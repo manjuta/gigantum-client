@@ -1,0 +1,9 @@
+{
+  "grant_type": "password",
+  "username": "johndoe",
+  "password": "secret",
+  "audience": "io.gigantum.api.dev",
+  "client_id": "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy",
+  "client_secret": "mt8XRw8sABBjwJrNLFlYP-Xq5ycTHTwhHBpy3KKGnPjgNmYa3dinfJxREmjaysgz",
+  "scope": "openid profile email user_metadata"
+}

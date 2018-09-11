@@ -1,0 +1,93 @@
+# Configuration File for the Gigantum LabManager
+
+# Extend/Modify an existing configuration file. If only file name provided, will assume in the same directory
+from: null
+
+# Core configuration
+core:
+  # Should the LabManager run in Team Mode (multi-user)
+  team_mode: false
+  # Location of configuration file for the LabManager logger
+  logging_config: "/etc/gigantum/logging.json"
+  # Should the app import a labbook into new user's working dirs on first login
+  import_demo_on_first_login: true
+
+# LabBook Container Configuration
+container:
+  # If null, no limit
+  # To set enter string with a units identification char (e.g. 100000b, 1000k, 128m, 1g)
+  memory: null
+
+  # If null, no limit
+  # To set enter a float for the CPU allocation desired. e.g. 4 CPUs available, 1.5 limits container to 1.5 CPUs
+  cpu: null
+
+  # If null, no CUDA/cuDNN support
+  # To set, replace null to a version (either 9.0 or 9.2)
+  cuda_version: null
+
+# Authentication Configuration
+auth:
+  client_id: 0Ajo8Ov6Qriafo0xVpSyejWy1pwNWdhk
+  provider_domain: gigantum.auth0.com
+  audience: api.gigantum.io
+  signing_algorithm: RS256
+  identity_manager: local
+
+# Environment Management Configuration
+# URLs can specify a non-default branch using the format <url>@<branch>
+environment:
+  repo_url:
+    - "https://github.com/gigantum/environment-components.git"
+
+# Git Configuration
+git:
+  backend: "filesystem-shim"
+  working_directory: "~/gigantum"
+  default_remote: "repo.gigantum.io"
+  lfs_enabled: true
+  remotes:
+    repo.gigantum.io:
+      remote_type: gitlab
+      admin_service: usersrv.gigantum.io
+      index_service: api.gigantum.com/read
+
+# Embedded Detail Object Database config
+detaildb:
+  logfile_limit: 8000000
+  options:
+    compress: true
+    compress_min_bytes: 4000
+
+# LabBook Lock Configuration
+lock:
+  redis:
+    host: localhost
+    port: 6379
+    db: 3
+    strict: true
+  reset_on_start: true
+  timeout: 120
+  expire: null
+  auto_renewal: false
+
+# Flask Configuration
+flask:
+  DEBUG: true
+  TESTING: true
+  allow_cors: true
+
+# Details for route proxying
+proxy:
+  # The host for the proxy control (to manipulate routes)
+  api_host: localhost
+  # The port for the proxy control
+  api_port: 1999
+  # All inbound requests (to be proxied) arrive
+  # at 0.0.0.0 on the following port
+  external_proxy_port: 10000
+  # Port from the perspective of the UI that the proxy
+  # is available from
+  apparent_proxy_port: 10000
+  # All LabManager api traffic has this default prefix.
+  labmanager_api_prefix: /api

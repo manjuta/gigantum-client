@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: gigantum/circleci-service-client:84814eab-2018-07-25
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Set Git credentials config
+          command: git config --global user.email "noreply@gigantum.io" && git config --global user.name "CircleCI" && git config --global credential.helper store
+
+      - run:
+          name: Install proxy lib
+          command: cd /tmp && git clone https://github.com/gigantum/confhttpproxy.git && pip3 install -e confhttpproxy
+
+      - run:
+          name: Clone lmcommon integration branch
+          command: |
+            cd /home/circleci/
+            git clone -b integration --single-branch https://github.com/gigantum/labmanager-common.git
+
+      - run:
+          name: Run unit, integration and coverage tests
+          command: |
+            export PYTHONPATH=$PYTHONPATH:/home/circleci/labmanager-common
+            cd /home/circleci/project
+            redis-server &
+            rqscheduler --interval=2 2> /dev/null &
+            python3 /home/circleci/labmanager-common/lmcommon/dispatcher/worker.py 7 &
+            pytest --cov=lmsrvlabbook --cov=lmsrvcore lmsrvlabbook/
+            pytest --cov=lmsrvcore --cov-append lmsrvcore/
+            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append lmsrvlabbook/tests/int_labbook_mutations.py
+            coveralls

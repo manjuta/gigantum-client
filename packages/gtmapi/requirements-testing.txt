@@ -1,0 +1,5 @@
+# Testing requirements
+mock==2.0.0
+pytest==3.5.0
+snapshottest==0.5.0
+rq-scheduler==0.7.0

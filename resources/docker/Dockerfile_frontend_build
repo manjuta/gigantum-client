@@ -1,0 +1,29 @@
+FROM ubuntu:18.04
+MAINTAINER Gigantum <hello@gigantum.io>
+
+# Install system level dependencies
+RUN apt-get -y update && apt-get -y install git curl gosu nodejs npm
+
+# Install Yarn
+RUN npm install yarn --global
+
+# Install babel-node
+RUN npm install -g babel-cli@6.26.0 jest@21.2.1 relay-compiler@1.6.0 webpack@3.3.0 jsdom-global@3.0.2 jsdom@>=10.0.0
+
+# Make build location dir
+RUN mkdir /opt/build_dir
+
+# Set the react port to match nginx
+ENV PORT "10001"
+
+# Copy in build script
+COPY frontend_resources/build_script.sh /opt/
+RUN chmod u+x /opt/build_script.sh
+
+# Setup entrypoint to configure permissions properly
+COPY frontend_resources/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod u+x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Run build script on container start
+CMD ["/bin/bash", "/opt/build_script.sh"]

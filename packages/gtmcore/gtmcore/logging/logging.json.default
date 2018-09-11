@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "loggers": {
+    "labmanager": {
+      "level": "INFO",
+      "handlers": ["fileHandler", "consoleHandler"],
+      "propagate": 0
+    }
+  },
+  "handlers": {
+    "consoleHandler": {
+      "class": "logging.StreamHandler",
+      "level": "DEBUG",
+      "formatter": "json",
+      "stream":  "ext://sys.stdout"
+    },
+    "fileHandler": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "formatter": "json",
+      "filename": "/mnt/gigantum/.labmanager/logs/labmanager.log",
+      "maxBytes": 8000000,
+      "backupCount": 5
+    }
+  },
+  "formatters": {
+    "labmanagerFormatter": {
+      "format": "%(asctime)s %(levelname)-10s %(filename)s in %(funcName)s (line %(lineno)d): %(message)s"
+    },
+    "json": {
+      "()": "gtmcore.JsonFormatter"
+    }
+  }
+}
