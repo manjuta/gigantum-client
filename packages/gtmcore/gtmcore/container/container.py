@@ -24,15 +24,15 @@ from typing import Optional, Tuple
 import docker
 import docker.errors
 
-from lmcommon.configuration import get_docker_client
-from lmcommon.logging import LMLogger
-from lmcommon.labbook import LabBook, LabbookException
+from gtmcore.configuration import get_docker_client
+from gtmcore.logging import LMLogger
+from gtmcore.labbook import LabBook, LabbookException
 
-from lmcommon.container.utils import infer_docker_image_name
-from lmcommon.container.exceptions import ContainerException
-from lmcommon.container.core import (build_docker_image, stop_labbook_container,
+from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.container.exceptions import ContainerException
+from gtmcore.container.core import (build_docker_image, stop_labbook_container,
                                      start_labbook_container, get_container_ip)
-from lmcommon.container.jupyter import start_jupyter
+from gtmcore.container.jupyter import start_jupyter
 
 logger = LMLogger.get_logger()
 

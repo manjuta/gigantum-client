@@ -22,9 +22,9 @@ import uuid
 import datetime
 from typing import (Any, Dict, List, Tuple, Optional)
 
-from lmcommon.activity.detaildb import ActivityDetailDB
-from lmcommon.activity.records import ActivityDetailRecord, ActivityRecord
-from lmcommon.logging import LMLogger
+from gtmcore.activity.detaildb import ActivityDetailDB
+from gtmcore.activity.records import ActivityDetailRecord, ActivityRecord
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

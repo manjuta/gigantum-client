@@ -17,15 +17,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from lmcommon.activity.tests.fixtures import redis_client, mock_kernel
-from lmcommon.fixtures import mock_labbook
+from gtmcore.activity.tests.fixtures import redis_client, mock_kernel
+from gtmcore.fixtures import mock_labbook
 import uuid
 import os
 
-from lmcommon.activity.monitors.monitor_jupyterlab import JupyterLabNotebookMonitor, JupyterLabCodeProcessor, \
+from gtmcore.activity.monitors.monitor_jupyterlab import JupyterLabNotebookMonitor, JupyterLabCodeProcessor, \
     JupyterLabFileChangeProcessor, JupyterLabPlaintextProcessor, JupyterLabImageExtractorProcessor
-from lmcommon.activity.processors.core import ActivityShowBasicProcessor
-from lmcommon.activity import ActivityStore, ActivityType, ActivityDetailType
+from gtmcore.activity.processors.core import ActivityShowBasicProcessor
+from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType
 
 
 class TestJupyterLabNotebookMonitor(object):

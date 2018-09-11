@@ -18,8 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-from lmcommon.activity.serializers import Serializer
-from lmcommon.activity.serializers.text import PlainSerializer
+from gtmcore.activity.serializers import Serializer
+from gtmcore.activity.serializers.text import PlainSerializer
 
 
 class TestSerializer(object):

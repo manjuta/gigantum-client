@@ -1,1 +1,1 @@
-from lmcommon.activity.serializers.serializer import Serializer
+from gtmcore.activity.serializers.serializer import Serializer

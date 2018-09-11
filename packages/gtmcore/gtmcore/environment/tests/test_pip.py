@@ -19,8 +19,8 @@
 # SOFTWARE.
 import pytest
 
-from lmcommon.environment.pip import PipPackageManager
-from lmcommon.fixtures.container import mock_config_with_repo, build_lb_image_for_env
+from gtmcore.environment.pip import PipPackageManager
+from gtmcore.fixtures.container import mock_config_with_repo, build_lb_image_for_env
 
 
 class TestPipPackageManager(object):

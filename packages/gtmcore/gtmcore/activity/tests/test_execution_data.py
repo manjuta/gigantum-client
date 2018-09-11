@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-from lmcommon.activity.processors.processor import ExecutionData
+from gtmcore.activity.processors.processor import ExecutionData
 
 
 class TestExecutionData(object):

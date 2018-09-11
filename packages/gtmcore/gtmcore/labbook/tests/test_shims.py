@@ -21,12 +21,12 @@ import pytest
 import os
 import copy
 
-from lmcommon.labbook import LabBook
-from lmcommon.activity import ActivityType, ActivityRecord, ActivityDetailType
+from gtmcore.labbook import LabBook
+from gtmcore.activity import ActivityType, ActivityRecord, ActivityDetailType
 
-from lmcommon.labbook.shims import process_sweep_status
+from gtmcore.labbook.shims import process_sweep_status
 
-from lmcommon.fixtures import mock_config_file
+from gtmcore.fixtures import mock_config_file
 
 
 @pytest.fixture

@@ -17,21 +17,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from lmcommon.labbook import LabBook
+from gtmcore.labbook import LabBook
 from typing import Optional
 import time
 import redis
 from docker.errors import NotFound
 
-from lmcommon.logging import LMLogger
-from lmcommon.configuration import get_docker_client
-from lmcommon.environment import ComponentManager
-from lmcommon.gitlib.git import GitAuthor
-from lmcommon.activity.monitors import DevEnvMonitorManager
+from gtmcore.logging import LMLogger
+from gtmcore.configuration import get_docker_client
+from gtmcore.environment import ComponentManager
+from gtmcore.gitlib.git import GitAuthor
+from gtmcore.activity.monitors import DevEnvMonitorManager
 
-from lmcommon.dispatcher import Dispatcher, JobKey
-from lmcommon.dispatcher.jobs import run_dev_env_monitor
-from lmcommon.container.utils import infer_docker_image_name
+from gtmcore.dispatcher import Dispatcher, JobKey
+from gtmcore.dispatcher.jobs import run_dev_env_monitor
+from gtmcore.container.utils import infer_docker_image_name
 
 
 logger = LMLogger.get_logger()

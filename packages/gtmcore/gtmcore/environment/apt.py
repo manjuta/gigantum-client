@@ -19,10 +19,10 @@
 # SOFTWARE.
 from typing import (List, Dict, Optional)
 
-from lmcommon.environment.packagemanager import PackageManager, PackageResult
-from lmcommon.container.container import ContainerOperations
-from lmcommon.labbook import LabBook
-from lmcommon.logging import LMLogger
+from gtmcore.environment.packagemanager import PackageManager, PackageResult
+from gtmcore.container.container import ContainerOperations
+from gtmcore.labbook import LabBook
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

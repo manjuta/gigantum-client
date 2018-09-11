@@ -28,13 +28,13 @@ import shutil
 
 from rq import get_current_job
 
-from lmcommon.activity.monitors.devenv import DevEnvMonitorManager
-from lmcommon.configuration import Configuration
-from lmcommon.configuration.utils import call_subprocess
-from lmcommon.labbook import LabBook
-from lmcommon.logging import LMLogger
-from lmcommon.workflows import sync_locally, GitWorkflow
-from lmcommon.container.core import (build_docker_image as build_image,
+from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
+from gtmcore.configuration import Configuration
+from gtmcore.configuration.utils import call_subprocess
+from gtmcore.labbook import LabBook
+from gtmcore.logging import LMLogger
+from gtmcore.workflows import sync_locally, GitWorkflow
+from gtmcore.container.core import (build_docker_image as build_image,
                                      start_labbook_container as start_container,
                                      stop_labbook_container as stop_container)
 

@@ -22,8 +22,8 @@ import pytest
 import tempfile
 from unittest.mock import PropertyMock, patch
 
-from lmcommon.configuration import (Configuration, _get_docker_server_api_version, get_docker_client)
-from lmcommon.fixtures import mock_config_file, mock_config_file_team
+from gtmcore.configuration import (Configuration, _get_docker_server_api_version, get_docker_client)
+from gtmcore.fixtures import mock_config_file, mock_config_file_team
 
 
 @pytest.fixture(scope="module")

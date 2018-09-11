@@ -22,10 +22,10 @@ import os
 import yaml
 import pprint
 
-from lmcommon.environment import ComponentManager, RepositoryManager
-from lmcommon.fixtures import mock_config_file, mock_config_with_repo
-from lmcommon.labbook import LabBook
-import lmcommon.fixtures
+from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.fixtures import mock_config_file, mock_config_with_repo
+from gtmcore.labbook import LabBook
+import gtmcore.fixtures
 
 
 class TestComponentManager(object):
@@ -143,8 +143,8 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # Add a component
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         # Verify file
         component_file = os.path.join(labbook_dir,
@@ -164,8 +164,8 @@ class TestComponentManager(object):
             with open(os.path.join(labbook_dir, ".gigantum/env/package_manager", p)) as f:
                 assert 'from_base: true' in f.read()
 
-        assert data['id'] == lmcommon.fixtures.ENV_UNIT_TEST_BASE
-        assert data['revision'] == lmcommon.fixtures.ENV_UNIT_TEST_REV
+        assert data['id'] == gtmcore.fixtures.ENV_UNIT_TEST_BASE
+        assert data['revision'] == gtmcore.fixtures.ENV_UNIT_TEST_REV
 
         # Verify git/activity
         log = lb.git.log()
@@ -189,8 +189,8 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # Add a component;
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         c = f"{gtmcore.fixtures.ENV_UNIT_TEST_REPO}_{gtmcore.fixtures.ENV_UNIT_TEST_BASE}.yaml"
         # Verify file
@@ -203,12 +203,12 @@ class TestComponentManager(object):
 
         # Add a component
         with pytest.raises(ValueError):
-            cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                             lmcommon.fixtures.ENV_UNIT_TEST_REV)
+            cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                             gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         # Force add a component
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV, force=True)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV, force=True)
         assert os.path.exists(component_file) is True
 
     def test_get_component_list_base(self, mock_config_with_repo):
@@ -219,14 +219,14 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # mock_config_with_repo is a ComponentManager Instance
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         bases = cm.get_component_list('base')
 
         assert len(bases) == 1
-        assert bases[0]['id'] == lmcommon.fixtures.ENV_UNIT_TEST_BASE
-        assert bases[0]['revision'] == lmcommon.fixtures.ENV_UNIT_TEST_REV
+        assert bases[0]['id'] == gtmcore.fixtures.ENV_UNIT_TEST_BASE
+        assert bases[0]['revision'] == gtmcore.fixtures.ENV_UNIT_TEST_REV
 
     def test_get_component_list_packages(self, mock_config_with_repo):
         """Test listing packages added a to labbook"""
@@ -259,7 +259,7 @@ class TestComponentManager(object):
 
         # mock_config_with_repo is a ComponentManager Instance
         cm.add_component("custom",
-                         lmcommon.fixtures.ENV_UNIT_TEST_REPO,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REPO,
                          "pillow",
                          0)
 
@@ -361,11 +361,11 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # Add a component
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         with pytest.raises(ValueError):
-            cm.remove_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, "adfasdfasdfasdf")
+            cm.remove_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, "adfasdfasdfasdf")
 
     def test_remove_component(self, mock_config_with_repo):
         """Test removing a component from a labbook"""
@@ -379,16 +379,16 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # Add a component
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
-        component_filename = "{}_{}.yaml".format(lmcommon.fixtures.ENV_UNIT_TEST_REPO,
-                                                     lmcommon.fixtures.ENV_UNIT_TEST_BASE)
+        component_filename = "{}_{}.yaml".format(gtmcore.fixtures.ENV_UNIT_TEST_REPO,
+                                                     gtmcore.fixtures.ENV_UNIT_TEST_BASE)
         component_path = os.path.join(lb._root_dir, '.gigantum', 'env', 'base', component_filename)
         assert os.path.exists(component_path)
 
         # Remove component
-        cm.remove_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE)
+        cm.remove_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE)
 
         # Ensure file is gone
         assert not os.path.exists(component_path)
@@ -419,8 +419,8 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # mock_config_with_repo is a ComponentManager Instance
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-2", 0)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-2", 0)
 
         with pytest.raises(ValueError):
             a = cm.base_fields
@@ -432,7 +432,7 @@ class TestComponentManager(object):
         cm = ComponentManager(lb)
 
         # mock_config_with_repo is a ComponentManager Instance
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
 
         base_data = cm.base_fields
 

@@ -20,9 +20,9 @@
 import os
 from typing import Optional
 
-from lmcommon.logging import LMLogger
-from lmcommon.auth.identity import IdentityManager, User, AuthenticationError
-from lmcommon.configuration import Configuration
+from gtmcore.logging import LMLogger
+from gtmcore.auth.identity import IdentityManager, User, AuthenticationError
+from gtmcore.configuration import Configuration
 
 logger = LMLogger.get_logger()
 

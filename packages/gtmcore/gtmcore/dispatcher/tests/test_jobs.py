@@ -27,13 +27,13 @@ import uuid
 
 import docker
 
-from lmcommon.configuration import get_docker_client
-from lmcommon.dispatcher import jobs
-import lmcommon.fixtures
-from lmcommon.fixtures import mock_config_file, mock_config_with_repo
-from lmcommon.environment import ComponentManager, RepositoryManager
-from lmcommon.labbook import LabBook
-from lmcommon.imagebuilder import ImageBuilder
+from gtmcore.configuration import get_docker_client
+from gtmcore.dispatcher import jobs
+import gtmcore.fixtures
+from gtmcore.fixtures import mock_config_file, mock_config_with_repo
+from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.imagebuilder import ImageBuilder
 
 
 class TestJobs(object):
@@ -44,8 +44,8 @@ class TestJobs(object):
         labbook_dir = lb.new(name="unittest-lb-for-export-import-test", description="Testing import-export.",
                              owner={"username": 'unittester'})
         cm = ComponentManager(lb)
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile()
@@ -125,8 +125,8 @@ class TestJobs(object):
         labbook_dir = lb.new(name="unittest-lb-for-export-import-test-lbk", description="Testing import-export.",
                              owner={"username": 'unittester'})
         cm = ComponentManager(lb)
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile()
@@ -182,8 +182,8 @@ class TestJobs(object):
         labbook_dir = lb.new(name="lb-fail-export-import-test", description="Failing import-export.",
                              owner={"username": "test"})
         cm = ComponentManager(lb)
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, lmcommon.fixtures.ENV_UNIT_TEST_BASE,
-                         lmcommon.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         lb_root = lb.root_dir
         with tempfile.TemporaryDirectory() as temp_dir_path:

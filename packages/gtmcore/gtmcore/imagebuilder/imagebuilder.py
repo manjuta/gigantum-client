@@ -24,9 +24,9 @@ import os
 import yaml
 from typing import (Any, Dict, List)
 
-from lmcommon.labbook import LabBook
-from lmcommon.logging import LMLogger
-from lmcommon.environment.utils import get_package_manager
+from gtmcore.labbook import LabBook
+from gtmcore.logging import LMLogger
+from gtmcore.environment.utils import get_package_manager
 
 
 logger = LMLogger.get_logger()

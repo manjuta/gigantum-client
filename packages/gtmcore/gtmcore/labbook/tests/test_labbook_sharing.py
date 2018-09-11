@@ -22,9 +22,9 @@ import pytest
 import os
 
 
-from lmcommon.labbook import LabBook, LabbookException
-from lmcommon.files import FileOperations
-from lmcommon.fixtures import (mock_config_file, mock_labbook_lfs_disabled, remote_labbook_repo)
+from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.files import FileOperations
+from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, remote_labbook_repo)
 
 # Note, I believe most of these tests are deprecated and OBE.
 

@@ -17,15 +17,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from lmcommon.auth.identity import IdentityManager, User, AuthenticationError
-from lmcommon.configuration import Configuration
+from gtmcore.auth.identity import IdentityManager, User, AuthenticationError
+from gtmcore.configuration import Configuration
 import os
 import json
 import jose
 
 from typing import Optional
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 logger = LMLogger.get_logger()
 
 

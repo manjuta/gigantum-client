@@ -20,7 +20,7 @@
 import pytest
 import responses
 
-from lmcommon.gitlib.gitlab import GitLabManager
+from gtmcore.gitlib.gitlab import GitLabManager
 
 
 @pytest.fixture()

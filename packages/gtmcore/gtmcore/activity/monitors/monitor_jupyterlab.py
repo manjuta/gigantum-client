@@ -27,17 +27,17 @@ import jupyter_client
 import redis
 import requests
 
-from lmcommon.activity.processors.processor import ExecutionData
-from lmcommon.configuration import get_docker_client
-from lmcommon.container.utils import infer_docker_image_name
-from lmcommon.activity.monitors.devenv import DevEnvMonitor
-from lmcommon.activity.monitors.activity import ActivityMonitor
-from lmcommon.activity.processors.jupyterlab import JupyterLabCodeProcessor, JupyterLabFileChangeProcessor, \
+from gtmcore.activity.processors.processor import ExecutionData
+from gtmcore.configuration import get_docker_client
+from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.activity.monitors.devenv import DevEnvMonitor
+from gtmcore.activity.monitors.activity import ActivityMonitor
+from gtmcore.activity.processors.jupyterlab import JupyterLabCodeProcessor, JupyterLabFileChangeProcessor, \
     JupyterLabPlaintextProcessor, JupyterLabImageExtractorProcessor
-from lmcommon.activity.processors.core import ActivityShowBasicProcessor
-from lmcommon.activity import ActivityType
-from lmcommon.dispatcher import Dispatcher, jobs
-from lmcommon.logging import LMLogger
+from gtmcore.activity.processors.core import ActivityShowBasicProcessor
+from gtmcore.activity import ActivityType
+from gtmcore.dispatcher import Dispatcher, jobs
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

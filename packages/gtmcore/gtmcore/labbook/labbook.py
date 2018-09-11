@@ -35,15 +35,15 @@ from redis import StrictRedis
 from natsort import natsorted
 from typing import (Any, Dict, List, Optional, Tuple)
 
-from lmcommon.configuration import Configuration
-from lmcommon.configuration.utils import call_subprocess
-from lmcommon.gitlib import get_git_interface, GitAuthor, GitRepoInterface
-from lmcommon.logging import LMLogger
-from lmcommon.labbook.schemas import validate_labbook_schema
-from lmcommon.labbook import shims
-from lmcommon.activity import ActivityStore, ActivityType, ActivityRecord, ActivityDetailType, ActivityDetailRecord, \
+from gtmcore.configuration import Configuration
+from gtmcore.configuration.utils import call_subprocess
+from gtmcore.gitlib import get_git_interface, GitAuthor, GitRepoInterface
+from gtmcore.logging import LMLogger
+from gtmcore.labbook.schemas import validate_labbook_schema
+from gtmcore.labbook import shims
+from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, ActivityDetailType, ActivityDetailRecord, \
     ActivityAction
-from lmcommon.labbook.schemas import CURRENT_SCHEMA
+from gtmcore.labbook.schemas import CURRENT_SCHEMA
 
 logger = LMLogger.get_logger()
 

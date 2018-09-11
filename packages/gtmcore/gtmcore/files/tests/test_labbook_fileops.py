@@ -23,9 +23,9 @@ import tempfile
 import os
 import pprint
 
-from lmcommon.labbook import LabBook
-from lmcommon.files import FileOperations as FO
-from lmcommon.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
+from gtmcore.labbook import LabBook
+from gtmcore.files import FileOperations as FO
+from gtmcore.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
 
 
 class TestLabbookFileOperations(object):

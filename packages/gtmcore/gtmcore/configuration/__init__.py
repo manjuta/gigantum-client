@@ -24,8 +24,8 @@ import os
 
 import docker
 
-from lmcommon.configuration.configuration import Configuration
-from lmcommon.logging import LMLogger
+from gtmcore.configuration.configuration import Configuration
+from gtmcore.logging import LMLogger
 
 
 logger = LMLogger.get_logger()

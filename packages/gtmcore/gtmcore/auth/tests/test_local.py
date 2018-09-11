@@ -25,11 +25,11 @@ import time
 import mock
 from typing import Optional
 
-from lmcommon.configuration import Configuration
-from lmcommon.fixtures import mock_config_file_with_auth, mock_config_file_with_auth_first_login, cleanup_auto_import
-from lmcommon.auth.identity import get_identity_manager, AuthenticationError
-from lmcommon.auth.local import LocalIdentityManager
-from lmcommon.auth import User
+from gtmcore.configuration import Configuration
+from gtmcore.fixtures import mock_config_file_with_auth, mock_config_file_with_auth_first_login, cleanup_auto_import
+from gtmcore.auth.identity import get_identity_manager, AuthenticationError
+from gtmcore.auth.local import LocalIdentityManager
+from gtmcore.auth import User
 
 
 def mock_import(archive_path: str, username: str, owner: str,

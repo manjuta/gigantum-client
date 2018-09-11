@@ -26,11 +26,11 @@ from jose import jwt
 import json
 from typing import (Optional, Dict, Any)
 
-from lmcommon.configuration import Configuration
-from lmcommon.logging import LMLogger
-from lmcommon.auth import User
-from lmcommon.dispatcher import (Dispatcher, jobs)
-from lmcommon.gitlib.gitlab import check_and_add_user
+from gtmcore.configuration import Configuration
+from gtmcore.logging import LMLogger
+from gtmcore.auth import User
+from gtmcore.dispatcher import (Dispatcher, jobs)
+from gtmcore.gitlib.gitlab import check_and_add_user
 
 
 logger = LMLogger.get_logger()

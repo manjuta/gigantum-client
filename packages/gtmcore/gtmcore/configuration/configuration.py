@@ -24,7 +24,7 @@ import yaml
 from typing import (Any, Dict, Optional)
 from pkg_resources import resource_filename
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

@@ -1,1 +1,1 @@
-from lmcommon.auth.user import User
+from gtmcore.auth.user import User

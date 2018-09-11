@@ -22,7 +22,7 @@ import pytest
 import tempfile
 import json
 from unittest.mock import PropertyMock, patch
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 import logging
 import os
 

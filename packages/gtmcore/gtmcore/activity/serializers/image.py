@@ -17,7 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from lmcommon.activity.serializers.mime import MimeSerializer
+from gtmcore.activity.serializers.mime import MimeSerializer
 from typing import Any
 import base64
 from PIL import Image

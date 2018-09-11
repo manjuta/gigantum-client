@@ -4,9 +4,9 @@ import shutil
 import time
 import os
 
-from lmcommon.configuration.utils import call_subprocess
-from lmcommon.labbook.labbook import LabBook, LabbookException
-from lmcommon.logging import LMLogger
+from gtmcore.configuration.utils import call_subprocess
+from gtmcore.labbook.labbook import LabBook, LabbookException
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

@@ -22,10 +22,10 @@ import time
 import os
 from typing import Optional
 
-from lmcommon.gitlib.gitlab import GitLabManager
-from lmcommon.labbook import LabBook, LabbookException, LabbookMergeException
-from lmcommon.logging import LMLogger
-from lmcommon.configuration.utils import call_subprocess
+from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.labbook import LabBook, LabbookException, LabbookMergeException
+from gtmcore.logging import LMLogger
+from gtmcore.configuration.utils import call_subprocess
 
 logger = LMLogger.get_logger()
 

@@ -22,7 +22,7 @@ import pytest
 import os
 os.environ['GITLIB_FS_BACKEND'] = 'filesystem-shim'
 
-from lmcommon.gitlib import GitFilesystemShimmed
+from gtmcore.gitlib import GitFilesystemShimmed
 from .git_interface_mixin import GitInterfaceMixin
 from .git_interface_mixin import mock_config_filesystem as mock_config
 from .git_interface_mixin import mock_initialized_filesystem as mock_initialized

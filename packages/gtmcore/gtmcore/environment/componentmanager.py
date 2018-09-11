@@ -26,12 +26,12 @@ import glob
 from typing import Optional
 
 
-from lmcommon.labbook import LabBook
-from lmcommon.environment.repository import ComponentRepository  # type: ignore
-from lmcommon.logging import LMLogger
-from lmcommon.activity import ActivityStore, ActivityType, ActivityRecord, ActivityDetailType, ActivityDetailRecord, \
+from gtmcore.labbook import LabBook
+from gtmcore.environment.repository import ComponentRepository  # type: ignore
+from gtmcore.logging import LMLogger
+from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, ActivityDetailType, ActivityDetailRecord, \
     ActivityAction
-from lmcommon.labbook.schemas import CURRENT_SCHEMA
+from gtmcore.labbook.schemas import CURRENT_SCHEMA
 
 logger = LMLogger.get_logger()
 

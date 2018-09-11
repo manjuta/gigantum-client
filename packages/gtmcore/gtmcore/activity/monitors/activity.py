@@ -18,16 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import abc
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 from typing import (Any, Dict, List, Optional)
 import redis
 
-from lmcommon.activity import ActivityRecord, ActivityStore, ActivityType
-from lmcommon.activity.processors.processor import ActivityProcessor, ExecutionData
-from lmcommon.configuration import get_docker_client
-from lmcommon.labbook import LabBook
-from lmcommon.gitlib.git import GitAuthor
-from lmcommon.container.utils import infer_docker_image_name
+from gtmcore.activity import ActivityRecord, ActivityStore, ActivityType
+from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
+from gtmcore.configuration import get_docker_client
+from gtmcore.labbook import LabBook
+from gtmcore.gitlib.git import GitAuthor
+from gtmcore.container.utils import infer_docker_image_name
 
 
 logger = LMLogger.get_logger()

@@ -19,10 +19,10 @@
 # SOFTWARE.
 from typing import (Any, Dict, List)
 
-from lmcommon.logging import LMLogger
-from lmcommon.activity.processors.processor import ActivityProcessor, ExecutionData
-from lmcommon.activity import ActivityRecord, ActivityDetailType, ActivityDetailRecord, ActivityAction
-from lmcommon.labbook import LabBook
+from gtmcore.logging import LMLogger
+from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
+from gtmcore.activity import ActivityRecord, ActivityDetailType, ActivityDetailRecord, ActivityAction
+from gtmcore.labbook import LabBook
 
 logger = LMLogger.get_logger()
 

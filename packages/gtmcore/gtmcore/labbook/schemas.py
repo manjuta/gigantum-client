@@ -21,7 +21,7 @@ from typing import Any, Dict, Optional
 from schema import (Schema, SchemaError, Optional as SchemaOptional,
                     Or as SchemaOr, Use as SchemaUse)
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

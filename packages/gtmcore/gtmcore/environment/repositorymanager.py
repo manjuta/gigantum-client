@@ -27,9 +27,9 @@ import shutil
 from collections import OrderedDict
 from typing import (Any, List, Dict, Optional)
 
-from lmcommon.gitlib import get_git_interface
-from lmcommon.logging import LMLogger
-from lmcommon.configuration import Configuration
+from gtmcore.gitlib import get_git_interface
+from gtmcore.logging import LMLogger
+from gtmcore.configuration import Configuration
 
 logger = LMLogger.get_logger()
 

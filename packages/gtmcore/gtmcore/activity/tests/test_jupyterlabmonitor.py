@@ -21,10 +21,10 @@ import json
 from pkg_resources import resource_filename
 import os
 import requests
-from lmcommon.activity.tests.fixtures import get_redis_client_mock, redis_client, MockSessionsResponse
-from lmcommon.container.utils import infer_docker_image_name
+from gtmcore.activity.tests.fixtures import get_redis_client_mock, redis_client, MockSessionsResponse
+from gtmcore.container.utils import infer_docker_image_name
 
-from lmcommon.activity.monitors.monitor_jupyterlab import JupyterLabMonitor
+from gtmcore.activity.monitors.monitor_jupyterlab import JupyterLabMonitor
 
 
 def mock_ip(key):

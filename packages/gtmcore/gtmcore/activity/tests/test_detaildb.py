@@ -19,8 +19,8 @@
 # SOFTWARE.
 import pytest
 import os
-from lmcommon.fixtures import mock_labbook, mock_config_with_detaildb
-from lmcommon.activity.detaildb import ActivityDetailDB
+from gtmcore.fixtures import mock_labbook, mock_config_with_detaildb
+from gtmcore.activity.detaildb import ActivityDetailDB
 
 
 class TestDetailDB(object):

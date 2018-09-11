@@ -20,14 +20,14 @@
 import pytest
 import shutil
 
-from lmcommon.environment.pip import PipPackageManager
-from lmcommon.fixtures import mock_config_with_repo, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
-from lmcommon.configuration import get_docker_client
+from gtmcore.environment.pip import PipPackageManager
+from gtmcore.fixtures import mock_config_with_repo, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.configuration import get_docker_client
 
-from lmcommon.environment import ComponentManager
-from lmcommon.labbook import LabBook
-from lmcommon.imagebuilder import ImageBuilder
-from lmcommon.container.container import ContainerOperations
+from gtmcore.environment import ComponentManager
+from gtmcore.labbook import LabBook
+from gtmcore.imagebuilder import ImageBuilder
+from gtmcore.container.container import ContainerOperations
 
 
 class TestContainerFallback(object):

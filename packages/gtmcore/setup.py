@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from codecs import open
 from os import path
-from lmcommon import __version__
+from gtmcore import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -17,7 +17,7 @@ install_requires = [x.strip() for x in all_reqs if 'git+' not in x]
 dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startswith('git+')]
 
 setup(
-    name='lmcommon',
+    name='gtmcore',
     version=__version__,
     description='Common tools and packages for the Gigantum LabManager application',
     long_description=long_description,
@@ -36,7 +36,7 @@ setup(
             'open science'
         ],
     packages=find_packages(exclude=['docs', '*tests*']),
-    package_data={'lmcommon': ['logging/*.default', 'configuration/config/*.default', 'labbook/*.default']},
+    package_data={'gtmcore': ['logging/*.default', 'configuration/config/*.default', 'labbook/*.default']},
     include_package_data=True,
     author='Gigantum/FlashX LLC',
     install_requires=install_requires,

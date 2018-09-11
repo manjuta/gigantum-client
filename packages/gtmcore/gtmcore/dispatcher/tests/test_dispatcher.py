@@ -34,15 +34,15 @@ import os
 import rq_scheduler
 import rq
 
-from lmcommon.imagebuilder import ImageBuilder
-from lmcommon.configuration import get_docker_client
-from lmcommon.environment import ComponentManager, RepositoryManager
-from lmcommon.fixtures import mock_config_file
-import lmcommon.fixtures
-from lmcommon.dispatcher import Dispatcher
-from lmcommon.labbook import LabBook
+from gtmcore.imagebuilder import ImageBuilder
+from gtmcore.configuration import get_docker_client
+from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.fixtures import mock_config_file
+import gtmcore.fixtures
+from gtmcore.dispatcher import Dispatcher
+from gtmcore.labbook import LabBook
 
-import lmcommon.dispatcher.jobs as bg_jobs
+import gtmcore.dispatcher.jobs as bg_jobs
 
 
 @pytest.fixture()
@@ -178,7 +178,7 @@ class TestDispatcher(object):
                              owner={"username": "unittester"})
 
         cm = ComponentManager(lb)
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)
         assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'Dockerfile'))
@@ -225,7 +225,7 @@ class TestDispatcher(object):
                              owner={"username": "unittester"})
 
         cm = ComponentManager(lb)
-        cm.add_component("base", lmcommon.fixtures.ENV_UNIT_TEST_REPO, 'quickstart-jupyterlab', 2)
+        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'quickstart-jupyterlab', 2)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)
@@ -240,7 +240,7 @@ class TestDispatcher(object):
         img_list = client.images.list()
 
         try:
-            from lmcommon.container.utils import infer_docker_image_name
+            from gtmcore.container.utils import infer_docker_image_name
             client.images.remove(infer_docker_image_name(labbook_name=lb.name, owner=lb.owner['username'],
                                                          username='unittester'))
         except:

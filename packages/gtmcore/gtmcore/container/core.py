@@ -25,11 +25,11 @@ import time
 import json
 from typing import Callable, Optional
 
-from lmcommon.configuration import get_docker_client
-from lmcommon.logging import LMLogger
-from lmcommon.labbook import LabBook
-from lmcommon.container.utils import infer_docker_image_name
-from lmcommon.container.exceptions import ContainerBuildException
+from gtmcore.configuration import get_docker_client
+from gtmcore.logging import LMLogger
+from gtmcore.labbook import LabBook
+from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.container.exceptions import ContainerBuildException
 
 logger = LMLogger.get_logger()
 

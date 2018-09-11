@@ -21,7 +21,7 @@ import os
 import pickle
 from typing import (Any, List, Dict)
 
-from lmcommon.configuration import Configuration
+from gtmcore.configuration import Configuration
 
 
 class ComponentRepository(object):

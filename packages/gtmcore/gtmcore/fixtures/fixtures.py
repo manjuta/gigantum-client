@@ -27,13 +27,13 @@ import git
 from pkg_resources import resource_filename
 import pytest
 
-from lmcommon.configuration import Configuration
-from lmcommon.environment import RepositoryManager, ComponentManager
-from lmcommon.labbook import LabBook
-from lmcommon.activity.detaildb import ActivityDetailDB
-from lmcommon.activity import ActivityStore
-from lmcommon.gitlib.git import GitAuthor
-from lmcommon.files import FileOperations
+from gtmcore.configuration import Configuration
+from gtmcore.environment import RepositoryManager, ComponentManager
+from gtmcore.labbook import LabBook
+from gtmcore.activity.detaildb import ActivityDetailDB
+from gtmcore.activity import ActivityStore
+from gtmcore.gitlib.git import GitAuthor
+from gtmcore.files import FileOperations
 import requests
 
 

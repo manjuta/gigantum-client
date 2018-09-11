@@ -21,13 +21,13 @@ import shutil
 import os
 from typing import Any, Dict, List, Optional
 
-from lmcommon.labbook import LabBook
-from lmcommon.labbook import shims
-from lmcommon.logging import LMLogger
-from lmcommon.activity import (ActivityDetailRecord, ActivityRecord,
+from gtmcore.labbook import LabBook
+from gtmcore.labbook import shims
+from gtmcore.logging import LMLogger
+from gtmcore.activity import (ActivityDetailRecord, ActivityRecord,
                                ActivityStore, ActivityAction)
-from lmcommon.configuration.utils import call_subprocess
-from lmcommon.files.utils import in_untracked
+from gtmcore.configuration.utils import call_subprocess
+from gtmcore.files.utils import in_untracked
 
 logger = LMLogger.get_logger()
 

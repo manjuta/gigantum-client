@@ -21,9 +21,9 @@ import git
 import subprocess
 from typing import Optional, List
 
-from lmcommon.logging import LMLogger
-from lmcommon.labbook import LabBook
-from lmcommon.workflows.core import call_subprocess
+from gtmcore.logging import LMLogger
+from gtmcore.labbook import LabBook
+from gtmcore.workflows.core import call_subprocess
 
 logger = LMLogger.get_logger()
 

@@ -26,7 +26,7 @@ import importlib
 import redis
 from pkg_resources import resource_filename
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

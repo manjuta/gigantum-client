@@ -21,7 +21,7 @@
 import time
 import subprocess
 from typing import List
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

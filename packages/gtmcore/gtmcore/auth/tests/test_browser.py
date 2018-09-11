@@ -22,11 +22,11 @@ import os
 import requests
 import getpass
 
-from lmcommon.configuration import Configuration
-from lmcommon.fixtures import mock_config_file_with_auth_browser
-from lmcommon.auth.identity import get_identity_manager, AuthenticationError
-from lmcommon.auth.browser import BrowserIdentityManager
-from lmcommon.auth import User
+from gtmcore.configuration import Configuration
+from gtmcore.fixtures import mock_config_file_with_auth_browser
+from gtmcore.auth.identity import get_identity_manager, AuthenticationError
+from gtmcore.auth.browser import BrowserIdentityManager
+from gtmcore.auth import User
 
 
 class TestIdentityBrowser(object):

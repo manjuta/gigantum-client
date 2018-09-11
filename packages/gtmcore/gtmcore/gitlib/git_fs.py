@@ -26,7 +26,7 @@ import shutil
 
 from typing import Dict, List, Optional, Tuple
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

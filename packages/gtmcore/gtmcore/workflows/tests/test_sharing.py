@@ -20,8 +20,8 @@ import pytest
 import os
 import pprint
 
-from lmcommon.workflows import GitWorkflow, MergeError, core, WorkflowsException
-from lmcommon.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
+from gtmcore.workflows import GitWorkflow, MergeError, core, WorkflowsException
+from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
                                sample_src_file, remote_labbook_repo, _MOCK_create_remote_repo2)
 
 

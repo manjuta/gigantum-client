@@ -24,7 +24,7 @@ import os
 import shutil
 import uuid
 import datetime
-from lmcommon.gitlib import GitFilesystem, GitFilesystemShimmed, GitAuthor
+from gtmcore.gitlib import GitFilesystem, GitFilesystemShimmed, GitAuthor
 from git import Repo
 from git.exc import GitCommandError
 

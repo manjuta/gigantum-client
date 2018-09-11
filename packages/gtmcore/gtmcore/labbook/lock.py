@@ -20,7 +20,7 @@
 import redis_lock
 from redis import StrictRedis
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

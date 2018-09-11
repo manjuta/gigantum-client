@@ -22,8 +22,8 @@ import time
 import os
 from multiprocessing import Process
 
-from lmcommon.labbook import LabBook
-from lmcommon.fixtures import mock_labbook
+from gtmcore.labbook import LabBook
+from gtmcore.fixtures import mock_labbook
 
 
 def write_function(filename: str, delay: int, value: str, labbook: LabBook) -> None:

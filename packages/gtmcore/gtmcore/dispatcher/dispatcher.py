@@ -25,8 +25,8 @@ import redis
 import rq
 import rq_scheduler
 
-import lmcommon.dispatcher.jobs
-from lmcommon.logging import LMLogger
+import gtmcore.dispatcher.jobs
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 
@@ -109,7 +109,7 @@ class Dispatcher(object):
     @staticmethod
     def _is_job_in_registry(method_reference: Callable) -> bool:
         """Return True if `method_reference` in the set of acceptable background jobs. """
-        job_list = [getattr(lmcommon.dispatcher.jobs, n) for n in dir(lmcommon.dispatcher.jobs)]
+        job_list = [getattr(gtmcore.dispatcher.jobs, n) for n in dir(gtmcore.dispatcher.jobs)]
         return any([method_reference == n for n in job_list])
 
     @property

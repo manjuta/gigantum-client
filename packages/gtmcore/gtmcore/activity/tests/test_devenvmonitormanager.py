@@ -18,10 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-from lmcommon.activity.tests.fixtures import get_redis_client_mock, redis_client
+from gtmcore.activity.tests.fixtures import get_redis_client_mock, redis_client
 
-from lmcommon.activity.monitors.devenv import DevEnvMonitorManager
-from lmcommon.activity.monitors.monitor_jupyterlab import JupyterLabMonitor
+from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
+from gtmcore.activity.monitors.monitor_jupyterlab import JupyterLabMonitor
 
 
 class TestDevEnvMonitorManager(object):

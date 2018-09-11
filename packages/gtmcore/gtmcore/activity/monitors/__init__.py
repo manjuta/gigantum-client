@@ -1,1 +1,1 @@
-from lmcommon.activity.monitors.devenv import DevEnvMonitorManager
+from gtmcore.activity.monitors.devenv import DevEnvMonitorManager

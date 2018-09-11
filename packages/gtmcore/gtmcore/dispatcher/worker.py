@@ -22,7 +22,7 @@ import multiprocessing
 import argparse
 import os
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 from rq import Connection, Queue, Worker
 
 logger = LMLogger.get_logger()

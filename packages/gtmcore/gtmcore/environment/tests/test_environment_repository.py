@@ -27,8 +27,8 @@ import pprint
 import pickle
 import yaml
 
-from lmcommon.environment import RepositoryManager, ComponentRepository
-from lmcommon.fixtures import (mock_config_file, mock_config_with_repo, setup_index,
+from gtmcore.environment import RepositoryManager, ComponentRepository
+from gtmcore.fixtures import (mock_config_file, mock_config_with_repo, setup_index,
                                ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
 
 

@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-from lmcommon.environment.utils import get_package_manager
-from lmcommon.labbook import LabBook
+from gtmcore.environment.utils import get_package_manager
+from gtmcore.labbook import LabBook
 
-from lmcommon.environment.pip import PipPackageManager
-from lmcommon.environment.conda import Conda2PackageManager, Conda3PackageManager
-from lmcommon.environment.apt import AptPackageManager
+from gtmcore.environment.pip import PipPackageManager
+from gtmcore.environment.conda import Conda2PackageManager, Conda3PackageManager
+from gtmcore.environment.apt import AptPackageManager
 
 
 class TestPackageManagerHelper(object):

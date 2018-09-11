@@ -20,15 +20,15 @@
 from typing import (Any, List, Dict, Optional)
 import requests
 import json
-from lmcommon.container.container import ContainerOperations
-from lmcommon.labbook import LabBook
+from gtmcore.container.container import ContainerOperations
+from gtmcore.labbook import LabBook
 
 from natsort import natsorted
 
 from distutils.version import StrictVersion
 from distutils.version import LooseVersion
 
-from lmcommon.environment.packagemanager import PackageManager, PackageResult
+from gtmcore.environment.packagemanager import PackageManager, PackageResult
 
 
 class PipPackageManager(PackageManager):

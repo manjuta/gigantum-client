@@ -19,7 +19,7 @@
 # SOFTWARE.
 import pytest
 import json
-from lmcommon.activity.records import ActivityDetailRecord, ActivityDetailType, ActivityAction
+from gtmcore.activity.records import ActivityDetailRecord, ActivityDetailType, ActivityAction
 
 
 class TestActivityDetailRecord(object):

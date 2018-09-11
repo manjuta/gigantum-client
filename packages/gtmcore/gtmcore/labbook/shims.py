@@ -20,8 +20,8 @@
 import os
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from lmcommon.logging import LMLogger
-from lmcommon.activity import ActivityAction, ActivityRecord, ActivityDetailRecord, ActivityType
+from gtmcore.logging import LMLogger
+from gtmcore.activity import ActivityAction, ActivityRecord, ActivityDetailRecord, ActivityType
 
 logger = LMLogger.get_logger()
 

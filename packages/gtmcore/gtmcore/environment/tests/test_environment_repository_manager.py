@@ -27,9 +27,9 @@ import pickle
 import yaml
 from git import Repo
 
-from lmcommon.environment import RepositoryManager
-from lmcommon.fixtures import mock_config_file, setup_index, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
-from lmcommon.fixtures.fixtures import _create_temp_work_dir
+from gtmcore.environment import RepositoryManager
+from gtmcore.fixtures import mock_config_file, setup_index, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
+from gtmcore.fixtures.fixtures import _create_temp_work_dir
 
 
 class TestEnvironmentRepositoryManager(object):

@@ -23,10 +23,10 @@ import os
 import yaml
 import time
 
-from lmcommon.files import FileOperations
-from lmcommon.labbook import LabBook, LabbookException
-from lmcommon.gitlib.git import GitAuthor
-from lmcommon.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
+from gtmcore.files import FileOperations
+from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.gitlib.git import GitAuthor
+from gtmcore.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
 
 
 class TestLabBook(object):

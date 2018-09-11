@@ -21,8 +21,8 @@ import pytest
 import re
 import getpass
 
-from lmcommon.environment.apt import AptPackageManager
-from lmcommon.fixtures.container import build_lb_image_for_env, mock_config_with_repo
+from gtmcore.environment.apt import AptPackageManager
+from gtmcore.fixtures.container import build_lb_image_for_env, mock_config_with_repo
 
 
 class TestAptPackageManager(object):

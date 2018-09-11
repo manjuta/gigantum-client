@@ -21,8 +21,8 @@ import abc
 from typing import (List, Dict, Optional)
 from collections import namedtuple
 
-from lmcommon.labbook import LabBook
-import lmcommon.environment
+from gtmcore.labbook import LabBook
+import gtmcore.environment
 
 # A namedtuple for the result of package validation
 PackageResult = namedtuple('PackageResult', ['package', 'version', 'error'])
@@ -36,7 +36,7 @@ class PackageManager(metaclass=abc.ABCMeta):
     def fallback_image(labbook: LabBook) -> str:
         """ Generate the image name of the LabManager if the docker image for
             the given labbook cannot be found. """
-        cm = getattr(lmcommon.environment, 'ComponentManager')(labbook)
+        cm = getattr(gtmcore.environment, 'ComponentManager')(labbook)
         base = cm.base_fields
         return f"{base['image']['namespace']}" \
                f"/{base['image']['repository']}" \

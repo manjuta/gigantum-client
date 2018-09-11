@@ -20,7 +20,7 @@
 import abc
 from typing import (Any, Dict, List)
 
-from lmcommon.activity import ActivityRecord
+from gtmcore.activity import ActivityRecord
 
 
 class ExecutionData(object):

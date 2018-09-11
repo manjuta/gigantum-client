@@ -23,10 +23,10 @@ import mock
 import os
 
 
-from lmcommon.labbook import LabBook, loaders
-from lmcommon.workflows import GitWorkflow, MergeError
-from lmcommon.files import FileOperations
-from lmcommon.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.workflows import GitWorkflow, MergeError
+from gtmcore.files import FileOperations
+from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
                                sample_src_file, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
                                mock_config_lfs_disabled)
 

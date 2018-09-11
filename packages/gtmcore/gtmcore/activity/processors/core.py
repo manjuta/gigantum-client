@@ -19,8 +19,8 @@
 # SOFTWARE.
 from typing import (Any, Dict, List)
 
-from lmcommon.activity.processors.processor import ActivityProcessor, ExecutionData
-from lmcommon.activity import ActivityRecord, ActivityDetailType
+from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
+from gtmcore.activity import ActivityRecord, ActivityDetailType
 
 
 class ActivityShowBasicProcessor(ActivityProcessor):

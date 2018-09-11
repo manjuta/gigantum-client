@@ -25,12 +25,12 @@ import docker
 import requests
 import shutil
 
-from lmcommon.configuration import get_docker_client
+from gtmcore.configuration import get_docker_client
 
-from lmcommon.container.container import ContainerOperations
-from lmcommon.container.utils import infer_docker_image_name
-from lmcommon.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo
-from lmcommon.container.exceptions import ContainerBuildException, ContainerException
+from gtmcore.container.container import ContainerOperations
+from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo
+from gtmcore.container.exceptions import ContainerBuildException, ContainerException
 
 
 def remove_image_cache_data():

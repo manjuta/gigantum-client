@@ -22,11 +22,11 @@ import os
 import random
 from datetime import datetime, timedelta, timezone
 
-from lmcommon.labbook import LabBook
-from lmcommon.activity.records import ActivityType, ActivityRecord, ActivityDetailRecord, ActivityDetailType,\
+from gtmcore.labbook import LabBook
+from gtmcore.activity.records import ActivityType, ActivityRecord, ActivityDetailRecord, ActivityDetailType,\
     ActivityAction
-from lmcommon.activity import ActivityStore
-from lmcommon.fixtures import mock_config_with_activitystore
+from gtmcore.activity import ActivityStore
+from gtmcore.fixtures import mock_config_with_activitystore
 
 
 def helper_create_labbook_change(labbook, cnt=0):

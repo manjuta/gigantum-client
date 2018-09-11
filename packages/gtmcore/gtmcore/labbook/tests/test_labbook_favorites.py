@@ -22,7 +22,7 @@ import os
 import json
 from collections import OrderedDict
 
-from lmcommon.fixtures import mock_labbook
+from gtmcore.fixtures import mock_labbook
 
 
 class TestLabBookFavorites(object):

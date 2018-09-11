@@ -22,8 +22,8 @@ import pprint
 import pytest
 import os
 
-from lmcommon.fixtures import mock_labbook
-from lmcommon.files import FileOperations, FileOperationsException
+from gtmcore.fixtures import mock_labbook
+from gtmcore.files import FileOperations, FileOperationsException
 
 
 class TestFileOps(object):

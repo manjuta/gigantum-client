@@ -20,9 +20,9 @@
 import os
 import pytest
 
-from lmcommon.fixtures.container import mock_config_with_repo, build_lb_image_for_env, build_lb_image_for_env_conda, \
+from gtmcore.fixtures.container import mock_config_with_repo, build_lb_image_for_env, build_lb_image_for_env_conda, \
     REQUESTS_LATEST_VERSION
-from lmcommon.environment.conda import Conda3PackageManager, Conda2PackageManager
+from gtmcore.environment.conda import Conda3PackageManager, Conda2PackageManager
 
 
 skip_clause = os.environ.get('CIRCLE_BRANCH') \

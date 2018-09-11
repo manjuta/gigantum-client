@@ -23,13 +23,13 @@ import tempfile
 import git
 import shutil
 
-from lmcommon.imagebuilder import ImageBuilder
-from lmcommon.environment import ComponentManager, RepositoryManager
-from lmcommon.fixtures import labbook_dir_tree, mock_config_file, setup_index, mock_config_with_repo, mock_labbook, \
+from gtmcore.imagebuilder import ImageBuilder
+from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.fixtures import labbook_dir_tree, mock_config_file, setup_index, mock_config_with_repo, mock_labbook, \
     ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
-import lmcommon.fixtures
-from lmcommon.labbook import LabBook
-from lmcommon.configuration import get_docker_client
+import gtmcore.fixtures
+from gtmcore.labbook import LabBook
+from gtmcore.configuration import get_docker_client
 
 
 def populate_with_pkgs(lb):

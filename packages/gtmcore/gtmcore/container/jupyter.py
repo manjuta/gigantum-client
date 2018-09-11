@@ -7,11 +7,11 @@ from typing import Optional
 import redis
 import requests
 
-from lmcommon.logging import LMLogger
-from lmcommon.configuration import get_docker_client
-from lmcommon.environment import ComponentManager
-from lmcommon.container.core import infer_docker_image_name, get_container_ip
-from lmcommon.labbook import LabBook, LabbookException
+from gtmcore.logging import LMLogger
+from gtmcore.configuration import get_docker_client
+from gtmcore.environment import ComponentManager
+from gtmcore.container.core import infer_docker_image_name, get_container_ip
+from gtmcore.labbook import LabBook, LabbookException
 
 logger = LMLogger.get_logger()
 

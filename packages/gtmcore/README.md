@@ -27,7 +27,7 @@ $ brew install libyaml
 
 ### configuration
 
-A class for centralized configuration information is available via `lmcommon.configuration.Configuration`
+A class for centralized configuration information is available via `gtmcore.configuration.Configuration`
 
 The class loads configuration information found in a configuration file in this order:
 
@@ -41,7 +41,7 @@ storage. Parameters should be broken into sections based on the component.
 ### logging
 
 A pre-configured logger is available from the class from
-lmcommon.logging.LMLogger.
+gtmcore.logging.LMLogger.
 
 It loads logger configuration from a configuration json file in this order:
 
@@ -71,7 +71,7 @@ lmlog.error("This is my error message")
 The auth package provides user authentication tools and middleware to create
 user identities from JSON Web Tokens (JWT) that come from auth0. To get all
 tests to pass, you need to set the auth server info in
-`lmcommon/auth/tests/auth_config.json`.  Ask a developer for this file.
+`gtmcore/auth/tests/auth_config.json`.  Ask a developer for this file.
 
 To configure from scratch:
 
@@ -84,8 +84,8 @@ To configure from scratch:
 - Create a new test API and client, configuring the client to only allow
   password grants
 - Update API to use RSA
-- Update `lmcommon/auth/tests/auth_config.json.example` to
-  `lmcommon/auth/tests/auth_config.json`, setting all values
+- Update `gtmcore/auth/tests/auth_config.json.example` to
+  `gtmcore/auth/tests/auth_config.json`, setting all values
 
 ## Testing
 

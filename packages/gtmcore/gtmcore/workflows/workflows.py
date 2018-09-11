@@ -20,10 +20,10 @@
 import time
 from typing import Optional
 
-from lmcommon.configuration.utils import call_subprocess
-from lmcommon.labbook import LabBook
-from lmcommon.logging import LMLogger
-from lmcommon.workflows import core
+from gtmcore.configuration.utils import call_subprocess
+from gtmcore.labbook import LabBook
+from gtmcore.logging import LMLogger
+from gtmcore.workflows import core
 
 logger = LMLogger.get_logger()
 

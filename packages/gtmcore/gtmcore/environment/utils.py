@@ -1,7 +1,7 @@
-from lmcommon.environment.packagemanager import PackageManager
-from lmcommon.environment.pip import PipPackageManager
-from lmcommon.environment.conda import Conda2PackageManager, Conda3PackageManager
-from lmcommon.environment.apt import AptPackageManager
+from gtmcore.environment.packagemanager import PackageManager
+from gtmcore.environment.pip import PipPackageManager
+from gtmcore.environment.conda import Conda2PackageManager, Conda3PackageManager
+from gtmcore.environment.apt import AptPackageManager
 
 
 def get_package_manager(manager: str) -> PackageManager:

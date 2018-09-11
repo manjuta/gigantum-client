@@ -26,7 +26,7 @@ import copy
 import operator
 import datetime
 
-from lmcommon.activity.serializers import Serializer
+from gtmcore.activity.serializers import Serializer
 
 
 class ActivityType(Enum):

@@ -20,7 +20,7 @@
 import pytest
 import json
 import datetime
-from lmcommon.activity.records import ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
+from gtmcore.activity.records import ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
 
 

@@ -26,7 +26,7 @@ import re
 import os
 from urllib.parse import quote_plus
 
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

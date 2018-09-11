@@ -19,8 +19,8 @@
 # SOFTWARE.
 from typing import Any
 
-from lmcommon.activity.serializers import text
-from lmcommon.activity.serializers import image
+from gtmcore.activity.serializers import text
+from gtmcore.activity.serializers import image
 
 
 class Serializer(object):
