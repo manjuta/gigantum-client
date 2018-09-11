@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test Home Rendering 1`] = `
+<div
+  className="Home"
+>
+  <div
+    className="Login"
+  >
+    <div
+      className="Login__panel"
+    >
+      <div
+        className="Login__logo"
+      />
+      <button
+        className="Login__button"
+        onClick={[Function]}
+      >
+        Log In
+      </button>
+    </div>
+  </div>
+</div>
+`;

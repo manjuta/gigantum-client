@@ -1,0 +1,453 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
+<div
+  className="LocalLabbooks__labbooks"
+>
+  <div
+    className="LocalLabbooks__sizer grid"
+  >
+    <div
+      className="ImportModule Labbooks__panel Labbooks__panel--add Labbooks__panel--import column-4-span-3"
+      id="dropZone"
+      onDragEnd={[Function]}
+      onDragOver={[Function]}
+      onDrop={[Function]}
+      type="file"
+    >
+      <div
+        className="Labbooks__labbook-main"
+      >
+        <div
+          className="Labbooks__labbook-header"
+        >
+          <div
+            className="Labbooks__labbook-icon"
+          >
+            <div
+              className="Labbooks__title-add"
+            />
+          </div>
+          <div
+            className="Labbooks__add-text"
+          >
+            <h4>
+              Add Project
+            </h4>
+          </div>
+        </div>
+        <div
+          className="Labbooks__labbook-button"
+          onClick={[Function]}
+        >
+          Create New
+        </div>
+        <div
+          className="hidden createLabbook"
+        >
+          <div
+            className="ToolTip__toggle createLabbook"
+            onClick={[Function]}
+          >
+            <div
+              className="ToolTip__glow-container"
+            >
+              <div
+                className="ToolTip__glow-ring-outer"
+              >
+                <div
+                  className="ToolTip__glow-ring-inner"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            className="hidden createLabbook"
+          />
+          <div
+            className="hidden createLabbook"
+          >
+            Clicking on the 'Create New' button will open the new Project window, letting you name and select a Base for the new Project.
+          </div>
+        </div>
+        <div
+          className="Labbooks__labbook-button-import"
+          onClick={[Function]}
+        >
+          Import Existing
+        </div>
+        <div
+          className="hidden importLabbook"
+        >
+          <div
+            className="ToolTip__toggle importLabbook"
+            onClick={[Function]}
+          >
+            <div
+              className="ToolTip__glow-container"
+            >
+              <div
+                className="ToolTip__glow-ring-outer"
+              >
+                <div
+                  className="ToolTip__glow-ring-inner"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            className="hidden importLabbook"
+          />
+          <div
+            className="hidden importLabbook"
+          >
+            Clicking on the Import Existing' button transition the card to Import mode. 
+             You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
+             You can also directly import Projects that have been shared with you in the Cloud view.
+          </div>
+        </div>
+      </div>
+      <div
+        className="hidden"
+      />
+    </div>
+    <a
+      className="LocalLabbooks__panel column-4-span-3 flex flex--column justify--space-between"
+      href="/projects/cbutler/zab"
+      onClick={[Function]}
+    >
+      <div
+        className="LocalLabbooks__icon-row"
+      >
+        <div
+          className="LocalLabbooks__containerStatus"
+        >
+          <button
+            className="LocalLabbooks__containerStatus--state loading"
+            onClick={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            
+          </button>
+        </div>
+      </div>
+      <div
+        className="LocalLabbooks__text-row"
+      >
+        <div
+          className="LocalLabbooks__title-row"
+        >
+          <h6
+            className="LocalLabbooks__panel-title"
+            onClick={[Function]}
+          >
+            <span
+              className={undefined}
+            >
+              <span
+                className=""
+                style={undefined}
+              >
+                zab
+              </span>
+            </span>
+          </h6>
+        </div>
+        <p
+          className="LocalLabbooks__owner"
+        >
+          Created by cbutler
+        </p>
+        <p
+          className="LocalLabbooks__description"
+        >
+          <span
+            className={undefined}
+          />
+        </p>
+      </div>
+      <div
+        className="Tooltip LocalLabbookPanel__loading"
+        data-tooltip="loading"
+      />
+    </a>
+    <a
+      className="LocalLabbooks__panel column-4-span-3 flex flex--column justify--space-between"
+      href="/projects/cbutler/untracked-labbook"
+      onClick={[Function]}
+    >
+      <div
+        className="LocalLabbooks__icon-row"
+      >
+        <div
+          className="LocalLabbooks__containerStatus"
+        >
+          <button
+            className="LocalLabbooks__containerStatus--state loading"
+            onClick={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            
+          </button>
+        </div>
+      </div>
+      <div
+        className="LocalLabbooks__text-row"
+      >
+        <div
+          className="LocalLabbooks__title-row"
+        >
+          <h6
+            className="LocalLabbooks__panel-title"
+            onClick={[Function]}
+          >
+            <span
+              className={undefined}
+            >
+              <span
+                className=""
+                style={undefined}
+              >
+                untracked-labbook
+              </span>
+            </span>
+          </h6>
+        </div>
+        <p
+          className="LocalLabbooks__owner"
+        >
+          Created by cbutler
+        </p>
+        <p
+          className="LocalLabbooks__description"
+        >
+          <span
+            className={undefined}
+          />
+        </p>
+      </div>
+      <div
+        className="Tooltip LocalLabbookPanel__loading"
+        data-tooltip="loading"
+      />
+    </a>
+    <a
+      className="LocalLabbooks__panel column-4-span-3 flex flex--column justify--space-between"
+      href="/projects/cbutler/untracked-2"
+      onClick={[Function]}
+    >
+      <div
+        className="LocalLabbooks__icon-row"
+      >
+        <div
+          className="LocalLabbooks__containerStatus"
+        >
+          <button
+            className="LocalLabbooks__containerStatus--state loading"
+            onClick={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            
+          </button>
+        </div>
+      </div>
+      <div
+        className="LocalLabbooks__text-row"
+      >
+        <div
+          className="LocalLabbooks__title-row"
+        >
+          <h6
+            className="LocalLabbooks__panel-title"
+            onClick={[Function]}
+          >
+            <span
+              className={undefined}
+            >
+              <span
+                className=""
+                style={undefined}
+              >
+                untracked-2
+              </span>
+            </span>
+          </h6>
+        </div>
+        <p
+          className="LocalLabbooks__owner"
+        >
+          Created by cbutler
+        </p>
+        <p
+          className="LocalLabbooks__description"
+        >
+          <span
+            className={undefined}
+          />
+        </p>
+      </div>
+      <div
+        className="Tooltip LocalLabbookPanel__loading"
+        data-tooltip="loading"
+      />
+    </a>
+    <a
+      className="LocalLabbooks__panel column-4-span-3 flex flex--column justify--space-between"
+      href="/projects/cbutler/untracked"
+      onClick={[Function]}
+    >
+      <div
+        className="LocalLabbooks__icon-row"
+      >
+        <div
+          className="LocalLabbooks__containerStatus"
+        >
+          <button
+            className="LocalLabbooks__containerStatus--state loading"
+            onClick={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            
+          </button>
+        </div>
+      </div>
+      <div
+        className="LocalLabbooks__text-row"
+      >
+        <div
+          className="LocalLabbooks__title-row"
+        >
+          <h6
+            className="LocalLabbooks__panel-title"
+            onClick={[Function]}
+          >
+            <span
+              className={undefined}
+            >
+              <span
+                className=""
+                style={undefined}
+              >
+                untracked
+              </span>
+            </span>
+          </h6>
+        </div>
+        <p
+          className="LocalLabbooks__owner"
+        >
+          Created by cbutler
+        </p>
+        <p
+          className="LocalLabbooks__description"
+        >
+          <span
+            className={undefined}
+          />
+        </p>
+      </div>
+      <div
+        className="Tooltip LocalLabbookPanel__loading"
+        data-tooltip="loading"
+      />
+    </a>
+    <a
+      className="LocalLabbooks__panel column-4-span-3 flex flex--column justify--space-between"
+      href="/projects/dmk/trump-tweets"
+      onClick={[Function]}
+    >
+      <div
+        className="LocalLabbooks__icon-row"
+      >
+        <div
+          className="LocalLabbooks__containerStatus"
+        >
+          <button
+            className="LocalLabbooks__containerStatus--state loading"
+            onClick={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            
+          </button>
+        </div>
+      </div>
+      <div
+        className="LocalLabbooks__text-row"
+      >
+        <div
+          className="LocalLabbooks__title-row"
+        >
+          <h6
+            className="LocalLabbooks__panel-title"
+            onClick={[Function]}
+          >
+            <span
+              className={undefined}
+            >
+              <span
+                className=""
+                style={undefined}
+              >
+                trump-tweets
+              </span>
+            </span>
+          </h6>
+        </div>
+        <p
+          className="LocalLabbooks__owner"
+        >
+          Created by dmk
+        </p>
+        <p
+          className="LocalLabbooks__description"
+        >
+          <span
+            className={undefined}
+          >
+            <span
+              className=""
+              style={undefined}
+            >
+              A LabBook to analyze Trumps stupid tweets
+            </span>
+          </span>
+        </p>
+      </div>
+      <div
+        className="Tooltip LocalLabbookPanel__loading"
+        data-tooltip="loading"
+      />
+    </a>
+    <div
+      className="Labbook__loader-hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="Labbook__loader-hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="Labbook__loader-hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="Labbook__loader-hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="Labbook__loader-hidden"
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;

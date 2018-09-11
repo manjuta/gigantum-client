@@ -1,0 +1,14 @@
+.Header {
+  position: fixed;
+  z-index: index($elements, headerStrip);
+  top: 0px;
+
+  width: 100%;
+  height: 10px;
+
+  background-color: $jet;
+}
+
+.Header.is-demo{
+  top: 50px;
+}

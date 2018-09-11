@@ -1,0 +1,104 @@
+{
+ "data": {
+  "labbook": {
+   "id": "TGFiYm9vazpjYnV0bGVyJmRhdGEtc2hhZGVy",
+   "description": "",
+   "branches": {
+    "edges": [
+     {
+      "node": {
+       "id": "TGFiYm9va1JlZjpOb25l",
+       "name": "data-shader",
+       "prefix": null,
+       "commit": {
+        "hash": "109c89a74b679ea849ac2a202b3b98c5d4e7a58e",
+        "shortHash": "109c89a7",
+        "committedOn": "2018-05-18T19:36:27+00:00",
+        "id": "TGFiYm9va0NvbW1pdDpOb25l"
+       },
+       "__typename": "LabbookRef"
+      },
+      "cursor": "MA=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9va1JlZjpOb25l",
+       "name": "data-shader",
+       "prefix": null,
+       "commit": {
+        "hash": "709c9e3d0401956563bba887ed6f757d2c17bfe7",
+        "shortHash": "709c9e3d",
+        "committedOn": "2018-07-20T20:54:15+00:00",
+        "id": "TGFiYm9va0NvbW1pdDpOb25l"
+       },
+       "__typename": "LabbookRef"
+      },
+      "cursor": "MQ=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9va1JlZjpOb25l",
+       "name": "data-shader",
+       "prefix": null,
+       "commit": {
+        "hash": "859b97eb358c2734ab687b0235615ada6fab7586",
+        "shortHash": "859b97eb",
+        "committedOn": "2018-07-20T20:56:57+00:00",
+        "id": "TGFiYm9va0NvbW1pdDpOb25l"
+       },
+       "__typename": "LabbookRef"
+      },
+      "cursor": "Mg=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9va1JlZjpOb25l",
+       "name": "data-shader",
+       "prefix": null,
+       "commit": {
+        "hash": "3181bd2ae257e748f907c4f788f12ebc6b48c858",
+        "shortHash": "3181bd2a",
+        "committedOn": "2018-05-18T17:31:29+00:00",
+        "id": "TGFiYm9va0NvbW1pdDpOb25l"
+       },
+       "__typename": "LabbookRef"
+      },
+      "cursor": "Mw=="
+     },
+     {
+      "node": {
+       "id": "TGFiYm9va1JlZjpOb25l",
+       "name": "data-shader",
+       "prefix": "origin",
+       "commit": {
+        "hash": "109c89a74b679ea849ac2a202b3b98c5d4e7a58e",
+        "shortHash": "109c89a7",
+        "committedOn": "2018-05-18T19:36:27+00:00",
+        "id": "TGFiYm9va0NvbW1pdDpOb25l"
+       },
+       "__typename": "LabbookRef"
+      },
+      "cursor": "NA=="
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "NA==",
+     "hasNextPage": false,
+     "hasPreviousPage": false,
+     "startCursor": "MA=="
+    }
+   },
+   "activeBranch": {
+    "id": "TGFiYm9va1JlZjpOb25l",
+    "name": "data-shader",
+    "prefix": null,
+    "commit": {
+     "hash": "709c9e3d0401956563bba887ed6f757d2c17bfe7",
+     "shortHash": "709c9e3d",
+     "committedOn": "2018-07-20T20:54:15+00:00",
+     "id": "TGFiYm9va0NvbW1pdDpOb25l"
+    }
+   }
+  }
+ }
+}

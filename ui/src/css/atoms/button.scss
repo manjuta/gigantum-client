@@ -1,0 +1,59 @@
+button {
+  height: 26px;
+  line-height: 22px;
+  padding: 0px 20px;
+  border: 2px solid $azure;
+  border-radius: 10px;
+  color: $white;
+  background: $azure;
+  cursor: pointer;
+  font-weight: 100;
+
+}
+
+button:hover {
+  color: $white;
+  background: $turquise;
+  border: 2px solid $turquise;
+}
+
+button:focus {
+  color: $white;
+  background: $azure;
+}
+
+
+button:disabled {
+  color: $grey;
+  background: $grey-light;
+  border: 2px solid $grey;
+  overflow: hidden;
+}
+
+.button--flat {
+  padding: 0px 20px;
+  border: 0px solid $azure;
+  border-radius: 0px;
+  color: $font-grey;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.button--flat:hover {
+  color: $turquise;
+  background: none;
+  border: 0px solid $turquise;
+}
+.button--flat:focus {
+  color: $azure;
+  background: none;
+  border: 0px solid $azure;
+}
+.button--flat:disabled,
+.button--flat:disabled:focus,
+.button--flat:disabled:hover{
+  color: $grey;
+  background: $grey-light;
+  border: 2px solid $grey;
+}

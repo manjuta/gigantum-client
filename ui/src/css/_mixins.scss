@@ -1,0 +1,77 @@
+@mixin modal($height, $width) {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: index($elements, modal);
+  width: $width;
+  height: $height;
+
+  margin: (-($height/2)) 0 0 (-($width/2));
+
+  border: 1px solid $white;
+  border-radius: 8px;
+  background-color: $white;
+  animation: slide-up-fade-in forwards .25s;
+  @extend .box-shadow;
+}
+
+@mixin modalHeader(){
+  padding: 5px 0 5px 0px;
+  color: $azure;
+  text-align: center;
+  min-width: 100%;
+  margin: 0 auto;
+}
+
+
+@mixin flex($content, $direction) {
+  display: flex;
+  justify-content: $content;
+  flex-direction: $direction;
+}
+
+@mixin close() {
+  position: absolute;
+  height: 28px;
+  width: 28px;
+  top: 7px;
+  right: 7px;
+  background: url('./../images/icons/close.svg') no-repeat center center;
+  background-size: 28px;
+  cursor: pointer;
+}
+
+@mixin card($height, $width) {
+  width: $width;
+  height: $height;
+
+  border: 1px solid $white;
+  background-color: $white;
+  @extend .box-shadow;
+
+}
+
+@mixin triangle($direction, $size, $color) {
+    width: 0;
+    height: 0;
+    @if $direction == 'up' {
+        border-left: $size solid transparent;
+        border-right: $size solid transparent;
+        border-bottom: $size solid $color;
+    }
+    @else if $direction == 'down' {
+        border-left: $size solid transparent;
+        border-right: $size solid transparent;
+        border-top: $size solid $color;
+    }
+    @else if $direction == 'right' {
+        border-top: $size solid transparent;
+        border-bottom: $size solid transparent;
+        border-left: $size solid $color;
+    }
+    @else if $direction == 'left' {
+        border-top: $size solid transparent;
+        border-bottom: $size solid transparent;
+        border-right: $size solid $color;
+    }
+}

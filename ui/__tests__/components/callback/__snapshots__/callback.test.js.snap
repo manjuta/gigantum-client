@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test Overview rendering 1`] = `
+<div
+  className="Callback"
+>
+  <div
+    className="Callback__loader"
+  >
+    <div
+      className="Loader"
+    />
+  </div>
+</div>
+`;
