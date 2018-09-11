@@ -24,13 +24,16 @@ import shutil
 
 import yaml
 
-from gtm import dockerize_windows_path
-from gtm import ask_question
+from gtm.common.dockerpath import dockerize_windows_path
+from gtm.common.console import ask_question
+
 
 class DockerConfig(object):
     """Class to manage configuring docker and the docker container for dev
     """
     def __init__(self):
+        self.user_config = os.path.expanduser("~/.gtm/config")
+
         self.resources_root = os.path.join(resource_filename("gtm", "resources"), 'developer_resources')
         self.compose_file_root = os.path.join(self.resources_root, 'docker_compose')
         self.gtm_root, _, _ = resource_filename("gtm", "resources").rsplit(os.sep, 2)

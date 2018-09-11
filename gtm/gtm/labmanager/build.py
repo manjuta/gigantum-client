@@ -19,7 +19,6 @@
 # SOFTWARE.
 import os
 import re
-from pkg_resources import resource_filename
 import platform
 import shutil
 import glob
@@ -30,7 +29,11 @@ from git import Repo
 from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
 
-from gtm import ask_question, dockerize_windows_path, get_docker_client, DockerVolume
+from gtm.common.console import ask_question
+from gtm.common.dockerpath import dockerize_windows_path
+from gtm.common.dockerclient import get_docker_client
+from gtm.common.dockervolume import DockerVolume
+from gtm import get_resources_root, get_client_root
 
 
 class LabManagerBuilder(object):
@@ -52,9 +55,7 @@ class LabManagerBuilder(object):
             str
         """
         # Get the path of the root directory
-        file_path = resource_filename("gtm", "labmanager")
-        file_path = file_path.rsplit(os.path.sep, 2)[0]
-        repo = Repo(file_path)
+        repo = Repo(get_client_root())
         return repo.head.commit.hexsha
 
     def _generate_image_name(self) -> str:
@@ -218,20 +219,21 @@ class LabManagerBuilder(object):
             # Create an empty volume
             self.node_volume.create()
 
-        docker_build_dir = os.path.expanduser(resource_filename("gtm", "resources"))
-        frontend_dir = os.path.join(docker_build_dir, 'submodules', 'labmanager-ui')
+        docker_build_dir = get_client_root()
+        frontend_dir = os.path.join(get_client_root(), 'ui')
+        dockerfile_path = os.path.join(get_resources_root(), 'docker', 'Dockerfile_frontend_build')
 
         if build_ui_container:
             # Build frontend image
             if show_output:
                 [print(ln[list(ln.keys())[0]], end='') for ln in self.docker_client.api.build(path=docker_build_dir,
-                                                                                  dockerfile='Dockerfile_frontend_build',
+                                                                                  dockerfile=dockerfile_path,
                                                                                   tag=self._ui_build_image_name,
                                                                                   pull=True, rm=True,
                                                                                   decode=True,
                                                                                   nocache=no_cache)]
             else:
-                self.docker_client.images.build(path=docker_build_dir, dockerfile='Dockerfile_frontend_build',
+                self.docker_client.images.build(path=docker_build_dir, dockerfile=dockerfile_path,
                                     tag=self._ui_build_image_name, pull=True, rm=True, nocache=no_cache)
 
         # Compile frontend application into gtm/resources/frontend_resources/build
@@ -240,7 +242,11 @@ class LabManagerBuilder(object):
         self.prune_container(container_name)
 
         # Copy labmanager-ui to temp dir WITHOUT node packages
-        temp_ui_dir = os.path.join(docker_build_dir, 'frontend_resources', 'build')
+        ui_build_dir = os.path.join(get_client_root(), 'build')
+        if os.path.exists(ui_build_dir) is False:
+            os.makedirs(ui_build_dir)
+
+        temp_ui_dir = os.path.join(ui_build_dir, 'build')
         if os.path.exists(temp_ui_dir):
             shutil.rmtree(temp_ui_dir)
         shutil.copytree(frontend_dir, temp_ui_dir + os.path.sep, ignore=shutil.ignore_patterns("node_modules"))
@@ -285,14 +291,6 @@ class LabManagerBuilder(object):
             print("** Error: Frontend build failed! ***")
             sys.exit(1)
 
-        # Copy build dir back to submodules/labmanager-ui
-        ui_dest_dir = os.path.join(frontend_dir, 'build')
-        if os.path.exists(ui_dest_dir):
-            shutil.rmtree(ui_dest_dir)
-        shutil.copytree(os.path.join(temp_ui_dir, 'build'), ui_dest_dir)
-        # Clean up temp copy of code
-        shutil.rmtree(temp_ui_dir)
-
         # Build LabManager container
         if demo:
             config_override_name = 'demo-config-override.yaml'
@@ -302,10 +300,14 @@ class LabManagerBuilder(object):
             supervisor_name = 'supervisord-labmanager.conf'
 
         # Write updated config file
-        base_config_file = os.path.join(docker_build_dir, "submodules", 'labmanager-common', 'lmcommon',
+        # TODO - rename labmanager_resources folder
+        base_config_file = os.path.join(get_client_root(), "packages", 'gtmcore', 'gtmcore',
                                         'configuration', 'config', 'labmanager.yaml.default')
-        overwrite_config_file = os.path.join(docker_build_dir, 'labmanager_resources' ,config_override_name)
-        final_config_file = os.path.join(docker_build_dir, 'labmanager_resources', 'labmanager-config.yaml')
+        overwrite_config_file = os.path.join(docker_build_dir, 'resources', 'labmanager_resources',
+                                             config_override_name)
+        # TODO - put output into build dir
+        final_config_file = os.path.join(docker_build_dir, 'resources', 'labmanager_resources',
+                                         'labmanager-config.yaml')
 
         with open(base_config_file, "rt") as cf:
             base_data = yaml.load(cf)
@@ -327,8 +329,9 @@ class LabManagerBuilder(object):
             cf.write(yaml.dump(base_data, default_flow_style=False))
 
         # Write final supervisor file to set CHP parameters
-        base_supervisor = os.path.join(docker_build_dir, "labmanager_resources", supervisor_name)
-        final_supervisor = os.path.join(docker_build_dir, "labmanager_resources", 'supervisord-configured.conf')
+        base_supervisor = os.path.join(docker_build_dir, 'resources', "labmanager_resources", supervisor_name)
+        final_supervisor = os.path.join(docker_build_dir, 'resources', "labmanager_resources",
+                                        'supervisord-configured.conf')
 
         with open(base_supervisor, 'rt') as source:
             with open(final_supervisor, 'wt') as dest:
@@ -349,21 +352,20 @@ priority=0""")
                   'io.gigantum.maintainer.email': 'hello@gigantum.io'}
 
         # Delete .pyc files in case dev tools used on something not ubuntu before building
-        self._remove_pyc(os.path.join(docker_build_dir, "submodules", 'labmanager-common', 'lmcommon'))
-        self._remove_pyc(os.path.join(docker_build_dir, "submodules", 'labmanager-service-labbook', 'lmsrvcore'))
-        self._remove_pyc(os.path.join(docker_build_dir, "submodules", 'labmanager-service-labbook', 'lmsrvlabbook'))
+        self._remove_pyc(os.path.join(docker_build_dir, "packages"))
 
         # Build image
+        dockerfile_path = os.path.join(get_resources_root(), 'docker', 'Dockerfile_labmanager')
         print("\n\n*** Building LabManager image `{}`, please wait...\n\n".format(self.image_name))
         if show_output:
             [print(ln[list(ln.keys())[0]], end='') for ln in self.docker_client.api.build(path=docker_build_dir,
-                                                                              dockerfile='Dockerfile_labmanager',
+                                                                              dockerfile=dockerfile_path,
                                                                               tag=named_image,
                                                                               labels=labels, nocache=no_cache,
                                                                               pull=True, rm=True,
                                                                               decode=True)]
         else:
-            self.docker_client.images.build(path=docker_build_dir, dockerfile='Dockerfile_labmanager',
+            self.docker_client.images.build(path=docker_build_dir, dockerfile=dockerfile_path,
                                             tag=named_image, nocache=no_cache,
                                             pull=True, labels=labels)
 

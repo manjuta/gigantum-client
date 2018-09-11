@@ -1,4 +1,7 @@
 .git
+.idea
+.docs
+gtm
 .DS_Store
 .pyc
 .rdb

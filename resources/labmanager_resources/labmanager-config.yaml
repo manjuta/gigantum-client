@@ -1,17 +1,17 @@
 auth:
   audience: api.gigantum.io
   client_id: 0Ajo8Ov6Qriafo0xVpSyejWy1pwNWdhk
-  identity_manager: browser
+  identity_manager: local
   provider_domain: gigantum.auth0.com
   signing_algorithm: RS256
 build_info:
   application: LabManager
-  built_on: '2018-09-07 20:17:52.667274'
-  revision: e38a62e55f69a41994a3611e48146a4ee4f0a7b6
+  built_on: '2018-09-11 22:03:15.041291'
+  revision: 8a7ae4d7cde4e76ffcac9336d05ddf20a30bb20a
 container:
-  cpu: 2
+  cpu: null
   cuda_version: null
-  memory: 8g
+  memory: null
 core:
   import_demo_on_first_login: true
   logging_config: /etc/gigantum/logging.json
@@ -36,7 +36,7 @@ git:
   remotes:
     repo.gigantum.io:
       admin_service: usersrv.gigantum.io
-      index_service: api.gigantum.com/read/index
+      index_service: api.gigantum.com/read
       remote_type: gitlab
   working_directory: /mnt/gigantum
 lock:
@@ -52,6 +52,6 @@ lock:
 proxy:
   api_host: localhost
   api_port: 1999
-  apparent_proxy_port: 80
+  apparent_proxy_port: 10000
   external_proxy_port: 10000
   labmanager_api_prefix: /api

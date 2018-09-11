@@ -2,8 +2,9 @@ FROM ubuntu:18.04
 LABEL maintainer="Gigantum <hello@gigantum.io>"
 
 # Copy requirements files
-COPY submodules/labmanager-common/requirements.txt /opt/labmanager-common/requirements.txt
-COPY submodules/labmanager-service-labbook/requirements.txt /opt/labmanager-service-labbook/requirements.txt
+COPY packages/gtmcore/requirements.txt /opt/labmanager-common/requirements.txt
+COPY packages/gtmapi/requirements.txt /opt/labmanager-service-labbook/requirements.txt
+COPY packages/gtmconfhttpproxy /opt/gtmconfhttpproxy
 ENV SHELL=/bin/bash
 
 # Super instruction to install all dependencies
@@ -15,7 +16,7 @@ RUN apt-get -y update && \
     curl -sL https://deb.nodesource.com/setup_8.x | bash && \
     apt-get -y install nodejs && \
     npm install -g configurable-http-proxy && \
-    cd /opt/ && git clone https://github.com/gigantum/confhttpproxy.git && pip3 install -e confhttpproxy && \
+    cd /opt/gtmconfhttpproxy && pip3 install -e . && \
     pip3 install wheel && \
     pip3 install -r /opt/labmanager-common/requirements.txt && \
     pip3 install -r /opt/labmanager-service-labbook/requirements.txt && \
@@ -25,42 +26,42 @@ RUN apt-get -y update && \
     rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
 
 # Copy Libraries
-COPY submodules/labmanager-service-labbook /opt/labmanager-service-labbook
-COPY submodules/labmanager-common /opt/labmanager-common
+COPY packages/gtmapi /opt/gtmapi
+COPY packages/gtmcore /opt/gtmcore
 
-RUN cd /opt/labmanager-common/ && python3 setup.py install
+RUN cd /opt/gtmcore/ && python3 setup.py install
 
 # Setup lmcommon config file - should be written by automation before copy
-COPY labmanager_resources/labmanager-config.yaml /etc/gigantum/labmanager.yaml
+COPY resources/labmanager_resources/labmanager-config.yaml /etc/gigantum/labmanager.yaml
 
 # Setup logging config file
-COPY submodules/labmanager-common/lmcommon/logging/logging.json.default /etc/gigantum/logging.json
+COPY packages/gtmcore/gtmcore/logging/logging.json.default /etc/gigantum/logging.json
 
 # Make needed directories
 RUN mkdir -p /mnt/gigantum && mkdir /opt/redis
 
 # Copy frontend
-COPY submodules/labmanager-ui/build/ /var/www/
+COPY build/build/build/ /var/www/
 
 # Setup NGINX/uWSGI
-COPY labmanager_resources/nginx_ui.conf /etc/nginx/sites-enabled/
-COPY labmanager_resources/nginx_api.conf /etc/nginx/sites-enabled/
+COPY resources/labmanager_resources/nginx_ui.conf /etc/nginx/sites-enabled/
+COPY resources/labmanager_resources/nginx_api.conf /etc/nginx/sites-enabled/
 RUN rm /etc/nginx/sites-enabled/default
 
 # Setup Redis
-COPY labmanager_resources/redis.conf /opt/redis/redis.conf
+COPY resources/labmanager_resources/redis.conf /opt/redis/redis.conf
 
 # Setup Supervisord to launch both uwsgi and nginx
 RUN mkdir -p /opt/log/supervisor && mkdir -p /opt/log/nginx && mkdir -p /opt/run && \
     mkdir -p /opt/nginx && nginx && nginx -s reload && nginx -s quit
-COPY labmanager_resources/supervisord_base.conf /etc/supervisor/supervisord.conf
-COPY labmanager_resources/supervisord-configured.conf /etc/supervisor/conf.d/supervisord.conf
+COPY resources/labmanager_resources/supervisord_base.conf /etc/supervisor/supervisord.conf
+COPY resources/labmanager_resources/supervisord-configured.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY labmanager_resources/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY resources/labmanager_resources/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod u+x /usr/local/bin/entrypoint.sh
 
 # Setup demo labbook
-COPY awful-intersections-demo.lbk /opt/awful-intersections-demo.lbk
+COPY resources/awful-intersections-demo.lbk /opt/awful-intersections-demo.lbk
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
