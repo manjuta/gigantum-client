@@ -2,4 +2,7 @@
 .DS_Store
 .pyc
 .rdb
-submodules/labmanager-ui/node_modules
+ui/node_modules
+ui/__mocks__
+ui/__tests__
+ui/build
