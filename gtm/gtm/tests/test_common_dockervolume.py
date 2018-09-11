@@ -18,10 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-from gtmlib.common import dockerclient
+from gtm import dockerclient
 from docker.errors import NotFound
 
-from gtmlib.common import DockerVolume
+from gtm import DockerVolume
 
 
 @pytest.fixture()

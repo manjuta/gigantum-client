@@ -24,16 +24,16 @@ import shutil
 
 import yaml
 
-from gtmlib.common import dockerize_windows_path
-from gtmlib.common.console import ask_question
+from gtm import dockerize_windows_path
+from gtm import ask_question
 
 class DockerConfig(object):
     """Class to manage configuring docker and the docker container for dev
     """
     def __init__(self):
-        self.resources_root = os.path.join(resource_filename("gtmlib", "resources"), 'developer_resources')
+        self.resources_root = os.path.join(resource_filename("gtm", "resources"), 'developer_resources')
         self.compose_file_root = os.path.join(self.resources_root, 'docker_compose')
-        self.gtm_root, _, _ = resource_filename("gtmlib", "resources").rsplit(os.sep, 2)
+        self.gtm_root, _, _ = resource_filename("gtm", "resources").rsplit(os.sep, 2)
 
     @staticmethod
     def prompt_with_default(question: str, default: str) -> str:
@@ -115,9 +115,9 @@ class DockerConfig(object):
         # newline to output files with unix line endings on all platforms
         with open(os.path.join(self.gtm_root, 'setup.sh'), 'wt', newline='\n') as template:
             script = """#!/bin/bash
-export PYTHONPATH=$PYTHONPATH:/opt/project/gtmlib/resources/submodules/labmanager-common
+export PYTHONPATH=$PYTHONPATH:/opt/project/gtm/resources/submodules/labmanager-common
 export JUPYTER_RUNTIME_DIR=/mnt/share
-cd /opt/project/gtmlib/resources/submodules
+cd /opt/project/gtm/resources/submodules
 su giguser
             """.format(working_dir)
 

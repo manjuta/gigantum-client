@@ -25,7 +25,7 @@ import yaml
 import sys
 import platform
 
-from gtmlib.common import get_docker_client, DockerVolume
+from gtm import get_docker_client, DockerVolume
 
 
 class DockerUtil(object):
@@ -39,7 +39,7 @@ class DockerUtil(object):
         Returns:
             str
         """
-        return os.path.join(resource_filename("gtmlib", "resources"), 'developer_resources')
+        return os.path.join(resource_filename("gtm", "resources"), 'developer_resources')
 
     def _docker_compose_exists(self) -> bool:
         """Method to check if the docker compose file has been created

@@ -1,6 +1,6 @@
 #!/bin/bash
-export PYTHONPATH=$PYTHONPATH:/opt/project/gtmlib/resources/submodules/labmanager-common
+export PYTHONPATH=$PYTHONPATH:/opt/project/gtm/resources/submodules/labmanager-common
 export JUPYTER_RUNTIME_DIR=/mnt/share
-cd /opt/project/gtmlib/resources/submodules
+cd /opt/project/gtm/resources/submodules
 su giguser
             

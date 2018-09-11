@@ -18,14 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import argparse
-import os
 import sys
 
-from gtmlib import labmanager
-from gtmlib import developer
-from gtmlib import baseimage
-from gtmlib import circleci
-from gtmlib.common.logreader import show_log
+from gtm import labmanager
+from gtm import developer
+from gtm import circleci
+from gtm.common.logreader import show_log
 
 
 def format_action_help(actions):
@@ -70,7 +68,7 @@ def labmanager_actions(args):
         None
     """
 
-    builder = labmanager.LabManagerBuilder()
+    builder = labmanager.build.LabManagerBuilder()
     if "override_name" in args:
         if args.override_name:
             builder.image_name = args.override_name
@@ -237,30 +235,6 @@ def developer_actions(args):
         sys.exit(1)
 
 
-def baseimage_actions(args):
-    """Method to provide logic and perform actions for the base-image component
-
-    Args:
-        args(Namespace): Parsed arguments
-
-    Returns:
-        None
-    """
-    builder = baseimage.BaseImageBuilder()
-    image_name = None
-    if ("override_name" in args) and args.override_name:
-        image_name = args.override_name
-
-    if args.action == "build":
-        builder.build(image_name=image_name, verbose=args.verbose, no_cache=args.no_cache)
-    elif args.action == "publish":
-        builder.publish(image_name=image_name, verbose=args.verbose)
-
-    else:
-        print("Error: Unsupported action provided: {}".format(args.action), file=sys.stderr)
-        sys.exit(1)
-
-
 def circleci_actions(args):
     """Method to provide logic and perform actions for the circleci component
 
@@ -305,9 +279,6 @@ if __name__ == '__main__':
                                ["prune", "Remove all images except the latest labmanager-dev build"],
                                ["log", "Show the client log file"]]
 
-    components['base-image'] = [["build", "Build all available base images"],
-                                ["publish", "Publish all available base images to docker hub"]]
-
     components['circleci'] = [["build-common", "Build the CircleCI container for the `lmcommon` repo"],
                               ["build-api", "Build the CircleCI container for the `labmanager-service-labbook` repo"]]
 
@@ -315,7 +286,7 @@ if __name__ == '__main__':
     help_str = format_component_help(components)
     component_str = ", ".join(list(components.keys()))
 
-    description_str = "Developer command line tool for the Gigantum platform. "
+    description_str = "Developer command line tool for the Gigantum Client. "
     description_str = description_str + "The following components and actions are supported:\n\n{}".format(help_str)
 
     parser = argparse.ArgumentParser(description=description_str,
@@ -347,9 +318,6 @@ if __name__ == '__main__':
     elif args.component == "developer":
         # Base Image Selected
         developer_actions(args)
-    elif args.component == "base-image":
-        # Base Image Selected
-        baseimage_actions(args)
     elif args.component == "circleci":
         # CircleCI Selected
         circleci_actions(args)

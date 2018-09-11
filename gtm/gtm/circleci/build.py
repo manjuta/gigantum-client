@@ -43,7 +43,7 @@ class CircleCIImageBuilder(object):
         Returns:
             str
         """
-        file_path = resource_filename("gtmlib", "common")
+        file_path = resource_filename("gtm", "common")
         return file_path.rsplit(os.path.sep, 2)[0]
 
     def _get_current_commit_hash(self) -> str:
@@ -77,7 +77,7 @@ class CircleCIImageBuilder(object):
         client = docker.from_env()
 
         # Generate tags for both the named and latest versions
-        docker_build_dir = os.path.expanduser(resource_filename("gtmlib", "resources"))
+        docker_build_dir = os.path.expanduser(resource_filename("gtm", "resources"))
 
         base_tag = "gigantum/{}".format(docker_repo_name)
         named_tag = "{}:{}".format(base_tag, self._generate_image_tag_suffix())

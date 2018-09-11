@@ -30,7 +30,7 @@ from git import Repo
 from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
 
-from gtmlib.common import ask_question, dockerize_windows_path, get_docker_client, DockerVolume
+from gtm import ask_question, dockerize_windows_path, get_docker_client, DockerVolume
 
 
 class LabManagerBuilder(object):
@@ -52,7 +52,7 @@ class LabManagerBuilder(object):
             str
         """
         # Get the path of the root directory
-        file_path = resource_filename("gtmlib", "labmanager")
+        file_path = resource_filename("gtm", "labmanager")
         file_path = file_path.rsplit(os.path.sep, 2)[0]
         repo = Repo(file_path)
         return repo.head.commit.hexsha
@@ -218,7 +218,7 @@ class LabManagerBuilder(object):
             # Create an empty volume
             self.node_volume.create()
 
-        docker_build_dir = os.path.expanduser(resource_filename("gtmlib", "resources"))
+        docker_build_dir = os.path.expanduser(resource_filename("gtm", "resources"))
         frontend_dir = os.path.join(docker_build_dir, 'submodules', 'labmanager-ui')
 
         if build_ui_container:
@@ -234,7 +234,7 @@ class LabManagerBuilder(object):
                 self.docker_client.images.build(path=docker_build_dir, dockerfile='Dockerfile_frontend_build',
                                     tag=self._ui_build_image_name, pull=True, rm=True, nocache=no_cache)
 
-        # Compile frontend application into gtmlib/resources/frontend_resources/build
+        # Compile frontend application into gtm/resources/frontend_resources/build
         print("\n*** Updating node packages and compiling frontend application...\n\n")
         container_name = self._ui_build_image_name.replace("/", ".")
         self.prune_container(container_name)

@@ -20,7 +20,7 @@
 import pytest
 
 
-from gtmlib.labmanager.build import LabManagerBuilder
+from gtm import LabManagerBuilder
 
 
 @pytest.fixture()

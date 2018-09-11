@@ -17,12 +17,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import typing
-import docker
 
 from docker.errors import NotFound
 
-from gtmlib.common import get_docker_client
+from gtm import get_docker_client
 
 
 class DockerVolume(object):

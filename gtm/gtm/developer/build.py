@@ -28,12 +28,10 @@ import datetime
 import time
 import typing
 
-import docker
-from docker.errors import NotFound
 import yaml
 
-from gtmlib.common import ask_question, dockerize_windows_path, get_docker_client, DockerVolume
-from gtmlib.labmanager.build import LabManagerBuilder
+from gtm import ask_question, dockerize_windows_path, get_docker_client, DockerVolume
+from gtm import LabManagerBuilder
 
 
 class LabManagerDevBuilder(LabManagerBuilder):
@@ -41,7 +39,7 @@ class LabManagerDevBuilder(LabManagerBuilder):
     """
     def __init__(self):
         LabManagerBuilder.__init__(self)
-        self.docker_build_dir = os.path.expanduser(resource_filename("gtmlib", "resources"))
+        self.docker_build_dir = os.path.expanduser(resource_filename("gtm", "resources"))
 
         # We saved our answers during developer setup
         setup_answers_path = os.path.join(self.docker_build_dir, 'developer_resources', 'setup-answers.yaml')
