@@ -30,8 +30,10 @@ import typing
 
 import yaml
 
-from gtm import ask_question, dockerize_windows_path, get_docker_client, DockerVolume
-from gtm import LabManagerBuilder
+from gtm.common.console import ask_question
+from gtm.common.dockerutil import dockerize_windows_path, get_docker_client
+from gtm.common.dockervolume import DockerVolume
+from gtm.labmanager.build import LabManagerBuilder
 
 
 class LabManagerDevBuilder(LabManagerBuilder):

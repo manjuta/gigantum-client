@@ -30,8 +30,7 @@ from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
 
 from gtm.common.console import ask_question
-from gtm.common.dockerpath import dockerize_windows_path
-from gtm.common.dockerclient import get_docker_client
+from gtm.common.dockerutil import dockerize_windows_path, get_docker_client
 from gtm.common.dockervolume import DockerVolume
 from gtm import get_resources_root, get_client_root
 

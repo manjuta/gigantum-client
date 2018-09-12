@@ -24,6 +24,7 @@ from gtm import labmanager
 from gtm import developer
 from gtm import circleci
 from gtm.common.logreader import show_log
+from gtm import common
 
 
 def format_action_help(actions):
@@ -217,7 +218,7 @@ def developer_actions(args):
         lm_builder = labmanager.LabManagerBuilder()
         lm_builder.cleanup(dev_images=True)
     elif args.action == "setup":
-        dc = developer.DockerConfig()
+        dc = common.config.UserConfig()
         dc.configure()
     elif args.action == "run":
         du = developer.DockerUtil()
