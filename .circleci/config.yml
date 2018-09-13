@@ -32,8 +32,9 @@ jobs:
       - run:
           name: Run Core unit and coverage tests
           command: |
-            redis-server &
-            rqscheduler --interval=2 2> /dev/null &
+            /bin/true
+          #  redis-server &
+          #  rqscheduler --interval=2 2> /dev/null &
           #  pytest --cov=gtmcore packages/gtmcore
           #  coveralls
       
@@ -46,7 +47,7 @@ jobs:
             pip3 install -r packages/gtmapi/requirements-testing.txt
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
-            python3 /home/circleci/repo/modules/gtmcore/gtmcore/dispatcher/worker.py 7 &
+            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
             pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
             pytest --cov=packages/gtmapi/lmsrvcore --cov-append packages/gtmapi/lmsrvcore
             pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
