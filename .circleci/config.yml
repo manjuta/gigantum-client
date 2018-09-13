@@ -27,10 +27,24 @@ jobs:
           command: bash /home/circleci/repo/.circleci/write_auth.sh
 
       - run:
-          name: Run unit and coverage tests
+          name: Run Core unit and coverage tests
+          command: /bin/true
+          #command: |
+          #  redis-server &
+          #  rqscheduler --interval=2 2> /dev/null &
+          #  pytest --cov=gtmcore packages/gtmcore
+          #  coveralls
+      
+      - run:
+          name: Run API unit, integration and coverage tests
           command: |
+            export PYTHONPATH=$PYTHONPATH:/home/circleci/labmanager-common
+            cd /home/circleci/repo
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
-            pytest --cov=gtmcore packages/gtmcore
-            coveralls
+            python3 /home/circleci/repo/modules/gtmcore/gtmcore/dispatcher/worker.py 7 &
+            pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
+            pytest --cov=packages/gtmapi/lmsrvcore --cov-append packages/gtmapi/lmsrvcore
+            pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
+            #coveralls
 
