@@ -38,7 +38,7 @@ jobs:
       - run:
           name: Run API unit, integration and coverage tests
           command: |
-            export PYTHONPATH=$PYTHONPATH:/home/circleci/labmanager-common
+            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
             cd /home/circleci/repo
             pip3 install -r packages/gtmapi/requirements.txt
             pip3 install -r packages/gtmapi/requirements-testing.txt
