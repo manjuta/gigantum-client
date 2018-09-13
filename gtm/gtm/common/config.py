@@ -8,7 +8,7 @@ import yaml
 from gtm.common.dockerutil import dockerize_windows_path
 from gtm.common.console import ask_question
 
-CONFIG_FILE = "~/.gtm/config.yaml"
+CONFIG_FILE = os.path.expanduser("~/.gtm/config.yaml")
 
 
 class UserConfig(object):
@@ -27,7 +27,7 @@ class UserConfig(object):
 
     @staticmethod
     def load_config_file():
-        config_file_path = os.path.expanduser(CONFIG_FILE)
+        config_file_path = CONFIG_FILE
         if os.path.exists(config_file_path):
             with open(config_file_path, 'rt') as cf:
                 data = yaml.load(cf)
@@ -37,7 +37,7 @@ class UserConfig(object):
 
     @staticmethod
     def save_config_file(data):
-        config_file_path = os.path.expanduser(CONFIG_FILE)
+        config_file_path = CONFIG_FILE
         with open(config_file_path, 'wt') as cf:
             cf.write(yaml.dump(data, default_flow_style=False))
 
@@ -160,7 +160,7 @@ su giguser
         gigantum_client_root = input("Path to the gigantum-client repository: ")
 
         # Save our answers
-        answer_fname = os.path.expanduser(CONFIG_FILE)
+        answer_fname = CONFIG_FILE
         if os.path.exists(os.path.dirname(answer_fname)) is False:
             os.makedirs(os.path.dirname(answer_fname))
 
