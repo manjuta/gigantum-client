@@ -2,7 +2,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: gigantum/circleci-common:84814eab-2018-07-25
+      #- image: gigantum/circleci-common:84814eab-2018-07-25
+      - image: gigantum/circleci-service-client:84814eab-2018-07-25
 
     working_directory: ~/repo
 
@@ -19,8 +20,6 @@ jobs:
       - run:
           name: Install proxy lib
           command: |
-            apt-get -y install curl gnupg gnupg2 gnupg1 && curl -sL https://deb.nodesource.com/setup_8.x | bash &&
-            apt-get -y install nodejs && npm install -g configurable-http-proxy &&
             cd /tmp && git clone https://github.com/gigantum/confhttpproxy.git && pip3 install -e confhttpproxy
 
       - run:
@@ -46,8 +45,6 @@ jobs:
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
             cd /home/circleci/repo
-            pip3 install -r packages/gtmapi/requirements.txt
-            pip3 install -r packages/gtmapi/requirements-testing.txt
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
