@@ -24,7 +24,7 @@ jobs:
 
       - run:
           name: Set authentication credentials
-          command: bash /home/circleci/project/.circleci/write_auth.sh
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
 
       - run:
           name: Run unit and coverage tests
