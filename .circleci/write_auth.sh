@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AUTH_PATH=/home/circleci/repo/packages/gtmcore/auth/tests/auth_config.json
+AUTH_PATH=/home/circleci/repo/packages/gtmcore/gtmcore/auth/tests/auth_config.json
 
 echo "{" > ${AUTH_PATH}
 echo "  \"grant_type\": \"password\"," >> ${AUTH_PATH}
