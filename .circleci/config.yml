@@ -41,7 +41,7 @@ jobs:
             export PYTHONPATH=$PYTHONPATH:/home/circleci/labmanager-common
             cd /home/circleci/repo
             pip3 install -r packages/gtmapi/requirements.txt
-            pip3 install -r packages/gtmapi/requirements-dev.txt
+            pip3 install -r packages/gtmapi/requirements-testing.txt
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
             python3 /home/circleci/repo/modules/gtmcore/gtmcore/dispatcher/worker.py 7 &
