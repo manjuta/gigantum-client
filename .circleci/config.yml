@@ -35,9 +35,9 @@ jobs:
           name: Run Core unit and coverage tests
           command: |
             /bin/true
-          #  redis-server &
-          #  rqscheduler --interval=2 2> /dev/null &
-          #  pytest --cov=gtmcore packages/gtmcore
+            redis-server &
+            rqscheduler --interval=2 2> /dev/null &
+            pytest --cov=gtmcore packages/gtmcore
           #  coveralls
       
       - run:
