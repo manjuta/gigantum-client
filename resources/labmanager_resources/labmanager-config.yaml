@@ -6,8 +6,8 @@ auth:
   signing_algorithm: RS256
 build_info:
   application: LabManager
-  built_on: '2018-09-11 22:03:15.041291'
-  revision: 8a7ae4d7cde4e76ffcac9336d05ddf20a30bb20a
+  built_on: '2018-09-13 18:18:50.812744'
+  revision: c6a97bc1cacd0e2c8b0a65eb3e00d70f31753bdb
 container:
   cpu: null
   cuda_version: null
