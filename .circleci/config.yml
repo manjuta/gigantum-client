@@ -31,6 +31,6 @@ jobs:
           command: |
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
-            pytest --cov=lmcommon packages/gtmcore
+            pytest --cov=gtmcore packages/gtmcore
             coveralls
 
