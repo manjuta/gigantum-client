@@ -21,8 +21,8 @@ import ast
 import json
 import graphene
 
-from lmcommon.logging import LMLogger
-from lmcommon.dispatcher import Dispatcher, JobKey
+from gtmcore.logging import LMLogger
+from gtmcore.dispatcher import Dispatcher, JobKey
 
 
 logger = LMLogger.get_logger()

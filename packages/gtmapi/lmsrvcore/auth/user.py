@@ -19,9 +19,9 @@
 # SOFTWARE.
 import flask
 
-from lmcommon.logging import LMLogger
-from lmcommon.auth.user import User
-from lmcommon.gitlib.git import GitAuthor
+from gtmcore.logging import LMLogger
+from gtmcore.auth.user import User
+from gtmcore.gitlib.git import GitAuthor
 from lmsrvcore.auth.identity import get_identity_manager_instance
 
 

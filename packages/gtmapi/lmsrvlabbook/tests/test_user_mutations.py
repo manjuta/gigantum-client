@@ -22,7 +22,7 @@ import pytest
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir
-from lmcommon.configuration import Configuration
+from gtmcore.configuration import Configuration
 
 from graphene.test import Client
 import graphene

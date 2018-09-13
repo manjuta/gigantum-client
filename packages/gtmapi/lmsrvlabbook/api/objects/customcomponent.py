@@ -20,7 +20,7 @@
 # SOFTWARE.
 import graphene
 
-from lmcommon.environment import ComponentRepository
+from gtmcore.environment import ComponentRepository
 
 
 class CustomComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):

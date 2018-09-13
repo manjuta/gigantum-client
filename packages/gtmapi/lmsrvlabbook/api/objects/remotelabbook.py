@@ -19,9 +19,9 @@
 # SOFTWARE.
 import graphene
 
-from lmcommon.configuration import Configuration
-from lmcommon.gitlib.gitlab import GitLabManager
-from lmcommon.labbook import LabBook
+from gtmcore.configuration import Configuration
+from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.labbook import LabBook
 
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username

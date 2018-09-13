@@ -20,13 +20,13 @@
 import base64
 import graphene
 
-from lmcommon.logging import LMLogger
-from lmcommon.dispatcher import Dispatcher
-from lmcommon.workflows import BranchManager
-from lmcommon.activity import ActivityStore
-from lmcommon.gitlib.gitlab import GitLabManager
-from lmcommon.files import FileOperations
-from lmcommon.environment.utils import get_package_manager
+from gtmcore.logging import LMLogger
+from gtmcore.dispatcher import Dispatcher
+from gtmcore.workflows import BranchManager
+from gtmcore.activity import ActivityStore
+from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.files import FileOperations
+from gtmcore.environment.utils import get_package_manager
 
 from lmsrvcore.auth.user import get_logged_in_username
 

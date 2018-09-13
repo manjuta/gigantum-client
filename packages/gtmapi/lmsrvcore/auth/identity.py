@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from flask import current_app
-from lmcommon.auth.identity import AuthenticationError
+from gtmcore.auth.identity import AuthenticationError
 
 
 def get_identity_manager_instance():

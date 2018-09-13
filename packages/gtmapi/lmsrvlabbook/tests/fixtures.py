@@ -31,17 +31,17 @@ from mock import patch
 import responses
 from graphene.test import Client
 
-from lmcommon.environment import RepositoryManager
-from lmcommon.configuration import Configuration, get_docker_client
-from lmcommon.auth.identity import get_identity_manager
-from lmcommon.labbook import LabBook
+from gtmcore.environment import RepositoryManager
+from gtmcore.configuration import Configuration, get_docker_client
+from gtmcore.auth.identity import get_identity_manager
+from gtmcore.labbook import LabBook
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
 from lmsrvcore.tests.fixtures import insert_cached_identity
 
-from lmcommon.fixtures import (ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, ENV_UNIT_TEST_BASE)
-from lmcommon.container.container import ContainerOperations
-from lmcommon.environment import ComponentManager
-from lmcommon.imagebuilder import ImageBuilder
+from gtmcore.fixtures import (ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, ENV_UNIT_TEST_BASE)
+from gtmcore.container.container import ContainerOperations
+from gtmcore.environment import ComponentManager
+from gtmcore.imagebuilder import ImageBuilder
 
 from lmsrvlabbook.api.query import LabbookQuery
 from lmsrvlabbook.api.mutation import LabbookMutations

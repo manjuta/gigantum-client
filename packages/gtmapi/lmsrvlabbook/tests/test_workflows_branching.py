@@ -27,11 +27,11 @@ import pprint
 from graphene.test import Client
 from mock import patch
 
-from lmcommon.auth.identity import get_identity_manager
-from lmcommon.configuration import Configuration
-from lmcommon.workflows import BranchManager
-from lmcommon.labbook import LabBook
-from lmcommon.files import FileOperations
+from gtmcore.auth.identity import get_identity_manager
+from gtmcore.configuration import Configuration
+from gtmcore.workflows import BranchManager
+from gtmcore.labbook import LabBook
+from gtmcore.files import FileOperations
 
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
 from lmsrvlabbook.tests.fixtures import ContextMock, fixture_working_dir, _create_temp_work_dir

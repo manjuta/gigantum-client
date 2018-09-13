@@ -25,8 +25,8 @@ import flask
 from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
 from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
 
-from lmcommon.labbook import LabBook
-from lmcommon.configuration import Configuration
+from gtmcore.labbook import LabBook
+from gtmcore.configuration import Configuration
 
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection

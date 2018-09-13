@@ -32,8 +32,8 @@ import graphene
 from mock import patch
 import rq
 
-from lmcommon.dispatcher import Dispatcher, jobs
-from lmcommon.configuration import Configuration
+from gtmcore.dispatcher import Dispatcher, jobs
+from gtmcore.configuration import Configuration
 
 
 @pytest.fixture()

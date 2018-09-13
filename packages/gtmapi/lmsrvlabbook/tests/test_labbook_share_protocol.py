@@ -28,11 +28,11 @@ from mock import patch
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
-from lmcommon.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
+from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
                                mock_config_file, _MOCK_create_remote_repo2)
-from lmcommon.labbook import LabBook, loaders
-from lmcommon.workflows import GitWorkflow
-from lmcommon.files import FileOperations
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.workflows import GitWorkflow
+from gtmcore.files import FileOperations
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
@@ -68,7 +68,7 @@ def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
 
 
 class TestLabbookShareProtocol(object):
-    @patch('lmcommon.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    @patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
     def test_publish_basic(self, fixture_working_dir, remote_bare_repo, mock_create_labbooks_no_lfs):
 
         # Mock the request context so a fake authorization header is present
@@ -96,7 +96,7 @@ class TestLabbookShareProtocol(object):
         #assert r['data']['publishLabbook']['success'] is True
 
     @responses.activate
-    @patch('lmcommon.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    @patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
     def test_sync_1(self, remote_bare_repo, mock_create_labbooks_no_lfs, mock_config_file):
 
         # Setup responses mock for this test

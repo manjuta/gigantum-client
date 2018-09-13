@@ -23,7 +23,7 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir
 from promise import Promise
 
 from lmsrvlabbook.dataloader.labbook import LabBookLoader
-from lmcommon.labbook import LabBook
+from gtmcore.labbook import LabBook
 
 
 class TestDataloaderLabBook(object):

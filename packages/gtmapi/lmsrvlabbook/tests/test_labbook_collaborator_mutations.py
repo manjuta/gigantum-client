@@ -28,8 +28,8 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir, property_mocks_fixt
 
 import pytest
 
-from lmcommon.configuration import get_docker_client
-from lmcommon.labbook import LabBook
+from gtmcore.configuration import get_docker_client
+from gtmcore.labbook import LabBook
 
 
 @pytest.fixture()

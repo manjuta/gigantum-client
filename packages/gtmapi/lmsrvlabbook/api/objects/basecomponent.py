@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import graphene
-from lmcommon.environment import ComponentRepository
+from gtmcore.environment import ComponentRepository
 
 
 class BaseComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):

@@ -24,7 +24,7 @@ import graphene
 
 from lmsrvlabbook.api import LabbookQuery, LabbookMutations
 
-from lmcommon.configuration import Configuration
+from gtmcore.configuration import Configuration
 
 
 # Load config data for the LabManager instance

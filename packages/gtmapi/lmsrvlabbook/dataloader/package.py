@@ -21,9 +21,9 @@ from typing import List
 
 from promise import Promise
 from promise.dataloader import DataLoader
-from lmcommon.environment.utils import get_package_manager
-from lmcommon.labbook import LabBook
-from lmcommon.logging import LMLogger
+from gtmcore.environment.utils import get_package_manager
+from gtmcore.labbook import LabBook
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

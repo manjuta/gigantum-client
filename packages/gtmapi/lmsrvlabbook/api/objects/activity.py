@@ -20,8 +20,8 @@
 import graphene
 from graphene.types import datetime
 
-from lmcommon.logging import LMLogger
-from lmcommon.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityType, ActivityAction
+from gtmcore.logging import LMLogger
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityType, ActivityAction
 
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username

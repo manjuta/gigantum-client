@@ -23,17 +23,17 @@ import os
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, fixture_working_dir_populated_scoped, fixture_test_file
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
-from lmcommon.files import FileOperations
-from lmcommon.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.files import FileOperations
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 import datetime
 import pprint
 
 import graphene
 
-import lmcommon
-from lmcommon.labbook import LabBook
-from lmcommon.fixtures import remote_labbook_repo
-from lmcommon.gitlib.git import GitAuthor
+import gtmcore
+from gtmcore.labbook import LabBook
+from gtmcore.fixtures import remote_labbook_repo
+from gtmcore.gitlib.git import GitAuthor
 
 
 class TestLabBookServiceQueries(object):
@@ -439,7 +439,7 @@ class TestLabBookServiceQueries(object):
     def test_get_labbook_size_rediculously_huge(self, monkeypatch, fixture_working_dir):
         """Test listing labbooks"""
         # Create labbooks
-        monkeypatch.setattr(lmcommon.files.FileOperations, 'content_size', lambda labbook: (2**32)*34)
+        monkeypatch.setattr(gtmcore.files.FileOperations, 'content_size', lambda labbook: (2**32)*34)
         lb = LabBook(fixture_working_dir[0])
         lb.new(owner={"username": "default"}, name="unittest-labbook1", description="my first labbook1")
 

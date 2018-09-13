@@ -40,11 +40,11 @@ from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 from werkzeug.datastructures import FileStorage
 
-from lmcommon.configuration import Configuration
-from lmcommon.dispatcher.jobs import export_labbook_as_zip
-from lmcommon.fixtures import remote_labbook_repo, mock_config_file
-from lmcommon.labbook import LabBook
-from lmcommon.files import FileOperations
+from gtmcore.configuration import Configuration
+from gtmcore.dispatcher.jobs import export_labbook_as_zip
+from gtmcore.fixtures import remote_labbook_repo, mock_config_file
+from gtmcore.labbook import LabBook
+from gtmcore.files import FileOperations
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):

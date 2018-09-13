@@ -8,9 +8,9 @@ import pytest
 from graphene.test import Client
 from werkzeug.datastructures import FileStorage
 
-from lmcommon.labbook import LabBook
-from lmcommon.files import FileOperations
-from lmcommon.fixtures import remote_labbook_repo, mock_config_file
+from gtmcore.labbook import LabBook
+from gtmcore.files import FileOperations
+from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 from lmsrvcore.middleware import LabBookLoaderMiddleware
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
 

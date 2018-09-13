@@ -24,7 +24,7 @@ import graphene
 from flask import Blueprint
 from flask_graphql import GraphQLView
 
-from lmcommon.configuration import Configuration
+from gtmcore.configuration import Configuration
 from lmsrvcore.middleware import AuthorizationMiddleware, LabBookLoaderMiddleware, time_all_resolvers_middleware, \
     error_middleware
 from lmsrvlabbook.api import LabbookQuery, LabbookMutations

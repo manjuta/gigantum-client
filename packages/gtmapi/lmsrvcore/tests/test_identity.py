@@ -25,9 +25,9 @@ from lmsrvcore.auth.identity import get_identity_manager_instance, Authenticatio
 from lmsrvcore.middleware import AuthorizationMiddleware, error_middleware, time_all_resolvers_middleware, \
     LabBookLoaderMiddleware
 from lmsrvcore.tests.fixtures import fixture_working_dir_with_cached_user
-from lmcommon.configuration import Configuration
+from gtmcore.configuration import Configuration
 
-from lmcommon.auth.local import LocalIdentityManager
+from gtmcore.auth.local import LocalIdentityManager
 
 
 class MockCurrentApp(object):

@@ -26,8 +26,8 @@ from graphene.test import Client
 import graphene
 from mock import patch
 
-from lmcommon.configuration import Configuration
-from lmcommon.labbook import LabBook
+from gtmcore.configuration import Configuration
+from gtmcore.labbook import LabBook
 
 
 class TestNoteService(object):

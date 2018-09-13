@@ -20,9 +20,9 @@
 import graphene
 import pprint
 
-from lmcommon.labbook import LabBook
-from lmcommon.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
-from lmcommon.environment import ComponentManager
+from gtmcore.labbook import LabBook
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.environment import ComponentManager
 
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
 

@@ -28,8 +28,8 @@ import json
 from mock import patch
 from pkg_resources import resource_filename
 
-from lmcommon.configuration import Configuration
-from lmcommon.auth.identity import get_identity_manager
+from gtmcore.configuration import Configuration
+from gtmcore.auth.identity import get_identity_manager
 
 
 def _create_temp_work_dir():

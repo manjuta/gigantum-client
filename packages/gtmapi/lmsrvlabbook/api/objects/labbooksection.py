@@ -21,8 +21,8 @@ import base64
 import graphene
 import os
 
-from lmcommon.files import FileOperations
-from lmcommon.logging import LMLogger
+from gtmcore.files import FileOperations
+from gtmcore.logging import LMLogger
 
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitRepository
