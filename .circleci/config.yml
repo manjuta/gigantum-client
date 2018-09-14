@@ -23,22 +23,21 @@ jobs:
             cd /tmp && git clone https://github.com/gigantum/confhttpproxy.git && pip3 install -e confhttpproxy
 
       - run:
+          name: Set authentication credentials
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
+
+      - run:
           name: Run mypy type checker
           command: |
             python3 -m mypy packages/gtmcore --ignore-missing-imports --strict-optional
 
       - run:
-          name: Set authentication credentials
-          command: bash /home/circleci/repo/.circleci/write_auth.sh
-
-      - run:
           name: Run Core unit and coverage tests
           command: |
-            /bin/true
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
             pytest --cov=gtmcore packages/gtmcore
-          #  coveralls
+            #coveralls
       
       - run:
           name: Run API unit, integration and coverage tests
