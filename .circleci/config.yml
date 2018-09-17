@@ -2,7 +2,6 @@ version: 2
 jobs:
   build:
     docker:
-      #- image: gigantum/circleci-common:84814eab-2018-07-25
       - image: gigantum/circleci-service-client:84814eab-2018-07-25
 
     working_directory: ~/repo
@@ -14,9 +13,6 @@ jobs:
           name: Set Git credentials config
           command: git config --global user.email "noreply@gigantum.io" && git config --global user.name "CircleCI" && git config --global credential.helper store
 
-      #- run:
-      #    name: Install proxy lib
-      #    command: cd ~/repo/packages/gtmconfhttpproxy && pip3 install -e .
       - run:
           name: Install proxy lib
           command: |
