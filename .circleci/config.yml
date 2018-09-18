@@ -14,13 +14,13 @@ jobs:
           command: git config --global user.email "noreply@gigantum.io" && git config --global user.name "CircleCI" && git config --global credential.helper store
 
       - run:
+          name: Set authentication credentials
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
+
+      - run:
           name: Install proxy lib
           command: |
             cd /tmp && git clone https://github.com/gigantum/confhttpproxy.git && pip3 install -e confhttpproxy
-
-      - run:
-          name: Set authentication credentials
-          command: bash /home/circleci/repo/.circleci/write_auth.sh
 
       - run:
           name: Run mypy type checker
