@@ -29,7 +29,7 @@ jobs:
             pip3 install -e .
             echo "import docker; c = docker.from_env()" > runtests.py
             echo "c.images.build('.', tag='httpconf')" >> runtests.py
-            echo "c.containers.run('httpconf', 'pytest /app')" >> runtests.py
+            echo "print(c.containers.run('httpconf', 'pytest /app'))" >> runtests.py
             cd ~/repo
 
       - run:
