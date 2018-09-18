@@ -26,7 +26,7 @@ jobs:
           name: Install proxy lib
           command: |
             cd ~/repo/packages/confhttpproxy
-            pip3 install -e confhttpproxy
+            pip3 install -e .
             docker build . --tag httpconf
             docker run httpconf pytest /app
             yes y | docker system prune
