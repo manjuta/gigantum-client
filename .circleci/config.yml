@@ -25,11 +25,12 @@ jobs:
       - run:
           name: Install proxy lib
           command: |
-            cd /repo/packages/confhttpproxy
+            cd ~/repo/packages/confhttpproxy
             pip3 install -e confhttpproxy
             docker build . --tag httpconf
             docker run httpconf pytest /app
             yes y | docker system prune
+            cd ~/repo
 
       - run:
           name: Run Core unit and coverage tests
