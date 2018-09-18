@@ -27,9 +27,9 @@ jobs:
           command: |
             cd ~/repo/packages/confhttpproxy
             pip3 install -e .
-            docker build . --tag httpconf
-            docker run httpconf pytest /app
-            yes y | docker system prune
+            echo "import docker; c = docker.from_env()" > runtests.py
+            echo "c.images.build('.', tag='httpconf')" >> runtests.py
+            echo "c.containers.run('httpconf', 'pytest /app')" >> runtests.py
             cd ~/repo
 
       - run:
