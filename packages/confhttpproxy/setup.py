@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='gtmconfhttpproxy',
+setup(name='confhttpproxy',
       version='0.0.0',
       description='Python interface for jupyter/configurable-http-proxy',
       author='Bill Van Besien',
