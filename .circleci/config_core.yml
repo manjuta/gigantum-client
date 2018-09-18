@@ -17,7 +17,7 @@ jobs:
       - run:
           name: Run mypy type checker
           command: |
-            python3 -m mypy . --ignore-missing-imports --strict-optional
+            python3 -m mypy packages/gtmcore --ignore-missing-imports --strict-optional
 
       - run:
           name: Set authentication credentials

@@ -28,8 +28,8 @@ from pkg_resources import resource_filename
 import getpass
 import json
 
-from lmcommon.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
-from lmcommon.files import FileOperations
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.files import FileOperations
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
@@ -39,11 +39,11 @@ from graphene.test import Client
 from mock import patch
 from werkzeug.datastructures import FileStorage
 
-from lmcommon.configuration import Configuration
-from lmcommon.dispatcher.jobs import export_labbook_as_zip
-from lmcommon.files import FileOperations
-from lmcommon.fixtures import remote_labbook_repo, mock_config_file
-from lmcommon.labbook import LabBook
+from gtmcore.configuration import Configuration
+from gtmcore.dispatcher.jobs import export_labbook_as_zip
+from gtmcore.files import FileOperations
+from gtmcore.fixtures import remote_labbook_repo, mock_config_file
+from gtmcore.labbook import LabBook
 
 from lmsrvcore.middleware import error_middleware, LabBookLoaderMiddleware
 

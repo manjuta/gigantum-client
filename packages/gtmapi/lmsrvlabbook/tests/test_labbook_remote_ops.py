@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import responses
-from lmcommon.labbook import LabBook
+from gtmcore.labbook import LabBook
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir

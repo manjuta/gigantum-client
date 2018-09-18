@@ -25,11 +25,11 @@ import docker
 from docker.errors import ImageNotFound, NotFound
 import requests
 
-from lmcommon.dispatcher import Dispatcher
-from lmcommon.environment.componentmanager import ComponentManager
-from lmcommon.configuration import get_docker_client
-from lmcommon.logging import LMLogger
-from lmcommon.container.utils import infer_docker_image_name
+from gtmcore.dispatcher import Dispatcher
+from gtmcore.environment.componentmanager import ComponentManager
+from gtmcore.configuration import get_docker_client
+from gtmcore.logging import LMLogger
+from gtmcore.container.utils import infer_docker_image_name
 
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username

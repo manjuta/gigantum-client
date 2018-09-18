@@ -30,12 +30,12 @@ import redis
 import blueprint
 
 
-from lmcommon.configuration import Configuration
-from lmcommon.logging import LMLogger
-from lmcommon.environment import RepositoryManager
-from lmcommon.auth.identity import AuthenticationError, get_identity_manager
-from lmcommon.labbook.lock import reset_all_locks
-from lmcommon.labbook import LabBook
+from gtmcore.configuration import Configuration
+from gtmcore.logging import LMLogger
+from gtmcore.environment import RepositoryManager
+from gtmcore.auth.identity import AuthenticationError, get_identity_manager
+from gtmcore.labbook.lock import reset_all_locks
+from gtmcore.labbook import LabBook
 from lmsrvcore.auth.user import get_logged_in_author
 
 

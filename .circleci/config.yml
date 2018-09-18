@@ -1,0 +1,50 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: gigantum/circleci-service-client:84814eab-2018-07-25
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Set Git credentials config
+          command: git config --global user.email "noreply@gigantum.io" && git config --global user.name "CircleCI" && git config --global credential.helper store
+
+      - run:
+          name: Install proxy lib
+          command: |
+            cd /tmp && git clone https://github.com/gigantum/confhttpproxy.git && pip3 install -e confhttpproxy
+
+      - run:
+          name: Set authentication credentials
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
+
+      - run:
+          name: Run mypy type checker
+          command: |
+            python3 -m mypy packages/gtmcore --ignore-missing-imports --strict-optional
+
+      - run:
+          name: Run Core unit and coverage tests
+          command: |
+            redis-server &
+            rqscheduler --interval=2 2> /dev/null &
+            pytest --cov=gtmcore packages/gtmcore
+            #coveralls
+      
+      - run:
+          name: Run API unit, integration and coverage tests
+          command: |
+            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
+            cd /home/circleci/repo
+            redis-server &
+            rqscheduler --interval=2 2> /dev/null &
+            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
+            pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
+            pytest --cov=packages/gtmapi/lmsrvcore --cov-append packages/gtmapi/lmsrvcore
+            pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
+            #coveralls
+

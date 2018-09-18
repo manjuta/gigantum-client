@@ -22,7 +22,7 @@ import abc
 
 import os
 import tempfile
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 from werkzeug.utils import secure_filename
 
 

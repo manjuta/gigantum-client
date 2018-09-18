@@ -29,7 +29,7 @@ from mock import patch
 import redis
 import rq
 
-from lmcommon.dispatcher import Dispatcher, jobs
+from gtmcore.dispatcher import Dispatcher, jobs
 
 
 @pytest.fixture()

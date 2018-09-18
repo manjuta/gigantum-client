@@ -26,9 +26,9 @@ from graphene.test import Client
 import graphene
 from mock import patch
 
-from lmcommon.labbook import LabBook
-from lmcommon.files import FileOperations
-from lmcommon.configuration import Configuration
+from gtmcore.labbook import LabBook
+from gtmcore.files import FileOperations
+from gtmcore.configuration import Configuration
 
 from ..api import LabbookMutations, LabbookQuery
 

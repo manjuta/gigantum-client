@@ -26,16 +26,16 @@ import flask
 import graphene
 import requests
 
-from lmcommon.configuration import Configuration, get_docker_client
-from lmcommon.container.container import ContainerOperations
-from lmcommon.dispatcher import (Dispatcher, jobs)
-from lmcommon.labbook import LabBook, loaders
-from lmcommon.logging import LMLogger
-from lmcommon.files import FileOperations
-from lmcommon.imagebuilder import ImageBuilder
-from lmcommon.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
-from lmcommon.gitlib.gitlab import GitLabManager
-from lmcommon.environment import ComponentManager
+from gtmcore.configuration import Configuration, get_docker_client
+from gtmcore.container.container import ContainerOperations
+from gtmcore.dispatcher import (Dispatcher, jobs)
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.logging import LMLogger
+from gtmcore.files import FileOperations
+from gtmcore.imagebuilder import ImageBuilder
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.environment import ComponentManager
 
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author

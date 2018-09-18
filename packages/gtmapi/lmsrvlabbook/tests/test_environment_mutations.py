@@ -23,11 +23,11 @@ from docker.errors import ImageNotFound
 import getpass
 import pprint
 
-from lmcommon.configuration import get_docker_client
-from lmcommon.labbook import LabBook
+from gtmcore.configuration import get_docker_client
+from gtmcore.labbook import LabBook
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from lmsrvcore.auth.user import get_logged_in_username
-from lmcommon.environment import ComponentManager
+from gtmcore.environment import ComponentManager
 
 
 TIMEOUT_MAX = 45

@@ -24,7 +24,7 @@ import graphql
 from snapshottest import snapshot
 
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
-from lmcommon.labbook import LabBook
+from gtmcore.labbook import LabBook
 
 
 class TestAddComponentMutations(object):

@@ -22,10 +22,10 @@ import glob
 import os
 import base64
 
-from lmcommon.logging import LMLogger
-from lmcommon.labbook import LabBook
-from lmcommon.environment import ComponentManager
-from lmcommon.labbook.schemas import CURRENT_SCHEMA
+from gtmcore.logging import LMLogger
+from gtmcore.labbook import LabBook
+from gtmcore.environment import ComponentManager
+from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent, PackageComponentInput
 from lmsrvlabbook.api.objects.customcomponent import CustomComponent

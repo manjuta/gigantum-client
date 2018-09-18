@@ -21,15 +21,15 @@ import os
 import graphene
 import confhttpproxy
 
-from lmcommon.configuration import Configuration, get_docker_client
-from lmcommon.imagebuilder import ImageBuilder
-from lmcommon.dispatcher import Dispatcher, jobs
-from lmcommon.labbook import LabBook
-from lmcommon.container.container import ContainerOperations
-from lmcommon.container.utils import infer_docker_image_name
-from lmcommon.workflows import GitWorkflow
-from lmcommon.logging import LMLogger
-from lmcommon.activity.services import stop_labbook_monitor
+from gtmcore.configuration import Configuration, get_docker_client
+from gtmcore.imagebuilder import ImageBuilder
+from gtmcore.dispatcher import Dispatcher, jobs
+from gtmcore.labbook import LabBook
+from gtmcore.container.container import ContainerOperations
+from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.workflows import GitWorkflow
+from gtmcore.logging import LMLogger
+from gtmcore.activity.services import stop_labbook_monitor
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.environment import Environment, ContainerStatus

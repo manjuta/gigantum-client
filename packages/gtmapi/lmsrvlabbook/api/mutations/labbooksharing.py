@@ -21,11 +21,11 @@ import os
 import base64
 import graphene
 
-from lmcommon.configuration import Configuration
-from lmcommon.labbook import LabBook
-from lmcommon.dispatcher import Dispatcher, jobs
-from lmcommon.logging import LMLogger
-from lmcommon.gitlib.gitlab import GitLabManager
+from gtmcore.configuration import Configuration
+from gtmcore.labbook import LabBook
+from gtmcore.dispatcher import Dispatcher, jobs
+from gtmcore.logging import LMLogger
+from gtmcore.gitlib.gitlab import GitLabManager
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token

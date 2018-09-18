@@ -31,13 +31,13 @@ import graphene
 from mock import patch
 import requests
 
-from lmcommon.environment import ComponentManager, RepositoryManager
-from lmcommon.dispatcher import Dispatcher, JobKey
-from lmcommon.labbook import LabBook
+from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.dispatcher import Dispatcher, JobKey
+from gtmcore.labbook import LabBook
 from lmsrvlabbook.api.mutation import LabbookMutations
 from lmsrvlabbook.api.query import LabbookQuery
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
-from lmcommon.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 
 
 import service

@@ -22,12 +22,12 @@ from typing import List
 from promise import Promise
 from promise.dataloader import DataLoader
 
-from lmcommon.labbook import LabBook
+from gtmcore.labbook import LabBook
 from lmsrvcore.auth.user import get_logged_in_author
 
 
 class LabBookLoader(DataLoader):
-    """Dataloader for lmcommon.labbook.LabBook instances
+    """Dataloader for gtmcore.labbook.LabBook instances
 
     The key for this object is username&owner&labbook_name
     """

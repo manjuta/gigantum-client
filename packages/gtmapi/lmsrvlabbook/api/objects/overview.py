@@ -22,8 +22,8 @@ import graphene
 import os
 import glob
 
-from lmcommon.logging import LMLogger
-from lmcommon.activity import ActivityStore
+from gtmcore.logging import LMLogger
+from gtmcore.activity import ActivityStore
 
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitRepository

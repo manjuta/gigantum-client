@@ -22,7 +22,7 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from graphene.test import Client
 from mock import patch
 
-from lmcommon.configuration import Configuration
+from gtmcore.configuration import Configuration
 
 
 class TestEnvironmentCustomDependencyQueries(object):

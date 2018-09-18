@@ -24,7 +24,7 @@ import graphene
 from lmsrvcore.api.objects.user import UserIdentity
 
 from lmsrvcore.auth.identity import get_identity_manager_instance
-from lmcommon.logging import LMLogger
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 

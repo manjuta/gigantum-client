@@ -23,17 +23,17 @@ import os
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, fixture_working_dir_populated_scoped, fixture_test_file
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
-from lmcommon.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
-from lmcommon.files import FileOperations
-from lmcommon.environment import ComponentManager
-from lmcommon.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.files import FileOperations
+from gtmcore.environment import ComponentManager
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
 
 import graphene
 
-from lmcommon.labbook import LabBook
-from lmcommon.fixtures import remote_labbook_repo
-from lmcommon.gitlib.git import GitAuthor
+from gtmcore.labbook import LabBook
+from gtmcore.fixtures import remote_labbook_repo
+from gtmcore.gitlib.git import GitAuthor
 
 
 class TestLabBookOverviewQueries(object):

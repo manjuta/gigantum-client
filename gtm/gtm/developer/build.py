@@ -18,7 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
-from pkg_resources import resource_filename
 import platform
 import uuid
 import shutil
@@ -30,6 +29,7 @@ import typing
 
 import yaml
 
+from gtm.common.config import get_client_root, get_resources_root
 from gtm.common.console import ask_question
 from gtm.common.dockerutil import dockerize_windows_path, get_docker_client
 from gtm.common.dockervolume import DockerVolume
@@ -41,7 +41,7 @@ class LabManagerDevBuilder(LabManagerBuilder):
     """
     def __init__(self):
         LabManagerBuilder.__init__(self)
-        self.docker_build_dir = os.path.expanduser(resource_filename("gtm", "resources"))
+        self.docker_build_dir = get_resources_root()
 
         # We saved our answers during developer setup
         setup_answers_path = os.path.join(self.docker_build_dir, 'developer_resources', 'setup-answers.yaml')

@@ -22,7 +22,7 @@ import flask
 import redis
 
 from lmsrvcore.auth.user import get_logged_in_author, get_logged_in_username, get_logged_in_user
-from lmcommon.gitlib.git import GitAuthor
+from gtmcore.gitlib.git import GitAuthor
 from lmsrvcore.tests.fixtures import fixture_working_dir_with_cached_user
 
 

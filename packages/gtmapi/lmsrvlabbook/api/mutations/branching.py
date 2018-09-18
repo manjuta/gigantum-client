@@ -20,10 +20,10 @@
 import os
 import graphene
 
-from lmcommon.logging import LMLogger
-from lmcommon.labbook import LabBook
-from lmcommon.workflows import BranchManager
-from lmcommon.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.logging import LMLogger
+from gtmcore.labbook import LabBook
+from gtmcore.workflows import BranchManager
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.labbook import Labbook
