@@ -19,6 +19,7 @@
 # SOFTWARE.
 import argparse
 import sys
+import os
 
 from gtm import labmanager
 from gtm import developer
@@ -59,8 +60,8 @@ def format_component_help(components):
     return response
 
 
-def labmanager_actions(args):
-    """Method to provide logic and perform actions for the LabManager component
+def client_actions(args):
+    """Method to provide logic and perform actions for building and client containers
 
     Args:
         args(Namespace): Parsed arguments
@@ -68,17 +69,28 @@ def labmanager_actions(args):
     Returns:
         None
     """
-
-    builder = labmanager.build.LabManagerBuilder()
+    builder = labmanager.build.LabManagerBuilder("gigantum/labmanager")
     if "override_name" in args:
         if args.override_name:
             builder.image_name = args.override_name
 
     if args.action == "build":
-        builder.build_image(show_output=args.verbose, no_cache=args.no_cache)
+        build_args = {"build_dir": os.path.join("build", "client"),
+                      "supervisor_file": os.path.join("resources", "client", "supervisord-local.conf"),
+                      "config_override_file": os.path.join("resources", "client",
+                                                           "labmanager-config-override.yaml")}
+
+        docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
+                       "NGINX_UI_CONFIG": "resources/client/nginx_ui.conf",
+                       "NGINX_API_CONFIG": "resources/client/nginx_api.conf",
+                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
+                       "ENTRYPOINT_FILE": "resources/client/entrypoint.sh"}
+
+        builder.build_image(show_output=args.verbose, no_cache=args.no_cache,
+                            build_args=build_args, docker_args=docker_args)
 
         # Print Name of image
-        print("\n\n*** Built LabManager Image: {}\n".format(builder.image_name))
+        print("\n\n*** Built Gigantum Client Image: {}\n".format(builder.image_name))
 
     elif args.action == "publish":
         image_tag = None
@@ -88,7 +100,7 @@ def labmanager_actions(args):
         # Print Name of image
         if not image_tag:
             image_tag = "latest"
-        print("\n\n*** Published LabManager Image: gigantum/labmanager:{}\n".format(image_tag))
+        print("\n\n*** Published Gigantum Client Image: gigantum/labmanager:{}\n".format(image_tag))
 
     elif args.action == "publish-edge":
         image_tag = None
@@ -101,7 +113,7 @@ def labmanager_actions(args):
         # Print Name of image
         if not image_tag:
             image_tag = "latest"
-        print("\n\n*** Published LabManager-Edge Image: gigantum/labmanager-edge:{}\n".format(image_tag))
+        print("\n\n*** Published Gigantum Client Edge Image: gigantum/labmanager-edge:{}\n".format(image_tag))
 
     elif args.action == "publish-demo":
         image_tag = None
@@ -130,8 +142,8 @@ def labmanager_actions(args):
         else:
             image_name = builder.image_name
 
-        launcher = labmanager.LabManagerRunner(image_name=image_name, container_name=builder.container_name,
-                                               show_output=args.verbose)
+        launcher = labmanager.run.LabManagerRunner(image_name=image_name, container_name=builder.container_name,
+                                                   show_output=args.verbose)
 
         if args.action == "start":
             if not launcher.is_running:
@@ -148,7 +160,7 @@ def labmanager_actions(args):
                 print("Error: Docker container by name `{}' is not started.".format(builder.image_name), file=sys.stderr)
                 sys.exit(1)
     elif args.action == "test":
-        tester = labmanager.LabManagerTester(builder.container_name)
+        tester = labmanager.test.LabManagerTester(builder.container_name)
         tester.test()
     else:
         print("Error: Unsupported action provided: `{}`".format(args.action), file=sys.stderr)
@@ -203,31 +215,49 @@ def developer_actions(args):
     Returns:
         None
     """
+    dc = common.config.UserConfig()
+    builder = labmanager.build.LabManagerBuilder("gigantum/labmanager-dev")
+
     if args.action == "build":
-        builder = developer.LabManagerDevBuilder()
         if "override_name" in args:
             if args.override_name:
                 builder.image_name = args.override_name
 
-        builder.build_image(show_output=args.verbose, no_cache=args.no_cache)
+        # Based on developer config, set variables
+        config = dc.load_config_file()
+
+        build_args = {"build_dir": os.path.join("build", "developer"),
+                      "config_override_file": os.path.join("resources", "developer",
+                                                           "labmanager-config-override.yaml")}
+
+        docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
+                       "NGINX_UI_CONFIG": "resources/client/nginx_null",
+                       "NGINX_API_CONFIG": "resources/client/nginx_null",
+                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
+                       "ENTRYPOINT_FILE": "resources/developer/entrypoint.sh"}
+
+        if config.get("is_backend") is True:
+            build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_backend.conf")
+            docker_args["NGINX_UI_CONFIG"] = "resources/client/nginx_ui.conf"
+        else:
+            build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_frontend.conf")
+            docker_args["NGINX_API_CONFIG"] = "resources/client/nginx_api.conf"
+
+        builder.build_image(show_output=args.verbose, no_cache=args.no_cache,
+                            build_args=build_args, docker_args=docker_args)
 
         # Print Name of image
         print("\n\n*** Built LabManager Dev Image: {}\n".format(builder.image_name))
 
     elif args.action == "prune":
-        lm_builder = labmanager.LabManagerBuilder()
-        lm_builder.cleanup(dev_images=True)
+        builder.cleanup(dev_images=True)
     elif args.action == "setup":
-        dc = common.config.UserConfig()
         dc.configure()
-    elif args.action == "run":
-        du = developer.DockerUtil()
+    elif args.action == "start":
+        du = developer.docker.DockerUtil()
         du.run()
-    elif args.action == "relay":
-        builder = developer.LabManagerDevBuilder()
-        builder.run_relay()
     elif args.action == "attach":
-        du = developer.DockerUtil()
+        du = developer.docker.DockerUtil()
         du.attach()
     elif args.action == "log":
         show_log()
@@ -256,29 +286,28 @@ def circleci_actions(args):
         sys.exit(1)
 
 
-if __name__ == '__main__':
+def main():
     # Setup supported components and commands
     components = {}
-    components['labmanager'] = [["build", "Build the LabManager Docker image"],
-                                ["start", "Start a Lab Manager Docker image"],
-                                ["stop", "Stop a LabManager Docker image"],
-                                ["test", "Run internal tests on a LabManager Docker image"],
-                                ["publish", "Publish the latest build to Docker Hub"],
-                                ["publish-edge", "Publish the latest build to Docker Hub as an Edge release"],
-                                ["prune", "Remove all images except the latest LabManager build"],
-                                ["log", "Show the client log file"],
-                                ]
+    components['client'] = [["build", "Build the Production configuration Docker image"],
+                            ["start", "Start a Production configuration Docker image"],
+                            ["stop", "Stop a Production configuration Docker image"],
+                            ["test", "Run internal tests on a Production configuration Docker image"],
+                            ["publish", "Publish the latest build to Docker Hub"],
+                            ["publish-edge", "Publish the latest build to Docker Hub as an Edge release"],
+                            ["prune", "Remove all images except the latest Production configuration build"],
+                            ["log", "Show the client log file in real-time"],
+                            ]
 
     components['demo'] = [["build", "Build the LabManager Docker image"],
                           ["publish", "Publish the latest build to Docker Hub as a Demo release"]]
 
-    components['developer'] = [["setup", "Generate Docker configuration for development"],
-                               ["build", "Build the LabManager Development Docker image based on `setup` config"],
-                               ["relay", "Re-compile relay queries. Runs automatically on a build command."],
-                               ["run", "Start the LabManager dev container (not applicable to PyCharm configs)"],
-                               ["attach", "Attach to the running dev container"],
-                               ["prune", "Remove all images except the latest labmanager-dev build"],
-                               ["log", "Show the client log file"]]
+    components['dev'] = [["setup", "Generate Docker configuration for development"],
+                         ["build", "Build the Client Development Docker image"],
+                         ["start", "Start the Client Development container (not applicable to PyCharm configs)"],
+                         ["attach", "Attach to the running dev container"],
+                         ["prune", "Remove all images except the latest labmanager-dev build"],
+                         ["log", "Show the client log file"]]
 
     components['circleci'] = [["build-common", "Build the CircleCI container for the `lmcommon` repo"],
                               ["build-api", "Build the CircleCI container for the `labmanager-service-labbook` repo"]]
@@ -313,10 +342,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.component == "labmanager":
+    if args.component == "client":
         # LabManager Selected
-        labmanager_actions(args)
-    elif args.component == "developer":
+        client_actions(args)
+    elif args.component == "dev":
         # Base Image Selected
         developer_actions(args)
     elif args.component == "circleci":
@@ -324,3 +353,7 @@ if __name__ == '__main__':
         circleci_actions(args)
     elif args.component == "demo":
         demo_actions(args)
+
+
+if __name__ == '__main__':
+    main()

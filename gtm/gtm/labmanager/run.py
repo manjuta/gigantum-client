@@ -22,7 +22,8 @@ import platform
 
 import docker
 
-from gtm.common import dockerize_windows_path, DockerVolume
+from gtm.common.dockerutil import dockerize_windows_path
+from gtm.common.dockervolume import DockerVolume
 
 
 class LabManagerRunner(object):

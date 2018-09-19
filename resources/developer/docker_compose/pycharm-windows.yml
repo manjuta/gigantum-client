@@ -15,6 +15,7 @@ services:
     environment:
      - WINDOWS_HOST=1
      - HOST_WORK_DIR={% WORKING_DIR %}
+     - PYCHARM-DEV=1
     network_mode: "bridge"
 
 volumes:

@@ -1,7 +1,7 @@
 import os
 import platform
 import shutil
-import json
+import sys
 
 import yaml
 
@@ -33,7 +33,8 @@ class UserConfig(object):
                 data = yaml.load(cf)
             return data
         else:
-            return dict()
+            print("No gtm config file found. Run `gtm dev setup` to configure your environment")
+            sys.exit(0)
 
     @staticmethod
     def save_config_file(data):
@@ -117,7 +118,7 @@ class UserConfig(object):
             script = """#!/bin/bash
 export PYTHONPATH=$PYTHONPATH:/opt/project/packages/gtmcore
 export JUPYTER_RUNTIME_DIR=/mnt/share
-cd /opt/project/packages/
+cd /opt/project/packages/gtmapi
 su giguser
             """
 

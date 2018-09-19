@@ -1,2 +1,1 @@
-from gtm.labmanager import build
-from gtm.labmanager.run import LabManagerRunner
+from gtm.labmanager import build, run, test

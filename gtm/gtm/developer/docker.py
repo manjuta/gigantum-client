@@ -25,21 +25,17 @@ import yaml
 import sys
 import platform
 
-from gtm import get_docker_client, DockerVolume
+from gtm.common.dockerutil import get_docker_client
+from gtm.common.dockervolume import DockerVolume
+from gtm.common import get_resources_root, get_client_root
 
 
 class DockerUtil(object):
     """Class to manage using docker dev containers outside of PyCharm
     """
-
-    @staticmethod
-    def _docker_compose_dir() -> str:
-        """Method to get the docker compose file directory
-
-        Returns:
-            str
-        """
-        return os.path.join(resource_filename("gtm", "resources"), 'developer_resources')
+    def __init__(self):
+        self._docker_compose_dir = os.path.join(get_resources_root(), 'developer', 'docker_compose')
+        self._build_dir = os.path.join(get_client_root(), 'build', 'developer')
 
     def _docker_compose_exists(self) -> bool:
         """Method to check if the docker compose file has been created
@@ -47,10 +43,10 @@ class DockerUtil(object):
         Returns:
             Bool
         """
-        if os.path.exists(os.path.join(self._docker_compose_dir(), 'docker-compose.yml')):
+        if os.path.exists(os.path.join(self._build_dir, 'docker-compose.yml')):
             return True
         else:
-            raise IOError("docker-compose.yml missing. Did you run `gtm developer setup`?")
+            raise IOError("docker-compose.yml missing. Did you run `gtm dev setup`?")
 
     def _verify_shell_config(self) -> None:
         """Method to check if the docker compose file is configured for shell based development
@@ -58,13 +54,14 @@ class DockerUtil(object):
         Returns:
             None
         """
-        with open(os.path.join(self._docker_compose_dir(), 'docker-compose.yml'), 'rt') as dcf:
+        with open(os.path.join(self._build_dir, 'docker-compose.yml'), 'rt') as dcf:
             data = dcf.read()
 
         if "PYCHARM-DEV" in data:
             # Configured for PYCHARM
             print("\n   You are currently configured for PyCharm based development")
-            print("   Run `gtm developer setup` to configure for shell-based development and try again\n")
+            print("   Run the API from PyCharm to debug and test\n")
+            print("   To change configuration to shell-based dev, `gtm developer setup`\n")
             sys.exit(1)
 
     def _get_env_vars(self) -> dict:
@@ -74,7 +71,7 @@ class DockerUtil(object):
             dict
         """
         data = {}
-        with open(os.path.join(self._docker_compose_dir(), 'docker-compose.yml'), 'rt') as dcf:
+        with open(os.path.join(self._build_dir, 'docker-compose.yml'), 'rt') as dcf:
             yaml_data = yaml.load(dcf)
             yaml_data = yaml_data['services']['labmanager']['environment']
 
@@ -100,11 +97,10 @@ class DockerUtil(object):
                 share_volume.create()
 
             print("Running docker up. CTRL+C to exit.")
-            cmd = 'docker-compose -f {} run -T --service-ports labmanager'.format(
-                                                                               os.path.join(self._docker_compose_dir(),
-                                                                               'docker-compose.yml'))
+            cmd = 'docker-compose -f {} run -T --service-ports labmanager'.format(os.path.join(self._build_dir,
+                                                                                  'docker-compose.yml'))
             try:
-                process = subprocess.run(shlex.split(cmd, posix = not platform.system() == 'Windows'),
+                process = subprocess.run(shlex.split(cmd, posix=not platform.system() == 'Windows'),
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE)
                 print(process)
@@ -131,7 +127,6 @@ class DockerUtil(object):
             sys.exit(1)
 
         if self._docker_compose_exists():
-            override_command = '/bin/bash -c \"cd /opt/project; echo \'-- Run (source ./setup.sh) to switch to giguser context\'; /bin/bash"'
-            command = 'cd {} && docker exec -it {} {}'.format(self._docker_compose_dir(), container_id, override_command)
+            override_command = '/bin/bash -c \"cd /opt/project; echo \'-- Run (source /opt/setup.sh) to switch to giguser context\'; /bin/bash"'
+            command = 'docker exec -it {} {}'.format(container_id, override_command)
             os.system(command)
-
