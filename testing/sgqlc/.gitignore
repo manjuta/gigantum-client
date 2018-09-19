@@ -1,0 +1,11 @@
+*.pyc
+*.pyo
+__pycache__
+*~
+/build
+/dist
+/sgqlc.egg-info
+/.coverage
+/cover
+/.venv
+/.eggs
