@@ -9,7 +9,7 @@ from sgqlc.endpoint.http import HTTPEndpoint
 
 USERNAME = os.environ['USERNAME']
 TOKEN = os.environ['TOKEN']
-HOST = 'http://localhost:10000/api/labbook'
+HOST = 'http://localhost:10000/api/labbook/'
 
 
 endpt_get = HTTPEndpoint(HOST, base_headers={"Authorization": f"Bearer {TOKEN}"}, method='POST')

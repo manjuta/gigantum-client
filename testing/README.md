@@ -3,15 +3,7 @@
 
 ## Usage
 
-First, install the assocated `sgqlc` package (Simple GraphQL Client)
-
-```
-    $ (virtualenv) cd sgqlc
-    $ (virtualenv) pip install -e .
-    $ (virtualenv) cd ..
-```
-
-Now, ensure a client app instance is running, then run tests...
+Ensure a client app instance is running, then run tests...
 
 ```
     $ (virtualenv) ./runtests.sh <your-username> <your-user-token>

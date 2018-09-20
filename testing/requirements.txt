@@ -1,1 +1,2 @@
 ansicolors
+git+https://github.com/profusion/sgqlc.git
