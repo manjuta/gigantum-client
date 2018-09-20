@@ -86,7 +86,7 @@ labbookQuery = '''
 
 
 
-def publish_labbook(endpoint, variables):
+def publish_labbook(endpoint, variables) -> float:
     # Publish labbook mutation
     v = variables
     v.update({'setPublic': False})
@@ -104,12 +104,13 @@ def publish_labbook(endpoint, variables):
             if md.get('method') == 'publish_labbook':
                 if j['status'] in ['failed', 'finished']:
                     tfin = time.time()
+                    pub_time = tfin-t0
                     print(f'Published project {d["data"]["labbook"]["owner"]}'
                           f'/{d["data"]["labbook"]["name"]} '
                           f'(size {d["data"]["labbook"]["sizeBytes"]}b) '
-                          f'in {tfin-t0:.2f}s')
+                          f'in {pub_time:.2f}s')
                     waiting = False
-                    break
+                    return pub_time
         time.sleep(1)
 
 
@@ -128,14 +129,15 @@ def sync_labbook(endpoint, variables):
             if md.get('method') == 'sync_labbook':
                 if j['status'] == 'finished':
                     tfin = time.time()
+                    sync_time = tfin-t0
                     print(f'Synced project {d["data"]["labbook"]["owner"]}'
                           f'/{d["data"]["labbook"]["name"]} '
                           f'(size {d["data"]["labbook"]["sizeBytes"]}b) '
-                          f'in {tfin-t0:.2f}s')
+                          f'in {sync_time:.2f}s')
                     waiting = False
                     pprint.pprint(md)
                     pprint.pprint(j)
-                    break
+                    return sync_time
                 elif j['status'] == 'failed':
                     print(f'FAIL Sync after {time.time()-t0:.2f}s')
                     pprint.pprint(md)
@@ -143,6 +145,15 @@ def sync_labbook(endpoint, variables):
                     waiting = False
                     break
         time.sleep(1)
+
+
+def check_limit(desc, time_allowed, time_executed):
+    if time_executed > time_allowed:
+        failt = color('OVERTIME', 'orange')
+        print(f'[{failt}] {desc} (max {time_allowed:.2f}s; took {time_executed:.2f}s)')
+    else:
+        passt = color('PASS', 'green')
+        print(f'[{passt}] {desc} (max {time_allowed:.2f}s; took {time_executed:.2f}s)')
 
 if __name__ == '__main__':
     lbname = f'cli-{uuid.uuid4().hex[:4]}'
@@ -154,7 +165,8 @@ if __name__ == '__main__':
             {'name': lbname})
 
     print(f'## Publishing {lbname} (bare, brand-new Project)')
-    publish_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    t = publish_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    check_limit("Publish bare", 5.0, t)
 
     print(f'## Syncing {lbname} (no upstream or local changes)')
     sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
