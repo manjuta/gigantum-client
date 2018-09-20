@@ -18,16 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-from gtm import dockerclient
 from docker.errors import NotFound
 
-from gtm import DockerVolume
+from gtm.dockerutils import DockerVolume, get_docker_client
 
 
 @pytest.fixture()
 def setup_docker_vol():
     """Fixture to create a Build instance with a test image name that does not exist and cleanup after"""
-    client = dockerclient.get_docker_client()
+    client = get_docker_client()
     vol = client.volumes.create(name='test-labmanager-volume')
 
     yield 'test-labmanager-volume', client
@@ -35,13 +34,14 @@ def setup_docker_vol():
     # Remove image post test if it still exists
     vol.remove()
 
+
 @pytest.fixture()
 def cleanup_docker_vol():
     """Fixture to create a Build instance with a test image name that does not exist and cleanup after"""
     yield 'test-labmanager-volume'
 
     # Remove image post test if it still exists
-    client = dockerclient.get_docker_client()
+    client = get_docker_client()
     try:
         vol = client.volumes.get('test-labmanager-volume')
         vol.remove()

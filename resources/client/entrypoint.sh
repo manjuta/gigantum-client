@@ -23,7 +23,7 @@ export HOME=/home/giguser
 chown -R giguser:root /mnt/share/
 
 # Set permissions for demo labbook
-chown giguser:root /opt/awful-intersections-demo_2018-03-14.lbk
+chown giguser:root /opt/awful-intersections-demo.lbk
 
 # Setup git config for giguser
 gosu giguser bash -c "git config --global user.email 'noreply@gigantum.io'"

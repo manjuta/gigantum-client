@@ -27,11 +27,11 @@ from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
 
 from gtm.common.console import ask_question
-from gtm.common.dockerutil import get_docker_client
-from gtm.common import get_resources_root, get_client_root
+from gtm.dockerutils import get_docker_client
+from gtm.common import get_client_root
 
 
-class LabManagerBuilder(object):
+class ClientBuilder(object):
     """Class to manage building the gigantum client container
     """
     def __init__(self, image_name: str):

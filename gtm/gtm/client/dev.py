@@ -18,19 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
-from pkg_resources import resource_filename
 import subprocess
 import shlex
 import yaml
 import sys
 import platform
 
-from gtm.common.dockerutil import get_docker_client
-from gtm.common.dockervolume import DockerVolume
+from gtm.dockerutils import get_docker_client, DockerVolume
 from gtm.common import get_resources_root, get_client_root
 
 
-class DockerUtil(object):
+class DevClientRunner(object):
     """Class to manage using docker dev containers outside of PyCharm
     """
     def __init__(self):
@@ -108,7 +106,7 @@ class DockerUtil(object):
                 print("\ndocker-compose exited")
 
     def attach(self) -> None:
-        """Method to run Docker down on the generated docker-compose file
+        """Method to attach to a running dev container for debugging or interaction with the sw
 
         Returns:
             None
@@ -123,10 +121,10 @@ class DockerUtil(object):
                 container_id = container.id
 
         if not container_id:
-            print("  \nNo LabManager dev container running. Did you run `gtm developer run` first?\n")
+            print("  \nNo Client dev container running. Did you run `gtm dev start` first?\n")
             sys.exit(1)
 
         if self._docker_compose_exists():
-            override_command = '/bin/bash -c \"cd /opt/project; echo \'-- Run (source /opt/setup.sh) to switch to giguser context\'; /bin/bash"'
+            override_command = '/bin/bash -c \"cd /opt/project; echo \'-- Run /opt/setup.sh to switch to giguser context\'; /bin/bash"'
             command = 'docker exec -it {} {}'.format(container_id, override_command)
             os.system(command)
