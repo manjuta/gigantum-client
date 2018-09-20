@@ -15,6 +15,7 @@ export TOKEN=$2
 
 ls Test_*.py | while read testfile
 do
+  echo "::: Running test $testfile ..."
   python3 Test_*.py
 done
 
