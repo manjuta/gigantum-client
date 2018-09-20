@@ -169,10 +169,10 @@ if __name__ == '__main__':
     drop_file(container_id, make_random_file(50000000), USERNAME, USERNAME, lbname, 'input')
     sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
 
-#    print(f'## Syncing {lbname} (1GB file in code and input)')
-#    drop_file(container_id, make_random_file(1000000000), USERNAME, USERNAME, lbname, 'code')
-#    drop_file(container_id, make_random_file(1000000000), USERNAME, USERNAME, lbname, 'input')
-#    sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    print(f'## Syncing {lbname} (100MB file in code and input)')
+    drop_file(container_id, make_random_file(100000000), USERNAME, USERNAME, lbname, 'code')
+    drop_file(container_id, make_random_file(100000000), USERNAME, USERNAME, lbname, 'input')
+    sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
 
 
     cleanup_random_files()
