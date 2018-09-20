@@ -8,28 +8,32 @@ from sgqlc.endpoint.http import HTTPEndpoint
 
 
 USERNAME = os.environ['USERNAME']
-TOKEN = os.environ['TOKEN']
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+ID_TOKEN = os.environ['ID_TOKEN']
 HOST = 'http://localhost:10000/api/labbook/'
 
 
-endpt_get = HTTPEndpoint(HOST, base_headers={"Authorization": f"Bearer {TOKEN}"}, method='POST')
-endpt_post = HTTPEndpoint(HOST, base_headers={"Authorization": f"Bearer {TOKEN}"}, method='POST')
+bh = {
+    'Identity': ID_TOKEN,
+    'Authorization': f'Bearer {ACCESS_TOKEN}'
+}
+endpt_post = HTTPEndpoint(HOST, base_headers=bh, method='POST')
 
 
 def gqlquery(endpoint, qname, query, variables):
-    print('-'*80)
     t0 = time.time()
     data = endpoint(query, variables)
     tf = time.time()
-    print(f'Ran query {qname} in {tf-t0:.2f}s')
+    #print(f'Ran query {qname} in {tf-t0:.2f}s')
     if 'errors' in data:
+        print('Error in {qname}')
         pprint.pprint(data)
         raise Exception()
     return data
 
 
 def run(*args):
-    print(f'Running: {" ".join(args)}')
+    #print(f'Running: {" ".join(args)}')
     ret = subprocess.run(args, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, check=True)
     return ret

@@ -3,6 +3,8 @@ import uuid
 import pprint
 import json
 
+from colors import color
+
 from misc import (gqlquery as run_query, endpt_post, USERNAME,
                   make_random_file, container_under_test, drop_file,
                   cleanup_random_files)
@@ -135,8 +137,8 @@ def sync_labbook(endpoint, variables):
                           f'(size {d["data"]["labbook"]["sizeBytes"]}b) '
                           f'in {sync_time:.2f}s')
                     waiting = False
-                    pprint.pprint(md)
-                    pprint.pprint(j)
+                    #pprint.pprint(md)
+                    #pprint.pprint(j)
                     return sync_time
                 elif j['status'] == 'failed':
                     print(f'FAIL Sync after {time.time()-t0:.2f}s')
@@ -155,6 +157,7 @@ def check_limit(desc, time_allowed, time_executed):
         passt = color('PASS', 'green')
         print(f'[{passt}] {desc} (max {time_allowed:.2f}s; took {time_executed:.2f}s)')
 
+
 if __name__ == '__main__':
     lbname = f'cli-{uuid.uuid4().hex[:4]}'
     print(f'Using labbook name: {lbname}')
@@ -169,22 +172,25 @@ if __name__ == '__main__':
     check_limit("Publish bare", 5.0, t)
 
     print(f'## Syncing {lbname} (no upstream or local changes)')
-    sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    t = sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    check_limit("Sync bare", 5.0, t)
 
     print(f'## Syncing {lbname} (1 MB file in code and input)')
     drop_file(container_id, make_random_file(1000000), USERNAME, USERNAME, lbname, 'code')
     drop_file(container_id, make_random_file(1000000), USERNAME, USERNAME, lbname, 'input')
-    sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    t = sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    check_limit("Sync 2MB LB", 5.0, t)
 
     print(f'## Syncing {lbname} (50 MB file in code and input)')
     drop_file(container_id, make_random_file(50000000), USERNAME, USERNAME, lbname, 'code')
     drop_file(container_id, make_random_file(50000000), USERNAME, USERNAME, lbname, 'input')
-    sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    t = sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    check_limit("Sync 100MB LB", 15.0, t)
 
     print(f'## Syncing {lbname} (100MB file in code and input)')
     drop_file(container_id, make_random_file(100000000), USERNAME, USERNAME, lbname, 'code')
     drop_file(container_id, make_random_file(100000000), USERNAME, USERNAME, lbname, 'input')
-    sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
-
+    t = sync_labbook(endpoint, variables={'name': lbname, 'owner': USERNAME})
+    check_limit("Sync 200MB LB", 30.0, t)
 
     cleanup_random_files()
