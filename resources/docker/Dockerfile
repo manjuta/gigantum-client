@@ -27,13 +27,6 @@ RUN /bin/bash /opt/ui_build_script.sh
 FROM ubuntu:18.04
 LABEL maintainer="Gigantum <support@gigantum.com>"
 
-# Arguments, defaulted to production values
-ARG CLIENT_CONFIG_FILE=build/client/labmanager-config.yaml
-ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
-ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
-ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
-ARG ENTRYPOINT_FILE=resources/client/entrypoint.sh
-
 # Copy requirements files
 COPY packages/gtmcore/requirements.txt /opt/gtmcore/requirements.txt
 COPY packages/gtmapi/requirements.txt /opt/gtmapi/requirements.txt
@@ -57,6 +50,13 @@ RUN apt-get -y update && \
     apt-get -qq -y remove gcc g++ python3-dev wget curl gnupg gnupg1 gnupg2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
+
+# Arguments, defaulted to production values
+ARG CLIENT_CONFIG_FILE=build/client/labmanager-config.yaml
+ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
+ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
+ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
+ARG ENTRYPOINT_FILE=resources/client/entrypoint.sh
 
 # Copy Libraries
 # TODO: Make pip installs once refactor is completed

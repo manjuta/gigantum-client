@@ -44,8 +44,8 @@ class ClientRunner(object):
         """Return True if a container by given name exists with `docker ps -a`. """
         return any([container.name == self.container_name for container in self.docker_client.containers.list()])
 
-    def stop(self, cleanup: bool=True, remove_all: bool=False):
-        """Stop the docker container by this name. """
+    def stop(self, remove_all: bool=False):
+        """Stop the the client container (or all containers) and prune"""
         if remove_all:
             # If all is set, we remove all containers!
             for container in self.docker_client.containers.list():
@@ -61,8 +61,7 @@ class ClientRunner(object):
             containers[0].stop()
             print("*** Stopped: {}".format(containers[0].name))
 
-        if cleanup:
-            self.docker_client.containers.prune()
+        self.docker_client.containers.prune()
 
     def launch(self):
         """Launch the docker container. """
