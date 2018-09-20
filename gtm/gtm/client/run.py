@@ -22,12 +22,11 @@ import platform
 
 import docker
 
-from gtm.common.dockerutil import dockerize_windows_path
-from gtm.common.dockervolume import DockerVolume
+from gtm.dockerutils import dockerize_windows_path, DockerVolume
 
 
-class LabManagerRunner(object):
-    """Class to manage the launch (or termination) of a labbook container.
+class ClientRunner(object):
+    """Class to manage running the Gigantum client container
     """
 
     def __init__(self, image_name: str, container_name: str, show_output: bool=False):
@@ -45,17 +44,24 @@ class LabManagerRunner(object):
         """Return True if a container by given name exists with `docker ps -a`. """
         return any([container.name == self.container_name for container in self.docker_client.containers.list()])
 
-    def stop(self, cleanup: bool=True):
-        """Stop the docker container by this name. """
-
-        if not self.is_running:
-            raise ValueError("Cannot stop container that is not running.")
+    def stop(self, remove_all: bool=False):
+        """Stop the the client container (or all containers) and prune"""
+        if remove_all:
+            # If all is set, we remove all containers!
+            for container in self.docker_client.containers.list():
+                container.stop()
+                print("*** Stopped: {}".format(container.name))
         else:
+            if not self.is_running:
+                print("Gigantum client is not running. No containers stopped.")
+                return
+
             containers = list(filter(lambda c: c.name == self.container_name, self.docker_client.containers.list()))
             assert len(containers) == 1
             containers[0].stop()
-            if cleanup:
-                self.docker_client.containers.prune()
+            print("*** Stopped: {}".format(containers[0].name))
+
+        self.docker_client.containers.prune()
 
     def launch(self):
         """Launch the docker container. """

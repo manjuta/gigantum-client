@@ -20,7 +20,7 @@
 
 from docker.errors import NotFound
 
-from gtm.common.dockerutil import get_docker_client
+from gtm.dockerutils import get_docker_client
 
 
 class DockerVolume(object):

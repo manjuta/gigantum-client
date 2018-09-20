@@ -1,6 +1,7 @@
 .git
+.circleci
 .idea
-.docs
+docs
 gtm
 .DS_Store
 .pyc

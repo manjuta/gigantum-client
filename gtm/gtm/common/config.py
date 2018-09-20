@@ -5,7 +5,7 @@ import sys
 
 import yaml
 
-from gtm.common.dockerutil import dockerize_windows_path
+from gtm.dockerutils import dockerize_windows_path
 from gtm.common.console import ask_question
 
 CONFIG_FILE = os.path.expanduser("~/.gtm/config.yaml")
@@ -107,6 +107,9 @@ class UserConfig(object):
             if not use_pycharm:
                 data = data.replace('{% GTM_DIR %}', self.user_config['root_dir'])
 
+        data = data.replace('{% HELPER_SCRIPT %}',
+                            os.path.join(self.gigantum_client_root, 'build', 'developer', 'setup.sh'))
+
         return data
 
     def write_helper_script(self):
@@ -186,6 +189,10 @@ su giguser
         developer_build_dir = os.path.join(self.gigantum_client_root, 'build', 'developer')
         if os.path.exists(developer_build_dir) is False:
             os.makedirs(developer_build_dir)
+        else:
+            shutil.rmtree(developer_build_dir)
+            os.makedirs(developer_build_dir)
+
         output_file = os.path.join(developer_build_dir, 'docker-compose.yml')
         with open(output_file, 'wt') as out_file:
             out_file.write(template_data)

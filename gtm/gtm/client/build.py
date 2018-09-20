@@ -21,17 +21,18 @@ import os
 import re
 import glob
 import datetime
+import sys
 
 from git import Repo
 from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
 
 from gtm.common.console import ask_question
-from gtm.common.dockerutil import get_docker_client
-from gtm.common import get_resources_root, get_client_root
+from gtm.dockerutils import get_docker_client
+from gtm.common import get_client_root
 
 
-class LabManagerBuilder(object):
+class ClientBuilder(object):
     """Class to manage building the gigantum client container
     """
     def __init__(self, image_name: str):
@@ -252,11 +253,12 @@ priority=0""")
         # TODO: Rename container to gigantum/client
         self.docker_client.api.tag(named_image, self.image_name, 'latest')
 
-    def publish(self, image_tag: str = None, verbose=False) -> None:
+    def publish(self, image_tag: str = None, verbose: bool=False) -> None:
         """Method to push image to the logged in image repository server (e.g hub.docker.com)
 
         Args:
             image_tag(str): full image tag to publish
+            verbose(bool): Flag indicating if output should be printed
 
         Returns:
             None
@@ -266,18 +268,31 @@ priority=0""")
             image_tag = self.get_image_tag()
 
         if verbose:
-            [print(ln[list(ln.keys())[0]]) for ln in self.docker_client.api.push('gigantum/labmanager', tag=image_tag,
-                                                                                 stream=True, decode=True)]
+            last_msg = ""
+            for ln in self.docker_client.api.push(self.image_name, tag=image_tag, stream=True, decode=True):
+                if 'status' in ln:
+                    if last_msg != ln.get('status'):
+                        print(f"\n{ln.get('status')}", end='', flush=True)
+                        last_msg = ln.get('status')
+                    else:
+                        print(".", end='', flush=True)
+
+                elif 'error' in ln:
+                    sys.stderr.write(f"\n{ln.get('error')}\n")
+                    sys.stderr.flush()
+                else:
+                    print(ln)
         else:
-            self.docker_client.images.push('gigantum/labmanager', tag=image_tag)
+            self.docker_client.images.push(self.image_name, tag=image_tag)
 
-        self.docker_client.images.push('gigantum/labmanager', tag='latest')
+        self.docker_client.images.push(self.image_name, tag='latest')
 
-    def publish_edge(self, image_tag: str = None, verbose=False) -> None:
+    def publish_edge(self, image_tag: str = None, verbose: bool=False) -> None:
         """Method to push image to the logged in image repository server (e.g hub.docker.com)
 
         Args:
             image_tag(str): full image tag to publish
+            verbose(bool): Flag indicating if output should be printed
 
         Returns:
             None
@@ -287,58 +302,38 @@ priority=0""")
             image_tag = self.get_image_tag()
 
         # Re-tag current labmanager build as edge locally
-        self.docker_client.images.get('gigantum/labmanager:latest').tag(f'gigantum/labmanager-edge:{image_tag}')
-        self.docker_client.images.get(f'gigantum/labmanager-edge:{image_tag}').tag('gigantum/labmanager-edge:latest')
+        self.docker_client.images.get(f'{self.image_name}:latest').tag(f'{self.image_name}-edge:{image_tag}')
+        self.docker_client.images.get(f'{self.image_name}-edge:{image_tag}').tag(f'{self.image_name}-edge:latest')
 
         if verbose:
-            [print(ln[list(ln.keys())[0]]) for ln in self.docker_client.api.push('gigantum/labmanager-edge',
-                                                                                 tag=image_tag,
-                                                                                 stream=True, decode=True)]
+            last_msg = ""
+            for ln in self.docker_client.api.push(f'{self.image_name}-edge', tag=image_tag, stream=True, decode=True):
+                if 'status' in ln:
+                    if last_msg != ln.get('status'):
+                        print(f"\n{ln.get('status')}", end='', flush=True)
+                        last_msg = ln.get('status')
+                    else:
+                        print(".", end='', flush=True)
+
+                elif 'error' in ln:
+                    sys.stderr.write(f"\n{ln.get('error')}\n")
+                    sys.stderr.flush()
+                else:
+                    print(ln)
         else:
-            self.docker_client.images.push('gigantum/labmanager-edge', tag=image_tag)
+            self.docker_client.images.push(f'{self.image_name}-edge', tag=image_tag)
 
-        self.docker_client.images.push('gigantum/labmanager-edge', tag='latest')
+        self.docker_client.images.push(f'{self.image_name}-edge', tag='latest')
 
-    def publish_demo(self, image_tag: str = None, verbose=False) -> None:
-        """Method to push a cloud demo image to the logged in image repository server (e.g hub.docker.com)
+    def cleanup(self, image_name):
+        """Method to clean up old images
 
         Args:
-            image_tag(str): full image tag to publish
+            image_name(str): Name of the image to cleanup (e.g. `gigantum/labmanager`)
 
         Returns:
             None
         """
-        # If no tag provided, use current repo hash
-        if not image_tag:
-            image_tag = self.get_image_tag()
-
-        # Re-tag current labmanager build as edge locally
-        self.docker_client.images.get('gigantum/labmanager:latest').tag(f'gigantum/gigantum-cloud-demo:{image_tag}')
-        self.docker_client.images.get(f'gigantum/gigantum-cloud-demo:{image_tag}').tag('gigantum/gigantum-cloud-demo:latest')
-
-        if verbose:
-            [print(ln[list(ln.keys())[0]]) for ln in self.docker_client.api.push('gigantum/gigantum-cloud-demo',
-                                                                                 tag=image_tag,
-                                                                                 stream=True, decode=True)]
-        else:
-            self.docker_client.images.push('gigantum/gigantum-cloud-demo', tag=image_tag)
-
-        self.docker_client.images.push('gigantum/gigantum-cloud-demo', tag='latest')
-
-    def cleanup(self, dev_images=False):
-        """Method to clean up old gigantum/labmanager images
-
-        Args:
-            dev_images(bool): If true, cleanup gigantum/labmanager-dev images instead
-
-        Returns:
-            None
-        """
-        if dev_images:
-            image_name = "gigantum/labmanager-dev"
-        else:
-            image_name = "gigantum/labmanager"
-
         images = self.docker_client.images.list(image_name)
 
         cnt = 0
