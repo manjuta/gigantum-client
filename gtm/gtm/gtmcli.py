@@ -286,10 +286,8 @@ def circleci_actions(args):
     """
     builder = circleci.CircleCIImageBuilder()
 
-    if args.action == 'build-common':
-        builder.build(repo_name='lmcommon', verbose=args.verbose, no_cache=args.no_cache)
-    elif args.action == "build-api":
-        builder.build(repo_name='labmanager-service-labbook', verbose=args.verbose)
+    if args.action == 'update':
+        builder.update(verbose=args.verbose, no_cache=args.no_cache)
     else:
         print("Error: Unsupported action provided: {}".format(args.action), file=sys.stderr)
         sys.exit(1)
@@ -320,8 +318,7 @@ def main():
                          ["prune", "Remove all images except the latest Client Development build"],
                          ["log", "Show the client log file"]]
 
-    components['circleci'] = [["build-common", "Build the CircleCI container for the `lmcommon` repo"],
-                              ["build-api", "Build the CircleCI container for the `labmanager-service-labbook` repo"]]
+    components['circleci'] = [["update", "Build and publish the container for circleci"]]
 
     # Prep the help string
     help_str = format_component_help(components)

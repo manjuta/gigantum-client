@@ -1,46 +1,61 @@
 version: 2
 jobs:
-  build:
+  mypy:
     docker:
-      - image: gigantum/circleci-service-client:84814eab-2018-07-25
-
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
     working_directory: ~/repo
-
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: Set Git credentials config
-          command: git config --global user.email "noreply@gigantum.io" && git config --global user.name "CircleCI" && git config --global credential.helper store
-
-      - run:
-          name: Set authentication credentials
-          command: bash /home/circleci/repo/.circleci/write_auth.sh
-
       - run:
           name: Run mypy type checker
           command: |
             python3 -m mypy packages/gtmcore --ignore-missing-imports --strict-optional
 
+  test-confhttpproxy:
+    docker:
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
       - run:
-          name: Install proxy lib
+          name: Test proxy lib
           command: |
             cd ~/repo/packages/confhttpproxy
-            pip3 install -e .
             echo "import docker; c = docker.from_env()" > runtests.py
             echo "c.images.build(path='.', tag='httpconf')" >> runtests.py
             echo "print(c.containers.run('httpconf', 'pytest /app').decode())" >> runtests.py
             python3 runtests.py
             cd ~/repo
 
+  test-gtmcore:
+    docker:
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Set authentication credentials
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
           name: Run Core unit and coverage tests
           command: |
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
             pytest --cov=gtmcore packages/gtmcore
-            #coveralls
-      
+            codecov
+
+  test-gtmapi:
+    docker:
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Set authentication credentials
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
           name: Run API unit, integration and coverage tests
           command: |
@@ -50,7 +65,80 @@ jobs:
             rqscheduler --interval=2 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
             pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
-            pytest --cov=packages/gtmapi/lmsrvcore --cov-append packages/gtmapi/lmsrvcore
+            pytest --cov=paockages/gtmapi/lmsrvcore --cov-append packages/gtmapi/lmsrvcore
             pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
-            #coveralls
+            codecov
 
+  test-ui-components:
+    docker:
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Initialize submodules
+          command: |
+            git submodule update --init --recursive
+      - run:
+          name: Build frontend production code
+          command: |
+            cd /home/circleci/repo/ui
+            npm install
+            npm install relay
+            npm run relay
+            unset CI && npm run build
+      - run:
+          name: Run dashboard tests
+          command: |
+            cd /home/circleci/repo/ui
+            jest dashboard -u --ci
+
+  #fossa:
+  #  docker:
+  #    - image: gigantum/circleci-client:3de053aab8-2018-09-20
+  #  working_directory: ~/repo
+  #  steps:
+  #    - checkout
+  #    - run:
+  #        name: Initialize submodules
+  #        command: |
+  #          git submodule update --init --recursive
+  #    - run:
+  #        name: Build frontend production code
+  #        command: |
+  #          cd /home/circleci/repo/ui
+  #          npm install
+  #          npm install relay
+  #          npm run relay
+  #          unset CI && npm run build
+  #    - run:
+  #        name: Run Fossa
+  #        command: |
+  #          cd /home/circleci/repo/
+  #          fossa analyze
+  #          fossa test
+
+workflows:
+  version: 2
+  run_tests:
+    jobs:
+      - mypy
+      - test-confhttpproxy:
+          requires:
+            - mypy
+      - test-gtmcore:
+          requires:
+            - mypy
+      - test-gtmapi:
+          requires:
+            - mypy
+      - test-ui-components:
+          requires:
+            - mypy
+      #- fossa:
+      #  filters:
+      #    branches:
+      #      only:
+      #        - master
+      #        - integration

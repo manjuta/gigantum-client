@@ -18,34 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
-import json
-import glob
 from datetime import datetime
-from pkg_resources import resource_filename
+import sys
 
 from git import Repo
 import docker
-from docker.errors import ImageNotFound, NotFound
+from docker.errors import NotFound
+
+from gtm.common import get_client_root, get_resources_root
 
 
 class CircleCIImageBuilder(object):
     """Class to manage building base images
     """
-    def __init__(self):
-        """
-
-        """
-        self.tracking_file = os.path.join(self._get_gtm_dir(), ".image-build-status.json")
-
-    def _get_gtm_dir(self) -> str:
-        """Method to get the root gtm directory
-
-        Returns:
-            str
-        """
-        file_path = resource_filename("gtm", "common")
-        return file_path.rsplit(os.path.sep, 2)[0]
-
     def _get_current_commit_hash(self) -> str:
         """Method to get the current commit hash of the gtm repository
 
@@ -53,7 +38,7 @@ class CircleCIImageBuilder(object):
             str
         """
         # Get the path of the root directory
-        repo = Repo(self._get_gtm_dir())
+        repo = Repo(get_client_root())
         return repo.head.commit.hexsha
 
     def _generate_image_tag_suffix(self) -> str:
@@ -62,45 +47,35 @@ class CircleCIImageBuilder(object):
         Returns:
             str
         """
-        return "{}-{}".format(self._get_current_commit_hash()[:8], str(datetime.utcnow().date()))
+        return "{}-{}".format(self._get_current_commit_hash()[:10], str(datetime.utcnow().date()))
 
-    def _build_image(self, docker_file: str, docker_repo_name: str, verbose=False, no_cache=False) -> str:
+    def _build_image(self, verbose: bool=False, no_cache: bool=False) -> str:
         """
 
         Args:
-            docker_file(str): name of the dockerfile to build
-            docker_repo_name(str): name of the dockerhub repo to push to
+            verbose(bool): set to True to print output
+            no_cache(bool): set to True to ignore docker build cache
 
         Returns:
 
         """
         client = docker.from_env()
 
-        # Generate tags for both the named and latest versions
-        docker_build_dir = os.path.expanduser(resource_filename("gtm", "resources"))
-
-        base_tag = "gigantum/{}".format(docker_repo_name)
+        base_tag = "gigantum/circleci-client"
         named_tag = "{}:{}".format(base_tag, self._generate_image_tag_suffix())
 
-        # If an image that could be the source for other images, you should pull, otherwise, you shouldn't
-        if docker_repo_name in ['circleci-common']:
-            pull = True
-        else:
-            pull = False
+        docker_file = os.path.join(get_resources_root(), 'docker', 'Dockerfile_circleci')
 
         if verbose:
-            [print(ln[list(ln.keys())[0]], end='') for ln in client.api.build(path=docker_build_dir,
+            [print(ln[list(ln.keys())[0]], end='') for ln in client.api.build(path=get_client_root(),
                                                                               dockerfile=docker_file,
                                                                               tag=named_tag,
                                                                               nocache=no_cache,
-                                                                              pull=pull, rm=True,
+                                                                              pull=True, rm=True,
                                                                               decode=True)]
         else:
-            client.images.build(path=docker_build_dir,  dockerfile=docker_file, tag=named_tag,
+            client.images.build(path=get_client_root(),  dockerfile=docker_file, tag=named_tag,
                                 pull=True, nocache=no_cache)
-
-        # Tag with latest in case images depend on each other. Will not get published.
-        client.images.get(named_tag).tag(f"{base_tag}:latest")
 
         # Verify the desired image built successfully
         try:
@@ -125,46 +100,41 @@ class CircleCIImageBuilder(object):
         image, tag = image_tag.split(":")
 
         if verbose:
-            [print(ln[list(ln.keys())[0]], end='') for ln in client.api.push(image, tag=tag,
-                                                                             stream=True, decode=True)]
+            last_msg = ""
+            for ln in client.api.push(image, tag=tag, stream=True, decode=True):
+                if 'status' in ln:
+                    if last_msg != ln.get('status'):
+                        print(f"\n{ln.get('status')}", end='', flush=True)
+                        last_msg = ln.get('status')
+                    else:
+                        print(".", end='', flush=True)
+
+                elif 'error' in ln:
+                    sys.stderr.write(f"\n{ln.get('error')}\n")
+                    sys.stderr.flush()
+                else:
+                    print(ln)
         else:
             client.images.push(image, tag=tag)
 
-    def build(self, repo_name: str = None, verbose=False, no_cache=False) -> None:
-        """Method to build all, or a single image based on the dockerfiles stored within the base-image submodule
+    def update(self, verbose=False, no_cache=False) -> None:
+        """Method to circleCI container
 
         Args:
-            repo_name(str): Name of the repository you are building a container to test
             verbose(bool): flag indication if output should print to the console
             no_cache(bool): flag indicating if the docker cache should be ignored
 
         Returns:
             None
         """
-        images = {
-            'lmcommon': {
-                "docker_file": "Dockerfile_circleci_lmcommon",
-                "docker_repo": "circleci-common"
-            },
-            'labmanager-service-labbook': {
-                "docker_file": "Dockerfile_circleci_service_labbook",
-                "docker_repo": "circleci-service-client"
-            },
-        }
-
-        if repo_name not in images:
-            raise ValueError(f"Unsupported repository name: {repo_name}")
-
         # Build image
-        print(f"Building CircleCI Docker image for repository: {repo_name}")
-        image_tag = self._build_image(images[repo_name]['docker_file'],
-                                      images[repo_name]['docker_repo'],
-                                      verbose=verbose, no_cache=no_cache)
+        print(f"\n** Building CircleCI Docker image")
+        image_tag = self._build_image(verbose=verbose, no_cache=no_cache)
 
         # Publish to dockerhub
-        print(f"Publishing CircleCI Docker image to DockerHub: {image_tag}")
+        print(f"\n\n** Publishing CircleCI Docker image to DockerHub: {image_tag}")
         self._publish_image(image_tag, verbose)
 
         print("Done!")
-        print(f"** Update `.circleci/config.yml` in {repo_name} to point to {image_tag} and "
-              f"commit to run tests with new container **")
+        print(f"\n\n** Update `.circleci/config.yml` to point to {image_tag} and "
+              "commit to run tests with new container **")
