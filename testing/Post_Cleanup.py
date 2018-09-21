@@ -2,6 +2,7 @@ import time
 import uuid
 import pprint
 import json
+import re
 
 from misc import (gqlquery as run_query, endpt_post, USERNAME,
                   make_random_file, container_under_test, drop_file,
@@ -84,8 +85,9 @@ if __name__ == '__main__':
     d = run_query(endpt_post, 'Get Remote Labbooks', remoteLabbookQuery, {})
     remote_lbs = d['data']['labbookList']['remoteLabbooks']['edges']
     for rlb in remote_lbs:
-        if 'cli-' in rlb['node']['name']:
-            print(rlb)
+        m = re.match('^cli-[\da-f]{4}$', rlb['node']['name'])
+        if m:
+            print(f'Deleting remote project {m.group(0)}')
             d = run_query(endpt_post, f'Delete Remote {rlb["node"]["owner"]}/{rlb["node"]["name"]}',
                     deleteRemoteLabbook,
                     {'owner': rlb["node"]["owner"],

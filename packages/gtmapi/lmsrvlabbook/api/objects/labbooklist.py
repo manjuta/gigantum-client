@@ -199,7 +199,7 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                                               "Identity": id_token})
 
         if response.status_code != 200:
-            raise IOError("Failed to retrieve Project listing from remove server")
+            raise IOError("Failed to retrieve Project listing from remote server")
         edges = response.json()
         cursors = [base64.b64encode("{}".format(page).encode("UTF-8")).decode("UTF-8") for _ in edges]
 
