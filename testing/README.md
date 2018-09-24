@@ -26,3 +26,9 @@ Note! Retrieve your user token from your chrome cache (must login via web first)
 Copy the value for `user_token` and `access_token` respectively from the Chrome dev tools menu.
 
 
+## Warning
+
+This test harness will create a series of local and remote projects of the pattern `cli-XXXX` where
+XXXX is a 4-digit hex string.
+It will remove these locally and remotely after execution.
+Be advised that any projects whose names precisely match this pattern will be deleted.
