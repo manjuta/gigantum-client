@@ -237,7 +237,7 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "plotly"
-        assert result[1].version == "3.2.0"
+        assert result[1].version == "3.2.1"
         assert result[1].error is False
 
 
@@ -299,5 +299,5 @@ class TestConda2PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "plotly"
-        assert result[1].version == "3.2.0"
+        assert result[1].version == "3.2.1"
         assert result[1].error is False
