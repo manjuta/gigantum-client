@@ -91,7 +91,8 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
         lb = LabBook()
         lb.from_directory(labbook_path)
         with lb.lock_labbook():
-            ZipExporter.export_zip(lb.root_dir, lb_export_directory)
+            p = ZipExporter.export_zip(lb.root_dir, lb_export_directory)
+        return p
     except Exception as e:
         logger.exception(f"(Job {p}) Error on export_labbook_as_zip: {e}")
         raise
@@ -127,7 +128,7 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
 
     try:
         lb = ZipExporter.import_zip(archive_path, username, owner, config_file=config_file,
-                                    base_filename=base_filename, remove_source=remove_source)
+                                    base_filename=base_filename)
         os.remove(archive_path)
         return lb.root_dir
     except Exception as e:
