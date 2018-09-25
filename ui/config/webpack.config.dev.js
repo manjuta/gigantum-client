@@ -1,11 +1,9 @@
-'use strict';
-
 const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+const InterpolateHtmlPlugin = require('@nenado/interpolate-html-plugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
@@ -41,6 +39,7 @@ module.exports = {
   // These are the "entry points" to our application.
   // This means they will be the "root" imports that are included in JS bundle.
   // The first two entry points enable "hot" CSS and auto-refreshes for JS.
+
   entry: [
     // Include an alternative client for WebpackDevServer. A client's job is to
     // connect to WebpackDevServer by a socket and get notified about changes.
@@ -60,11 +59,24 @@ module.exports = {
     // Finally, this is your app's code:
     paths.appIndexJs,
     paths.dahshboardJs,
-    paths.labbookJs
+    paths.labbookJs,
+    paths.labbookActivityJs,
+    paths.labbookEnvironmentJs,
+    paths.labbookOverviewJs,
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.
   ],
+
+
+  // entry: {
+  //   main: paths.appIndexJs,
+  //   Dashboard: paths.dahshboardJs,
+  //   Labbook: paths.labbookJs,
+  //   Activity: paths.labbookActivityJs,
+  //   Environment: paths.labbookEnvironmentJs,
+  //   Overview: paths.labbookOverviewJs,
+  // },
   output: {
     // Next line is not used in dev but WebpackDevServer crashes without it:
     path: paths.appBuild,
@@ -95,7 +107,7 @@ module.exports = {
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
     // https://github.com/facebookincubator/create-react-app/issues/290
-    extensions: ['.js', '.json', '.jsx'],
+    extensions: ['.js', '.json', '.jsx', '.scss'],
     alias: {
 
       // Support React Native Web
@@ -105,7 +117,10 @@ module.exports = {
       'Mutations': path.resolve(__dirname, '../src/js/mutations/'),
       'JS': path.resolve(__dirname, '../src/js/'),
       'Submodules': path.resolve(__dirname, '../submodules/'),
-      'Images': path.resolve(__dirname, '../src/images/')
+      'Images': path.resolve(__dirname, '../src/images/'),
+      'Styles': path.resolve(__dirname, '../src/css/'),
+      'Fonts': path.resolve(__dirname, '../src/fonts/'),
+      'Node': path.resolve(__dirname, '../node_modules'),
 
     },
     plugins: [
@@ -131,15 +146,7 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         enforce: 'pre',
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter,
-
-            },
-            loader: require.resolve('eslint-loader'),
-          },
-        ],
+        loader: "eslint-loader",
         include: paths.appSrc,
       },
       // ** ADDING/UPDATING LOADERS **
@@ -226,28 +233,58 @@ module.exports = {
       // Remember to add the new extension(s) to the "file" loader exclusion list.
     ],
   },
+  mode:'development',
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // get the name. E.g. node_modules/packageName/not/this/part.js
+            // or node_modules/packageName
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+
+            // npm package names are URL-safe, but some servers don't like @ symbols
+            return `npm.${packageName.replace('@', '')}`;
+          },
+        },
+      },
+    },
+  },
   plugins: [
     // new BundleAnalyzerPlugin({
     //        analyzerMode: 'static'
     // }), //comment back in when needed
-    new webpack.optimize.CommonsChunkPlugin({
-         name: 'node-static',
-         filename: 'node-static.js',
-         minChunks(module, count) {
-             var context = module.context;
-             return context && context.indexOf('node_modules') >= 0;
-         },
-     }),
+    // new webpack.optimize.CommonsChunkPlugin({
+    //      name: 'node-static',
+    //      filename: 'node-static.js',
+    //      minChunks(module, count) {
+    //          var context = module.context;
+    //          return context && context.indexOf('node_modules') >= 0;
+    //      },
+    //  }),
+
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.
-    new InterpolateHtmlPlugin(env.raw),
+
     // Generates an `index.html` file with the <script> injected.
+    new webpack.LoaderOptionsPlugin({ options: {} }),
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
     }),
+    // new ScriptExtHtmlWebpackPlugin({
+    //   defaultAttribute: 'async'
+    // }),
+    new InterpolateHtmlPlugin(env.raw),
+    //removed webpack4
+    // new InterpolateHtmlPlugin(env.raw),
 
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
@@ -269,6 +306,7 @@ module.exports = {
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new webpack.HashedModuleIdsPlugin(),
     // new HardSourceWebpackPlugin({
     //   // Either an absolute path or relative to webpack's options.context.
     //   cacheDirectory: 'node_modules/.cache/hard-source/[confighash]',
@@ -314,6 +352,8 @@ module.exports = {
   // cumbersome.
   performance: {
     hints: "warning",
+    maxAssetSize: 3000000,
+    maxEntrypointSize: 10000000,
   },
   externals:[{
     xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'

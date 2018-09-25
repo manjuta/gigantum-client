@@ -1,11 +1,10 @@
 import {
   commitMutation,
   graphql,
-} from 'react-relay'
-import environment from 'JS/createRelayEnvironment'
-//redux store
-import reduxStore from 'JS/redux/store'
-
+} from 'react-relay';
+import environment from 'JS/createRelayEnvironment';
+// store
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 
 const mutation = graphql`
   mutation AddCollaboratorMutation($input: AddLabbookCollaboratorInput!){
@@ -25,35 +24,29 @@ export default function AddCollaboratorMutation(
   labbookName,
   owner,
   username,
-  callback
+  callback,
 ) {
   const variables = {
     input: {
       labbookName,
       owner,
       username,
-      clientMutationId: tempID++
-    }
-  }
+      clientMutationId: tempID++,
+    },
+  };
   commitMutation(
     environment,
     {
       mutation,
       variables,
       onCompleted: (response, error) => {
-        if(error){
-          console.log(error)
-          reduxStore.dispatch({
-            type: 'ERROR_MESSAGE',
-            payload:{
-              message: `ERROR: Could not add Collaborator ${username}`,
-              messageBody: error
-            }
-          })
+        if (error) {
+          console.log(error);
+          setErrorMessage(`ERROR: Could not add Collaborator ${username}`, error);
         }
-        callback(response, error)
+        callback(response, error);
       },
-      onError: err => console.error(err)
+      onError: err => console.error(err),
     },
-  )
+  );
 }

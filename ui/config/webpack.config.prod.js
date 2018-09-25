@@ -6,12 +6,14 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+const InterpolateHtmlPlugin = require('@nenado/interpolate-html-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -33,7 +35,7 @@ if (env.stringified['process.env'].NODE_ENV !== '"production"') {
 }
 
 // Note: defined here because it will be used more than once.
-const cssFilename = 'static/css/[name].[contenthash:8].css';
+const cssFilename = 'static/css/[name].[md5:contenthash:hex:20].css';
 
 // ExtractTextPlugin expects the build output to be flat.
 // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
@@ -54,11 +56,24 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: 'source-map',
   // In production, we only want to load the polyfills and the app code.
+  // entry: {
+  //   main: paths.appIndexJs,
+  //   Dashboard: paths.dahshboardJs,
+  //   Labbook: paths.labbookJs,
+  //   Activity: paths.labbookActivityJs,
+  //   Environment: paths.labbookEnvironmentJs,
+  //   Overview: paths.labbookOverviewJs,
+  // },
   entry: [
     require.resolve('./polyfills'),
     paths.appIndexJs,
-    paths.dahshboardJs
+    paths.dahshboardJs,
+    paths.labbookJs,
+    paths.labbookActivityJs,
+    paths.labbookEnvironmentJs,
+    paths.labbookOverviewJs,
   ],
+  mode: 'production',
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -93,17 +108,18 @@ module.exports = {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
-      Components: path.resolve(__dirname, '../src/js/components/'),
-      Mutations: path.resolve(__dirname, '../src/js/mutations/'),
-      JS: path.resolve(__dirname, '../src/js/'),
+      'Components': path.resolve(__dirname, '../src/js/components/'),
+      'Mutations': path.resolve(__dirname, '../src/js/mutations/'),
+      'JS': path.resolve(__dirname, '../src/js/'),
       'Submodules': path.resolve(__dirname, '../submodules/'),
-      'Images': path.resolve(__dirname, '../src/images/')
+      'Images': path.resolve(__dirname, '../src/images/'),
+      'Styles': path.resolve(__dirname, '../src/css/'),
+      'Fonts': path.resolve(__dirname, '../src/fonts/'),
+      'Node': path.resolve(__dirname, '../node_modules')
     },
     plugins: [
 
-      new webpack.LoaderOptionsPlugin({
-        debug: true
-      })
+
       // Prevents users from importing files from outside of src/ (or node_modules/).
       // This often causes confusion because we only process files within src/ with babel.
       // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
@@ -125,14 +141,7 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         enforce: 'pre',
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter,
-            },
-            loader: require.resolve('eslint-loader'),
-          },
-        ],
+        loader: "eslint-loader",
         include: paths.appSrc,
       },
       // ** ADDING/UPDATING LOADERS **
@@ -148,6 +157,7 @@ module.exports = {
           /\.html$/,
           /\.(js|jsx)$/,
           /\.css$/,
+          /\.scss$/,
           /\.json$/,
           /\.bmp$/,
           /\.gif$/,
@@ -174,10 +184,17 @@ module.exports = {
         test: /\.(js|jsx)$/,
         include: paths.appSrc,
         loader: require.resolve('babel-loader'),
+        options: {
 
+          compact: true,
+        }
       },
 
       {
+        exclude: [
+          /\.css$/,
+          /\.scss$/
+        ],
         test: /\.(js|jsx)$/,
         include: paths.submodules,
         loader: require.resolve('babel-loader'),
@@ -200,20 +217,27 @@ module.exports = {
         loader: ExtractTextPlugin.extract(
           Object.assign(
             {
-              fallback: require.resolve('style-loader'),
+              fallback: {
+                loader: require.resolve('style-loader'),
+                options: {
+                  hmr: false,
+                },
+              },
               use: [
                 {
                   loader: require.resolve('css-loader'),
                   options: {
                     importLoaders: 1,
                     minimize: true,
-                    sourceMap: true,
+                    sourceMap: false,
                   },
                 },
                 {
                   loader: require.resolve('postcss-loader'),
                   options: {
-                    ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
+                    // Necessary for external CSS imports to work
+                    // https://github.com/facebookincubator/create-react-app/issues/2677
+                    ident: 'postcss',
                     plugins: () => [
                       require('postcss-flexbugs-fixes'),
                       autoprefixer({
@@ -235,6 +259,7 @@ module.exports = {
                   }
                 }
               ],
+
             },
             extractTextPluginOptions
           )
@@ -245,13 +270,60 @@ module.exports = {
       // Remember to add the new extension(s) to the "file" loader exclusion list.
     ],
   },
+  // optimization:{
+  //   runtimeChunk: 'single',
+  //   splitChunks: {
+  //     chunks: 'all',
+  //     maxInitialRequests: Infinity,
+  //     minSize: 0,
+  //     cacheGroups: {
+  //       vendor: {
+  //         test: /[\\/]node_modules[\\/]/,
+  //         name(module) {
+  //           // get the name. E.g. node_modules/packageName/not/this/part.js
+  //           // or node_modules/packageName
+  //           const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+
+  //           // npm package names are URL-safe, but some servers don't like @ symbols
+  //           return `npm.${packageName.replace('@', '')}`;
+  //         },
+  //       },
+  //     },
+  //   },
+  //   // minimizer: [
+  //   //   new UglifyJsPlugin({
+  //   //     cache: true,
+  //   //     parallel: true,
+  //   //   })
+  //   // ],
+  // },
+
+    optimization: {
+      minimize: true,
+      minimizer: [
+        new UglifyJsPlugin({
+          sourceMap: true,
+          uglifyOptions: {
+              compress: {
+                  unused: false,
+                  dead_code: false,
+                  warnings: true
+              },
+              output: {
+                  comments: true
+              }
+          }
+        })
+      ]
+  },
   plugins: [
+    new ProgressBarPlugin(),
+    new webpack.LoaderOptionsPlugin({ options: {} }),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In production, it will be an empty string unless you specify "homepage"
     // in `package.json`, in which case it will be the pathname of that URL.
-    new InterpolateHtmlPlugin(env.raw),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,
@@ -269,6 +341,7 @@ module.exports = {
         minifyURLs: true,
       },
     }),
+    new InterpolateHtmlPlugin(env.raw),
 
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
@@ -276,23 +349,26 @@ module.exports = {
     // Otherwise React will be compiled in the very slow development mode.
     new webpack.DefinePlugin(env.stringified),
     // Minify the code.
-    new webpack.optimize.UglifyJsPlugin({
-      splitChunks: {
-       chunks: 'all'
-      },
-      compress: {
-        warnings: false,
-        // Disabled because of an issue with Uglify breaking seemingly valid code:
-        // https://github.com/facebookincubator/create-react-app/issues/2376
-        // Pending further investigation:
-        // https://github.com/mishoo/UglifyJS2/issues/2011
-        comparisons: false,
-      },
-      output: {
-        comments: false,
-      },
-      sourceMap: false,
-    }),
+
+    //deprecated
+    // new webpack.optimize.UglifyJsPlugin({
+    //   splitChunks: {
+    //    chunks: 'all'
+    //   },
+    //   compress: {
+    //     warnings: false,
+    //     // Disabled because of an issue with Uglify breaking seemingly valid code:
+    //     // https://github.com/facebookincubator/create-react-app/issues/2376
+    //     // Pending further investigation:
+    //     // https://github.com/mishoo/UglifyJS2/issues/2011
+    //     comparisons: false,
+    //   },
+    //   output: {
+    //     comments: false,
+    //   },
+    //   sourceMap: false,
+    // }),
+
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
     new ExtractTextPlugin({
       filename: cssFilename,
@@ -341,8 +417,10 @@ module.exports = {
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
   node: {
+    dgram: 'empty',
     fs: 'empty',
     net: 'empty',
     tls: 'empty',
+    child_process: 'empty',
   },
 };

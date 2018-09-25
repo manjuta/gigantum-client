@@ -1,0 +1,129 @@
+@import '~Styles/_imports.scss';
+
+.CustomDockerfile {
+  position: relative;
+  hr {
+    opacity: 0.5;
+    max-width: 85%;
+    margin: 0;
+  }
+}
+
+.CustomDockerfile__header {
+  color: $romanSilver;
+}
+
+.CustomDockerfile__sub-header {
+  margin-top: 0;
+  font-size: 14px;
+  color: $romanSilver;
+  p{
+    margin: 5px 0;
+
+    &:first-child {
+      margin: 0 0 10px 0;
+    }
+  }
+
+  code {
+    font-family: monospace;
+  }
+}
+
+.CustomDockerfile--code-snippet code{
+  padding: 2px 10px;
+  margin: -4px 0 4px 11px;
+ }
+
+.CustomDockerfile__content {
+  padding: 10px !important;
+  color: $jet;
+  white-space: pre-wrap;
+  padding: 0;
+  word-wrap: break-word;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  flex-direction: column;
+
+  p {
+    margin: 0
+  }
+
+  div:first-child {
+
+    /*
+      have to use extend as ReactMarkDown does not inherit classNames
+    */
+
+    margin-bottom: 0;
+    p {
+      font-family: monospace !important;
+      font-size: 1em !important;
+    }
+  }
+  button {
+    margin-top: 2px;
+  }
+  .column-1-span-2 {
+    align-self: flex-end;
+
+    @include flex(space-between, row);
+  }
+
+  .empty {
+    color: $romanSilver;
+    opacity: 0.5;
+    font-style: oblique;
+  }
+
+  code{
+    text-align: left;
+  }
+}
+
+.CustomDockerfile__textarea {
+  padding: 10px;
+  height: 200px;
+  font-family: monospace;
+  font-size: 1em;
+  resize:vertical;
+  width: calc(100% - 40px);
+  margin: 20px;
+}
+
+.CustomDockerfile__textarea:focus {
+  border: 2px solid #26a69a;
+  box-shadow: 0 1px 0 0 #26a69a;
+  outline: none;
+}
+
+.CustomDockerfile__buttonContainer{
+  margin: 0 20px 20px;
+  @include flex(flex-end, row);
+}
+
+.CustomDockerfile__btn {
+
+  &--edit,
+   --edit:hover,
+   --edit:focus,
+   --edit:disabled {
+    height: 22px;
+    width: 22px;
+    border: 0px;
+    background: url('~Images/icons/edit.svg') no-repeat center center;
+    background-size: 22px;
+
+  }
+
+  &--edit:disabled{
+      opacity: 0.2;
+  }
+
+  &--cancel,
+   --cancel:hover,
+   --cancel:focus {
+    padding: 0;
+  }
+
+}
