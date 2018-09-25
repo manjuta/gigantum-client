@@ -17,11 +17,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import datetime
 import subprocess
 import shutil
 import time
 import os
-from typing import Optional
+from typing import Optional, Callable
 
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
@@ -133,7 +134,7 @@ class ZipExporter(object):
     @classmethod
     def import_zip(cls, archive_path: str, username: str, owner: str,
                    config_file: Optional[str] = None, base_filename: Optional[str] = None,
-                   update_meta: callable = lambda _ : None) -> LabBook:
+                   update_meta: Callable = lambda _ : None) -> LabBook:
         statusmsg = "Initializing..."
         update_meta(statusmsg)
 
