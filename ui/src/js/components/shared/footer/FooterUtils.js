@@ -44,7 +44,7 @@ const FooterUtils = {
               ? fullMessage.slice(0, fullMessage.length - 1)
               : fullMessage;
 
-            const html = ansi_up.ansi_to_html(fullMessage);
+            let html = ansi_up.ansi_to_html(fullMessage);
 
             const lastIndex = (fullMessage.lastIndexOf('\n') > -1)
               ? fullMessage.lastIndexOf('\n')
@@ -84,7 +84,13 @@ const FooterUtils = {
 
               }
             } else if (response.data.jobStatus.status === 'failed') {
-              setMultiInfoMessage(response.data.jobStatus.id, message, true, null, [{ message: html }]);
+              const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
+              let errorMessage = response.data.jobStatus.failureMessage;
+              if (method === 'build_image') {
+                errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
+              }
+              html += `\n<span style="color:rgb(255,85,85)">${response.data.jobStatus.failureMessage}</span>`;
+              setMultiInfoMessage(response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
             } else {
               // refetch status data not ready
               refetch();

@@ -60,6 +60,10 @@ export default class FooterNotificationList extends Component {
                   'Footer__body-height': messageItem.messageBodyOpen,
                   [messageItem.className]: true,
                 });
+                const messageTitleCSS = classNames({
+                  'Footer__message-title': true,
+                  'Footer__message-title--collapsed': !messageItem.messageBodyOpen,
+                });
                 return (
                   <li
                     key={messageItem.id + index}
@@ -71,7 +75,7 @@ export default class FooterNotificationList extends Component {
 
                         <div className="Footer__message-time">{Moment(messageItem.date).fromNow()}</div>
                         <div className="Footer__message-item">
-                          <p className="Footer__message-title">
+                          <p className={messageTitleCSS}>
                             {messageItem.message}
                           </p>
                         </div>

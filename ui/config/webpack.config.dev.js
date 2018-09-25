@@ -11,6 +11,7 @@ const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -256,6 +257,7 @@ module.exports = {
     },
   },
   plugins: [
+    new ProgressBarPlugin(),
     // new BundleAnalyzerPlugin({
     //        analyzerMode: 'static'
     // }), //comment back in when needed
@@ -283,9 +285,6 @@ module.exports = {
     //   defaultAttribute: 'async'
     // }),
     new InterpolateHtmlPlugin(env.raw),
-    //removed webpack4
-    // new InterpolateHtmlPlugin(env.raw),
-
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
     new webpack.DefinePlugin(env.stringified),
