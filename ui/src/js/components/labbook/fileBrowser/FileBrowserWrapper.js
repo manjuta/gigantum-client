@@ -1,6 +1,6 @@
 // vendor
 import React, { Component } from 'react';
-import FileBrowser from 'Submodules/react-keyed-file-browser/FileBrowser/src/browser';
+import FileBrowser from './fileBrowserCore/FileBrowser';
 import uuidv4 from 'uuid/v4';
 // components
 import DetailPanel from './../detail/DetailPanel';
@@ -733,6 +733,7 @@ export default class FileBrowserWrapper extends Component {
               size: edge.node.size,
               isFavorite: edge.node.isFavorite,
               id: edge.node.id,
+              isDir: edge.node.isDir,
             });
             idExists.push(edge.node.id);
           }

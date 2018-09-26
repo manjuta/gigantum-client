@@ -1,0 +1,9 @@
+@import '~Styles/_imports.scss';
+
+.Folder__row{
+    @include flex(space-between, row);
+}
+
+.Folder__child{
+    margin-left: 20px;
+}

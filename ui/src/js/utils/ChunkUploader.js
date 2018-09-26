@@ -7,28 +7,8 @@ import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/Comple
 import store from 'JS/redux/store';
 import { setUploadMessageUpdate, setUploadMessageRemove, setWarningMessage } from 'JS/redux/reducers/footer';
 import { setFinishedUploading, setPauseChunkUpload } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
-
-/**
-  @param {number} bytes
-  converts bytes into suitable units
-*/
-export const humanFileSize = (bytes) => {
-  const thresh = 1000;
-
-  if (Math.abs(bytes) < thresh) {
-    return `${bytes} kB`;
-  }
-
-  const units = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  let u = -1;
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-  return `${bytes.toFixed(1)} ${units[u]}`;
-};
-
+// config
+import config from 'JS/config';
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
@@ -72,8 +52,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
     chunkSize,
   } = chunkData;
   const chunkIndex = chunkData.chunkIndex + 1;
-  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? humanFileSize(fileSizeKb) : humanFileSize((chunkSize / 1000) * chunkIndex);
-  const fileSize = humanFileSize(fileSizeKb);
+  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? config.humanFileSize(fileSizeKb) : config.humanFileSize((chunkSize / 1000) * chunkIndex);
+  const fileSize = config.humanFileSize(fileSizeKb);
   setUploadMessageUpdate(`${uploadedChunkSize} of ${fileSize} files`, 1, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
 
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {

@@ -7,8 +7,8 @@ import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';
-// utils
-import { humanFileSize } from 'JS/utils/ChunkUploader';
+// config
+import config from 'JS/config';
 
 export default class RecentCard extends Component {
   constructor(props) {
@@ -93,7 +93,7 @@ export default class RecentCard extends Component {
                             Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}
             </p>
             <p>
-                            Size: {humanFileSize(this.props.file.node.size / 1000)}
+                            Size: {config.humanFileSize(this.props.file.node.size / 1000)}
             </p>
 
           </div>
