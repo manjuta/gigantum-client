@@ -90,8 +90,9 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
     try:
         lb = LabBook()
         lb.from_directory(labbook_path)
-        with lb.lock_labbook():
-            path = ZipExporter.export_zip(lb.root_dir, lb_export_directory)
+        #TODO!! Put export into lock
+        #with lb.lock_labbook():
+        path = ZipExporter.export_zip(lb.root_dir, lb_export_directory)
         return path
     except Exception as e:
         logger.exception(f"(Job {p}) Error on export_labbook_as_zip: {e}")
