@@ -42,7 +42,7 @@ RUN apt-get -y update && \
     curl -sL https://deb.nodesource.com/setup_8.x | bash && \
     apt-get -y install nodejs && \
     npm install -g configurable-http-proxy && \
-    cd /opt/confhttpproxy && pip3 install -e . && \
+    cd /opt/confhttpproxy && pip3 install . && \
     pip3 install wheel && \
     pip3 install -r /opt/gtmcore/requirements.txt && \
     pip3 install -r /opt/gtmapi/requirements.txt && \
@@ -64,6 +64,10 @@ COPY packages/gtmapi /opt/gtmapi
 COPY packages/gtmcore /opt/gtmcore
 
 RUN cd /opt/gtmcore/ && python3 setup.py install
+
+# Install testing requirements (will essentially be a noop in production)
+COPY build/requirements-testing.txt /opt/requirements-testing.txt
+RUN pip3 install -r /opt/requirements-testing.txt
 
 # Setup lmcommon config file - should be written by automation before copy
 COPY $CLIENT_CONFIG_FILE /etc/gigantum/labmanager.yaml

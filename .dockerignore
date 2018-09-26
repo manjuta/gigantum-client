@@ -10,3 +10,6 @@ ui/node_modules
 ui/__mocks__
 ui/__tests__
 ui/build
+ui/resources
+.pytest_cache/
+.mypy_cache

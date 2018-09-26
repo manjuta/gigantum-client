@@ -56,9 +56,9 @@ yet, go do it). It is located in `gtm/gtmlib/resource/developer_resource/docker-
     
 7. In the Project file viewer, several directories need to be marked as a "Sources Root", by right-clicking, then 
    selecting *Mark Directory as > Sources Root*. These directories are both found under
-   `gtm/gtmlib/resources/submodules`:
-  - `labmanager-common`
-  - `labmanager-service-labbook`
+   `packages/`:
+  - `gtmcore`
+  - `gtmapi`
   
 8. Also in `gtm/gtmlib/resources/submodules`, you can speed up development by marking `labmanager-ui` as "Excluded", otherwise PyCharm will force you to wait
    each time `node_modules` is rebuilt. (`node_modules` appears to be marked as excluded, but the indexing happens anyway

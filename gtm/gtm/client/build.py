@@ -127,6 +127,47 @@ class ClientBuilder(object):
         # Remove image
         self.docker_client.images.remove(image_name)
 
+    @staticmethod
+    def merge_requirements_files(source_files):
+        """Method to merge requirements.txt files into a single file for build purposes. This simplifies build process
+        and also lets the app build with additional dependencies when needed (e.g. test)
+
+        Args:
+            source_files(list): List of relative file paths to requirement.txt files
+
+        Returns:
+
+        """
+        build_dir = os.path.join(get_client_root(), 'build')
+        if os.path.exists(build_dir) is False:
+            os.makedirs(build_dir)
+
+        output = ""
+        for f in source_files:
+            with open(os.path.join(get_client_root(), f), 'rt') as fd:
+                output = f"{output}{fd.read()}\n\n"
+
+        with open(os.path.join(get_client_root(), 'build', 'requirements-testing.txt'), 'wt') as fw:
+            fw.write(output)
+
+    @staticmethod
+    def write_empty_testing_requirements_file():
+        """Method to merge requirements.txt files into a single file for build purposes. This simplifies build process
+        and also lets the app build with additional dependencies when needed (e.g. test)
+
+        Args:
+            source_files(list): List of relative file paths to requirement.txt files
+
+        Returns:
+
+        """
+        build_dir = os.path.join(get_client_root(), 'build')
+        if os.path.exists(build_dir) is False:
+            os.makedirs(build_dir)
+
+        with open(os.path.join(get_client_root(), 'build', 'requirements-testing.txt'), 'wt') as fw:
+            fw.write("")
+
     def prune_container(self, container_name: str) -> None:
         """Remove a docker container by name
 
