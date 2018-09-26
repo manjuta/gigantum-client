@@ -35,17 +35,17 @@ class PackageLatestVersionLoader(DataLoader):
 
     The key for this object is  manager&package
     """
-    def __init__(self, keys: List[str], labbook: LabBook, username: str):
+    def __init__(self, keys: List[str], labbook: LabBook, username: str) -> None:
         DataLoader.__init__(self)
         self.keys = keys
-        self.latest_versions = dict()
+        self.latest_versions: dict = dict()
         self.labbook = labbook
         self.username = username
 
     def populate_latest_versions(self):
-        conda3_pkgs = list()
-        conda2_pkgs = list()
-        normal_pkgs = list()
+        conda3_pkgs: list = list()
+        conda2_pkgs: list = list()
+        normal_pkgs: list = list()
         for key in self.keys:
             # Repack key data
             manager, package = key.split('&')
@@ -116,10 +116,10 @@ class PackageValidator(DataLoader):
 
     The key for this object is  manager&package
     """
-    def __init__(self, keys: List[str], labbook: LabBook, username: str):
+    def __init__(self, keys: List[str], labbook: LabBook, username: str) -> None:
         DataLoader.__init__(self)
         self.keys = keys
-        self.latest_versions = dict()
+        self.latest_versions: dict = dict()
         self.labbook = labbook
         self.username = username
 

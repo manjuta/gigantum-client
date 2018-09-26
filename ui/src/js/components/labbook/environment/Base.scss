@@ -1,0 +1,70 @@
+@import '~Styles/_imports.scss';
+
+.Base *{
+  font-weight: 100;
+}
+
+.Base__header{
+  color: $romanSilver;
+}
+
+.Base__card{
+  padding: 30px;
+
+  color: $romanSilver;
+
+  @include flex(space-between, row);
+}
+
+.Base__image{
+  min-width: 70px;
+  margin: 0 10px 0 0;
+}
+
+
+.Base__imageContainer{
+  width: 250px;
+  margin: 0 20px 0 0;
+
+  @include flex(space-between, row);
+}
+
+.Base__paragraph{
+   font-size: 14px;
+   font-weight: 400;
+ }
+
+.Base__name{
+  font-weight: 400;
+}
+
+.Base__title{
+  flex: 1;
+
+  width: 160px;
+}
+
+.Base__cardText{
+  flex: 1;
+
+  p{
+    margin-top: 0px;
+  }
+}
+
+.Base__categories{
+  @include flex(flex-start, row);
+
+  h6{
+    font-size: 16px;
+    font-weight: 400;
+  }
+}
+
+.Base__languages{
+  width: 50%;
+}
+
+.Base__tools{
+  width: 50%;
+}

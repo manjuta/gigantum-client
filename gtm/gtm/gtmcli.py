@@ -86,6 +86,7 @@ def client_actions(args):
                        "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
                        "ENTRYPOINT_FILE": "resources/client/entrypoint.sh"}
 
+        builder.write_empty_testing_requirements_file()
         builder.build_image(show_output=args.verbose, no_cache=args.no_cache,
                             build_args=build_args, docker_args=docker_args)
 
@@ -185,6 +186,8 @@ def demo_actions(args):
                        "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
                        "ENTRYPOINT_FILE": "resources/client/entrypoint.sh"}
 
+        builder.write_empty_testing_requirements_file()
+
         builder.build_image(show_output=args.verbose, no_cache=args.no_cache,
                             build_args=build_args, docker_args=docker_args)
 
@@ -231,7 +234,6 @@ def developer_actions(args):
 
         # Based on developer config, set variables
         config = dc.load_config_file()
-
         build_args = {"build_dir": os.path.join("build", "developer"),
                       "config_override_file": os.path.join("resources", "developer",
                                                            "labmanager-config-override.yaml")}
@@ -248,6 +250,10 @@ def developer_actions(args):
         else:
             build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_frontend.conf")
             docker_args["NGINX_API_CONFIG"] = "resources/client/nginx_api.conf"
+
+        # Setup testing dependencies
+        builder.merge_requirements_files([os.path.join("packages", "gtmapi", "requirements-testing.txt"),
+                                          os.path.join("packages", "gtmcore", "requirements-testing.txt")])
 
         builder.build_image(show_output=args.verbose, no_cache=args.no_cache,
                             build_args=build_args, docker_args=docker_args)

@@ -1,15 +1,26 @@
 version: 2
 jobs:
-  mypy:
+  mypy-gtmcore:
     docker:
       - image: gigantum/circleci-client:3de053aab8-2018-09-20
     working_directory: ~/repo
     steps:
       - checkout
       - run:
-          name: Run mypy type checker
+          name: Run mypy type checker for gtmcore
           command: |
             python3 -m mypy packages/gtmcore --ignore-missing-imports --strict-optional
+
+  mypy-gtmapi:
+    docker:
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Run mypy type checker for gtmapi
+          command: |
+            python3 -m mypy packages/gtmapi --ignore-missing-imports --strict-optional
 
   test-confhttpproxy:
     docker:
@@ -41,10 +52,11 @@ jobs:
       - run:
           name: Run Core unit and coverage tests
           command: |
+            export SKIP_CONDA_TESTS=1
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
             pytest --cov=gtmcore packages/gtmcore
-            codecov
+            codecov -F core
 
   test-gtmapi:
     docker:
@@ -60,14 +72,39 @@ jobs:
           name: Run API unit, integration and coverage tests
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
+            export SKIP_CONDA_TESTS=1
             cd /home/circleci/repo
             redis-server &
             rqscheduler --interval=2 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
-            pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
-            pytest --cov=packages/gtmapi/lmsrvcore --cov-append packages/gtmapi/lmsrvcore
-            pytest --cov=packages/gtmapi/lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
-            codecov
+            pytest --cov=lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
+            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvcore
+            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
+            codecov -F api
+
+  test-long-running-env:
+    docker:
+      - image: gigantum/circleci-client:3de053aab8-2018-09-20
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Set authentication credentials
+          command: bash /home/circleci/repo/.circleci/write_auth.sh
+      - run:
+          name: Run long running conda environment tests
+          command: |
+            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
+            cd /home/circleci/repo
+            redis-server &
+            rqscheduler --interval=2 2> /dev/null &
+            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
+            pytest --cov=lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook/tests/test_dataloader_package.py
+            codecov -F api
+            rm /home/circleci/repo/coverage.xml
+            pytest --cov=gtmcore packages/gtmcore/gtmcore/environment/tests/test_conda.py
+            codecov -F core
 
   test-ui-components:
     docker:
@@ -123,19 +160,25 @@ workflows:
   version: 2
   run_tests:
     jobs:
-      - mypy
+      - mypy-gtmcore
+      - mypy-gtmapi
+      - test-long-running-env
       - test-confhttpproxy:
           requires:
-            - mypy
+            - mypy-gtmcore
+            - mypy-gtmapi
       - test-gtmcore:
           requires:
-            - mypy
+            - mypy-gtmcore
+            - mypy-gtmapi
       - test-gtmapi:
           requires:
-            - mypy
+            - mypy-gtmcore
+            - mypy-gtmapi
       - test-ui-components:
           requires:
-            - mypy
+            - mypy-gtmcore
+            - mypy-gtmapi
       #- fossa:
       #  filters:
       #    branches:

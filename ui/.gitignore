@@ -26,3 +26,5 @@ yarn-debug.log*
 yarn-error.log*
 /node_modules.zip
 /src.zip
+package-lock.json
+yarn.lock

@@ -1,32 +1,33 @@
 // vendor
-import React, { Component } from 'react'
-import {createPaginationContainer, graphql} from 'react-relay'
-//mutations
-import FileBrowserWrapper from 'Components/labbook/fileBrowser/FileBrowserWrapper'
-//store
-import store from 'JS/redux/store'
+import React, { Component } from 'react';
+import { createPaginationContainer, graphql } from 'react-relay';
+// mutations
+import FileBrowserWrapper from 'Components/labbook/fileBrowser/FileBrowserWrapper';
+// store
+import store from 'JS/redux/store';
 
 class InputDataBrowser extends Component {
-  constructor(props){
+  constructor(props) {
   	super(props);
 
-    const {owner, labbookName} = store.getState().routes
+    const { owner, labbookName } = store.getState().routes;
 
     this.state = {
-      'show': false,
-      'message': '',
-      'files': [],
-      'moreLoading': false,
+      show: false,
+      message: '',
+      files: [],
+      moreLoading: false,
       owner,
-      labbookName
-    }
+      labbookName,
+    };
   }
 
   /*
     loads more if branches are switched
   */
-  componentDidUpdate(){
-    if(!this.state.moreLoading && this.props.input.allFiles && this.props.input.allFiles.edges.length < 3 && this.props.input.allFiles.pageInfo.hasNextPage){
+  componentDidUpdate() {
+    this.props.loadStatus(this.state.moreLoading);
+    if (!this.state.moreLoading && this.props.input.allFiles && this.props.input.allFiles.edges.length < 3 && this.props.input.allFiles.pageInfo.hasNextPage) {
       this._loadMore();
     }
   }
@@ -35,11 +36,12 @@ class InputDataBrowser extends Component {
     handle state and addd listeners when component mounts
   */
   componentDidMount() {
-    if(this.props.input.allFiles &&
+    this.props.loadStatus(this.state.moreLoading);
+    if (this.props.input.allFiles &&
       this.props.input.allFiles.pageInfo.hasNextPage) {
-      this._loadMore()
+      this._loadMore();
     } else {
-      this.setState({'moreLoading': false});
+      this.setState({ moreLoading: false });
     }
   }
 
@@ -51,40 +53,38 @@ class InputDataBrowser extends Component {
   */
 
   _loadMore() {
-    //this.setState({'moreLoading': true});
-    let self = this;
+    // this.setState({'moreLoading': true});
+    const self = this;
     this.props.relay.loadMore(
-     100, // Fetch the next 100 feed items
-     (response, error) => {
-       if(error){
-         console.error(error)
-       }
+      100, // Fetch the next 100 feed items
+      (response, error) => {
+        if (error) {
+          console.error(error);
+        }
 
-       if(self.props.input.allFiles &&
+        if (self.props.input.allFiles &&
          self.props.input.allFiles.pageInfo.hasNextPage) {
-
-         self._loadMore()
-       } else {
-        //this.setState({'moreLoading': false});
-      }
-     }
-   );
+          self._loadMore();
+        } else {
+          this.setState({ moreLoading: false });
+        }
+      },
+    );
   }
 
-  render(){
-    this.props.loadStatus(this.state.moreLoading);
-    if(this.props.input && this.props.input.allFiles){
-      let inputFiles = this.props.input.allFiles
-      if(this.props.input.allFiles.edges.length === 0){
+  render() {
+    if (this.props.input && this.props.input.allFiles) {
+      let inputFiles = this.props.input.allFiles;
+      if (this.props.input.allFiles.edges.length === 0) {
         inputFiles = {
           edges: [],
-          pageInfo: this.props.input.allFiles.pageInfo
-        }
+          pageInfo: this.props.input.allFiles.pageInfo,
+        };
       }
 
-      return(
+      return (
         <FileBrowserWrapper
-          ref='inputBrowser'
+          ref="inputBrowser"
           section="input"
           files={inputFiles}
           selectedFiles={this.props.selectedFiles}
@@ -96,10 +96,9 @@ class InputDataBrowser extends Component {
           isLocked={this.props.isLocked}
           {...this.props}
         />
-      )
-    }else{
-      return(<div>No Files Found</div>)
+      );
     }
+    return (<div>No Files Found</div>);
   }
 }
 
@@ -130,12 +129,12 @@ export default createPaginationContainer(
           }
         }
 
-      }`
+      }`,
   },
   {
     direction: 'forward',
     getConnectionFromProps(props) {
-      return props.input && props.input.allFiles
+      return props.input && props.input.allFiles;
     },
     getFragmentVariables(prevVars, totalCount) {
       return {
@@ -143,14 +142,14 @@ export default createPaginationContainer(
         count: totalCount,
       };
     },
-    getVariables(props, {count, cursor}, fragmentVariables) {
-      const {owner, labbookName} = store.getState().routes
+    getVariables(props, { count, cursor }, fragmentVariables) {
+      const { owner, labbookName } = store.getState().routes;
 
       return {
         first: count,
         cursor,
-        owner: owner,
-        name: labbookName
+        owner,
+        name: labbookName,
       };
     },
     query: graphql`
@@ -167,6 +166,6 @@ export default createPaginationContainer(
           }
         }
       }
-    `
-  }
-)
+    `,
+  },
+);
