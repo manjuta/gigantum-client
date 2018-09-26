@@ -302,7 +302,7 @@ module.exports = {
       minimize: true,
       minimizer: [
         new UglifyJsPlugin({
-          sourceMap: true,
+          sourceMap: false,
           uglifyOptions: {
               compress: {
                   unused: false,

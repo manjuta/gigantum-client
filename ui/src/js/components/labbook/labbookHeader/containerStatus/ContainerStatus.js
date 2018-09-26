@@ -14,7 +14,6 @@ import { setContainerStatus, setContainerMenuVisibility } from 'JS/redux/reducer
 import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/redux/reducers/labbook/environment/environment';
 import { setBuildingState, setMergeMode } from 'JS/redux/reducers/labbook/labbook';
 import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
-
 //
 import FetchContainerStatus from './fetchContainerStatus';
 // components
@@ -112,11 +111,6 @@ class ContainerStatus extends Component {
               isBuilding: false,
             });
             this.props.setBuildingState(false);
-          }
-          // throws build failed error
-          // passes error message to footer using redux
-          if (state.imageStatus !== environment.imageStatus && environment.imageStatus === 'BUILD_FAILED') {
-            this.props.setErrorMessage('Project failed to build: Check for and remove invalid dependencies and try again.');
           }
           // only updates state if container or imageStatus has changed
           if ((state.containerStatus !== environment.containerStatus) || (state.imageStatus !== environment.imageStatus)) {
