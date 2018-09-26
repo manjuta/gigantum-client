@@ -15,7 +15,7 @@ class UserConfig(object):
     """Class to manage configuring gtm for a user
     """
     def __init__(self):
-        self.user_config = self.load_config_file()
+        self.user_config = None
 
         self.resources_root = None
         self.compose_file_root = None
@@ -162,6 +162,7 @@ su giguser
             uid = self.prompt_with_default("Desired User ID", os.getuid())
 
         gigantum_client_root = input("Path to the gigantum-client repository: ")
+        gigantum_client_root = os.path.expanduser(gigantum_client_root)
 
         # Save our answers
         answer_fname = CONFIG_FILE
@@ -175,6 +176,7 @@ su giguser
                    'root_dir': gigantum_client_root,
                    'uid':         uid}
         self.save_config_file(answers)
+        self.user_config = self.load_config_file()
 
         self.gigantum_client_root = gigantum_client_root
         self.resources_root = os.path.join(gigantum_client_root, 'resources')
