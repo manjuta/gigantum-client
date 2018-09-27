@@ -7,7 +7,7 @@ open source project.
 
 Please note that Gigantum is still in a beta period and the core team continues
 to make significant changes to the codebase. Please [submit an
-issue](https://github.com/gigantum/gtm/issues) prior to developing an intended
+issue](https://github.com/gigantum/gigantum-client/issues) prior to developing an intended
 contribution so the Gigantum team can help make it easier to accept your work!
 
 As with Docker and the Linux kernel, Gigantum uses the [Developer Certificate
