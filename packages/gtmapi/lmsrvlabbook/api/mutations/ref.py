@@ -63,7 +63,7 @@ class CreateBranch(graphene.relay.ClientIDMutation):
 
         # Create Branch
         # TODO - Query if is locked and then fail fast
-        with labbook_obj.lock_labbook:
+        with labbook_obj.lock_labbook():
             labbook_obj.checkout_branch(branch_name, new=True)
 
         if labbook_obj.active_branch != branch_name:
@@ -105,6 +105,6 @@ class CheckoutBranch(graphene.relay.ClientIDMutation):
         labbook_obj.from_name(username, owner, labbook_name)
 
         # Checkout
-        with labbook_obj.lock_labbook:
+        with labbook_obj.lock_labbook():
             labbook_obj.checkout_branch(branch_name)
         return CheckoutBranch(labbook=Labbook(owner=owner, name=labbook_name))

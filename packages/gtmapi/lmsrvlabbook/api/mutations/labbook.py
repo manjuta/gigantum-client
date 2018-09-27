@@ -385,7 +385,7 @@ class AddLabbookRemote(graphene.relay.ClientIDMutation):
         logger.info(f"Adding labbook remote {remote_name} {remote_url}")
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
-        with lb.lock_labbook:
+        with lb.lock_labbook():
             lb.add_remote(remote_name, remote_url)
         return AddLabbookRemote(success=True)
 

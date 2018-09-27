@@ -147,7 +147,7 @@ class LabBook(object):
         return __validator
 
     @contextmanager
-    def lock_labbook(self, lock_key: Optional[str] = None):
+    def lock_labbook(self, lock_key: Optional[str] = None, blocking: bool = False):
         """A context manager for locking labbook operations that is decorator compatible
 
         Manages the lock process along with catching and logging exceptions that may occur
@@ -177,13 +177,13 @@ class LabBook(object):
                                    strict=config['redis']['strict'])
 
             # Get the lock
-            if lock.acquire(timeout=config['timeout']):
+            if lock.acquire(timeout=config['timeout'], blocking=blocking):
                 # Do the work
                 start_time = time.time()
                 yield
                 if config['expire']:
                     if (time.time() - start_time) > config['expire']:
-                        logger.warning(
+                        logger.error(
                             f"LabBook task took more than {config['expire']}s. File locking possibly invalid.")
             else:
                 raise IOError(f"Could not acquire LabBook lock within {config['timeout']} seconds.")
