@@ -62,7 +62,9 @@ class CreateBranch(graphene.relay.ClientIDMutation):
         labbook_obj.from_name(username, owner, labbook_name)
 
         # Create Branch
-        labbook_obj.checkout_branch(branch_name, new=True)
+        # TODO - Query if is locked and then fail fast
+        with labbook_obj.lock_labbook:
+            labbook_obj.checkout_branch(branch_name, new=True)
 
         if labbook_obj.active_branch != branch_name:
             raise ValueError(f"Create branch failed, could not switch to new branch {branch_name}")
@@ -103,5 +105,6 @@ class CheckoutBranch(graphene.relay.ClientIDMutation):
         labbook_obj.from_name(username, owner, labbook_name)
 
         # Checkout
-        labbook_obj.checkout_branch(branch_name)
+        with labbook_obj.lock_labbook:
+            labbook_obj.checkout_branch(branch_name)
         return CheckoutBranch(labbook=Labbook(owner=owner, name=labbook_name))

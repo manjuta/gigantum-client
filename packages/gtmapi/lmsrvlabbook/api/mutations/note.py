@@ -49,6 +49,24 @@ class CreateUserNote(graphene.relay.ClientIDMutation):
     new_activity_record_edge = graphene.Field(lambda: ActivityConnection.Edge)
 
     @classmethod
+    def _create_user_note(cls, lb, title, body, tags):
+        store = ActivityStore(lb)
+        adr = ActivityDetailRecord(ActivityDetailType.NOTE,
+                                   show=True,
+                                   importance=255)
+        if body:
+            adr.add_value('text/markdown', body)
+
+        ar = ActivityRecord(ActivityType.NOTE,
+                            message=title,
+                            linked_commit="no-linked-commit",
+                            importance=255,
+                            tags=tags)
+        ar.add_detail_object(adr)
+        ar = store.create_activity_record(ar)
+        return ar
+
+    @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, title, body=None, tags=None,
                                client_mutation_id=None):
         username = get_logged_in_username()
@@ -57,26 +75,11 @@ class CreateUserNote(graphene.relay.ClientIDMutation):
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
 
-        # Create a Activity Store instance
-        store = ActivityStore(lb)
+        with lb.lock_labbook():
+            ar = cls._create_user_note(lb, title, body, tags)
 
-        # Create detail record
-        adr = ActivityDetailRecord(ActivityDetailType.NOTE,
-                                   show=True,
-                                   importance=255)
-        if body:
-            adr.add_value('text/markdown', body)
-
-        # Create activity record
-        ar = ActivityRecord(ActivityType.NOTE,
-                            message=title,
-                            linked_commit="no-linked-commit",
-                            importance=255,
-                            tags=tags)
-        ar.add_detail_object(adr)
-        ar = store.create_activity_record(ar)
-
-        return CreateUserNote(new_activity_record_edge=ActivityConnection.Edge(node=ActivityRecordObject(owner=owner,
-                                                                                                         name=labbook_name,
-                                                                                                         commit=ar.commit),
-                                                                               cursor=ar.commit))
+        return CreateUserNote(new_activity_record_edge=ActivityConnection.Edge(
+            node=ActivityRecordObject(owner=owner,
+                                      name=labbook_name,
+                                      commit=ar.commit),
+            cursor=ar.commit))

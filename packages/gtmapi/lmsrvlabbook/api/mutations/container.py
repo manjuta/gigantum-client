@@ -45,12 +45,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     path = graphene.String()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, dev_tool,
-                               container_override_id=None, client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-
+    def _start_dev_tool(cls, lb, username, dev_tool, container_override_id):
         lb_ip = ContainerOperations.get_labbook_ip(lb, username)
         lb_port = 8888
         lb_endpoint = f'http://{lb_ip}:{lb_port}'
@@ -85,5 +80,18 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             path = suffix
         else:
             path = f':{apparent_proxy_port}{suffix}'
+
+        return path
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, dev_tool,
+                               container_override_id=None, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = LabBook(author=get_logged_in_author())
+        lb.from_name(username, owner, labbook_name)
+
+        # TODO - Fail fast if already locked
+        with lb.lock_labbook():
+            path = cls._start_dev_tool(lb, username, container_override_id)
 
         return StartDevTool(path=path)

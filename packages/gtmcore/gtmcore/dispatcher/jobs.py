@@ -55,9 +55,10 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
 
-        wf = GitWorkflow(labbook)
-        wf.publish(username=username, access_token=access_token, remote=remote or "origin",
-                   public=public)
+        with labbook.lock_labbook:
+            wf = GitWorkflow(labbook)
+            wf.publish(username=username, access_token=access_token, remote=remote or "origin",
+                       public=public)
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_labbook: {e}")
         raise
@@ -73,9 +74,10 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
 
-        wf = GitWorkflow(labbook)
-        cnt = wf.sync(username=username, remote=remote, force=force)
-        return cnt
+        with labbook.lock_labbook:
+            wf = GitWorkflow(labbook)
+            cnt = wf.sync(username=username, remote=remote, force=force)
+            return cnt
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_labbook: {e}")
         raise
