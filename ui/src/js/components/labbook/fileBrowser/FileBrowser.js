@@ -3,21 +3,26 @@ import React, { Component } from 'react';
 // assets
 import './FileBrowser.scss';
 // components
-import File from './File';
-import Folder from './Folder';
+import File from './fileRow/File';
+import Folder from './fileRow/Folder';
 
 export default class FileBrowser extends Component {
-
+    /**
+    *  @param {}
+    *  sorts files into an object for rendering
+    *  @return {}
+    */
     _processFiles() {
-        const files = this.props.files;
+        const edges = this.props.files.edges;
         let collectedFiles = {};
-        this.props.files.forEach((file) => {
-            let splitKey = file.key.split('/', -1).filter(key => key.length);
+
+        edges.forEach((edge) => {
+            let splitKey = edge.node.key.split('/', -1).filter(key => key.length);
             let currentFileObjectPosition = collectedFiles;
             while (splitKey.length > 1) {
-                const currentKey = splitKey[0]
-                if (!currentFileObjectPosition[currentKey]) {
+                const currentKey = splitKey[0];
 
+                if (!currentFileObjectPosition[currentKey]) {
                     currentFileObjectPosition[currentKey] = { children: {} };
                 }
                 currentFileObjectPosition = currentFileObjectPosition[currentKey].children;
@@ -25,28 +30,20 @@ export default class FileBrowser extends Component {
             }
             if (splitKey.length === 1) {
                 if (currentFileObjectPosition[splitKey[0]]) {
-                    currentFileObjectPosition[splitKey[0]].data = file;
+                    currentFileObjectPosition[splitKey[0]].data = edge.node;
                 } else {
-                    currentFileObjectPosition[splitKey[0]] = { data: file };
+                    currentFileObjectPosition[splitKey[0]] = { data: edge.node };
                 }
-                if (file.isDir) {
+                if (edge.node.isDir) {
                     currentFileObjectPosition[splitKey[0]].children = {};
                 }
             }
         });
         return collectedFiles;
-    }
-    _renderJSX(files) {
-        return Object.keys(files).map((file) => {
-            if (files[file].children) {
-                return (<Folder data={files[file]}></Folder>);
-            }
-            return (<File data={files[file]}></File>);
-        })
-    }
+  }
   render() {
-    const files = this._processFiles()
-    console.log(files)
+    const files = this._processFiles();
+
     return (
         <div className="FileBrowser">
                 <div className="FileBrowser__header">

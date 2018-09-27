@@ -47,9 +47,8 @@ export default class Folder extends Component {
                         className={buttonCSS}
                         onClick={(evt) => {
                             evt.stopPropagation();
-                            this.setState({ isSelected: !this.state.isSelected })
-
-                            }
+                            this.setState({ isSelected: !this.state.isSelected });
+                          }
                         }
                     >
                     </button>
