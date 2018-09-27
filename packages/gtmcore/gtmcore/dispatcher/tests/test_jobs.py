@@ -192,7 +192,7 @@ class TestJobs(object):
             try:
                 exported_archive_path = jobs.export_labbook_as_zip("/tmp", export_dir)
                 assert False, "Exporting /tmp should fail"
-            except Exception as e:
+            except ValueError as e:
                 pass
 
             # Export the labbook, then remove before re-importing
@@ -202,14 +202,14 @@ class TestJobs(object):
                 imported_lb_path = jobs.import_labboook_from_zip(archive_path=exported_archive_path, username="test",
                                                                  owner="test", config_file=mock_config_with_repo[0])
                 assert False, f"Should not be able to import LabBook because it already exited at {lb_root}"
-            except Exception as e:
+            except ValueError as e:
                 pass
 
             try:
                 imported_lb_path = jobs.import_labboook_from_zip(archive_path="/t", username="test",
                                                                  owner="test", config_file=mock_config_with_repo[0])
                 assert False, f"Should not be able to import LabBook from strange directory /t"
-            except Exception as e:
+            except ValueError as e:
                 pass
 
             shutil.rmtree(lb.root_dir)

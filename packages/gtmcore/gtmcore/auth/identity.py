@@ -31,7 +31,6 @@ from gtmcore.logging import LMLogger
 from gtmcore.auth import User
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.gitlib.gitlab import check_and_add_user
-from gtmcore.workflows import ZipExporter
 
 
 logger = LMLogger.get_logger()
@@ -109,10 +108,11 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 logger.info(f"Importing Demo LabBook for first-time user: {username}")
 
                 assumed_lb_name = demo_labbook_name.replace('.lbk', '')
-                ZipExporter.import_zip(archive_path=os.path.join('/opt', demo_labbook_name),
-                                       username=username,
-                                       owner=username,
-                                       base_filename=assumed_lb_name)
+                jobs.import_labboook_from_zip(archive_path=os.path.join('/opt', demo_labbook_name),
+                                              username=username,
+                                              owner=username,
+                                              base_filename=assumed_lb_name,
+                                              remove_source=False)
 
                 inferred_lb_directory = os.path.join(working_directory, username, username, 'labbooks',
                                                      assumed_lb_name)

@@ -2,7 +2,6 @@ FROM ubuntu:18.04
 LABEL maintainer="Gigantum <support@gigantum.com>"
 
 # Copy requirements.txt files
-COPY resources/awful-intersections-demo.lbk /opt/awful-intersections-demo.lbk
 COPY packages/gtmcore/requirements.txt /opt/gtmcore/requirements.txt
 COPY packages/gtmcore/requirements-testing.txt /opt/gtmcore/requirements-testing.txt
 COPY packages/gtmapi/requirements.txt /opt/gtmapi/requirements.txt
@@ -42,8 +41,7 @@ RUN curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/f
 # Set up working dir, required for import mocks
 RUN mkdir -p /mnt/gigantum && chown -R circleci:circleci /mnt/gigantum && \
     mkdir /home/circleci/gigantum && chown -R circleci:circleci /home/circleci/gigantum && \
-    mkdir /mnt/share && chown -R circleci:circleci /mnt/share && \
-    mkdir /opt/redis && chown -R circleci:circleci /opt/redis
+    mkdir /mnt/share && chown -R circleci:circleci /mnt/share
 
 # Finish setting up user
 USER circleci

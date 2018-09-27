@@ -18,6 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from gtmcore.workflows.workflows import GitWorkflow, ZipExporter
+from gtmcore.workflows.workflows import GitWorkflow
 from gtmcore.workflows.core import WorkflowsException, sync_locally, MergeError, GitLabRemoteError
 from gtmcore.workflows.branching import BranchManager, BranchException, BranchWorkflowViolation, InvalidBranchName

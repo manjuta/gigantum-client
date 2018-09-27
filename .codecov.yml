@@ -10,20 +10,16 @@ coverage:
   status:
     project:
       core:
-        threshold: 1
         paths:
         - packages/gtmcore/*
       api:
-        threshold: 1
         paths:
         - packages/gtmapi/*
     patch:
       core:
-        threshold: 6
         paths:
         - packages/gtmcore/*
       api:
-        threshold: 3
         paths:
         - packages/gtmapi/*
     changes: no
