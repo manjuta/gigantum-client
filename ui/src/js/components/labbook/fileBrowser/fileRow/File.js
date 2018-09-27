@@ -15,14 +15,20 @@ export default class File extends Component {
         super(props);
         this.state = {
             isSelected: props.isSelected || false,
+            stateSwitch: false,
         };
+        this._setSelected = this._setSelected.bind(this)
     }
 
-    static getDerivedStateFromProps(nextProps, nextState) {
-        return {
-            ...nextState,
-            isSelected: nextProps.isSelected === undefined ? nextState.isSelected : nextProps.isSelected,
-        };
+    _setSelected(isSelected) {
+        this.setState({ isSelected }, () => {
+            Object.keys(this.refs).forEach((ref) => {
+                this.refs[ref]._setSelected();
+            });
+            if (this.props.checkParent) {
+                this.props.checkParent();
+            }
+        });
     }
 
   render() {
@@ -38,21 +44,21 @@ export default class File extends Component {
             <div className="File__row">
                 <button
                     className={buttonCSS}
-                    onClick={() => this.setState({ isSelected: !this.state.isSelected })}
+                    onClick={() => this._setSelected(!this.state.isSelected)}
                 >
                 </button>
                 <div
                     className={`File__icon ${fileIconsJs.getClass(fileName)}`}
                 >
                 </div>
-                <div>
+                <div className="File__name">
                     {fileName}
                 </div>
-                <div>
+                <div className="File__size">
                     {config.humanFileSize(fileInfo.size)}
                 </div>
-                <div>
-                    {Moment((fileInfo.modified * 1000), 'x').fromNow()}
+                <div className="File__date">
+                    {Moment((fileInfo.modifiedAt * 1000), 'x').fromNow()}
                 </div>
                 <ActionsMenu>
                 </ActionsMenu>

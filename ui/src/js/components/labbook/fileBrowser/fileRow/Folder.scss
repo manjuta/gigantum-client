@@ -13,22 +13,26 @@
     }
     position: relative;
 
-
-    & div:nth-child(2) {
-        margin-right: 5px;
-    }
-    & div:nth-child(4) {
-        position: absolute;
-        left: 30%;
-    }
-    & div:nth-child(5) {
-        position: absolute;
-        left: 55%;
-    }
     &:hover {
         background-color: $background-color;
     }
 }
+
+
+.Folder__icon{
+    margin-right: 5px
+}
+
+.Folder__size{
+    position: absolute;
+    right: 400px;
+}
+
+.Folder__date{
+    position: absolute;
+    right: 200px;
+}
+
 
 .Folder__btn{
     left: 0;
@@ -46,6 +50,12 @@
         border: none;
     }
 
+    &:focus {
+        background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
     &--selected {
         background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
@@ -54,6 +64,30 @@
 
     &--selected:hover {
         background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--selected:focus {
+        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--incomplete {
+        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--incomplete:hover {
+        background: url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--incomplete:focus {
+        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: none;
     }
