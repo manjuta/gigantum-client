@@ -5,30 +5,22 @@ version: 1
 cli:
   server: https://app.fossa.io
   fetcher: custom
-  project: github.com/gigantum/gigantum-client
+  project: Gigantum Client
+
 analyze:
   modules:
   - name: lab-manager-ui
     type: npm
-    target: ui
-    path: ui
-  - name: react-keyed-file-browser
-    type: npm
-    target: ui/submodules/react-keyed-file-browser/FileBrowser
-    path: ui/submodules/react-keyed-file-browser/FileBrowser
+    path: ./ui/
   - name: confhttpproxy
     type: pip
-    target: packages/confhttpproxy
-    path: packages/confhttpproxy
+    path: ./packages/confhttpproxy/
   - name: gtmapi
     type: pip
-    target: packages/gtmapi
-    path: packages/gtmapi
+    path: ./packages/gtmapi/
   - name: gtmcore
     type: pip
-    target: packages/gtmcore
-    path: packages/gtmcore
+    path: ./packages/gtmcore/
   - name: gtm
     type: pip
-    target: gtm
-    path: gtm
+    path: ./gtm/

@@ -1,8 +1,8 @@
-# gigantum-client
+# Gigantum Client
 
-[![CircleCI](https://circleci.com/gh/gigantum/gigantum-client/tree/master.svg?style=svg)](https://circleci.com/gh/gigantum/gigantum-client/tree/master)  [![codecov](https://codecov.io/gh/gigantum/gigantum-client/branch/master/graph/badge.svg?token=1k6CENUN8G)](https://codecov.io/gh/gigantum/gigantum-client)
+[![CircleCI](https://circleci.com/gh/gigantum/gigantum-client/tree/master.svg?style=svg)](https://circleci.com/gh/gigantum/gigantum-client/tree/master)  [![codecov](https://codecov.io/gh/gigantum/gigantum-client/branch/master/graph/badge.svg?token=1k6CENUN8G)](https://codecov.io/gh/gigantum/gigantum-client) [![FOSSA Status](https://app.fossa.io/api/projects/custom%2B6007%2FGigantum%20Client.svg?type=small)](https://app.fossa.io/projects/custom%2B6007%2FGigantum%20Client?ref=badge_small)
 
-Monorepo containing the source and build tooling for Gigantum Client
+Monorepo containing the source and build tooling for the Gigantum Client
 
 
 ## Overview
@@ -152,4 +152,4 @@ the `gigantum-client` repo into it. While running, `gtm dev attach` will drop yo
 
 The Gigantum Client is released under an [MIT license](LICENSE)
 
-TODO: Add license info and large fossa badge
+[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B6007%2FGigantum%20Client.svg?type=large)](https://app.fossa.io/projects/custom%2B6007%2FGigantum%20Client?ref=badge_large)

@@ -131,30 +131,30 @@ jobs:
             cd /home/circleci/repo/ui
             jest dashboard -u --ci
 
-  #fossa:
-  #  docker:
-  #    - image: gigantum/circleci-client:b484b23e01-2018-09-26
-  #  working_directory: ~/repo
-  #  steps:
-  #    - checkout
-  #    - run:
-  #        name: Initialize submodules
-  #        command: |
-  #          git submodule update --init --recursive
-  #    - run:
-  #        name: Build frontend production code
-  #        command: |
-  #          cd /home/circleci/repo/ui
-  #          npm install
-  #          npm install relay
-  #          npm run relay
-  #          unset CI && npm run build
-  #    - run:
-  #        name: Run Fossa
-  #        command: |
-  #          cd /home/circleci/repo/
-  #          fossa analyze
-  #          fossa test
+  fossa:
+    docker:
+      - image: gigantum/circleci-client:b484b23e01-2018-09-26
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Initialize submodules
+          command: |
+            git submodule update --init --recursive
+      - run:
+          name: Build frontend production code
+          command: |
+            cd /home/circleci/repo/ui
+            npm install
+            npm install relay
+      - run:
+          name: Run Fossa
+          command: fossa
+          working_directory: /home/circleci/repo/
+      - run:
+          name: Enforce Fossa checks
+          command: fossa test
+          working_directory: /home/circleci/repo/
 
 workflows:
   version: 2
@@ -179,9 +179,11 @@ workflows:
           requires:
             - mypy-gtmcore
             - mypy-gtmapi
-      #- fossa:
-      #  filters:
-      #    branches:
-      #      only:
-      #        - master
-      #        - integration
+      - fossa:
+          requires:
+            - test-confhttpproxy
+        #filters:
+        #  branches:
+        #    only:
+        #      - master
+        #      - integration
