@@ -80,6 +80,12 @@ export default class Folder extends Component {
             'Folder__btn--selected': this.state.isSelected,
             'Folder__btn--incomplete': this.state.isIncomplete,
         });
+
+        const folderChildCSS = classNames({
+            Folder__child: true,
+            hidden: !this.state.expanded,
+        });
+
         const splitKey = folderInfo.key.split('/');
         const folderName = splitKey[splitKey.length - 2];
 
@@ -108,42 +114,40 @@ export default class Folder extends Component {
                     <ActionsMenu>
                     </ActionsMenu>
                 </div>
-                { this.state.expanded &&
-                    <div className="Folder__child">
-                        <div
-                            className="Folder__subfolder"
-                        >
-                            Add Subfolder
-                        </div>
-                        {
-                            Object.keys(children).map((childFile) => {
-                                if (children[childFile].children) {
-                                    return (
-                                        <Folder
-                                            ref={children[childFile].data.key}
-                                            data={children[childFile]}
-                                            key={children[childFile].data.key}
-                                            isSelected={this.state.isSelected}
-                                            setIncomplete={this._setIncomplete}
-                                            checkParent={this._checkParent}
-                                        >
-                                        </Folder>
-                                    );
-                                }
+                <div className={folderChildCSS}>
+                    <div
+                        className="Folder__subfolder"
+                    >
+                        Add Subfolder
+                    </div>
+                    {
+                        Object.keys(children).map((childFile) => {
+                            if (children[childFile].children) {
                                 return (
-                                    <File
+                                    <Folder
                                         ref={children[childFile].data.key}
                                         data={children[childFile]}
                                         key={children[childFile].data.key}
                                         isSelected={this.state.isSelected}
+                                        setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}
                                     >
-                                    </File>
+                                    </Folder>
                                 );
-                            })
-                        }
-                    </div>
-                }
+                            }
+                            return (
+                                <File
+                                    ref={children[childFile].data.key}
+                                    data={children[childFile]}
+                                    key={children[childFile].data.key}
+                                    isSelected={this.state.isSelected}
+                                    checkParent={this._checkParent}
+                                >
+                                </File>
+                            );
+                        })
+                    }
+                </div>
 
             </div>
         );
