@@ -1,5 +1,66 @@
 @import '~Styles/_imports.scss';
 
 .File__row{
-    @include flex(space-between, row);
+    @include flex(flex-start, row);
+    height: 50px;
+    padding: 12px 0;
+    border-bottom: 1px solid $romanSilver;
+    padding-left: 5%;
+    position: relative;
+    & div:nth-child(2) {
+        margin-right: 5px
+    }
+    & div:nth-child(4) {
+        position: absolute;
+        left: 30%;
+    }
+    & div:nth-child(5) {
+        position: absolute;
+        left: 55%;
+    }
+}
+
+.File__btn{
+    left: 0;
+    position: absolute;
+    background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+    border: none;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background-size: 26px !important;
+
+    &:hover {
+        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &:focus {
+        background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--selected {
+        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--selected:hover {
+        background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+    &--selected:focus {
+        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+}
+
+.File__icon{
+    // margin-left: 70px;
+    align-self: center;
 }

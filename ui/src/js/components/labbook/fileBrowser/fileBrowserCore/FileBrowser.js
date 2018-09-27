@@ -49,19 +49,19 @@ export default class FileBrowser extends Component {
     console.log(files)
     return (
         <div className="FileBrowser">
-            <div className="FileBrowser__header">
-                <div>
-                    File
-                </div>
+                <div className="FileBrowser__header">
+                    <div>
+                        File
+                    </div>
 
-                <div>
-                    Size
-                </div>
+                    <div>
+                        Size
+                    </div>
 
-                <div>
-                    Modified
+                    <div>
+                        Modified
+                    </div>
                 </div>
-            </div>
             <div className="FileBrowser__body">
                 {
                     Object.keys(files).map((file) => {

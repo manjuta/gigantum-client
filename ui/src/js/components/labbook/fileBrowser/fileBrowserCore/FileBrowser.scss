@@ -2,9 +2,30 @@
 
 .FileBrowser{
     width: 100%;
-    height: 400px;
-    overflow-x: auto;
+    padding: 20px;
+    position: relative;
 }
 .FileBrowser__header{
-    @include flex(space-around, row);
+    @include flex(flex-start, row);
+    position: relative;
+    border-bottom: 2px solid $romanSilver;
+    height: 50px;
+    padding: 12px 0;
+
+    & div:first-child {
+        padding-left: 5%
+    }
+    & div:nth-child(2) {
+        position: absolute;
+        left: 30%;
+    }
+    & div:nth-child(3) {
+        position: absolute;
+        left: 55%;
+    }
+}
+
+.FileBrowser__body{
+    max-height: 400px;
+    overflow-x: auto;
 }

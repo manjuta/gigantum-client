@@ -1,9 +1,71 @@
 @import '~Styles/_imports.scss';
 
 .Folder__row{
-    @include flex(space-between, row);
+    @include flex(flex-start, row);
+    height: 50px;
+    padding: 12px 0;
+    border-bottom: 1px solid $romanSilver;
+    padding-left: 5%;
+    cursor: pointer;
+
+    &--expanded{
+        border-bottom: none;
+    }
+    position: relative;
+
+
+    & div:nth-child(2) {
+        margin-right: 5px;
+    }
+    & div:nth-child(4) {
+        position: absolute;
+        left: 30%;
+    }
+    & div:nth-child(5) {
+        position: absolute;
+        left: 55%;
+    }
+    &:hover {
+        background-color: $background-color;
+    }
+}
+
+.Folder__btn{
+    left: 0;
+    position: absolute;
+    background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+    border: none;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background-size: 26px !important;
+
+    &:hover {
+        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--selected {
+        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--selected:hover {
+        background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
 }
 
 .Folder__child{
     margin-left: 20px;
+}
+
+.Folder__subfolder{
+    height: 50px;
+    padding: 12px 0;
+    background: $background-color;
+    text-align: left;
 }
