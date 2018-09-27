@@ -176,8 +176,14 @@ class LabBook(object):
                                    auto_renewal=config['auto_renewal'],
                                    strict=config['redis']['strict'])
 
-            # Get the lock
-            if lock.acquire(timeout=config['timeout'], blocking=blocking):
+            # Get the lock - blocking and timeout kw args can not
+            # be used simultaneously
+            if blocking:
+                lock_kwargs = {'blocking': blocking}
+            else:
+                lock_kwargs = {'timeout': config['timeout']}
+
+            if lock.acquire(**lock_kwargs):
                 # Do the work
                 start_time = time.time()
                 yield
