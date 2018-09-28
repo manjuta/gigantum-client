@@ -82,7 +82,7 @@ class AddPackageComponents(graphene.relay.ClientIDMutation):
         lb.from_name(username, owner, labbook_name)
 
         with lb.lock_labbook():
-            cls._add_package_components(lb, packages)
+            new_edges = cls._add_package_components(lb, packages)
 
         return AddPackageComponents(new_package_component_edges=new_edges)
 
@@ -147,8 +147,7 @@ class RemoveCustomDocker(graphene.relay.ClientIDMutation):
         lb.from_name(username, owner, labbook_name)
         # TODO - Should we cehck if a custom docker component already exists?
         with lb.lock_labbook():
-            cm = ComponentManager(lb)
-            cm.remove_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME)
+
         return RemoveCustomDocker(updated_environment=Environment(owner=owner, name=labbook_name))
 
 
