@@ -3,7 +3,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const InterpolateHtmlPlugin = require('@nenado/interpolate-html-plugin');
+const InterpolateHtmlPlugin = require('./plugins/InterpolateHtmlPlugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
@@ -89,7 +89,7 @@ module.exports = {
     // There are also additional JS chunk files if you use code splitting.
     chunkFilename: 'static/js/[name].chunk.js',
     // This is the URL that app is served from. We use "/" in development.
-    publicPath: publicPath,
+    publicPath,
     // Point sourcemap entries to original disk location
     devtoolModuleFilenameTemplate: info =>
       path.resolve(info.absoluteResourcePath),
@@ -267,6 +267,7 @@ module.exports = {
     //          return context && context.indexOf('node_modules') >= 0;
     //      },
     //  }),
+    // Generates an `index.html` file with the <script> injected.
 
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
@@ -274,15 +275,13 @@ module.exports = {
     // In development, this will be an empty string.
 
     // Generates an `index.html` file with the <script> injected.
-    new webpack.LoaderOptionsPlugin({ options: {} }),
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
     }),
-    // new ScriptExtHtmlWebpackPlugin({
-    //   defaultAttribute: 'async'
-    // }),
     new InterpolateHtmlPlugin(env.raw),
+
+    new webpack.LoaderOptionsPlugin({ options: {} }),
     //removed webpack4
     // new InterpolateHtmlPlugin(env.raw),
 

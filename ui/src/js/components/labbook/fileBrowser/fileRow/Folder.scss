@@ -1,17 +1,21 @@
 @import '~Styles/_imports.scss';
 
 .Folder__row{
-    @include flex(flex-start, row);
+    position: relative;
+
     height: 50px;
     padding: 12px 0;
-    border-bottom: 1px solid $romanSilver;
     padding-left: 5%;
+
     cursor: pointer;
+
+    border-bottom: 1px solid $romanSilver;
+
+    @include flex(flex-start, row);
 
     &--expanded{
         border-bottom: none;
     }
-    position: relative;
 
     &:hover {
         background-color: $background-color;
@@ -35,19 +39,21 @@
 
 
 .Folder__btn{
-    left: 0;
     position: absolute;
-    background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
-    border: none;
+    left: 0;
+
     width: 20px;
     height: 20px;
     padding: 0;
+
+    border: none;
+    background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
     background-size: 26px !important;
 
     &:hover {
+        border: none;
         background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
-        border: none;
     }
 
     &:focus {
@@ -57,15 +63,15 @@
     }
 
     &--selected {
+        border: none;
         background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
-        border: none;
     }
 
     &--selected:hover {
+        border: none;
         background: url('~Images/icons/check-unselected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
-        border: none;
     }
 
     &--selected:focus {
@@ -100,6 +106,8 @@
 .Folder__subfolder{
     height: 50px;
     padding: 12px 0;
-    background: $background-color;
+
     text-align: left;
+
+    background: $background-color;
 }

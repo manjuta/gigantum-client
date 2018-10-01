@@ -14,6 +14,7 @@ export default class FileBrowser extends Component {
     */
     _processFiles() {
         const edges = this.props.files.edges;
+
         let collectedFiles = {};
 
         edges.forEach((edge) => {
@@ -39,11 +40,12 @@ export default class FileBrowser extends Component {
                 }
             }
         });
+        console.log(collectedFiles)
         return collectedFiles;
   }
   render() {
     const files = this._processFiles();
-
+    console.log(files)
     return (
         <div className="FileBrowser">
                 <div className="FileBrowser__header">
