@@ -1,5 +1,6 @@
 // vendor
 import React, { Component } from 'react';
+import store from 'JS/redux/store'
 // assets
 import './FileBrowser.scss';
 // components
@@ -31,21 +32,48 @@ export default class FileBrowser extends Component {
             }
             if (splitKey.length === 1) {
                 if (currentFileObjectPosition[splitKey[0]]) {
-                    currentFileObjectPosition[splitKey[0]].data = edge.node;
+                    currentFileObjectPosition[splitKey[0]].edge = edge;
                 } else {
-                    currentFileObjectPosition[splitKey[0]] = { data: edge.node };
+                    currentFileObjectPosition[splitKey[0]] = { edge };
                 }
                 if (edge.node.isDir) {
                     currentFileObjectPosition[splitKey[0]].children = {};
                 }
             }
         });
-        console.log(collectedFiles)
+        console.log(collectedFiles);
         return collectedFiles;
   }
+  /**
+  *  @param {}
+  *  sorts files into an object for rendering
+  *  @return {object}
+  */
+  _getMutationData() {
+
+    const {
+      parentId,
+      connection,
+      favoriteConnection,
+      section,
+    } = this.props
+    const { owner, labbookName } = store.getState().routes;
+
+    return {
+      owner,
+      labbookName,
+      parentId,
+      connection,
+      favoriteConnection,
+      section,
+    }
+  }
+
   render() {
     const files = this._processFiles();
-    console.log(files)
+
+    const mutationData = this._getMutationData();
+    console.log(mutationData)
     return (
         <div className="FileBrowser">
                 <div className="FileBrowser__header">
@@ -67,16 +95,18 @@ export default class FileBrowser extends Component {
                         if (files[file].children) {
                             return (
                                 <Folder
+                                    mutationData={mutationData}
                                     data={files[file]}
-                                    key={files[file].data.key}
+                                    key={files[file].edge.node.key}
                                 >
                                 </Folder>
                             );
                         }
                         return (
                             <File
+                                mutationData={mutationData}
                                 data={files[file]}
-                                key={files[file].data.key}
+                                key={files[file].edge.node.key}
                             >
                             </File>
                         );

@@ -29,8 +29,15 @@ export default class Folder extends Component {
     */
     _setSelected(isSelected) {
         this.setState({ isSelected, isIncomplete: false }, () => {
+            console.log(this.refs)
             Object.keys(this.refs).forEach((ref) => {
-                this.refs[ref]._setSelected(isSelected);
+                  const folder = this.refs[ref];
+
+                  if (folder._setSelected) {
+                    folder._setSelected(isSelected);
+                  } else {
+                    folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected)
+                  }
             });
             if (this.props.checkParent) {
                 this.props.checkParent();
@@ -104,9 +111,17 @@ export default class Folder extends Component {
         }
     }
 
+    _selectClicked(evt) {
+      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
+        this.setState({ expanded: !this.state.expanded })
+      }
+    }
+
     render() {
-        const folderInfo = this.props.data.data;
+        console.log(this.props)
+        const { node } = this.props.data.edge;
         const { children } = this.props.data;
+        const childrenKeys = Object.keys(children);
         const folderRowCSS = classNames({
             Folder__row: true,
             'Folder__row--expanded': this.state.expanded,
@@ -122,63 +137,63 @@ export default class Folder extends Component {
             hidden: !this.state.expanded,
         });
 
-        const splitKey = folderInfo.key.split('/');
+        const splitKey = node.key.split('/');
         const folderName = splitKey[splitKey.length - 2];
 
         return (
             <div className="Folder">
                 <div
                     className={folderRowCSS}
-                    onClick={evt => !evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && this.setState({ expanded: !this.state.expanded }) }
-                >
+                    onClick={evt => this._selectClicked(evt)}>
                     <button
                         className={buttonCSS}
-                        onClick={() => this._setSelected(!this.state.isSelected)}
-                    >
+                        onClick={() => this._setSelected(!this.state.isSelected)}>
                     </button>
-                    <div className="Folder__icon">
+                    <div className="Folder__cell Folder__cell--name">
+                      <div className="Folder__icon">
+                      </div>
+                      <div className="Folder__name">
+                          {folderName}
+                      </div>
                     </div>
-                    <div className="Folder__name">
-                        {folderName}
-                    </div>
-                    <div className="Folder__size">
+                    <div className="Folder__cell Folder__cell--size">
 
                     </div>
-                    <div className="Folder__date">
-                        {Moment((folderInfo.modifiedAt * 1000), 'x').fromNow()}
+                    <div className="Folder__cell Folder__cell--date">
+                        {Moment((node.modifiedAt * 1000), 'x').fromNow()}
                     </div>
-                    <ActionsMenu>
-                    </ActionsMenu>
+                    <div className="Folder__cell Folder__cell--menu">
+                      <ActionsMenu />
+                    </div>
                 </div>
                 <div className={folderChildCSS}>
                     <div
-                        className="Folder__subfolder"
-                    >
+                        className="Folder__subfolder">
                         Add Subfolder
                     </div>
                     {
-                        Object.keys(children).map((childFile) => {
+                        childrenKeys.map((childFile) => {
                             if (children[childFile].children) {
                                 return (
                                     <Folder
-                                        ref={children[childFile].data.key}
+                                        mutationData={this.props.mutationData}
+                                        ref={children[childFile].edge.node.key}
                                         data={children[childFile]}
-                                        key={children[childFile].data.key}
+                                        key={children[childFile].edge.node.key}
                                         isSelected={this.state.isSelected}
                                         setIncomplete={this._setIncomplete}
-                                        checkParent={this._checkParent}
-                                    >
+                                        checkParent={this._checkParent}>
                                     </Folder>
                                 );
                             }
                             return (
                                 <File
-                                    ref={children[childFile].data.key}
+                                    mutationData={this.props.mutationData}
+                                    ref={children[childFile].edge.node.key}
                                     data={children[childFile]}
-                                    key={children[childFile].data.key}
+                                    key={children[childFile].edge.node.key}
                                     isSelected={this.state.isSelected}
-                                    checkParent={this._checkParent}
-                                >
+                                    checkParent={this._checkParent}>
                                 </File>
                             );
                         })

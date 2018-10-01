@@ -1,34 +1,53 @@
 @import '~Styles/_imports.scss';
 
 .File__row{
-    position: relative;
-
     height: 50px;
     padding: 12px 0;
-    padding-left: 5%;
-    position: relative;
+    padding-left: 10px;
+
+
+    border-bottom: 1px solid $romanSilver;
+
+    @include flex(space-between, row);
+}
+
+.File__cell{
+
+  @include flex(flex-start, row);
+
+  &--name{
+      margin: 0 20px;
+      flex: 1;
+  }
+
+  &--size{
+      width: 100px;
+  }
+
+  &--date{
+      width: 140px;
+  }
+
+  &--menu{
+    width: 140px;
+  }
+
+}
+
+.File__text{
+  flex: 1;
+  text-align: left;
 }
 
 .File__icon{
     margin-right: 5px
 }
 
-.File__size{
-    position: absolute;
-    right: 400px;
-}
-
-.File__date{
-    position: absolute;
-    right: 200px;
-}
-
 .File__btn{
-    position: absolute;
-    left: 0;
 
     width: 20px;
     height: 20px;
+    margin: 0 0 0 20px;
     padding: 0;
 
     border: none;
