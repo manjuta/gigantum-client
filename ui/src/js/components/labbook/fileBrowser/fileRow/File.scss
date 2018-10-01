@@ -7,17 +7,20 @@
     border-bottom: 1px solid $romanSilver;
     padding-left: 5%;
     position: relative;
-    & div:nth-child(2) {
-        margin-right: 5px
-    }
-    & div:nth-child(4) {
-        position: absolute;
-        left: 30%;
-    }
-    & div:nth-child(5) {
-        position: absolute;
-        left: 55%;
-    }
+}
+
+.File__icon{
+    margin-right: 5px
+}
+
+.File__size{
+    position: absolute;
+    right: 400px;
+}
+
+.File__date{
+    position: absolute;
+    right: 200px;
 }
 
 .File__btn{
@@ -53,14 +56,33 @@
         background-size: 26px !important;
         border: none;
     }
+
     &--selected:focus {
         background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: none;
     }
+
+    &--incomplete {
+        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: 1px solid red;
+    }
+
+    &--incomplete:hover {
+        background: url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
+    &--incomplete:focus {
+        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background-size: 26px !important;
+        border: none;
+    }
+
 }
 
 .File__icon{
-    // margin-left: 70px;
     align-self: center;
 }
