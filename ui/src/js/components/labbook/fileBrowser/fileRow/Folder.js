@@ -17,11 +17,16 @@ export default class Folder extends Component {
             isIncomplete: false,
         };
 
-        this._setSelected = this._setSelected.bind(this)
-        this._setIncomplete = this._setIncomplete.bind(this)
-        this._checkParent = this._checkParent.bind(this)
+        this._setSelected = this._setSelected.bind(this);
+        this._setIncomplete = this._setIncomplete.bind(this);
+        this._checkParent = this._checkParent.bind(this);
     }
 
+    /**
+    *  @param {boolean}
+    *  sets child elements to be selected and current folder item
+    *  @return {}
+    */
     _setSelected(isSelected) {
         this.setState({ isSelected, isIncomplete: false }, () => {
             Object.keys(this.refs).forEach((ref) => {
@@ -33,10 +38,23 @@ export default class Folder extends Component {
         });
     }
 
+    /**
+    *  @param {}
+    *  sets parents element to selected if count matches child length
+    *  @return {}
+    */
     _setIncomplete() {
-        this.setState({ isIncomplete: true, isSelected: false });
+        this.setState({
+          isIncomplete: true,
+          isSelected: false,
+        });
     }
 
+    /**
+    *  @param {}
+    *  checks parent item
+    *  @return {}
+    */
     _checkParent() {
         let checkCount = 0;
         Object.keys(this.refs).forEach((ref) => {
@@ -45,26 +63,44 @@ export default class Folder extends Component {
             }
         });
         if (checkCount === 0) {
-            this.setState({ isIncomplete: false, isSelected: false }, () => {
+            this.setState(
+              {
+                isIncomplete: false,
+                isSelected: false,
+              },
+              () => {
                 if (this.props.checkParent) {
-                    this.props.checkParent();
+                   this.props.checkParent();
                 }
-            });
+              },
+            );
         } else if (checkCount === Object.keys(this.refs).length) {
-            this.setState({ isIncomplete: false, isSelected: true }, () => {
+            this.setState(
+              {
+                isIncomplete: false,
+                isSelected: true,
+              },
+              () => {
                 if (this.props.checkParent) {
                     this.props.checkParent();
                 }
-            });
+              },
+            );
             if (this.props.checkParent) {
                 this.props.checkParent();
             }
         } else {
-            this.setState({ isIncomplete: true, isSelected: false }, () => {
+            this.setState(
+              {
+                isIncomplete: true,
+                isSelected: false,
+              },
+              () => {
                 if (this.props.setIncomplete) {
                     this.props.setIncomplete();
                 }
-            });
+              },
+          );
         }
     }
 
