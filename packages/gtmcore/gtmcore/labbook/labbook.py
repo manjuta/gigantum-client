@@ -147,7 +147,7 @@ class LabBook(object):
         return __validator
 
     @contextmanager
-    def lock_labbook(self, lock_key: Optional[str] = None, blocking: bool = False):
+    def lock_labbook(self, lock_key: Optional[str] = None, failfast: bool = False):
         """A context manager for locking labbook operations that is decorator compatible
 
         Manages the lock process along with catching and logging exceptions that may occur
@@ -178,8 +178,8 @@ class LabBook(object):
 
             # Get the lock - blocking and timeout kw args can not
             # be used simultaneously
-            if blocking:
-                lock_kwargs = {'blocking': blocking}
+            if failfast:
+                lock_kwargs = {'blocking': False}
             else:
                 lock_kwargs = {'timeout': config['timeout']}
 
