@@ -31,7 +31,7 @@ def write_function(filename: str, delay: int, value: str, labbook: LabBook) -> N
     A test function that appends to a file after a delay
     """
     time.sleep(delay)
-    with labbook.lock_labbook():
+    with labbook.lock_labbook(blocking=True):
         with open(filename, 'at') as f:
             f.write(value)
             time.sleep(2)
