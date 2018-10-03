@@ -22,7 +22,7 @@ import time
 import os
 from multiprocessing import Process
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, LabbookLockedException
 from gtmcore.fixtures import mock_labbook
 
 
@@ -31,13 +31,18 @@ def write_function(filename: str, delay: int, value: str, labbook: LabBook) -> N
     A test function that appends to a file after a delay
     """
     time.sleep(delay)
-    with labbook.lock_labbook(failfast=True):
+    with labbook.lock_labbook():
         with open(filename, 'at') as f:
             f.write(value)
             time.sleep(2)
 
 
 class TestLabBookLock(object):
+
+    def test_vacuous(self):
+        time.sleep(2)
+
+
     def test_simple_write(self, mock_labbook):
         """Test simple lock case"""
         filename = os.path.join(mock_labbook[2].root_dir, 'testfile.txt')
@@ -48,6 +53,21 @@ class TestLabBookLock(object):
             data = f.read()
 
         assert data == "1"
+
+    def test_failfast(self, mock_labbook):
+        filename = os.path.join(mock_labbook[2].root_dir, 'testfile.txt')
+        p1 = Process(target=write_function, args=(filename, 0, "A", mock_labbook[2]))
+        p1.start()
+
+        time.sleep(0.5)
+
+        with pytest.raises(LabbookLockedException):
+            with mock_labbook[2].lock_labbook(failfast=True):
+                assert False, "Should not be able to acquire lock"
+
+        time.sleep(1.6)
+        with mock_labbook[2].lock_labbook(failfast=True):
+            assert True
 
     def test_multiple_acquires(self, mock_labbook):
         """Test trying to lock around multiple writes"""

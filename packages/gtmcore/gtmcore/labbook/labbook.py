@@ -63,6 +63,13 @@ class LabbookMergeException(LabbookException):
     pass
 
 
+class LabbookLockedException(LabbookException):
+    """ Raised when trying to acquire a Labbook lock when lock
+    is already acquired by another process and failfast flag is set to
+    True"""
+    pass
+
+
 def _check_git_tracked(repo: GitRepoInterface) -> None:
     """Validates that a Git repo is not leaving any uncommitted changes or files.
     Raises ValueError if it does."""
@@ -153,7 +160,9 @@ class LabBook(object):
         Manages the lock process along with catching and logging exceptions that may occur
 
         Args:
-            lock_key(str): The lock key to override the default value.
+            lock_key: The lock key to override the default value.
+            failfast: Raise LabbookLockedException right away if labbook
+                      is already locked. Do not block.
 
         """
         lock: redis_lock.Lock = None
@@ -192,6 +201,8 @@ class LabBook(object):
                         logger.error(
                             f"LabBook task took more than {config['expire']}s. File locking possibly invalid.")
             else:
+                if failfast:
+                    raise LabbookLockedException("Cannot interrupt operation in progress")
                 raise IOError(f"Could not acquire LabBook lock within {config['timeout']} seconds.")
 
         except Exception as e:
