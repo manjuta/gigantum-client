@@ -223,7 +223,7 @@ module.exports = {
           'css-loader',
           {
             loader: 'sass-loader',
-            options:{
+            options: {
               sourceMap: true
             }
           }

@@ -18,8 +18,8 @@ const dragSource = {
     return monitor.getItem().key === props.key;
   },
 
-  beginDrag(props) {
-    // console.log(props);
+  beginDrag(props, monitor) {
+    console.log(monitor.isDragging(), props);
     return {
       isDragging: true,
       data: props.data,
@@ -32,10 +32,10 @@ const dragSource = {
       // console.log(monitor)
       return;
     }
-    console.log(props, monitor, component)
+
     const item = monitor.getItem();
     const dropResult = monitor.getDropResult();
-    console.log(monitor.getDropResult())
+
     let fileNameParts = props.data.edge.node.key.split('/');
 
     let fileName = fileNameParts[fileNameParts.length - 1];
@@ -59,7 +59,14 @@ const dragSource = {
 
     if (newKeyPath !== fileKeyPath) {
       if ((newKey !== props.data.edge.node.key)) {
-        console.log('move file', newKey, props.data.edge.node.key)
+        console.log('move file', newKey, props)
+        const moveLabbookFileData = {
+          newKey,
+          edge: props.data.edge,
+        }
+        props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
+          console.log(response)
+        })
         // props.browserProps.openFolder(`${dropResult.path}/`);
         // props.browserProps.renameFile(props.fileKey, newKey);
       }

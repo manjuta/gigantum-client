@@ -14,9 +14,9 @@ class FileBrowserMutations {
     * pass above props to state
     */
    constructor(props) {
-    this.state = {
-      ...props,
-    };
+
+    console.log(props)
+    this.state = props
    }
 
    /**
@@ -58,9 +58,9 @@ class FileBrowserMutations {
    moveLabbookFile(data, callback) {
       const {
         edge,
-        newKeyComputed,
+        newKey,
       } = data;
-
+      console.log(this.state)
       const {
         connection,
         owner,
@@ -78,7 +78,7 @@ class FileBrowserMutations {
         parentId,
         edge,
         key,
-        newKeyComputed,
+        newKey,
         section,
         (response, error) => {
           callback(response, error);

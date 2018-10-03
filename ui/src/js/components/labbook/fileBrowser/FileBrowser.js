@@ -1,13 +1,21 @@
 // vendor
 import React, { Component } from 'react';
-import store from 'JS/redux/store'
+import store from 'JS/redux/store';
 // assets
 import './FileBrowser.scss';
 // components
 import File from './fileRow/File';
 import Folder from './fileRow/Folder';
+import FileBrowserMutations from './utilities/FileBrowserMutations';
 
 export default class FileBrowser extends Component {
+    constructor(props) {
+      super(props);
+
+      this.state = {
+        mutations: new FileBrowserMutations(this._getMutationData()),
+      };
+    }
     /**
     *  @param {}
     *  sorts files into an object for rendering
@@ -56,7 +64,7 @@ export default class FileBrowser extends Component {
       connection,
       favoriteConnection,
       section,
-    } = this.props
+    } = this.props;
     const { owner, labbookName } = store.getState().routes;
 
     return {
@@ -66,14 +74,13 @@ export default class FileBrowser extends Component {
       connection,
       favoriteConnection,
       section,
-    }
+    };
   }
 
   render() {
-    const files = this._processFiles();
+    const files = this._processFiles(),
+          mutationData = this._getMutationData();
 
-    const mutationData = this._getMutationData();
-    console.log(mutationData)
     return (
         <div className="FileBrowser">
                 <div className="FileBrowser__header">
@@ -98,7 +105,7 @@ export default class FileBrowser extends Component {
                                     mutationData={mutationData}
                                     data={files[file]}
                                     key={files[file].edge.node.key}
-                                >
+                                    mutations={this.state.mutations}>
                                 </Folder>
                             );
                         }
@@ -107,7 +114,7 @@ export default class FileBrowser extends Component {
                                 mutationData={mutationData}
                                 data={files[file]}
                                 key={files[file].edge.node.key}
-                            >
+                                mutations={this.state.mutations}>
                             </File>
                         );
                     })

@@ -1,23 +1,39 @@
 @import '~Styles/_imports.scss';
 
+.UserSelect--none{
+  -webkit-touch-callout: none; /* iOS Safari */
+-webkit-user-select: none; /* Safari */
+ -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently
+                              supported by Chrome and Opera */
+}
+
 .File__row{
     height: 50px;
     padding: 12px 0;
     padding-left: 10px;
 
+    cursor: pointer;
 
     border-bottom: 1px solid $romanSilver;
 
     @include flex(space-between, row);
+
+    @extend .UserSelect--none;
 }
 
 .File__cell{
 
   @include flex(flex-start, row);
 
+  @extend .UserSelect--none;
+
   &--name{
       margin: 0 20px;
       flex: 1;
+      @extend .UserSelect--none;
   }
 
   &--size{
@@ -37,10 +53,12 @@
 .File__text{
   flex: 1;
   text-align: left;
+  @extend .UserSelect--none;
 }
 
 .File__icon{
-    margin-right: 5px
+    margin-right: 5px;
+    @extend .UserSelect--none;
 }
 
 .File__btn{
@@ -101,9 +119,11 @@
         background-size: 26px !important;
         border: none;
     }
-
+    @extend .UserSelect--none;
 }
 
 .File__icon{
     align-self: center;
+
+    @extend .UserSelect--none;
 }

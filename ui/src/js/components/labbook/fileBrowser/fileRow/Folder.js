@@ -2,16 +2,23 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import Moment from 'moment';
-// assets
-import './Folder.scss';
+import { DragSource, DropTarget } from 'react-dnd';
+import { NativeTypes } from 'react-dnd-html5-backend';
 // components
 import ActionsMenu from './ActionsMenu';
 import File from './File';
+// assets
+import './Folder.scss';
+// components
+import Connectors from './Connectors';
 
-export default class Folder extends Component {
+
+class Folder extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
+            isDragging: props.isDragging,
             expanded: false,
             isSelected: props.isSelected || false,
             isIncomplete: false,
@@ -36,7 +43,7 @@ export default class Folder extends Component {
                   if (folder._setSelected) {
                     folder._setSelected(isSelected);
                   } else {
-                    folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected)
+                    folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected);
                   }
             });
             if (this.props.checkParent) {
@@ -111,14 +118,49 @@ export default class Folder extends Component {
         }
     }
 
-    _selectClicked(evt) {
+    /**
+    *  @param {event}
+    *  sets item to expanded
+    *  @return {}
+    */
+    _expandSection(evt) {
       if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
         this.setState({ expanded: !this.state.expanded })
       }
     }
 
+    /**
+    *  @param {}
+    *  sets elements to be selected and parent
+    */
+    connectDND(render) {
+      // console.log(this.props);
+      if (this.state.isDragging) {
+        render = this.props.connectDragSource(render);
+      } else {
+        render = this.props.connectDropTarget(render);
+      }
+      // console.log('dragging', this.props.isDragging)
+      return render;
+    }
+    /**
+    *  @param {}
+    *  sets dragging state
+    */
+    _mouseEnter() {
+      this.setState({ isDragging: true });
+    }
+
+    /**
+    *  @param {}
+    *  sets dragging state
+    */
+    _mouseLeave() {
+      this.setState({ isDragging: false });
+    }
+
     render() {
-        console.log(this.props)
+
         const { node } = this.props.data.edge;
         const { children } = this.props.data;
         const childrenKeys = Object.keys(children);
@@ -140,11 +182,10 @@ export default class Folder extends Component {
         const splitKey = node.key.split('/');
         const folderName = splitKey[splitKey.length - 2];
 
-        return (
-            <div className="Folder">
+        let folder = this.props.connectDragPreview(<div onMouseLeave={() => { this._mouseLeave(); }} onMouseEnter={() => { this._mouseEnter(); }} className="Folder">
                 <div
                     className={folderRowCSS}
-                    onClick={evt => this._selectClicked(evt)}>
+                    onClick={evt => this._expandSection(evt)}>
                     <button
                         className={buttonCSS}
                         onClick={() => this._setSelected(!this.state.isSelected)}>
@@ -175,7 +216,8 @@ export default class Folder extends Component {
                         childrenKeys.map((childFile) => {
                             if (children[childFile].children) {
                                 return (
-                                    <Folder
+                                    <FolderDND
+                                        mutations={this.props.mutations}
                                         mutationData={this.props.mutationData}
                                         ref={children[childFile].edge.node.key}
                                         data={children[childFile]}
@@ -183,11 +225,12 @@ export default class Folder extends Component {
                                         isSelected={this.state.isSelected}
                                         setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}>
-                                    </Folder>
+                                    </FolderDND>
                                 );
                             }
                             return (
                                 <File
+                                    mutations={this.props.mutations}
                                     mutationData={this.props.mutationData}
                                     ref={children[childFile].edge.node.key}
                                     data={children[childFile]}
@@ -200,7 +243,23 @@ export default class Folder extends Component {
                     }
                 </div>
 
-            </div>
+            </div>);
+
+        return(
+          this.connectDND(folder)
         );
     }
 }
+
+const FolderDND = DragSource(
+  'card',
+  Connectors.dragSource,
+  Connectors.dragCollect,
+)(DropTarget(
+    ['card', NativeTypes.FILE],
+    Connectors.targetSource,
+    Connectors.targetCollect,
+  )(Folder));
+
+// export default File
+export default FolderDND;
