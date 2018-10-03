@@ -55,7 +55,7 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
 
-        with labbook.lock_labbook(blocking=True):
+        with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public)
@@ -74,7 +74,7 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
 
-        with labbook.lock_labbook(blocking=True):
+        with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
             cnt = wf.sync(username=username, remote=remote, force=force)
             return cnt
@@ -93,7 +93,7 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
         lb = LabBook()
         lb.from_directory(labbook_path)
         #TODO!! Put export into lock
-        with lb.lock_labbook(blocking=True):
+        with lb.lock_labbook():
             path = ZipExporter.export_zip(lb.root_dir, lb_export_directory)
         return path
     except Exception as e:
