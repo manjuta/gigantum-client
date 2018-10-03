@@ -1075,14 +1075,10 @@ class LabBook(object):
 
             # Verify name not already in use
             if os.path.isdir(os.path.join(owner_dir, name)):
-                # Exists already. Raise an exception
                 raise ValueError(f"LabBook `{name}` already exists locally. Choose a new LabBook name")
 
             # Create LabBook subdirectory
             new_root_dir = os.path.join(owner_dir, name)
-
-            logger.info(f"Making labbook directory in {new_root_dir}")
-
             os.makedirs(new_root_dir)
             self._set_root_dir(new_root_dir)
 
