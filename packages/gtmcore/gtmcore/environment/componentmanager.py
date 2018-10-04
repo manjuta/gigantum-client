@@ -27,7 +27,7 @@ from typing import Optional
 
 
 from gtmcore.labbook import LabBook
-from gtmcore.environment.repository import ComponentRepository  # type: ignore
+from gtmcore.environment.repository import BaseRepository  # type: ignore
 from gtmcore.logging import LMLogger
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, ActivityDetailType, ActivityDetailRecord, \
     ActivityAction
@@ -74,8 +74,8 @@ class ComponentManager(object):
         """
         # Save labbook instance
         self.labbook = labbook
-        # Create a component repo instance using the same config file
-        self.components = ComponentRepository(config_file=self.labbook.labmanager_config.config_file)
+        # Create a base repo instance using the same config file
+        self.bases = BaseRepository(config_file=self.labbook.labmanager_config.config_file)
         # Make sure the LabBook's environment directory is ready to go
         self._initialize_env_dir()
 
@@ -351,72 +351,57 @@ exec gosu giguser "$@"
         ars = ActivityStore(self.labbook)
         ars.create_activity_record(ar)
 
-    def add_component(self, component_class: str, repository: str, component: str, revision: int,
-                      force: bool = False) -> None:
-        """Method to add a component to a LabBook's environment
+    def add_base(self, repository: str, base_id: str, revision: int) -> None:
+        """Method to add a base to a LabBook's environment
 
         Args:
-            component_class(str): The class of component (e.g. "base", "custom", etc)
             repository(str): The Environment Component repository the component is in
-            component(str): The name of the component
+            base_id(str): The name of the component
             revision(int): The revision to use (r_<revision_) in yaml filename.
-            force(bool): Force overwriting a component if it already exists (e.g. you want to update the version)
 
         Returns:
             None
         """
-
-        if not component_class:
-            raise ValueError('component_class cannot be None or empty')
-
         if not repository:
             raise ValueError('repository cannot be None or empty')
 
-        if not component:
+        if not base_id:
             raise ValueError('component cannot be None or empty')
 
-        # Get the component
-        component_data = self.components.get_component(component_class, repository, component, revision)
-        component_filename = "{}_{}.yaml".format(repository, component, revision)
-        component_file = os.path.join(self.env_dir, component_class, component_filename)
+        # Get the base
+        base_data = self.bases.get_base(repository, base_id, revision)
+        base_filename = "{}_{}.yaml".format(repository, base_id, revision)
+        base_final_path = os.path.join(self.env_dir, 'base', base_filename)
 
-        short_message = "Add {} environment component: {}".format(component_class, component)
-        if os.path.exists(component_file):
-            if not force:
-                raise ValueError("The component {} already exists in this LabBook." +
-                                 " Use `force` to overwrite".format(component))
-            else:
-                logger.warning("Updating component file at {}".format(component_file))
-                short_message = "Update {} environment component: {} ".format(component_class, component)
+        short_message = "Added base: {}".format(base_id)
+        if os.path.exists(base_final_path):
+            raise ValueError("The base {} already exists in this project")
 
-        with open(component_file, 'wt') as cf:
-            cf.write(yaml.dump(component_data, default_flow_style=False))
+        with open(base_final_path, 'wt') as cf:
+            cf.write(yaml.dump(base_data, default_flow_style=False))
 
-        if component_class == 'base':
-            self.labbook.cuda_version = component_data.get('cuda_version')
-            for manager in component_data['package_managers']:
-                packages = list()
-                # Build dictionary of packages
-                for p_manager in manager.keys():
-                    if manager[p_manager]:
-                        for pkg in manager[p_manager]:
-                            pkg_name, pkg_version = strip_package_and_version(p_manager, pkg)
-                            packages.append({"package": pkg_name, "version": pkg_version, "manager": p_manager})
+        self.labbook.cuda_version = base_data.get('cuda_version')
+        for manager in base_data['package_managers']:
+            packages = list()
+            # Build dictionary of packages
+            for p_manager in manager.keys():
+                if manager[p_manager]:
+                    for pkg in manager[p_manager]:
+                        pkg_name, pkg_version = strip_package_and_version(p_manager, pkg)
+                        packages.append({"package": pkg_name, "version": pkg_version, "manager": p_manager})
 
-                        self.add_packages(package_manager=p_manager, packages=packages,
-                                          force=True, from_base=True)
+                    self.add_packages(package_manager=p_manager, packages=packages,
+                                      force=True, from_base=True)
 
-        logger.info(f"Added {component_class} from {repository}: {component} rev{revision}")
-
-        # Add to git
-        self.labbook.git.add(component_file)
+        self.labbook.git.add(base_final_path)
         commit = self.labbook.git.commit(short_message)
+        logger.info(f"Added base from {repository}: {base_id} rev{revision}")
 
         # Create a ActivityRecord
-        long_message = "Added a `{}` class environment component {}\n".format(component_class, component)
-        long_message = "{}\n{}\n\n".format(long_message, component_data['description'])
+        long_message = "Added base {}\n".format(base_id)
+        long_message = "{}\n{}\n\n".format(long_message, base_data['description'])
         long_message = "{}  - repository: {}\n".format(long_message, repository)
-        long_message = "{}  - component: {}\n".format(long_message, component)
+        long_message = "{}  - component: {}\n".format(long_message, base_id)
         long_message = "{}  - revision: {}\n".format(long_message, revision)
 
         # Create detail record
@@ -427,68 +412,13 @@ exec gosu giguser "$@"
         ar = ActivityRecord(ActivityType.ENVIRONMENT,
                             message=short_message,
                             linked_commit=commit.hexsha,
-                            tags=["environment", component_class],
+                            tags=["environment", "base"],
                             show=True)
         ar.add_detail_object(adr)
 
         # Store
         ars = ActivityStore(self.labbook)
         ars.create_activity_record(ar)
-
-    def remove_component(self, component_class: str, repository: str, component: str) -> None:
-        """Remove yaml file describing a custom component and its context to the labbook.
-
-        Args:
-            component_class: The class of component (e.g. "base", "custom", etc)
-            repository: The Environment Component repository the component is in
-            component: The name of the component
-
-        Returns:
-            None
-        """
-        if not component_class:
-            raise ValueError('component_class cannot be None or empty')
-
-        if not repository:
-            raise ValueError('repository cannot be None or empty')
-
-        if not component:
-            raise ValueError('component cannot be None or empty')
-
-        component_filename = "{}_{}.yaml".format(repository, component)
-        component_file = os.path.join(self.env_dir, component_class, component_filename)
-
-        # Check for package to exist
-        if not os.path.exists(component_file):
-            raise ValueError(f"{component_class} {component_file} does not exist. Failed to remove")
-
-        # Delete the yaml file, which on next Dockerfile gen/rebuild will remove the dependency
-        os.remove(component_file)
-        if os.path.exists(component_file):
-            raise ValueError(f"Failed to remove {component_class} {component}.")
-
-        # Add to git
-        short_message = f"Remove {component_class} component {component}"
-        self.labbook.git.remove(component_file)
-        commit = self.labbook.git.commit(short_message)
-
-        # Create detail record
-        adr = ActivityDetailRecord(ActivityDetailType.ENVIRONMENT, show=False, action=ActivityAction.DELETE)
-        adr.add_value('text/plain', short_message)
-
-        # Create activity record
-        ar = ActivityRecord(ActivityType.ENVIRONMENT,
-                            show=True,
-                            message=short_message,
-                            linked_commit=commit.hexsha,
-                            tags=["environment", component_class])
-        ar.add_detail_object(adr)
-
-        # Store
-        ars = ActivityStore(self.labbook)
-        ars.create_activity_record(ar)
-
-        logger.info(f"Removed {component_class} from {repository}: {component}")
 
     def get_component_list(self, component_class: str) -> List[Dict[str, Any]]:
         """Method to get the YAML contents for a given component class

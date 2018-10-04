@@ -666,11 +666,11 @@ class Activity extends Component {
       }
         <ToolTip section="activityCluster" />
         <div className={clusterCSS} ref={`cluster--${obj.flatindex}`} onClick={() => this._deleteCluster(clusterRef, i)}>
-          <div className="ActivityCard__cluster--layer1">
+          <div className="ActivityCard__cluster--layer1 box-shadow">
             {clusterElements.length} Minor Activities
           </div>
-          <div className="ActivityCard__cluster--layer2" />
-          <div className="ActivityCard__cluster--layer3" />
+          <div className="ActivityCard__cluster--layer2 box-shadow" />
+          <div className="ActivityCard__cluster--layer3 box-shadow" />
         </div>
       </div>
     );

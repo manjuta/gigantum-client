@@ -200,7 +200,7 @@ class Overview extends Component {
       }),
 
       overviewReadmeButtonCSS = classNames({
-        'Overview__readme-edit-button': (this.state.editingReadme || !this.props.readme),
+        'Overview__readme-edit-button': true,
         hidden: this.state.editingReadme || !this.props.readme,
       });
 

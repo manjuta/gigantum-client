@@ -34,11 +34,9 @@ from gtmcore.configuration import get_docker_client
 
 def populate_with_pkgs(lb):
     with tempfile.TemporaryDirectory() as checkoutdir:
-        repo = git.Repo.clone_from("https://github.com/gig-dev/components2.git", checkoutdir)
-        shutil.copy(os.path.join(checkoutdir, "base/quickstart-jupyterlab/quickstart-jupyterlab_r0.yaml"),
+        repo = git.Repo.clone_from("https://github.com/gigantum/base-images-testing.git", checkoutdir)
+        shutil.copy(os.path.join(checkoutdir, "quickstart-jupyterlab/quickstart-jupyterlab_r0.yaml"),
                     os.path.join(lb.root_dir, ".gigantum", "env", "base"))
-        shutil.copy(os.path.join(checkoutdir, "custom/pillow/pillow_r0.yaml"),
-                    os.path.join(lb.root_dir, ".gigantum", "env", "custom"))
 
 
 class TestImageBuilder(object):
@@ -154,16 +152,6 @@ class TestImageBuilder(object):
         for line in test_lines:
             assert line in dockerfile_text.split(os.linesep)
 
-    def test_custom_package(self, mock_labbook):
-        lb = mock_labbook[2]
-        populate_with_pkgs(lb)
-
-        ib = ImageBuilder(lb)
-        pkg_lines = [l.strip() for l in ib._load_custom() if 'RUN' in l]
-
-        assert 'RUN apt-get -y install libjpeg-dev libtiff5-dev zlib1g-dev libfreetype6-dev liblcms2-dev libopenjpeg-dev' in pkg_lines
-        assert 'RUN pip3 install Pillow==4.2.1' in pkg_lines
-
     def test_docker_snippet(self, mock_labbook):
         lb = mock_labbook[2]
         package_manager_dir = os.path.join(lb.root_dir, '.gigantum', 'env', 'custom')
@@ -172,7 +160,7 @@ class TestImageBuilder(object):
         erm.index_repositories()
         cm = ComponentManager(lb)
         custom = ['RUN true', 'RUN touch /tmp/cat', 'RUN rm /tmp/cat']
-        cm.add_component("base", ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+        cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
         cm.add_packages("pip", [{"manager": "pip", "package": "requests", "version": "2.18.4"}])
         cm.add_docker_snippet('test-docker', custom, description="Apostrophe's and wėįrd çhårāčtêrś")
         ib = ImageBuilder(lb)

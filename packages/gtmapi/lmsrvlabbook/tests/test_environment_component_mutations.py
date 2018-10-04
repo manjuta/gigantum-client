@@ -189,64 +189,6 @@ class TestAddComponentMutations(object):
         assert "errors" in result
         assert result['errors'][0]['message'] == "'version'"
 
-    def test_add_custom_dep(self, fixture_working_dir_env_repo_scoped, snapshot):
-        """Test adding a custom dependency"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        labbook_dir = lb.new(name="labbook3", description="my first labbook",
-                             owner={"username": "default"})
-
-        # Add a base image
-        query = """
-        mutation myEnvMutation{
-          addCustomComponent(input: {
-            owner: "default",
-            labbookName: "labbook3",
-            repository: "gig-dev_components2",
-            componentId: "pillow",
-            revision: 0
-          }) {
-            clientMutationId
-            newCustomComponentEdge {
-              node{
-                id
-                repository
-                componentId
-                revision
-                name
-                description
-                tags
-                license
-                url
-                requiredPackageManagers
-                dockerSnippet
-              }
-            }
-          }
-        }
-        """
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
-
-        # Validate the LabBook .gigantum/env/ directory
-        assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'base')) is True
-        assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'package_manager')) is True
-        assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'custom')) is True
-        assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'entrypoint.sh')) is True
-
-        # Verify file
-        component_file = os.path.join(labbook_dir,
-                                      '.gigantum',
-                                      'env',
-                                      'custom',
-                                      "gig-dev_components2_pillow.yaml")
-        assert os.path.exists(component_file) is True
-
-        # Verify git/notes
-        log = lb.git.log()
-        assert len(log) == 5
-        assert "_GTM_ACTIVITY_START_" in log[0]["message"]
-        assert 'pillow' in log[0]["message"]
-
     def test_remove_package(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test removing a package from a labbook"""
         lb = LabBook(fixture_working_dir_env_repo_scoped[0])
@@ -299,63 +241,6 @@ class TestAddComponentMutations(object):
         assert not os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env',
                                                'package_manager', 'pip3_requests.yaml'))
         assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'package_manager', 'pip3_responses.yaml'))
-
-    def test_remove_custom_dep(self, fixture_working_dir_env_repo_scoped, snapshot):
-        """Test removing a custom dependency"""
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-
-        labbook_dir = lb.new(name="labbook-remove-custom", description="my first labbook",
-                             owner={"username": "default"})
-
-        # Add a custom dep
-        query = """
-        mutation myEnvMutation{
-          addCustomComponent(input: {
-            owner: "default",
-            labbookName: "labbook-remove-custom",
-            repository: "gig-dev_components2",
-            componentId: "pillow",
-            revision: 0
-          }) {
-            clientMutationId
-            newCustomComponentEdge {
-              node{
-                repository
-                componentId
-                revision
-                name
-                description
-              }
-            }
-          }
-        }
-        """
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
-
-        # Verify file
-        component_file = os.path.join(labbook_dir,
-                                      '.gigantum',
-                                      'env',
-                                      'custom',
-                                      "gig-dev_components2_pillow.yaml")
-        assert os.path.exists(component_file) is True
-
-        # Remove a custom dep
-        query = """
-        mutation myEnvMutation{
-          removeCustomComponent(input: {
-            owner: "default",
-            labbookName: "labbook-remove-custom",
-            repository: "gig-dev_components2",
-            componentId: "pillow"
-          }) {
-            clientMutationId
-            success
-          }
-        }
-        """
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
-        assert os.path.exists(component_file) is False
 
     def test_custom_docker_snippet_success(self, fixture_working_dir_env_repo_scoped):
         """Test adding a custom dependency"""

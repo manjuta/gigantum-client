@@ -59,7 +59,7 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
         name = graphene.String(required=True)
         description = graphene.String(required=True)
         repository = graphene.String(required=True)
-        component_id = graphene.String(required=True)
+        base_id = graphene.String(required=True)
         revision = graphene.Int(required=True)
         is_untracked = graphene.Boolean(required=False)
 
@@ -67,7 +67,7 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
     labbook = graphene.Field(lambda: Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, name, description, repository, component_id, revision,
+    def mutate_and_get_payload(cls, root, info, name, description, repository, base_id, revision,
                                is_untracked=False, client_mutation_id=None):
         username = get_logged_in_username()
 
@@ -110,11 +110,7 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
 
         # Add Base component
         cm = ComponentManager(lb)
-        cm.add_component("base", repository, component_id, revision)
-
-        # Prime dataloader with labbook you just created
-        dataloader = LabBookLoader()
-        dataloader.prime(f"{username}&{username}&{lb.name}", lb)
+        cm.add_base(repository, base_id, revision)
 
         # Get a graphene instance of the newly created LabBook
         return CreateLabbook(labbook=Labbook(owner=username, name=lb.name))

@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import graphene
-from gtmcore.environment import ComponentRepository
+from gtmcore.environment import BaseRepository
 
 
 class BaseComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
@@ -109,9 +109,9 @@ class BaseComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
     def _load_component_info(self):
         """Private method to retrieve file info for a given key"""
         if not self._component_data:
-            repo = ComponentRepository()
+            repo = BaseRepository()
 
-            self._component_data = repo.get_component("base", self.repository, self.component_id, self.revision)
+            self._component_data = repo.get_base(self.repository, self.component_id, self.revision)
 
         self.schema = self._component_data['schema']
         self.name = self._component_data['name']

@@ -159,7 +159,7 @@ class PackageDependencies extends Component {
   _loadMore() {
     if (!this.state.loadingMore) {
       this.setState({ loadingMore: true });
-      console.log('load more running');
+
       totalCount += 5;
       const self = this;
       this.props.relay.loadMore(
@@ -170,10 +170,8 @@ class PackageDependencies extends Component {
           if (error) {
             console.error(error);
           }
-          console.log(self.props.environment.packageDependencies, self.props.environment.packageDependencies.pageInfo.hasNextPage);
           if (self.props.environment.packageDependencies &&
            self.props.environment.packageDependencies.pageInfo.hasNextPage) {
-            console.log('recursive load more');
             self._loadMore();
           } else {
             self._refetch();
@@ -196,10 +194,9 @@ class PackageDependencies extends Component {
         this.props.setRefetchOccuring(true);
 
         self.pendingRefetch = relay.refetchConnection(
-          null,
-          () => {
+          packageDependencies.edges.length,
+          (response) => {
             this.props.setRefetchOccuring(false);
-
             if (store.getState().packageDependencies.refetchQueued) {
               this.props.setRefetchQueued(false);
               self._refetch();
@@ -404,6 +401,7 @@ class PackageDependencies extends Component {
 
     this.props.setBuildingState(true);
     this.props.setLookingUpPackagesState(true);
+
     PackageLookup.query(labbookName, owner, filteredInput).then((response) => {
       this.props.setLookingUpPackagesState(false);
       if (response.errors) {
@@ -522,7 +520,7 @@ class PackageDependencies extends Component {
   *  get tabs data
   * */
   _getPackmanagerTabs() {
-    const tabs = this.props.base.packageManagers.map((packageName) => {
+    const tabs = this.props.base && this.props.base.packageManagers.map((packageName) => {
       let count = 0;
       this.props.environment.packageDependencies.edges.forEach((edge) => {
         if (packageName === edge.node.manager) {
@@ -538,8 +536,8 @@ class PackageDependencies extends Component {
   *  adds to removalpackages state pending removal of packages
   * */
   _addRemovalPackage(edge, updateAvailable, version, oldVersion) {
-    const { manager, id } = edge;
-    const pkg = edge.package;
+    const { manager, id } = edge.node;
+    const pkg = edge.node.package;
 
     const newRemovalPackages = Object.assign({}, this.state.removalPackages);
     const newUpdatePackages = Object.assign({}, this.state.updatePackages);
@@ -577,7 +575,6 @@ class PackageDependencies extends Component {
         newUpdatePackages[manager] = { [pkg]: { id, version } };
       }
     }
-
     this.setState({ removalPackages: newRemovalPackages, updatePackages: newUpdatePackages });
   }
 

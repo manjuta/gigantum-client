@@ -234,7 +234,7 @@ module.exports = {
       // Remember to add the new extension(s) to the "file" loader exclusion list.
     ],
   },
-  mode:'development',
+  mode: 'development',
   optimization: {
     runtimeChunk: 'single',
     splitChunks: {

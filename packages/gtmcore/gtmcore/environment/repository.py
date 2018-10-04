@@ -24,8 +24,8 @@ from typing import (Any, List, Dict)
 from gtmcore.configuration import Configuration
 
 
-class ComponentRepository(object):
-    """Class to interface with local copies of environment component repositories
+class BaseRepository(object):
+    """Class to interface with local indices of base image repositories
     """
 
     def __init__(self, config_file: str=None) -> None:
@@ -39,97 +39,76 @@ class ComponentRepository(object):
                                                        ".labmanager", "environment_repositories"))
 
         # Dictionary to hold loaded index files in memory
-        self.list_index_data: Dict[str, Any] = {}
+        self.list_index_data: List[str] = list()
         self.detail_index_data: Dict[str, Any] = {}
 
-    def _get_list_index_data(self, component_class: str) -> List[str]:
-        """Private method to get list index data from either the file or memory
-
-        Args:
-            component_class(str): Name of the component class (e.g. base_image)
-
-        Returns:
-            list: the data stored in the index file
-        """
-        if component_class not in self.list_index_data:
-            # Load data for the first time
-            with open(os.path.join(self.local_repo_directory, f"{component_class}_list_index.pickle"),
-                      'rb') as fh:
-                self.list_index_data[component_class] = pickle.load(fh)
-
-        return self.list_index_data[component_class]
-
-    def _get_detail_index_data(self, component_class: str) -> Dict[str, Any]:
+    def _get_detail_index_data(self) -> Dict[str, Any]:
         """Private method to get detail index data from either the file or memory
-
-        Args:
-            component_class(str): Name of the component class (e.g. "base" or "custom")
 
         Returns:
             dict: the data stored in the index file
         """
-        if component_class not in self.detail_index_data:
+        if not self.detail_index_data:
             # Load data for the first time
-            with open(os.path.join(self.local_repo_directory, "{}_index.pickle".format(component_class)),
-                      'rb') as fh:
-                self.detail_index_data[component_class] = pickle.load(fh)
+            with open(os.path.join(self.local_repo_directory, "base_index.pickle"), 'rb') as fh:
+                self.detail_index_data = pickle.load(fh)
 
-        return self.detail_index_data[component_class]
+        return self.detail_index_data
 
-    def get_component_list(self, component_class: str) -> List[str]:
+    def get_base_list(self) -> List[str]:
         """Method to get a list of all components of a specific class (e.g base_image, development_environment, etc)
         The component class should map to a directory in the component repository
 
         Returns:
             list
         """
-        index_data = self._get_list_index_data(component_class)
+        if not self.list_index_data:
+            with open(os.path.join(self.local_repo_directory, f"base_list_index.pickle"), 'rb') as fh:
+                self.list_index_data = pickle.load(fh)
 
-        return index_data
+        return self.list_index_data
 
-    def get_component_versions(self, component_class: str, repository: str, component: str) -> List[str]:
+    def get_base_versions(self, repository: str, base: str) -> List[str]:
         """Method to get a detailed list of all available versions for a single component
 
         Args:
-            component_class(str): class of the component (e.g. base_image, development_env, etc)
             repository(str): name of the component as provided via the list (<namespace>_<repo name>)
-            component(str): name of the component
+            base(str): name of the base
 
         Returns:
             list
         """
         # Open index
-        index_data = self._get_detail_index_data(component_class)
+        index_data = self._get_detail_index_data()
 
         if repository not in index_data:
             raise ValueError("Repository `{}` not found.".format(repository))
 
-        if component not in index_data[repository]:
-            raise ValueError("Component `{}` not found in repository `{}`.".format(component, repository))
+        if base not in index_data[repository]:
+            raise ValueError("Base `{}` not found in repository `{}`.".format(base, repository))
 
-        return list(index_data[repository][component].items())
+        return list(index_data[repository][base].items())
 
-    def get_component(self, component_class: str, repository: str, component: str, revision: int) -> Dict[str, Any]:
-        """Method to get a detailed list of all available versions for a single component
+    def get_base(self, repository: str, base: str, revision: int) -> Dict[str, Any]:
+        """Method to get a details for a version of a base
 
         Args:
-            component_class(str): class of the component (e.g. base_image, development_env, etc)
             repository(str): name of the component as provided via the list (<namespace>_<repo name>)
-            component(str): name of the component
+            base(str): name of the component
             revision(str): the version string of the component
 
         Returns:
             dict
         """
-        index_data = self._get_detail_index_data(component_class)
+        index_data = self._get_detail_index_data()
 
         if repository not in index_data:
             raise ValueError("Repository `{}` not found.".format(repository))
 
-        if component not in index_data[repository]:
-            raise ValueError("Component `{}` not found in repository `{}`.".format(component, repository))
+        if base not in index_data[repository]:
+            raise ValueError("Base `{}` not found in repository `{}`.".format(base, repository))
 
-        if revision not in index_data[repository][component]:
-            raise ValueError("Version `{}` not found in repository `{}`.".format(revision, repository))
+        if revision not in index_data[repository][base]:
+            raise ValueError("Revision `{}` not found in repository `{}`.".format(revision, repository))
 
-        return index_data[repository][component][revision]
+        return index_data[repository][base][revision]
