@@ -157,10 +157,10 @@ class TestConda3PackageManager(object):
         packages = [{'name': 'mypackage', 'version': '3.1.4'}]
 
         result = mrg.generate_docker_install_snippet(packages)
-        assert result == ['RUN conda install mypackage=3.1.4']
+        assert result == ['RUN conda install -yq mypackage=3.1.4']
 
         result = mrg.generate_docker_install_snippet(packages, single_line=True)
-        assert result == ['RUN conda install mypackage=3.1.4']
+        assert result == ['RUN conda install -yq mypackage=3.1.4']
 
     def test_generate_docker_install_snippet_multiple(self):
         """Test generate_docker_install_snippet command
@@ -170,10 +170,10 @@ class TestConda3PackageManager(object):
                     {'name': 'yourpackage', 'version': '2017-54.0'}]
 
         result = mrg.generate_docker_install_snippet(packages)
-        assert result == ['RUN conda install mypackage=3.1.4', 'RUN conda install yourpackage=2017-54.0']
+        assert result == ['RUN conda install -yq mypackage=3.1.4 yourpackage=2017-54.0']
 
         result = mrg.generate_docker_install_snippet(packages, single_line=True)
-        assert result == ['RUN conda install mypackage=3.1.4 yourpackage=2017-54.0']
+        assert result == ['RUN conda install -yq mypackage=3.1.4 yourpackage=2017-54.0']
 
     def test_list_versions_badpackage(self, build_lb_image_for_env):
         """Test list_versions command"""

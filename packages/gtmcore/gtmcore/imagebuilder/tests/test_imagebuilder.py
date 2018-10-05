@@ -75,7 +75,7 @@ class TestImageBuilder(object):
 
         ib = ImageBuilder(lb)
         pkg_lines = [l for l in ib._load_packages() if 'RUN' in l]
-        assert 'RUN apt-get -y install docker' in pkg_lines
+        assert 'RUN apt-get -y --no-install-recommends install docker' in pkg_lines
 
     def test_package_pip(self, mock_labbook):
         lb = mock_labbook[2]
@@ -145,7 +145,7 @@ class TestImageBuilder(object):
             dockerfile.write(dockerfile_text)
 
         test_lines = ['## Adding individual packages',
-                      'RUN apt-get -y install docker',
+                      'RUN apt-get -y --no-install-recommends install docker',
                       'RUN pip install docker==2.0.1',
                       'RUN pip install requests==2.18.4']
 
