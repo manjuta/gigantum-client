@@ -231,7 +231,7 @@ class AptPackageManager(PackageManager):
         package_strings = [f"{x['name']}" for x in packages]
 
         if single_line:
-            return [f"RUN apt-get -y install {' '.join(package_strings)}"]
+            return [f"RUN apt-get -y --no-install-recommends install {' '.join(package_strings)}"]
         else:
-            docker_strings = [f"RUN apt-get -y install {x}" for x in package_strings]
+            docker_strings = [f"RUN apt-get -y --no-install-recommends install {x}" for x in package_strings]
             return docker_strings

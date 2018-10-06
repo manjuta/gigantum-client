@@ -213,59 +213,73 @@ module.exports = {
       // use the "style" loader inside the async code so CSS from them won't be
       // in the main CSS file.
       {
-        test: /\.(css|scss)$/,
-        loader: ExtractTextPlugin.extract(
-          Object.assign(
+          test: /\.(scss|css)$/,
+          loaders: [
+            'style-loader',
+            'css-loader',
             {
-              fallback: {
-                loader: require.resolve('style-loader'),
-                options: {
-                  hmr: false,
-                },
-              },
-              use: [
-                {
-                  loader: require.resolve('css-loader'),
-                  options: {
-                    importLoaders: 1,
-                    minimize: true,
-                    sourceMap: false,
-                  },
-                },
-                {
-                  loader: require.resolve('postcss-loader'),
-                  options: {
-                    // Necessary for external CSS imports to work
-                    // https://github.com/facebookincubator/create-react-app/issues/2677
-                    ident: 'postcss',
-                    plugins: () => [
-                      require('postcss-flexbugs-fixes'),
-                      autoprefixer({
-                        browsers: [
-                          '>1%',
-                          'last 4 versions',
-                          'Firefox ESR',
-                          'not ie < 9', // React doesn't support IE8 anyway
-                        ],
-                        flexbox: 'no-2009',
-                      }),
-                    ],
-                  },
-                },
-                {
-                  loader: 'sass-loader',
-                  options:{
-                    sourceMap: false
-                  }
-                }
-              ],
-
-            },
-            extractTextPluginOptions
-          )
-        ),
-        // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+              loader: 'sass-loader',
+              options:{
+                sourceMap: true
+              }
+            }
+          ]
       },
+      // TODO: fix #101, code commented out until issue is fixed
+      // {
+      //   test: /\.(css|scss)$/,
+      //   loader: ExtractTextPlugin.extract(
+      //     Object.assign(
+      //       {
+      //         fallback: {
+      //           loader: require.resolve('style-loader'),
+      //           options: {
+      //             hmr: false,
+      //           },
+      //         },
+      //         use: [
+      //           {
+      //             loader: require.resolve('css-loader'),
+      //             options: {
+      //               importLoaders: 1,
+      //               minimize: true,
+      //               sourceMap: false,
+      //             },
+      //           },
+      //           {
+      //             loader: require.resolve('postcss-loader'),
+      //             options: {
+      //               // Necessary for external CSS imports to work
+      //               // https://github.com/facebookincubator/create-react-app/issues/2677
+      //               ident: 'postcss',
+      //               plugins: () => [
+      //                 require('postcss-flexbugs-fixes'),
+      //                 autoprefixer({
+      //                   browsers: [
+      //                     '>1%',
+      //                     'last 4 versions',
+      //                     'Firefox ESR',
+      //                     'not ie < 9', // React doesn't support IE8 anyway
+      //                   ],
+      //                   flexbox: 'no-2009',
+      //                 }),
+      //               ],
+      //             },
+      //           },
+      //           {
+      //             loader: 'sass-loader',
+      //             options:{
+      //               sourceMap: false
+      //             }
+      //           }
+      //         ],
+      //
+      //       },
+      //       extractTextPluginOptions
+      //     )
+      //   ),
+      //   // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+      // },
       // ** STOP ** Are you adding a new loader?
       // Remember to add the new extension(s) to the "file" loader exclusion list.
     ],

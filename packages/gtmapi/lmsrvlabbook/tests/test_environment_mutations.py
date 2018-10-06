@@ -28,6 +28,7 @@ from gtmcore.labbook import LabBook
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from lmsrvcore.auth.user import get_logged_in_username
 from gtmcore.environment import ComponentManager
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 
 
 TIMEOUT_MAX = 45
@@ -66,7 +67,7 @@ class TestEnvironmentMutations(object):
         lb.new(owner={"username": "default"}, name="labbook-build1", description="building an env")
         # add a base
         cm = ComponentManager(lb)
-        cm.add_component("base", "gig-dev_components2", "ut-busybox", 0)
+        cm.add_base(ENV_UNIT_TEST_REPO, "ut-busybox", 0)
 
         query = """
         {
@@ -156,7 +157,7 @@ class TestEnvironmentMutations(object):
         lb.new(owner={"username": "default"}, name="labbook-build2", description="building an env")
         # add a base
         cm = ComponentManager(lb)
-        cm.add_component("base", "gig-dev_components2", "ut-busybox", 0)
+        cm.add_base(ENV_UNIT_TEST_REPO, "ut-busybox", 0)
 
         query = """
         {

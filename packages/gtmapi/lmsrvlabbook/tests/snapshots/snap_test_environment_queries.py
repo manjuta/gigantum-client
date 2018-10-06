@@ -46,7 +46,7 @@ snapshots['TestEnvironmentServiceQueries.test_get_base 2'] = {
                     'dockerImageServer': 'hub.docker.com',
                     'dockerImageTag': '1effaaea-2018-05-23',
                     'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                    'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
+                    'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
                     'languages': [
                         'python3'
                     ],
@@ -106,7 +106,7 @@ RUN pip3 install Pillow==4.2.1
                                 'id': 'Q3VzdG9tQ29tcG9uZW50OmdpZy1kZXZfY29tcG9uZW50czImcGlsbG93JjA=',
                                 'license': 'PIL Software License',
                                 'name': 'Pillow',
-                                'repository': 'gig-dev_components2',
+                                'repository': 'gigantum_base-images-testing',
                                 'requiredPackageManagers': [
                                     'apt',
                                     'pip'

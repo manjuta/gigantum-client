@@ -49,7 +49,7 @@ def repo_url_to_name(url: str) -> str:
 
 
 class RepositoryManager(object):
-    """Class to manage local copies of Environment Component Repositories
+    """Class to manage local copies of Base Repositories
     """
 
     def __init__(self, config_file: str=None) -> None:
@@ -164,11 +164,11 @@ class RepositoryManager(object):
         else:
             return False
 
-    def index_component_repository(self, repo_name: str, component: str) -> OrderedDict:
-        """Method to 'index' a base_image directory in a single environment component repository
+    def index_repository(self, repo_name: str) -> OrderedDict:
+        """Method to 'index' a base image directory in a single environment component repository
 
         Currently, the `index` is simply an ordered dictionary of all of the base image components in the repo
-        The dictionary contains the contents of the YAML files for every version of the component and is strucutured:
+        The dictionary contains the contents of the YAML files for every version of the component and is structured:
 
             {
                 "<repo_name>": {
@@ -187,11 +187,10 @@ class RepositoryManager(object):
         """
         # Get full path to repo
         repo_dir = os.path.join(self.local_repo_directory, repo_name)
-        component_repo_dir = os.path.join(repo_dir, component)
 
         # Get all base image YAML files
-        # E.g., repo/<base|custom>/*/*
-        yaml_files = glob.glob(os.path.join(component_repo_dir, "*", "*"))
+        # E.g., repo/*/*.yaml
+        yaml_files = glob.glob(os.path.join(repo_dir, "*", "*.yaml"))
 
         data: OrderedDict[str, Any] = OrderedDict()
         data[repo_name] = OrderedDict()
@@ -204,7 +203,7 @@ class RepositoryManager(object):
 
                 # Save the COMPONENT repository to aid in accessing components via API
                 # Will pack this info into the `component` field for use in mutations to access the component
-                yaml_data["###repository###"] = repo_name
+                yaml_data["repository"] = repo_name
 
                 if component_name not in data[repo_name]:
                     data[repo_name][component_name] = OrderedDict()
@@ -214,28 +213,29 @@ class RepositoryManager(object):
 
         return data
 
-    def build_component_list_index(self, index_data: OrderedDict) -> List:
+    @staticmethod
+    def build_base_list_index(index_data: OrderedDict) -> List:
         """Method to convert the structured index of all versions into a flat list with only the latest version
 
         Returns:
             list
         """
-        component_list = []
+        base_list = []
         repos = list(index_data.keys())
         for repo in repos:
             if repo == 'info':
                 # ignore the repository info section
                 continue
 
-            components = list(index_data[repo].keys())
+            bases = list(index_data[repo].keys())
 
-            for component in components:
+            for base in bases:
                 # Sort based on the revision
-                revs = list(index_data[repo][component].items())
+                revs = list(index_data[repo][base].items())
                 revs = sorted(revs, reverse=True, key=operator.itemgetter(0))
-                component_list.append(revs[0][1])
+                base_list.append(revs[0][1])
 
-        return sorted(component_list, key=lambda n: n['id'])
+        return sorted(base_list, key=lambda n: n['id'])
 
     def index_repositories(self) -> None:
         """Method to index repos using a naive approach
@@ -250,25 +250,15 @@ class RepositoryManager(object):
         repo_names = [repo_url_to_name(x) for x in repo_urls]
 
         base_image_all_repo_data: OrderedDict = OrderedDict()
-        custom_all_repo_data: OrderedDict = OrderedDict()
         for repo_name in repo_names:
             # Index Base Images
-            base_image_all_repo_data.update(self.index_component_repository(repo_name, 'base'))
-
-            # Index Custom Deps
-            custom_all_repo_data.update(self.index_component_repository(repo_name, 'custom'))
+            base_image_all_repo_data.update(self.index_repository(repo_name))
 
         # Generate list index
-        base_image_list_repo_data = self.build_component_list_index(base_image_all_repo_data)
-        custom_list_repo_data = self.build_component_list_index(custom_all_repo_data)
+        base_image_list_repo_data = self.build_base_list_index(base_image_all_repo_data)
 
         # Write files
         with open(os.path.join(self.local_repo_directory, "base_index.pickle"), 'wb') as fh:
             pickle.dump(base_image_all_repo_data, fh)
         with open(os.path.join(self.local_repo_directory, "base_list_index.pickle"), 'wb') as fh:
             pickle.dump(base_image_list_repo_data, fh)
-
-        with open(os.path.join(self.local_repo_directory, "custom_index.pickle"), 'wb') as fh:
-            pickle.dump(custom_all_repo_data, fh)
-        with open(os.path.join(self.local_repo_directory, "custom_list_index.pickle"), 'wb') as fh:
-            pickle.dump(custom_list_repo_data, fh)

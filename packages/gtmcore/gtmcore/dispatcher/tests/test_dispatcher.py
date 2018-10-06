@@ -178,7 +178,7 @@ class TestDispatcher(object):
                              owner={"username": "unittester"})
 
         cm = ComponentManager(lb)
-        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)
         assert os.path.exists(os.path.join(labbook_dir, '.gigantum', 'env', 'Dockerfile'))
@@ -225,7 +225,7 @@ class TestDispatcher(object):
                              owner={"username": "unittester"})
 
         cm = ComponentManager(lb)
-        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'quickstart-jupyterlab', 2)
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, 'quickstart-jupyterlab', 2)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)

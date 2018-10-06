@@ -44,8 +44,8 @@ class TestJobs(object):
         labbook_dir = lb.new(name="unittest-lb-for-export-import-test", description="Testing import-export.",
                              owner={"username": 'unittester'})
         cm = ComponentManager(lb)
-        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
-                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                    gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile()
@@ -125,8 +125,8 @@ class TestJobs(object):
         labbook_dir = lb.new(name="unittest-lb-for-export-import-test-lbk", description="Testing import-export.",
                              owner={"username": 'unittester'})
         cm = ComponentManager(lb)
-        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
-                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                    gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile()
@@ -182,8 +182,8 @@ class TestJobs(object):
         labbook_dir = lb.new(name="lb-fail-export-import-test", description="Failing import-export.",
                              owner={"username": "test"})
         cm = ComponentManager(lb)
-        cm.add_component("base", gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
-                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                    gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
         lb_root = lb.root_dir
         with tempfile.TemporaryDirectory() as temp_dir_path:

@@ -163,6 +163,7 @@
 
 
 .Overview__readme--editing {
+  text-align: left;
   padding: 10px;
   color: $romanSilver;
   z-index: index($elements, card);
@@ -203,6 +204,7 @@
   background: white;
   min-height: 200px;
   overflow: hidden;
+  text-align: left;
   h1 {
     padding: 10px 0;
     font-size: 2em;

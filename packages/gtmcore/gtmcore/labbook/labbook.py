@@ -1266,12 +1266,12 @@ class LabBook(object):
         files_collected = sorted(files_collected)
 
         # Generate dictionary to return
-        result: List[Dict[str, str]] = list()
+        result: List[Dict[str, Any]] = list()
         for dir_path in files_collected:
             if os.path.isdir(dir_path):
                 _, username, owner, _, labbook = dir_path.rsplit(os.path.sep, 4)
 
-                lb_item = {"owner": owner, "name": labbook}
+                lb_item: Dict[str, Any] = {"owner": owner, "name": labbook}
 
                 if sort_mode == 'name':
                     lb_item['sort_val'] = labbook

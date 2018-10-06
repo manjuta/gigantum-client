@@ -555,11 +555,11 @@ snapshots['TestLabBookServiceMutations.test_create_labbook 2'] = {
                                     'data': [
                                         [
                                             'text/plain',
-                                            '''Added a `base` class environment component quickstart-jupyterlab
+                                            '''Added base quickstart-jupyterlab
 
 Data Science Quickstart using Jupyterlab, numpy, and Matplotlib. A great base for any analysis.
 
-  - repository: gig-dev_components2
+  - repository: gigantum_base-images-testing
   - component: quickstart-jupyterlab
   - revision: 2
 '''
@@ -574,7 +574,7 @@ Data Science Quickstart using Jupyterlab, numpy, and Matplotlib. A great base fo
                             ],
                             'email': 'jane@doe.com',
                             'importance': 0,
-                            'message': 'Add base environment component: quickstart-jupyterlab',
+                            'message': 'Added base: quickstart-jupyterlab',
                             'show': True,
                             'tags': [
                                 'environment',

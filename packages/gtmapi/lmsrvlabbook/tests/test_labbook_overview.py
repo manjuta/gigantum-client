@@ -96,33 +96,6 @@ class TestLabBookOverviewQueries(object):
                     """
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
 
-    def test_custom_counts(self, fixture_working_dir_env_repo_scoped, snapshot):
-        """Test getting the a LabBook's package manager dependencies"""
-        # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook55", description="my first labbook10000")
-
-        cm = ComponentManager(lb)
-        # Add packages
-        cm.add_component("custom", ENV_UNIT_TEST_REPO, "pillow", 0)
-        cm.add_component("custom", ENV_UNIT_TEST_REPO, "noop-2", 0)
-        cm.add_component("custom", ENV_UNIT_TEST_REPO, "noop-1", 0)
-
-        query = """
-                    {
-                      labbook(owner: "default", name: "labbook55") {
-                        overview {
-                          numAptPackages
-                          numConda2Packages
-                          numConda3Packages
-                          numPipPackages
-                          numCustomDependencies
-                        }
-                      }
-                    }
-                    """
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
-
     def test_get_recent_activity(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test paging through activity records"""
         lb = LabBook(fixture_working_dir[0], author=GitAuthor(name="tester", email="tester@test.com"))

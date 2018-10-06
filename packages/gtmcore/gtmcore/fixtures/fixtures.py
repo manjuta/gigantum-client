@@ -37,7 +37,7 @@ from gtmcore.files import FileOperations
 import requests
 
 
-ENV_UNIT_TEST_REPO = 'gig-dev_components2'
+ENV_UNIT_TEST_REPO = 'gigantum_base-images-testing'
 ENV_UNIT_TEST_BASE = 'quickstart-jupyterlab'
 ENV_UNIT_TEST_REV = 2
 
@@ -65,7 +65,7 @@ def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
             'import_demo_on_first_login': False
         },
         'environment': {
-            'repo_url': ["https://github.com/gig-dev/components2.git"]
+            'repo_url': ["https://github.com/gigantum/base-images-testing.git"]
         },
         'flask': {
             'DEBUG': False
@@ -345,20 +345,6 @@ def mock_config_lfs_disabled():
 
 
 @pytest.fixture()
-def mock_labbook_with_populated_env():
-    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
-
-    conf_file, working_dir = _create_temp_work_dir()
-    lb = LabBook(conf_file)
-    labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
-                             owner={"username": "test"})
-    env = ComponentManager(lb)
-    env.add
-    yield conf_file, labbook_dir, lb
-    shutil.rmtree(working_dir)
-
-
-@pytest.fixture()
 def mock_duplicate_labbook():
     """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
 
@@ -423,7 +409,7 @@ def labbook_dir_tree():
             os.makedirs(os.path.join(tempdir, "my-temp-labbook", *subdir), exist_ok=True)
 
         with tempfile.TemporaryDirectory() as checkoutdir:
-            repo = git.Repo.clone_from("https://github.com/gig-dev/components2.git", checkoutdir)
+            repo = git.Repo.clone_from("https://github.com/gigantum/base-images-testing.git", checkoutdir)
             shutil.copy(os.path.join(checkoutdir, "base/quickstart-jupyterlab/quickstart-jupyterlab_r0.yaml"),
                         os.path.join(tempdir, "my-temp-labbook", ".gigantum", "env", "base"))
             shutil.copy(os.path.join(checkoutdir, "custom/pillow/pillow_r0.yaml"),

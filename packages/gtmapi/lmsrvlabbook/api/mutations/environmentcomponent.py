@@ -28,9 +28,8 @@ from gtmcore.environment import ComponentManager
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent, PackageComponentInput
-from lmsrvlabbook.api.objects.customcomponent import CustomComponent
 from lmsrvlabbook.api.objects.environment import Environment
-from lmsrvlabbook.api.connections.environment import CustomComponentConnection, PackageComponentConnection
+from lmsrvlabbook.api.connections.environment import PackageComponentConnection
 
 logger = LMLogger.get_logger()
 
@@ -150,61 +149,3 @@ class RemoveCustomDocker(graphene.relay.ClientIDMutation):
             cm = ComponentManager(lb)
             cm.remove_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME)
         return RemoveCustomDocker(updated_environment=Environment(owner=owner, name=labbook_name))
-
-
-class AddCustomComponent(graphene.relay.ClientIDMutation):
-    """Mutation to add a new environment component to a LabBook"""
-
-    class Input:
-        owner = graphene.String(required=True)
-        labbook_name = graphene.String(required=True)
-        repository = graphene.String(required=True)
-        component_id = graphene.String(required=True)
-        revision = graphene.Int(required=True)
-
-    new_custom_component_edge = graphene.Field(lambda: CustomComponentConnection.Edge)
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, repository, component_id, revision,
-                               client_mutation_id=None):
-        # TODO: get cursor by checking how many packages are already installed
-        username = get_logged_in_username()
-
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-
-        with lb.lock_labbook():
-            cm = ComponentManager(lb)
-            cm.add_component("custom", repository, component_id, revision, force=True)
-
-            new_edge = CustomComponentConnection.Edge(
-                node=CustomComponent(repository=repository,
-                                     component_id=component_id,
-                                     revision=revision),
-                cursor=0)
-
-        return AddCustomComponent(new_custom_component_edge=new_edge)
-
-
-class RemoveCustomComponent(graphene.relay.ClientIDMutation):
-    """Mutation to remove an environment component to a LabBook"""
-
-    class Input:
-        owner = graphene.String(required=True)
-        labbook_name = graphene.String(required=True)
-        repository = graphene.String(required=True)
-        component_id = graphene.String(required=True)
-
-    success = graphene.Boolean()
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, repository, component_id, client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-
-        with lb.lock_labbook():
-            cm = ComponentManager(lb)
-            cm.remove_component("custom", repository, component_id)
-
-        return RemoveCustomComponent(success=True)

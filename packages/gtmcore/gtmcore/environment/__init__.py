@@ -1,4 +1,4 @@
 from gtmcore.environment.packagemanager import PackageManager
 from gtmcore.environment.repositorymanager import RepositoryManager
-from gtmcore.environment.repository import ComponentRepository
+from gtmcore.environment.repository import BaseRepository
 from gtmcore.environment.componentmanager import ComponentManager
