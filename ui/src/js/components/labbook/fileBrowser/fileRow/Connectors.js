@@ -1,6 +1,7 @@
 import React from 'react';
 import { DragSource } from 'react-dnd';
-import { createFiles } from './../utilities/FileBrowserMethods'
+// utilities
+import CreateFiles from './../utilities/CreateFiles';
 
 const dragSource = {
 
@@ -29,7 +30,6 @@ const dragSource = {
   endDrag(props, monitor, component) {
     if (!monitor.didDrop()) {
 
-      // console.log(monitor)
       return;
     }
 
@@ -90,7 +90,6 @@ const targetSource = {
      return true;
   },
   drop(props, monitor, component) {
-    console.log(props);
     const dndItem = monitor.getItem();
 
     let newPath,
@@ -113,11 +112,9 @@ const targetSource = {
                     let key = props.data.edge.node.key || props.fileKey;
                     path = key.substr(0, key.lastIndexOf('/') || key.length);
 
-                     // handle dragged folder(s)
-                     // create files
                      console.log(fileList, props)
                      if (fileList) {
-                        createFiles(fileList, `${path}/`, props.mutationData);
+                        CreateFiles.createFiles(fileList, `${path}/`, props.mutationData);
                      }
                      files = fileList;
                   } else if (dndItem.files && dndItem.files.length) {
@@ -127,7 +124,7 @@ const targetSource = {
                        let item = monitor.getItem();
 
                        if (item && item.files && props.browserProps.createFiles) {
-                         props.browserProps.createFiles(item.files, `${path}/`);
+                         CreateFiles.createFiles(item.files, `${path}/`, props.mutationData);
                        }
                        newPath = null;
                        fileKey = null;

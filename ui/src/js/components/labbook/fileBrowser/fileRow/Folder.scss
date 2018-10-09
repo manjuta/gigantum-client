@@ -28,6 +28,17 @@
   &--name{
       margin: 0 20px;
       flex: 1;
+
+      padding: 0 0 0 35px;
+      line-height: 26px;
+
+      background: url(~Images/icons/folder.svg) no-repeat 0% 50%;
+      background-size: 20px;
+  }
+
+  &--open{
+    background: url(~Images/icons/folder-open.svg) no-repeat 0% 50%;
+    background-size: 20px;
   }
 
   &--size{
@@ -107,13 +118,4 @@
 
 .Folder__child{
     margin-left: 20px;
-}
-
-.Folder__subfolder{
-    height: 50px;
-    padding: 12px 0;
-
-    text-align: left;
-
-    background: $background-color;
 }

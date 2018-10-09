@@ -7,6 +7,7 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 // components
 import ActionsMenu from './ActionsMenu';
 import File from './File';
+import AddSubfolder from './AddSubfolder';
 // assets
 import './Folder.scss';
 // components
@@ -35,21 +36,26 @@ class Folder extends Component {
     *  @return {}
     */
     _setSelected(isSelected) {
-        this.setState({ isSelected, isIncomplete: false }, () => {
-            console.log(this.refs)
-            Object.keys(this.refs).forEach((ref) => {
-                  const folder = this.refs[ref];
+        this.setState(
+          {
+            isSelected,
+            isIncomplete: false,
+          },
+          () => {
+              Object.keys(this.refs).forEach((ref) => {
+                    const folder = this.refs[ref];
 
-                  if (folder._setSelected) {
-                    folder._setSelected(isSelected);
-                  } else {
-                    folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected);
-                  }
-            });
-            if (this.props.checkParent) {
-                this.props.checkParent();
-            }
-        });
+                    if (folder._setSelected) {
+                      folder._setSelected(isSelected);
+                    } else {
+                      folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected);
+                    }
+              });
+              if (this.props.checkParent) {
+                  this.props.checkParent();
+              }
+          },
+        );
     }
 
     /**
@@ -72,10 +78,11 @@ class Folder extends Component {
     _checkParent() {
         let checkCount = 0;
         Object.keys(this.refs).forEach((ref) => {
-            if (this.refs[ref].state.isSelected) {
+            if (this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state.isSelected) {
                 checkCount += 1;
             }
         });
+
         if (checkCount === 0) {
             this.setState(
               {
@@ -125,7 +132,7 @@ class Folder extends Component {
     */
     _expandSection(evt) {
       if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
-        this.setState({ expanded: !this.state.expanded })
+        this.setState({ expanded: !this.state.expanded });
       }
     }
 
@@ -134,13 +141,12 @@ class Folder extends Component {
     *  sets elements to be selected and parent
     */
     connectDND(render) {
-      // console.log(this.props);
       if (this.state.isDragging) {
         render = this.props.connectDragSource(render);
       } else {
         render = this.props.connectDropTarget(render);
       }
-      // console.log('dragging', this.props.isDragging)
+
       return render;
     }
     /**
@@ -160,7 +166,6 @@ class Folder extends Component {
     }
 
     render() {
-
         const { node } = this.props.data.edge;
         const { children } = this.props.data;
         const childrenKeys = Object.keys(children);
@@ -179,6 +184,11 @@ class Folder extends Component {
             hidden: !this.state.expanded,
         });
 
+        const folderNameCSS = classNames({
+          'Folder__cell Folder__cell--name': true,
+          'Folder__cell--open': this.state.expanded,
+        })
+
         const splitKey = node.key.split('/');
         const folderName = splitKey[splitKey.length - 2];
 
@@ -190,7 +200,7 @@ class Folder extends Component {
                         className={buttonCSS}
                         onClick={() => this._setSelected(!this.state.isSelected)}>
                     </button>
-                    <div className="Folder__cell Folder__cell--name">
+                    <div className={folderNameCSS}>
                       <div className="Folder__icon">
                       </div>
                       <div className="Folder__name">
@@ -208,20 +218,22 @@ class Folder extends Component {
                     </div>
                 </div>
                 <div className={folderChildCSS}>
-                    <div
-                        className="Folder__subfolder">
-                        Add Subfolder
-                    </div>
+                    <AddSubfolder
+                      key={`${node.key}__subfolder`}
+                      folderKey={node.key}
+                      mutationData={this.props.mutationData}
+                      mutations={this.props.mutations}
+                    />
                     {
-                        childrenKeys.map((childFile) => {
-                            if (children[childFile].children) {
+                        childrenKeys.map((file) => {
+                            if (children[file].children) {
                                 return (
                                     <FolderDND
+                                        key={children[file].edge.node.key}
+                                        ref={children[file].edge.node.key}
                                         mutations={this.props.mutations}
                                         mutationData={this.props.mutationData}
-                                        ref={children[childFile].edge.node.key}
-                                        data={children[childFile]}
-                                        key={children[childFile].edge.node.key}
+                                        data={children[file]}
                                         isSelected={this.state.isSelected}
                                         setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}>
@@ -232,9 +244,9 @@ class Folder extends Component {
                                 <File
                                     mutations={this.props.mutations}
                                     mutationData={this.props.mutationData}
-                                    ref={children[childFile].edge.node.key}
-                                    data={children[childFile]}
-                                    key={children[childFile].edge.node.key}
+                                    ref={children[file].edge.node.key}
+                                    data={children[file]}
+                                    key={children[file].edge.node.key}
                                     isSelected={this.state.isSelected}
                                     checkParent={this._checkParent}>
                                 </File>
@@ -245,7 +257,7 @@ class Folder extends Component {
 
             </div>);
 
-        return(
+        return (
           this.connectDND(folder)
         );
     }

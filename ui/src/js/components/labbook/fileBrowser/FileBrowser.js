@@ -6,6 +6,7 @@ import './FileBrowser.scss';
 // components
 import File from './fileRow/File';
 import Folder from './fileRow/Folder';
+import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 
 export default class FileBrowser extends Component {
@@ -33,7 +34,10 @@ export default class FileBrowser extends Component {
                 const currentKey = splitKey[0];
 
                 if (!currentFileObjectPosition[currentKey]) {
-                    currentFileObjectPosition[currentKey] = { children: {} };
+                    currentFileObjectPosition[currentKey] = {
+                                                  children: {},
+                                                  edge,
+                                                };
                 }
                 currentFileObjectPosition = currentFileObjectPosition[currentKey].children;
                 splitKey = splitKey.slice(1, splitKey.length);
@@ -49,7 +53,7 @@ export default class FileBrowser extends Component {
                 }
             }
         });
-        console.log(collectedFiles);
+
         return collectedFiles;
   }
   /**
@@ -97,6 +101,12 @@ export default class FileBrowser extends Component {
                     </div>
                 </div>
             <div className="FileBrowser__body">
+                <AddSubfolder
+                  key={'rootAddSubfolder'}
+                  folderKey=""
+                  mutationData={mutationData}
+                  mutations={this.state.mutations}
+                />
                 {
                     Object.keys(files).map((file) => {
                         if (files[file].children) {

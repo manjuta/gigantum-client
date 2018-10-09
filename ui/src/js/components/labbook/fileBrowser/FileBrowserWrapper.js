@@ -16,7 +16,6 @@ import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/Comple
 import FolderUpload from './folderUpload';
 // Config
 import config from 'JS/config';
-
 // utilities
 import ChunkUploader from 'JS/utils/ChunkUploader';
 // store
@@ -157,7 +156,7 @@ export default class FileBrowserWrapper extends Component {
   *  @param {array, boolean}
   *  updates footer message depending on the type of upload
   */
-  _creteFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData) {
+  _createFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData) {
     if (totalFiles > 0) {
       setStartedUploading();
       setUploadMessageSetter(`Preparing Upload for ${totalFiles} files`, Math.random() * 10000, totalFiles);

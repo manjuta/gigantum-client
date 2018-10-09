@@ -14,8 +14,6 @@ class FileBrowserMutations {
     * pass above props to state
     */
    constructor(props) {
-
-    console.log(props)
     this.state = props
    }
 
@@ -26,7 +24,6 @@ class FileBrowserMutations {
    makeLabbookDirectory(data, callback) {
      const {
        key,
-       section,
      } = data;
 
      const {
@@ -34,6 +31,7 @@ class FileBrowserMutations {
        owner,
        labbookName,
        parentId,
+       section,
      } = this.state;
 
      MakeLabbookDirectoryMutation(
@@ -48,6 +46,8 @@ class FileBrowserMutations {
            console.error(error);
            setErrorMessage(`ERROR: could not create ${key}`, error);
          }
+
+         callback(response, error);
        },
      );
    }
