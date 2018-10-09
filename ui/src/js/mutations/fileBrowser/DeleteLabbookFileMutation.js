@@ -40,9 +40,11 @@ export default function DeleteLabbookFileMutation(
       clientMutationId: `${tempID++}`,
     },
   };
-  const recentConnectionKey = section === 'code' ? 'MostRecentCode_allFiles' :
-    section === 'input' ? 'MostRecentInput_allFiles' :
-      'MostRecentOutput_allFiles';
+  const recentConnectionKey = section === 'code' ?
+        'MostRecentCode_allFiles' :
+        section === 'input' ?
+        'MostRecentInput_allFiles' :
+        'MostRecentOutput_allFiles';
 
   function sharedUpdater(store, labbookID, deletedID, connectionKey) {
     const userProxy = store.get(labbookID);

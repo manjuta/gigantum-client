@@ -7,6 +7,7 @@ import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation
 import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/CompleteBatchUploadTransactionMutation';
 // store
 import store from 'JS/redux/store';
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 
 class FileBrowserMutations {
    /**
@@ -14,7 +15,7 @@ class FileBrowserMutations {
     * pass above props to state
     */
    constructor(props) {
-    this.state = props
+    this.state = props;
    }
 
    /**
@@ -60,7 +61,7 @@ class FileBrowserMutations {
         edge,
         newKey,
       } = data;
-      console.log(this.state)
+
       const {
         connection,
         owner,
@@ -177,16 +178,16 @@ class FileBrowserMutations {
   */
   deleteLabbookFile(data, callback) {
     const {
-        folderKey,
-        edge,
-        favorites,
-      } = data,
-      edgeId = edge.node.id;
+          key,
+          edge,
+        } = data,
+        edgeId = edge.node.id;
 
     const {
         connection,
         owner,
         labbookName,
+        parentId,
         section,
       } = this.state;
 
@@ -196,13 +197,13 @@ class FileBrowserMutations {
       labbookName,
       parentId,
       edgeId,
-      folderKey,
+      key,
       section,
       edge,
       (response, error) => {
         if (error) {
           console.error(error);
-          setErrorMessage(`ERROR: could not delete folder ${folderKey}`, error);
+          setErrorMessage(`ERROR: could not delete folder ${key}`, error);
         }
       },
     );

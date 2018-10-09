@@ -116,6 +116,21 @@
     }
 }
 
-.Folder__child{
-    margin-left: 20px;
+.Folder__child {
+    padding-left: 20px;
+
+    .AddSubfolder{
+      height: 50px;
+      padding: 12px 0 12px 120px;
+      cursor: pointer;
+      text-align: left;
+      background: #f0f1f5 url(~Images/icons/folder-add.svg) no-repeat 87px 50%;
+      background-size: 20px;
+      line-height: 30px;
+    }
+
+    .File__row,
+    .Folder__row {
+      padding-left: 30px;
+    }
 }

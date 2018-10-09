@@ -50,14 +50,14 @@ const createFiles = (files, prefix, mutationData) => {
       startFileUpload(files, prefix, fileSizeData, mutationData);
     }
   // }
-}
+};
 /**
 *  @param {}
 *  show modal assking user if they want to upload files between 10-100 MB
 */
 const promptUserToAcceptUpload = () => {
   // this.setState({ fileSizePromptVisible: true });
-}
+};
 /**
 *  @param {array, string, Int}
 *  flattens file Array
@@ -101,7 +101,7 @@ const startFolderUpload = (folderFiles, prefix, totalFiles, mutationData) => {
     totalFiles,
     count,
   );
-}
+};
 /**
 *  @param {array, string}
 *  gets file count and upload type
@@ -165,7 +165,7 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
   if (folderFiles.length > 0) {
     startFolderUpload(folderFiles, prefix, totalFiles, mutationData);
   }
-}
+};
 
 
 /**
@@ -232,7 +232,7 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData) 
   } else {
     setWarningMessage('Cannot upload these file types');
   }
-}
+};
 
  /**
   * @param {array} files
@@ -277,10 +277,10 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData) 
     filesRecursionCount(files);
 
     return { fileSizeNotAllowed, fileSizePrompt };
- }
+ };
 
 export default {
   createFiles,
   startFileUpload,
   startFolderUpload,
-}
+};

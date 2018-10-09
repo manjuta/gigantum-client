@@ -16,6 +16,8 @@ export default class FileBrowser extends Component {
       this.state = {
         mutations: new FileBrowserMutations(this._getMutationData()),
       };
+
+      this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
     }
     /**
     *  @param {}
@@ -62,7 +64,6 @@ export default class FileBrowser extends Component {
   *  @return {object}
   */
   _getMutationData() {
-
     const {
       parentId,
       connection,
@@ -80,6 +81,45 @@ export default class FileBrowser extends Component {
       section,
     };
   }
+  /**
+  *  @param {}
+  *  loops through selcted files and deletes them
+  *  @return {}
+  */
+  _deleteSelectedFiles() {
+    let self = this;
+    function loopDelete(refs) {
+      Object.keys(refs).forEach((filename) => {
+        const file = refs[filename].getDecoratedComponentInstance().getDecoratedComponentInstance();
+
+        const { edge } = file.props.data;
+
+        if (file.state.isSelected) {
+          self._deleteMutation(edge.node.key, edge);
+        } else if (file.props.data.edge.node.isDir && !file.state.isSelected) {
+          loopDelete(file.refs);
+        }
+      });
+    }
+
+    loopDelete(this.refs);
+  }
+
+  /**
+  *  @param {}
+  *  triggers delete muatation
+  *  @return {}
+  */
+  _deleteMutation(key, edge) {
+    const data = {
+      key,
+      edge,
+    };
+
+    this.state.mutations.deleteLabbookFile(data, (response) => {
+      console.log(response, edge);
+    });
+  }
 
   render() {
     const files = this._processFiles(),
@@ -89,6 +129,8 @@ export default class FileBrowser extends Component {
         <div className="FileBrowser">
                 <div className="FileBrowser__header">
                     <div>
+                        <button className="FileBrowser__btn FileBrowser__btn --delete"
+                          onClick={() => { this._deleteSelectedFiles(); }} />
                         File
                     </div>
 
@@ -112,18 +154,20 @@ export default class FileBrowser extends Component {
                         if (files[file].children) {
                             return (
                                 <Folder
+                                    ref={file}
+                                    key={files[file].edge.node.key}
                                     mutationData={mutationData}
                                     data={files[file]}
-                                    key={files[file].edge.node.key}
                                     mutations={this.state.mutations}>
                                 </Folder>
                             );
                         }
                         return (
                             <File
+                                ref={file}
+                                key={files[file].edge.node.key}
                                 mutationData={mutationData}
                                 data={files[file]}
-                                key={files[file].edge.node.key}
                                 mutations={this.state.mutations}>
                             </File>
                         );

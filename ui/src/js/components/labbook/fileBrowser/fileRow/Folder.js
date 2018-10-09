@@ -170,24 +170,22 @@ class Folder extends Component {
         const { children } = this.props.data;
         const childrenKeys = Object.keys(children);
         const folderRowCSS = classNames({
-            Folder__row: true,
-            'Folder__row--expanded': this.state.expanded,
-        });
-        const buttonCSS = classNames({
-            Folder__btn: true,
-            'Folder__btn--selected': this.state.isSelected,
-            'Folder__btn--incomplete': this.state.isIncomplete,
-        });
-
-        const folderChildCSS = classNames({
-            Folder__child: true,
-            hidden: !this.state.expanded,
-        });
-
-        const folderNameCSS = classNames({
-          'Folder__cell Folder__cell--name': true,
-          'Folder__cell--open': this.state.expanded,
-        })
+              Folder__row: true,
+              'Folder__row--expanded': this.state.expanded,
+            }),
+            buttonCSS = classNames({
+                Folder__btn: true,
+                'Folder__btn--selected': this.state.isSelected,
+                'Folder__btn--incomplete': this.state.isIncomplete,
+            }),
+            folderChildCSS = classNames({
+                Folder__child: true,
+                hidden: !this.state.expanded,
+            }),
+            folderNameCSS = classNames({
+              'Folder__cell Folder__cell--name': true,
+              'Folder__cell--open': this.state.expanded,
+            });
 
         const splitKey = node.key.split('/');
         const folderName = splitKey[splitKey.length - 2];
