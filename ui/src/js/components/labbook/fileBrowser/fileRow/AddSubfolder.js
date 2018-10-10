@@ -32,8 +32,6 @@ class AddSubfolder extends Component {
   *  @return {}
   */
   _clickedOffInput(evt) {
-
-    console.log(evt.target.className.indexOf('AddSubfolder'))
     if (!(evt.target.className.indexOf('AddSubfolder') > -1)) {
       this._clearState();
     }

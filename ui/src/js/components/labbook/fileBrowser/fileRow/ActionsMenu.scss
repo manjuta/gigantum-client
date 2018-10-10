@@ -2,77 +2,108 @@
 
 .ActionsMenu{
     right: 20px;
-    background: $background-color;
-    border: 1px solid $romanSilver;
-    border-radius: 10px;
-    @include flex(space-between, row);
+
     padding: 2px;
 
-    & div{
-        margin: 2.5px;
-    }
+    border: 1px solid $romanSilver;
+    border-radius: 10px;
+    background: $background-color;
+
+    @include flex(space-between, row);
+
 }
 
-.ActionsMenu__item{
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
+.ActionsMenu__item {
     position: relative;
 
-    &:hover:after{
-        content: attr(name);
+    width: 20px;
+    height: 20px;
+
+    cursor: pointer;
+
+    &:hover:after {
         position: absolute;
+        z-index: index($elements, popup);
         top: 25px;
         left: -15px;
-        background: $azure;
-        color: $white;
+
         padding: 2px;
+
+        content: attr(name);
+
+        color: $white;
+        background: $azure;
+
         font-size: 14px;
-        z-index: index($elements, popup);
     }
 
-    &--delete{
-        background: url('~Images/icons/trash.svg') no-repeat 50% 50% !important;
+    &--delete {
+        background: url('~Images/icons/trash.svg') no-repeat 50% 50%;
+        background-size: 20px;
 
         &:hover{
             //change color here
-            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50% !important;
+            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50%;
+            background-size: 20px;
         }
     }
 
-    &--rename{
-        background: url('~Images/icons/trash.svg') no-repeat 50% 50% !important;
-;
+    &--rename {
+        background: url('~Images/icons/trash.svg') no-repeat 50% 50%;
+        background-size: 20px;
+
         &:hover{
             //change color here
-            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50% !important;
+            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50%;
+            background-size: 20px;
         }
     }
 
-    &--duplicate{
-        background: url('~Images/icons/trash.svg') no-repeat 50% 50% !important;
+    &--duplicate {
+        background: url('~Images/icons/copy-light.svg') no-repeat 50% 50%;
+        background-size: 24px;
 
         &:hover{
             //change color here
-            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50% !important;
+            background: url('~Images/icons/copy-light.svg') no-repeat 50% 50%;
+            background-size: 24px;
         }
     }
 
-    &--favorite{
-        background: url('~Images/icons/trash.svg') no-repeat 50% 50% !important;
+    &--favorite-on {
+        background: url('~Images/icons/star__on.svg') no-repeat 50% 50%;
+        background-size: 20px;
 
-        &:hover{
+        &:hover {
             //change color here
-            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50% !important;
+            background: url('~Images/icons/star__on.svg') no-repeat 50% 50%;
+            background-size: 20px;
         }
     }
 
-    &--actions{
-        background: url('~Images/icons/trash.svg') no-repeat 50% 50% !important;
+    &--favorite-off {
+        background: url('~Images/icons/star__off.svg') no-repeat 50% 50%;
+        background-size: 20px;
 
-        &:hover{
+        &:hover {
             //change color here
-            background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50% !important;
+            background: url('~Images/icons/star__off.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+    }
+
+    &--menu {
+        width: 50px;
+
+        cursor: pointer;
+
+        background: transparent url('~Images/icons/ellipsis.svg') no-repeat 50% 50%;
+        background-size: 60px 30px;
+
+        &:hover {
+            //change color here
+            background: transparent url('~Images/icons/ellipsis.svg') no-repeat 50% 50%;
+            background-size: 65px 35px;
         }
     }
 

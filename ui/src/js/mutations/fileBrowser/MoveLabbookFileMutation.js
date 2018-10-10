@@ -110,7 +110,7 @@ export default function MoveLabbookFileMutation(
           );
 
           const node = store.create(id, 'MoveFile');
-          console.log(conn)
+
           if (conn) {
             const newEdge = RelayRuntime.ConnectionHandler.createEdge(
               store,

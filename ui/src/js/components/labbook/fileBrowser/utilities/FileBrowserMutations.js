@@ -71,7 +71,16 @@ class FileBrowserMutations {
       } = this.state;
 
       const { key } = edge.node;
-
+      console.log(
+          connection,
+          owner,
+          labbookName,
+          parentId,
+          edge,
+          key,
+          newKey,
+          section,
+        )
       MoveLabbookFileMutation(
         connection,
         owner,
@@ -92,12 +101,12 @@ class FileBrowserMutations {
   */
   addFavorite(data, callback) {
     const {
-      connection,
-      newKey,
+      key,
       edge,
     } = data;
 
     const {
+      connection,
       favoriteConnection,
       owner,
       labbookName,
@@ -111,7 +120,7 @@ class FileBrowserMutations {
       parentId,
       owner,
       labbookName,
-      newKey,
+      key,
       '',
       false,
       edge,
@@ -119,7 +128,7 @@ class FileBrowserMutations {
       (response, error) => {
         if (error) {
           console.error(error);
-          setErrorMessage(`ERROR: could not add favorite ${newKey}`, error);
+          setErrorMessage(`ERROR: could not add favorite ${key}`, error);
         }
       },
     );
@@ -131,7 +140,7 @@ class FileBrowserMutations {
   */
   removeFavorite(data, callback) {
     const {
-        oldKey,
+        key,
         edge,
         favorites,
       } = data,
@@ -145,28 +154,27 @@ class FileBrowserMutations {
         parentId,
       } = this.state;
 
-    let { newKey } = data;
-
     RemoveFavoriteMutation(
       favoriteConnection,
       parentId,
       owner,
       labbookName,
       section,
-      oldKey,
+      key,
       edgeId,
       edge,
       favorites,
       (response, error) => {
         if (error) {
           console.error(error);
-          setErrorMessage(`ERROR: could not remove favorite ${oldKey}`, error);
+          setErrorMessage(`ERROR: could not remove favorite ${key}`, error);
         } else {
-          if (newKey[0] === '/') {
-            newKey = newKey.slice(1);
+          let tempKey = key;
+          if (tempKey[0] === '/') {
+            tempKey = tempKey.slice(1);
           }
 
-          callback(newKey);
+          callback(tempKey);
         }
       },
     );

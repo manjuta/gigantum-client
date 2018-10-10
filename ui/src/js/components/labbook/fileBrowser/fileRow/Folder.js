@@ -174,13 +174,13 @@ class Folder extends Component {
               'Folder__row--expanded': this.state.expanded,
             }),
             buttonCSS = classNames({
-                Folder__btn: true,
-                'Folder__btn--selected': this.state.isSelected,
-                'Folder__btn--incomplete': this.state.isIncomplete,
+              Folder__btn: true,
+              'Folder__btn--selected': this.state.isSelected,
+              'Folder__btn--incomplete': this.state.isIncomplete,
             }),
             folderChildCSS = classNames({
-                Folder__child: true,
-                hidden: !this.state.expanded,
+              Folder__child: true,
+              hidden: !this.state.expanded,
             }),
             folderNameCSS = classNames({
               'Folder__cell Folder__cell--name': true,
@@ -190,7 +190,10 @@ class Folder extends Component {
         const splitKey = node.key.split('/');
         const folderName = splitKey[splitKey.length - 2];
 
-        let folder = this.props.connectDragPreview(<div onMouseLeave={() => { this._mouseLeave(); }} onMouseEnter={() => { this._mouseEnter(); }} className="Folder">
+        let folder = this.props.connectDragPreview(<div
+          onMouseLeave={() => { this._mouseLeave(); }}
+          onMouseEnter={() => { this._mouseEnter(); }}
+          className="Folder">
                 <div
                     className={folderRowCSS}
                     onClick={evt => this._expandSection(evt)}>
@@ -212,7 +215,12 @@ class Folder extends Component {
                         {Moment((node.modifiedAt * 1000), 'x').fromNow()}
                     </div>
                     <div className="Folder__cell Folder__cell--menu">
-                      <ActionsMenu />
+                      <ActionsMenu
+                        edge={this.props.data.edge}
+                        mutationData={this.props.mutationData}
+                        mutations={this.props.mutations}
+                        renameEditMode={ () => {} }
+                      />
                     </div>
                 </div>
                 <div className={folderChildCSS}>

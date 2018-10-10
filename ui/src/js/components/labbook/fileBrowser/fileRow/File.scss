@@ -48,6 +48,11 @@
     width: 140px;
   }
 
+  &--edit{
+    @include flex(space-around, row);
+    width: 500px;
+  }
+
 }
 
 .File__text{
@@ -126,4 +131,69 @@
     align-self: center;
 
     @extend .UserSelect--none;
+}
+
+
+
+.File__input[type="text"]{
+  height: 30px !important;
+  background: $white !important;
+  border-bottom: 0px solid $white !important;
+  box-shadow: 0 4px 30px 0 rgba(0, 0, 0, 0.1) !important;
+
+  margin: 0 20px 0 0 !important;
+
+  flex: 1;
+
+  &:focus{
+    height: 30px !important;
+    background: $white !important;
+    border-bottom: 0px solid $white !important;
+    box-shadow: 0 4px 30px 0 rgba(0, 0, 0, 0.4) !important;
+
+  }
+}
+
+.File__container {
+  position: relative;
+  min-width: 400px;
+}
+
+.File__btn {
+  &--add {
+    height: 30px;
+    width: 34px !important;
+    padding: 0;
+
+    border-radius: 15px;
+
+    background: $azure url(~Images/icons/add.svg) no-repeat center center;
+    background-size: 16px;
+    flex: 0 1 30px;
+
+    &:hover {
+      background: $turquise url(~Images/icons/add.svg) no-repeat center center;
+      background-size: 16px;
+    }
+
+    &:focus {
+      background: $azure url(~Images/icons/add.svg) no-repeat center center;
+      background-size: 16px;
+    }
+  }
+
+  &--clear,
+  &--clear:focus,
+  &--clear:hover {
+    position: absolute;
+    top: 50%;
+    right: 0%;
+    margin: -14px 0 0 -35px;
+    padding: 0 35px 0 0;
+    color: $romanSilver;
+    background-color: transparent;
+    border: 0;
+    background: url(~Images/icons/close.svg) no-repeat calc(100% - 5px) center;
+    background-size: 24px;
+  }
 }
