@@ -135,16 +135,19 @@ class DeleteLabbook(graphene.ClientIDMutation):
         lb.from_directory(inferred_lb_directory)
 
         if confirm:
-            # TODO - Take lock?
-            logger.warning(f"Deleting {str(lb)}...")
+            logger.info(f"Deleting {str(lb)}...")
             try:
                 lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
-            except OSError:
-                pass
+            except OSError as e:
+                logger.warning(e)
+
             lb, docker_removed = ContainerOperations.delete_image(labbook=lb, username=username)
             if not docker_removed:
                 raise ValueError(f'Cannot delete docker image for {str(lb)} - unable to delete LB from disk')
+
+            # TODO - gtmcore should contain routine to properly delete a labbook
             shutil.rmtree(lb.root_dir, ignore_errors=True)
+
             if os.path.exists(lb.root_dir):
                 logger.error(f'Deleted {str(lb)} but root directory {lb.root_dir} still exists!')
                 return DeleteLabbook(success=False)

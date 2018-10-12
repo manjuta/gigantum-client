@@ -138,7 +138,7 @@ class StopContainer(graphene.relay.ClientIDMutation):
     environment = graphene.Field(lambda: Environment)
 
     @classmethod
-    def stop_container(cls, lb, username):
+    def _stop_container(cls, lb, username):
         lb_ip = ContainerOperations.get_labbook_ip(lb, username)
         stop_labbook_monitor(lb, username)
         lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
@@ -168,6 +168,6 @@ class StopContainer(graphene.relay.ClientIDMutation):
         lb.from_name(username, owner, labbook_name)
 
         with lb.lock_labbook():
-            cls.stop_container(lb, username)
+            cls._stop_container(lb, username)
 
         return StopContainer(environment=Environment(owner=owner, name=labbook_name))
