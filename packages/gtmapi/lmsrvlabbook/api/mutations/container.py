@@ -45,7 +45,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     path = graphene.String()
 
     @classmethod
-    def _start_dev_tool(cls, lb, username, dev_tool, container_override_id):
+    def _start_dev_tool(cls, lb, username, dev_tool, container_override_id=None):
         lb_ip = ContainerOperations.get_labbook_ip(lb, username)
         lb_port = 8888
         lb_endpoint = f'http://{lb_ip}:{lb_port}'
@@ -91,7 +91,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         lb.from_name(username, owner, labbook_name)
 
         # TODO - Fail fast if already locked
-        with lb.lock_labbook():
-            path = cls._start_dev_tool(lb, username, container_override_id)
+        with lb.lock_labbook(failfast=True):
+            path = cls._start_dev_tool(lb, username, "jupyterlab")
 
         return StartDevTool(path=path)

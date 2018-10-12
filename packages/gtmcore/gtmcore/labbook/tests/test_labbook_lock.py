@@ -65,7 +65,7 @@ class TestLabBookLock(object):
             with mock_labbook[2].lock_labbook(failfast=True):
                 assert False, "Should not be able to acquire lock"
 
-        time.sleep(1.6)
+        time.sleep(1.8)
         with mock_labbook[2].lock_labbook(failfast=True):
             assert True
 
