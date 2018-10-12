@@ -19,7 +19,7 @@ coverage:
         - packages/gtmapi/*
     patch:
       core:
-        threshold: 6
+        threshold: 7
         paths:
         - packages/gtmcore/*
       api:

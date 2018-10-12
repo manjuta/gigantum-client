@@ -203,7 +203,7 @@ class LabBook(object):
             else:
                 if failfast:
                     raise LabbookLockedException("Cannot interrupt operation in progress")
-                raise IOError(f"Could not acquire LabBook lock within {config['timeout']} seconds.")
+                raise IOError(f"Could not acquire Project lock within {config['timeout']} seconds.")
 
         except Exception as e:
             logger.error(e)
