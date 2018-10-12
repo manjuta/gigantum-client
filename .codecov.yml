@@ -19,11 +19,11 @@ coverage:
         - packages/gtmapi/*
     patch:
       core:
-        threshold: 8
+        threshold: 9
         paths:
         - packages/gtmcore/*
       api:
-        threshold: 8
+        threshold: 9
         paths:
         - packages/gtmapi/*
     changes: no
