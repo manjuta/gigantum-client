@@ -206,9 +206,8 @@ class ImageBuilder(object):
             lb = LabBook()
             lb.from_directory(self.labbook.root_dir)
 
-            with lb.lock_labbook():
-                with open(dockerfile_name, "w") as dockerfile:
-                    dockerfile.write(os.linesep.join(docker_lines))
+            with open(dockerfile_name, "w") as dockerfile:
+                dockerfile.write(os.linesep.join(docker_lines))
         else:
             logger.info("Dockerfile NOT being written; write=False; {}".format(dockerfile_name))
 

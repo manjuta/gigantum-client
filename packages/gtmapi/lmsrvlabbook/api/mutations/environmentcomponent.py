@@ -49,13 +49,7 @@ class AddPackageComponents(graphene.relay.ClientIDMutation):
     new_package_component_edges = graphene.List(PackageComponentConnection.Edge)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, packages, client_mutation_id=None):
-        username = get_logged_in_username()
-
-        # Load LabBook instance
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-
+    def _add_package_components(cls, lb, packages):
         manager = list(set([x['manager'] for x in packages]))
         if len(manager) != 1:
             raise ValueError("Only batch add packages via 1 package manager at a time.")
@@ -76,6 +70,18 @@ class AddPackageComponents(graphene.relay.ClientIDMutation):
                                                                                    version=pkg["version"],
                                                                                    schema=CURRENT_SCHEMA),
                              cursor=base64.b64encode(str(cursor+cnt).encode()).decode()))
+        return new_edges
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, packages, client_mutation_id=None):
+        username = get_logged_in_username()
+
+        # Load LabBook instance
+        lb = LabBook(author=get_logged_in_author())
+        lb.from_name(username, owner, labbook_name)
+
+        with lb.lock_labbook():
+            new_edges = cls._add_package_components(lb, packages)
 
         return AddPackageComponents(new_package_component_edges=new_edges)
 
@@ -95,14 +101,12 @@ class RemovePackageComponents(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, manager, packages,
                                client_mutation_id=None):
         username = get_logged_in_username()
-
-        # Load LabBook instance
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
 
-        # Create Component Manager
-        cm = ComponentManager(lb)
-        cm.remove_packages(package_manager=manager, package_names=packages)
+        with lb.lock_labbook():
+            cm = ComponentManager(lb)
+            cm.remove_packages(package_manager=manager, package_names=packages)
 
         return RemovePackageComponents(success=True)
 
@@ -120,9 +124,11 @@ class AddCustomDocker(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
-        docker_lines = [n for n in docker_content.strip().split('\n') if n]
-        cm = ComponentManager(lb)
-        cm.add_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME, docker_lines)
+
+        with lb.lock_labbook():
+            docker_lines = [n for n in docker_content.strip().split('\n') if n]
+            cm = ComponentManager(lb)
+            cm.add_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME, docker_lines)
         return AddCustomDocker(updated_environment=Environment(owner=owner, name=labbook_name))
 
 
@@ -139,6 +145,7 @@ class RemoveCustomDocker(graphene.relay.ClientIDMutation):
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
         # TODO - Should we cehck if a custom docker component already exists?
-        cm = ComponentManager(lb)
-        cm.remove_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME)
+        with lb.lock_labbook():
+            cm = ComponentManager(lb)
+            cm.remove_docker_snippet(cm.DEFAULT_CUSTOM_DOCKER_NAME)
         return RemoveCustomDocker(updated_environment=Environment(owner=owner, name=labbook_name))

@@ -90,22 +90,21 @@ class BranchManager(object):
         if full_branch_name in self.branches:
             raise InvalidBranchName('Branch with title {title} already exists')
 
-        with self.labbook.lock_labbook():
-            self.labbook.sweep_uncommitted_changes()
-            if revision:
-                # The following call prints "commit" if {revision} exists in git history.
-                result = subprocess.check_output(f'git cat-file -t {revision} || echo "invalid"',
-                                                 cwd=self.labbook.root_dir, shell=True)
-                if result.decode().strip() != 'commit':
-                    logger.error(result.decode().strip())
-                    raise InvalidBranchName(f'Revision {revision} does not exist in {str(self.labbook)};'
-                                            f'cannot create branch {title}')
-                # Should be in a detached-head, and then make branch from there.
-                logger.info(f"Creating rollback branch from revision {revision} in {str(self.labbook)}")
-                r = subprocess.check_output(f'git checkout {revision}', cwd=self.labbook.root_dir, shell=True)
-                logger.info(r)
-            self.labbook.checkout_branch(branch_name=full_branch_name, new=True)
-            logger.info(f'Activated new branch {self.active_branch} in {str(self.labbook)}')
+        self.labbook.sweep_uncommitted_changes()
+        if revision:
+            # The following call prints "commit" if {revision} exists in git history.
+            result = subprocess.check_output(f'git cat-file -t {revision} || echo "invalid"',
+                                             cwd=self.labbook.root_dir, shell=True)
+            if result.decode().strip() != 'commit':
+                logger.error(result.decode().strip())
+                raise InvalidBranchName(f'Revision {revision} does not exist in {str(self.labbook)};'
+                                        f'cannot create branch {title}')
+            # Should be in a detached-head, and then make branch from there.
+            logger.info(f"Creating rollback branch from revision {revision} in {str(self.labbook)}")
+            r = subprocess.check_output(f'git checkout {revision}', cwd=self.labbook.root_dir, shell=True)
+            logger.info(r)
+        self.labbook.checkout_branch(branch_name=full_branch_name, new=True)
+        logger.info(f'Activated new branch {self.active_branch} in {str(self.labbook)}')
 
         return full_branch_name
 
@@ -127,10 +126,9 @@ class BranchManager(object):
         if target_branch == self.active_branch:
             raise BranchWorkflowViolation(f'Cannot delete current active branch `{target_branch}`')
 
-        with self.labbook.lock_labbook():
-            logger.info(f'Removing from {str(self.labbook)} feature branch `{target_branch}`')
-            # Note use "force=True" to prevent warning on merge.
-            self.labbook.git.delete_branch(target_branch, force=True)
+        logger.info(f'Removing from {str(self.labbook)} feature branch `{target_branch}`')
+        # Note use "force=True" to prevent warning on merge.
+        self.labbook.git.delete_branch(target_branch, force=True)
 
         if target_branch in self.branches:
             raise BranchWorkflowViolation(f'Removal of branch `{target_branch}` in {str(self.labbook)} failed.')
@@ -141,10 +139,9 @@ class BranchManager(object):
         if branch_name not in self.branches:
             raise InvalidBranchName(f'Target branch to work on `{branch_name}` does not exist')
 
-        with self.labbook.lock_labbook():
-            self.labbook.sweep_uncommitted_changes()
-            self.labbook.checkout_branch(branch_name=branch_name)
-            logger.info(f'Activated new branch {self.active_branch} in {str(self.labbook)}')
+        self.labbook.sweep_uncommitted_changes()
+        self.labbook.checkout_branch(branch_name=branch_name)
+        logger.info(f'Activated new branch {self.active_branch} in {str(self.labbook)}')
 
     def merge_from(self, other_branch: str, force: bool = False):
         """Pulls/merges `other_branch` into current branch. """
@@ -156,22 +153,21 @@ class BranchManager(object):
             raise InvalidBranchName(f'Other branch {other_branch} not mergeable into {self.active_branch}')
 
         logger.info(f"In {str(self.labbook)} merging branch `{other_branch}` into `{self.active_branch}`...")
-        with self.labbook.lock_labbook():
-            try:
-                self.labbook.sweep_uncommitted_changes()
-                if force:
-                    logger.warning("Using force to overwrite local changes")
-                    call_subprocess(['git', 'merge', '-s', 'recursive', '-X', 'theirs', other_branch],
-                                    cwd=self.labbook.root_dir)
-                else:
-                    try:
-                        call_subprocess(['git', 'merge', other_branch], cwd=self.labbook.root_dir)
-                    except (git.exc.GitCommandError, subprocess.CalledProcessError) as merge_error:
-                        logger.error(f"Merge conflict syncing {str(self.labbook)} - Use `force` to overwrite.")
-                        # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
-                        raise BranchException(f"Cannot merge - {merge_error}")
-                self.labbook.git.commit(f'Merged from branch `{other_branch}`')
-                logger.info(f"{str(self.labbook)} finished merge")
-            except Exception as e:
-                call_subprocess(['git', 'reset', '--hard'], cwd=self.labbook.root_dir)
-                raise e
+        try:
+            self.labbook.sweep_uncommitted_changes()
+            if force:
+                logger.warning("Using force to overwrite local changes")
+                call_subprocess(['git', 'merge', '-s', 'recursive', '-X', 'theirs', other_branch],
+                                cwd=self.labbook.root_dir)
+            else:
+                try:
+                    call_subprocess(['git', 'merge', other_branch], cwd=self.labbook.root_dir)
+                except (git.exc.GitCommandError, subprocess.CalledProcessError) as merge_error:
+                    logger.error(f"Merge conflict syncing {str(self.labbook)} - Use `force` to overwrite.")
+                    # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
+                    raise BranchException(f"Cannot merge - {merge_error}")
+            self.labbook.git.commit(f'Merged from branch `{other_branch}`')
+            logger.info(f"{str(self.labbook)} finished merge")
+        except Exception as e:
+            call_subprocess(['git', 'reset', '--hard'], cwd=self.labbook.root_dir)
+            raise e

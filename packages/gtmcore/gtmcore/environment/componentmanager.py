@@ -159,28 +159,27 @@ exec gosu giguser "$@"
             'content': docker_content
         }
 
-        with self.labbook.lock_labbook():
-            docker_dir = os.path.join(self.labbook.root_dir, '.gigantum', 'env', 'docker')
-            docker_file = os.path.join(docker_dir, f'{name}.yaml')
-            os.makedirs(docker_dir, exist_ok=True)
-            yaml_dump = yaml.dump(file_data, default_flow_style=False)
-            with open(docker_file, 'w') as df:
-                df.write(yaml_dump)
+        docker_dir = os.path.join(self.labbook.root_dir, '.gigantum', 'env', 'docker')
+        docker_file = os.path.join(docker_dir, f'{name}.yaml')
+        os.makedirs(docker_dir, exist_ok=True)
+        yaml_dump = yaml.dump(file_data, default_flow_style=False)
+        with open(docker_file, 'w') as df:
+            df.write(yaml_dump)
 
-            logger.info(f"Wrote custom Docker snippet `{name}` to {str(self.labbook)}")
-            short_message = f"Wrote custom Docker snippet `{name}`"
-            self.labbook.git.add(docker_file)
-            commit = self.labbook.git.commit(short_message)
-            adr = ActivityDetailRecord(ActivityDetailType.ENVIRONMENT, show=False, action=ActivityAction.CREATE)
-            adr.add_value('text/plain', '\n'.join(docker_content))
-            ar = ActivityRecord(ActivityType.ENVIRONMENT,
-                                message=short_message,
-                                show=True,
-                                linked_commit=commit.hexsha,
-                                tags=["environment", "docker", "snippet"])
-            ar.add_detail_object(adr)
-            ars = ActivityStore(self.labbook)
-            ars.create_activity_record(ar)
+        logger.info(f"Wrote custom Docker snippet `{name}` to {str(self.labbook)}")
+        short_message = f"Wrote custom Docker snippet `{name}`"
+        self.labbook.git.add(docker_file)
+        commit = self.labbook.git.commit(short_message)
+        adr = ActivityDetailRecord(ActivityDetailType.ENVIRONMENT, show=False, action=ActivityAction.CREATE)
+        adr.add_value('text/plain', '\n'.join(docker_content))
+        ar = ActivityRecord(ActivityType.ENVIRONMENT,
+                            message=short_message,
+                            show=True,
+                            linked_commit=commit.hexsha,
+                            tags=["environment", "docker", "snippet"])
+        ar.add_detail_object(adr)
+        ars = ActivityStore(self.labbook)
+        ars.create_activity_record(ar)
 
     def remove_docker_snippet(self, name: str) -> None:
         """Remove a custom docker snippet
@@ -197,21 +196,20 @@ exec gosu giguser "$@"
         if not os.path.exists(docker_file):
             raise ValueError(f'Docker snippet name `{name}` does not exist')
 
-        with self.labbook.lock_labbook():
-            self.labbook.git.remove(docker_file, keep_file=False)
-            short_message = f"Removed custom Docker snippet `{name}`"
-            logger.info(short_message)
-            commit = self.labbook.git.commit(short_message)
-            adr = ActivityDetailRecord(ActivityDetailType.ENVIRONMENT, show=False, action=ActivityAction.DELETE)
-            adr.add_value('text/plain', short_message)
-            ar = ActivityRecord(ActivityType.ENVIRONMENT,
-                                message=short_message,
-                                show=False,
-                                linked_commit=commit.hexsha,
-                                tags=["environment", "docker", "snippet"])
-            ar.add_detail_object(adr)
-            ars = ActivityStore(self.labbook)
-            ars.create_activity_record(ar)
+        self.labbook.git.remove(docker_file, keep_file=False)
+        short_message = f"Removed custom Docker snippet `{name}`"
+        logger.info(short_message)
+        commit = self.labbook.git.commit(short_message)
+        adr = ActivityDetailRecord(ActivityDetailType.ENVIRONMENT, show=False, action=ActivityAction.DELETE)
+        adr.add_value('text/plain', short_message)
+        ar = ActivityRecord(ActivityType.ENVIRONMENT,
+                            message=short_message,
+                            show=False,
+                            linked_commit=commit.hexsha,
+                            tags=["environment", "docker", "snippet"])
+        ar.add_detail_object(adr)
+        ars = ActivityStore(self.labbook)
+        ars.create_activity_record(ar)
 
     def add_packages(self, package_manager: str, packages: List[dict],
                      force: bool = False, from_base: bool = False) -> None:

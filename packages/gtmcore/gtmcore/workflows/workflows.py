@@ -40,8 +40,7 @@ class GitWorkflow(object):
 
     def garbagecollect(self):
         """ Run a `git gc` on the labbook. """
-        with self.labbook.lock_labbook():
-            core.git_garbage_collect(self.labbook)
+        core.git_garbage_collect(self.labbook)
 
     def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
                 public: bool = False) -> None:
@@ -64,23 +63,22 @@ class GitWorkflow(object):
         if self.labbook.active_branch != f'gm.workspace-{username}':
             raise ValueError(f"Must be on user workspace (gm.workspace-{username}) to sync")
 
-        with self.labbook.lock_labbook():
-            try:
-                self.labbook.sweep_uncommitted_changes()
-                vis = "public" if public is True else "private"
-                t0 = time.time()
-                core.create_remote_gitlab_repo(labbook=self.labbook, username=username,
-                                               access_token=access_token, visibility=vis)
-                logger.info(f"Created remote repo for {str(self.labbook)} in {time.time()-t0:.1f}sec")
-                t0 = time.time()
-                core.publish_to_remote(labbook=self.labbook, username=username, remote=remote)
-                logger.info(f"Published {str(self.labbook)} in {time.time()-t0:.1f}sec")
-            except Exception as e:
-                # Unsure what specific exception add_remote creates, so make a catchall.
-                logger.error(f"Publish failed {e}: {str(self.labbook)} may be in corrupted Git state!")
-                call_subprocess(['git', 'reset', '--hard'], cwd=self.labbook.root_dir)
-                self.labbook.checkout_branch(f"gm.workspace-{username}")
-                raise e
+        try:
+            self.labbook.sweep_uncommitted_changes()
+            vis = "public" if public is True else "private"
+            t0 = time.time()
+            core.create_remote_gitlab_repo(labbook=self.labbook, username=username,
+                                           access_token=access_token, visibility=vis)
+            logger.info(f"Created remote repo for {str(self.labbook)} in {time.time()-t0:.1f}sec")
+            t0 = time.time()
+            core.publish_to_remote(labbook=self.labbook, username=username, remote=remote)
+            logger.info(f"Published {str(self.labbook)} in {time.time()-t0:.1f}sec")
+        except Exception as e:
+            # Unsure what specific exception add_remote creates, so make a catchall.
+            logger.error(f"Publish failed {e}: {str(self.labbook)} may be in corrupted Git state!")
+            call_subprocess(['git', 'reset', '--hard'], cwd=self.labbook.root_dir)
+            self.labbook.checkout_branch(f"gm.workspace-{username}")
+            raise e
 
     def sync(self, username: str, remote: str = "origin", force: bool = False) -> int:
         """ Sync with remote GitLab repo (i.e., pull any upstream changes and push any new changes). Following
