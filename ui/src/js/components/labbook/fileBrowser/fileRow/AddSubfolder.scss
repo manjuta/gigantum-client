@@ -1,8 +1,8 @@
 @import '~Styles/_imports.scss';
 
-.AddSubfolder{
-    height: 50px;
-    padding: 12px 0 12px 105px;
+.AddSubfolder {
+    height: 34px;
+    padding: 6px 0 6px 105px;
 
     cursor: pointer;
     text-align: left;
@@ -10,12 +10,13 @@
     background: $background-color url(~Images/icons/folder-add.svg) no-repeat 70px 50%;
     background-size: 20px;
 
-    line-height: 26px;
+    line-height: 24px;
 
     &:hover{
 
     }
 }
+
 
 .AddSubfolder__edit{
   @include flex(space-around, row);

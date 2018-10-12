@@ -1,6 +1,9 @@
 // vendor
 import React, { Component } from 'react';
 import store from 'JS/redux/store';
+import { DropTarget } from 'react-dnd';
+import { NativeTypes } from 'react-dnd-html5-backend';
+import classNames from 'classnames';
 // assets
 import './FileBrowser.scss';
 // components
@@ -8,16 +11,29 @@ import File from './fileRow/File';
 import Folder from './fileRow/Folder';
 import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
+import Connectors from './utilities/Connectors';
 
-export default class FileBrowser extends Component {
+class FileBrowser extends Component {
     constructor(props) {
       super(props);
 
       this.state = {
         mutations: new FileBrowserMutations(this._getMutationData()),
+        mutationData: this._getMutationData(),
+        hoverId: '',
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
+      this._setState = this._setState.bind(this);
+    }
+    /**
+    *  @param {}
+    *  update state of component for a given key value pair
+    *  @return {}
+    */
+    _setState(stateKey, value) {
+       console.log(stateKey)
+       this.setState({ [stateKey]: value });
     }
     /**
     *  @param {}
@@ -120,13 +136,56 @@ export default class FileBrowser extends Component {
       console.log(response, edge);
     });
   }
+  /**
+  *  @param {string, boolean}
+  *  updates boolean state of a given key
+  *  @return {}
+  */
+  _updateStateBoolean(key, value) {
+    this.setState({ [key]: value });
+  }
+  /**
+  *  @param {}
+  *  checks if folder refs has props.isOver === true
+  *  @return {boolean}
+  */
+  _checkRefs() {
+    let isOver = this.props.isOver;
+
+    function checkRefs(refs) {
+      Object.keys(refs).forEach((childname) => {
+        if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+          const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+          if (child.props.data && child.props.data.edge.node.isDir) {
+            if (child.props.isOver) {
+
+              isOver = false;
+            } else if (Object.keys(child.refs).length > 0) {
+              checkRefs(child.refs);
+            }
+          }
+        }
+      });
+    }
+
+    if (Object.keys(this.refs).length > 0) {
+      checkRefs(this.refs);
+    }
+    return (isOver);
+  }
 
   render() {
     const files = this._processFiles(),
-          mutationData = this._getMutationData();
+          { mutationData } = this.state,
+          isOver = this._checkRefs();
 
-    return (
-        <div className="FileBrowser">
+   const fileBrowserCSS = classNames({
+     FileBrowser: true,
+     'FileBrowser--highlight': isOver,
+   });
+
+   return (
+       this.props.connectDropTarget(<div className={fileBrowserCSS}>
                 <div className="FileBrowser__header">
                     <div>
                         <button className="FileBrowser__btn FileBrowser__btn --delete"
@@ -158,7 +217,8 @@ export default class FileBrowser extends Component {
                                     key={files[file].edge.node.key}
                                     mutationData={mutationData}
                                     data={files[file]}
-                                    mutations={this.state.mutations}>
+                                    mutations={this.state.mutations}
+                                    setState={this._setState}>
                                 </Folder>
                             );
                         }
@@ -174,7 +234,17 @@ export default class FileBrowser extends Component {
                     })
                 }
             </div>
-        </div>
+            {/* <div className={drogTargetCSS}>
+              <h3 className="FileBrowser__h3">Add file to root</h3>
+            </div> */}
+        </div>)
     );
   }
 }
+
+
+export default DropTarget(
+    ['card', NativeTypes.FILE],
+    Connectors.targetSource,
+    Connectors.targetCollect,
+  )(FileBrowser);

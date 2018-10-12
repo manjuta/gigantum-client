@@ -1,5 +1,6 @@
 import React from 'react';
 import { DragSource } from 'react-dnd';
+import uuidv4 from 'uuid/v4';
 // utilities
 import CreateFiles from './../utilities/CreateFiles';
 
@@ -29,7 +30,6 @@ const dragSource = {
 
   endDrag(props, monitor, component) {
     if (!monitor.didDrop()) {
-
       return;
     }
 
@@ -59,14 +59,13 @@ const dragSource = {
 
     if (newKeyPath !== fileKeyPath) {
       if ((newKey !== props.data.edge.node.key)) {
-        console.log('move file', newKey, props)
         const moveLabbookFileData = {
           newKey,
           edge: props.data.edge,
-        }
+        };
         props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
           console.log(response)
-        })
+        });
         // props.browserProps.openFolder(`${dropResult.path}/`);
         // props.browserProps.renameFile(props.fileKey, newKey);
       }
@@ -96,8 +95,8 @@ const targetSource = {
         fileKey,
         path,
         files;
-    // console.log(dndItem)
-    if (dndItem) {
+
+    if (dndItem && props.data) {
           if (!dndItem.dirContent) {
               fileKey = props.data.edge.node.key;
 
@@ -112,7 +111,6 @@ const targetSource = {
                     let key = props.data.edge.node.key || props.fileKey;
                     path = key.substr(0, key.lastIndexOf('/') || key.length);
 
-                     console.log(fileList, props)
                      if (fileList) {
                         CreateFiles.createFiles(fileList, `${path}/`, props.mutationData);
                      }
@@ -131,12 +129,37 @@ const targetSource = {
                   }
               });
           }
+      } else {
+          // uploads to root directory
+          let item = monitor.getItem();
+          console.log(component)
+          CreateFiles.createFiles(item.files, '', component.state.mutationData);
       }
 
       return {
        data: props.data,
       };
   },
+  // hover(props, monitor, component) {
+  //   // // This is fired very often and lets you perform side effects
+  //   // // in response to the hover. You can't handle enter and leave
+  //   // // here—if you need them, put monitor.isOver() into collect() so you
+  //   // // can just use componentWillReceiveProps() to handle enter/leave.
+  //   //
+  //   // // You can access the coordinates if you need them
+  //   // const clientOffset = monitor.getClientOffset();
+  //   // const componentRect = findDOMNode(component).getBoundingClientRect();
+  //   //
+  //   // // You can check whether we're over a nested drop target
+  //   // const isJustOverThisOne = monitor.isOver({ shallow: true });
+  //   //
+  //   // // You will receive hover() even for items for which canDrop() is false
+  //   // const canDrop = monitor.canDrop();
+  //   // console.log(component);
+  //   if (component._setState) {
+  //     component._setState('hoverId', uuidv4());
+  //   }
+  // },
 };
 
 function targetCollect(connect, monitor) {

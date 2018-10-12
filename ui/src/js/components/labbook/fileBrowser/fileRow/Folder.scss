@@ -1,5 +1,16 @@
 @import '~Styles/_imports.scss';
 
+.Folder {
+  &--highlight {
+    background-color: rgba(0, 126, 168, 0.5);
+    border: 1px solid $azure;
+
+    .AddSubfolder {
+      background-color: transparent !important;
+    }
+  }
+}
+
 .Folder__row{
 
     height: 50px;
@@ -13,10 +24,6 @@
 
     &--expanded{
         border-bottom: none;
-    }
-
-    &:hover {
-        background-color: $background-color;
     }
 }
 
@@ -119,14 +126,14 @@
 .Folder__child {
     padding-left: 20px;
 
-    .AddSubfolder{
-      height: 50px;
-      padding: 12px 0 12px 120px;
+    .AddSubfolder {
+      height: 34px;
+      padding: 6px 0 6px 120px;
       cursor: pointer;
       text-align: left;
       background: #f0f1f5 url(~Images/icons/folder-add.svg) no-repeat 87px 50%;
       background-size: 20px;
-      line-height: 30px;
+      line-height: 24px;
     }
 
     .File__row,

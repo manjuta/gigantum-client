@@ -4,6 +4,16 @@
     width: 100%;
     padding: 20px;
     position: relative;
+    z-index: 1;
+
+    &--highlight{
+      background-color: rgba(0,126,168, 0.5);
+      border: 1px solid $azure;
+
+      .AddSubfolder {
+        background-color: transparent !important;
+      }
+    }
 }
 
 .FileBrowser__header {
@@ -44,4 +54,26 @@
     background: $turquise url(~Images/icons/trash-white.svg) no-repeat center center;
     background-size: 20px;
   }
+}
+
+.FileBrowser__dropTarget{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 1;
+
+  background-color: $azure;
+
+  opacity: 0.7;
+
+  @include flex(center, column);
+}
+
+.FileBrowser__h3{
+  color: $white;
+  font-weight: 100;
+  text-align: center;
 }

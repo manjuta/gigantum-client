@@ -5,7 +5,7 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 // assets
 import './AddSubfolder.scss';
 // components
-import Connectors from './Connectors';
+import Connectors from './../utilities/Connectors';
 
 
 class AddSubfolder extends Component {
@@ -36,6 +36,7 @@ class AddSubfolder extends Component {
       this._clearState();
     }
   }
+
   /**
   *  @param {string, boolean}
   *  sets state on a boolean value
@@ -47,6 +48,7 @@ class AddSubfolder extends Component {
     });
     this.subfolderInput.focus();
   }
+
   /**
   *  @param {event}
   *  sets state on folderName

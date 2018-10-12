@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Moment from 'moment';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
+import uuidv4 from 'uuid/v4';
 // components
 import ActionsMenu from './ActionsMenu';
 import File from './File';
@@ -11,7 +12,7 @@ import AddSubfolder from './AddSubfolder';
 // assets
 import './Folder.scss';
 // components
-import Connectors from './Connectors';
+import Connectors from './../utilities/Connectors';
 
 
 class Folder extends Component {
@@ -23,13 +24,34 @@ class Folder extends Component {
             expanded: false,
             isSelected: props.isSelected || false,
             isIncomplete: false,
+            hoverId: '',
+            isOver: false,
+            prevIsOverState: false,
         };
 
         this._setSelected = this._setSelected.bind(this);
         this._setIncomplete = this._setIncomplete.bind(this);
         this._checkParent = this._checkParent.bind(this);
+        this._checkRefs = this._checkRefs.bind(this);
+        this._setState = this._setState.bind(this);
     }
 
+    static getDerivedStateFromProps(props, state) {
+      return {
+        ...state,
+        isOver: props.isOver,
+        prevIsOverState: state.isOver,
+      };
+    }
+
+    /**
+    *  @param {}
+    *  update state of component for a given key value pair
+    *  @return {}
+    */
+    _setState(stateKey, value) {
+       this.setState({ [stateKey]: value });
+    }
     /**
     *  @param {boolean}
     *  sets child elements to be selected and current folder item
@@ -164,36 +186,90 @@ class Folder extends Component {
     _mouseLeave() {
       this.setState({ isDragging: false });
     }
+    /**
+    *  @param {}
+    *  checks if folder refs has props.isOver === true
+    *  @return {boolean}
+    */
+    _checkRefs() {
+      let isOver = this.props.isOver;
+
+      function checkRefs(refs) {
+        Object.keys(refs).forEach((childname) => {
+          if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+            const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+            if (child.props.data && child.props.data.edge.node.isDir) {
+              if (child.props.isOver) {
+                isOver = false;
+              } else if (Object.keys(child.refs).length > 0) {
+                checkRefs(child.refs);
+              }
+            }
+          }
+        });
+
+        Object.keys(refs).forEach((childname) => {
+          if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+            const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+            if (child.props.data && !child.props.data.edge.node.isDir) {
+              if (child.props.isOver) {
+                isOver = true;
+              }
+            }
+          }
+        });
+      }
+
+      if (Object.keys(this.refs).length > 0) {
+        checkRefs(this.refs);
+      }
+
+      if (this.state.prevIsOverState && !isOver) {
+        if (isOver === this.state.isOver) {
+          this.props.setState('hoverId', uuidv4());
+        }
+      }
+      return (isOver);
+    }
 
     render() {
-        const { node } = this.props.data.edge;
-        const { children } = this.props.data;
-        const childrenKeys = Object.keys(children);
-        const folderRowCSS = classNames({
-              Folder__row: true,
-              'Folder__row--expanded': this.state.expanded,
-            }),
-            buttonCSS = classNames({
-              Folder__btn: true,
-              'Folder__btn--selected': this.state.isSelected,
-              'Folder__btn--incomplete': this.state.isIncomplete,
-            }),
-            folderChildCSS = classNames({
-              Folder__child: true,
-              hidden: !this.state.expanded,
-            }),
-            folderNameCSS = classNames({
-              'Folder__cell Folder__cell--name': true,
-              'Folder__cell--open': this.state.expanded,
-            });
+        const { node } = this.props.data.edge,
+              { children } = this.props.data,
+              childrenKeys = Object.keys(children),
+              isOver = this._checkRefs(),
+              splitKey = node.key.split('/'),
+              folderName = splitKey[splitKey.length - 2],
 
-        const splitKey = node.key.split('/');
-        const folderName = splitKey[splitKey.length - 2];
+              folderRowCSS = classNames({
+                Folder__row: true,
+                'Folder__row--expanded': this.state.expanded,
+              }),
+
+              buttonCSS = classNames({
+                Folder__btn: true,
+                'Folder__btn--selected': this.state.isSelected,
+                'Folder__btn--incomplete': this.state.isIncomplete,
+              }),
+
+              folderChildCSS = classNames({
+                Folder__child: true,
+                hidden: !this.state.expanded,
+              }),
+
+              folderNameCSS = classNames({
+                'Folder__cell Folder__cell--name': true,
+                'Folder__cell--open': this.state.expanded,
+              }),
+
+              folderCSS = classNames({
+                Folder: true,
+                'Folder--highlight': isOver,
+              });
 
         let folder = this.props.connectDragPreview(<div
           onMouseLeave={() => { this._mouseLeave(); }}
           onMouseEnter={() => { this._mouseEnter(); }}
-          className="Folder">
+          className={folderCSS}>
                 <div
                     className={folderRowCSS}
                     onClick={evt => this._expandSection(evt)}>
@@ -242,7 +318,8 @@ class Folder extends Component {
                                         data={children[file]}
                                         isSelected={this.state.isSelected}
                                         setIncomplete={this._setIncomplete}
-                                        checkParent={this._checkParent}>
+                                        checkParent={this._checkParent}
+                                        setState={this._setState}>
                                     </FolderDND>
                                 );
                             }

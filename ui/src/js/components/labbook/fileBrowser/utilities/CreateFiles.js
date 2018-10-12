@@ -148,9 +148,9 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
             connectionKey: mutationData.connection,
           };
 
-          self._chunkLoader(data, (data) => {
+          ChunkUploader.chunkFile(data, (data) => {
 
-          });
+          }, index);
         };
 
         fileReader.readAsArrayBuffer(file);

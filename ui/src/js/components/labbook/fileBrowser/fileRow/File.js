@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 // components
-import Connectors from './Connectors';
+import Connectors from './../utilities/Connectors';
 import ActionsMenu from './ActionsMenu';
 // config
 import config from 'JS/config';
@@ -37,7 +37,7 @@ class File extends Component {
   _setSelected(isSelected) {
       this.setState({ isSelected }, () => {
           Object.keys(this.refs).forEach((ref) => {
-              this.refs[ref]._setSelected();
+              this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected();
           });
           if (this.props.checkParent) {
               this.props.checkParent();
@@ -128,7 +128,7 @@ class File extends Component {
     let fileKeyArray = this.props.data.edge.node.key.split('/');
     fileKeyArray.pop();
     let folderKeyArray = fileKeyArray;
-    console.log(folderKeyArray);
+
     let folderKey = folderKeyArray.join('/');
 
     const data = {
@@ -146,19 +146,18 @@ class File extends Component {
     const splitKey = node.key.split('/');
 
     const fileName = splitKey[splitKey.length - 1];
-      const buttonCSS = classNames({
-          File__btn: true,
-          'File__btn--selected': this.state.isSelected,
-      }),
-
-      textIconsCSS = classNames({
-        'File__cell File__cell--name': true,
-        hidden: this.state.renameEditMode,
-      }),
-      renameCSS = classNames({
-        'File__cell File__cell--edit': true,
-        hidden: !this.state.renameEditMode,
-      });
+    const buttonCSS = classNames({
+            File__btn: true,
+            'File__btn--selected': this.state.isSelected,
+          }),
+          textIconsCSS = classNames({
+            'File__cell File__cell--name': true,
+            hidden: this.state.renameEditMode,
+          }),
+          renameCSS = classNames({
+            'File__cell File__cell--edit': true,
+            hidden: !this.state.renameEditMode,
+          });
 
     let file = this.props.connectDragPreview(<div onMouseDown={() => { this._mouseDown(); }} className="File">
 
@@ -183,7 +182,7 @@ class File extends Component {
 
                   <div className="File__container">
                     <input
-                      ref={'renameInput'}
+                      ref={(input) => { this.reanmeInput = input; }}
                       placeholder="Rename File"
                       type="text"
                       className="File__input"
