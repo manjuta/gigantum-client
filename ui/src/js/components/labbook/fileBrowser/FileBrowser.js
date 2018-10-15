@@ -48,6 +48,7 @@ class FileBrowser extends Component {
         edges.forEach((edge) => {
             let splitKey = edge.node.key.split('/', -1).filter(key => key.length);
             let currentFileObjectPosition = collectedFiles;
+
             while (splitKey.length > 1) {
                 const currentKey = splitKey[0];
 
@@ -66,7 +67,7 @@ class FileBrowser extends Component {
                 } else {
                     currentFileObjectPosition[splitKey[0]] = { edge };
                 }
-                if (edge.node.isDir) {
+                if (edge.node.isDir && !currentFileObjectPosition[splitKey[0]]) {
                     currentFileObjectPosition[splitKey[0]].children = {};
                 }
             }
