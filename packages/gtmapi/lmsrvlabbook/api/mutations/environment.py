@@ -82,6 +82,7 @@ class BuildImage(graphene.relay.ClientIDMutation):
         lb.from_directory(labbook_dir)
 
         # Generate Dockerfile
+        # TODO - Move to build_image ??
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)
 
@@ -118,7 +119,9 @@ class StartContainer(graphene.relay.ClientIDMutation):
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
 
-        lb, container_id = ContainerOperations.start_container(labbook=lb, username=username)
+        with lb.lock_labbook():
+            lb, container_id = ContainerOperations.start_container(
+                labbook=lb, username=username)
         logger.info(f'Started new {lb} container ({container_id})')
 
         return StartContainer(environment=Environment(owner=owner, name=labbook_name))
@@ -135,21 +138,13 @@ class StopContainer(graphene.relay.ClientIDMutation):
     environment = graphene.Field(lambda: Environment)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
+    def _stop_container(cls, lb, username):
         lb_ip = ContainerOperations.get_labbook_ip(lb, username)
-
         stop_labbook_monitor(lb, username)
         lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
 
-        try:
-            # We know `git gc` fails on windows, so just give best effort fire-and-forget
-            wf = GitWorkflow(lb)
-            wf.garbagecollect()
-        except Exception as e:
-            logger.error(e)
+        wf = GitWorkflow(lb)
+        wf.garbagecollect()
 
         # Try to remove route from proxy
         lb_port = 8888
@@ -165,5 +160,14 @@ class StopContainer(graphene.relay.ClientIDMutation):
 
         if not stopped:
             raise ValueError(f"Failed to stop labbook {labbook_name}")
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = LabBook(author=get_logged_in_author())
+        lb.from_name(username, owner, labbook_name)
+
+        with lb.lock_labbook():
+            cls._stop_container(lb, username)
 
         return StopContainer(environment=Environment(owner=owner, name=labbook_name))

@@ -51,10 +51,10 @@ class TestEnvironmentServiceQueries(object):
         # Create labbook
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
-                                 $component_id: String!, $revision: Int!) {
+                                 $base_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id, revision: $revision}) {
+                                baseId: $base_id, revision: $revision}) {
             labbook {
               id
               name
@@ -64,7 +64,7 @@ class TestEnvironmentServiceQueries(object):
         }
         """
         variables = {"name": "labbook-base-test", "desc": "my test 1",
-                     "component_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
+                     "base_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
@@ -99,58 +99,6 @@ class TestEnvironmentServiceQueries(object):
                 }
         """
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
-
-    def test_get_custom(self, fixture_working_dir_env_repo_scoped, snapshot):
-        """Test getting the a LabBook's custom dependencies"""
-        # Create labbook
-        lb = LabBook(fixture_working_dir_env_repo_scoped[0])
-        lb.new(owner={"username": "default"}, name="labbook3", description="my first labbook10000")
-
-        query = """
-                    {
-                      labbook(owner: "default", name: "labbook3") {
-                        environment {
-                         customDependencies { 
-                            edges {
-                              node {
-                                id
-                                schema
-                                componentId
-                                repository
-                                revision
-                                name
-                                description                        
-                                tags
-                                license
-                                url
-                                requiredPackageManagers
-                                dockerSnippet
-                              }
-                              cursor
-                            }
-                            pageInfo {
-                              hasNextPage
-                              hasPreviousPage
-                            }
-                         }
-                       }  
-                      }
-                    }            
-                    """
-        # should be null
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
-
-        # Add a base image
-        cm = ComponentManager(lb)
-        cm.add_component("custom",
-                         ENV_UNIT_TEST_REPO,
-                         "pillow",
-                         0)
-
-        # Test again
-        r2 = fixture_working_dir_env_repo_scoped[2].execute(query)
-        assert 'errors' not in r2
-        snapshot.assert_match(r2)
 
     def test_get_package_manager(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's package manager dependencies"""

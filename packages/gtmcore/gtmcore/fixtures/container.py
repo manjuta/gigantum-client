@@ -43,7 +43,7 @@ def build_lb_image_for_jupyterlab(mock_config_with_repo):
     # Create Component Manager
     cm = ComponentManager(lb)
     # Add a component
-    cm.add_component("base", ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+    cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
     cm.add_packages("pip", [{"manager": "pip", "package": "requests", "version": "2.18.4"}])
 
     ib = ImageBuilder(lb)
@@ -100,7 +100,7 @@ def build_lb_image_for_env(mock_config_with_repo):
     # Create Component Manager
     cm = ComponentManager(lb)
     # Add a component
-    cm.add_component("base", ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+    cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
 
     ib = ImageBuilder(lb)
     ib.assemble_dockerfile(write=True)
@@ -129,7 +129,7 @@ def build_lb_image_for_env_conda(mock_config_with_repo):
     labbook_dir = lb.new(name="containerunittestbookenvconda", description="Testing environment functions.",
                          owner={"username": "unittester"})
     cm = ComponentManager(lb)
-    cm.add_component("base", ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+    cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
     cm.add_packages('conda3', [{'package': 'matplotlib', 'version': '2.0.0'},
                                {'package': 'requests', 'version': REQUESTS_LATEST_VERSION}])
 

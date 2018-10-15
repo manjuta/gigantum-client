@@ -176,7 +176,8 @@ class SetVisibility(graphene.relay.ClientIDMutation):
         if visibility not in ['public', 'private']:
             raise ValueError(f'Visibility must be either "public" or "private";'
                              f'("{visibility}" invalid)')
-        mgr.set_visibility(namespace=owner, labbook_name=labbook_name, visibility=visibility)
+        with lb.lock_labbook():
+            mgr.set_visibility(namespace=owner, labbook_name=labbook_name, visibility=visibility)
 
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
         lbedge = LabbookConnection.Edge(node=LabbookObject(owner=lb.owner['username'], name=labbook_name),

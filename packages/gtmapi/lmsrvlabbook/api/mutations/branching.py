@@ -98,8 +98,9 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
-        bm = BranchManager(labbook=lb, username=username)
-        bm.remove_branch(target_branch=branch_name)
+        with lb.lock_labbook():
+            bm = BranchManager(labbook=lb, username=username)
+            bm.remove_branch(target_branch=branch_name)
         logger.info(f'Removed experimental branch {branch_name} from {str(lb)}')
         return DeleteExperimentalBranch(success=True)
 
@@ -120,8 +121,10 @@ class WorkonBranch(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
-        bm = BranchManager(labbook=lb, username=username)
-        bm.workon_branch(branch_name=branch_name)
+        # TODO - fail fast if already locked.
+        with lb.lock_labbook():
+            bm = BranchManager(labbook=lb, username=username)
+            bm.workon_branch(branch_name=branch_name)
         return WorkonBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
                                             name=labbook_name, owner=owner))
 
@@ -143,8 +146,9 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
-        bm = BranchManager(labbook=lb, username=username)
-        bm.merge_from(other_branch=other_branch_name, force=force)
+        with lb.lock_labbook():
+            bm = BranchManager(labbook=lb, username=username)
+            bm.merge_from(other_branch=other_branch_name, force=force)
 
         return MergeFromBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))

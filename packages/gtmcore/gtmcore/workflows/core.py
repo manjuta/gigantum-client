@@ -198,37 +198,37 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str, force: bool) 
 
         updates = 0
         logger.info(f"Syncing {str(labbook)} for user {username} to remote {remote}")
-        with labbook.lock_labbook():
-            labbook.sweep_uncommitted_changes()
-            git_garbage_collect(labbook)
 
-            tokens = ['git', 'pull', '--commit', 'origin', 'gm.workspace']
-            tokens_force = ['git', 'pull', '--commit', '-s', 'recursive', '-X', 'theirs', 'origin',
-                            'gm.workspace']
+        labbook.sweep_uncommitted_changes()
+        git_garbage_collect(labbook)
 
-            checkpoint = labbook.git.commit_hash
-            try:
-                call_subprocess(tokens if not force else tokens_force, cwd=labbook.root_dir)
-                if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
-                    call_subprocess(['git', 'lfs', 'pull', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
-            except subprocess.CalledProcessError as x:
-                logger.error(f"{str(labbook)} cannot merge with remote; resetting to revision {checkpoint}...")
-                call_subprocess(['git', 'merge', '--abort'], cwd=labbook.root_dir)
-                call_subprocess(['git', 'reset', '--hard', checkpoint], cwd=labbook.root_dir)
-                raise LabbookMergeException('Merge conflict pulling upstream changes')
+        tokens = ['git', 'pull', '--commit', 'origin', 'gm.workspace']
+        tokens_force = ['git', 'pull', '--commit', '-s', 'recursive', '-X', 'theirs', 'origin',
+                        'gm.workspace']
 
-            checkpoint2 = labbook.git.commit_hash
-            # TODO - A lot of this can be removed
-            call_subprocess(['git', 'checkout', 'gm.workspace'], cwd=labbook.root_dir)
-            call_subprocess(['git', 'merge', f'gm.workspace-{username}'], cwd=labbook.root_dir)
-            call_subprocess(['git', 'push', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
+        checkpoint = labbook.git.commit_hash
+        try:
+            call_subprocess(tokens if not force else tokens_force, cwd=labbook.root_dir)
             if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
-                t0 = time.time()
-                call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
-                logger.info(f'Ran in {str(labbook)} `git lfs push all` in {t0-time.time()}s')
-            labbook.checkout_branch(f"gm.workspace-{username}")
+                call_subprocess(['git', 'lfs', 'pull', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
+        except subprocess.CalledProcessError as x:
+            logger.error(f"{str(labbook)} cannot merge with remote; resetting to revision {checkpoint}...")
+            call_subprocess(['git', 'merge', '--abort'], cwd=labbook.root_dir)
+            call_subprocess(['git', 'reset', '--hard', checkpoint], cwd=labbook.root_dir)
+            raise LabbookMergeException('Merge conflict pulling upstream changes')
 
-            updates = 0 if checkpoint == checkpoint2 else 1
+        checkpoint2 = labbook.git.commit_hash
+        # TODO - A lot of this can be removed
+        call_subprocess(['git', 'checkout', 'gm.workspace'], cwd=labbook.root_dir)
+        call_subprocess(['git', 'merge', f'gm.workspace-{username}'], cwd=labbook.root_dir)
+        call_subprocess(['git', 'push', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
+        if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
+            t0 = time.time()
+            call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
+            logger.info(f'Ran in {str(labbook)} `git lfs push all` in {t0-time.time()}s')
+        labbook.checkout_branch(f"gm.workspace-{username}")
+
+        updates = 0 if checkpoint == checkpoint2 else 1
 
         # Return 1 if there have been updates made
         return updates
@@ -257,22 +257,21 @@ def sync_locally(labbook: LabBook, username: Optional[str] = None) -> None:
         LabbookException
     """
     try:
-        with labbook.lock_labbook():
-            labbook.sweep_uncommitted_changes()
+        labbook.sweep_uncommitted_changes()
 
-            git_garbage_collect(labbook)
+        git_garbage_collect(labbook)
 
-            if username and f"gm.workspace-{username}" not in labbook.get_branches()['local']:
-                labbook.checkout_branch("gm.workspace")
-                labbook.checkout_branch(f"gm.workspace-{username}", new=True)
-                labbook.git.merge("gm.workspace")
-                labbook.git.commit(f"Created and merged new user workspace gm.workspace-{username}")
-            else:
-                orig_branch = labbook.active_branch
-                labbook.checkout_branch("gm.workspace")
-                labbook.git.merge(orig_branch)
-                labbook.git.commit(f"Merged from local workspace")
-                labbook.checkout_branch(orig_branch)
+        if username and f"gm.workspace-{username}" not in labbook.get_branches()['local']:
+            labbook.checkout_branch("gm.workspace")
+            labbook.checkout_branch(f"gm.workspace-{username}", new=True)
+            labbook.git.merge("gm.workspace")
+            labbook.git.commit(f"Created and merged new user workspace gm.workspace-{username}")
+        else:
+            orig_branch = labbook.active_branch
+            labbook.checkout_branch("gm.workspace")
+            labbook.git.merge(orig_branch)
+            labbook.git.commit(f"Merged from local workspace")
+            labbook.checkout_branch(orig_branch)
     except Exception as e:
         logger.error(e)
         raise LabbookException(e)

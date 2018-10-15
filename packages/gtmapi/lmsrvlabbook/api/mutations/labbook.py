@@ -59,7 +59,7 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
         name = graphene.String(required=True)
         description = graphene.String(required=True)
         repository = graphene.String(required=True)
-        component_id = graphene.String(required=True)
+        base_id = graphene.String(required=True)
         revision = graphene.Int(required=True)
         is_untracked = graphene.Boolean(required=False)
 
@@ -67,7 +67,7 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
     labbook = graphene.Field(lambda: Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, name, description, repository, component_id, revision,
+    def mutate_and_get_payload(cls, root, info, name, description, repository, base_id, revision,
                                is_untracked=False, client_mutation_id=None):
         username = get_logged_in_username()
 
@@ -110,11 +110,7 @@ class CreateLabbook(graphene.relay.ClientIDMutation):
 
         # Add Base component
         cm = ComponentManager(lb)
-        cm.add_component("base", repository, component_id, revision)
-
-        # Prime dataloader with labbook you just created
-        dataloader = LabBookLoader()
-        dataloader.prime(f"{username}&{username}&{lb.name}", lb)
+        cm.add_base(repository, base_id, revision)
 
         # Get a graphene instance of the newly created LabBook
         return CreateLabbook(labbook=Labbook(owner=username, name=lb.name))
@@ -139,15 +135,19 @@ class DeleteLabbook(graphene.ClientIDMutation):
         lb.from_directory(inferred_lb_directory)
 
         if confirm:
-            logger.warning(f"Deleting {str(lb)}...")
+            logger.info(f"Deleting {str(lb)}...")
             try:
                 lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
-            except OSError:
-                pass
+            except OSError as e:
+                logger.warning(e)
+
             lb, docker_removed = ContainerOperations.delete_image(labbook=lb, username=username)
             if not docker_removed:
                 raise ValueError(f'Cannot delete docker image for {str(lb)} - unable to delete LB from disk')
+
+            # TODO - gtmcore should contain routine to properly delete a labbook
             shutil.rmtree(lb.root_dir, ignore_errors=True)
+
             if os.path.exists(lb.root_dir):
                 logger.error(f'Deleted {str(lb)} but root directory {lb.root_dir} still exists!')
                 return DeleteLabbook(success=False)
@@ -384,7 +384,8 @@ class AddLabbookRemote(graphene.relay.ClientIDMutation):
         logger.info(f"Adding labbook remote {remote_name} {remote_url}")
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
-        lb.add_remote(remote_name, remote_url)
+        with lb.lock_labbook():
+            lb.add_remote(remote_name, remote_url)
         return AddLabbookRemote(success=True)
 
 
@@ -447,8 +448,9 @@ class CompleteBatchUploadTransaction(graphene.relay.ClientIDMutation):
             working_directory, username, owner, 'labbooks', labbook_name)
         lb = LabBook(author=get_logged_in_author())
         lb.from_directory(inferred_lb_directory)
-        FileOperations.complete_batch(lb, transaction_id, cancel=cancel,
-                                      rollback=rollback)
+        with lb.lock_labbook():
+            FileOperations.complete_batch(lb, transaction_id, cancel=cancel,
+                                          rollback=rollback)
         return CompleteBatchUploadTransaction(success=True)
 
 
@@ -490,11 +492,12 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
             lb.from_directory(inferred_lb_directory)
             dstpath = os.path.join(os.path.dirname(file_path), cls.filename)
 
-            fops = FileOperations.put_file(labbook=lb,
-                                           section=section,
-                                           src_file=cls.upload_file_path,
-                                           dst_path=dstpath,
-                                           txid=transaction_id)
+            with lb.lock_labbook():
+                fops = FileOperations.put_file(labbook=lb,
+                                               section=section,
+                                               src_file=cls.upload_file_path,
+                                               dst_path=dstpath,
+                                               txid=transaction_id)
         finally:
             try:
                 logger.debug(f"Removing temp file {cls.upload_file_path}")
@@ -536,7 +539,9 @@ class DeleteLabbookFile(graphene.ClientIDMutation):
                                              labbook_name)
         lb = LabBook(author=get_logged_in_author())
         lb.from_directory(inferred_lb_directory)
-        FileOperations.delete_file(lb, section=section, relative_path=file_path)
+
+        with lb.lock_labbook():
+            FileOperations.delete_file(lb, section=section, relative_path=file_path)
 
         return DeleteLabbookFile(success=True)
 
@@ -563,8 +568,9 @@ class MoveLabbookFile(graphene.ClientIDMutation):
                                              labbook_name)
         lb = LabBook(author=get_logged_in_author())
         lb.from_directory(inferred_lb_directory)
-        file_info = FileOperations.move_file(lb, section, src_path, dst_path)
-        logger.info(f"Moved file to `{dst_path}`")
+
+        with lb.lock_labbook():
+            file_info = FileOperations.move_file(lb, section, src_path, dst_path)
 
         # Prime dataloader with labbook you already loaded
         dataloader = LabBookLoader()
@@ -603,8 +609,8 @@ class MakeLabbookDirectory(graphene.ClientIDMutation):
                                              labbook_name)
         lb = LabBook(author=get_logged_in_author())
         lb.from_directory(inferred_lb_directory)
-        FileOperations.makedir(lb, os.path.join(section, directory), create_activity_record=True)
-        logger.info(f"Made new directory in `{directory}`")
+        with lb.lock_labbook():
+            FileOperations.makedir(lb, os.path.join(section, directory), create_activity_record=True)
 
         # Prime dataloader with labbook you already loaded
         dataloader = LabBookLoader()
@@ -621,8 +627,10 @@ class MakeLabbookDirectory(graphene.ClientIDMutation):
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
 
-        return MakeLabbookDirectory(new_labbook_file_edge=LabbookFileConnection.Edge(node=LabbookFile(**create_data),
-                                                                                     cursor=cursor))
+        return MakeLabbookDirectory(
+            new_labbook_file_edge=LabbookFileConnection.Edge(
+                node=LabbookFile(**create_data),
+                cursor=cursor))
 
 
 class AddLabbookFavorite(graphene.relay.ClientIDMutation):
@@ -651,7 +659,8 @@ class AddLabbookFavorite(graphene.relay.ClientIDMutation):
             if key[-1] != "/":
                 key = f"{key}/"
 
-        new_favorite = lb.create_favorite(section, key, description=description, is_dir=is_dir)
+        with lb.lock_labbook():
+            new_favorite = lb.create_favorite(section, key, description=description, is_dir=is_dir)
 
         # Create data to populate edge
         create_data = {"id": f"{owner}&{labbook_name}&{section}&{key}",
@@ -687,10 +696,10 @@ class UpdateLabbookFavorite(graphene.relay.ClientIDMutation):
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(username, owner, labbook_name)
 
-        # Update Favorite
-        new_favorite = lb.update_favorite(section, key,
-                                          new_description=updated_description,
-                                          new_index=updated_index)
+        with lb.lock_labbook():
+            new_favorite = lb.update_favorite(section, key,
+                                              new_description=updated_description,
+                                              new_index=updated_index)
 
         # Create data to populate edge
         create_data = {"id": f"{owner}&{labbook_name}&{section}&{key}",
@@ -727,8 +736,8 @@ class RemoveLabbookFavorite(graphene.ClientIDMutation):
         favorite_node_id = f"LabbookFavorite:{owner}&{labbook_name}&{section}&{key}"
         favorite_node_id = base64.b64encode(favorite_node_id.encode()).decode()
 
-        # Remove Favorite
-        lb.remove_favorite(section, key)
+        with lb.lock_labbook():
+            lb.remove_favorite(section, key)
 
         return RemoveLabbookFavorite(success=True, removed_node_id=favorite_node_id)
 
@@ -828,6 +837,7 @@ class WriteReadme(graphene.relay.ClientIDMutation):
         lb.from_name(logged_in_username, owner, labbook_name)
 
         # Write data
-        lb.write_readme(content)
+        with lb.lock_labbook():
+            lb.write_readme(content)
 
         return WriteReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))

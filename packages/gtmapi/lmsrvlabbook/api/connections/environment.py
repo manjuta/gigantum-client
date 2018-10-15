@@ -20,7 +20,6 @@
 import graphene
 from lmsrvlabbook.api.objects.basecomponent import BaseComponent
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
-from lmsrvlabbook.api.objects.customcomponent import CustomComponent
 
 
 class BaseComponentConnection(graphene.relay.Connection):
@@ -33,13 +32,3 @@ class PackageComponentConnection(graphene.relay.Connection):
     """A Connection for paging through Package components"""
     class Meta:
         node = PackageComponent
-
-
-class CustomComponentConnection(graphene.relay.Connection):
-    """A Connection for paging through Custom components"""
-    class Meta:
-        node = CustomComponent
-
-
-
-

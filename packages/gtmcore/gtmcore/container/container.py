@@ -192,8 +192,7 @@ class ContainerOperations(object):
             stopped = stop_labbook_container(n)
         finally:
             # Save state of LB when container turned off.
-            with labbook.lock_labbook():
-                labbook.sweep_uncommitted_changes()
+            labbook.sweep_uncommitted_changes()
 
         return labbook, stopped
 

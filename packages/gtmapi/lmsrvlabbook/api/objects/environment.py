@@ -35,10 +35,9 @@ from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 
-from lmsrvlabbook.api.connections.environment import CustomComponentConnection, PackageComponentConnection
+from lmsrvlabbook.api.connections.environment import PackageComponentConnection
 from lmsrvlabbook.api.objects.basecomponent import BaseComponent
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
-from lmsrvlabbook.api.objects.customcomponent import CustomComponent
 from lmsrvlabbook.dataloader.package import PackageLatestVersionLoader
 
 logger = LMLogger.get_logger()
@@ -92,11 +91,6 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
 
     # The LabBook's Package manager installed dependencies
     package_dependencies = graphene.ConnectionField(PackageComponentConnection)
-
-    # The LabBook's Custom dependencies
-    custom_dependencies = graphene.ConnectionField(CustomComponentConnection,
-                                                   deprecation_reason="Custom Dependencies have been replaced "
-                                                                      "with custom docker interface")
 
     # A custom docker snippet to be run after all other dependencies and bases have been added.
     docker_snippet = graphene.String()
@@ -189,8 +183,14 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
         component_data = cm.base_fields
 
         if component_data:
-            return BaseComponent(id=f"{component_data['###repository###']}&{component_data['id']}&{component_data['revision']}",
-                                 repository=component_data['###repository###'],
+            if '###repository###' in component_data:
+                # Legacy base
+                repo = component_data['###repository###']
+            else:
+                repo = component_data['repository']
+
+            return BaseComponent(id=f"{repo}&{component_data['id']}&{component_data['revision']}",
+                                 repository=repo,
                                  component_id=component_data['id'],
                                  revision=int(component_data['revision']),
                                  _component_data=component_data)
@@ -256,46 +256,6 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
         """
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_package_dependencies(labbook, kwargs))
-
-    @staticmethod
-    def helper_resolve_custom_dependencies(labbook, kwargs):
-        """Helper to generate custom dependencies (DEPRECATED)"""
-        cm = ComponentManager(labbook)
-        edges = cm.get_component_list("custom")
-
-        if edges:
-            cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in
-                       enumerate(edges)]
-
-            # Process slicing and cursor args
-            lbc = ListBasedConnection(edges, cursors, kwargs)
-            lbc.apply()
-
-            # Get DevEnv instances
-            edge_objs = []
-            for edge, cursor in zip(lbc.edges, lbc.cursors):
-                edge_objs.append(CustomComponentConnection.Edge(node=CustomComponent(repository=edge['###repository###'],
-                                                                                     component_id=edge['id'],
-                                                                                     revision=edge['revision']),
-                                                                cursor=cursor))
-
-            return CustomComponentConnection(edges=edge_objs, page_info=lbc.page_info)
-
-        else:
-            return CustomComponentConnection(edges=[], page_info=graphene.relay.PageInfo(has_next_page=False,
-                                                                                         has_previous_page=False))
-
-    def resolve_custom_dependencies(self, info, **kwargs):
-        """Method to get the LabBook's custom dependencies
-
-        Args:
-            info:
-
-        Returns:
-
-        """
-        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: self.helper_resolve_custom_dependencies(labbook, kwargs))
 
     @staticmethod
     def helper_resolve_docker_snippet(labbook):

@@ -25,7 +25,7 @@ export default class FileEmpty extends Component {
             </Link>
                     :
             <p
-              className="FileEmpty__sub-text"
+              className="FileEmpty__text--sub"
               onClick={() => { this.props.callback(); }}
             >
               {subText}
