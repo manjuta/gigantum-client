@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "auth0-js": "^8.12.3",
+    "auth0-js": "^9.3.0",
     "autoprefixer": "^7.2.6",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
@@ -65,8 +65,7 @@
     "url-loader": "^1.0.1",
     "webpack": "^4.19.1",
     "webpack-dev-server": "^3.1.8",
-    "webpack-manifest-plugin": "^2.0.4",
-    "whatwg-fetch": "^2.0.4"
+    "webpack-manifest-plugin": "^2.0.4"
   },
   "dependencies": {
     "@babel/traverse": "^7.1.0",

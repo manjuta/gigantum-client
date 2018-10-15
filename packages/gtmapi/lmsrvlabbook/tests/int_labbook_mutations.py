@@ -116,7 +116,7 @@ class TestLabbookMutation(object):
         lb.new(name=lb_name, description="Import/Export Mutation Testing.",
                owner={"username": "default"})
         cm = ComponentManager(lb)
-        cm.add_component("base", ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
+        cm.add_base(ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
 
         assert api_server_proc.is_alive()
         export_query = """

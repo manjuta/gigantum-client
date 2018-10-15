@@ -101,14 +101,21 @@
     line-height: 18px;
 }
 
+.Footer__message-title--collapsed{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+}
 .Footer__message-title{
-  word-break: break-all;
+    word-break: break-all;
 }
 
 .Footer__message-dismiss:hover {
     color: $turquise;
 }
-
 
 .Footer__message-list {
     overflow-y: auto;

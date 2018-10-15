@@ -93,7 +93,7 @@ class ImageBuilder(object):
         docker_repo = fields['image']['repository']
         docker_tag = fields['image']['tag']
 
-        docker_lines: List[str] = []
+        docker_lines: List[str] = list()
         docker_lines.append("# Dockerfile generated on {}".format(generation_ts))
         docker_lines.append("# Name: {}".format(fields["name"]))
         docker_lines.append("# Description: {}".format(fields["description"]))
@@ -102,22 +102,6 @@ class ImageBuilder(object):
         # Must remove '_' if its in docker hub namespace.
         prefix = '' if '_' in docker_owner_ns else f'{docker_owner_ns}/'
         docker_lines.append("FROM {}{}:{}".format(prefix, docker_repo, docker_tag))
-
-        return docker_lines
-
-    def _load_custom(self) -> List[str]:
-        """Load custom dependencies, specifically the docker snippet"""
-
-        root_dir = os.path.join(self.labbook.root_dir, '.gigantum', 'env', 'custom')
-        custom_dep_files = self._get_yaml_files(root_dir)
-
-        docker_lines = ['## Adding Custom Packages']
-        for custom in sorted(custom_dep_files):
-            pkg_fields: Dict[str, Any] = {}
-            with open(custom) as custom_content:
-                pkg_fields.update(yaml.load(custom_content))
-                docker_lines.append('## Installing {}'.format(pkg_fields['name']))
-                docker_lines.extend(pkg_fields['docker'].split(os.linesep))
 
         return docker_lines
 
@@ -199,7 +183,6 @@ class ImageBuilder(object):
             str - Content of Dockerfile in single string using os.linesep as line separator.
         """
         assembly_pipeline = [self._load_baseimage,
-                             self._load_custom,
                              self._load_packages,
                              self._load_docker_snippets,
                              self._post_image_hook,
@@ -223,9 +206,8 @@ class ImageBuilder(object):
             lb = LabBook()
             lb.from_directory(self.labbook.root_dir)
 
-            with lb.lock_labbook():
-                with open(dockerfile_name, "w") as dockerfile:
-                    dockerfile.write(os.linesep.join(docker_lines))
+            with open(dockerfile_name, "w") as dockerfile:
+                dockerfile.write(os.linesep.join(docker_lines))
         else:
             logger.info("Dockerfile NOT being written; write=False; {}".format(dockerfile_name))
 

@@ -18,18 +18,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
+import os
+
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, build_image_for_jupyterlab
-import getpass
 from promise import Promise
 
 from lmsrvlabbook.dataloader.package import PackageLatestVersionLoader
-from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
-from gtmcore.configuration import get_docker_client
-from gtmcore.labbook import LabBook
 
 
+skip_clause = os.environ.get('CIRCLE_BRANCH') is not None \
+              and os.environ.get('SKIP_CONDA_TESTS') is not None
+skip_msg = "Skip long Conda tests on circleCI when not in `test-long-running-env` job"
+
+
+@pytest.mark.skipif(skip_clause, reason=skip_msg)
 class TestDataloaderPackage(object):
-
     def test_load_one_pip(self, build_image_for_jupyterlab):
         """Test loading 1 package"""
 
@@ -57,7 +60,6 @@ class TestDataloaderPackage(object):
         assert version_list[1] == "0.13"
         assert version_list[2] == "1.15.2"
 
-    @pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Conda not available on CircleCI")
     def test_load_many_conda(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
         lb, username = build_image_for_jupyterlab[0], build_image_for_jupyterlab[5]
@@ -71,9 +73,8 @@ class TestDataloaderPackage(object):
 
         assert version_list[0] == "4.0.11"
         assert version_list[1] == "1.1.0"
-        assert version_list[2] == "1.15.1"
+        assert version_list[2] == "1.15.2"
 
-    @pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Conda not available on CircleCI")
     def test_load_many_conda2(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
         lb, username = build_image_for_jupyterlab[0], build_image_for_jupyterlab[5]
@@ -86,9 +87,8 @@ class TestDataloaderPackage(object):
         assert len(version_list) == 3
         assert version_list[0] == "4.0.11"
         assert version_list[1] == "1.1.0"
-        assert version_list[2] == "1.15.1"
+        assert version_list[2] == "1.15.2"
 
-    @pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Conda not available on CircleCI")
     def test_load_many_mixed(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
         lb, username = build_image_for_jupyterlab[0], build_image_for_jupyterlab[5]
@@ -101,9 +101,8 @@ class TestDataloaderPackage(object):
         assert len(version_list) == 3
         assert version_list[0] == "4.0.11"
         assert version_list[1] == "1.1.0"
-        assert version_list[2] == "1.15.1"
+        assert version_list[2] == "1.15.2"
 
-    @pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Conda not available on CircleCI")
     def test_load_invalid_package(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
         lb, username = build_image_for_jupyterlab[0], build_image_for_jupyterlab[5]

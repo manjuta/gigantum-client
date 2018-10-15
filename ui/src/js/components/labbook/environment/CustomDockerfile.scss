@@ -105,15 +105,14 @@
 .CustomDockerfile__btn {
 
   &--edit,
-   --edit:hover,
-   --edit:focus,
-   --edit:disabled {
+  &--edit:hover,
+  &--edit:focus,
+  &--edit:disabled {
     height: 22px;
     width: 22px;
     border: 0px;
     background: url('~Images/icons/edit.svg') no-repeat center center;
     background-size: 22px;
-
   }
 
   &--edit:disabled{
@@ -121,8 +120,8 @@
   }
 
   &--cancel,
-   --cancel:hover,
-   --cancel:focus {
+  &--cancel:hover,
+  &--cancel:focus {
     padding: 0;
   }
 

@@ -72,24 +72,21 @@ def from_remote(remote_url: str, username: str, owner: str,
     labbook._set_root_dir(est_root_dir)
     labbook._load_labbook_data()
 
-    with labbook.lock_labbook():
-        logger.info(f"Checking out gm.workspace-{username}")
-        if f'origin/gm.workspace-{username}' in labbook.get_branches()['remote']:
-            labbook.checkout_branch(f"gm.workspace-{username}")
-        else:
-            labbook.checkout_branch(f"gm.workspace-{username}", new=True)
+    logger.info(f"Checking out gm.workspace-{username}")
+    if f'origin/gm.workspace-{username}' in labbook.get_branches()['remote']:
+        labbook.checkout_branch(f"gm.workspace-{username}")
+    else:
+        labbook.checkout_branch(f"gm.workspace-{username}", new=True)
 
     if make_owner:
-        with labbook.lock_labbook():
-            logger.info(f"Cloning public repo; changing owner to {username}")
-            labbook._load_labbook_data()
-            if labbook._data:
-                labbook._data['owner']['username'] = username
-            else:
-                raise LabbookException("LabBook _data not defined")
+        logger.info(f"Cloning public repo; changing owner to {username}")
+        labbook._load_labbook_data()
+        if labbook._data:
+            labbook._data['owner']['username'] = username
+        else:
+            raise LabbookException("LabBook _data not defined")
         labbook._save_labbook_data()
-        with labbook.lock_labbook():
-            labbook.remove_remote('origin')
-            msg = f"Imported and changed owner to {username}"
-            labbook.sweep_uncommitted_changes(extra_msg=msg)
+        labbook.remove_remote('origin')
+        msg = f"Imported and changed owner to {username}"
+        labbook.sweep_uncommitted_changes(extra_msg=msg)
     return labbook

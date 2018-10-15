@@ -102,7 +102,7 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         elif sort == "asc":
             reverse = False
         else:
-            raise ValueError(f"Unsupported sort_str: {sort_str}. Use `desc`, `asc`")
+            raise ValueError(f"Unsupported sort_str: {sort}. Use `desc`, `asc`")
 
         # Collect all labbooks for all owners
         edges = lb.list_local_labbooks(username=username, sort_mode=order_by, reverse=reverse)

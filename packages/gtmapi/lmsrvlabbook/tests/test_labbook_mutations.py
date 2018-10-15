@@ -72,10 +72,10 @@ class TestLabBookServiceMutations(object):
         # Create LabBook
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
-                                 $component_id: String!, $revision: Int!) {
+                                 $base_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id, revision: $revision}) {
+                                baseId: $base_id, revision: $revision}) {
             labbook {
               id
               name
@@ -85,7 +85,7 @@ class TestLabBookServiceMutations(object):
         }
         """
         variables = {"name": "test-lab-book1", "desc": "my test description",
-                     "component_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
+                     "base_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
@@ -203,14 +203,13 @@ class TestLabBookServiceMutations(object):
         assert r['data']['deleteLabbook']['success'] is False
         assert os.path.exists(labbook_dir)
 
-
     def test_set_lb_for_untracked_ins_and_outs(self, fixture_working_dir_env_repo_scoped):
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
                                  $component_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id,
+                                baseId: $component_id,
                                 revision: $revision,
                                 isUntracked: true}) {
             labbook {
@@ -243,10 +242,10 @@ class TestLabBookServiceMutations(object):
         """Test listing labbooks"""
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
-                                 $component_id: String!, $revision: Int!) {
+                                 $base_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id, revision: $revision}) {
+                                baseId: $base_id, revision: $revision}) {
             labbook {
               id
               name
@@ -256,7 +255,7 @@ class TestLabBookServiceMutations(object):
         }
         """
         variables = {"name": "test-lab-duplicate", "desc": "my test description",
-                     "component_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
+                     "base_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 

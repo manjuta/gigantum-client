@@ -18,13 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-import tempfile
 import os
-import uuid
-import shutil
 import pprint
 import pickle
-import yaml
 from git import Repo
 
 from gtmcore.environment import RepositoryManager
@@ -36,7 +32,7 @@ class TestEnvironmentRepositoryManager(object):
     def test_clone_repositories_branch(self):
         """Test cloning a branch"""
         conf_file, working_dir = _create_temp_work_dir(override_dict={'environment':
-                                 {'repo_url': ["https://github.com/gig-dev/components2.git@test-branch-DONOTDELETE"]}})
+                   {'repo_url': ["https://github.com/gigantum/base-images-testing.git@test-branch-DONOTDELETE"]}})
 
         # Run clone and index operation
         erm = RepositoryManager(conf_file)
@@ -67,27 +63,13 @@ class TestEnvironmentRepositoryManager(object):
         with open(os.path.join(setup_index[0].local_repo_directory, "base_index.pickle"), 'rb') as fh:
             data = pickle.load(fh)
 
-        pprint.pprint(data)
         assert ENV_UNIT_TEST_REPO in data
         assert ENV_UNIT_TEST_BASE in data[ENV_UNIT_TEST_REPO]
         assert ENV_UNIT_TEST_REV in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE]
         assert "image" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]
         assert "server" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]['image']
         assert "package_managers" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]
-        assert "###repository###" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]
-
-    def test_index_repositories_custom(self, setup_index):
-        """Test creating and accessing the detail version of the dev env index"""
-        # Verify index file contents
-        with open(os.path.join(setup_index[0].local_repo_directory, "custom_index.pickle"), 'rb') as fh:
-            data = pickle.load(fh)
-
-        assert ENV_UNIT_TEST_REPO in data
-        assert "pillow" in data[ENV_UNIT_TEST_REPO]
-        assert 0 in data[ENV_UNIT_TEST_REPO]["pillow"]
-        assert "docker" in data[ENV_UNIT_TEST_REPO]["pillow"][0]
-        assert "Pillow==4.2.1" in data[ENV_UNIT_TEST_REPO]["pillow"][0]["docker"]
-        assert "###repository###" in data[ENV_UNIT_TEST_REPO]["pillow"][0]
+        assert "repository" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]
 
     def test_index_repositories_base_image_list(self, setup_index):
         """Test accessing the list version of the base image index"""
@@ -97,13 +79,3 @@ class TestEnvironmentRepositoryManager(object):
 
         assert len(data) >= 2
         assert any(n.get('id') == ENV_UNIT_TEST_BASE for n in data)
-        #assert data[1]['id'] == ENV_UNIT_TEST_BASE
-
-    def test_index_repositories_custom_list(self, setup_index):
-        """Test accessing the list version of the dev env index"""
-        # Verify index file contents
-        with open(os.path.join(setup_index[0].local_repo_directory, "custom_list_index.pickle"), 'rb') as fh:
-            data = pickle.load(fh)
-
-        assert len(data) >= 1
-        assert any(d['id'] == 'pillow' for d in data)

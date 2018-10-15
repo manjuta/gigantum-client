@@ -19,15 +19,12 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startsw
 setup(
     name='gtmcore',
     version=__version__,
-    description='Common tools and packages for the Gigantum LabManager application',
+    description='Common tools and packages for the Gigantum Client application',
     long_description=long_description,
-    url='https://github.com/gigantum/labmanager-common',
-    download_url='https://github.com/gigantum/labmanager-common/tarball/' + __version__,
     license='MIT',
     classifiers=[
-      'Development Status :: 3 - Alpha',
+      'Development Status :: 4 - Beta',
       'Intended Audience :: Developers',
-      'Programming Language :: Python :: 3.4',
       'Programming Language :: Python :: 3.5',
       'Programming Language :: Python :: 3.6',
     ],
@@ -41,5 +38,5 @@ setup(
     author='Gigantum/FlashX LLC',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    author_email='hello@gigantum.io'
+    author_email='support@gigantum.com'
 )

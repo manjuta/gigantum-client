@@ -42,7 +42,7 @@ class TestContainerFallback(object):
         # Create Component Manager
         cm = ComponentManager(lb)
         # Add a component
-        cm.add_component("base", ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+        cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
 
         ib = ImageBuilder(lb)
         ib.assemble_dockerfile(write=True)

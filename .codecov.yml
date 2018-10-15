@@ -10,19 +10,34 @@ coverage:
   status:
     project:
       core:
+        threshold: 1
         paths:
         - packages/gtmcore/*
       api:
+        threshold: 1
         paths:
         - packages/gtmapi/*
     patch:
       core:
+        threshold: 9
         paths:
         - packages/gtmcore/*
       api:
+        threshold: 9
         paths:
         - packages/gtmapi/*
     changes: no
+
+flags:
+  core:
+    paths:
+      - packages/gtmcore/*
+  api:
+    paths:
+      - packages/gtmapi/*
+
+ignore:
+  - "packages/gtmapi/lmsrvlabbook/tests/snapshots"  # ignore snapshot files as they don't really go towards coverage
 
 parsers:
   gcov:
@@ -33,6 +48,6 @@ parsers:
       macro: no
 
 comment:
-  layout: "header, diff"
+  layout: "header, reach, diff, flags, files"
   behavior: default
   require_changes: no

@@ -1,8 +1,9 @@
-# gigantum-client
+# Gigantum Client
 
-[![CircleCI](https://circleci.com/gh/gigantum/gigantum-client/tree/master.svg?style=svg)](https://circleci.com/gh/gigantum/gigantum-client/tree/master)  [![codecov](https://codecov.io/gh/gigantum/gigantum-client/branch/master/graph/badge.svg?token=1k6CENUN8G)](https://codecov.io/gh/gigantum/gigantum-client)
 
-Monorepo containing the source and build tooling for Gigantum Client
+[![CircleCI](https://circleci.com/gh/gigantum/gigantum-client/tree/master.svg?style=svg)](https://circleci.com/gh/gigantum/gigantum-client/tree/master)  [![codecov](https://codecov.io/gh/gigantum/gigantum-client/branch/master/graph/badge.svg?token=1k6CENUN8G)](https://codecov.io/gh/gigantum/gigantum-client) [![FOSSA Status](https://app.fossa.io/api/projects/custom%2B6007%2FGigantum%20Client.svg?type=small)](https://app.fossa.io/projects/custom%2B6007%2FGigantum%20Client?ref=badge_small)
+
+Monorepo containing the source and build tooling for the Gigantum Client
 
 
 ## Overview
@@ -40,7 +41,7 @@ For more information visit [gigantum.com](https://gigantum.com) and check out th
 
 ### Overview of Monorepo Structure
 
-`gigantum-client` is organized as a monorepo, which means it contains multiple packages. While this has a few draw backs
+`gigantum-client` is organized as a monorepo, which means it contains multiple packages. While this has a few drawbacks
 (e.g. larger repo, code possibly looks more intimidating, can't pip/npm install from Github), it has lots of benefits. 
 By bundling all of the components and tooling into a single repository, it makes it easier to develop, build, and release 
 the Gigantum Client. It also provides a single place to report issues, makes it easier to coordinate complex changes
@@ -104,6 +105,15 @@ released as stable.
 The `master` branch is the last version released as stable (i.e. what you get when you install the Gigantum Desktop
 app)
 
+#### 2a) Initialize submodules (temporary)
+
+   The file browser widget is still a submodule, but will soon be refactored out.
+   For now, initialize all submodules in the repo:
+
+   ```
+   git submodule update --init --recursive
+   ```
+
 #### 3) Install gtm 
 
 `gtm` is a command line tool to help build and configure the Client. This is a Python 3 application, so you must have
@@ -143,4 +153,4 @@ the `gigantum-client` repo into it. While running, `gtm dev attach` will drop yo
 
 The Gigantum Client is released under an [MIT license](LICENSE)
 
-TODO: Add license info and large fossa badge
+[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B6007%2FGigantum%20Client.svg?type=large)](https://app.fossa.io/projects/custom%2B6007%2FGigantum%20Client?ref=badge_large)

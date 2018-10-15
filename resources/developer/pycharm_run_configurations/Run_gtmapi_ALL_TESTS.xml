@@ -1,14 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run lmsrvlabbook ALL TESTS" type="tests" factoryName="py.test">
+  <configuration default="false" name="Run gtmapi ALL TESTS" type="tests" factoryName="py.test">
+    <module name="gigantum-client" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
-    <envs />
     <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <module name="gtm" />
     <EXTENSION ID="DockerContainerSettingsRunConfigurationExtension">
       <option name="envVars">
         <list>
@@ -71,11 +70,11 @@
         </list>
       </option>
     </EXTENSION>
-    <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="_new_keywords" value="&quot;&quot;" />
     <option name="_new_additionalArguments" value="&quot;&quot;" />
-    <option name="_new_target" value="&quot;$PROJECT_DIR$/gtmlib/resources/submodules/labmanager-service-labbook/lmsrvlabbook&quot;" />
+    <option name="_new_target" value="&quot;$PROJECT_DIR$/packages/gtmapi&quot;" />
     <option name="_new_targetType" value="&quot;PATH&quot;" />
-    <method />
+    <method v="2" />
   </configuration>
 </component>

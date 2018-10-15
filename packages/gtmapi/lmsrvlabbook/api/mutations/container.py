@@ -21,11 +21,13 @@ import os
 import uuid
 import time
 
+import requests
 import graphene
 import confhttpproxy
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, LabbookException
 from gtmcore.container.container import ContainerOperations
+from gtmcore.container.jupyter import check_jupyter_reachable
 from gtmcore.logging import LMLogger
 from gtmcore.activity.services import start_labbook_monitor
 
@@ -45,25 +47,36 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     path = graphene.String()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, dev_tool,
-                               container_override_id=None, client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-
+    def _start_dev_tool(cls, lb, username, dev_tool, container_override_id=None):
         lb_ip = ContainerOperations.get_labbook_ip(lb, username)
         lb_port = 8888
         lb_endpoint = f'http://{lb_ip}:{lb_port}'
 
         pr = confhttpproxy.ProxyRouter.get_proxy(lb.labmanager_config.config['proxy'])
         routes = pr.routes
+
         est_target = [k for k in routes.keys()
                       if lb_endpoint in routes[k]['target']
                       and 'jupyter' in k]
 
+        start_jupyter = True
+        suffix = None
         if len(est_target) == 1:
+            logger.info(f'Found existing Jupyter instance in route table for {str(lb)}.')
             suffix = est_target[0]
-        elif len(est_target) == 0:
+
+            # wait for jupyter to be up
+            try:
+                check_jupyter_reachable(lb_ip, lb_port, suffix)
+                start_jupyter = False
+            except LabbookException:
+                logger.warning(f'Detected stale route. Attempting to restart Jupyter and clean up route table.')
+                pr.remove(suffix[1:])
+
+        elif len(est_target) > 1:
+            raise ValueError(f"Multiple Jupyter instances found in route table for {str(lb)}! Restart container.")
+
+        if start_jupyter:
             rt_prefix = str(uuid.uuid4()).replace('-', '')[:8]
             rt_prefix, _ = pr.add(lb_endpoint, f'jupyter/{rt_prefix}')
 
@@ -76,8 +89,6 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             start_labbook_monitor(lb, username, dev_tool,
                                   url=f'{lb_endpoint}/{rt_prefix}',
                                   author=get_logged_in_author())
-        else:
-            raise ValueError(f"Multiple Jupyter instances for {str(lb)}")
 
         # Don't include the port in the path if running on 80
         apparent_proxy_port = lb.labmanager_config.config['proxy']["apparent_proxy_port"]
@@ -85,5 +96,18 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             path = suffix
         else:
             path = f':{apparent_proxy_port}{suffix}'
+
+        return path
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, dev_tool,
+                               container_override_id=None, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = LabBook(author=get_logged_in_author())
+        lb.from_name(username, owner, labbook_name)
+
+        # TODO - Fail fast if already locked
+        with lb.lock_labbook(failfast=True):
+            path = cls._start_dev_tool(lb, username, "jupyterlab")
 
         return StartDevTool(path=path)

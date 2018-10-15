@@ -11,6 +11,7 @@ const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -233,7 +234,7 @@ module.exports = {
       // Remember to add the new extension(s) to the "file" loader exclusion list.
     ],
   },
-  mode:'development',
+  mode: 'development',
   optimization: {
     runtimeChunk: 'single',
     splitChunks: {
@@ -256,6 +257,7 @@ module.exports = {
     },
   },
   plugins: [
+    new ProgressBarPlugin(),
     // new BundleAnalyzerPlugin({
     //        analyzerMode: 'static'
     // }), //comment back in when needed
