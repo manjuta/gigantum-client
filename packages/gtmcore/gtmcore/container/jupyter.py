@@ -50,8 +50,7 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
         if not t:
             raise LabbookException('Cannot detect Jupyter Lab token')
         token = t.groups()[0]
-
-        suffix = f'{proxy_prefix or ""}/lab?token={token}'
+        suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
 
         if check_reachable:
             check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
@@ -63,7 +62,7 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
             proxy_prefix = f'/{proxy_prefix}'
         _start_jupyter_process(labbook, lb_container, username, lb_key, token,
                                proxy_prefix)
-        suffix = f'{proxy_prefix or ""}/lab?token={token}'
+        suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
         if check_reachable:
             check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
         return suffix

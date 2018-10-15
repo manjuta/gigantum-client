@@ -19,6 +19,11 @@ import FetchContainerStatus from './fetchContainerStatus';
 // components
 import ToolTip from 'Components/shared/ToolTip';
 
+function Bounce(w) {
+  window.blur();
+  w.focus();
+}
+
 class ContainerStatus extends Component {
   constructor(props) {
   	super(props);
@@ -185,7 +190,7 @@ class ContainerStatus extends Component {
     set containerStatus secondsElapsed state by iterating
     @return {string}
   */
-  _checkJupyterStatus = () => {
+  _checkJupyterStatus = (devTool) => {
     // update this when juphyter can accept cors
 
     setTimeout(() => {
@@ -290,22 +295,29 @@ class ContainerStatus extends Component {
   _openDevToolMuation(developmentTool) {
     const { owner, labbookName } = store.getState().routes;
     this.props.setInfoMessage(`Starting ${developmentTool}, make sure to allow popups.`);
+    const tabName = `${developmentTool}-${owner}-${labbookName}`;
 
-    StartDevToolMutation(
-      owner,
-      labbookName,
-      developmentTool,
-      (response, error) => {
-        if (response.startDevTool) {
-          const path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-          window.open(path, '_blank');
-        }
+    if (window[tabName] && !window[tabName].closed) {
+      window[tabName].focus();
+    } else {
+      StartDevToolMutation(
+        owner,
+        labbookName,
+        developmentTool,
+        (response, error) => {
+          if (response.startDevTool) {
+            const tabName = `${developmentTool}-${owner}-${labbookName}`;
+            const path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
 
-        if (error) {
-          this.props.setErrorMessage('Error Starting Dev tool', error);
-        }
-      },
-    );
+            window[tabName] = window.open(path, tabName);
+          }
+
+          if (error) {
+            this.props.setErrorMessage('Error Starting Dev tool', error);
+          }
+        },
+      );
+    }
   }
 
   /**
