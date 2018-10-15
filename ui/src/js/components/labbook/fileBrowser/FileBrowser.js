@@ -13,6 +13,15 @@ import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 
+const sortFolders = (a, b) => {
+  if (a.node.isDir && !b.node.isDir) {
+    return -1;
+  } else if (!a.node.isDir && b.node.isDir) {
+    return 1;
+  }
+  return 0;
+};
+
 class FileBrowser extends Component {
     constructor(props) {
       super(props);
@@ -41,39 +50,46 @@ class FileBrowser extends Component {
     *  @return {}
     */
     _processFiles() {
-        const edges = this.props.files.edges;
+        let edges = this.props.files.edges;
 
-        let collectedFiles = {};
+        let edgesToSort = JSON.parse(JSON.stringify(edges));
+        console.log(edges)
+        // console.log(edgesSort)
+        // edgesSort.sort(sortFolders);
+        let edgeSorted = edgesToSort.sort(sortFolders)
+        console.log(edgeSorted)
 
-        edges.forEach((edge) => {
+        let fileObject = {};
+
+
+        edgeSorted.forEach((edge) => {
             let splitKey = edge.node.key.split('/', -1).filter(key => key.length);
-            let currentFileObjectPosition = collectedFiles;
+            let currentFileObjectPosition = fileObject;
 
-            while (splitKey.length > 1) {
-                const currentKey = splitKey[0];
+            splitKey.forEach((key) => {
 
-                if (!currentFileObjectPosition[currentKey]) {
-                    currentFileObjectPosition[currentKey] = {
-                                                  children: {},
-                                                  edge,
-                                                };
+                if (!fileObject[key]) {
+                    fileObject[key] = {
+                      children: {},
+                      edge,
+                    };
                 }
-                currentFileObjectPosition = currentFileObjectPosition[currentKey].children;
-                splitKey = splitKey.slice(1, splitKey.length);
+                currentFileObjectPosition = currentFileObjectPosition[key].children;
             }
+
             if (splitKey.length === 1) {
-                if (currentFileObjectPosition[splitKey[0]]) {
+                if (currentFileObjectPosition && currentFileObjectPosition[splitKey[0]]) {
                     currentFileObjectPosition[splitKey[0]].edge = edge;
-                } else {
+                } else if (currentFileObjectPosition) {
                     currentFileObjectPosition[splitKey[0]] = { edge };
                 }
                 if (edge.node.isDir && !currentFileObjectPosition[splitKey[0]]) {
-                    currentFileObjectPosition[splitKey[0]].children = {};
+                    currentFileObjectPosition[splitKey[0]] = { edge, children: {} };
                 }
             }
         });
 
-        return collectedFiles;
+        return fileObject;
   }
   /**
   *  @param {}
