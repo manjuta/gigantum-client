@@ -143,9 +143,6 @@ class StopContainer(graphene.relay.ClientIDMutation):
         stop_labbook_monitor(lb, username)
         lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
 
-        wf = GitWorkflow(lb)
-        wf.garbagecollect()
-
         # Try to remove route from proxy
         lb_port = 8888
         lb_endpoint = f'http://{lb_ip}:{lb_port}'
@@ -156,9 +153,14 @@ class StopContainer(graphene.relay.ClientIDMutation):
                       if lb_endpoint in routes[k]['target']
                       and 'jupyter' in k]
         if len(est_target) == 1:
+            # TODO: Why only 1? what if there's more?
             pr.remove(est_target[0][1:])
 
+        wf = GitWorkflow(lb)
+        wf.garbagecollect()
+
         if not stopped:
+            # TODO: Why would stopped=False? Should this move up??
             raise ValueError(f"Failed to stop labbook {labbook_name}")
 
     @classmethod
