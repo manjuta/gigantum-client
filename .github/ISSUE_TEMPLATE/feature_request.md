@@ -15,3 +15,6 @@ A clear and concise description of any alternative solutions or features you've 
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
+
+**Testing Suggestions**
+Suggestions to testing team what areas of application need to be exercised, what concerns the developer has, potential edge cases or emergent behavior, etc.
