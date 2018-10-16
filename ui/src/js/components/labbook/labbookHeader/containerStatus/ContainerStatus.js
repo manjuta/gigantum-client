@@ -12,6 +12,7 @@ import store from 'JS/redux/store';
 import { setContainerState } from 'JS/redux/reducers/labbook/overview/overview';
 import { setContainerStatus, setContainerMenuVisibility } from 'JS/redux/reducers/labbook/containerStatus';
 import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/redux/reducers/labbook/environment/environment';
+import { setPackageMenuVisible } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setBuildingState, setMergeMode } from 'JS/redux/reducers/labbook/labbook';
 import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
 //
@@ -224,6 +225,7 @@ class ContainerStatus extends Component {
 
     if ((status) && (status !== 'Stopped') && (status !== 'Rebuild')) {
       this.props.setCloseEnvironmentMenus();
+      setPackageMenuVisible(false);
     }
 
     return status;
@@ -264,6 +266,7 @@ class ContainerStatus extends Component {
   _startContainerMutation() {
     const self = this;
     this.props.setCloseEnvironmentMenus();
+    setPackageMenuVisible(false);
     this.props.setContainerMenuVisibility(false);
 
     StartContainerMutation(
@@ -284,6 +287,7 @@ class ContainerStatus extends Component {
           }
         } else {
           this.props.setCloseEnvironmentMenus();
+          setPackageMenuVisible(false);
         }
       },
     );
