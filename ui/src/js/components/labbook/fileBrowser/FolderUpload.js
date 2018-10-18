@@ -12,7 +12,7 @@ import { setFinishedUploading, setPauseUploadData } from 'JS/redux/reducers/labb
 
 
 const fileExistenceQuery = graphql`
-  query folderUploadQuery($labbookName: String!, $owner: String!, $path: String!){
+  query FolderUploadQuery($labbookName: String!, $owner: String!, $path: String!){
     labbook(name: $labbookName, owner: $owner){
       id
       code{

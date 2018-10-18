@@ -240,13 +240,11 @@ class ExportLabbook(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
-
         username = get_logged_in_username()
-        logger.info(f'Exporting LabBook: {username}/{owner}/{labbook_name}')
-
         working_directory = Configuration().config['git']['working_directory']
-        inferred_lb_directory = os.path.join(working_directory, username, owner, 'labbooks',
-                                             labbook_name)
+        inferred_lb_directory = os.path.join(working_directory, username, owner,
+                                             'labbooks', labbook_name)
+
         lb = LabBook(author=get_logged_in_author())
         lb.from_directory(inferred_lb_directory)
 
@@ -255,8 +253,9 @@ class ExportLabbook(graphene.relay.ClientIDMutation):
         job_kwargs = {'labbook_path': lb.root_dir,
                       'lb_export_directory': os.path.join(working_directory, 'export')}
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.export_labbook_as_zip, kwargs=job_kwargs, metadata=job_metadata)
-        logger.info(f"Exporting LabBook {lb.root_dir} in background job with key {job_key.key_str}")
+        job_key = dispatcher.dispatch_task(jobs.export_labbook_as_zip,
+                                           kwargs=job_kwargs,
+                                           metadata=job_metadata)
 
         return ExportLabbook(job_key=job_key.key_str)
 
@@ -266,7 +265,6 @@ class ImportLabbook(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         chunk_upload_params = ChunkUploadInput(required=True)
 
     import_job_key = graphene.String()
-    build_image_job_key = graphene.String()
 
     @classmethod
     def mutate_and_wait_for_chunks(cls, info, **kwargs):
@@ -279,42 +277,18 @@ class ImportLabbook(graphene.relay.ClientIDMutation, ChunkUploadMutation):
             raise ValueError('No file uploaded')
 
         username = get_logged_in_username()
-        logger.info(
-            f"Handling ImportLabbook mutation: user={username},"
-            f"owner={username}. Uploaded file {cls.upload_file_path}")
-
         job_metadata = {'method': 'import_labbook_from_zip'}
         job_kwargs = {
             'archive_path': cls.upload_file_path,
             'username': username,
-            'owner': username,
-            'base_filename': cls.filename
+            'owner': username
         }
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.import_labboook_from_zip, kwargs=job_kwargs, metadata=job_metadata)
-        logger.info(f"Importing LabBook {cls.upload_file_path} in background job with key {job_key.key_str}")
+        job_key = dispatcher.dispatch_task(jobs.import_labboook_from_zip,
+                                           kwargs=job_kwargs,
+                                           metadata=job_metadata)
 
-        assumed_lb_name = cls.filename.replace('.lbk', '').split('_')[0]
-        working_directory = Configuration().config['git']['working_directory']
-        inferred_lb_directory = os.path.join(working_directory, username, username, 'labbooks',
-                                             assumed_lb_name)
-        build_img_kwargs = {
-            'path': inferred_lb_directory,
-            'username': username,
-            'nocache': True
-        }
-        build_img_metadata = {
-            'method': 'build_image',
-            # TODO - we need labbook key but labbook is not available...
-            'labbook': f"{username}|{username}|{assumed_lb_name}"
-        }
-        logger.warning(f"Using assumed labbook name {build_img_metadata['labbook']}, better solution needed.")
-        build_image_job_key = dispatcher.dispatch_task(jobs.build_labbook_image, kwargs=build_img_kwargs,
-                                                       dependent_job=job_key, metadata=build_img_metadata)
-        logger.info(f"Adding dependent job {build_image_job_key} to build "
-                    f"Docker image for labbook `{inferred_lb_directory}`")
-
-        return ImportLabbook(import_job_key=job_key.key_str, build_image_job_key=build_image_job_key.key_str)
+        return ImportLabbook(import_job_key=job_key.key_str)
 
 
 class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
@@ -531,12 +505,13 @@ class DeleteLabbookFile(graphene.ClientIDMutation):
     success = graphene.Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, file_path, is_directory=False,
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section,
+                               file_path, is_directory=False,
                                client_mutation_id=None):
         username = get_logged_in_username()
         working_directory = Configuration().config['git']['working_directory']
-        inferred_lb_directory = os.path.join(working_directory, username, owner, 'labbooks',
-                                             labbook_name)
+        inferred_lb_directory = os.path.join(working_directory, username,
+                                             owner, 'labbooks', labbook_name)
         lb = LabBook(author=get_logged_in_author())
         lb.from_directory(inferred_lb_directory)
 
@@ -751,7 +726,8 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
     updated_labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, username, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, username,
+                               client_mutation_id=None):
         logged_in_username = get_logged_in_username()
         lb = LabBook(author=get_logged_in_author())
         lb.from_name(logged_in_username, owner, labbook_name)
@@ -768,7 +744,8 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
         if "HTTP_AUTHORIZATION" in info.context.headers.environ:
             token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
         else:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+            raise ValueError("Authorization header not provided. "
+                             "Must have a valid session to query for collaborators")
 
         # Add collaborator to remote service
         mgr = GitLabManager(default_remote, admin_service, token)

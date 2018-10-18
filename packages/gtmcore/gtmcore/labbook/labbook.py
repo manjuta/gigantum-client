@@ -110,7 +110,7 @@ class LabBook(object):
 
         # LabBook Properties
         self._root_dir: Optional[str] = None  # The root dir is the location of the labbook this instance represents
-        self._data: Optional[Dict[str, Any]] = None
+        self._data: Dict[str, Any] = {}
         self._checkout_id: Optional[str] = None
 
         # LabBook Environment
@@ -127,6 +127,9 @@ class LabBook(object):
             return f'<LabBook at `{self._root_dir}`>'
         else:
             return f'<LabBook UNINITIALIZED>'
+
+    def __eq__(self, other):
+        return isinstance(other, LabBook) and other.root_dir == self.root_dir
 
     def _validate_git(method_ref):  #type: ignore
         """Definition of decorator that validates git operations.
@@ -1252,6 +1255,7 @@ class LabBook(object):
         Returns:
             dict: A list of labbooks for a given user
         """
+        # TODO - Move to new inventory package
         # Make sure you expand a user string
         working_dir = os.path.expanduser(self.labmanager_config.config["git"]["working_directory"])
 

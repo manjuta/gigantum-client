@@ -105,13 +105,21 @@
     }
 
     .ContainerStatus{
+      .ContainerStatus__plugins-button,
       .ContainerStatus__plugins-button{
-        left: -25px;
-
-        width: 32px;
-        padding: 3px 0 0 5px;
-
+        width: 96px;
         font-size: 0px;
+        top: 3px;
+        border-radius: 10px 0 0 10px;
+        left: -67px;
+        .ContainerStatus__selected-tool{
+          border-radius: 10px 0 0 10px;
+          font-size: 12px;
+        }
+      }
+      .ContainerStatus__expand-tools,
+      .ContainerStatus__plugins-menu{
+        display: none;
       }
     }
 

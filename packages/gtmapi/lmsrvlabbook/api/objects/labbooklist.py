@@ -167,12 +167,15 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         # Prep arguments
         if "before" in kwargs:
             before = base64.b64decode(kwargs['before']).decode('utf-8')
-            page = max(0, int(before) - 1)
+            page = max(1, int(before) - 1)
         elif "after" in kwargs:
-            after = base64.b64decode(kwargs['after']).decode('utf-8')
-            page = int(after) + 1
+            if kwargs.get("after"):
+                after = base64.b64decode(kwargs['after']).decode('utf-8')
+                page = int(after) + 1
+            else:
+                page = 1
         else:
-            page = 0
+            page = 1
 
         if "first" in kwargs:
             per_page = int(kwargs['first'])
@@ -201,11 +204,11 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         if response.status_code != 200:
             raise IOError("Failed to retrieve Project listing from remote server")
         edges = response.json()
-        cursors = [base64.b64encode("{}".format(page).encode("UTF-8")).decode("UTF-8") for _ in edges]
+        cursor = base64.b64encode("{}".format(page).encode("UTF-8")).decode("UTF-8")
 
         # Get Labbook instances
         edge_objs = []
-        for edge, cursor in zip(edges, cursors):
+        for edge in edges:
             create_data = {"id": "{}&{}".format(edge["namespace"], edge["project"]),
                            "name": edge["project"],
                            "owner": edge["namespace"],
@@ -218,10 +221,10 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                                                           cursor=cursor))
 
         # Create Page Info instance
-        has_previous_page = True if page > 0 else False
-        has_next_page = False if len(edges) < per_page else True
+        has_previous_page = True if page > 1 else False
+        has_next_page = len(edges) != 0
 
         page_info = graphene.relay.PageInfo(has_next_page=has_next_page, has_previous_page=has_previous_page,
-                                            start_cursor=cursors[0], end_cursor=cursors[-1])
+                                            start_cursor=cursor, end_cursor=cursor)
 
         return RemoteLabbookConnection(edges=edge_objs, page_info=page_info)

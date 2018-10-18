@@ -11,7 +11,6 @@ const mutation = graphql`
     importLabbook(input: $input){
       clientMutationId
       importJobKey
-      buildImageJobKey
     }
   }
 `;
@@ -50,9 +49,9 @@ export default function ImportLabbookMutation(
         if (error) {
           console.log(error);
         }
-        if (response) {
+
+        if (response.importLabbook.importJobKey) {
           FooterUtils.getJobStatus(response, 'importLabbook', 'importJobKey');
-          FooterUtils.getJobStatus(response, 'importLabbook', 'buildImageJobKey');
         }
 
         callback(response, error);

@@ -376,21 +376,13 @@ class BranchMenu extends Component {
     const self = this;
 
     JobStatus.getJobStatus(jobKey).then((data) => {
-      if (data.jobStatus.status !== 'queued') {
-        this.props.setExportingState(false);
+      this.props.setExportingState(false);
 
-        if (data.jobStatus.result) {
-          setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
-        }
-
-        this.setState({ exporting: false });
-      } else {
-        setTimeout(() => {
-          setInfoMessage('Exporting...');
-
-          self._jobStatus(jobKey);
-        }, 500);
+      if (data.jobStatus.result) {
+        setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
       }
+
+      this.setState({ exporting: false });
     }).catch((error) => {
       console.log(error);
 

@@ -10,6 +10,7 @@ import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/Logi
 import ToolTip from 'Components/shared/ToolTip';
 // store
 import store from 'JS/redux/store';
+import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // mutations
@@ -105,17 +106,11 @@ const getRoute = (filepath) => {
  @param {string} filePath
  dispatched upload success message and passes labbookName/route to the footer
 */
-const dispatchFinishedStatus = (filepath) => {
+const dispatchFinishedStatus = (filepath, history, buildImage) => {
   const route = getRoute(filepath);
-
-  store.dispatch({
-    type: 'IMPORT_MESSAGE_SUCCESS',
-    payload: {
-      uploadMessage: `${route} Project is Ready`,
-      id: '',
-      labbookName: `${localStorage.getItem('username')}/${route}`, // route is labbookName
-    },
-  });
+  history.push(`/projects/${localStorage.getItem('username')}/${route}`);
+  buildImage(route, localStorage.getItem('username'), uuidv4());
+  setUploadMessageRemove('', uuidv4(), 0);
 };
 
 const dropZoneId = uuidv4();
@@ -217,7 +212,7 @@ export default class ImportModule extends Component {
   _dragleave(evt) {
     counter--;
 
-    if (evt.target.classList.contains(dropZoneId) < 0) {
+    if (evt.target.classList && evt.target.classList.contains(dropZoneId) < 0) {
       if (document.getElementById('dropZone')) {
         if (counter === 0) {
           this._toggleImportScreen(false);
@@ -241,7 +236,7 @@ export default class ImportModule extends Component {
       document.getElementById('dropZone').classList.add('ImportModule__drop-area-highlight');
     }
 
-    if (evt.target.classList.contains(dropZoneId) < 0) {
+    if (evt.target.classList && evt.target.classList.contains(dropZoneId) < 0) {
       evt.preventDefault();
       evt.dataTransfer.effectAllowed = 'none';
       evt.dataTransfer.dropEffect = 'none';
@@ -253,10 +248,20 @@ export default class ImportModule extends Component {
   *  preventDefault on dragOver event
   */
   _getBlob = (dataTransfer) => {
+    let chunkSize = 1024;
+    let offset = 0;
+    let fileReader = new FileReader();
+    let file;
+    function seek() {
+      if (offset >= file.size) {
+        return;
+      }
+      var slice = file.slice(offset, offset + chunkSize);
+      fileReader.readAsArrayBuffer(slice);
+    }
     const self = this;
     for (let i = 0; i < dataTransfer.files.length; i++) {
-      // let file = dataTransfer.items ? dataTransfer.items[i].getAsFile() : dataTransfer.files[0];
-      const file = dataTransfer.files[0];
+      file = dataTransfer.files[0];
       if (file.name.slice(file.name.length - 4, file.name.length) !== '.lbk' && file.name.slice(file.name.length - 4, file.name.length) !== '.zip') {
         this.setState({ error: true });
 
@@ -266,10 +271,7 @@ export default class ImportModule extends Component {
       } else {
         this.setState({ error: false });
 
-        const fileReader = new FileReader();
-
         fileReader.onloadend = function (evt) {
-          // debugger
           const arrayBuffer = evt.target.result;
 
           const blob = new Blob([new Uint8Array(arrayBuffer)]);
@@ -287,7 +289,17 @@ export default class ImportModule extends Component {
           self._fileUpload();
         };
 
-        fileReader.readAsArrayBuffer(file);
+        fileReader.onload = function () {
+          var view = new Uint8Array(fileReader.result);
+          for (var i = 0; i < view.length; ++i) {
+            if (view[i] === 10 || view[i] === 13) {
+              return;
+            }
+          }
+          offset += chunkSize;
+          seek();
+        };
+        seek();
       }
     }
   }
@@ -310,20 +322,7 @@ export default class ImportModule extends Component {
     evt.preventDefault();
     evt.dataTransfer.effectAllowed = 'none';
     evt.dataTransfer.dropEffect = 'none';
-
-    // If dropped items aren't files, reject them;
-    if (dataTransfer.items) {
-      // Use DataTransferItemList interface to access the file(s)
-      this._getBlob(dataTransfer);
-    } else {
-      // Use DataTransfer interface to access the file(s)
-      for (let i = 0; i < dataTransfer.files.length; i++) {
-        this.setState({
-          files: [dataTransfer.files[i].name],
-        });
-        this._fileUpload();
-      }
-    }
+    this._getBlob(dataTransfer);
 
     return false;
   }
@@ -366,7 +365,7 @@ export default class ImportModule extends Component {
     const self = this;
 
     this._importingState();
-
+    console.log(this.state.files[0]);
     const filepath = this.state.files[0].filename;
 
     const data = {
@@ -410,9 +409,8 @@ export default class ImportModule extends Component {
           });
 
           if (response.jobStatus.status === 'finished') {
-            dispatchFinishedStatus(filepath);
-
             self._clearState();
+            dispatchFinishedStatus(response.jobStatus.result, self.props.history, self._buildImage);
           } else if (response.jobStatus.status === 'failed') {
             dispatchFailedStatus();
 
@@ -484,7 +482,6 @@ export default class ImportModule extends Component {
     if (document.getElementById('dropZone__filename')) {
       document.getElementById('dropZone__filename').classList.remove('ImportModule__animation');
     }
-
     this.setState({ files: [], isImporting: false });
   }
 
@@ -646,7 +643,7 @@ export default class ImportModule extends Component {
   *  @return {}
   */
   _buildImage(labbookName, owner, id) {
-    BuildImageMutation(labbookName, owner, false, (error) => {
+    BuildImageMutation(labbookName, owner, false, (response, error) => {
       if (error) {
         console.error(error);
 

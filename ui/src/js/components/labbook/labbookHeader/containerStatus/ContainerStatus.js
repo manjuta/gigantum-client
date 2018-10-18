@@ -14,7 +14,7 @@ import { setContainerStatus, setContainerMenuVisibility } from 'JS/redux/reducer
 import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/redux/reducers/labbook/environment/environment';
 import { setPackageMenuVisible } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setBuildingState, setMergeMode } from 'JS/redux/reducers/labbook/labbook';
-import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/reducers/footer';
 //
 import FetchContainerStatus from './fetchContainerStatus';
 // components
@@ -41,6 +41,8 @@ class ContainerStatus extends Component {
       rebuildAttempts: 0,
       owner,
       labbookName,
+      selectedDevTool: 'JupyterLab',
+      showDevList: false,
     };
 
     this.state = state;
@@ -168,6 +170,10 @@ class ContainerStatus extends Component {
         pluginsMenu: false,
       });
     }
+
+    if (this.state.showDevList && evt.target.className.indexOf('ContainerStatus__expand-tools') === -1) {
+      this.setState({ showDevList: false });
+    }
   }
 
   /**
@@ -263,7 +269,7 @@ class ContainerStatus extends Component {
     @param {}
     triggers start container mutation
   */
-  _startContainerMutation() {
+  _startContainerMutation(launchDevTool) {
     const self = this;
     this.props.setCloseEnvironmentMenus();
     setPackageMenuVisible(false);
@@ -287,6 +293,10 @@ class ContainerStatus extends Component {
           }
         } else {
           this.props.setCloseEnvironmentMenus();
+
+          if (launchDevTool) {
+            this._openDevToolMuation(this.state.selectedDevTool, 'Running');
+          }
           setPackageMenuVisible(false);
         }
       },
@@ -296,14 +306,24 @@ class ContainerStatus extends Component {
     @param {}
     mutation to trigger opening of development tool
   */
-  _openDevToolMuation(developmentTool) {
+  _openDevToolMuation(developmentTool, status) {
     const { owner, labbookName } = store.getState().routes;
-    this.props.setInfoMessage(`Starting ${developmentTool}, make sure to allow popups.`);
     const tabName = `${developmentTool}-${owner}-${labbookName}`;
 
-    if (window[tabName] && !window[tabName].closed) {
+    if (status !== 'Stopped' && status !== 'Running') {
+      setWarningMessage('Could not launch development environment as the project is not ready.');
+    } else if (status === 'Stopped') {
+      this.props.setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
+      this.setState({
+        status: 'Starting',
+        contanerMenuRunning: false,
+      });
+      this.props.setMergeMode(false, false);
+      this._startContainerMutation(true);
+    } else if (window[tabName] && !window[tabName].closed) {
       window[tabName].focus();
     } else {
+      this.props.setInfoMessage(`Starting ${developmentTool}, make sure to allow popups.`);
       StartDevToolMutation(
         owner,
         labbookName,
@@ -311,7 +331,14 @@ class ContainerStatus extends Component {
         (response, error) => {
           if (response.startDevTool) {
             const tabName = `${developmentTool}-${owner}-${labbookName}`;
-            const path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+            if (developmentTool === 'Notebook') {
+              if (path.includes('/lab/tree')) {
+                path = path.replace('/lab/tree', '/tree');
+              } else {
+                path = `${path}/tree/code`;
+              }
+            }
 
             window[tabName] = window.open(path, tabName);
           }
@@ -462,66 +489,25 @@ class ContainerStatus extends Component {
 
     const containerMenuCSS = classNames({
       'ContainerStatus__plugins-menu': true,
-      hidden: !this.state.pluginsMenu,
+      hidden: !this.state.showDevList,
+      'ContainerStatus__plugins-menu--hover': this.state.isMouseOver,
     });
 
     const jupyterButtonCss = classNames({
       'ContainerStatus__plugins-button': true,
-      'jupyter-icon': true,
       'ContainerStatus__button--bottom': this.state.isMouseOver,
     });
+
+    const expandToolsCSS = classNames({
+      'ContainerStatus__expand-tools': true,
+      'ContainerStatus__expand-tools--open': this.state.showDevList,
+    });
     const textStatus = this._getStatusText(status);
+    const devTools = ['JupyterLab', 'Notebook'];
+    devTools.splice(devTools.indexOf(this.state.selectedDevTool), 1);
 
     return (
       <div className="ContainerStatus flex flex--row">
-
-        { (status === 'Running') &&
-
-        <div className="ContainerStatus__plugins">
-
-          <div
-            className={jupyterButtonCss}
-            onClick={() => { this._openDevToolMuation(this.props.base.developmentTools[0]); }}
-          >
-                  Open Jupyter
-          </div>
-
-          <div className={containerMenuIconCSS} />
-
-          <div
-            className={containerMenuCSS}
-          >
-
-            <div className="ContainerStatus__plugins-title">Launch</div>
-
-            <ul className="ContainerStatus__plugins-list">
-              {
-
-                      this.props.base.developmentTools.map(developmentTool => (
-
-                        <li
-                          key={developmentTool}
-                          className="ContainerStatus__plugins-list-item"
-                        >
-
-                          <button
-                            className={jupyterButtonCss}
-                            onClick={() => this._openDevToolMuation(developmentTool)}
-                            rel="noopener noreferrer"
-                          >
-                            {developmentTool}
-                          </button>
-
-                        </li>
-                        ))
-                    }
-            </ul>
-
-          </div>
-
-        </div>
-
-        }
 
         <div
           onClick={evt => this._containerAction(textStatus, key)}
@@ -532,6 +518,42 @@ class ContainerStatus extends Component {
         >
 
           {this._getStatusText(textStatus)}
+
+        </div>
+
+        <div className="ContainerStatus__plugins">
+          <div className={jupyterButtonCss}>
+            <div
+              className="ContainerStatus__selected-tool"
+              onClick={() => { this._openDevToolMuation(this.state.selectedDevTool, status); }}
+            >
+                {this.state.selectedDevTool}
+            </div>
+            <div
+              className={expandToolsCSS}
+              onClick={() => this.setState({ showDevList: !this.state.showDevList })}
+            >
+            </div>
+          </div>
+
+          <div className={containerMenuIconCSS} />
+
+          <ul className={containerMenuCSS}>
+            {
+
+              devTools.map(developmentTool => (
+
+                <li
+                  key={developmentTool}
+                  className="ContainerStatus__plugins-list-item jupyter-icon"
+                  onClick={() => this.setState({ selectedDevTool: developmentTool, showDevList: false })}
+                >
+                  {developmentTool}
+                </li>
+                ))
+            }
+          </ul>
+
 
         </div>
 

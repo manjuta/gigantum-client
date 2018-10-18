@@ -31,6 +31,7 @@ export const humanFileSize = (bytes) => {
 
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
+  console.log(file, chunk, accessToken, getChunkCallback);
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
     if (result && (error === undefined)) {
       getChunkCallback(file, result);

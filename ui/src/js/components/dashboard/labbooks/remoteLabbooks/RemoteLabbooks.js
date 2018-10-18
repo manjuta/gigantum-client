@@ -206,6 +206,8 @@ export default createPaginationContainer(
             owner
             id
             isLocal
+            creationDateUtc
+            modifiedDateUtc
           }
           cursor
         }

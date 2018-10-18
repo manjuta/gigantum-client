@@ -216,8 +216,10 @@ class TestLabBookRemoteOperations(object):
         """test list labbooks"""
         responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=2&page=1&order_by=name&sort=desc',
                       json=DUMMY_DATA, status=200)
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=2&page=1&order_by=name&sort=asc',
+        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=3&page=1&order_by=name&sort=asc',
                       json=list(reversed(DUMMY_DATA)), status=200)
+        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=3&page=2&order_by=name&sort=asc',
+                      json=list(), status=200)
 
         list_query = """
                     {
@@ -249,7 +251,33 @@ class TestLabBookRemoteOperations(object):
         list_query = """
                     {
                     labbookList{
-                      remoteLabbooks(orderBy: "name", sort: "asc", first: 10){
+                      remoteLabbooks(orderBy: "name", sort: "asc", first: 3){
+                        edges{
+                          node{
+                            id
+                            description
+                            creationDateUtc
+                            modifiedDateUtc
+                            name
+                            owner
+                          }
+                          cursor
+                        }
+                        pageInfo{
+                          hasNextPage
+                        }
+                      }
+                    }
+                    }"""
+
+        r = fixture_working_dir[2].execute(list_query)
+        assert 'errors' not in r
+        snapshot.assert_match(r)
+
+        list_query = """
+                    {
+                    labbookList{
+                      remoteLabbooks(orderBy: "name", sort: "asc", first: 3, after: "MQ=="){
                         edges{
                           node{
                             id
@@ -401,8 +429,11 @@ class TestLabBookRemoteOperations(object):
         responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=1&page=1&order_by=name&sort=desc',
                       json=[DUMMY_DATA[0]], status=200)
 
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=2&page=2&order_by=name&sort=desc',
+        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=1&page=2&order_by=name&sort=desc',
                       json=[DUMMY_DATA[1]], status=200)
+
+        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?per_page=1&page=3&order_by=name&sort=desc',
+                      json=list(), status=200)
 
         list_query = """
                     {
@@ -434,7 +465,33 @@ class TestLabBookRemoteOperations(object):
         list_query = """
                     {
                     labbookList{
-                      remoteLabbooks(orderBy: "name", sort: "asc", first: 2, after: "MA=="){
+                      remoteLabbooks(orderBy: "name", sort: "desc", first: 1, after: "MQ=="){
+                        edges{
+                          node{
+                            id
+                            description
+                            creationDateUtc
+                            modifiedDateUtc
+                            name
+                            owner
+                          }
+                          cursor
+                        }
+                        pageInfo{
+                          hasNextPage
+                        }
+                      }
+                    }
+                    }"""
+
+        r = fixture_working_dir[2].execute(list_query)
+        assert 'errors' not in r
+        snapshot.assert_match(r)
+
+        list_query = """
+                    {
+                    labbookList{
+                      remoteLabbooks(orderBy: "name", sort: "desc", first: 1, after: "Mq=="){
                         edges{
                           node{
                             id

@@ -162,7 +162,8 @@ class Dispatcher(object):
             return None
 
         # Fetch the RQ job. There needs to be a little processing done on it first.
-        rq_job = rq.job.Job.fetch(job_key.key_str.split(':')[-1].replace("'", ''), connection=redis.Redis())
+        rq_job = rq.job.Job.fetch(job_key.key_str.split(':')[-1],
+                                  connection=redis.Redis())
 
         # Build the properly decoded dict, which will be returned.
         decoded_dict = {}
@@ -185,12 +186,6 @@ class Dispatcher(object):
         Returns:
             bool: True if task scheduled successfully, False if task not found.
         """
-
-        if not job_key:
-            raise ValueError("job_key cannot be None or empty")
-
-        if not type(job_key) == JobKey:
-            raise ValueError("job_key must be type JobKey")
 
         # Encode job_id as byes from regular string, strip off the "rq:job" prefix.
         enc_job_id = job_key.key_str.split(':')[-1].encode()
@@ -295,7 +290,8 @@ class Dispatcher(object):
 
         rq_job_key_str = rq_job_ref.key.decode()
         logger.info(
-            "Dispatched job `{}` to queue '{}', job={}".format(method_reference.__name__, self._job_queue.name,
+            "Dispatched job `{}` to queue '{}', job={}".format(method_reference.__name__,
+                                                               self._job_queue.name,
                                                                rq_job_key_str))
         try:
             assert rq_job_key_str

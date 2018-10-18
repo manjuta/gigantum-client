@@ -20,7 +20,8 @@
 from typing import Optional
 
 
-def infer_docker_image_name(labbook_name: str, owner: str, username: Optional[str] = None) -> str:
+def infer_docker_image_name(labbook_name: str, owner: str,
+                            username: Optional[str] = None) -> str:
     """
     Produce the suggested name for the Docker image from the given LabBook details
 
@@ -30,7 +31,8 @@ def infer_docker_image_name(labbook_name: str, owner: str, username: Optional[st
         username: Optional username of active owner
 
     Returns:
-        A string containing the name that should be used for the Docker image. If username is not provided,
-        a known string is substituted. Note the prefix "gmlb" means "Gigantum-Managed LabBook".
+        A string containing the name that should be used for the Docker image.
+        If username is not provided, a known string is substituted.
+        Note the prefix "gmlb" means "Gigantum-Managed LabBook".
     """
     return f"gmlb-{username or 'nouser'}-{owner}-{labbook_name}"

@@ -38,10 +38,12 @@
   font-size: 14px;
 
   &--owner{
-    height: 20px;
+    color: $jet;
+    font-size: 12px;
+    height: 14px;
     margin: 2px;
 
-    line-height: 20px;
+    line-height: 14px;
   }
 
   &--description{
@@ -57,7 +59,7 @@
 
     line-height: 20px;
 
-    -webkit-line-clamp: 6;
+    -webkit-line-clamp: 5;
     box-orient: vertical;
   }
 }

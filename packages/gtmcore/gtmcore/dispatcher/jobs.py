@@ -101,7 +101,7 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
 
 
 def import_labboook_from_zip(archive_path: str, username: str, owner: str,
-                             config_file: Optional[str] = None, base_filename: Optional[str] = None) -> str:
+                             config_file: Optional[str] = None) -> str:
     """Method to import a labbook from a zip file
 
     Args:
@@ -109,8 +109,6 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
         username(str): Username
         owner(str): Owner username
         config_file(str): Optional path to a labmanager config file
-        base_filename(str): The desired basename for the upload, without an upload ID prepended
-        remove_source(bool): Flag indicating if the source file should removed after import
 
     Returns:
         str: directory path of imported labbook
@@ -129,13 +127,16 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
                 f"username={username}, owner={owner}, config_file={config_file})")
 
     try:
-        lb = ZipExporter.import_zip(archive_path, username, owner, config_file=config_file,
-                                    base_filename=base_filename)
-        os.remove(archive_path)
+        lb = ZipExporter.import_zip(archive_path, username, owner,
+                                    config_file=config_file,
+                                    update_meta=update_meta)
         return lb.root_dir
     except Exception as e:
         logger.exception(f"(Job {p}) Error on import_labbook_from_zip({archive_path}): {e}")
         raise
+    finally:
+        if os.path.exists(archive_path):
+            os.remove(archive_path)
 
 
 def build_labbook_image(path: str, username: Optional[str] = None,

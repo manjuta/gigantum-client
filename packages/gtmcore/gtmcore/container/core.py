@@ -41,7 +41,9 @@ def get_labmanager_ip() -> Optional[str]:
         str of IP address
     """
     client = get_docker_client()
-    container = [c for c in client.containers.list() if 'gigantum.labmanager' in c.name and 'gmlb-' not in c.name][0]
+    container = [c for c in client.containers.list()
+                 if 'gigantum.labmanager' in c.name
+                 and 'gmlb-' not in c.name][0]
     ip = container.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']
     logger.info("container {} IP: {}".format(container.name, ip))
     return ip
@@ -114,8 +116,9 @@ def _remove_docker_image(image_name: str) -> None:
         logger.warning(f"Attempted to delete Docker image {image_name}, but not found")
 
 
-def build_docker_image(root_dir: str, override_image_tag: Optional[str], nocache: bool = False,
-                       username: Optional[str] = None, feedback_callback: Optional[Callable] = None) -> str:
+def build_docker_image(root_dir: str, override_image_tag: Optional[str],
+                       nocache: bool = False, username: Optional[str] = None,
+                       feedback_callback: Optional[Callable] = None) -> str:
     """
     Build a new docker image from the Dockerfile at the given directory, give this image
     the name defined by the image_name argument.
@@ -163,7 +166,11 @@ def build_docker_image(root_dir: str, override_image_tag: Optional[str], nocache
         image_id = None
         # From: https://docker-py.readthedocs.io/en/stable/api.html#docker.api.build.BuildApiMixin.build
         # This builds the image and generates output status text.
-        for line in docker.from_env().api.build(path=env_dir, tag=image_name, pull=True, nocache=nocache, forcerm=True):
+        for line in docker.from_env().api.build(path=env_dir,
+                                                tag=image_name,
+                                                pull=True,
+                                                nocache=nocache,
+                                                forcerm=True):
             ldict = json.loads(line)
             stream = (ldict.get("stream") or "").strip()
             if feedback_callback:

@@ -855,7 +855,6 @@ class TestLabBookServiceMutations(object):
                                 }}
                               }}) {{
                                 importJobKey
-                                buildImageJobKey
                               }}
                             }}
                             """
@@ -863,9 +862,7 @@ class TestLabBookServiceMutations(object):
                 assert "errors" not in result
                 if chunk_index == total_chunks - 1:
                     assert type(result['data']['importLabbook']['importJobKey']) == str
-                    assert type(result['data']['importLabbook']['buildImageJobKey']) == str
                     assert "rq:job:" in result['data']['importLabbook']['importJobKey']
-                    assert "rq:job:" in result['data']['importLabbook']['buildImageJobKey']
 
                 chunk.close()
 
