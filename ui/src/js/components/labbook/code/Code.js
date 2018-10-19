@@ -74,36 +74,6 @@ class Code extends Component {
             />
           }
           </div>
-          <div className="Code__header">
-            <div className="Code__subtitle-container">
-              <h5 className="Code__subtitle">Code Browser
-                <ToolTip section="codeBrowser" />
-                {
-                  this.state.loadingStatus &&
-                  <div className="Code__loading" />
-                }
-              </h5>
-              <p className="Code__subtitle-sub">To view and edit files, open JupyterLab. If in the "Stopped" state, click the container status button to "Run".</p>
-            </div>
-
-            <div className="Code__toolbar end">
-              <p className="Code__import-text" id="Code__">
-                <label
-                  className="Code__import-file"
-                  htmlFor="file__code"
-                >
-                  Upload File
-                </label>
-                <input
-                  id="file__code"
-                  className="hidden"
-                  type="file"
-                  onChange={(evt) => { this._setSelectedFiles(evt); }}
-                />
-                or Drag and Drop File Below
-              </p>
-            </div>
-          </div>
           <div className="Code__file-browser">
             <CodeBrowser
               selectedFiles={this.state.selectedFiles}

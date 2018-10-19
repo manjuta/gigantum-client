@@ -14,9 +14,12 @@ import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 
 const sortFolders = (a, b) => {
-  if (a.node.isDir && !b.node.isDir) {
+  let aKey = a.node.key.split('/').length;
+  let bKey = b.node.key.split('/').length;
+
+  if ((aKey > bKey) || a.node.isDir) {
     return -1;
-  } else if (!a.node.isDir && b.node.isDir) {
+  } else if ((aKey < bKey) || !a.node.isDir) {
     return 1;
   }
   return 0;
@@ -41,7 +44,6 @@ class FileBrowser extends Component {
     *  @return {}
     */
     _setState(stateKey, value) {
-       console.log(stateKey)
        this.setState({ [stateKey]: value });
     }
     /**
@@ -51,42 +53,32 @@ class FileBrowser extends Component {
     */
     _processFiles() {
         let edges = this.props.files.edges;
-
         let edgesToSort = JSON.parse(JSON.stringify(edges));
-        console.log(edges)
-        // console.log(edgesSort)
-        // edgesSort.sort(sortFolders);
-        let edgeSorted = edgesToSort.sort(sortFolders)
-        console.log(edgeSorted)
-
+        let edgesSorted = edgesToSort.sort(sortFolders);
         let fileObject = {};
 
-
-        edgeSorted.forEach((edge) => {
+        edgesSorted.forEach((edge, index) => {
+            let currentObject = fileObject;
             let splitKey = edge.node.key.split('/', -1).filter(key => key.length);
-            let currentFileObjectPosition = fileObject;
 
-            splitKey.forEach((key) => {
+            splitKey.forEach((key, index) => {
+                if (currentObject && !currentObject[key]) {
+                    if (edge.node.isDir) {
+                      currentObject[key] = {
+                        children: {},
+                        edge,
+                      };
 
-                if (!fileObject[key]) {
-                    fileObject[key] = {
-                      children: {},
-                      edge,
-                    };
+                      currentObject = currentObject[key];
+                    } else {
+                      currentObject[key] = {
+                        edge,
+                      };
+                    }
+                } else if (currentObject) {
+                    currentObject = currentObject[key].children;
                 }
-                currentFileObjectPosition = currentFileObjectPosition[key].children;
-            }
-
-            if (splitKey.length === 1) {
-                if (currentFileObjectPosition && currentFileObjectPosition[splitKey[0]]) {
-                    currentFileObjectPosition[splitKey[0]].edge = edge;
-                } else if (currentFileObjectPosition) {
-                    currentFileObjectPosition[splitKey[0]] = { edge };
-                }
-                if (edge.node.isDir && !currentFileObjectPosition[splitKey[0]]) {
-                    currentFileObjectPosition[splitKey[0]] = { edge, children: {} };
-                }
-            }
+            });
         });
 
         return fileObject;
@@ -167,27 +159,24 @@ class FileBrowser extends Component {
   *  @return {boolean}
   */
   _checkRefs() {
-    let isOver = this.props.isOver;
+    let isOver = this.props.isOverCurrent,
+        { refs } = this;
 
-    function checkRefs(refs) {
-      Object.keys(refs).forEach((childname) => {
-        if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
-          const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-          if (child.props.data && child.props.data.edge.node.isDir) {
-            if (child.props.isOver) {
+    Object.keys(refs).forEach((childname) => {
+      if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+        const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+        if (!child.props.data.edge.node.isDir) {
+          console.log(child.props.data.edge.node.key, child.props.isOverCurrent, !child.props.data.edge.node.isDir);
+        }
 
-              isOver = false;
-            } else if (Object.keys(child.refs).length > 0) {
-              checkRefs(child.refs);
-            }
+        if (child.props.data && !child.props.data.edge.node.isDir) {
+          if (child.props.isOverCurrent) {
+            isOver = true;
           }
         }
-      });
-    }
-
-    if (Object.keys(this.refs).length > 0) {
-      checkRefs(this.refs);
-    }
+      }
+    });
+    console.log(isOver);
     return (isOver);
   }
 
@@ -204,18 +193,21 @@ class FileBrowser extends Component {
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
                 <div className="FileBrowser__header">
-                    <div>
-                        <button className="FileBrowser__btn FileBrowser__btn --delete"
+                    <div className="FileBrowser__header--name">
+                        <button className="FileBrowser__btn FileBrowser__btn--delete"
                           onClick={() => { this._deleteSelectedFiles(); }} />
                         File
                     </div>
 
-                    <div>
+                    <div className="FileBrowser__header--size">
                         Size
                     </div>
 
-                    <div>
+                    <div className="FileBrowser__header--date">
                         Modified
+                    </div>
+
+                    <div className="FileBrowser__header--menu">
                     </div>
                 </div>
             <div className="FileBrowser__body">

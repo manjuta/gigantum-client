@@ -5,6 +5,7 @@ import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
+import TextTruncate from 'react-text-truncate';
 // components
 import Connectors from './../utilities/Connectors';
 import ActionsMenu from './ActionsMenu';
@@ -22,13 +23,14 @@ class File extends Component {
           isSelected: props.isSelected || false,
           stateSwitch: false,
           newFileName: '',
+          renameEditMode: false,
       };
       this._setSelected = this._setSelected.bind(this);
       this.connectDND = this.connectDND.bind(this);
       this._renameEditMode = this._renameEditMode.bind(this);
       this._triggerMutation = this._triggerMutation.bind(this);
       this._clearState = this._clearState.bind(this);
-      this._clearInput = this._clearInput.bind(this);
+      this._setHoverState = this._setHoverState.bind(this);
   }
   /**
   *  @param {boolean}
@@ -49,13 +51,11 @@ class File extends Component {
   *  sets elements to be selected and parent
   */
   connectDND(render) {
-    // console.log(this.props);
     if (this.state.isDragging) {
       render = this.props.connectDragSource(render);
     } else {
       render = this.props.connectDropTarget(render);
     }
-    // console.log('dragging', this.props.isDragging)
     return render;
   }
   /**
@@ -100,23 +100,12 @@ class File extends Component {
   _clearState() {
     this.setState({
       newFileName: '',
-      editMode: false,
-    });
-    console.log(this);
-    // this.refs.renameInput.value = '';
-  }
-
-  /**
-  *  @param {}
-  *  sets state on a boolean value
-  *  @return {}
-  */
-  _clearInput() {
-    this.setState({
-      newFileName: '',
+      renameEditMode: false,
     });
 
-    // this.refs.renameInput.value = '';
+    if (this.renameInput) {
+      this.renameInput.value = '';
+    }
   }
 
   /**
@@ -141,12 +130,31 @@ class File extends Component {
     });
   }
 
+  /**
+  *  @param {event, boolean}
+  *  sets hover state
+  *  @return {}
+  */
+  _setHoverState(evt, hover) {
+    evt.preventDefault();
+    this.setState({ hover });
+
+    if (this.props.setParentHoverState && hover) {
+      this.props.setParentHoverState(evt, !hover);
+    }
+  }
+
   render() {
     const { node } = this.props.data.edge;
     const splitKey = node.key.split('/');
 
     const fileName = splitKey[splitKey.length - 1];
-    const buttonCSS = classNames({
+    const fileRowCSS = classNames({
+            File__row: true,
+            'File__row--hover': this.state.hover,
+            'File__row--background': this.props.isDragging,
+          }),
+          buttonCSS = classNames({
             File__btn: true,
             'File__btn--selected': this.state.isSelected,
           }),
@@ -159,9 +167,13 @@ class File extends Component {
             hidden: !this.state.renameEditMode,
           });
 
-    let file = this.props.connectDragPreview(<div onMouseDown={() => { this._mouseDown(); }} className="File">
+    let file = this.props.connectDragPreview(<div
+      onMouseOver={(evt) => { this._setHoverState(evt, true); }}
+      onMouseOut={(evt) => { this._setHoverState(evt, false); }}
+      onMouseDown={() => { this._mouseDown(); }}
+      className="File">
 
-             <div className="File__row">
+             <div className={fileRowCSS}>
 
                 <button
                     className={buttonCSS}
@@ -173,7 +185,12 @@ class File extends Component {
                   <div className={`File__icon ${fileIconsJs.getClass(fileName)}`}></div>
 
                   <div className="File__text">
-                      {fileName}
+                    <TextTruncate
+                        className="File__paragragh"
+                        line={1}
+                        truncateText="…"
+                        text={fileName}
+                    />
                   </div>
 
                 </div>
@@ -188,19 +205,16 @@ class File extends Component {
                       className="File__input"
                       onKeyUp={(evt) => { this._updateFileName(evt); }}
                     />
-                    { (this.state.newFileName.length > 0) &&
-                        <button
-                          className="File__btn File__btn--clear"
-                          onClick={() => { this._clearInput(); }}>
-                          Clear
-                        </button>
-                      }
                   </div>
-                  <button
-                    className="file__btn File__btn--add"
-                    onClick={() => { this._triggerMutation(); }}
-                  />
-
+                  <div className="flex justify-space-around">
+                    <button
+                      className="File__btn--round File__btn--cancel"
+                      onClick={() => { this._clearState(); }} />
+                    <button
+                      className="File__btn--round File__btn--add"
+                      onClick={() => { this._triggerMutation(); }}
+                    />
+                  </div>
                 </div>
 
                 <div className="File__cell File__cell--size">

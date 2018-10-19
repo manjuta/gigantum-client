@@ -2,6 +2,10 @@
     box-shadow: 0 0px 12px 0 rgba(0,0,0,.10);
 }
 
+@mixin boxShadowDark(){
+    box-shadow: 0 0px 12px 0 rgba(0,0,0,.50);
+}
+
 
 @mixin modal($height, $width) {
   position: fixed;

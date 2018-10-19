@@ -11,6 +11,7 @@
 }
 
 .File__row{
+    //background: $white;
     height: 50px;
     padding: 12px 0;
     padding-left: 10px;
@@ -22,6 +23,31 @@
     @include flex(space-between, row);
 
     @extend .UserSelect--none;
+
+    &--background {
+      background: $white;
+    }
+
+    &--hover {
+      @include boxShadowDark();
+
+      .ActionsMenu__item {
+        &--rename {
+            background: url('~Images/icons/rename-dark.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+
+        &--delete {
+            background: url('~Images/icons/trash-dark.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+
+        &--favorite-off {
+            background: url('~Images/icons/star__off-dark.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+      }
+    }
 }
 
 .File__cell{
@@ -50,7 +76,8 @@
 
   &--edit{
     @include flex(space-around, row);
-    width: 500px;
+    flex: 1;
+    margin: 0 20px;
   }
 
 }
@@ -58,6 +85,7 @@
 .File__text{
   flex: 1;
   text-align: left;
+  align-self: center;
   @extend .UserSelect--none;
 }
 
@@ -156,44 +184,49 @@
 
 .File__container {
   position: relative;
-  min-width: 400px;
+  flex: 1;
 }
 
 .File__btn {
-  &--add {
+  &--round {
     height: 30px;
     width: 34px !important;
     padding: 0;
 
-    border-radius: 15px;
+    border: 0 !important;
 
-    background: $azure url(~Images/icons/add.svg) no-repeat center center;
-    background-size: 16px;
+    border-radius: 15px;
+  }
+
+  &--add {
+    background: url(~Images/icons/check-selected.svg) no-repeat center center;
+    background-size: 30px;
     flex: 0 1 30px;
 
     &:hover {
-      background: $turquise url(~Images/icons/add.svg) no-repeat center center;
-      background-size: 16px;
+      background: url(~Images/icons/check-selected.svg) no-repeat center center;
+      background-size: 34px;
     }
 
     &:focus {
-      background: $azure url(~Images/icons/add.svg) no-repeat center center;
-      background-size: 16px;
+      background: url(~Images/icons/check-selected.svg) no-repeat center center;
+      background-size: 30px;
     }
   }
 
-  &--clear,
-  &--clear:focus,
-  &--clear:hover {
-    position: absolute;
-    top: 50%;
-    right: 0%;
-    margin: -14px 0 0 -35px;
-    padding: 0 35px 0 0;
-    color: $romanSilver;
-    background-color: transparent;
-    border: 0;
-    background: url(~Images/icons/close.svg) no-repeat calc(100% - 5px) center;
-    background-size: 24px;
+  &--cancel {
+    background: url(~Images/icons/close.svg) no-repeat center center;
+    background-size: 26px;
+    flex: 0 1 30px;
+
+    &:hover {
+      background: url(~Images/icons/close.svg) no-repeat center center;
+      background-size: 30px;
+    }
+
+    &:focus {
+      background: url(~Images/icons/close.svg) no-repeat center center;
+      background-size: 26px;
+    }
   }
 }

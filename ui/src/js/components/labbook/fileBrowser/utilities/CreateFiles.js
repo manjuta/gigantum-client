@@ -182,7 +182,7 @@ const getTotalFileLength = (files) => {
       file.forEach((nestedFile) => {
         filesRecursionCount(nestedFile);
       });
-    } else if (file.file && Array.isArray(file.file) && (file.file.length > 0)) {
+    } else if (file && file.file && Array.isArray(file.file) && (file.file.length > 0)) {
       file.file.forEach((nestedFile) => {
         filesRecursionCount(nestedFile);
       });
@@ -251,7 +251,7 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData) 
         file.forEach((nestedFile) => {
           filesRecursionCount(nestedFile);
         });
-      } else if (file.file && Array.isArray(file.file) && (file.file.length > 0)) {
+      } else if (file && file.file && Array.isArray(file.file) && (file.file.length > 0)) {
         file.file.forEach((nestedFile) => {
           filesRecursionCount(nestedFile);
         });

@@ -34,6 +34,7 @@ class Folder extends Component {
         this._checkParent = this._checkParent.bind(this);
         this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
+        this._setHoverState = this._setHoverState.bind(this);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -192,44 +193,41 @@ class Folder extends Component {
     *  @return {boolean}
     */
     _checkRefs() {
-      let isOver = this.props.isOver;
+      let isOver = this.props.isOverCurrent,
+          { refs } = this;
 
-      function checkRefs(refs) {
-        Object.keys(refs).forEach((childname) => {
-          if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
-            const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-            if (child.props.data && child.props.data.edge.node.isDir) {
-              if (child.props.isOver) {
-                isOver = false;
-              } else if (Object.keys(child.refs).length > 0) {
-                checkRefs(child.refs);
-              }
+
+      Object.keys(refs).forEach((childname) => {
+        if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+          const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+          if (child.props.data && !child.props.data.edge.node.isDir) {
+            if (child.props.isOverCurrent) {
+              isOver = true;
             }
           }
-        });
-
-        Object.keys(refs).forEach((childname) => {
-          if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
-            const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-            if (child.props.data && !child.props.data.edge.node.isDir) {
-              if (child.props.isOver) {
-                isOver = true;
-              }
-            }
-          }
-        });
-      }
-
-      if (Object.keys(this.refs).length > 0) {
-        checkRefs(this.refs);
-      }
-
-      if (this.state.prevIsOverState && !isOver) {
-        if (isOver === this.state.isOver) {
-          this.props.setState('hoverId', uuidv4());
         }
-      }
+      });
+
       return (isOver);
+    }
+
+    /**
+    *  @param {event, boolean}
+    *  sets hover state
+    *  @return {}
+    */
+    _setHoverState(evt, hover) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      this.setState({ hover });
+
+      if (this.props.setParentHoverState && hover) {
+        let fakeEvent = {
+          preventDefault: () => {},
+          stopPropagation: () => {},
+        };
+        this.props.setParentHoverState(fakeEvent, false);
+      }
     }
 
     render() {
@@ -264,9 +262,13 @@ class Folder extends Component {
               folderCSS = classNames({
                 Folder: true,
                 'Folder--highlight': isOver,
+                'Folder--hover': this.state.hover,
+                'Folder--background': this.props.isDragging,
               });
 
         let folder = this.props.connectDragPreview(<div
+          onMouseOver={(evt) => { this._setHoverState(evt, true); }}
+          onMouseOut={(evt) => { this._setHoverState(evt, false); }}
           onMouseLeave={() => { this._mouseLeave(); }}
           onMouseEnter={() => { this._mouseEnter(); }}
           className={folderCSS}>
@@ -319,7 +321,8 @@ class Folder extends Component {
                                         isSelected={this.state.isSelected}
                                         setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}
-                                        setState={this._setState}>
+                                        setState={this._setState}
+                                        setParentHoverState={this._setHoverState}>
                                     </FolderDND>
                                 );
                             }
@@ -331,7 +334,8 @@ class Folder extends Component {
                                     data={children[file]}
                                     key={children[file].edge.node.key}
                                     isSelected={this.state.isSelected}
-                                    checkParent={this._checkParent}>
+                                    checkParent={this._checkParent}
+                                    setParentHoverState={this._setHoverState}>
                                 </File>
                             );
                         })

@@ -9,6 +9,14 @@
       background-color: transparent !important;
     }
   }
+
+  &--hover {
+    @include boxShadowDark();
+  }
+
+  &--background {
+    background: $white;
+  }
 }
 
 .Folder__row{
@@ -24,6 +32,27 @@
 
     &--expanded{
         border-bottom: none;
+    }
+
+    &:hover {
+      //@include boxShadowDark();
+
+      .ActionsMenu__item {
+        &--rename {
+            background: url('~Images/icons/rename-dark.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+
+        &--delete {
+            background: url('~Images/icons/trash-dark.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+
+        &--favorite-off {
+            background: url('~Images/icons/star__off-dark.svg') no-repeat 50% 50%;
+            background-size: 20px;
+        }
+      }
     }
 }
 

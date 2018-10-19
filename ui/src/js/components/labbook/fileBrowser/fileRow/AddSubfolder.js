@@ -81,7 +81,9 @@ class AddSubfolder extends Component {
       editMode: false,
     });
 
-    this.subfolderInput.value = '';
+    if (this.subfolderInput) {
+      this.subfolderInput.value = '';
+    }
   }
 
   /**

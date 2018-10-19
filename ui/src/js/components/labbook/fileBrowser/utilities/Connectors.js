@@ -1,8 +1,11 @@
 import React from 'react';
 import { DragSource } from 'react-dnd';
 import uuidv4 from 'uuid/v4';
+import FileBrowserMutations from './FileBrowserMutations';
 // utilities
 import CreateFiles from './../utilities/CreateFiles';
+// store
+import store from 'JS/redux/store';
 
 const dragSource = {
 
@@ -12,16 +15,10 @@ const dragSource = {
  },
 
  isDragging(props, monitor) {
-    // If your component gets unmounted while dragged
-    // (like a card in Kanban board dragged between lists)
-    // you can implement something like this to keep its
-    // appearance dragged:
-    // console.log(props, monitor)
     return monitor.getItem().key === props.key;
   },
 
   beginDrag(props, monitor) {
-    console.log(monitor.isDragging(), props);
     return {
       isDragging: true,
       data: props.data,
@@ -39,46 +36,71 @@ const dragSource = {
     let fileNameParts = props.data.edge.node.key.split('/');
 
     let fileName = fileNameParts[fileNameParts.length - 1];
+    if (dropResult.data) {
+      let pathArray = dropResult.data.edge.node.key.split('/');
+      pathArray.pop();
+      let path = pathArray.join('/');
 
-    let pathArray = dropResult.data.edge.node.key.split('/');
-    pathArray.pop();
-    let path = pathArray.join('/');
+      let newKey = path ? `${path}/${fileName}` : `${fileName}`;
 
-    let newKey = path ? `${path}/${fileName}` : `${fileName}`;
+      let newKeyArray = dropResult.data.edge.node.key.split('/');
+      let fileKeyArray = props.data.edge.node.key.split('/');
 
-    let newKeyArray = dropResult.data.edge.node.key.split('/');
-    let fileKeyArray = props.data.edge.node.key.split('/');
+      newKeyArray.pop();
+      fileKeyArray.pop();
 
-    newKeyArray.pop();
-    fileKeyArray.pop();
+      let newKeyPath = newKeyArray.join('/');
+      let fileKeyPath = fileKeyArray.join('/');
 
-    let newKeyPath = newKeyArray.join('/');
-    let fileKeyPath = fileKeyArray.join('/');
+      newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
+      console.log(newKeyPath, fileKeyPath)
+      if (newKeyPath !== fileKeyPath) {
+        if ((newKey !== props.data.edge.node.key)) {
 
-    newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
+          const moveLabbookFileData = {
+            newKey,
+            edge: props.data.edge,
+          };
 
-    if (newKeyPath !== fileKeyPath) {
-      if ((newKey !== props.data.edge.node.key)) {
-        const moveLabbookFileData = {
-          newKey,
-          edge: props.data.edge,
-        };
-        props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
-          console.log(response)
-        });
-        // props.browserProps.openFolder(`${dropResult.path}/`);
-        // props.browserProps.renameFile(props.fileKey, newKey);
+          if (props.mutations) {
+            props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
+              console.log(response);
+            });
+          } else {
+            const {
+              parentId,
+              connection,
+              favoriteConnection,
+              section,
+            } = props;
+            const { owner, labbookName } = store.getState().routes;
+
+            const mutationData = {
+              owner,
+              labbookName,
+              parentId,
+              connection,
+              favoriteConnection,
+              section,
+            };
+
+            const mutations = new FileBrowserMutations(mutationData);
+
+            mutations.moveLabbookFile(moveLabbookFileData, (response) => {
+              console.log(response);
+            });
+          }
+        }
       }
     }
   },
 };
 
 function dragCollect(connect, monitor) {
-  // console.log(connect, monitor)
   return {
     connectDragPreview: connect.dragPreview(),
     connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging(),
+    isDragging: monitor.getSourceId() === monitor.sourceId,
   };
 }
 
@@ -86,7 +108,7 @@ const targetSource = {
   canDrop(props, monitor) {
      // You can disallow drop based on props or item
      const item = monitor.getItem();
-     return true;
+     return monitor.isOver({ shallow: true });
   },
   drop(props, monitor, component) {
     const dndItem = monitor.getItem();
@@ -110,12 +132,13 @@ const targetSource = {
                   if (fileList.length) {
                     let key = props.data.edge.node.key || props.fileKey;
                     path = key.substr(0, key.lastIndexOf('/') || key.length);
-
+                    console.log('move')
                      if (fileList) {
                         CreateFiles.createFiles(fileList, `${path}/`, props.mutationData);
                      }
                      files = fileList;
                   } else if (dndItem.files && dndItem.files.length) {
+                      console.log('drop')
                        // handle dragged files
                        let key = props.newKey || props.fileKey;
                        path = key.substr(0, key.lastIndexOf('/') || key.length);
@@ -132,42 +155,67 @@ const targetSource = {
       } else {
           // uploads to root directory
           let item = monitor.getItem();
-          console.log(component)
-          CreateFiles.createFiles(item.files, '', component.state.mutationData);
+
+          if (item.files) {
+            CreateFiles.createFiles(item.files, '', component.state.mutationData);
+          } else {
+            const dropResult = monitor.getDropResult();
+            let currentKey = item.data.edge.node.key;
+            let splitKey = currentKey.split('/');
+            let newKey = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
+            newKey = `${newKey}/`;
+
+            if ((newKey !== item.data.edge.node.key)) {
+              const moveLabbookFileData = {
+                newKey,
+                edge: item.data.edge,
+              };
+              if (props.mutations) {
+                console.log(props)
+                props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
+                  console.log(response);
+                });
+              } else {
+                console.log(newKey, item.data.edge.node.key)
+                const {
+                  parentId,
+                  connection,
+                  favoriteConnection,
+                  section,
+                } = props;
+                const { owner, labbookName } = store.getState().routes;
+
+                const mutationData = {
+                  owner,
+                  labbookName,
+                  parentId,
+                  connection,
+                  favoriteConnection,
+                  section,
+                };
+
+                const mutations = new FileBrowserMutations(mutationData);
+
+                mutations.moveLabbookFile(moveLabbookFileData, (response) => {
+                  console.log(response);
+                });
+              }
+            }
+          }
       }
 
       return {
        data: props.data,
       };
   },
-  // hover(props, monitor, component) {
-  //   // // This is fired very often and lets you perform side effects
-  //   // // in response to the hover. You can't handle enter and leave
-  //   // // here—if you need them, put monitor.isOver() into collect() so you
-  //   // // can just use componentWillReceiveProps() to handle enter/leave.
-  //   //
-  //   // // You can access the coordinates if you need them
-  //   // const clientOffset = monitor.getClientOffset();
-  //   // const componentRect = findDOMNode(component).getBoundingClientRect();
-  //   //
-  //   // // You can check whether we're over a nested drop target
-  //   // const isJustOverThisOne = monitor.isOver({ shallow: true });
-  //   //
-  //   // // You will receive hover() even for items for which canDrop() is false
-  //   // const canDrop = monitor.canDrop();
-  //   // console.log(component);
-  //   if (component._setState) {
-  //     component._setState('hoverId', uuidv4());
-  //   }
-  // },
 };
 
 function targetCollect(connect, monitor) {
-  // console.log(connect, monitor);
   return {
     connectDropTarget: connect.dropTarget(),
-    isOver: monitor.isOver({ shallow: true }),
 		canDrop: true,
+    isOver: monitor.isOver(),
+    isOverCurrent: monitor.isOver({ shallow: true }),
   };
 }
 
@@ -177,5 +225,5 @@ const Connectors = {
   targetSource,
   targetCollect,
 };
-// console.log(this)
+
 export default Connectors;

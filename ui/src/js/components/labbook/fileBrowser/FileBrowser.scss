@@ -17,27 +17,37 @@
 }
 
 .FileBrowser__header {
-    @include flex(flex-start, row);
-    position: relative;
+    @include flex(space-between, row);
     border-bottom: 2px solid $romanSilver;
     height: 50px;
     padding: 12px 0;
+    width: 100%;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: left;
 
-    & div:first-child {
-        padding-left: 10px;
+
+    &--name{
+        margin: 0 10px;
+        flex: 1;
+
     }
-    & div:nth-child(2) {
-        position: absolute;
-        right: 420px;
+
+    &--size{
+        width: 100px;
     }
-    & div:nth-child(3) {
-        position: absolute;
-        right: 220px;
+
+    &--date{
+        width: 140px;
+    }
+
+    &--menu{
+        width: 140px;
     }
 }
 
 .FileBrowser__body {
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
 .FileBrowser__btn {

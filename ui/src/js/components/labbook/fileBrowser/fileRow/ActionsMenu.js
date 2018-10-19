@@ -5,10 +5,33 @@ import classNames from 'classnames';
 import './ActionsMenu.scss';
 
 export default class ActionsMenu extends Component {
+  constructor(props) {
+  	super(props);
+  	this._closePopup = this._closePopup.bind(this);
+    this._setWrapperRef = this._setWrapperRef.bind(this);
+  }
+
+  state = {
+    popupVisible: false,
+  }
+  /**
+  *  LIFECYCLE MEHTODS START
+  */
+  componentDidMount() {
+    window.addEventListener('click', this._closePopup);
+  }
+
+  componentWillMount() {
+    window.removeEventListener('click', this._closePopup);
+  }
+  /**
+  *  LIFECYCLE MEHTODS END
+  */
+
   /**
   *  @param {}
   *  triggers favoirte unfavorite mutation
-  *  @return {}
+  *  @return{ }
   */
   _triggerFavoriteMutation() {
      const data = {
@@ -27,17 +50,95 @@ export default class ActionsMenu extends Component {
      }
   }
 
+  /**
+  *  @param {}
+  *  closes popup when clicking
+  *  @return {}
+  */
+  _closePopup(evt) {
+    if (this[this.props.edge.node.id] && !this[this.props.edge.node.id].contains(evt.target)) {
+      this.setState({ popupVisible: false });
+    }
+  }
+
+  /**
+  *  @param {}
+  *  triggers favoirte unfavorite mutation
+  *  @return {}
+  */
+  _togglePopup(evt, popupVisible) {
+    if (!popupVisible) {
+      evt.stopPropagation(); // only stop propagation when closing popup, other menus won't close on click if propagation is stopped
+    }
+    console.log(popupVisible);
+    this.setState({ popupVisible });
+  }
+
+  /**
+  *  @param {}
+  *  triggers DeleteLabbookFileMutation
+  *  @return {}
+  */
+  _triggerDeleteMutation(evt) {
+    const deleteFileData = {
+      key: this.props.edge.node.key,
+      edge: this.props.edge,
+    };
+
+    this.props.mutations.deleteLabbookFile(deleteFileData, (reponse) => {
+      console.log(response);
+    });
+
+    this._togglePopup(evt, false);
+  }
+
+  /**
+  * Set the wrapper ref
+  */
+   _setWrapperRef(node) {
+     this[this.props.edge.node.id] = node;
+   }
+
   render() {
     const favoriteCSS = classNames({
-      ActionsMenu__item: true,
-      'ActionsMenu__item--favorite-on': this.props.edge.node.isFavorite,
-      'ActionsMenu__item--favorite-off': !this.props.edge.node.isFavorite,
-    });
+            ActionsMenu__item: true,
+            'ActionsMenu__item--favorite-on': this.props.edge.node.isFavorite,
+            'ActionsMenu__item--favorite-off': !this.props.edge.node.isFavorite,
+          }),
+          popupCSS = classNames({
+            ActionsMenu__popup: true,
+            hidden: !this.state.popupVisible,
+            ToolTip__message: true,
+          }),
+
+          deleteCSS = classNames({
+            'ActionsMenu__item ActionsMenu__item--delete': true,
+            'ActionsMenu__popup-visible': this.state.popupVisible,
+          });
+
     return (
-        <div className="ActionsMenu">
+        <div
+          className="ActionsMenu"
+          key={`${this.props.edge.node.id}-action-menu}`}
+          ref={this._setWrapperRef}>
           <div
-            className="ActionsMenu__item ActionsMenu__item--delete"
-            name="Delete">
+            className={deleteCSS}
+            name="Delete"
+            onClick={(evt) => { this._togglePopup(evt, true); }} >
+
+            <div className={popupCSS}>
+              <div className="ToolTip__pointer"></div>
+              <p>Are you sure?</p>
+              <div className="flex justify--space-around">
+                <button
+                  className="File__btn--round File__btn--cancel"
+                  onClick={(evt) => { this._togglePopup(evt, false); }} />
+                <button
+                  className="File__btn--round File__btn--add"
+                  onClick={(evt) => { this._triggerDeleteMutation(evt); }}
+                />
+              </div>
+            </div>
           </div>
           <div
             onClick={() => { this.props.renameEditMode(true); }}
@@ -45,17 +146,9 @@ export default class ActionsMenu extends Component {
             name="Rename">
           </div>
           <div
-            className="ActionsMenu__item ActionsMenu__item--duplicate"
-            name="Duplicate">
-          </div>
-          <div
             onClick={ () => { this._triggerFavoriteMutation(); }}
             className={favoriteCSS}
             name="Favorite">
-          </div>
-          <div
-            className="ActionsMenu__item ActionsMenu__item--menu"
-            name="Menu">
           </div>
         </div>
     );
