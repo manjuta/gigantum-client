@@ -398,7 +398,13 @@ class LabBook(object):
                 d = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
                 return d
         else:
-            return None
+            first_commit = self.git.repo.git.rev_list('HEAD', max_parents=0)
+            create_date = self.git.log_entry(first_commit)['committed_on'].replace(tzinfo=None)
+            return create_date
+
+    @property
+    def modified_on(self) -> datetime.datetime:
+        return self.git.log(max_count=1)[0]['committed_on']
 
     @property
     def build_details(self) -> Optional[Dict[str, str]]:
@@ -593,36 +599,6 @@ class LabBook(object):
 
         possible_section, _ = relative_path.split('/', 1)
         return LabBook.get_activity_type_from_section(possible_section)
-
-    def get_file_info(self, section: str, rel_file_path: str) -> Dict[str, Any]:
-        """Method to get a file's detail information
-
-        Args:
-            rel_file_path(str): The relative file path to generate info from
-            section(str): The section name (code, input, output)
-
-        Returns:
-            dict
-        """
-        # remove leading separators if one exists.
-        rel_file_path = rel_file_path[1:] if rel_file_path[0] == os.path.sep else rel_file_path
-        full_path = os.path.join(self.root_dir, section, rel_file_path)
-
-        file_info = os.stat(full_path)
-        is_dir = os.path.isdir(full_path)
-
-        # If it's a directory, add a trailing slash so UI renders properly
-        if is_dir:
-            if rel_file_path[-1] != os.path.sep:
-                rel_file_path = f"{rel_file_path}{os.path.sep}"
-
-        return {
-                  'key': rel_file_path,
-                  'is_dir': is_dir,
-                  'size': file_info.st_size if not is_dir else 0,
-                  'modified_at': file_info.st_mtime,
-                  'is_favorite': rel_file_path in self.favorite_keys[section]
-               }
 
     @property
     def is_repo_clean(self) -> bool:
@@ -1236,94 +1212,6 @@ class LabBook(object):
         dname = [t for t in self.root_dir.split(os.sep) if t][-1]
         if self.name != dname:
             raise ValueError(f"Labbook name {self.name} does not match directory name {dname}")
-
-    def list_local_labbooks(self, username: str,
-                            sort_mode: str = "name",
-                            reverse: bool = False) -> List[Dict[str, str]]:
-        """Method to list available LabBooks
-
-        Args:
-            username(str): Username to filter the query on
-            sort_mode(sort_mode): String specifying how labbooks should be sorted
-            reverse(bool): Reverse sorting if True. Default is ascending (a-z, oldest-newest)
-
-        Supported sorting modes:
-            - name: naturally sort
-            - created_on: sort by creation date, newest first
-            - modified_on: sort by modification date, newest first
-
-        Returns:
-            dict: A list of labbooks for a given user
-        """
-        # TODO - Move to new inventory package
-        # Make sure you expand a user string
-        working_dir = os.path.expanduser(self.labmanager_config.config["git"]["working_directory"])
-
-        # Return only labbooks for the provided user
-        files_collected = glob.glob(os.path.join(working_dir,
-                                                 username,
-                                                 "*",
-                                                 "labbooks",
-                                                 "*"))
-
-        # Sort to give deterministic response
-        files_collected = sorted(files_collected)
-
-        # Generate dictionary to return
-        result: List[Dict[str, Any]] = list()
-        for dir_path in files_collected:
-            if os.path.isdir(dir_path):
-                _, username, owner, _, labbook = dir_path.rsplit(os.path.sep, 4)
-
-                lb_item: Dict[str, Any] = {"owner": owner, "name": labbook}
-
-                if sort_mode == 'name':
-                    lb_item['sort_val'] = labbook
-                elif sort_mode == 'created_on':
-                    # get create data from yaml file
-                    try:
-                        lb = LabBook()
-                        lb.from_directory(dir_path)
-                    except Exception as e:
-                        logger.error(e)
-                        continue
-                    create_date = lb.creation_date
-
-                    # SHIM - Can be removed on major release
-                    if not create_date:
-                        # This is an old labbook with no creation data metadata
-                        first_commit = lb.git.repo.git.rev_list('HEAD', max_parents=0)
-                        create_date = lb.git.log_entry(first_commit)['committed_on'].replace(tzinfo=None)
-
-                    lb_item['sort_val'] = create_date
-
-                elif sort_mode == 'modified_on':
-                    # lookup date of last commit
-                    try:
-                        lb = LabBook()
-                        lb.from_directory(dir_path)
-                        lb_item['sort_val'] = lb.git.log(max_count=1)[0]['committed_on']
-                    except Exception as e:
-                        logger.error(e)
-                        continue
-                else:
-                    raise ValueError(f"Unsupported sort_mode: {sort_mode}")
-
-                result.append(lb_item)
-
-        # Apply sort
-        if sort_mode in ['created_on', 'modified_on']:
-            # Sort on datetime objects, flipping the reverse state to match default sort behavior
-            result = sorted(result, key=lambda x: x['sort_val'], reverse=reverse)
-        else:
-            # Use natural sort for labbook names
-            result = natsorted(result, key=lambda x: x['sort_val'], reverse=reverse)
-
-        # Remove sort_val from dictionary before returning
-        for item in result:
-            del item['sort_val']
-
-        return result
 
     def log(self, username: str = None, max_count: int = 10):
         """Method to list commit history of a Labbook

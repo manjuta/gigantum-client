@@ -20,6 +20,7 @@
 import graphene
 import base64
 
+from gtmcore.files import FileOperations
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.user import get_logged_in_username
 
@@ -58,7 +59,7 @@ class LabbookFile(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
             lb = dataloader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").get()
 
             # Retrieve file info
-            self._file_info = lb.get_file_info(self.section, self.key)
+            self._file_info = FileOperations.get_file_info(lb, self.section, self.key)
 
         # Set class properties
         self.is_dir = self._file_info['is_dir']

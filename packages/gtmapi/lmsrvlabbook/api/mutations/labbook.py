@@ -592,7 +592,7 @@ class MakeLabbookDirectory(graphene.ClientIDMutation):
         dataloader.prime(f"{owner}&{labbook_name}&{lb.name}", lb)
 
         # Create data to populate edge
-        file_info = lb.get_file_info(section, directory)
+        file_info = FileOperations.get_file_info(lb, section, directory)
         create_data = {'owner': owner,
                        'name': labbook_name,
                        'section': section,

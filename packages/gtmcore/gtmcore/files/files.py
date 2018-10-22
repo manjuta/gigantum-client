@@ -169,7 +169,7 @@ class FileOperations(object):
 
         fdst = shutil.move(src_file, full_dst)
         relpath = fdst.replace(os.path.join(labbook.root_dir, section), '')
-        return labbook.get_file_info(section, relpath)
+        return cls.get_file_info(labbook, section, relpath)
 
     @classmethod
     def insert_file(cls, labbook: LabBook, section: str, src_file: str,
@@ -399,7 +399,7 @@ class FileOperations(object):
                 ars = ActivityStore(labbook)
                 ars.create_activity_record(ar)
 
-            return labbook.get_file_info(section, dst_rel_path)
+            return cls.get_file_info(labbook, section, dst_rel_path)
         except Exception as e:
             logger.critical("Failed moving file in labbook. Repository may be in corrupted state.")
             logger.exception(e)
@@ -471,6 +471,38 @@ class FileOperations(object):
                 ars.create_activity_record(ar)
 
     @classmethod
+    def get_file_info(cls, labbook: LabBook, section: str, rel_file_path: str) -> Dict[str, Any]:
+        """Method to get a file's detail information
+
+        Args:
+            labbook: Subject labbook
+            rel_file_path(str): The relative file path to generate info from
+            section(str): The section name (code, input, output)
+
+        Returns:
+            dict
+        """
+        # remove leading separators if one exists.
+        rel_file_path = _make_path_relative(rel_file_path)
+        full_path = os.path.join(labbook.root_dir, section, rel_file_path)
+
+        file_info = os.stat(full_path)
+        is_dir = os.path.isdir(full_path)
+
+        # If it's a directory, add a trailing slash so UI renders properly
+        if is_dir:
+            if rel_file_path[-1] != os.path.sep:
+                rel_file_path = f"{rel_file_path}{os.path.sep}"
+
+        return {
+                  'key': rel_file_path,
+                  'is_dir': is_dir,
+                  'size': file_info.st_size if not is_dir else 0,
+                  'modified_at': file_info.st_mtime,
+                  'is_favorite': rel_file_path in labbook.favorite_keys[section]
+               }
+
+    @classmethod
     def walkdir(cls, labbook: LabBook, section: str, show_hidden: bool = False) -> List[Dict[str, Any]]:
         """Return a list of all files and directories in a section of the labbook. Never includes the .git or
          .gigantum directory.
@@ -509,7 +541,7 @@ class FileOperations(object):
         for f_p in keys:
             if not show_hidden and any([len(p) and p[0] == '.' for p in f_p.split(os.path.sep)]):
                 continue
-            stats.append(labbook.get_file_info(section, f_p))
+            stats.append(cls.get_file_info(labbook, section, f_p))
 
         return stats
 
@@ -544,7 +576,7 @@ class FileOperations(object):
                 continue
 
             # Create tuple (isDir, key)
-            stats.append(labbook.get_file_info(section, os.path.join(base_path or "", item)))
+            stats.append(cls.get_file_info(labbook, section, os.path.join(base_path or "", item)))
 
         # For more deterministic responses, sort resulting paths alphabetically.
         return sorted(stats, key=lambda a: a['key'])

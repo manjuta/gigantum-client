@@ -25,7 +25,7 @@ import flask
 from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
 from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.configuration import Configuration
 
 from lmsrvcore.auth.user import get_logged_in_username
@@ -93,8 +93,6 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         Returns:
             list(Labbook)
         """
-        lb = LabBook()
-
         username = get_logged_in_username()
 
         if sort == "desc":
@@ -105,7 +103,11 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
             raise ValueError(f"Unsupported sort_str: {sort}. Use `desc`, `asc`")
 
         # Collect all labbooks for all owners
-        edges = lb.list_local_labbooks(username=username, sort_mode=order_by, reverse=reverse)
+        local_lbs = InventoryManager().list_labbooks(username=username, sort_mode=order_by)
+        if reverse:
+            local_lbs.reverse()
+
+        edges = [(lb.owner['username'], lb.name) for lb in local_lbs]
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in enumerate(edges)]
 
         # Process slicing and cursor args
@@ -115,9 +117,9 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         # Get Labbook instances
         edge_objs = []
         for edge, cursor in zip(lbc.edges, lbc.cursors):
-            create_data = {"id": "{}&{}".format(edge["owner"], edge["name"]),
-                           "name": edge["name"],
-                           "owner": edge["owner"]}
+            create_data = {"id": "{}&{}".format(edge[0], edge[1]),
+                           "name": edge[1],
+                           "owner": edge[0]}
 
             edge_objs.append(LabbookConnection.Edge(node=Labbook(**create_data),
                                                     cursor=cursor))

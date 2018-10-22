@@ -204,7 +204,7 @@ class ZipExporter(object):
                             cwd=lb.root_dir)
 
             im = InventoryManager(config_file)
-            lb = im.accept_labbook(unzipped_path, username=username, owner=owner)
+            lb = im.put_labbook(unzipped_path, username=username, owner=owner)
 
             statusmsg = f'{statusmsg}\nImport Complete'
             update_meta(statusmsg)
