@@ -47,7 +47,7 @@ class GitWorkflow(object):
         core.git_garbage_collect(self.labbook)
 
     def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
-                public: bool = False) -> None:
+                public: bool = False, feedback_callback: Callable = lambda _ : None) -> None:
         """ Publish this labbook to the remote GitLab instance.
 
         Args:
@@ -55,6 +55,7 @@ class GitWorkflow(object):
             access_token: Temp token/password to gain permissions on GitLab instance
             remote: Name of Git remote (always "origin" for now).
             public: Allow public read access
+            feedback_callback: Callback to give user-facing realtime feedback
 
         Returns:
             None
@@ -75,7 +76,8 @@ class GitWorkflow(object):
                                            access_token=access_token, visibility=vis)
             logger.info(f"Created remote repo for {str(self.labbook)} in {time.time()-t0:.1f}sec")
             t0 = time.time()
-            core.publish_to_remote(labbook=self.labbook, username=username, remote=remote)
+            core.publish_to_remote(labbook=self.labbook, username=username,
+                                   remote=remote, feedback_callback=feedback_callback)
             logger.info(f"Published {str(self.labbook)} in {time.time()-t0:.1f}sec")
         except Exception as e:
             # Unsure what specific exception add_remote creates, so make a catchall.
@@ -84,7 +86,8 @@ class GitWorkflow(object):
             self.labbook.checkout_branch(f"gm.workspace-{username}")
             raise e
 
-    def sync(self, username: str, remote: str = "origin", force: bool = False) -> int:
+    def sync(self, username: str, remote: str = "origin", force: bool = False,
+             feedback_callback: Callable = lambda _ : None) -> int:
         """ Sync with remote GitLab repo (i.e., pull any upstream changes and push any new changes). Following
         a sync operation both the local repo and remote should be at the same revision.
 
@@ -92,11 +95,13 @@ class GitWorkflow(object):
             username: Subject user
             remote: Name of remote (usually only origin for now)
             force: In the event of conflict, force overwrite local changes
+            feedback_callback: Used to give periodic feedback
 
         Returns:
             Integer number of commits pulled down from remote.
         """
-        return core.sync_with_remote(labbook=self.labbook, username=username, remote=remote, force=force)
+        return core.sync_with_remote(labbook=self.labbook, username=username, remote=remote,
+                                     force=force, feedback_callback=feedback_callback)
 
     def _add_remote(self, remote_name: str, url: str):
         self.labbook.add_remote(remote_name=remote_name, url=url)

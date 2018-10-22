@@ -51,6 +51,13 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting publish_labbook({labbook_path})")
 
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        job.meta['feedback'] = msg
+        job.save_meta()
+
     try:
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
@@ -58,7 +65,7 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
-                       public=public)
+                       public=public, feedback_callback=update_meta)
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_labbook: {e}")
         raise
@@ -70,13 +77,21 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_labbook({labbook_path})")
 
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        job.meta['feedback'] = msg
+        job.save_meta()
+
     try:
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
 
         with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
-            cnt = wf.sync(username=username, remote=remote, force=force)
+            cnt = wf.sync(username=username, remote=remote, force=force,
+                          feedback_callback=update_meta)
             return cnt
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_labbook: {e}")

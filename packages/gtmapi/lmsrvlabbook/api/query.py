@@ -20,6 +20,7 @@
 import base64
 from typing import List
 import graphene
+import json
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
@@ -192,38 +193,6 @@ class LabbookQuery(graphene.ObjectType):
                                                           cursor=cursor))
 
         return BaseComponentConnection(edges=edge_objs, page_info=lbc.page_info)
-
-    # Currently not fully supported, but will be added in the future.
-    # def resolve_available_base_image_versions(self, info, repository, namespace, component, **kwargs):
-    #     """Method to return a all graphene BaseImages that are available
-    #
-    #     Returns:
-    #         list(Labbook)
-    #     """
-    #     repo = ComponentRepository()
-    #     edges = repo.get_base_versions("base_image",
-    #                                         repository,
-    #                                         namespace,
-    #                                         component)
-    #     cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in enumerate(edges)]
-    #
-    #     # Process slicing and cursor args
-    #     lbc = ListBasedConnection(edges, cursors, kwargs)
-    #     lbc.apply()
-    #
-    #     # Get BaseImage instances
-    #     edge_objs = []
-    #     for edge, cursor in zip(lbc.edges, lbc.cursors):
-    #         id_data = {'component_data': edge[1],
-    #                    'component_class': 'base_image',
-    #                    'repo': repository,
-    #                    'namespace': namespace,
-    #                    'component': component,
-    #                    'version': edge[0]
-    #                    }
-    #         edge_objs.append(BaseImageConnection.Edge(node=BaseImage.create(id_data), cursor=cursor))
-    #
-    #     return BaseImageConnection(edges=edge_objs, page_info=lbc.page_info)
 
     def resolve_user_identity(self, info):
         """Method to return a graphene UserIdentity instance based on the current logged (both on & offline) user

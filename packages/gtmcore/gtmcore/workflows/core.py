@@ -20,7 +20,7 @@
 import subprocess
 import time
 import os
-from typing import Optional
+from typing import Optional, Callable
 
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.labbook import LabBook, LabbookException, LabbookMergeException
@@ -119,7 +119,8 @@ def create_remote_gitlab_repo(labbook: LabBook, username: str, visibility: str,
         raise GitLabRemoteError(e)
 
 
-def publish_to_remote(labbook: LabBook, username: str, remote: str) -> None:
+def publish_to_remote(labbook: LabBook, username: str, remote: str,
+                      feedback_callback: Callable) -> None:
     # TODO - This should be called from the dispatcher
     # Current branch must be the user's workspace.
     if f'gm.workspace-{username}' != labbook.active_branch:
@@ -129,6 +130,7 @@ def publish_to_remote(labbook: LabBook, username: str, remote: str) -> None:
     if 'gm.workspace' not in labbook.get_branches()['local']:
         raise ValueError('Branch gm.workspace does not exist in local Labbook branches')
 
+    feedback_callback("Preparing to publish")
     git_garbage_collect(labbook)
 
     # Try five attempts to fetch - the remote repo could have been created just milliseconds
@@ -148,27 +150,34 @@ def publish_to_remote(labbook: LabBook, username: str, remote: str) -> None:
         raise ValueError(f'Cannot publish since {labbook.active_branch} is not synced')
 
     # Make sure the master workspace is synced before attempting to publish.
+    feedback_callback("Checking out primary branch...")
     labbook.checkout_branch("gm.workspace")
 
     if labbook.get_commits_behind_remote(remote_name=remote)[1] > 0:
         raise ValueError(f'Cannot publish since {labbook.active_branch} is not synced')
 
+    feedback_callback("Merging with user workspace...")
     # Now, it should be safe to pull the user's workspace into the master workspace.
     call_subprocess(['git', 'merge', f'gm.workspace-{username}'], cwd=labbook.root_dir)
     labbook.git.add_all(labbook.root_dir)
     labbook.git.commit(f"Merged gm.workspace-{username}")
 
+    feedback_callback("Pushing up regular objects...")
     call_subprocess(['git', 'push', '--set-upstream', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
 
+    feedback_callback("Pushing up large objects...")
     if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
         t0 = time.time()
         call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
         logger.info(f"Ran in {str(labbook)} `git lfs push --all` in {t0-time.time()}s")
+
+    feedback_callback(f"Returning to {username} workspace ...")
     # Return to the user's workspace, merge it with the global workspace (as a precaution)
     labbook.checkout_branch(branch_name=f'gm.workspace-{username}')
 
 
-def sync_with_remote(labbook: LabBook, username: str, remote: str, force: bool) -> int:
+def sync_with_remote(labbook: LabBook, username: str, remote: str,
+                     force: bool, feedback_callback: Callable) -> int:
     """Sync workspace and personal workspace with the remote.
 
     Args:
@@ -176,6 +185,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str, force: bool) 
         username(str): Username of current user (populated by API)
         remote(str): Name of the Git remote
         force: Force overwrite
+        feedback_callback: Place to ingest user-facing updates
 
     Returns:
         int: Number of commits pulled from remote (0 implies no upstream changes pulled in).
@@ -196,9 +206,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str, force: bool) 
             sync_locally(labbook, username)
             return 0
 
-        updates = 0
-        logger.info(f"Syncing {str(labbook)} for user {username} to remote {remote}")
-
+        feedback_callback(f"Sweeping {str(labbook)} uncommitted changes...")
         labbook.sweep_uncommitted_changes()
         git_garbage_collect(labbook)
 
@@ -208,8 +216,10 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str, force: bool) 
 
         checkpoint = labbook.git.commit_hash
         try:
+            feedback_callback("Pulling any upstream changes...")
             call_subprocess(tokens if not force else tokens_force, cwd=labbook.root_dir)
             if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
+                feedback_callback("Pulling large files...")
                 call_subprocess(['git', 'lfs', 'pull', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
         except subprocess.CalledProcessError as x:
             logger.error(f"{str(labbook)} cannot merge with remote; resetting to revision {checkpoint}...")
@@ -217,15 +227,20 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str, force: bool) 
             call_subprocess(['git', 'reset', '--hard', checkpoint], cwd=labbook.root_dir)
             raise LabbookMergeException('Merge conflict pulling upstream changes')
 
+        feedback_callback("Merging with upstream changes...")
         checkpoint2 = labbook.git.commit_hash
         # TODO - A lot of this can be removed
         call_subprocess(['git', 'checkout', 'gm.workspace'], cwd=labbook.root_dir)
         call_subprocess(['git', 'merge', f'gm.workspace-{username}'], cwd=labbook.root_dir)
+
+        feedback_callback("Pushing local changes back to remote...")
         call_subprocess(['git', 'push', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
         if labbook.labmanager_config.config["git"]["lfs_enabled"] is True:
             t0 = time.time()
             call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=labbook.root_dir)
             logger.info(f'Ran in {str(labbook)} `git lfs push all` in {t0-time.time()}s')
+
+        feedback_callback(f"Returning to {username} workspace...")
         labbook.checkout_branch(f"gm.workspace-{username}")
 
         updates = 0 if checkpoint == checkpoint2 else 1
