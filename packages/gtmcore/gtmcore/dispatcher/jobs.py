@@ -55,7 +55,10 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         job = get_current_job()
         if not job:
             return
-        job.meta['feedback'] = msg
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
         job.save_meta()
 
     try:
@@ -81,7 +84,10 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
         job = get_current_job()
         if not job:
             return
-        job.meta['feedback'] = msg
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
         job.save_meta()
 
     try:

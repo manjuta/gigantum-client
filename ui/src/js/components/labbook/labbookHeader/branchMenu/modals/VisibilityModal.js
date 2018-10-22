@@ -115,8 +115,6 @@ export default class PublishModal extends Component {
 
                 self.props.showContainerMenuMessage('publishing');
 
-                setMultiInfoMessage(id, 'Publishing Project to Gigantum cloud ...', false, false);
-
                 PublishLabbookMutation(
                   owner,
                   labbookName,

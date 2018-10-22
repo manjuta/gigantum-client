@@ -818,3 +818,23 @@ class WriteReadme(graphene.relay.ClientIDMutation):
             lb.write_readme(content)
 
         return WriteReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))
+
+
+class FetchLabbookEdge(graphene.relay.ClientIDMutation):
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+
+    new_labbook_edge = graphene.Field(LabbookConnection.Edge)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+        logged_in_username = get_logged_in_username()
+        lb = LabBook(author=get_logged_in_author())
+        lb.from_name(logged_in_username, owner, labbook_name)
+
+        cursor = base64.b64encode(f"{0}".encode('utf-8'))
+        lbedge = LabbookConnection.Edge(node=Labbook(owner=lb.owner['username'], name=labbook_name),
+                                        cursor=cursor)
+
+        return FetchLabbookEdge(new_labbook_edge=lbedge)

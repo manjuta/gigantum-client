@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Oct 15 2018 13:51:51 GMT-0400 (EDT)
+# timestamp: Thu Oct 18 2018 13:48:42 GMT-0400 (EDT)
 
 schema {
   query: LabbookQuery
@@ -439,6 +439,17 @@ type ExportLabbookPayload {
   clientMutationId: String
 }
 
+input FetchLabbookEdgeInput {
+  owner: String!
+  labbookName: String!
+  clientMutationId: String
+}
+
+type FetchLabbookEdgePayload {
+  newLabbookEdge: LabbookEdge
+  clientMutationId: String
+}
+
 """An interface for any object that is represented by a git commit"""
 interface GitCommit {
   hash: String!
@@ -508,7 +519,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of.
+A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -705,6 +716,7 @@ type LabbookMutations {
   mergeFromBranch(input: MergeFromBranchInput!): MergeFromBranchPayload
   workonExperimentalBranch(input: WorkonBranchInput!): WorkonBranchPayload
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
+  fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
 }
 
 """
@@ -769,7 +781,7 @@ type LabbookRefEdge {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-
+    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -805,7 +817,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary.
+Merge from another branch into the current active branch. Force if necessary. 
 """
 type MergeFromBranchPayload {
   labbook: Labbook

@@ -174,6 +174,7 @@ def publish_to_remote(labbook: LabBook, username: str, remote: str,
     feedback_callback(f"Returning to {username} workspace ...")
     # Return to the user's workspace, merge it with the global workspace (as a precaution)
     labbook.checkout_branch(branch_name=f'gm.workspace-{username}')
+    feedback_callback(f"Publish complete.")
 
 
 def sync_with_remote(labbook: LabBook, username: str, remote: str,
@@ -242,6 +243,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str,
 
         feedback_callback(f"Returning to {username} workspace...")
         labbook.checkout_branch(f"gm.workspace-{username}")
+        feedback_callback(f"Sync complete.")
 
         updates = 0 if checkpoint == checkpoint2 else 1
 
