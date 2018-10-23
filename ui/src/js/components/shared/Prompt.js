@@ -1,15 +1,28 @@
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 
+let updateAvailable = false;
+
 const pingServer = () => {
   const apiHost = process.env.NODE_ENV === 'development' ? 'localhost:10000' : window.location.host;
 
   const url = `${window.location.protocol}//${apiHost}${process.env.PING_API}?v=${uuidv4()}`;
+  const currentVersion = localStorage.getItem('currentVersion');
 
   return fetch(url, {
     method: 'GET',
   }).then((response) => {
     if (response.status === 200 && (response.headers.get('content-type') === 'application/json')) {
+      if (!updateAvailable) {
+        response.json().then((res) => {
+          if (!currentVersion) {
+            localStorage.setItem('currentVersion', res.revision);
+          } else if (res.revision !== currentVersion) {
+            updateAvailable = true;
+            localStorage.setItem('currentVersion', res.revision);
+          }
+        });
+      }
       return true;
     }
     return false;
@@ -24,6 +37,7 @@ export default class Prompt extends Component {
       failureCount: 0,
       connected: false,
       promptState: true,
+      updateAvailable: false,
     };
     this._handlePing = this._handlePing.bind(this);
   }
@@ -40,6 +54,9 @@ export default class Prompt extends Component {
   _handlePing = () => {
     pingServer()
       .then((response) => {
+        if (updateAvailable !== this.state.updateAvailable) {
+          this.setState({ updateAvailable });
+        }
         if (response) {
           if (this.state.failureCount > 0) window.location.reload();
           this.setState({ promptState: true, connected: true, failureCount: 0 });
@@ -81,6 +98,19 @@ export default class Prompt extends Component {
                   </div>
               }
             </div>
+          </div>
+        </div>
+        <div className={this.state.updateAvailable ? 'Prompt__refresh' : 'hidden'}>
+          <div>
+            <p>A newer version of gigantum has been detected. Please refresh the page to view changes.</p>
+          </div>
+
+          <div>
+            <button
+              className="button--green"
+              onClick={() => window.location.reload()}>
+              Refresh
+            </button>
           </div>
         </div>
       </div>

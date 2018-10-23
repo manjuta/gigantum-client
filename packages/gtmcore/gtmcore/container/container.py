@@ -141,13 +141,13 @@ class ContainerOperations(object):
 
         except docker.errors.ContainerError as e:
             tfail = time.time()
-            logger.error(f'Command ({cmd_text}) failed after {tfail-t0}s - '
+            logger.error(f'Command ({cmd_text}) failed after {tfail-t0:.2f}s - '
                          f'output: {e.exit_status}, {e.stderr}')
             raise ContainerException(e)
 
         ts = time.time()
         if ts - t0 > 5.0:
-            logger.warning(f'Command ({cmd_text}) in {str(labbook)} took {ts-t0} sec')
+            logger.warning(f'Command ({cmd_text}) in {str(labbook)} took {ts-t0:.2f} sec')
 
         return result
 
@@ -185,7 +185,9 @@ class ContainerOperations(object):
         Returns:
             A tuple of (Labbook, boolean indicating whether a container was successfully stopped).
         """
-        n = infer_docker_image_name(labbook_name=labbook.name, owner=labbook.owner['username'], username=username)
+        n = infer_docker_image_name(labbook_name=labbook.name,
+                                    owner=labbook.owner['username'],
+                                    username=username)
         logger.info(f"Stopping {str(labbook)} ({n})")
 
         try:

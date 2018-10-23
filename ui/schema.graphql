@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Tue Oct 02 2018 10:29:26 GMT-0400 (EDT)
+# timestamp: Thu Oct 18 2018 13:48:42 GMT-0400 (EDT)
 
 schema {
   query: LabbookQuery
@@ -439,6 +439,17 @@ type ExportLabbookPayload {
   clientMutationId: String
 }
 
+input FetchLabbookEdgeInput {
+  owner: String!
+  labbookName: String!
+  clientMutationId: String
+}
+
+type FetchLabbookEdgePayload {
+  newLabbookEdge: LabbookEdge
+  clientMutationId: String
+}
+
 """An interface for any object that is represented by a git commit"""
 interface GitCommit {
   hash: String!
@@ -477,7 +488,6 @@ input ImportLabbookInput {
 
 type ImportLabbookPayload {
   importJobKey: String
-  buildImageJobKey: String
   clientMutationId: String
 }
 
@@ -706,6 +716,7 @@ type LabbookMutations {
   mergeFromBranch(input: MergeFromBranchInput!): MergeFromBranchPayload
   workonExperimentalBranch(input: WorkonBranchInput!): WorkonBranchPayload
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
+  fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
 }
 
 """

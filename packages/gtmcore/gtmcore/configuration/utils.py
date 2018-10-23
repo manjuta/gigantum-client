@@ -45,8 +45,8 @@ def call_subprocess(cmd_tokens: List[str], cwd: str, check: bool = True,
     logger.debug(f"Executing `{' '.join(cmd_tokens)}` in {cwd}")
     start_time = time.time()
     try:
-        r = subprocess.run(cmd_tokens, cwd=cwd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=check,
-                           shell=shell)
+        r = subprocess.run(cmd_tokens, cwd=cwd, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                           check=check, shell=shell)
         finish_time = time.time()
         elapsed_time = finish_time - start_time
         logger.debug(f"Finished command `{' '.join(cmd_tokens)}` in {elapsed_time}s")
@@ -55,5 +55,6 @@ def call_subprocess(cmd_tokens: List[str], cwd: str, check: bool = True,
         return (r.stdout or b"").decode()
     except subprocess.CalledProcessError as x:
         fail_time = time.time() - start_time
-        logger.error(f"Command failed `{' '.join(cmd_tokens)}` after {fail_time}s: stderr={x.stderr}")
+        logger.error(f"Command failed `{' '.join(cmd_tokens)}` after {fail_time}s: "
+                     f"stderr={x.stderr}, stdout={x.stdout}")
         raise

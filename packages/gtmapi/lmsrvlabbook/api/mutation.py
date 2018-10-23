@@ -32,7 +32,7 @@ from lmsrvlabbook.api.mutations import (CreateBranch, CheckoutBranch, CreateLabb
                                         DeleteExperimentalBranch,
                                         MergeFromBranch, WorkonBranch, WriteReadme, AddCustomDocker, RemoveCustomDocker,
                                         DeleteRemoteLabbook,
-                                        CompleteBatchUploadTransaction, SetVisibility)
+                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge)
 
 
 class LabbookMutations(graphene.ObjectType):
@@ -152,3 +152,6 @@ class LabbookMutations(graphene.ObjectType):
 
     # Set a remote project visibiltiy
     set_visibility = SetVisibility.Field()
+
+    # Kludge-query to return a labbook edge when querying for job status
+    fetch_labbook_edge = FetchLabbookEdge.Field()

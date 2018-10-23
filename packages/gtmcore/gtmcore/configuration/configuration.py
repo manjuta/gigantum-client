@@ -33,6 +33,7 @@ class Configuration(object):
     """Class to interact with LabManager configuration files    
     """
     INSTALLED_LOCATION = "/etc/gigantum/labmanager.yaml"
+    USER_LOCATION = os.path.expanduser("~/user-config.yaml")
 
     def __init__(self, config_file: Optional[str] = None) -> None:
         """
@@ -46,6 +47,12 @@ class Configuration(object):
             self.config_file = self.find_default_config()
 
         self.config = self.load(self.config_file)
+
+        # If a user config exists, take fields from that to override
+        # the default config. However, do NOT load user config if a path
+        # to a config file was explicitly given in the constructor.
+        if os.path.exists(self.USER_LOCATION) and not config_file:
+            self.config.update(self.user_config)
 
     @staticmethod
     def find_default_config() -> str:
@@ -69,6 +76,21 @@ class Configuration(object):
             return str(v)
         else:
             return None
+
+    @property
+    def user_config(self) -> Dict[str, Any]:
+        """Return the configuration items loaded from the user's config.yaml"""
+
+        if self.config_file != self.find_default_config():
+            # If we are using a custom config file, then disregard any
+            # user overrides (This is used only in testing)
+            return {}
+        elif os.path.exists(self.USER_LOCATION):
+            with open(self.USER_LOCATION) as user_conf_file:
+                user_conf_data = yaml.load(user_conf_file)
+            return user_conf_data
+        else:
+            return {}
 
     def _read_config_file(self, config_file: str) -> Dict[str, Any]:
         """Method to read a config file into a dictionary

@@ -240,8 +240,9 @@ class Routes extends Component {
                         )}
                     />
 
-
-                    <Helper />
+                    <Helper
+                      auth={this.props.auth}
+                    />
 
                     <Prompt
                       ref="prompt"

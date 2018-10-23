@@ -209,6 +209,7 @@ class Labbook extends Component {
 
 
             <LabbookHeader
+              description={labbook.description}
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
@@ -227,7 +228,6 @@ class Labbook extends Component {
                       <Overview
                         key={`${this.props.labbookName}_overview`}
                         labbook={labbook}
-                        description={labbook.description}
                         labbookId={labbook.id}
                         setBuildingState={this._setBuildingState}
                         readme={labbook.readme}

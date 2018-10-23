@@ -31,10 +31,12 @@
   font-size: 14px;
 
   &--owner {
-    height: 20px;
+    color: $jet;
+    font-size: 12px;
+    height: 14px;
     margin: 2px;
 
-    line-height: 20px;
+    line-height: 14px;
   }
 
   &--description{
@@ -50,8 +52,8 @@
     line-height: 20px;
 
     -o-text-overflow: ellipsis;
-    -webkit-line-clamp: 6;
-    line-clamp: 6;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
     box-orient: vertical;
   }
 }
@@ -104,47 +106,109 @@
 }
 
 .RemoteLabbooks__icon--cloud-download{
-  background: url('~Images/icons/download.svg') no-repeat 0 center;
+  background: url('~Images/icons/download.svg') no-repeat 7px center;
   background-size: 20px;
+  color: $romanSilver;
+  width: 125px;
+  height: 26px;
+  border-radius: 0;
+  padding: 2px 0 2px 21px;
+  border: 1px solid $romanSilver;
 
   &:hover,
    :focus{
-    background: url('~Images/icons/download-azure.svg') no-repeat 0 center;
+    background: url('~Images/icons/download-azure.svg') no-repeat 7px center;
     background-size: 20px;
+    width: 125px;
+    height: 26px;
+    border-radius: 0;
+    padding: 2px 0 2px 21px;
+    border: 1px solid $azure;
+    color: $azure;
   }
 
   &:disabled{
-    background: url('~Images/icons/download.svg') no-repeat 0 center;
+    background: $background-color url('~Images/icons/download.svg') no-repeat 7px center;
     background-size: 20px;
+    width: 125px;
+    height: 26px;
+    border-radius: 0;
+    padding: 2px 0 2px 21px;
+    border: 1px solid $romanSilver;
+    color: $romanSilver;
   }
 }
 
 .RemoteLabbooks__icon--cloud{
-  background: url('~Images/icons/download-check.svg') no-repeat 0 center;
+  background: url('~Images/icons/download-check.svg') no-repeat 7px center;
   background-size: 20px;
-
-  &:disabled{
-    background: url('~Images/icons/download-check.svg') no-repeat 0 center;
-    background-size: 20px;
-  }
+  color: $romanSilver;
+  height: 26px;
+  width: 125px;
+  border-radius: 0;
+  padding: 2px 0 2px 21px;
+  border: 1px solid $romanSilver;
 
   &:hover,
    :focus {
-    background: url('~Images/icons/download-check.svg') no-repeat 0 center;
+    background: $background-color url('~Images/icons/download-check.svg') no-repeat 7px center;
     background-size: 20px;
+    height: 26px;
+    width: 125px;
+    border-radius: 0;
+    padding: 2px 0 2px 21px;
+    border: 1px solid $romanSilver;
+  }
+
+  &:disabled{
+    background: $background-color url('~Images/icons/download-check.svg') no-repeat 7px center;
+    background-size: 20px;
+    height: 26px;
+    width: 125px;
+    border-radius: 0;
+    padding: 2px 0 2px 21px;
+    border: 1px solid $romanSilver;
+  }
+  &:hover:after{
+    content: attr(data-tooltip);
+    position: absolute;
+    min-width: 100px;
+    font-weight: 100;
+    line-height: 1.3em;
+    font-size: 16px;
+    margin: 0;
+    background: $azure;
+    color: $white;
+    padding: 5px;
+    border-radius: 5px;
+    left: 30px;
+    top: 50px;
+    z-index: 1;
+    font-size: .7em;
   }
 }
 
 .RemoteLabbooks__icon--delete{
-  background: url('~Images/icons/trash.svg') no-repeat 0 center;
+  background: url('~Images/icons/trash.svg') no-repeat 7px center;
   background-size: 20px;
+  color: $romanSilver;
+  height: 26px;
+  width: 125px;
+  border-radius: 0;
+  padding: 2px 0 2px 21px;
+  border: 1px solid $romanSilver;
 
   &:hover,
    :focus {
-    background: url('~Images/icons/trash-azure.svg') no-repeat 0 center;
+    background: url('~Images/icons/trash-azure.svg') no-repeat 7px center;
     background-size: 20px;
+    height: 26px;
+    width: 125px;
+    border-radius: 0;
+    padding: 2px 0 2px 21px;
+    border: 1px solid $azure;
+    color: $azure;
   }
-
 }
 
 .RemoteLabbooks__icon--delete-disabled,
@@ -152,8 +216,29 @@
 .RemoteLabbooks__icon--delete-disabled:focus,
 .RemoteLabbooks__icon--delete-disabled:disabled{
   cursor: auto;
-
-  opacity: 0.2;
-  background: url('~Images/icons/trash.svg') no-repeat 0 center;
+  background: $background-color url('~Images/icons/trash.svg') no-repeat 7px center;
   background-size: 20px;
+  height: 26px;
+  width: 125px;
+  border-radius: 0;
+  padding: 2px 0 2px 21px;
+  border: 1px solid $romanSilver;
+
+  &:hover:after{
+    content: attr(data-tooltip);
+    position: absolute;
+    min-width: 100px;
+    font-weight: 100;
+    line-height: 1.3em;
+    font-size: 16px;
+    margin: 0;
+    background: $azure;
+    color: $white;
+    padding: 5px;
+    border-radius: 5px;
+    left: 30px;
+    top: 50px;
+    z-index: 1;
+    font-size: .7em;
+  }
 }

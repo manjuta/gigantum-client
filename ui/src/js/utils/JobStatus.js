@@ -26,7 +26,7 @@ const JobStatus = {
     return new Promise((resolve, reject) => {
       const fetchData = function () {
         fetchQuery(jobStatusQuery(), variables).then((response) => {
-          if (response.data.jobStatus.status === 'started') {
+          if (response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'queued') {
             setTimeout(() => {
               fetchData();
             }, 250);

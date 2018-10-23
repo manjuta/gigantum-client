@@ -78,7 +78,7 @@ class PackageDependencies extends Component {
 
   componentDidUpdate() {
     if (this.props.forceRefetch) {
-      this._refetch();
+      // this._refetch();
       this.props.setForceRefetch(false);
     }
     if (this.props.forceCancelRefetch) {
@@ -142,8 +142,10 @@ class PackageDependencies extends Component {
       this._loadMore(); // routes query only loads 2, call loadMore
     } else if (!store.getState().packageDependencies.latestFetched) {
       this.props.setLatestFetched(true);
-      this._refetch();
+      // this._refetch();
     }
+
+    this._refetch();
 
     if (this.state.selectedTab === '') {
       this.setState({ selectedTab: this.props.base.packageManagers[0] });
@@ -199,7 +201,7 @@ class PackageDependencies extends Component {
             this.props.setRefetchOccuring(false);
             if (store.getState().packageDependencies.refetchQueued) {
               this.props.setRefetchQueued(false);
-              self._refetch();
+              // self._refetch();
             }
             self.setState({ forceRender: true });
           },
@@ -209,7 +211,6 @@ class PackageDependencies extends Component {
             cursor: null,
           },
         );
-        // disposible.dispose()
       }
     } else {
       this.props.setRefetchQueued(true);
@@ -733,7 +734,7 @@ class PackageDependencies extends Component {
                           const versionText = `${version === 'latest' ? node.validity === 'checking' ? 'retrieving latest version' : 'latest version' : `${version}`}`;
                           return (
                             <tr
-                              className={`PackageDependencies__table-row--${node.validity}`}
+                              className={`PackageDependencies__table-row--${node.validity} flex`}
                               key={node.package + node.version}
                             >
                               <td className="PackageDependencies__td--package">{`${node.package}`}</td>
@@ -855,7 +856,7 @@ class PackageDependencies extends Component {
       }),
 
       trCSS = classNames({
-        'PackageDependencies__cell--optimistic-updating ': edge.node.id === undefined,
+        'PackageDependencies__cell--optimistic-updating': edge.node.id === undefined,
       });
 
     return (

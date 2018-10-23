@@ -25,7 +25,7 @@ import flask
 from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
 from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
 
-from gtmcore.labbook import LabBook
+from gtmcore.labbook import LabBook, InventoryManager
 from gtmcore.configuration import Configuration
 
 from lmsrvcore.auth.user import get_logged_in_username
@@ -93,8 +93,6 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         Returns:
             list(Labbook)
         """
-        lb = LabBook()
-
         username = get_logged_in_username()
 
         if sort == "desc":
@@ -105,7 +103,11 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
             raise ValueError(f"Unsupported sort_str: {sort}. Use `desc`, `asc`")
 
         # Collect all labbooks for all owners
-        edges = lb.list_local_labbooks(username=username, sort_mode=order_by, reverse=reverse)
+        local_lbs = InventoryManager().list_labbooks(username=username, sort_mode=order_by)
+        if reverse:
+            local_lbs.reverse()
+
+        edges = [(lb.owner['username'], lb.name) for lb in local_lbs]
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in enumerate(edges)]
 
         # Process slicing and cursor args
@@ -115,9 +117,9 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         # Get Labbook instances
         edge_objs = []
         for edge, cursor in zip(lbc.edges, lbc.cursors):
-            create_data = {"id": "{}&{}".format(edge["owner"], edge["name"]),
-                           "name": edge["name"],
-                           "owner": edge["owner"]}
+            create_data = {"id": "{}&{}".format(edge[0], edge[1]),
+                           "name": edge[1],
+                           "owner": edge[0]}
 
             edge_objs.append(LabbookConnection.Edge(node=Labbook(**create_data),
                                                     cursor=cursor))
@@ -167,12 +169,15 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         # Prep arguments
         if "before" in kwargs:
             before = base64.b64decode(kwargs['before']).decode('utf-8')
-            page = max(0, int(before) - 1)
+            page = max(1, int(before) - 1)
         elif "after" in kwargs:
-            after = base64.b64decode(kwargs['after']).decode('utf-8')
-            page = int(after) + 1
+            if kwargs.get("after"):
+                after = base64.b64decode(kwargs['after']).decode('utf-8')
+                page = int(after) + 1
+            else:
+                page = 1
         else:
-            page = 0
+            page = 1
 
         if "first" in kwargs:
             per_page = int(kwargs['first'])
@@ -201,11 +206,11 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         if response.status_code != 200:
             raise IOError("Failed to retrieve Project listing from remote server")
         edges = response.json()
-        cursors = [base64.b64encode("{}".format(page).encode("UTF-8")).decode("UTF-8") for _ in edges]
+        cursor = base64.b64encode("{}".format(page).encode("UTF-8")).decode("UTF-8")
 
         # Get Labbook instances
         edge_objs = []
-        for edge, cursor in zip(edges, cursors):
+        for edge in edges:
             create_data = {"id": "{}&{}".format(edge["namespace"], edge["project"]),
                            "name": edge["project"],
                            "owner": edge["namespace"],
@@ -218,10 +223,10 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                                                           cursor=cursor))
 
         # Create Page Info instance
-        has_previous_page = True if page > 0 else False
-        has_next_page = False if len(edges) < per_page else True
+        has_previous_page = True if page > 1 else False
+        has_next_page = len(edges) != 0
 
         page_info = graphene.relay.PageInfo(has_next_page=has_next_page, has_previous_page=has_previous_page,
-                                            start_cursor=cursors[0], end_cursor=cursors[-1])
+                                            start_cursor=cursor, end_cursor=cursor)
 
         return RemoteLabbookConnection(edges=edge_objs, page_info=page_info)

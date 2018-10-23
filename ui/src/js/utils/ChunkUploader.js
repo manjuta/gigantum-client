@@ -11,6 +11,7 @@ import { setFinishedUploading, setPauseChunkUpload } from 'JS/redux/reducers/lab
 import config from 'JS/config';
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
+  console.log(file, chunk, accessToken, getChunkCallback);
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
     if (result && (error === undefined)) {
       getChunkCallback(file, result);

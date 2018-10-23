@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 // components
 import Branches from './branches/Branches';
+import Description from './description/Description';
 import BranchMenu from './branchMenu/BranchMenu';
 import ContainerStatus from './containerStatus/ContainerStatus';
 import ToolTip from 'Components/shared/ToolTip';
@@ -26,11 +27,14 @@ import './LabbookHeader.scss';
 class LabbookHeader extends Component {
   constructor(props) {
     super(props);
-
+    this.state = {
+      hovered: false,
+    };
     // bind functions here
     this._setSelectedComponent = this._setSelectedComponent.bind(this);
     this._showLabbookModal = this._showLabbookModal.bind(this);
     this._hideLabbookModal = this._hideLabbookModal.bind(this);
+    this._setHoverState = this._setHoverState.bind(this);
   }
 
   /**
@@ -130,6 +134,14 @@ class LabbookHeader extends Component {
       setSyncingState(isSyncing);
     }
   }
+  /** ***
+  *  @param {boolean} hovered
+  *  sets hover state
+  *  @return {}
+  */
+  _setHoverState(hovered) {
+    this.setState({ hovered });
+  }
 
   render() {
     const {
@@ -171,6 +183,9 @@ class LabbookHeader extends Component {
                 self={this}
                 branchesOpen={branchesOpen}
                 branchName={branchName}
+                description={this.props.description}
+                hovered={this.state.hovered}
+                setHoverState={this._setHoverState}
               />
             </div>
 
@@ -288,7 +303,14 @@ const LabbookTitle = ({
   );
 };
 
-const BranchName = ({ self, branchesOpen, branchName }) => {
+const BranchName = ({
+  self,
+  branchesOpen,
+  branchName,
+  description,
+  hovered,
+  setHoverState,
+}) => {
   const branchNameCSS = classNames({
     LabbookHeader__branchTitle: true,
     'LabbookHeader__branchTitle--open': branchesOpen,
@@ -297,20 +319,21 @@ const BranchName = ({ self, branchesOpen, branchName }) => {
 
   return (
     <div className={branchNameCSS}>
-
-      <div
-        className="LabbookHeader__name"
-        onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
-      >
-        {branchName}
+      <div className="LabbookHeader__name-container">
+        <div
+          onMouseEnter={() => setHoverState(true)}
+          onMouseLeave={() => setHoverState(false)}
+          className="LabbookHeader__name"
+          onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
+        >
+          {branchName}
+        </div>
+        <ToolTip section="branchView" />
       </div>
-
-      <div
-        onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
-        className="LabbookHeader__branchToggle"
+      <Description
+        hovered={hovered}
+        description={description}
       />
-
-      <ToolTip section="branchView" />
     </div>
   );
 };

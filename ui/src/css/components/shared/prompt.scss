@@ -145,3 +145,21 @@
 .hidden {
     display: none;
 }
+
+.Prompt__refresh {
+    position: fixed;
+    bottom: 20px;
+    left: 180px;
+    z-index: index($elements, popup);
+    padding: 20px;
+
+    border-radius: 8px;
+
+    width: 500px;
+
+    color: $romanSilver;
+    background: $white;
+    word-wrap: break-word;
+    box-shadow: 0 0px 12px 0 rgba(0,0,0,.20);
+    text-align: center;
+}

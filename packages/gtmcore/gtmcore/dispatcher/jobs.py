@@ -51,6 +51,16 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting publish_labbook({labbook_path})")
 
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+        job.save_meta()
+
     try:
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
@@ -58,7 +68,7 @@ def publish_labbook(labbook_path: str, username: str, access_token: str,
         with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
-                       public=public)
+                       public=public, feedback_callback=update_meta)
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_labbook: {e}")
         raise
@@ -70,13 +80,24 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_labbook({labbook_path})")
 
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+        job.save_meta()
+
     try:
         labbook: LabBook = LabBook()
         labbook.from_directory(labbook_path)
 
         with labbook.lock_labbook():
             wf = GitWorkflow(labbook)
-            cnt = wf.sync(username=username, remote=remote, force=force)
+            cnt = wf.sync(username=username, remote=remote, force=force,
+                          feedback_callback=update_meta)
             return cnt
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_labbook: {e}")
@@ -101,7 +122,7 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
 
 
 def import_labboook_from_zip(archive_path: str, username: str, owner: str,
-                             config_file: Optional[str] = None, base_filename: Optional[str] = None) -> str:
+                             config_file: Optional[str] = None) -> str:
     """Method to import a labbook from a zip file
 
     Args:
@@ -109,8 +130,6 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
         username(str): Username
         owner(str): Owner username
         config_file(str): Optional path to a labmanager config file
-        base_filename(str): The desired basename for the upload, without an upload ID prepended
-        remove_source(bool): Flag indicating if the source file should removed after import
 
     Returns:
         str: directory path of imported labbook
@@ -129,13 +148,16 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
                 f"username={username}, owner={owner}, config_file={config_file})")
 
     try:
-        lb = ZipExporter.import_zip(archive_path, username, owner, config_file=config_file,
-                                    base_filename=base_filename)
-        os.remove(archive_path)
+        lb = ZipExporter.import_zip(archive_path, username, owner,
+                                    config_file=config_file,
+                                    update_meta=update_meta)
         return lb.root_dir
     except Exception as e:
         logger.exception(f"(Job {p}) Error on import_labbook_from_zip({archive_path}): {e}")
         raise
+    finally:
+        if os.path.exists(archive_path):
+            os.remove(archive_path)
 
 
 def build_labbook_image(path: str, username: Optional[str] = None,

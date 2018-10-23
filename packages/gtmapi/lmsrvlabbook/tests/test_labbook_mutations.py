@@ -855,7 +855,6 @@ class TestLabBookServiceMutations(object):
                                 }}
                               }}) {{
                                 importJobKey
-                                buildImageJobKey
                               }}
                             }}
                             """
@@ -863,9 +862,7 @@ class TestLabBookServiceMutations(object):
                 assert "errors" not in result
                 if chunk_index == total_chunks - 1:
                     assert type(result['data']['importLabbook']['importJobKey']) == str
-                    assert type(result['data']['importLabbook']['buildImageJobKey']) == str
                     assert "rq:job:" in result['data']['importLabbook']['importJobKey']
-                    assert "rq:job:" in result['data']['importLabbook']['buildImageJobKey']
 
                 chunk.close()
 
@@ -891,66 +888,24 @@ class TestLabBookServiceMutations(object):
         """
         snapshot.assert_match(mock_create_labbooks[2].execute(query))
 
-        # TODO - Re-enable this when rename comes back.
-        #snapshot.assert_match(client.execute(query))
-        # # Wait up to 15 seconds for the container to build successfully after renaming
-        # query = """
-        #    {
-        #      labbook(owner: "default", name: "test-new-name") {
-        #          environment {
-        #            imageStatus
-        #          }
-        #      }
-        #    }
-        #    """
-        # t_start = datetime.datetime.now()
-        # success = False
-        # while (datetime.datetime.now() - t_start).seconds < 15:
-        #     response = client.execute(query)
-        #     if response['data']['labbook']['environment']['imageStatus'] == 'EXISTS':
-        #         success = True
-        #         break
-        #
-        # # Verify everything worked
-        # assert success is True
-        # assert os.path.exists(original_dir) is False
-        # assert os.path.exists(new_dir) is True
-        #
-        # original_dir = new_dir
-        # new_dir = os.path.join(labbooks_dir, 'test-renamed-again')
-        #
-        # # rename again (this time the container will have been built)
-        # query = f"""
-        #             mutation myMutation{{
-        #               renameLabbook(input:{{owner:"default",
-        #               originalLabbookName: "test-new-name",
-        #               newLabbookName: "test-renamed-again"}}) {{
-        #                 success
-        #               }}
-        #             }}
-        #             """
-        # r = client.execute(query)
-        # assert r['data']['renameLabbook']['success'] is True
-        #
-        # # Wait up to 15 seconds for the container to build successfully after renaming
-        # query = """
-        #            {
-        #              labbook(owner: "default", name: "test-renamed-again") {
-        #                  environment {
-        #                    imageStatus
-        #                  }
-        #              }
-        #            }
-        #            """
-        # t_start = datetime.datetime.now()
-        # success = False
-        # while (datetime.datetime.now() - t_start).seconds < 15:
-        #     response = client.execute(query)
-        #     if response['data']['labbook']['environment']['imageStatus'] == 'EXISTS':
-        #         success = True
-        #         break
-        #
-        # # Verify everything worked
-        # assert success is True
-        # assert os.path.exists(original_dir) is False
-        # assert os.path.exists(new_dir) is True
+    def test_fetch_labbook_edge(self, mock_create_labbooks):
+        query = f"""
+        mutation f {{
+            fetchLabbookEdge(input:{{
+                owner: "default",
+                labbookName: "labbook1"
+            }}) {{
+                newLabbookEdge {{
+                    node {{
+                        name
+                        owner
+                    }}
+                }}
+            }}
+        }}
+        """
+        r = mock_create_labbooks[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['fetchLabbookEdge']['newLabbookEdge']['node']['owner'] == 'default'
+        assert r['data']['fetchLabbookEdge']['newLabbookEdge']['node']['name'] == 'labbook1'
+

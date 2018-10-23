@@ -28,6 +28,7 @@ import flask
 from flask_cors import CORS, cross_origin
 import redis
 import blueprint
+import yaml
 
 
 from gtmcore.configuration import Configuration
@@ -45,6 +46,19 @@ logger = LMLogger.get_logger()
 app = Flask("lmsrvlabbook")
 
 # Load configuration class into the flask application
+user_conf_path = "/mnt/gigantum/.labmanager/config.yaml"
+if os.path.exists(user_conf_path):
+    logger.info(f"Using custom user configuration from {user_conf_path}")
+    try:
+        with open(user_conf_path) as user_file:
+            yaml.load(user_file)
+        shutil.copyfile(user_conf_path, os.path.expanduser("~/user-config.yaml"))
+    except Exception as e:
+        logger.error("Error parsing user config, cannot proceed")
+        raise
+else:
+    logger.info("No custom user configuration found")
+
 random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration()
