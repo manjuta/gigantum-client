@@ -7,7 +7,7 @@
 
   cursor: auto;
 
-  color: $lightBlue;
+  color: $tintBlue;
 
   @include flex(center, column);
 
@@ -22,7 +22,7 @@
 
   align-items: center;
 
-  color: $lightBlue;
+  color: $tintBlue;
 
   @include flex(center, row);
 }
@@ -35,9 +35,7 @@
   -webkit-transition: all .25s;
   -o-transition: .25s all;
   transition: all .25s;
-
-  opacity: .4;
-  background: url('~Images/icons/labbooks-blue.svg') no-repeat 50%;
+  background: url('~Images/icons/labbooks-dark-blue.svg') no-repeat 50%;
   background-size: 50px;
 }
 
@@ -105,7 +103,7 @@ input.Import__input--paste{
 
     color: $azure !important;
     border-radius: 20px !important;
-    background: $lightBlue !important;
+    background: $tintBlue !important;
 
     font-size: 20px;
 
@@ -134,8 +132,8 @@ input.Import__input--paste{
 
     cursor: pointer;
 
-    color: $lightBlue;
-    border: 3px solid $lightBlue;
+    color: $tintBlue;
+    border: 3px solid $tintBlue;
     background: $white;
 
     font-size: 22px;
@@ -152,7 +150,7 @@ input.Import__input--paste{
 
   &--import:hover {
     color: $white;
-    background: $lightBlue;
+    background: $tintBlue;
   }
 }
 
@@ -244,7 +242,7 @@ input.Import__input--paste{
   cursor: pointer;
   text-decoration: underline;
 
-  color: $lightBlue;
+  color: $tintBlue;
 
   font-size: 16px;
 }

@@ -183,6 +183,20 @@
 
   .Activity__add-note{
     @include flex(flex-start, row);
+    &:hover {
+      cursor: pointer;
+      h5{
+        color: $turquise;
+      }
+      button {
+        background: $turquise url('~Images/icons/menu-add-turquise.svg') no-repeat center center;
+        background-size: 25px;
+      }
+      .Activity__hide-note-button{
+        background: $turquise url('~Images/icons/menu-add-turquise.svg') no-repeat center center !important;
+        transform: rotate(45deg);
+      }
+    }
     h5 {
       margin: 6px;
       font-weight: 600;
@@ -198,30 +212,35 @@
       background-size: 25px;
       padding: 0;
       transition: all 0.125s;
-    }
-    button:hover {
-      background: $turquise url('~Images/icons/menu-add-turquise.svg') no-repeat center center;
-      background-size: 25px;
+      border: none !important;
     }
     .Activity__hide-note-button{
       background: $azure url('~Images/icons/menu-add.svg') no-repeat center center !important;
       transform: rotate(45deg);
 
     }
-    .Activity__hide-note-button:hover{
-      background: $azure url('~Images/icons/menu-add-turquise.svg') no-repeat center center !important;
-      transform: rotate(45deg);
-    }
   }
   .Activity__add-branch{
     margin-left: 10px;
     @include flex(flex-start, row);
+    &:hover {
+      cursor: pointer;
+      h5{
+        color: $turquise;
+      }
+      button{
+        background: $turquise url('~Images/icons/menu-add-turquise.svg') no-repeat center center;
+        background-size: 25px;
+        border: none;
+      }
+    }
     h5 {
       margin: 6px;
       font-weight: 600;
       font-size: 16px;
       color: $romanSilver;
       user-select: none;
+      cursor: pointer;
     }
     button {
       background: $azure url('~Images/icons/menu-add.svg') no-repeat center center;
@@ -230,10 +249,7 @@
       height: 25px;
       background-size: 25px;
       padding: 0;
-    }
-    button:hover {
-      background: $turquise url('~Images/icons/menu-add-turquise.svg') no-repeat center center;
-      background-size: 25px;
+      border: none;
     }
   }
 }

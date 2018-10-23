@@ -26,7 +26,7 @@ UserIdentity.getUserIdentity().then((response) => {
       localStorage.setItem('expires_at', expiresAt);
 
       forceLoginScreen = false;
-    } else if (response.data.userIdentity && localStorage.getItem('accessToken')) {
+    } else if (response.data.userIdentity && localStorage.getItem('access_token')) {
       loadingRenew = true;
       auth.renewToken(null, null, null, true, () => {
         routes.setState({ loadingRenew: false });

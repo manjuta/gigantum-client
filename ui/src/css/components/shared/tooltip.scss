@@ -119,45 +119,46 @@
 
 .ToolTip.containerStatus{
   .ToolTip__toggle{
-    left: -75px;
-    bottom: -20px;
+    right: -12px;
+    top: -23px;
   }
   .ToolTip__pointer{
-    left: -83px;
-    top: 54px;
+    right: -18px;
+    top: -6px;
   }
   .ToolTip__message{
-    left: -342px;
-    top: 68px;
+    right: -20px;
+    top: 5px;
   }
 }
 
 .ToolTip.descriptionOverview{
   .ToolTip__toggle{
-    top: 35px;
-    left: 20px;
+    top: -58px;
+    right: -18px;
   }
   .ToolTip__pointer{
-    top: 60px;
-    left: 12px;
+    right: -24px;
+    top: -40px;
   }
   .ToolTip__message{
-    left: 2px;
-    top: 73px;
+    right: -50px;
+    top: -26px;
   }
 }
 
 .ToolTip.branchView{
   .ToolTip__toggle{
-    top: 24px;
+    bottom: 13px;
+    right: 12px;
   }
   .ToolTip__pointer{
-    top: 45px;
-    left: -7px;
+    bottom: -6px;
+    right: 5px;
   }
   .ToolTip__message{
-    top: 58px;
-    left: -170px;
+    right: -78px;
+    top: 61px;
   }
 }
 

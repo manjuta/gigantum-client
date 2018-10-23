@@ -116,7 +116,9 @@ export default class ActivityCard extends Component {
         }
         <div className={activityCardCSS} ref="card" style={activityCardStyle}>
 
-          <div className={`ActivityCard__badge ActivityCard__badge--${type}`} />
+          <div className={`ActivityCard__badge ActivityCard__badge--${type}`}
+            title={type}
+          />
 
           <div className="ActivityCard__content">
 

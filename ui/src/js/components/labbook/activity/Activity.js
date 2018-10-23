@@ -699,17 +699,21 @@ class Activity extends Component {
           } : evt => this._toggleSubmenu(evt)}
           />
           <div className="Activity__user-note-menu">
-            <div className="Activity__add-note">
+            <div
+              className="Activity__add-note"
+              onClick={() => this._toggleActivity()}
+            >
               <button
                 className={this.state.modalVisible ? 'Activity__hide-note-button' : 'Activity__add-note-button'}
-                onClick={() => this._toggleActivity()}
               />
               <h5>Add Note</h5>
             </div>
-            <div className="Activity__add-branch">
+            <div
+              className="Activity__add-branch"
+              onClick={() => this._createBranch()}
+            >
               <button
                 className="Activity__add-branch-button"
-                onClick={() => this._createBranch()}
               />
               <h5>Add Branch</h5>
             </div>
