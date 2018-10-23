@@ -33,10 +33,39 @@ class FileBrowser extends Component {
         mutations: new FileBrowserMutations(this._getMutationData()),
         mutationData: this._getMutationData(),
         hoverId: '',
+        childrenState: {},
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
       this._setState = this._setState.bind(this);
+      this._updateChildState = this._updateChildState.bind(this);
+      this._checkChildState = this._checkChildState.bind(this);
+    }
+    static getDerivedStateFromProps(props, state) {
+        let childrenState = {};
+        props.files.edges.forEach((edge) => {
+          let key = edge.node.key.split('/').join('');
+          childrenState[key] = {
+            isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
+            edge,
+          };
+        });
+
+        return {
+          ...state,
+          childrenState,
+        };
+    }
+    /**
+    *  @param {string} key - key of file to be updated
+    *  @param {boolean} isSelected - update if the value is selected
+    *  @return {}
+    */
+    _updateChildState(key, isSelected) {
+      let { childrenState } = this.state;
+      let santizedKey = key.split('/').join('');
+      childrenState[santizedKey].isSelected = isSelected;
+      this.setState({ childrenState });
     }
     /**
     *  @param {}
@@ -113,21 +142,13 @@ class FileBrowser extends Component {
   */
   _deleteSelectedFiles() {
     let self = this;
-    function loopDelete(refs) {
-      Object.keys(refs).forEach((filename) => {
-        const file = refs[filename].getDecoratedComponentInstance().getDecoratedComponentInstance();
-
-        const { edge } = file.props.data;
-
-        if (file.state.isSelected) {
-          self._deleteMutation(edge.node.key, edge);
-        } else if (file.props.data.edge.node.isDir && !file.state.isSelected) {
-          loopDelete(file.refs);
-        }
-      });
+    for (let key in this.state.childrenState) {
+      if (this.state.childrenState[key].isSelected) {
+        let { edge } = this.state.childrenState[key];
+        delete this.state.childrenState[key];
+        self._deleteMutation(edge.node.key, edge);
+      }
     }
-
-    loopDelete(this.refs);
   }
 
   /**
@@ -165,9 +186,6 @@ class FileBrowser extends Component {
     Object.keys(refs).forEach((childname) => {
       if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
         const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-        if (!child.props.data.edge.node.isDir) {
-          console.log(child.props.data.edge.node.key, child.props.isOverCurrent, !child.props.data.edge.node.isDir);
-        }
 
         if (child.props.data && !child.props.data.edge.node.isDir) {
           if (child.props.isOverCurrent) {
@@ -176,14 +194,36 @@ class FileBrowser extends Component {
         }
       }
     });
-    console.log(isOver);
-    return (isOver);
+
+    return ({
+      isOver,
+    });
+  }
+  /**
+  *  @param {}
+  *  checks if folder refs has props.isOver === true
+  *  @return {boolean} isSelected - returns true if a child has been selected
+  */
+  _checkChildState() {
+    let isSelected = false;
+
+    for (let key in this.state.childrenState) {
+      if (this.state.childrenState[key].isSelected) {
+        isSelected = true;
+      }
+    }
+
+    return { isSelected };
   }
 
   render() {
     const files = this._processFiles(),
           { mutationData } = this.state,
-          isOver = this._checkRefs();
+          {
+            isOver,
+          } = this._checkRefs();
+
+   const { isSelected } = this._checkChildState();
 
    const fileBrowserCSS = classNames({
      FileBrowser: true,
@@ -194,7 +234,9 @@ class FileBrowser extends Component {
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
                 <div className="FileBrowser__header">
                     <div className="FileBrowser__header--name">
-                        <button className="FileBrowser__btn FileBrowser__btn--delete"
+                        <button
+                          disabled={ !isSelected }
+                          className="Btn Btn--round Btn--delete"
                           onClick={() => { this._deleteSelectedFiles(); }} />
                         File
                     </div>
@@ -227,7 +269,8 @@ class FileBrowser extends Component {
                                     mutationData={mutationData}
                                     data={files[file]}
                                     mutations={this.state.mutations}
-                                    setState={this._setState}>
+                                    setState={this._setState}
+                                    updateChildState={this._updateChildState}>
                                 </Folder>
                             );
                         }
@@ -237,7 +280,8 @@ class FileBrowser extends Component {
                                 key={files[file].edge.node.key}
                                 mutationData={mutationData}
                                 data={files[file]}
-                                mutations={this.state.mutations}>
+                                mutations={this.state.mutations}
+                                updateChildState={this._updateChildState}>
                             </File>
                         );
                     })

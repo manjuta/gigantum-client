@@ -33,10 +33,11 @@ class File extends Component {
       this._setHoverState = this._setHoverState.bind(this);
   }
   /**
-  *  @param {boolean}
+  *  @param {boolean} isSelected - sets if file has been selected
   *  sets elements to be selected and parent
   */
   _setSelected(isSelected) {
+      this.props.updateChildState(this.props.data.edge.node.key, isSelected);
       this.setState({ isSelected }, () => {
           Object.keys(this.refs).forEach((ref) => {
               this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected();

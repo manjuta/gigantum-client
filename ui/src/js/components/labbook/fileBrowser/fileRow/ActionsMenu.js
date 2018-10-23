@@ -70,12 +70,11 @@ export default class ActionsMenu extends Component {
     if (!popupVisible) {
       evt.stopPropagation(); // only stop propagation when closing popup, other menus won't close on click if propagation is stopped
     }
-    console.log(popupVisible);
     this.setState({ popupVisible });
   }
 
   /**
-  *  @param {}
+  *  @param {event} evt - event from clicking delete button
   *  triggers DeleteLabbookFileMutation
   *  @return {}
   */
@@ -93,7 +92,9 @@ export default class ActionsMenu extends Component {
   }
 
   /**
-  * Set the wrapper ref
+  *  @param {Object} node - Dom object to be assigned as a ref
+  *  set wrapper ref
+  *  @return {}
   */
    _setWrapperRef(node) {
      this[this.props.edge.node.id] = node;

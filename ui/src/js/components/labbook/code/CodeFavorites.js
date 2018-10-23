@@ -74,9 +74,6 @@ class CodeFavorites extends Component {
 
   render() {
     if (this.props.code && this.props.code.favorites) {
-      let loadingClass = (this.props.code.favorites.pageInfo.hasNextPage) ? 'Favorite__action-bar' : 'hidden';
-      loadingClass = (this.state.loading) ? 'Favorite__action-bar--loading' : loadingClass;
-
       if (this.props.code.favorites.edges.length > 0) {
         const favorites = this.props.code.favorites.edges.filter(edge => edge && (edge.node !== undefined));
 
@@ -90,16 +87,6 @@ class CodeFavorites extends Component {
               favorites={favorites}
               owner={this.props.owner}
             />
-
-
-            <div className={loadingClass}>
-              <button
-                className="Favorite__load-more"
-                onClick={() => { this._loadMore(); }}
-              >
-                Load More
-              </button>
-            </div>
           </div>
 
         );

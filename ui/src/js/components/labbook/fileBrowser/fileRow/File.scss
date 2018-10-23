@@ -21,6 +21,7 @@
     border-bottom: 1px solid $romanSilver;
 
     @include flex(space-between, row);
+    align-items: center;
 
     @extend .UserSelect--none;
 

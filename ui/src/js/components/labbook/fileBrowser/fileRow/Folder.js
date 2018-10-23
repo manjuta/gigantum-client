@@ -59,6 +59,7 @@ class Folder extends Component {
     *  @return {}
     */
     _setSelected(isSelected) {
+        this.props.updateChildState(this.props.data.edge.node.key, isSelected);
         this.setState(
           {
             isSelected,
@@ -322,7 +323,8 @@ class Folder extends Component {
                                         setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}
                                         setState={this._setState}
-                                        setParentHoverState={this._setHoverState}>
+                                        setParentHoverState={this._setHoverState}
+                                        updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
                             }
@@ -335,7 +337,8 @@ class Folder extends Component {
                                     key={children[file].edge.node.key}
                                     isSelected={this.state.isSelected}
                                     checkParent={this._checkParent}
-                                    setParentHoverState={this._setHoverState}>
+                                    setParentHoverState={this._setHoverState}
+                                    updateChildState={this.props.updateChildState}>
                                 </File>
                             );
                         })

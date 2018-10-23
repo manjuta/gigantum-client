@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 // componenets
 import FavoriteCard from './../fileBrowser/FavoriteCard';
+// assets
+import './Favorite.scss';
 
 class CodeFavoriteList extends Component {
   constructor(props) {

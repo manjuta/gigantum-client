@@ -71,16 +71,7 @@ class FileBrowserMutations {
       } = this.state;
 
       const { key } = edge.node;
-      console.log(
-          connection,
-          owner,
-          labbookName,
-          parentId,
-          edge,
-          key,
-          newKey,
-          section,
-        )
+
       MoveLabbookFileMutation(
         connection,
         owner,

@@ -1,3 +1,5 @@
+@import '~Styles/_imports.scss';
+
 .Favorite__list {
   position: relative;
 }
@@ -16,6 +18,15 @@
     }
 
 }
+.Favorite__card {
+  &--opaque {
+    opacity: 0.1;
+    animation: fluxuateLoad 3s infinite;
+  }
+  &--hidden{
+    opacity: 0;
+  }
+}
 
 .Favorite__card--opaque {
   opacity: 0.1;
@@ -25,10 +36,10 @@
 .Favorite__card,
 .Favorite__card--opaque {
 
-  height: 220px;
+  height: 120px;
   position: relative;
   text-align: left;
-  padding: 20px;
+  padding: 10px;
 
   P {
     font-size: 14px;
@@ -36,24 +47,37 @@
   }
 }
 
-.Favorite__edit-button,
-.Favorite__edit-button:hover,
-.Favorite__edit-button:focus {
+.Favorite__edit-button {
   font-weight: light;
   color: $romanSilver;
   font-size: 14px;
   height: 30px;
   width: 30px;
   padding: 5px;
-  border: 0px;
-  background: url('./../images/icons/edit.svg') no-repeat center center;
-  background-size: 22px;
   position: absolute;
-  bottom: 10px;
-  right: 20px;
+  bottom: 1px;
+  right: 10px;
+
+  &:hover{
+    background: url('~Images/icons/edit.svg') no-repeat center center;
+    background-size: 26px;
+    border: 0px;
+  }
+
+  &,
+  &:focus{
+    background: url('~Images/icons/edit.svg') no-repeat center center;
+    background-size: 22px;
+    border: 0px;
+  }
+
+}
+
+.Favorite__description{
+  width: calc(100% - 40px);
 }
 .Favorite__description-section{
-  max-height: 80px;
+  height: 60px;
   word-break: break-all;
   overflow: hidden;
     p{
@@ -63,44 +87,45 @@
 
 .Favorite__description-editor {
   resize: none;
-  height: 90px;
-  width: 100%;
-  max-width: 100%;
+  padding: 0 5px;
+  line-height: 20px;
+  height: 50px;
+  width: calc(100% - 50px);
+  max-width: calc(100% - 50px);
+  overflow: hidden;
 }
 
 
 .Favorite__description-filler {
   background-color: #fff;
   line-height: 30px;
-  height: 90px;
+  height: 40px;
   background: linear-gradient(#eee 0.1em, transparent 0.1em) repeat 30px 34px;
   background-size: 100% 38px;
   color: $romanSilver;
 }
-.Favorite__header-section{
-  height: 50px;
-}
+
 .Favorite__path-section{
-  height: 30px;
+  height: 28px;
   .Favorite__path{
     margin: 0;
   }
 }
 
 .Favorite__card-header {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
-  padding: 5px 0;
+  padding: 0;
   color: $slateBlue;
   word-break: break-all;
-  width: calc(100% - 35px);
+  max-width: 300px;
 }
 
 .Favorite__star {
   cursor: pointer;
   position: absolute;
   top: 10px;
-  right: 20px;
+  right: 10px;
 }
 
 .Favorite__star,
@@ -108,7 +133,7 @@
   height: 30px;
   width: 30px;
 
-  background: url('../images/icons/star__on.svg') no-repeat center center;
+  background: url('~Images/icons/star__on.svg') no-repeat center center;
   background-size: 24px;
 }
 
@@ -121,7 +146,7 @@
   height: 30px;
   width: 30px;
 
-  background: url('../images/icons/star__off.svg') no-repeat center center;
+  background: url('~Images/icons/star__off.svg') no-repeat center center;
   background-size: 24px;
 }
 
@@ -217,7 +242,7 @@
   z-index: -1;
   text-align: center;
   width: calc(50% - 50px);
-  background: linear-gradient(-45deg, $slateBlue, $purple, $turquise, $goldenLemon);
+  background: linear-gradient(-45deg, $slateBlue, $turquise, $goldenLemon);
   background-size: 200% 200%;
   animation: Gradient 7s ease infinite;
 }
@@ -233,7 +258,7 @@
   z-index: -1;
   text-align: center;
   width: calc(50% - 50px);
-  background: linear-gradient(45deg, $goldenLemon, $turquise, $purple, $slateBlue);
+  background: linear-gradient(45deg, $goldenLemon, $turquise, $slateBlue);
   background-size: 200% 200%;
   animation: Gradient 7s ease infinite;
 }
