@@ -28,13 +28,15 @@ class Helper extends Component {
   */
   componentDidMount() {
     window.addEventListener('resize', this._resize);
-    const guideShown = localStorage.getItem('guideShown');
-    if (!guideShown && this.props.auth.isAuthenticated()) {
-      this.setState({ showPopup: true });
-      localStorage.setItem('guideShown', true);
-      this._toggleIsVisible();
-      this._toggleMenuView();
-    }
+    this.props.auth.isAuthenticated().then((response) => {
+      const guideShown = localStorage.getItem('guideShown');
+      if (!guideShown && response) {
+        this.setState({ showPopup: true });
+        localStorage.setItem('guideShown', true);
+        this._toggleIsVisible();
+        this._toggleMenuView();
+      }
+    });
   }
 
   /**

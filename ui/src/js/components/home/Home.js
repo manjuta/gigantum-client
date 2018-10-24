@@ -6,8 +6,24 @@ export default class Home extends Component {
   // login for Auth0 function
   constructor(props) {
     super(props);
-
+    this.state = {
+      authenticated: null,
+    };
     this.footerWorkerCallback = this.footerWorkerCallback.bind(this);
+  }
+  /*
+    sets authentication response to the state
+  */
+  componentDidMount() {
+    this.props.auth.isAuthenticated().then((response) => {
+      let isAuthenticated = response;
+      if (isAuthenticated === null) {
+        isAuthenticated = false;
+      }
+      if (response !== this.state.authenticated) {
+        this.setState({ authenticated: isAuthenticated });
+      }
+    });
   }
   login() {
     this.props.auth.login();
@@ -17,13 +33,11 @@ export default class Home extends Component {
     this.props.footerWorkerCallback(worker, filepath);
   }
   render() {
-    const { isAuthenticated } = this.props.auth;
     const { loadingRenew } = this.props;
-
     return (
       <div className="Home">
         {
-          isAuthenticated() && (
+          this.state.authenticated && (
             <Dashboard
               auth={this.props.auth}
               footerWorkerCallback={this.footerWorkerCallback}
@@ -34,7 +48,7 @@ export default class Home extends Component {
         }
 
         {
-          (!isAuthenticated()) && (
+          !this.state.authenticated && this.state.authenticated !== null && (
           <Login
             auth={this.props.auth}
             loadingRenew={loadingRenew}

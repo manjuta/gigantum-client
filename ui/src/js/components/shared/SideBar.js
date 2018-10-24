@@ -10,6 +10,26 @@ import { setCallbackRoute } from 'JS/redux/reducers/routes';
 import config from 'JS/config';
 
 export default class SideBar extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      authenticated: null,
+    };
+  }
+  /*
+    sets authentication response to the state
+  */
+  componentDidMount() {
+    this.props.auth.isAuthenticated().then((response) => {
+      let isAuthenticated = response;
+      if (isAuthenticated === null) {
+        isAuthenticated = false;
+      }
+      if (response !== this.state.authenticated) {
+        this.setState({ authenticated: isAuthenticated });
+      }
+    });
+  }
   /**
     @param {}
     logout through Auth0
@@ -18,12 +38,10 @@ export default class SideBar extends Component {
     this.props.auth.logout();
   }
   render() {
-    const { isAuthenticated } = this.props.auth;
     const isLabbooks = (window.location.href.indexOf('labbooks') > 0) || (window.location.href.indexOf('datsets') === -1);
-    const authed = isAuthenticated();
     const sidebarCSS = classNames({
-      'SideBar col-sm-1': authed,
-      hidden: !authed,
+      'SideBar col-sm-1': this.state.authenticated || this.state.authenticated === null,
+      hidden: !(this.state.authenticated || this.state.authenticated === null),
       'is-demo': window.location.hostname === config.demoHostName,
     });
     return (
@@ -55,7 +73,7 @@ export default class SideBar extends Component {
           </ul>
 
           {
-            isAuthenticated() && (
+            this.state.authenticated && (
             <User {...this.props} />
               )
           }

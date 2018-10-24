@@ -93,18 +93,16 @@ class Routes extends Component {
     }
   }
 
-
   render() {
     if (!this.state.hasError) {
-      const authed = this.props.auth.isAuthenticated();
       const headerCSS = classNames({
-        Header: authed,
-        hidden: !authed,
+        Header: this.props.validSession,
+        hidden: !this.props.validSession,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({
-        Routes__main: authed,
-        'Routes__main-no-auth': !authed,
+        Routes__main: this.props.validSession,
+        'Routes__main-no-auth': !this.props.validSession,
       });
 
       const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
@@ -182,6 +180,17 @@ class Routes extends Component {
 
                     <Route
                       exact
+                      path="/login"
+                      render={props => (<Home
+                        loadingRenew={this.state.loadingRenew}
+                        history={history}
+                        auth={this.props.auth}
+                        {...props}
+                        />)
+                      }
+                    />
+                    <Route
+                      exact
                       path="/:id"
                       render={props =>
                         <Redirect to="/projects/local" />
@@ -215,7 +224,7 @@ class Routes extends Component {
                       path="/projects/:owner/:labbookName"
                       auth={this.props.auth}
                       render={(parentProps) => {
-                          if (this.props.forceLoginScreen) {
+                          if (this.state.forceLoginScreen) {
                             return <Redirect to="/login" />;
                           }
 

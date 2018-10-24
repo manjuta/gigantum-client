@@ -31,6 +31,7 @@
     cursor: pointer;
     -webkit-line-clamp: 3;
     display: -webkit-box;
+    max-height: 80px;
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
     overflow: hidden;

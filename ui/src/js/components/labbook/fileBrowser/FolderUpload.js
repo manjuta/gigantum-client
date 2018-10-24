@@ -99,7 +99,7 @@ const makeDirectory = (
       (response, error) => {
         if (error) {
           console.error(error);
-          setUploadMessageUpdate('ERROR: cannot upload', labbookName + path, null, true);
+          setUploadMessageUpdate('ERROR: cannot upload', null, null, true);
           setErrorMessage(`ERROR: could not make ${path}`, error);
           reject(error);
         } else {

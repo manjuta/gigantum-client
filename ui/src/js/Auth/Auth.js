@@ -2,6 +2,8 @@ import history from 'JS/history';
 import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import RemoveUserIdentityMutation from 'Mutations/RemoveUserIdentityMutation';
+// queries
+import SessionCheck from 'JS/Auth/sessionCheck';
 // store
 import { setLogout, setLoginError } from 'JS/redux/reducers/login';
 
@@ -109,8 +111,7 @@ export default class Auth {
   isAuthenticated() {
     // Check whether the current time is past the
     // access token's expiry time
-    const expiresAt = JSON.parse(localStorage.getItem('expires_at'));
 
-    return new Date().getTime() < expiresAt;
+    return SessionCheck.getUserIdentity().then(response => response && response.data && response.data.userIdentity && response.data.userIdentity.isSessionValid);
   }
 }

@@ -50,8 +50,8 @@ const updateTotalStatus = (file, labbookName, owner, transactionId) => {
   if (fileCount === totalFiles) {
     setTimeout(() => {
       setFinishedUploading();
-      setUploadMessageRemove(`Uploaded ${fileCount} of ${totalFiles} files`, null, progressBarPercentage);
-    }, 2000);
+      setUploadMessageUpdate(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
+    }, 1000);
 
     CompleteBatchUploadTransactionMutation(
       'connectionKey',
@@ -61,7 +61,7 @@ const updateTotalStatus = (file, labbookName, owner, transactionId) => {
       false,
       transactionId,
       (response, error) => {
-
+        setUploadMessageRemove(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
       },
     );
   }
@@ -80,8 +80,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
     setFinishedUploading();
     setTimeout(() => {
-      setUploadMessageRemove(`Uploaded ${fileSizeKb} of ${fileSizeKb} files`, null, (100 * 100));
-    }, 2000);
+      setUploadMessageUpdate('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
+    }, 1000);
 
     CompleteBatchUploadTransactionMutation(
       'connectionKey',
@@ -91,7 +91,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
       false,
       transactionId,
       (response, error) => {
-
+        setUploadMessageRemove('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
       },
     );
   }
