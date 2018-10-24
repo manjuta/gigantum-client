@@ -149,7 +149,7 @@ class File extends Component {
     const { node } = this.props.data.edge;
     const splitKey = node.key.split('/');
 
-    const fileName = splitKey[splitKey.length - 1];
+    const fileName = this.props.filename;
     const fileRowCSS = classNames({
             File__row: true,
             'File__row--hover': this.state.hover,

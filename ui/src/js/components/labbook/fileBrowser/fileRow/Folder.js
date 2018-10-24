@@ -197,7 +197,6 @@ class Folder extends Component {
       let isOver = this.props.isOverCurrent,
           { refs } = this;
 
-
       Object.keys(refs).forEach((childname) => {
         if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
           const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
@@ -234,11 +233,10 @@ class Folder extends Component {
     render() {
         const { node } = this.props.data.edge,
               { children } = this.props.data,
-              childrenKeys = Object.keys(children),
+              childrenKeys = children ? Object.keys(children) : [],
               isOver = this._checkRefs(),
               splitKey = node.key.split('/'),
-              folderName = splitKey[splitKey.length - 2],
-
+              folderName = this.props.filename,
               folderRowCSS = classNames({
                 Folder__row: true,
                 'Folder__row--expanded': this.state.expanded,
@@ -266,6 +264,7 @@ class Folder extends Component {
                 'Folder--hover': this.state.hover,
                 'Folder--background': this.props.isDragging,
               });
+
 
         let folder = this.props.connectDragPreview(<div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -311,9 +310,12 @@ class Folder extends Component {
                     />
                     {
                         childrenKeys.map((file) => {
-                            if (children[file].children) {
+
+                            if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
+                                console.log(children[file].edge)
                                 return (
                                     <FolderDND
+                                        filename={file}
                                         key={children[file].edge.node.key}
                                         ref={children[file].edge.node.key}
                                         mutations={this.props.mutations}
@@ -327,20 +329,23 @@ class Folder extends Component {
                                         updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
+                            } else if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
+                              return (
+                                  <File
+                                      filename={file}
+                                      mutations={this.props.mutations}
+                                      mutationData={this.props.mutationData}
+                                      ref={children[file].edge.node.key}
+                                      data={children[file]}
+                                      key={children[file].edge.node.key}
+                                      isSelected={this.state.isSelected}
+                                      checkParent={this._checkParent}
+                                      setParentHoverState={this._setHoverState}
+                                      updateChildState={this.props.updateChildState}>
+                                  </File>
+                              );
                             }
-                            return (
-                                <File
-                                    mutations={this.props.mutations}
-                                    mutationData={this.props.mutationData}
-                                    ref={children[file].edge.node.key}
-                                    data={children[file]}
-                                    key={children[file].edge.node.key}
-                                    isSelected={this.state.isSelected}
-                                    checkParent={this._checkParent}
-                                    setParentHoverState={this._setHoverState}
-                                    updateChildState={this.props.updateChildState}>
-                                </File>
-                            );
+                            return (<div>Loading</div>)
                         })
                     }
                 </div>

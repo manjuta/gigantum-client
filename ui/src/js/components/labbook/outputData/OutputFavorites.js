@@ -4,9 +4,10 @@ import { createPaginationContainer, graphql } from 'react-relay';
 // componenets
 import OutputFavoriteList from './OutputFavoriteList';
 import FileEmpty from 'Components/labbook/overview/FileEmpty';
-
 // store
 import store from 'JS/redux/store';
+// assets
+import './../code/Favorite.scss';
 
 class OutputFavorites extends Component {
   /*
@@ -87,10 +88,11 @@ class OutputFavorites extends Component {
         );
       }
       return (
-        <FileEmpty
-          section="outputData"
-          mainText="This Project has No Output Favorites"
-        />
+        <div className="Favorite__none flex flex--column justify--center">
+          <div className="Favorite__icon--star"></div>
+          <p className="Favorite__p"><b>No Output Favorites</b></p>
+          <p className="Favorite__p">Add a favorite and enter a description to highlight important items.</p>
+        </div>
       );
     }
     return (<div>No Files Found</div>);

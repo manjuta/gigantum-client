@@ -92,10 +92,11 @@ class CodeFavorites extends Component {
         );
       }
       return (
-        <FileEmpty
-          section="code"
-          mainText="This Project has No Code Favorites"
-        />
+        <div className="Favorite__none flex flex--column justify--center">
+          <div className="Favorite__icon--star"></div>
+          <p className="Favorite__p"><b>No Code Favorites</b></p>
+          <p className="Favorite__p">Add a favorite and enter a description to highlight important items.</p>
+        </div>
       );
     }
     return (<div>No Files Found</div>);

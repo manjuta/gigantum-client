@@ -13,17 +13,19 @@ import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 
-const sortFolders = (a, b) => {
-  let aKey = a.node.key.split('/').length;
-  let bKey = b.node.key.split('/').length;
-
-  if ((aKey > bKey) || a.node.isDir) {
-    return -1;
-  } else if ((aKey < bKey) || !a.node.isDir) {
-    return 1;
-  }
-  return 0;
-};
+// const sortFolders = (a, b) => {
+//   if (a.node && b.node) {
+//     let aKey = a.node.key.split('/').length;
+//     let bKey = b.node.key.split('/').length;
+//
+//     if ((aKey < bKey) || a.node.isDir) {
+//       return -1;
+//     } else if ((aKey > bKey) || !a.node.isDir) {
+//       return 1;
+//     }
+//   }
+//   return 0;
+// };
 
 class FileBrowser extends Component {
     constructor(props) {
@@ -44,11 +46,13 @@ class FileBrowser extends Component {
     static getDerivedStateFromProps(props, state) {
         let childrenState = {};
         props.files.edges.forEach((edge) => {
-          let key = edge.node.key.split('/').join('');
-          childrenState[key] = {
-            isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
-            edge,
-          };
+          if (edge.node && edge.node.key) {
+            let key = edge.node.key.split('/').join('');
+            childrenState[key] = {
+              isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
+              edge,
+            };
+          }
         });
 
         return {
@@ -83,33 +87,40 @@ class FileBrowser extends Component {
     _processFiles() {
         let edges = this.props.files.edges;
         let edgesToSort = JSON.parse(JSON.stringify(edges));
-        let edgesSorted = edgesToSort.sort(sortFolders);
         let fileObject = {};
 
-        edgesSorted.forEach((edge, index) => {
-            let currentObject = fileObject;
-            let splitKey = edge.node.key.split('/', -1).filter(key => key.length);
+        edgesToSort.forEach((edge, index) => {
+            if (edge.node) {
+              let currentObject = fileObject;
+              let splitKey = edge.node.key.split('/').filter(key => key.length);
+              console.log(`${edge.node.key}-----------------------------`);
 
-            splitKey.forEach((key, index) => {
-                if (currentObject && !currentObject[key]) {
-                    if (edge.node.isDir) {
+              splitKey.forEach((key, index) => {
+                  console.log(key)
+                  if (currentObject && (index === (splitKey.length - 1))) {
+                      if (!currentObject[key]) {
+                        currentObject[key] = {
+                          edge,
+                        };
+                      } else {
+                        currentObject[key].edge = edge
+                      }
+                      console.log(currentObject)
+                  } else if (currentObject && !currentObject[key]) {
                       currentObject[key] = {
                         children: {},
-                        edge,
-                      };
-
-                      currentObject = currentObject[key];
-                    } else {
-                      currentObject[key] = {
-                        edge,
-                      };
-                    }
-                } else if (currentObject) {
+                      }
+                      currentObject = currentObject[key].children;
+                  } else if (currentObject && currentObject[key] && !currentObject[key].children) {
+                      currentObject[key].children = {};
+                      currentObject = currentObject[key].children;
+                  } else {
                     currentObject = currentObject[key].children;
-                }
-            });
+                  }
+              });
+            }
         });
-
+        console.log(fileObject)
         return fileObject;
   }
   /**
@@ -261,10 +272,11 @@ class FileBrowser extends Component {
                 />
                 {
                     Object.keys(files).map((file) => {
-                        if (files[file].children) {
+                        if (files[file] && files[file].edge && files[file].edge.node.isDir) {
                             return (
                                 <Folder
                                     ref={file}
+                                    filename={file}
                                     key={files[file].edge.node.key}
                                     mutationData={mutationData}
                                     data={files[file]}
@@ -273,17 +285,21 @@ class FileBrowser extends Component {
                                     updateChildState={this._updateChildState}>
                                 </Folder>
                             );
+                        } else if (files[file] && files[file].edge && !files[file].edge.node.isDir) {
+                          return (
+                              <File
+                                  ref={file}
+                                  filename={file}
+                                  key={files[file].edge.node.key}
+                                  mutationData={mutationData}
+                                  data={files[file]}
+                                  mutations={this.state.mutations}
+                                  updateChildState={this._updateChildState}>
+                              </File>
+                          );
                         }
-                        return (
-                            <File
-                                ref={file}
-                                key={files[file].edge.node.key}
-                                mutationData={mutationData}
-                                data={files[file]}
-                                mutations={this.state.mutations}
-                                updateChildState={this._updateChildState}>
-                            </File>
-                        );
+
+                        return (<div>Loading</div>);
                     })
                 }
             </div>

@@ -272,6 +272,26 @@
   bottom: 0px;
 }
 
+.Favorite__none {
+  align-items: center;
+  height: 152px;
+}
+.Favorite__icon {
+  &--star {
+    background: url(~Images/icons/star__off.svg) no-repeat center center;
+    background-size: 30px;
+    margin: 0 0 5px 0;
+    height: 26px;
+    width: 40px;
+  }
+}
+
+.Favorite__p {
+  color: $jet;
+  padding: 0;
+  margin: 2px 0;
+}
+
 @media screen and (max-width: 50000px) and (min-width: 1235px) {
   .Favorite__card-wrapper {
     min-width: 33%;

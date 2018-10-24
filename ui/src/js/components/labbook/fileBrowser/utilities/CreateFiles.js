@@ -116,7 +116,7 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
     self = this,
     folderFiles = [];
 
-  createFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData);
+  createFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData, mutationData);
   // loop through files and upload if file is a file
   files.forEach((file, index) => {
     if (file.isDirectory) {
@@ -208,7 +208,7 @@ const getTotalFileLength = (files) => {
 *  @param {array, boolean}
 *  updates footer message depending on the type of upload
 */
-const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData) => {
+const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData, mutationData) => {
   if (totalFiles > 0) {
     setStartedUploading();
     setUploadMessageSetter(`Preparing Upload for ${totalFiles} files`, Math.random() * 10000, totalFiles);
@@ -224,8 +224,9 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData) 
     const fileSizeNotAllowedString = fileSizeNotAllowedNames.join(', ');
 
     if (fileSizeNotAllowedString.length > 0) {
-      const size = this.props.section === 'code' ? '100 MB' : '1.8 GB';
-      const message = `Cannot upload files over ${size} to the ${this.props.section} directory. The following files have not been added ${fileSizeNotAllowedString}`;
+      console.log(mutationData)
+      const size = mutationData.section === 'code' ? '100 MB' : '1.8 GB';
+      const message = `Cannot upload files over ${size} to the ${mutationData.section} directory. The following files have not been added ${fileSizeNotAllowedString}`;
 
       setWarningMessage(message);
     }
