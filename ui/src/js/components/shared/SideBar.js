@@ -25,7 +25,7 @@ export default class SideBar extends Component {
       if (isAuthenticated === null) {
         isAuthenticated = false;
       }
-      if (response !== this.state.authenticated) {
+      if (isAuthenticated !== this.state.authenticated) {
         this.setState({ authenticated: isAuthenticated });
       }
     });
