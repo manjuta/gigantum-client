@@ -15,7 +15,7 @@ class InputFavoriteList extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    const favorites = this.state.favorites;
+    const favorites = state.favorites;
     const newFavorites = [];
     const nextPropsFavorites = props.favorites;
 

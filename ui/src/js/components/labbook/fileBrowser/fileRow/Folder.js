@@ -37,11 +37,18 @@ class Folder extends Component {
         this._setHoverState = this._setHoverState.bind(this);
     }
 
-    static getDerivedStateFromProps(props, state) {
+
+    static getDerivedStateFromProps(nextProps, state) {
+      let isSelected = (nextProps.multiSelect === 'all')
+        ? true
+        : (nextProps.multiSelect === 'none')
+        ? false
+        : state.isSelected;
       return {
         ...state,
-        isOver: props.isOver,
+        isOver: nextProps.isOver,
         prevIsOverState: state.isOver,
+        isSelected,
       };
     }
 
@@ -322,6 +329,7 @@ class Folder extends Component {
                                         mutationData={this.props.mutationData}
                                         data={children[file]}
                                         isSelected={this.state.isSelected}
+                                        multiSelect={this.props.multiSelect}
                                         setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}
                                         setState={this._setState}
@@ -339,6 +347,7 @@ class Folder extends Component {
                                       data={children[file]}
                                       key={children[file].edge.node.key}
                                       isSelected={this.state.isSelected}
+                                      multiSelect={this.props.multiSelect}
                                       checkParent={this._checkParent}
                                       setParentHoverState={this._setHoverState}
                                       updateChildState={this.props.updateChildState}>

@@ -32,6 +32,19 @@ class File extends Component {
       this._clearState = this._clearState.bind(this);
       this._setHoverState = this._setHoverState.bind(this);
   }
+
+  static getDerivedStateFromProps(nextProps, state) {
+    let isSelected = (nextProps.multiSelect === 'all')
+      ? true
+      : (nextProps.multiSelect === 'none')
+      ? false
+      : state.isSelected;
+    return {
+      ...state,
+      isSelected,
+    };
+  }
+
   /**
   *  @param {boolean} isSelected - sets if file has been selected
   *  sets elements to be selected and parent

@@ -16,6 +16,14 @@
     }
 }
 
+.FileBrowser__name-buttons {
+  width: 92px;
+}
+
+.FileBrowser__name-text {
+
+}
+
 .FileBrowser__header {
     @include flex(space-between, row);
     align-items: center;

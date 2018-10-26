@@ -13,20 +13,6 @@ import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 
-// const sortFolders = (a, b) => {
-//   if (a.node && b.node) {
-//     let aKey = a.node.key.split('/').length;
-//     let bKey = b.node.key.split('/').length;
-//
-//     if ((aKey < bKey) || a.node.isDir) {
-//       return -1;
-//     } else if ((aKey > bKey) || !a.node.isDir) {
-//       return 1;
-//     }
-//   }
-//   return 0;
-// };
-
 class FileBrowser extends Component {
     constructor(props) {
       super(props);
@@ -36,6 +22,7 @@ class FileBrowser extends Component {
         mutationData: this._getMutationData(),
         hoverId: '',
         childrenState: {},
+        multiSelect: 'none',
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
@@ -66,10 +53,26 @@ class FileBrowser extends Component {
     *  @return {}
     */
     _updateChildState(key, isSelected) {
+      let isChildSelected = false;
+      let count = 0;
+      let selectedCount = 0;
       let { childrenState } = this.state;
       let santizedKey = key.split('/').join('');
       childrenState[santizedKey].isSelected = isSelected;
-      this.setState({ childrenState });
+
+      for (let key in childrenState) {
+        if (childrenState[key]) {
+          if (childrenState[key].isSelected) {
+            isChildSelected = true;
+            selectedCount++;
+          }
+          count++;
+        }
+      }
+
+      let multiSelect = !isChildSelected ? 'none' : (selectedCount === count) ? 'all' : 'partial';
+
+      this.setState({ childrenState, multiSelect });
     }
     /**
     *  @param {}
@@ -93,23 +96,20 @@ class FileBrowser extends Component {
             if (edge.node) {
               let currentObject = fileObject;
               let splitKey = edge.node.key.split('/').filter(key => key.length);
-              console.log(`${edge.node.key}-----------------------------`);
 
               splitKey.forEach((key, index) => {
-                  console.log(key)
                   if (currentObject && (index === (splitKey.length - 1))) {
                       if (!currentObject[key]) {
                         currentObject[key] = {
                           edge,
                         };
                       } else {
-                        currentObject[key].edge = edge
+                        currentObject[key].edge = edge;
                       }
-                      console.log(currentObject)
                   } else if (currentObject && !currentObject[key]) {
                       currentObject[key] = {
                         children: {},
-                      }
+                      };
                       currentObject = currentObject[key].children;
                   } else if (currentObject && currentObject[key] && !currentObject[key].children) {
                       currentObject[key].children = {};
@@ -120,7 +120,6 @@ class FileBrowser extends Component {
               });
             }
         });
-        console.log(fileObject)
         return fileObject;
   }
   /**
@@ -160,6 +159,40 @@ class FileBrowser extends Component {
         self._deleteMutation(edge.node.key, edge);
       }
     }
+  }
+
+  /**
+  *  @param {}
+  *  selects all or unselects files
+  *  @return {}
+  */
+  _selectFiles() {
+    let isSelected = false;
+    let count = 0;
+    let selectedCount = 0;
+
+    for (let key in this.state.childrenState) {
+      if (this.state.childrenState[key]) {
+        if (this.state.childrenState[key].isSelected) {
+          isSelected = true;
+          selectedCount++;
+        }
+        count++;
+      }
+    }
+    let multiSelect = (count === selectedCount) ? 'none' : 'all';
+
+    let { childrenState } = this.state;
+    for (let key in childrenState) {
+      if (childrenState[key]) {
+        console.log(childrenState[key], key);
+        childrenState[key].isSelected = (multiSelect === 'all');
+
+        count++;
+      }
+    }
+    console.log(childrenState)
+    this.setState({ multiSelect, childrenState });
   }
 
   /**
@@ -237,19 +270,35 @@ class FileBrowser extends Component {
    const { isSelected } = this._checkChildState();
 
    const fileBrowserCSS = classNames({
-     FileBrowser: true,
-     'FileBrowser--highlight': isOver,
-   });
+           FileBrowser: true,
+           'FileBrowser--highlight': isOver,
+         }),
+         deleteButtonCSS = classNames({
+           'Btn Btn--round Btn--delete': true,
+           hidden: !isSelected,
+         }),
+         multiSelectButtonCSS = classNames({
+           'Btn Btn--round': true,
+           'Btn--check': this.state.multiSelect === 'all',
+           'Btn--uncheck': this.state.multiSelect === 'none',
+           'Btn--partial': this.state.multiSelect === 'partial',
+         });
 
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
                 <div className="FileBrowser__header">
-                    <div className="FileBrowser__header--name">
+                    <div className="FileBrowser__header--name flex justify--start">
+                      <div className="FileBrowser__name-buttons flex justify--start">
                         <button
-                          disabled={ !isSelected }
-                          className="Btn Btn--round Btn--delete"
+                          className={multiSelectButtonCSS}
+                          onClick={() => { this._selectFiles(); }} />
+                        <button
+                          className={deleteButtonCSS}
                           onClick={() => { this._deleteSelectedFiles(); }} />
+                      </div>
+                      <div className="FileBrowser__name-text">
                         File
+                      </div>
                     </div>
 
                     <div className="FileBrowser__header--size">
@@ -278,6 +327,7 @@ class FileBrowser extends Component {
                                     ref={file}
                                     filename={file}
                                     key={files[file].edge.node.key}
+                                    multiSelect={this.state.multiSelect}
                                     mutationData={mutationData}
                                     data={files[file]}
                                     mutations={this.state.mutations}
@@ -291,6 +341,7 @@ class FileBrowser extends Component {
                                   ref={file}
                                   filename={file}
                                   key={files[file].edge.node.key}
+                                  multiSelect={this.state.multiSelect}
                                   mutationData={mutationData}
                                   data={files[file]}
                                   mutations={this.state.mutations}
