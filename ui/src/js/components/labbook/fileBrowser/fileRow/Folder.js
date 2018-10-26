@@ -239,7 +239,7 @@ class Folder extends Component {
 
     render() {
         const { node } = this.props.data.edge,
-              { children } = this.props.data,
+              { children, index } = this.props.data,
               childrenKeys = children ? Object.keys(children) : [],
               isOver = this._checkRefs(),
               splitKey = node.key.split('/'),
@@ -270,8 +270,9 @@ class Folder extends Component {
                 'Folder--highlight': isOver,
                 'Folder--hover': this.state.hover,
                 'Folder--background': this.props.isDragging,
-              });
-
+              }),
+              paddingLeft = 40 * index,
+              rowStyle = { paddingLeft: `${paddingLeft}px` };
 
         let folder = this.props.connectDragPreview(<div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -281,6 +282,7 @@ class Folder extends Component {
           className={folderCSS}>
                 <div
                     className={folderRowCSS}
+                    style={rowStyle}
                     onClick={evt => this._expandSection(evt)}>
                     <button
                         className={buttonCSS}

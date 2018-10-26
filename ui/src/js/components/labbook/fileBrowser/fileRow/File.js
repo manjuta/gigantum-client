@@ -160,6 +160,7 @@ class File extends Component {
 
   render() {
     const { node } = this.props.data.edge;
+    const { index } = this.props.data;
     const splitKey = node.key.split('/');
 
     const fileName = this.props.filename;
@@ -179,7 +180,9 @@ class File extends Component {
           renameCSS = classNames({
             'File__cell File__cell--edit': true,
             hidden: !this.state.renameEditMode,
-          });
+          }),
+          paddingLeft = 40 * index,
+          rowStyle = { paddingLeft: `${paddingLeft}px` };
 
     let file = this.props.connectDragPreview(<div
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -187,7 +190,9 @@ class File extends Component {
       onMouseDown={() => { this._mouseDown(); }}
       className="File">
 
-             <div className={fileRowCSS}>
+             <div
+               className={fileRowCSS}
+               style={rowStyle}>
 
                 <button
                     className={buttonCSS}

@@ -102,6 +102,7 @@ class FileBrowser extends Component {
                       if (!currentObject[key]) {
                         currentObject[key] = {
                           edge,
+                          index,
                         };
                       } else {
                         currentObject[key].edge = edge;
