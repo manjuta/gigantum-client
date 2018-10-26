@@ -59,7 +59,7 @@ const CONFIG = {
     },
   },
   getToolTipText: section => tips[section],
-  demoHostName: 'try.gigantum.com',
+  demoHostName: 'localhost',
 };
 
 export default CONFIG;
