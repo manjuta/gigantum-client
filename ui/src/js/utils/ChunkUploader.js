@@ -79,7 +79,10 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
 
 
 const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, username, filepath, section, getChunkCallback, componentCallback) => {
-  if (!store.getState().fileBrowser.pause || (store.getState().footer.totalFiles > 1)) {
+  let { footer, fileBrowser } = store.getState();
+  console.log(footer.totalFiles, fileBrowser.pause)
+  if (fileBrowser.pause || (footer.totalFiles > 1)) {
+
     AddLabbookFileMutation(
       data.connectionKey,
       username,
@@ -121,14 +124,17 @@ const ChunkUploader = {
     @param {object} data includes file filepath username and accessToken
   */
   chunkFile: (data, postMessage, passedChunkIndex) => {
-    let file = data.file,
-      filepath = data.filepath,
-      username = data.username,
-      section = data.section,
+
+    let {
+        file,
+        filepath,
+        username,
+        section,
+      } = data,
       componentCallback = (response) => { // callback to trigger postMessage from initializer
         postMessage(response, false);
       };
-
+    console.log(data);
     const id = uuidv4(),
       chunkSize = 1000 * 1000 * 48,
       fileSize = file.size,
@@ -142,6 +148,7 @@ const ChunkUploader = {
       @param{object, object} response result
     */
     const getChunk = (response, result) => {
+      console.log(response)
       if (response.name) { // checks if response is a file
         let sliceUpperBound = (fileSize > (fileLoadedSize + chunkSize))
             ? (fileLoadedSize + chunkSize)
@@ -161,7 +168,7 @@ const ChunkUploader = {
           filename: file.name,
           uploadId: id,
         };
-
+        console.log(chunkIndex, totalChunks)
         if (chunkIndex <= totalChunks) { // if  there is still chunks to process do next chunk
           // select type of mutation
           if (file.name.indexOf('.lbk') > -1 || file.name.indexOf('.zip') > -1) {
@@ -172,11 +179,11 @@ const ChunkUploader = {
                 data.accessToken,
                 getChunk,
               );
-
               postMessage(chunkData, false); // post progress back to worker instantiator file
             }
           } else {
             // if(store.getState().fileBrowser.pause === false){
+            // sasd
             uploadFileBrowserChunk(
               data,
               chunkData,

@@ -59,6 +59,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
   };
 
   const getListAsArray = function getListAsArray(list) {
+    console.log(list)
     return (// returns a flat array
       arrayConcat.apply([], list)
     );
@@ -154,7 +155,9 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
     options = initOptions(options);
 
     return new Promise(((resolve) => {
+      console.log(getListAsArray(evt.dataTransfer.files));
       if (evt.dataTransfer.items) {
+        console.log('sdsd')
         Promise.all(getListAsArray(evt.dataTransfer.items).filter(item => isItemFileEntry(item)).map(item => getDataTransferItemFiles(item, options))).then(files => resolve(getListAsArray(files)));
       } else if (evt.dataTransfer.files) {
         resolve(getListAsArray(evt.dataTransfer.files)); // turn into regular array (instead of FileList)

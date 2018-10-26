@@ -319,9 +319,7 @@ class Folder extends Component {
                     />
                     {
                         childrenKeys.map((file) => {
-
                             if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
-                                console.log(children[file].edge)
                                 return (
                                     <FolderDND
                                         filename={file}
