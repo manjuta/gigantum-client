@@ -32,8 +32,11 @@ class AddSubfolder extends Component {
   *  @return {}
   */
   _clickedOffInput(evt) {
-    if (!(evt.target.className.indexOf('AddSubfolder') > -1)) {
+    if (!(evt.target.className.indexOf('AddSubfolder') > -1) && (this.props.addFolderVisible || this.props.addFolderVisible === undefined)) {
       this._clearState();
+      if (this.props.setAddFolderVisible) {
+        this.props.setAddFolderVisible(false);
+      }
     }
   }
 
@@ -115,28 +118,31 @@ class AddSubfolder extends Component {
   }
 
   render() {
-    const subfolderTextCSS = classNames({
-            AddSubfolder__text: true,
-            hidden: this.state.editMode,
-          }),
-          subfolderInputCSS = classNames({
+    const subfolderInputCSS = classNames({
             AddSubfolder__edit: true,
-            hidden: !this.state.editMode,
+            hidden: !this.state.editMode && !this.props.addFolderVisible,
+          }),
+          addFolderCSS = classNames({
+            AddSubfolder: true,
+            hidden: !this.props.addFolderVisible && this.props.addFolderVisible !== undefined,
+          }),
+          subfolderTextCSS = classNames({
+            AddSubfolder__text: true,
+            hidden: (this.state.editMode && this.props.addFolderVisible === undefined) || this.props.addFolderVisible,
           });
-
 
     return (
       <div
           onClick={() => { this._updateStateBoolean('editMode', true); }}
-          className="AddSubfolder">
+          className={addFolderCSS}>
           <div className={subfolderTextCSS}>
-            Add Subfolder
+            Add Folder
           </div>
            <div className={subfolderInputCSS}>
              <div className="AddSubfolder__container">
                <input
                  ref={(input) => { this.subfolderInput = input; }}
-                 placeholder="Add Subfolder"
+                 placeholder="Enter Folder Name"
                  type="text"
                  className="AddSubfolder__input"
                  onKeyUp={(evt) => { this._updateFolderName(evt); }}

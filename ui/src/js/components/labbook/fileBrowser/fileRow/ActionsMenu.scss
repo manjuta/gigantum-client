@@ -96,6 +96,17 @@
         }
     }
 
+    &--AddSubfolder {
+        background: url('~Images/icons/folder-add.svg') no-repeat 50% 50%;
+        background-size: 17px;
+
+        &:hover {
+            //change color here
+            background: url('~Images/icons/folder-add.svg') no-repeat 50% 50%;
+            background-size: 17px;
+        }
+    }
+
     &--menu {
         width: 50px;
 

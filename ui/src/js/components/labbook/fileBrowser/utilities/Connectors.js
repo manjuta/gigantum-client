@@ -56,7 +56,8 @@ const dragSource = {
 
       if (newKeyPath !== fileKeyPath) {
         if ((newKey !== props.data.edge.node.key)) {
-
+          console.log(newKeyPath)
+          console.log(newKey)
           const moveLabbookFileData = {
             newKey,
             edge: props.data.edge,

@@ -27,6 +27,7 @@ class Folder extends Component {
             hoverId: '',
             isOver: false,
             prevIsOverState: false,
+            addFolderVisible: false,
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -35,6 +36,7 @@ class Folder extends Component {
         this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
         this._setHoverState = this._setHoverState.bind(this);
+        this._addFolderVisible = this._addFolderVisible.bind(this);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -157,6 +159,19 @@ class Folder extends Component {
     _expandSection(evt) {
       if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
         this.setState({ expanded: !this.state.expanded });
+        console.log(this.props.data.children);
+        console.log(this.refs);
+        Object.keys(this.refs).forEach((ref) => {
+          console.log(ref);
+          // console.log(this.refs[ref]);
+          this.refs[ref].setState({ ForceRerender: true }, () => {
+            console.log(this.refs[ref])
+
+          })
+        });
+      }
+      if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
+        this.setState({ expanded: true });
       }
     }
 
@@ -187,6 +202,17 @@ class Folder extends Component {
     */
     _mouseLeave() {
       this.setState({ isDragging: false });
+    }
+    /**
+      *  @param {}
+      *  sets addFolderVisible state
+    */
+    _addFolderVisible(reverse) {
+      if (reverse) {
+        this.setState({ addFolderVisible: !this.state.addFolderVisible });
+      } else {
+        this.setState({ addFolderVisible: false });
+      }
     }
     /**
     *  @param {}
@@ -297,6 +323,7 @@ class Folder extends Component {
                         edge={this.props.data.edge}
                         mutationData={this.props.mutationData}
                         mutations={this.props.mutations}
+                        addFolderVisible={this._addFolderVisible}
                         renameEditMode={ () => {} }
                       />
                     </div>
@@ -307,12 +334,14 @@ class Folder extends Component {
                       folderKey={node.key}
                       mutationData={this.props.mutationData}
                       mutations={this.props.mutations}
+                      setAddFolderVisible={this._addFolderVisible}
+                      addFolderVisible={this.state.addFolderVisible}
                     />
                     {
                         childrenKeys.map((file) => {
 
                             if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
-                                console.log(children[file].edge)
+                                // console.log(children[file].edge)
                                 return (
                                     <FolderDND
                                         filename={file}

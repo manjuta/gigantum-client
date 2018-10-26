@@ -93,10 +93,10 @@ class FileBrowser extends Component {
             if (edge.node) {
               let currentObject = fileObject;
               let splitKey = edge.node.key.split('/').filter(key => key.length);
-              console.log(`${edge.node.key}-----------------------------`);
+              // console.log(`${edge.node.key}-----------------------------`);
 
               splitKey.forEach((key, index) => {
-                  console.log(key)
+                  // console.log(key)
                   if (currentObject && (index === (splitKey.length - 1))) {
                       if (!currentObject[key]) {
                         currentObject[key] = {
@@ -105,7 +105,7 @@ class FileBrowser extends Component {
                       } else {
                         currentObject[key].edge = edge
                       }
-                      console.log(currentObject)
+                      // console.log(currentObject)
                   } else if (currentObject && !currentObject[key]) {
                       currentObject[key] = {
                         children: {},
@@ -120,7 +120,7 @@ class FileBrowser extends Component {
               });
             }
         });
-        console.log(fileObject)
+        // console.log(fileObject)
         return fileObject;
   }
   /**

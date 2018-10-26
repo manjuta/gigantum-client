@@ -83,6 +83,7 @@ class FileBrowserMutations {
         section,
         (response, error) => {
           callback(response, error);
+          console.log(response, error, edge, newKey);
         },
       );
   }
