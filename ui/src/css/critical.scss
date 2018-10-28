@@ -129,7 +129,8 @@ code {
   white-space: nowrap;
   top: 0;
   text-align: left;
-  background-size: 120%;
+  background-size: auto 120%;
+  z-index: index($elements, loader);
   a,
   a:visited{
     text-decoration: underline;
