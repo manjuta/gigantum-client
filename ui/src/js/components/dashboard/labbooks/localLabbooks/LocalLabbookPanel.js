@@ -215,7 +215,6 @@ export default class LocalLabbookPanel extends Component {
 
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{edge.node.owner}</p>
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner">{`Modified on ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
 
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"

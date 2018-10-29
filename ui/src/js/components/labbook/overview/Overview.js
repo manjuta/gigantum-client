@@ -207,7 +207,7 @@ class Overview extends Component {
                 id="markDown"
               />
 
-              <div className="Overview__readme--editing-buttons Card Card--auto Card--no-hover">
+              <div className="Overview__readme--editing-buttons">
 
                 <button
                   className="Overview__readme-save"
