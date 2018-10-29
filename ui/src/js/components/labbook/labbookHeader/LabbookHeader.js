@@ -35,6 +35,7 @@ class LabbookHeader extends Component {
     this._showLabbookModal = this._showLabbookModal.bind(this);
     this._hideLabbookModal = this._hideLabbookModal.bind(this);
     this._setHoverState = this._setHoverState.bind(this);
+    this._checkOverflow = this._checkOverflow.bind(this);
   }
 
   /**
@@ -121,6 +122,25 @@ class LabbookHeader extends Component {
    }
  }
 
+  /** *
+    @param {object} element
+    checks if element is too large for card area
+    @return {boolean}
+  */
+ _checkOverflow(element) {
+   if (element) {
+     const curOverflow = element.style.overflow;
+
+     if (!curOverflow || curOverflow === 'visible') { element.style.overflow = 'hidden'; }
+
+     const isOverflowing = element.clientWidth < element.scrollWidth || element.clientHeight < element.scrollHeight;
+
+     element.style.overflow = curOverflow;
+
+     return isOverflowing;
+   }
+ }
+
   /** ***
   *  @param {boolean} isSyncing
   *  updates container status state
@@ -135,12 +155,14 @@ class LabbookHeader extends Component {
     }
   }
   /** ***
-  *  @param {boolean} hovered
+  *  @param {boolean, event} hovered, evt
   *  sets hover state
   *  @return {}
   */
-  _setHoverState(hovered) {
-    this.setState({ hovered });
+  _setHoverState(hovered, evt) {
+    if (this._checkOverflow(evt.target) || !hovered) {
+      this.setState({ hovered });
+    }
   }
 
   render() {
@@ -321,8 +343,8 @@ const BranchName = ({
     <div className={branchNameCSS}>
       <div className="LabbookHeader__name-container">
         <div
-          onMouseEnter={() => setHoverState(true)}
-          onMouseLeave={() => setHoverState(false)}
+          onMouseEnter={evt => setHoverState(true, evt)}
+          onMouseLeave={evt => setHoverState(false, evt)}
           className="LabbookHeader__name"
           onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
         >
