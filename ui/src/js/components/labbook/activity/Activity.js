@@ -916,7 +916,7 @@ export default createPaginationContainer(
       const first = counter;
 
       cursor = pagination ? props.labbook.activityRecords.edges[props.labbook.activityRecords.edges.length - 1].cursor : null;
-      console.log(cursor);
+
       return {
         first,
         cursor,
