@@ -37,8 +37,8 @@ from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
-class NoTestJobs(object):
-    def notest_success_import_export_zip(self, mock_config_with_repo):
+class TestJobs(object):
+    def test_success_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
         im = InventoryManager(mock_config_with_repo[0])
@@ -118,7 +118,7 @@ class NoTestJobs(object):
                 pprint.pprint(e)
                 raise
 
-    def notest_success_import_export_lbk(self, mock_config_with_repo):
+    def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
         # Create new LabBook to be exported
         lb = InventoryManager(mock_config_with_repo[0]).create_labbook('unittester', 'unittester',
@@ -174,7 +174,7 @@ class NoTestJobs(object):
             assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
-    def notest_fail_import_export_zip(self, mock_config_with_repo):
+    def test_fail_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
         lb = InventoryManager(mock_config_with_repo[0]).create_labbook('test', 'test',
@@ -210,8 +210,3 @@ class NoTestJobs(object):
                 assert False, f"Should not be able to import LabBook from strange directory /t"
             except Exception as e:
                 pass
-
-            shutil.rmtree(lb.root_dir)
-            assert not os.path.exists(lb_root), f"LabBook at {lb_root} should not exist."
-            imported_lb_path = jobs.import_labboook_from_zip(archive_path=exported_archive_path, username="test",
-                                                             owner="test", config_file=mock_config_with_repo[0])
