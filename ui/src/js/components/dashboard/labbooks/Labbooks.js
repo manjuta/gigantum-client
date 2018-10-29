@@ -229,7 +229,7 @@ class Labbooks extends Component {
    * returns true if labbook's name or description exists in filtervalue, else returns false
   */
   _filterSearch(labbook) {
-    if (labbook.node && labbook.node.name && (this.props.filterText === '' || labbook.node.name.toLowerCase().indexOf(this.props.filterText.toLowerCase()) > -1 || labbook.node.description && labbook.node.description.toLowerCase().indexOf(this.props.filterText.toLowerCase()) > -1)) {
+    if (labbook.node && labbook.node.name && (this.props.filterText === '' || labbook.node.name.toLowerCase().indexOf(this.props.filterText.toLowerCase()) > -1 || (labbook.node.description && labbook.node.description.toLowerCase().indexOf(this.props.filterText.toLowerCase()) > -1))) {
       return true;
     }
     return false;
