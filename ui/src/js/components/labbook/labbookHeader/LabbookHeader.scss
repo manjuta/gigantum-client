@@ -190,7 +190,8 @@
   font-weight: 100;
   line-height: 48px;
   &:hover {
-    overflow: visible;
+    width: 78%;
+    position: absolute;
   }
 }
 
@@ -221,13 +222,6 @@
 
   h2:hover {
     color: $turquise;
-  }
-
-  &--open{
-    .LabbookHeader__name {
-      background: url('~Images/icons/up-arrow-silver.svg') no-repeat center right 5px;
-      background-size: 16px;
-    }
   }
 }
 
@@ -312,11 +306,7 @@
   &--selected a {
     position: relative;
     z-index: index($elements, button);
-    bottom: -2px;
-
     color: $selected-blue;
-
-    line-height: 15px;
   }
 }
 
