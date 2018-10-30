@@ -241,7 +241,7 @@ export default class RemoteLabbookPanel extends Component {
 
          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Modified on ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
+         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Modified ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
 
          <p
            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
