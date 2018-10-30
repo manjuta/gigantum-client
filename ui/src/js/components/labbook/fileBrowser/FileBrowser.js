@@ -23,6 +23,7 @@ class FileBrowser extends Component {
         hoverId: '',
         childrenState: {},
         multiSelect: 'none',
+        search: '',
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
@@ -91,8 +92,31 @@ class FileBrowser extends Component {
         let edges = this.props.files.edges;
         let edgesToSort = JSON.parse(JSON.stringify(edges));
         let fileObject = {};
+        const { search } = this.state;
+        const searchLowerCase = search.toLowerCase();
+
+        if (search !== '') {
+          let edgesSearchMatch = edgesToSort.filter((edge) => {
+            const lowerCaseKey = edge.node.key.toLowerCase();
+            return (lowerCaseKey.indexOf(searchLowerCase) > -1);
+          });
+
+          edgesToSort = edgesToSort.filter((edge) => {
+            let keyMatch = false;
+            edgesSearchMatch.forEach((matchEdge) => {
+              if (matchEdge.node.key.indexOf(edge.node.key) > -1) {
+                keyMatch = true;
+              }
+            });
+            return keyMatch;
+          });
+        }
 
         edgesToSort.forEach((edge, index) => {
+            let key = edge.node.key.toLowerCase();
+            let searchLowerCase = search.toLowerCase();
+
+
             if (edge.node) {
               let currentObject = fileObject;
               let splitKey = edge.node.key.split('/').filter(key => key.length);
@@ -119,8 +143,9 @@ class FileBrowser extends Component {
                     currentObject = currentObject[key].children;
                   }
               });
-            }
+           }
         });
+
         return fileObject;
   }
   /**
@@ -192,7 +217,6 @@ class FileBrowser extends Component {
         count++;
       }
     }
-    console.log(childrenState)
     this.setState({ multiSelect, childrenState });
   }
 
@@ -260,6 +284,14 @@ class FileBrowser extends Component {
 
     return { isSelected };
   }
+  /**
+  *  @param {evt}
+  *  update state
+  *  @return {}
+  */
+  _updateSearchState(evt) {
+    this.setState({ search: evt.target.value });
+  }
 
   render() {
     const files = this._processFiles(),
@@ -287,16 +319,28 @@ class FileBrowser extends Component {
 
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
+
+                <div className="FileBrowser__tools flex justify--space-between">
+                  <div className="FileBrowser__multiselect flex justify--start">
+                    <button
+                      className={multiSelectButtonCSS}
+                      onClick={() => { this._selectFiles(); }} />
+                    <button
+                      className={deleteButtonCSS}
+                      onClick={() => { this._deleteSelectedFiles(); }} />
+                  </div>
+                  <div className="FileBrowser__search flex-1">
+                    <input
+                      className="FileBrowser__input full--border"
+                      type="text"
+                      placeholder="Search Files Here"
+                      onChange={(evt) => { this._updateSearchState(evt); } }
+                      onKeyUp={(evt) => { this._updateSearchState(evt); } }
+                    />
+                  </div>
+                </div>
                 <div className="FileBrowser__header">
                     <div className="FileBrowser__header--name flex justify--start">
-                      <div className="FileBrowser__name-buttons flex justify--start">
-                        <button
-                          className={multiSelectButtonCSS}
-                          onClick={() => { this._selectFiles(); }} />
-                        <button
-                          className={deleteButtonCSS}
-                          onClick={() => { this._deleteSelectedFiles(); }} />
-                      </div>
                       <div className="FileBrowser__name-text">
                         File
                       </div>

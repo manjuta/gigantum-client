@@ -16,8 +16,22 @@
     }
 }
 
-.FileBrowser__name-buttons {
-  width: 92px;
+.FileBrowser__tools {
+  align-items: center;
+}
+
+.FileBrowser__multiselect {
+  width: 200px;
+  padding: 0px 10px;
+}
+
+.FileBrowser__search {
+  max-width: 500px;
+}
+
+.FileBrowser__input{
+  margin: 0px !important;
+  height: 34px;
 }
 
 .FileBrowser__name-text {
