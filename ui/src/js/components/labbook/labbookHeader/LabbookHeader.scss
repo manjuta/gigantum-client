@@ -133,6 +133,9 @@
         height: 0px;
     }
   }
+  &--expanded {
+    height: 100px;
+  }
 }
 
 .LabbookHeader__columnContainer{
@@ -275,6 +278,15 @@
   margin-top: 154px;
 
   transition: 0.5s all;
+  &--expanded {
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+    width: 100%;
+    .LabbookHeader__nav{
+      border: none;
+    }
+  }
 }
 
 .LabbookHeader__nav {
