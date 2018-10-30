@@ -36,7 +36,6 @@ class BranchMenu extends Component {
       addNoteEnabled: false,
       isValid: true,
       createBranchVisible: false,
-      addedRemoteThisSession: !(this.props.defaultRemote === null),
       showCollaborators: false,
       newCollaborator: '',
       showLoginPrompt: false,
@@ -216,8 +215,6 @@ class BranchMenu extends Component {
           if (navigator.onLine) {
             if (response.data && response.data.userIdentity) {
               if (response.data.userIdentity.isSessionValid) {
-                setMultiInfoMessage(id, 'Syncing Project with Gigantum cloud ...', false, false);
-
                 this.props.setSyncingState(true);
 
                 this._showContainerMenuMessage('syncing');
@@ -250,8 +247,6 @@ class BranchMenu extends Component {
                       );
 
                       setContainerMenuVisibility(false);
-
-                      setMultiInfoMessage(id, `Successfully synced ${this.state.labbookName}`, true, false);
                     }
                   },
                 );
@@ -376,21 +371,13 @@ class BranchMenu extends Component {
     const self = this;
 
     JobStatus.getJobStatus(jobKey).then((data) => {
-      if (data.jobStatus.status !== 'queued') {
-        this.props.setExportingState(false);
+      this.props.setExportingState(false);
 
-        if (data.jobStatus.result) {
-          setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
-        }
-
-        this.setState({ exporting: false });
-      } else {
-        setTimeout(() => {
-          setInfoMessage('Exporting...');
-
-          self._jobStatus(jobKey);
-        }, 500);
+      if (data.jobStatus.result) {
+        setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
       }
+
+      this.setState({ exporting: false });
     }).catch((error) => {
       console.log(error);
 
@@ -570,7 +557,7 @@ class BranchMenu extends Component {
 
           <DeleteLabbook
             handleClose={() => this._toggleDeleteModal()}
-            remoteAdded={this.state.addedRemoteThisSession}
+            remoteAdded={this.props.defaultRemote}
             history={this.props.history}
           />
         }
@@ -699,7 +686,7 @@ class BranchMenu extends Component {
             </li>
 
             {
-              this.state.addedRemoteThisSession &&
+              this.props.defaultRemote &&
 
               <li className={`BranchMenu__item BranchMenu__item--visibility-${this.props.visibility}`}>
 
@@ -728,7 +715,7 @@ class BranchMenu extends Component {
 
           <hr className="BranchMenu__line" />
 
-          {!this.state.addedRemoteThisSession &&
+          {!this.props.defaultRemote &&
 
             <div className="BranchMenu__publish">
 
@@ -756,7 +743,7 @@ class BranchMenu extends Component {
             </div>
           }
 
-          {this.state.addedRemoteThisSession &&
+          {this.props.defaultRemote &&
 
             <div className="BranchMenu__sync">
 

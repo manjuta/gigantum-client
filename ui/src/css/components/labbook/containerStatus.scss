@@ -3,8 +3,7 @@
   position: relative;
   display: flex;
   justify-content: flex-start;
-  flex-direction: row;
-  margin-left: 135px;
+  flex-direction: column;
 }
 
 .ContainerStatus__button-menu {
@@ -33,7 +32,24 @@
 }
 
 .ContainerStatus__plugins-list-item {
-  padding: 5px 0;
+  height: 40px;
+  padding: 10px 5px !important;
+  padding-top: 2px;
+  text-align: center;
+  user-select: none;
+
+  border-bottom: 1px solid $grey;
+
+  &:last-child{
+    border-bottom: none;
+  }
+
+  &:hover {
+    transition: background-color 0.25s ease-in-out;
+
+    background: $azure;
+    color: $white;
+  }
 }
 
 .ContainerStatus__button--flat {
@@ -136,26 +152,25 @@
   background: $background-color url('~Images/loaders/button-starting.svg') no-repeat 90% center;
   background-size: 20px;
   border: 3px solid $goldenLemon;
-  opacity: 0.75;
+  color: $grey;
 }
 
 .ContainerStatus__plugins {
-  position: relative;
+  position: absolute;
   overflow: visible;
 }
 
 .ContainerStatus__plugins-button {
-
+  transition: all 0.125s;
   height: 24px;
-  width: 134px;
+  width: 113px;
+  border-radius: 0 0 5px 5px;
   background-color: #aaa;
-  border-radius: 12px 0 0 12px;
   position: absolute;
-  bottom: 3px;
-  transition: left 0.125s;
-  left: -129px;
+  bottom: -55px;
+  left: 13px;
   color: white;
-  text-align: center;
+  text-align: left;
   line-height: 21px;
   cursor: pointer;
   font-size: 14px;
@@ -166,8 +181,50 @@
   }
 }
 
-.ContainerStatus__plugins-button:hover{
-  background-color: rgba(237,97, 31, 0.8);
+.ContainerStatus__selected-tool {
+  background: url('~Images/icons/offsite.svg') no-repeat right 4px center ;
+  background-size: 11px;
+  padding-left: 5px;
+  padding-top: 2px;
+  width: 90px;
+  height: 100%;
+  border-radius: 0 0 0 5px;
+  display: inline-block;
+  text-align: left;
+  &:hover {
+  background: rgba(237,97, 31, 0.8) url('~Images/icons/offsite.svg') no-repeat right 4px center ;
+  background-size: 11px;
+  }
+}
+
+.ContainerStatus__expand-tools {
+  transition: all 0.25s;
+  background: url('~Images/icons/down-arrow-white.svg') no-repeat center center ;
+  background-size: 10px;
+  position: absolute;
+  width: 23px;
+  display: inline-block;
+  border-left: 1px solid $white;
+  height: 12px;
+  top: 6px;
+  right: 0;
+  &:hover{
+    background: rgba(237,97, 31, 0.8) url('~Images/icons/down-arrow-white.svg') no-repeat center center ;
+    background-size: 10px;
+    height: 100%;
+    top: 0;
+  }
+  &--open{
+    background: url('~Images/icons/up-arrow-white.svg') no-repeat center center ;
+    background-size: 10px;
+    &:hover{
+      background:rgba(237,97, 31, 0.8) url('~Images/icons/up-arrow-white.svg') no-repeat center center ;
+      background-size: 10px;
+      height: 100%;
+      top: 0;
+    }
+
+  }
 }
 
 .ContainerStatus__plugins-title {
@@ -176,18 +233,8 @@
   border-bottom: 1px solid $romanSilver;
 }
 
-.ContainerStatus__plugins-list {
-  .jupyter-icon{
-    font-size: 14px;
-    font-weight: 100;
-    font-family: 'NunitoSans' !important;
-  }
-  .jupyter-icon:before {
-    font-family: 'file-icons' !important;
-    padding: 0 6px 0 0;
-    font-size: 17px;
-    margin: 0 6px;
-  }
+.jupyter-icon:before {
+  margin-right: 5px;
 }
 
 .ContainerStatus__plugins-item:hover {
@@ -195,17 +242,25 @@
 }
 
 .ContainerStatus__plugins-menu {
+  animation: slide-down-fade-in forwards .25s;
+  transition: all 0.25s;
   position: absolute;
-  top: 42px;
-  right: -100px;
-  width: 200px;
+  padding: 3px !important;
+  top: 53px;
+  right: -126px;
+  width: 113px;
   background: $white;
   color: $romanSilver;
   height: auto;
-  border-radius: 8px;
+  border: 1px solid $grey;
   @extend .box-shadow;
-  z-index: index($elements, popup);
+  z-index: -1;
   padding: 15px;
+}
+
+.ContainerStatus__plugins-menu--hover{
+  top: 54px;
+  right: -129px;
 }
 
 .ContainerStatus__plugins-menu-arrow {
@@ -217,7 +272,8 @@
 }
 
 .ContainerStatus__button--bottom{
-  left: -128px;
+  left: 16px;
+  bottom: -57px;
 }
 
 

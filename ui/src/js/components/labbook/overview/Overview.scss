@@ -42,70 +42,6 @@
   position: relative;
 }
 
-.Overview__description {
-  color: $jet;
-  white-space: pre-line;
-  padding: 50px 0 0 0;
-  word-wrap: break-word;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-
-  p {
-    margin: 0
-  }
-
-  div:first-child {
-
-    /*
-      have to use extend as ReactMarkDown does not inherit classNames
-    */
-    @include spanColumns(9);
-    margin-bottom: 0;
-  }
-
-  button {
-    margin-top: 2px;
-  }
-
-  .column-1-span-1 {
-    @include flex(flex-start, column);
-  }
-
-  .empty {
-    color: $romanSilver;
-    opacity: 0.5;
-    font-style: oblique;
-  }
-
-}
-
-.Overview__input--description {
-  height: 100px;
-  resize: none;
-
-  &:focus {
-    border: 2px solid #26a69a;
-    box-shadow: 0 1px 0 0 #26a69a;
-    outline: none;
-  }
-}
-
-.Overview__description-edit-button,
-.Overview__description-edit-button:hover,
-.Overview__description-edit-button:focus {
-  height: 22px;
-  width: 22px;
-  border: 0px;
-  background: url('~Images/icons/edit.svg') no-repeat center center;
-  background-size: 22px;
-}
-
-.Overview__description-cancel-button,
-.Overview__description-cancel-button:hover,
-.Overview__description-cancel-button:focus {
-  padding: 0;
-}
-
 .Overview__header {
   font-weight: light;
 }
@@ -163,6 +99,7 @@
 
 
 .Overview__readme--editing {
+  text-align: left;
   padding: 10px;
   color: $romanSilver;
   z-index: index($elements, card);
@@ -203,6 +140,7 @@
   background: white;
   min-height: 200px;
   overflow: hidden;
+  text-align: left;
   h1 {
     padding: 10px 0;
     font-size: 2em;

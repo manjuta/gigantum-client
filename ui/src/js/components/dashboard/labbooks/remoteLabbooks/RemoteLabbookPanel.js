@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
+import Moment from 'moment';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
@@ -145,7 +146,7 @@ export default class RemoteLabbookPanel extends Component {
                    labbookName,
                    localStorage.getItem('username'),
                    false,
-                   (error) => {
+                   (response, error) => {
                      if (error) {
                        console.error(error);
                        setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
@@ -196,20 +197,29 @@ export default class RemoteLabbookPanel extends Component {
           this.props.existsLocally ?
             <button
               className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
+              data-tooltip="Project exists locally"
               disabled
-            />
+            >
+              Imported
+            </button>
           :
             <button
               disabled={this.state.isImporting}
               className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
               onClick={() => this.importLabbook(edge.node.owner, edge.node.name)}
-            />
+            >
+              Import
+            </button>
         }
          <button
            className={deleteCSS}
-           disabled={this.state.isImporting}
+           data-tooltip={localStorage.getItem('username') !== edge.node.owner ? 'Can only delete remote projects created by you' : ''}
+           disabled={this.state.isImporting || localStorage.getItem('username') !== edge.node.owner}
            onClick={() => this._handleDelete(edge)}
-         />
+         >
+          Delete
+        </button>
+
        </div>
 
        <div className={descriptionCss}>
@@ -229,7 +239,9 @@ export default class RemoteLabbookPanel extends Component {
 
          </div>
 
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Created by ${edge.node.owner}`}</p>
+         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
+         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
+         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Modified ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
 
          <p
            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"

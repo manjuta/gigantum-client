@@ -55,7 +55,7 @@ def _create_temp_work_dir(lfs_enabled: bool = True):
 
     config = Configuration()
     # Make sure the "test" environment components are always used
-    config.config["environment"]["repo_url"] = ["https://github.com/gig-dev/components2.git"]
+    config.config["environment"]["repo_url"] = ["https://github.com/gigantum/base-images-testing.git"]
     config.config["flask"]["DEBUG"] = False
     # Set the working dir to the new temp dir
     config.config["git"]["working_directory"] = temp_dir
@@ -280,7 +280,7 @@ def build_image_for_jupyterlab():
             # Create Component Manager
             cm = ComponentManager(lb)
             # Add a component
-            cm.add_component("base", ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+            cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
             cm.add_packages("pip3", [{"manager": "pip3", "package": "requests", "version": "2.18.4"}])
 
             ib = ImageBuilder(lb)

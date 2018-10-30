@@ -224,6 +224,12 @@
   text-align: center;
 }
 
+.BranchMenu__btn{
+  &:focus {
+    color: $romanSilver;
+  }
+}
+
 
 .BranchMenu__btn{
   &--flat{
@@ -273,7 +279,7 @@
    }
 
    &--remote,
-    --sync {
+   &--sync {
      width: 90%;
      border-radius: 40px;
    }

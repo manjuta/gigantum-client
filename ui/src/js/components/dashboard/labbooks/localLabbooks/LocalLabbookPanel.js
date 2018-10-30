@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
+import Moment from 'moment';
 // muations
 import StartContainerMutation from 'Mutations/StartContainerMutation';
 import StopContainerMutation from 'Mutations/StopContainerMutation';
@@ -212,7 +213,8 @@ export default class LocalLabbookPanel extends Component {
 
           </div>
 
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{`Created by ${edge.node.owner}`}</p>
+          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{edge.node.owner}</p>
+          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
 
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"

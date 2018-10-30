@@ -666,11 +666,11 @@ class Activity extends Component {
       }
         <ToolTip section="activityCluster" />
         <div className={clusterCSS} ref={`cluster--${obj.flatindex}`} onClick={() => this._deleteCluster(clusterRef, i)}>
-          <div className="ActivityCard__cluster--layer1">
+          <div className="ActivityCard__cluster--layer1 box-shadow">
             {clusterElements.length} Minor Activities
           </div>
-          <div className="ActivityCard__cluster--layer2" />
-          <div className="ActivityCard__cluster--layer3" />
+          <div className="ActivityCard__cluster--layer2 box-shadow" />
+          <div className="ActivityCard__cluster--layer3 box-shadow" />
         </div>
       </div>
     );
@@ -699,17 +699,21 @@ class Activity extends Component {
           } : evt => this._toggleSubmenu(evt)}
           />
           <div className="Activity__user-note-menu">
-            <div className="Activity__add-note">
+            <div
+              className="Activity__add-note"
+              onClick={() => this._toggleActivity()}
+            >
               <button
                 className={this.state.modalVisible ? 'Activity__hide-note-button' : 'Activity__add-note-button'}
-                onClick={() => this._toggleActivity()}
               />
               <h5>Add Note</h5>
             </div>
-            <div className="Activity__add-branch">
+            <div
+              className="Activity__add-branch"
+              onClick={() => this._createBranch()}
+            >
               <button
                 className="Activity__add-branch-button"
-                onClick={() => this._createBranch()}
               />
               <h5>Add Branch</h5>
             </div>

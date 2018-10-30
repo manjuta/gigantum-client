@@ -20,7 +20,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_base_image_by_node 1'] = {
             'dockerImageServer': 'hub.docker.com',
             'dockerImageTag': '826b6f24-2018-02-09',
             'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-            'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnF1aWNrc3RhcnQtanVweXRlcmxhYiYx',
+            'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnF1aWNrc3RhcnQtanVweXRlcmxhYiYx',
             'languages': [
                 'python3'
             ],
@@ -59,7 +59,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images 1'] = 
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '1effaaea-2018-05-23',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
                         'installedPackages': [
                             'apt|vim|2:7.4.1689-3ubuntu1.2',
                             'pip3|numpy|1.14.0',
@@ -101,7 +101,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images 1'] = 
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '1.28.0',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWJ1c3lib3gmMA==',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWJ1c3lib3gmMA==',
                         'installedPackages': [
                         ],
                         'languages': [
@@ -133,7 +133,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images 1'] = 
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMSYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMSYw',
                         'installedPackages': [
                             'apt|supervisor|latest',
                             'apt|curl|latest',
@@ -184,7 +184,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images 1'] = 
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMiYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMiYw',
                         'installedPackages': [
                             'apt|supervisor|latest',
                             'apt|python3-dev|latest',
@@ -230,7 +230,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images 1'] = 
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMyYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMyYw',
                         'installedPackages': [
                             'apt|supervisor|latest',
                             'apt|python3-dev|latest',
@@ -283,7 +283,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images_pagina
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '1effaaea-2018-05-23',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
                         'languages': [
                             'python3'
                         ],
@@ -329,7 +329,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images_pagina
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMSYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMSYw',
                         'languages': [
                             'python3'
                         ],
@@ -363,7 +363,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images_pagina
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMiYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMiYw',
                         'languages': [
                             'python3'
                         ],
@@ -409,7 +409,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images_pagina
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMSYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMSYw',
                         'languages': [
                             'python3'
                         ],
@@ -455,7 +455,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images_pagina
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '9718fedc-2018-01-16',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnV0LWp1cHl0ZXJsYWItMyYw',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnV0LWp1cHl0ZXJsYWItMyYw',
                         'languages': [
                             'python3'
                         ],
@@ -502,7 +502,7 @@ snapshots['TestEnvironmentBaseImageQueries.test_get_available_base_images_pagina
                         'dockerImageServer': 'hub.docker.com',
                         'dockerImageTag': '1effaaea-2018-05-23',
                         'icon': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-                        'id': 'QmFzZUNvbXBvbmVudDpnaWctZGV2X2NvbXBvbmVudHMyJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
+                        'id': 'QmFzZUNvbXBvbmVudDpnaWdhbnR1bV9iYXNlLWltYWdlcy10ZXN0aW5nJnF1aWNrc3RhcnQtanVweXRlcmxhYiYy',
                         'languages': [
                             'python3'
                         ],

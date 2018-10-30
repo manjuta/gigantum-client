@@ -27,6 +27,29 @@
   background: url('./../images/icons/down-arrow-white.svg') no-repeat center right;
   background-size: 16px;
   cursor: pointer;
+  max-width: 105px;
+  overflow: hidden;
+  border-right: solid 5px rgba(0, 0, 0, 0);
+  text-overflow: ellipsis;
+  margin-left: 5px;
+
+  &--long:hover:after{
+    content: attr(data-tooltip);
+    position: absolute;
+    min-width: 100px;
+    font-weight: 100;
+    line-height: 1.3em;
+    font-size: 16px;
+    margin: 0;
+    background: $azure;
+    color: $white;
+    padding: 5px;
+    border-radius: 5px;
+    left: 30px;
+    top: 50px;
+    z-index: 1;
+    font-size: .7em;
+  }
 
 }
 

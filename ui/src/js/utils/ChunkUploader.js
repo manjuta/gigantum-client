@@ -31,6 +31,7 @@ export const humanFileSize = (bytes) => {
 
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
+  console.log(file, chunk, accessToken, getChunkCallback);
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
     if (result && (error === undefined)) {
       getChunkCallback(file, result);
@@ -47,10 +48,8 @@ const updateTotalStatus = (file, labbookName, owner, transactionId) => {
   setUploadMessageUpdate(`Uploaded ${fileCount} of ${totalFiles} files`, fileCount, progressBarPercentage);
 
   if (fileCount === totalFiles) {
-    setTimeout(() => {
-      setFinishedUploading();
-      setUploadMessageRemove(`Uploaded ${fileCount} of ${totalFiles} files`, null, progressBarPercentage);
-    }, 2000);
+    setFinishedUploading();
+    setUploadMessageUpdate(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
 
     CompleteBatchUploadTransactionMutation(
       'connectionKey',
@@ -60,7 +59,7 @@ const updateTotalStatus = (file, labbookName, owner, transactionId) => {
       false,
       transactionId,
       (response, error) => {
-
+        setUploadMessageRemove(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
       },
     );
   }
@@ -78,9 +77,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
 
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
     setFinishedUploading();
-    setTimeout(() => {
-      setUploadMessageRemove(`Uploaded ${fileSizeKb} of ${fileSizeKb} files`, null, (100 * 100));
-    }, 2000);
+    setUploadMessageUpdate('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
 
     CompleteBatchUploadTransactionMutation(
       'connectionKey',
@@ -90,7 +87,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
       false,
       transactionId,
       (response, error) => {
-
+        setUploadMessageRemove('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
       },
     );
   }

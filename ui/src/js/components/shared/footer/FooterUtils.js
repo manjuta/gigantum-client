@@ -4,6 +4,8 @@ import store from 'JS/redux/store';
 import AnsiUp from 'ansi_up';
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/reducers/footer';
 import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
+// mutations
+import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 
 const ansi_up = new AnsiUp();
 
@@ -71,17 +73,25 @@ const FooterUtils = {
             }
 
             if (response.data.jobStatus.status === 'started') {
-              setMultiInfoMessage(response.data.jobStatus.id, message, false, false, [{ message: html }]);
+              if (html.length) {
+                setMultiInfoMessage(response.data.jobStatus.id, message, false, false, [{ message: html }]);
+              }
               refetch();
             } else if (response.data.jobStatus.status === 'finished') {
               setMultiInfoMessage(response.data.jobStatus.id, message, true, null, [{ message: html }]);
-
               if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
-
-                // const userArray = JSON.parse(response.data.jobStatus.jobMetadata).labbook.split('|')
-
-                // TODO update labbook edge/node here
-
+                const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).labbook.split('|');
+                const owner = metaDataArr[1];
+                const labbookName = metaDataArr[2];
+                FetchLabbookEdgeMutation(
+                  owner,
+                  labbookName,
+                  (error) => {
+                    if (error) {
+                      console.error(error);
+                    }
+                  },
+                );
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;

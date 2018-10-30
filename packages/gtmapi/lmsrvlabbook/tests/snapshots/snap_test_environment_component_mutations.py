@@ -21,7 +21,7 @@ RUN pip3 install Pillow==4.2.1
                     'id': 'Q3VzdG9tQ29tcG9uZW50OmdpZy1kZXZfY29tcG9uZW50czImcGlsbG93JjA=',
                     'license': 'PIL Software License',
                     'name': 'Pillow',
-                    'repository': 'gig-dev_components2',
+                    'repository': 'gigantum_base-images-testing',
                     'requiredPackageManagers': [
                         'apt',
                         'pip'
@@ -51,7 +51,7 @@ snapshots['TestAddComponentMutations.test_remove_custom_dep 1'] = {
                     'componentId': 'pillow',
                     'description': 'Pillow v4.2.1 for Ubuntu and Python3',
                     'name': 'Pillow',
-                    'repository': 'gig-dev_components2',
+                    'repository': 'gigantum_base-images-testing',
                     'revision': 0
                 }
             }

@@ -31,6 +31,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.auth import User
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.gitlib.gitlab import check_and_add_user
+from gtmcore.workflows import ZipExporter
 
 
 logger = LMLogger.get_logger()
@@ -106,31 +107,25 @@ class IdentityManager(metaclass=abc.ABCMeta):
 
                 # Import demo labbook
                 logger.info(f"Importing Demo LabBook for first-time user: {username}")
+                demo_lb = ZipExporter.import_zip(archive_path=os.path.join('/opt', demo_labbook_name),
+                                                 username=username, owner=username)
 
-                assumed_lb_name = demo_labbook_name.replace('.lbk', '')
-                jobs.import_labboook_from_zip(archive_path=os.path.join('/opt', demo_labbook_name),
-                                              username=username,
-                                              owner=username,
-                                              base_filename=assumed_lb_name,
-                                              remove_source=False)
-
-                inferred_lb_directory = os.path.join(working_directory, username, username, 'labbooks',
-                                                     assumed_lb_name)
                 build_img_kwargs = {
-                    'path': inferred_lb_directory,
+                    'path': demo_lb.root_dir,
                     'username': username,
                     'nocache': True
                 }
                 build_img_metadata = {
                     'method': 'build_image',
                     # TODO - we need labbook key but labbook is not available...
-                    'labbook': f"{username}|{username}|{assumed_lb_name}"
+                    'labbook': f"{username}|{username}|{demo_lb.name}"
                 }
                 dispatcher = Dispatcher()
-                build_image_job_key = dispatcher.dispatch_task(jobs.build_labbook_image, kwargs=build_img_kwargs,
+                build_image_job_key = dispatcher.dispatch_task(jobs.build_labbook_image,
+                                                               kwargs=build_img_kwargs,
                                                                metadata=build_img_metadata)
                 logger.info(f"Adding job {build_image_job_key} to build "
-                            f"Docker image for labbook `{inferred_lb_directory}`")
+                            f"Docker image for labbook `{demo_lb.name}`")
 
                 # Add user to backend if needed
                 default_remote = self.config.config['git']['default_remote']

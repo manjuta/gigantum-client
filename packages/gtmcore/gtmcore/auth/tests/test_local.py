@@ -34,16 +34,26 @@ from gtmcore.auth import User
 
 def mock_import(archive_path: str, username: str, owner: str,
                 config_file: Optional[str] = None, base_filename: Optional[str] = None,
-                remove_source: bool = True) -> str:
+                remove_source: bool = True):
     if not username:
         username = "johndoe"
     if not base_filename:
-        base_filename = "awful-intersection-demo"
+        base_filename = "awful-intersections-demo"
 
-    lb_dir = os.path.join('/mnt', 'gigantum', username, username, "labbooks", base_filename)
-    os.makedirs(lb_dir)
+    lb_dir = os.path.join('/mnt', 'gigantum', username, owner, "labbooks", base_filename)
+    os.makedirs(lb_dir, exist_ok=True)
+    assert os.path.exists(lb_dir)
 
-    return lb_dir
+    class FakeLB:
+        @property
+        def root_dir(self):
+            return lb_dir
+
+        @property
+        def name(self):
+            return base_filename
+
+    return FakeLB()
 
 
 def clean_local_cache(mgr):
@@ -306,7 +316,7 @@ class TestIdentityLocal(object):
         assert os.path.exists(os.path.join('/mnt', 'gigantum', "johndoe", "johndoe", "labbooks",
                                            "awful-intersections-demo")) is False
 
-    @mock.patch('gtmcore.dispatcher.jobs.import_labboook_from_zip', side_effect=mock_import)
+    @mock.patch('gtmcore.workflows.ZipExporter.import_zip', side_effect=mock_import)
     @responses.activate
     def test_check_first_login_no_user_locally_in_repo(self, mock_import, mock_config_file_with_auth_first_login,
                                                        cleanup_auto_import):
@@ -325,9 +335,9 @@ class TestIdentityLocal(object):
         # Should import labbook - note we aren't mocking all the way to the workers
         time.sleep(5)
         assert os.path.exists(os.path.join('/mnt', 'gigantum', "johndoe", "johndoe", "labbooks",
-                                           "awful-intersections-demo")) is True
+                                           "awful-intersections-demo"))
 
-    @mock.patch('gtmcore.dispatcher.jobs.import_labboook_from_zip', side_effect=mock_import)
+    @mock.patch('gtmcore.workflows.ZipExporter.import_zip', side_effect=mock_import)
     @responses.activate
     def test_check_first_login_no_user_locally_no_repo(self, mock_import, mock_config_file_with_auth_first_login,
                                                        cleanup_auto_import):

@@ -59,7 +59,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 1'] = {
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -71,7 +71,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 1'] = {
                         }
                     },
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -97,7 +97,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 2'] = {
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -108,7 +108,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 2'] = {
                         }
                     },
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -118,6 +118,20 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 2'] = {
                             'owner': 'tester'
                         }
                     }
+                ],
+                'pageInfo': {
+                    'hasNextPage': True
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 3'] = {
+    'data': {
+        'labbookList': {
+            'remoteLabbooks': {
+                'edges': [
                 ],
                 'pageInfo': {
                     'hasNextPage': False
@@ -133,7 +147,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 1'] = 
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -145,7 +159,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 1'] = 
                         }
                     },
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -171,7 +185,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 2'] = 
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -182,7 +196,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 2'] = 
                         }
                     },
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -194,7 +208,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 2'] = 
                     }
                 ],
                 'pageInfo': {
-                    'hasNextPage': False
+                    'hasNextPage': True
                 }
             }
         }
@@ -207,7 +221,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 1'] = {
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -219,7 +233,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 1'] = {
                         }
                     },
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -245,7 +259,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 2'] = {
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -256,7 +270,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 2'] = {
                         }
                     },
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -268,7 +282,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 2'] = {
                     }
                 ],
                 'pageInfo': {
-                    'hasNextPage': False
+                    'hasNextPage': True
                 }
             }
         }
@@ -281,7 +295,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 1'] = {
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MA==',
+                        'cursor': 'MQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
@@ -307,7 +321,7 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 2'] = {
             'remoteLabbooks': {
                 'edges': [
                     {
-                        'cursor': 'MQ==',
+                        'cursor': 'Mg==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
@@ -317,6 +331,20 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 2'] = {
                             'owner': 'tester'
                         }
                     }
+                ],
+                'pageInfo': {
+                    'hasNextPage': True
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 3'] = {
+    'data': {
+        'labbookList': {
+            'remoteLabbooks': {
+                'edges': [
                 ],
                 'pageInfo': {
                     'hasNextPage': False

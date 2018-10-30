@@ -38,10 +38,6 @@ class Overview extends Component {
       readmeExpanded: false,
       overflowExists: false,
       simpleExists: false,
-      editingDescription: false,
-      descriptionText: this.props.description.replace(/\n/g, ' '),
-      lastSavedDescription: this.props.description.replace(/\n/g, ' '),
-      savingDescription: false,
       editorFullscreen: false,
     };
     this._editReadme = this._editReadme.bind(this);
@@ -143,36 +139,6 @@ class Overview extends Component {
     this.setState({ editingReadme: true });
   }
 
-  _saveDescription() {
-    const { owner, labbookName } = store.getState().routes;
-    this.setState({ savingDescription: true });
-    SetLabbookDescriptionMutation(
-      owner,
-      labbookName,
-      this.state.descriptionText.replace(/\n/g, ' '),
-      (res, error) => {
-        if (error) {
-          console.log(error);
-          setErrorMessage('Description was not set: ', error);
-        } else {
-          this.setState({ editingDescription: false, lastSavedDescription: this.state.descriptionText.replace(/\n/g, ' '), savingDescription: false });
-        }
-      },
-    );
-  }
-  _editingDescription() {
-    this.setState({ editingDescription: true });
-  }
-
-  /**
-    *  @param {Object} nextprops
-    *  fires when component recieves props
-    *  changes the description text, particularly used when switching branches
-  */
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ descriptionText: nextProps.description.replace(/\n/g, ' '), lastSavedDescription: nextProps.description.replace(/\n/g, ' ') });
-  }
-
   render() {
     const overviewCSS = classNames({
         Overview: true,
@@ -194,13 +160,8 @@ class Overview extends Component {
         hidden: this.state.editingReadme,
       }),
 
-      descriptionCSS = classNames({
-        'column-1-span-10': true,
-        empty: !this.state.descriptionText,
-      }),
-
       overviewReadmeButtonCSS = classNames({
-        'Overview__readme-edit-button': (this.state.editingReadme || !this.props.readme),
+        'Overview__readme-edit-button': true,
         hidden: this.state.editingReadme || !this.props.readme,
       });
 
@@ -212,66 +173,12 @@ class Overview extends Component {
 
         <div className={overviewCSS}>
 
-          <ToolTip section="descriptionOverview" />
+          <div>
 
-          <div className="Overview__description grid column-1-span-12">
-
-            {
-              this.state.editingDescription ?
-
-                <Fragment>
-
-                  <textarea
-                    maxLength="260"
-                    className="Overview__input--description column-1-span-10"
-                    type="text"
-                    onChange={(evt) => { this.setState({ descriptionText: evt.target.value.replace(/\n/g, ' ') }); }}
-                    placeholder="Short description of Project"
-                    defaultValue={this.state.descriptionText ? this.state.descriptionText : ''}
-                  />
-
-                  <div className="column-1-span-1">
-
-                    <button
-                      disabled={this.state.savingDescription}
-                      onClick={() => this._saveDescription()}
-                      className="Overview__description-save-button"
-                    >
-                    Save
-                    </button>
-
-                    <button
-                      onClick={() => this.setState({ editingDescription: false, descriptionText: this.state.lastSavedDescription })}
-                      className="Overview__description-cancel-button button--flat"
-                    >
-                    Cancel
-                    </button>
-
-                  </div>
-
-                </Fragment>
-
-              :
-
-                <Fragment>
-
-                  <ReactMarkdown
-                    className={descriptionCSS}
-                    source={this.state.descriptionText ? this.state.descriptionText : 'No description provided.'}
-                  />
-
-                  <div className="column-1-span-1">
-
-                    <button
-                      onClick={() => this.setState({ editingDescription: true })}
-                      className="Overview__description-edit-button"
-                    />
-
-                  </div>
-
-                </Fragment>
-
-            }
+            <RecentActivity
+              recentActivity={this.props.labbook.overview.recentActivity}
+              scrollToTop={this.props.scrollToTop}
+            />
 
           </div>
 
@@ -287,9 +194,9 @@ class Overview extends Component {
 
             </h5>
 
-          </div>
+            </div>
 
-          {
+            {
             this.state.editingReadme &&
 
             <div className={overviewReadmeEditingCSS}>
@@ -300,7 +207,7 @@ class Overview extends Component {
                 id="markDown"
               />
 
-              <div className="Overview__readme--editing-buttons Card Card--auto Card--no-hover">
+              <div className="Overview__readme--editing-buttons">
 
                 <button
                   className="Overview__readme-save"
@@ -330,8 +237,8 @@ class Overview extends Component {
                 </button>
               </div>
             </div>
-          }
-          {
+            }
+            {
             this.props.readme ?
               <div
                 className={overviewReadmeCSS}
@@ -382,13 +289,7 @@ class Overview extends Component {
                   subText="Click here to create one"
                   callback={this._editReadme}
                 />
-          }
-
-          <div>
-
-            <RecentActivity recentActivity={this.props.labbook.overview.recentActivity} scrollToTop={this.props.scrollToTop} />
-
-          </div>
+            }
 
           <div className="Overview__container">
 

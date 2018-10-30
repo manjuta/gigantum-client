@@ -353,6 +353,8 @@ class CondaPackageManagerBase(PackageManager):
     def generate_docker_install_snippet(self, packages: List[Dict[str, str]], single_line: bool = False) -> List[str]:
         """Method to generate a docker snippet to install 1 or more packages
 
+        Note: Because conda be so slow to solve environments with conda-forge included, always single line it.
+
         Args:
             packages(list(dict)): A list of package names and versions to install
             single_line(bool): If true, collapse
@@ -363,10 +365,9 @@ class CondaPackageManagerBase(PackageManager):
         package_strings = [f"{x['name']}={x['version']}" for x in packages]
 
         if single_line:
-            return [f"RUN conda install {' '.join(package_strings)}"]
+            return [f"RUN conda install -yq {' '.join(package_strings)}"]
         else:
-            docker_strings = [f"RUN conda install {x}" for x in package_strings]
-            return docker_strings
+            return [f"RUN conda install -yq {' '.join(package_strings)}"]
 
 
 class Conda3PackageManager(CondaPackageManagerBase):

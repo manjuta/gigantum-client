@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // store
@@ -13,9 +13,10 @@ class Helper extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
-
-    this.state.helperMenuOpen = false;
+    this.state = {
+      helperMenuOpen: false,
+      showPopup: false,
+    };
 
     this._toggleIsVisible = this._toggleIsVisible.bind(this);
     this._resize = this._resize.bind(this);
@@ -27,6 +28,15 @@ class Helper extends Component {
   */
   componentDidMount() {
     window.addEventListener('resize', this._resize);
+    this.props.auth.isAuthenticated().then((response) => {
+      const guideShown = localStorage.getItem('guideShown');
+      if (!guideShown && response) {
+        this.setState({ showPopup: true });
+        localStorage.setItem('guideShown', true);
+        this._toggleIsVisible();
+        this._toggleMenuView();
+      }
+    });
   }
 
   /**
@@ -71,6 +81,26 @@ class Helper extends Component {
 
     return (
       <div className="Helper">
+      {
+        this.state.showPopup &&
+        <Fragment>
+          <div className="Helper__prompt">
+            <div>
+              <p>Use the guide to view tips on how to use Gigantum. The guide can be toggled in the Help menu below.</p>
+            </div>
+
+            <div>
+              <button
+                className="button--green"
+                onClick={() => this.setState({ showPopup: false })}>
+                Got it!
+              </button>
+            </div>
+          </div>
+          <div className="Helper__prompt-pointer"/>
+        </Fragment>
+      }
+
         <div
           className={helperButtonCSS}
           onClick={() => this._toggleMenuView()}
@@ -110,6 +140,7 @@ class Helper extends Component {
             <label className="Helper-guide-switch">
               <input
                 type="checkbox"
+                defaultChecked={!localStorage.getItem('guideShown')}
                 onClick={() => this._toggleIsVisible()}
               />
               <span className="Helper-guide-slider" />

@@ -73,7 +73,6 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'
     : window.location.host;
-
   const apiURL = `${window.location.protocol}//${apiHost}${process.env.GIGANTUM_API}`;
 
   return fetch(apiURL, {

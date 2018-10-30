@@ -19,8 +19,11 @@
 # SOFTWARE.
 
 import pytest
+import os
 import tempfile
 from unittest.mock import PropertyMock, patch
+
+import yaml
 
 from gtmcore.configuration import (Configuration, _get_docker_server_api_version, get_docker_client)
 from gtmcore.fixtures import mock_config_file, mock_config_file_team
@@ -137,3 +140,23 @@ class TestConfiguration(object):
         """Test no exceptions when getting docker client both for max-compatible versions and default versions. """
         docker_client = get_docker_client(check_server_version=True)
         docker_client_2 = get_docker_client(check_server_version=False)
+
+    def test_load_user_config(self, mock_config_file):
+        """ Test loading configuration override items from a user's custom config """
+        with tempfile.TemporaryDirectory() as tempdir:
+            override_config_path = os.path.join(tempdir, 'user-config.yaml')
+            with open(override_config_path, 'w') as yf:
+                override_dict = {'container': {'memory': 99}}
+                yf.write(yaml.dump(override_dict, default_flow_style=False))
+
+            with patch('gtmcore.configuration.Configuration.USER_LOCATION', new_callable=PropertyMock,
+                       return_value=yf.name):
+                conf = Configuration()
+                assert conf.USER_LOCATION == yf.name
+                assert conf.user_config['container']['memory'] == 99
+                assert conf.config['container']['memory'] == 99
+
+                # If we give an explicit config file, then we IGNORE any user overrides
+                conf2 = Configuration(mock_config_file[0])
+                assert conf2.config['container']['memory'] is None
+                assert len(conf2.user_config.keys()) == 0

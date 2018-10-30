@@ -22,6 +22,7 @@
   &--selected {
     background-color: $white;
     color: $romanSilver;
+    border-bottom: 1px solid $white;
   }
 }
 
@@ -95,8 +96,8 @@
   }
 
   &--absolute.ButtonLoader--loading,
-   --absolute.ButtonLoader--finished,
-   --absolute.ButtonLoader--error {
+  &--absolute.ButtonLoader--finished,
+  &--absolute.ButtonLoader--error {
     margin: 0 0 0 -13px;
     bottom: -13px;
   }
@@ -112,7 +113,7 @@
   }
 
   &--remove--adder,
-  --remove-adder:focus {
+  &--remove-adder:focus {
     background: $azure url('~Images/icons/close-white.svg') no-repeat 50% 50%;
     background-size: 14px;
   }
@@ -150,9 +151,9 @@
   }
 
   &--remove--selected,
-   --remove--selected:hover,
-   --remove--selected:focus {
-    background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50%;
+  &--remove--selected:hover,
+  &--remove--selected:focus {
+    background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
     background-size: 44px !important;
     border: none;
   }
@@ -192,7 +193,7 @@
   }
 
   &--margin{
-    margin: 0 0 0 10px;
+    margin: 20px 10px 0 10px;
     line-height: 18px;
   }
 }
@@ -215,12 +216,12 @@
 .PackageDependencies__input {
   &[type="text"] {
     flex: 2;
-    margin: 0 20px 0 0;
+    margin: 0 20px 0 0 !important;
   }
 
   &--version[type="text"] {
     flex: 1 1;
-    margin: 0 20px 0 0;
+    margin: 0 20px 0 0 !important;
   }
 }
 
@@ -320,11 +321,13 @@
   border-radius: 0 10px 10px 0;
   background-size: 14px;
   font-size: 14px;
+  word-break: normal;
 }
 
 .PackageDependencies__remove-button--half:hover{
   background: $turquise url('~Images/icons/trash-white.svg') no-repeat 2px center;
   background-size: 14px;
+  word-break: normal;
 }
 
 .PackageDependencies__update-button,
@@ -334,11 +337,13 @@
   border-radius: 10px 0 0 10px;
   background-size: 18px;
   font-size: 14px;
+  word-break: normal;
 }
 
 .PackageDependencies__update-button:hover{
   background: $turquise url('~Images/icons/update-version.svg') no-repeat 2px 50% ;
   background-size: 18px;
+  word-break: normal;
 }
 
 .PackageDependencies__table thead,

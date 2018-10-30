@@ -7,7 +7,7 @@
 
   cursor: auto;
 
-  color: $lightBlue;
+  color: $tintBlue;
 
   @include flex(center, column);
 
@@ -22,9 +22,15 @@
 
   align-items: center;
 
-  color: $lightBlue;
+  color: $tintBlue;
 
   @include flex(center, row);
+}
+
+.Import_paragraph {
+  color: $grey;
+  font-size: 16px;
+  line-height: 2;
 }
 
 .Import__labbook-icon {
@@ -35,9 +41,7 @@
   -webkit-transition: all .25s;
   -o-transition: .25s all;
   transition: all .25s;
-
-  opacity: .4;
-  background: url('~Images/icons/labbooks-blue.svg') no-repeat 50%;
+  background: url('~Images/icons/labbooks-dark-blue.svg') no-repeat 50%;
   background-size: 50px;
 }
 
@@ -134,8 +138,8 @@ input.Import__input--paste{
 
     cursor: pointer;
 
-    color: $lightBlue;
-    border: 3px solid $lightBlue;
+    color: $tintBlue;
+    border: 3px solid $tintBlue;
     background: $white;
 
     font-size: 22px;
@@ -152,7 +156,7 @@ input.Import__input--paste{
 
   &--import:hover {
     color: $white;
-    background: $lightBlue;
+    background: $tintBlue;
   }
 }
 
@@ -227,11 +231,11 @@ input.Import__input--paste{
   font-weight: 400;
 
   &--margin{
-    margin: 10px 30px;
+    margin: 10px 30px 0 30px;
   }
 }
 
-.Import__paragraph{
+.Import_paragraph{
   color: $grey;
 
   font-size: 16px;
@@ -243,8 +247,6 @@ input.Import__input--paste{
 
   cursor: pointer;
   text-decoration: underline;
-
-  color: $lightBlue;
 
   font-size: 16px;
 }

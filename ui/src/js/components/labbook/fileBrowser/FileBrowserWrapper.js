@@ -13,7 +13,7 @@ import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/CompleteBatchUploadTransactionMutation';
 // helpers
-import FolderUpload from './folderUpload';
+import FolderUpload from './FolderUpload';
 // Config
 import config from 'JS/config';
 

@@ -27,41 +27,50 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
     Returns:
         Path to jupyter (e.g., "/lab?token=xyz")
     """
-
     lb_key = tag or infer_docker_image_name(labbook_name=labbook.name,
                                             owner=labbook.owner['username'],
                                             username=username)
     docker_client = get_docker_client()
     lb_container = docker_client.containers.get(lb_key)
     if lb_container.status != 'running':
-        raise LabbookException(f"{str(labbook)} container is not running")
+        raise LabbookException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
 
     search_sh = f'sh -c "ps aux | grep \'jupyter lab\' | grep -v \' grep \'"'
     ec, jupyter_tokens = lb_container.exec_run(search_sh)
     jupyter_ps = [l for l in jupyter_tokens.decode().split('\n') if l]
 
+    # Get IP of container on Docker Bridge Network
+    lb_ip_addr = get_container_ip(lb_key)
+
     if len(jupyter_ps) == 1:
+        logger.info(f'Found existing Jupyter instance for {str(labbook)}.')
+
         # Get token from PS in container
         t = re.search("token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
         if not t:
             raise LabbookException('Cannot detect Jupyter Lab token')
         token = t.groups()[0]
-        return f'{proxy_prefix or ""}/lab?token={token}'
+        suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
+
+        if check_reachable:
+            check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
+
+        return suffix
     elif len(jupyter_ps) == 0:
         token = str(uuid.uuid4()).replace('-', '')
         if proxy_prefix and proxy_prefix[0] != '/':
             proxy_prefix = f'/{proxy_prefix}'
         _start_jupyter_process(labbook, lb_container, username, lb_key, token,
                                proxy_prefix)
-        suffix = f'{proxy_prefix or ""}/lab?token={token}'
+        suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
         if check_reachable:
-            _check_jupyter_reachable(lb_key, suffix)
+            check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
         return suffix
     else:
         # If "ps aux" for jupyterlab returns multiple hits - this should never happen.
         for n, l in enumerate(jupyter_ps):
             logger.error(f'Multiple JupyerLab instances - ({n+1} of {len(jupyter_ps)}) - {l}')
-        raise ValueError(f'Multiple ({len(jupyter_ps)}) Jupyter Lab instances detected')
+        raise ValueError(f'Multiple Jupyter Lab instances detected in project env. You should restart the container.')
 
 
 def _shim_skip_python2_savehook(labbook: LabBook) -> bool:
@@ -108,19 +117,20 @@ def _start_jupyter_process(labbook: LabBook, lb_container,
     redis_conn.set(f"{lb_key}-jupyter-token", token)
 
 
-def _check_jupyter_reachable(lb_key: str, suffix: str):
-    for n in range(30):
-        # Get IP of container on Docker Bridge Network
-        lb_ip_addr = get_container_ip(lb_key)
-        test_url = f'http://{lb_ip_addr}:{DEFAULT_JUPYTER_PORT}{suffix}'
+def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
+    for n in range(20):
+        test_url = f'http://{ip_address}:{port}{prefix}/api'
         logger.debug(f"Attempt {n + 1}: Testing if JupyerLab is up at {test_url}...")
         try:
             r = requests.get(test_url, timeout=0.5)
             if r.status_code != 200:
                 time.sleep(0.5)
             else:
-                logger.info(f'Found JupyterLab up at {test_url} after {n/2.0} seconds')
-                break
+                if "version" in r.json():
+                    logger.info(f'Found JupyterLab up at {test_url} after {n/2.0} seconds')
+                    break
+                else:
+                    time.sleep(0.5)
         except requests.exceptions.ConnectionError:
             # Assume API isn't up at all yet, so no connection can be made
             time.sleep(0.5)

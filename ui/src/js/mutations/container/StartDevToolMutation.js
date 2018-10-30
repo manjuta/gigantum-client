@@ -27,6 +27,7 @@ export default function AddEnvironmentPackageMutation(
       labbookName,
       owner,
       devTool,
+      containerOverrideId: null,
       clientMutationId: tempID++,
     },
   };

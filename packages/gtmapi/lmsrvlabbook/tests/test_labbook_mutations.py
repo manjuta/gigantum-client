@@ -72,10 +72,10 @@ class TestLabBookServiceMutations(object):
         # Create LabBook
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
-                                 $component_id: String!, $revision: Int!) {
+                                 $base_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id, revision: $revision}) {
+                                baseId: $base_id, revision: $revision}) {
             labbook {
               id
               name
@@ -85,7 +85,7 @@ class TestLabBookServiceMutations(object):
         }
         """
         variables = {"name": "test-lab-book1", "desc": "my test description",
-                     "component_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
+                     "base_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
@@ -203,14 +203,13 @@ class TestLabBookServiceMutations(object):
         assert r['data']['deleteLabbook']['success'] is False
         assert os.path.exists(labbook_dir)
 
-
     def test_set_lb_for_untracked_ins_and_outs(self, fixture_working_dir_env_repo_scoped):
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
                                  $component_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id,
+                                baseId: $component_id,
                                 revision: $revision,
                                 isUntracked: true}) {
             labbook {
@@ -243,10 +242,10 @@ class TestLabBookServiceMutations(object):
         """Test listing labbooks"""
         query = """
         mutation myCreateLabbook($name: String!, $desc: String!, $repository: String!, 
-                                 $component_id: String!, $revision: Int!) {
+                                 $base_id: String!, $revision: Int!) {
           createLabbook(input: {name: $name, description: $desc, 
                                 repository: $repository, 
-                                componentId: $component_id, revision: $revision}) {
+                                baseId: $base_id, revision: $revision}) {
             labbook {
               id
               name
@@ -256,7 +255,7 @@ class TestLabBookServiceMutations(object):
         }
         """
         variables = {"name": "test-lab-duplicate", "desc": "my test description",
-                     "component_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
+                     "base_id": ENV_UNIT_TEST_BASE, "repository": ENV_UNIT_TEST_REPO,
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
@@ -856,7 +855,6 @@ class TestLabBookServiceMutations(object):
                                 }}
                               }}) {{
                                 importJobKey
-                                buildImageJobKey
                               }}
                             }}
                             """
@@ -864,9 +862,7 @@ class TestLabBookServiceMutations(object):
                 assert "errors" not in result
                 if chunk_index == total_chunks - 1:
                     assert type(result['data']['importLabbook']['importJobKey']) == str
-                    assert type(result['data']['importLabbook']['buildImageJobKey']) == str
                     assert "rq:job:" in result['data']['importLabbook']['importJobKey']
-                    assert "rq:job:" in result['data']['importLabbook']['buildImageJobKey']
 
                 chunk.close()
 
@@ -892,66 +888,24 @@ class TestLabBookServiceMutations(object):
         """
         snapshot.assert_match(mock_create_labbooks[2].execute(query))
 
-        # TODO - Re-enable this when rename comes back.
-        #snapshot.assert_match(client.execute(query))
-        # # Wait up to 15 seconds for the container to build successfully after renaming
-        # query = """
-        #    {
-        #      labbook(owner: "default", name: "test-new-name") {
-        #          environment {
-        #            imageStatus
-        #          }
-        #      }
-        #    }
-        #    """
-        # t_start = datetime.datetime.now()
-        # success = False
-        # while (datetime.datetime.now() - t_start).seconds < 15:
-        #     response = client.execute(query)
-        #     if response['data']['labbook']['environment']['imageStatus'] == 'EXISTS':
-        #         success = True
-        #         break
-        #
-        # # Verify everything worked
-        # assert success is True
-        # assert os.path.exists(original_dir) is False
-        # assert os.path.exists(new_dir) is True
-        #
-        # original_dir = new_dir
-        # new_dir = os.path.join(labbooks_dir, 'test-renamed-again')
-        #
-        # # rename again (this time the container will have been built)
-        # query = f"""
-        #             mutation myMutation{{
-        #               renameLabbook(input:{{owner:"default",
-        #               originalLabbookName: "test-new-name",
-        #               newLabbookName: "test-renamed-again"}}) {{
-        #                 success
-        #               }}
-        #             }}
-        #             """
-        # r = client.execute(query)
-        # assert r['data']['renameLabbook']['success'] is True
-        #
-        # # Wait up to 15 seconds for the container to build successfully after renaming
-        # query = """
-        #            {
-        #              labbook(owner: "default", name: "test-renamed-again") {
-        #                  environment {
-        #                    imageStatus
-        #                  }
-        #              }
-        #            }
-        #            """
-        # t_start = datetime.datetime.now()
-        # success = False
-        # while (datetime.datetime.now() - t_start).seconds < 15:
-        #     response = client.execute(query)
-        #     if response['data']['labbook']['environment']['imageStatus'] == 'EXISTS':
-        #         success = True
-        #         break
-        #
-        # # Verify everything worked
-        # assert success is True
-        # assert os.path.exists(original_dir) is False
-        # assert os.path.exists(new_dir) is True
+    def test_fetch_labbook_edge(self, mock_create_labbooks):
+        query = f"""
+        mutation f {{
+            fetchLabbookEdge(input:{{
+                owner: "default",
+                labbookName: "labbook1"
+            }}) {{
+                newLabbookEdge {{
+                    node {{
+                        name
+                        owner
+                    }}
+                }}
+            }}
+        }}
+        """
+        r = mock_create_labbooks[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['fetchLabbookEdge']['newLabbookEdge']['node']['owner'] == 'default'
+        assert r['data']['fetchLabbookEdge']['newLabbookEdge']['node']['name'] == 'labbook1'
+

@@ -96,7 +96,7 @@ class TestConda3PackageManager(object):
 
         # numpy is a non-installed package
         result = mrg.latest_version("numpy", lb, username)
-        assert result == '1.15.2'
+        assert result == '1.15.3'
 
     def test_latest_versions(self, build_lb_image_for_env_conda):
         """Test latest_version command"""
@@ -106,9 +106,9 @@ class TestConda3PackageManager(object):
         pkgs = ["numpy", "requests", "matplotlib"]
         result = mrg.latest_versions(pkgs, lb, username)
 
-        assert result[0] == '1.15.2'  # Numpy
+        assert result[0] == '1.15.3'  # Numpy
         assert result[1] == REQUESTS_LATEST_VERSION  # Requests
-        assert result[2] == '3.0.0'  # Matplotlib
+        assert result[2] == '3.0.1'  # Matplotlib
 
     def test_latest_versions_bad_pkg(self, build_lb_image_for_env):
         """Test latest_version command"""
@@ -157,10 +157,10 @@ class TestConda3PackageManager(object):
         packages = [{'name': 'mypackage', 'version': '3.1.4'}]
 
         result = mrg.generate_docker_install_snippet(packages)
-        assert result == ['RUN conda install mypackage=3.1.4']
+        assert result == ['RUN conda install -yq mypackage=3.1.4']
 
         result = mrg.generate_docker_install_snippet(packages, single_line=True)
-        assert result == ['RUN conda install mypackage=3.1.4']
+        assert result == ['RUN conda install -yq mypackage=3.1.4']
 
     def test_generate_docker_install_snippet_multiple(self):
         """Test generate_docker_install_snippet command
@@ -170,10 +170,10 @@ class TestConda3PackageManager(object):
                     {'name': 'yourpackage', 'version': '2017-54.0'}]
 
         result = mrg.generate_docker_install_snippet(packages)
-        assert result == ['RUN conda install mypackage=3.1.4', 'RUN conda install yourpackage=2017-54.0']
+        assert result == ['RUN conda install -yq mypackage=3.1.4 yourpackage=2017-54.0']
 
         result = mrg.generate_docker_install_snippet(packages, single_line=True)
-        assert result == ['RUN conda install mypackage=3.1.4 yourpackage=2017-54.0']
+        assert result == ['RUN conda install -yq mypackage=3.1.4 yourpackage=2017-54.0']
 
     def test_list_versions_badpackage(self, build_lb_image_for_env):
         """Test list_versions command"""
@@ -226,10 +226,11 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "plotly"
-        assert result[1].version == "3.2.1"
+        assert result[1].version == "3.3.0"
         assert result[1].error is False
 
 
+@pytest.mark.skipif(skip_clause, reason=skip_msg)
 class TestConda2PackageManager(object):
     def test_latest_versions(self, build_lb_image_for_env):
         """Test latest_version command"""
@@ -239,8 +240,8 @@ class TestConda2PackageManager(object):
         pkgs = ["numpy", "requests"]
         result = mrg.latest_versions(pkgs, lb, username)
 
-        assert result[0] == '1.15.2'  # Numpy
-        assert result[1] == '2.19.1'  # Requests
+        assert result[0] == '1.15.3'  # Numpy
+        assert result[1] == '2.20.0'  # Requests
 
     def test_is_valid_errors(self, build_lb_image_for_env):
         """Test list_versions command"""
@@ -285,5 +286,5 @@ class TestConda2PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "plotly"
-        assert result[1].version == "3.2.1"
+        assert result[1].version == "3.3.0"
         assert result[1].error is False

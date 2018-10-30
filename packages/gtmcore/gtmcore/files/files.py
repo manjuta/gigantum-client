@@ -114,13 +114,12 @@ class FileOperations(object):
             raise FileOperationsException(f'Section {section} already '
                                           f'untracked in {str(labbook)}')
 
-        with labbook.lock_labbook():
-            with open(os.path.join(labbook.root_dir, '.gitignore'), 'a') as gi_file:
-                gi_file.write('\n'.join([''] + append_lines + ['']))
+        with open(os.path.join(labbook.root_dir, '.gitignore'), 'a') as gi_file:
+            gi_file.write('\n'.join([''] + append_lines + ['']))
 
-            labbook.git.add(os.path.join(labbook.root_dir, '.gitignore'))
-            labbook.git.commit(f"Set section {section} as untracked as fix "
-                               f"for Git performance")
+        labbook.git.add(os.path.join(labbook.root_dir, '.gitignore'))
+        labbook.git.commit(f"Set section {section} as untracked as fix "
+                           f"for Git performance")
 
         return labbook
 
@@ -170,7 +169,7 @@ class FileOperations(object):
 
         fdst = shutil.move(src_file, full_dst)
         relpath = fdst.replace(os.path.join(labbook.root_dir, section), '')
-        return labbook.get_file_info(section, relpath)
+        return cls.get_file_info(labbook, section, relpath)
 
     @classmethod
     def insert_file(cls, labbook: LabBook, section: str, src_file: str,
@@ -200,32 +199,31 @@ class FileOperations(object):
                            f" be tracked by commits or activity records.")
             return finfo
 
-        with labbook.lock_labbook():
-            # If we are setting this section to be untracked
-            activity_type, activity_detail_type, section_str = \
-                labbook.get_activity_type_from_section(section)
+        # If we are setting this section to be untracked
+        activity_type, activity_detail_type, section_str = \
+            labbook.get_activity_type_from_section(section)
 
-            commit_msg = f"Added new {section_str} file {rel_path}"
-            try:
-                labbook.git.add(rel_path)
-                commit = labbook.git.commit(commit_msg)
-            except Exception as x:
-                logger.error(x)
-                os.remove(dst_path)
-                raise FileOperationsException(x)
+        commit_msg = f"Added new {section_str} file {rel_path}"
+        try:
+            labbook.git.add(rel_path)
+            commit = labbook.git.commit(commit_msg)
+        except Exception as x:
+            logger.error(x)
+            os.remove(dst_path)
+            raise FileOperationsException(x)
 
-            # Create Activity record and detail
-            _, ext = os.path.splitext(rel_path) or 'file'
-            adr = ActivityDetailRecord(activity_detail_type, show=False,
-                                       importance=0,
-                                       action=ActivityAction.CREATE)
-            adr.add_value('text/plain', commit_msg)
-            ar = ActivityRecord(activity_type, message=commit_msg, show=True,
-                                importance=255, linked_commit=commit.hexsha,
-                                tags=[ext])
-            ar.add_detail_object(adr)
-            ars = ActivityStore(labbook)
-            ars.create_activity_record(ar)
+        # Create Activity record and detail
+        _, ext = os.path.splitext(rel_path) or 'file'
+        adr = ActivityDetailRecord(activity_detail_type, show=False,
+                                   importance=0,
+                                   action=ActivityAction.CREATE)
+        adr.add_value('text/plain', commit_msg)
+        ar = ActivityRecord(activity_type, message=commit_msg, show=True,
+                            importance=255, linked_commit=commit.hexsha,
+                            tags=[ext])
+        ar.add_detail_object(adr)
+        ars = ActivityStore(labbook)
+        ars.create_activity_record(ar)
 
         return finfo
 
@@ -245,19 +243,18 @@ class FileOperations(object):
             None
         """
 
-        with labbook.lock_labbook():
-            if cancel and rollback:
-                logger.warning(f"Cancelled tx {txid}, doing git reset")
-                call_subprocess(['git', 'reset', '--hard'],
-                                cwd=labbook.root_dir)
-            else:
-                logger.info(f"Done batch upload {txid}, cancelled={cancel}")
-                if cancel:
-                    logger.warning("Sweeping aborted batch upload.")
-                m = "Cancelled upload `{txid}`. " if cancel else ''
-                labbook.sweep_uncommitted_changes(upload=True,
-                                                  extra_msg=m,
-                                                  show=True)
+        if cancel and rollback:
+            logger.warning(f"Cancelled tx {txid}, doing git reset")
+            call_subprocess(['git', 'reset', '--hard'],
+                            cwd=labbook.root_dir)
+        else:
+            logger.info(f"Done batch upload {txid}, cancelled={cancel}")
+            if cancel:
+                logger.warning("Sweeping aborted batch upload.")
+            m = "Cancelled upload `{txid}`. " if cancel else ''
+            labbook.sweep_uncommitted_changes(upload=True,
+                                              extra_msg=m,
+                                              show=True)
 
     @classmethod
     def delete_file(cls, labbook: LabBook, section: str, relative_path: str) -> bool:
@@ -278,59 +275,58 @@ class FileOperations(object):
             None
         """
         labbook.validate_section(section)
-        with labbook.lock_labbook():
-            relative_path = LabBook.make_path_relative(relative_path)
-            target_path = os.path.join(labbook.root_dir, section, relative_path)
-            if not os.path.exists(target_path):
-                raise ValueError(f"Attempted to delete non-existent path at `{target_path}`")
+        relative_path = LabBook.make_path_relative(relative_path)
+        target_path = os.path.join(labbook.root_dir, section, relative_path)
+        if not os.path.exists(target_path):
+            raise ValueError(f"Attempted to delete non-existent path at `{target_path}`")
+        else:
+            target_type = 'file' if os.path.isfile(target_path) else 'directory'
+            logger.info(f"Removing {target_type} at `{target_path}`")
+
+            if shims.in_untracked(labbook.root_dir, section=section):
+                logger.info(f"Removing untracked target {target_path}")
+                if os.path.isdir(target_path):
+                    shutil.rmtree(target_path)
+                else:
+                    os.remove(target_path)
+                return True
+
+            commit_msg = f"Removed {target_type} {relative_path}."
+            labbook.git.remove(target_path, force=True, keep_file=False)
+            assert not os.path.exists(target_path)
+            commit = labbook.git.commit(commit_msg)
+
+            if os.path.isfile(target_path):
+                _, ext = os.path.splitext(target_path)
             else:
-                target_type = 'file' if os.path.isfile(target_path) else 'directory'
-                logger.info(f"Removing {target_type} at `{target_path}`")
+                ext = 'directory'
 
-                if shims.in_untracked(labbook.root_dir, section=section):
-                    logger.info(f"Removing untracked target {target_path}")
-                    if os.path.isdir(target_path):
-                        shutil.rmtree(target_path)
-                    else:
-                        os.remove(target_path)
-                    return True
+            # Get LabBook section
+            activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
 
-                commit_msg = f"Removed {target_type} {relative_path}."
-                labbook.git.remove(target_path, force=True, keep_file=False)
-                assert not os.path.exists(target_path)
-                commit = labbook.git.commit(commit_msg)
+            # Create detail record
+            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
+                                       action=ActivityAction.DELETE)
+            adr.add_value('text/plain', commit_msg)
 
-                if os.path.isfile(target_path):
-                    _, ext = os.path.splitext(target_path)
-                else:
-                    ext = 'directory'
+            # Create activity record
+            ar = ActivityRecord(activity_type,
+                                message=commit_msg,
+                                linked_commit=commit.hexsha,
+                                show=True,
+                                importance=255,
+                                tags=[ext])
+            ar.add_detail_object(adr)
 
-                # Get LabBook section
-                activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
+            # Store
+            ars = ActivityStore(labbook)
+            ars.create_activity_record(ar)
 
-                # Create detail record
-                adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                           action=ActivityAction.DELETE)
-                adr.add_value('text/plain', commit_msg)
-
-                # Create activity record
-                ar = ActivityRecord(activity_type,
-                                    message=commit_msg,
-                                    linked_commit=commit.hexsha,
-                                    show=True,
-                                    importance=255,
-                                    tags=[ext])
-                ar.add_detail_object(adr)
-
-                # Store
-                ars = ActivityStore(labbook)
-                ars.create_activity_record(ar)
-
-                if not os.path.exists(target_path):
-                    return True
-                else:
-                    logger.error(f"{target_path} should have been deleted, but remains.")
-                    return False
+            if not os.path.exists(target_path):
+                return True
+            else:
+                logger.error(f"{target_path} should have been deleted, but remains.")
+                return False
 
     @classmethod
     def move_file(cls, labbook: LabBook, section: str, src_rel_path: str, dst_rel_path: str) -> Dict[str, Any]:
@@ -344,8 +340,9 @@ class FileOperations(object):
             src_rel_path(str): Source file or directory
             dst_rel_path(str): Target file name and/or directory
         """
-        labbook.validate_section(section)
+
         # Start with Validations
+        labbook.validate_section(section)
         if not src_rel_path:
             raise ValueError("src_rel_path cannot be None or empty")
 
@@ -353,61 +350,60 @@ class FileOperations(object):
             raise ValueError("dst_rel_path cannot be None or empty")
 
         is_untracked = shims.in_untracked(labbook.root_dir, section)
-        with labbook.lock_labbook():
-            src_rel_path = LabBook.make_path_relative(src_rel_path)
-            dst_rel_path = LabBook.make_path_relative(dst_rel_path)
+        src_rel_path = LabBook.make_path_relative(src_rel_path)
+        dst_rel_path = LabBook.make_path_relative(dst_rel_path)
 
-            src_abs_path = os.path.join(labbook.root_dir, section, src_rel_path.replace('..', ''))
-            dst_abs_path = os.path.join(labbook.root_dir, section, dst_rel_path.replace('..', ''))
+        src_abs_path = os.path.join(labbook.root_dir, section, src_rel_path.replace('..', ''))
+        dst_abs_path = os.path.join(labbook.root_dir, section, dst_rel_path.replace('..', ''))
 
-            if not os.path.exists(src_abs_path):
-                raise ValueError(f"No src file exists at `{src_abs_path}`")
+        if not os.path.exists(src_abs_path):
+            raise ValueError(f"No src file exists at `{src_abs_path}`")
 
-            try:
-                src_type = 'directory' if os.path.isdir(src_abs_path) else 'file'
-                logger.info(f"Moving {src_type} `{src_abs_path}` to `{dst_abs_path}`")
+        try:
+            src_type = 'directory' if os.path.isdir(src_abs_path) else 'file'
+            logger.info(f"Moving {src_type} `{src_abs_path}` to `{dst_abs_path}`")
 
-                if not is_untracked:
-                    labbook.git.remove(src_abs_path, keep_file=True)
+            if not is_untracked:
+                labbook.git.remove(src_abs_path, keep_file=True)
 
-                shutil.move(src_abs_path, dst_abs_path)
+            shutil.move(src_abs_path, dst_abs_path)
 
-                if not is_untracked:
-                    commit_msg = f"Moved {src_type} `{src_rel_path}` to `{dst_rel_path}`"
+            if not is_untracked:
+                commit_msg = f"Moved {src_type} `{src_rel_path}` to `{dst_rel_path}`"
 
-                    if os.path.isdir(dst_abs_path):
-                        labbook.git.add_all(dst_abs_path)
-                    else:
-                        labbook.git.add(dst_abs_path)
+                if os.path.isdir(dst_abs_path):
+                    labbook.git.add_all(dst_abs_path)
+                else:
+                    labbook.git.add(dst_abs_path)
 
-                    commit = labbook.git.commit(commit_msg)
+                commit = labbook.git.commit(commit_msg)
 
-                    # Get LabBook section
-                    activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
+                # Get LabBook section
+                activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
 
-                    # Create detail record
-                    adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                               action=ActivityAction.EDIT)
-                    adr.add_value('text/markdown', commit_msg)
+                # Create detail record
+                adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
+                                           action=ActivityAction.EDIT)
+                adr.add_value('text/markdown', commit_msg)
 
-                    # Create activity record
-                    ar = ActivityRecord(activity_type,
-                                        message=commit_msg,
-                                        linked_commit=commit.hexsha,
-                                        show=True,
-                                        importance=255,
-                                        tags=['file-move'])
-                    ar.add_detail_object(adr)
+                # Create activity record
+                ar = ActivityRecord(activity_type,
+                                    message=commit_msg,
+                                    linked_commit=commit.hexsha,
+                                    show=True,
+                                    importance=255,
+                                    tags=['file-move'])
+                ar.add_detail_object(adr)
 
-                    # Store
-                    ars = ActivityStore(labbook)
-                    ars.create_activity_record(ar)
+                # Store
+                ars = ActivityStore(labbook)
+                ars.create_activity_record(ar)
 
-                return labbook.get_file_info(section, dst_rel_path)
-            except Exception as e:
-                logger.critical("Failed moving file in labbook. Repository may be in corrupted state.")
-                logger.exception(e)
-                raise
+            return cls.get_file_info(labbook, section, dst_rel_path)
+        except Exception as e:
+            logger.critical("Failed moving file in labbook. Repository may be in corrupted state.")
+            logger.exception(e)
+            raise
 
     @classmethod
     def makedir(cls, labbook: LabBook, relative_path: str, make_parents: bool = True,
@@ -426,54 +422,85 @@ class FileOperations(object):
         if not relative_path:
             raise ValueError("relative_path argument cannot be None or empty")
 
-        with labbook.lock_labbook():
-            relative_path = LabBook.make_path_relative(relative_path)
-            new_directory_path = os.path.join(labbook.root_dir, relative_path)
-            section = relative_path.split(os.sep)[0]
-            git_untracked = shims.in_untracked(labbook.root_dir, section)
-            if os.path.exists(new_directory_path):
+        relative_path = LabBook.make_path_relative(relative_path)
+        new_directory_path = os.path.join(labbook.root_dir, relative_path)
+        section = relative_path.split(os.sep)[0]
+        git_untracked = shims.in_untracked(labbook.root_dir, section)
+        if os.path.exists(new_directory_path):
+            return
+        else:
+            logger.info(f"Making new directory in `{new_directory_path}`")
+            os.makedirs(new_directory_path, exist_ok=make_parents)
+            if git_untracked:
+                logger.warning(f'New {str(labbook)} untracked directory `{new_directory_path}`')
                 return
-            else:
-                logger.info(f"Making new directory in `{new_directory_path}`")
-                os.makedirs(new_directory_path, exist_ok=make_parents)
-                if git_untracked:
-                    logger.warning(f'New {str(labbook)} untracked directory `{new_directory_path}`')
-                    return
-                new_dir = ''
-                for d in relative_path.split(os.sep):
-                    new_dir = os.path.join(new_dir, d)
-                    full_new_dir = os.path.join(labbook.root_dir, new_dir)
+            new_dir = ''
+            for d in relative_path.split(os.sep):
+                new_dir = os.path.join(new_dir, d)
+                full_new_dir = os.path.join(labbook.root_dir, new_dir)
 
-                    gitkeep_path = os.path.join(full_new_dir, '.gitkeep')
-                    if not os.path.exists(gitkeep_path):
-                        with open(gitkeep_path, 'w') as gitkeep:
-                            gitkeep.write("This file is necessary to keep this directory tracked by Git"
-                                          " and archivable by compression tools. Do not delete or modify!")
-                        labbook.git.add(gitkeep_path)
+                gitkeep_path = os.path.join(full_new_dir, '.gitkeep')
+                if not os.path.exists(gitkeep_path):
+                    with open(gitkeep_path, 'w') as gitkeep:
+                        gitkeep.write("This file is necessary to keep this directory tracked by Git"
+                                      " and archivable by compression tools. Do not delete or modify!")
+                    labbook.git.add(gitkeep_path)
 
-                if create_activity_record:
-                    # Create detail record
-                    activity_type, activity_detail_type, section_str = labbook.infer_section_from_relative_path(
-                        relative_path)
-                    adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                               action=ActivityAction.CREATE)
+            if create_activity_record:
+                # Create detail record
+                activity_type, activity_detail_type, section_str = labbook.infer_section_from_relative_path(
+                    relative_path)
+                adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
+                                           action=ActivityAction.CREATE)
 
-                    msg = f"Created new {section_str} directory `{relative_path}`"
-                    commit = labbook.git.commit(msg)
-                    adr.add_value('text/markdown', msg)
+                msg = f"Created new {section_str} directory `{relative_path}`"
+                commit = labbook.git.commit(msg)
+                adr.add_value('text/markdown', msg)
 
-                    # Create activity record
-                    ar = ActivityRecord(activity_type,
-                                        message=msg,
-                                        linked_commit=commit.hexsha,
-                                        show=True,
-                                        importance=255,
-                                        tags=['directory-create'])
-                    ar.add_detail_object(adr)
+                # Create activity record
+                ar = ActivityRecord(activity_type,
+                                    message=msg,
+                                    linked_commit=commit.hexsha,
+                                    show=True,
+                                    importance=255,
+                                    tags=['directory-create'])
+                ar.add_detail_object(adr)
 
-                    # Store
-                    ars = ActivityStore(labbook)
-                    ars.create_activity_record(ar)
+                # Store
+                ars = ActivityStore(labbook)
+                ars.create_activity_record(ar)
+
+    @classmethod
+    def get_file_info(cls, labbook: LabBook, section: str, rel_file_path: str) -> Dict[str, Any]:
+        """Method to get a file's detail information
+
+        Args:
+            labbook: Subject labbook
+            rel_file_path(str): The relative file path to generate info from
+            section(str): The section name (code, input, output)
+
+        Returns:
+            dict
+        """
+        # remove leading separators if one exists.
+        rel_file_path = _make_path_relative(rel_file_path)
+        full_path = os.path.join(labbook.root_dir, section, rel_file_path)
+
+        file_info = os.stat(full_path)
+        is_dir = os.path.isdir(full_path)
+
+        # If it's a directory, add a trailing slash so UI renders properly
+        if is_dir:
+            if rel_file_path[-1] != os.path.sep:
+                rel_file_path = f"{rel_file_path}{os.path.sep}"
+
+        return {
+                  'key': rel_file_path,
+                  'is_dir': is_dir,
+                  'size': file_info.st_size if not is_dir else 0,
+                  'modified_at': file_info.st_mtime,
+                  'is_favorite': rel_file_path in labbook.favorite_keys[section]
+               }
 
     @classmethod
     def walkdir(cls, labbook: LabBook, section: str, show_hidden: bool = False) -> List[Dict[str, Any]]:
@@ -514,7 +541,7 @@ class FileOperations(object):
         for f_p in keys:
             if not show_hidden and any([len(p) and p[0] == '.' for p in f_p.split(os.path.sep)]):
                 continue
-            stats.append(labbook.get_file_info(section, f_p))
+            stats.append(cls.get_file_info(labbook, section, f_p))
 
         return stats
 
@@ -549,7 +576,7 @@ class FileOperations(object):
                 continue
 
             # Create tuple (isDir, key)
-            stats.append(labbook.get_file_info(section, os.path.join(base_path or "", item)))
+            stats.append(cls.get_file_info(labbook, section, os.path.join(base_path or "", item)))
 
         # For more deterministic responses, sort resulting paths alphabetically.
         return sorted(stats, key=lambda a: a['key'])

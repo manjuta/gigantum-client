@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 // components
 import Branches from './branches/Branches';
+import Description from './description/Description';
 import BranchMenu from './branchMenu/BranchMenu';
 import ContainerStatus from './containerStatus/ContainerStatus';
 import ToolTip from 'Components/shared/ToolTip';
@@ -26,11 +27,15 @@ import './LabbookHeader.scss';
 class LabbookHeader extends Component {
   constructor(props) {
     super(props);
-
+    this.state = {
+      hovered: false,
+    };
     // bind functions here
     this._setSelectedComponent = this._setSelectedComponent.bind(this);
     this._showLabbookModal = this._showLabbookModal.bind(this);
     this._hideLabbookModal = this._hideLabbookModal.bind(this);
+    this._setHoverState = this._setHoverState.bind(this);
+    this._checkOverflow = this._checkOverflow.bind(this);
   }
 
   /**
@@ -117,6 +122,25 @@ class LabbookHeader extends Component {
    }
  }
 
+  /** *
+    @param {object} element
+    checks if element is too large for card area
+    @return {boolean}
+  */
+ _checkOverflow(element) {
+   if (element) {
+     const curOverflow = element.style.overflow;
+
+     if (!curOverflow || curOverflow === 'visible') { element.style.overflow = 'hidden'; }
+
+     const isOverflowing = element.clientWidth < element.scrollWidth || element.clientHeight < element.scrollHeight;
+
+     element.style.overflow = curOverflow;
+
+     return isOverflowing;
+   }
+ }
+
   /** ***
   *  @param {boolean} isSyncing
   *  updates container status state
@@ -128,6 +152,16 @@ class LabbookHeader extends Component {
 
     if (this.props.isSyncing !== isSyncing) {
       setSyncingState(isSyncing);
+    }
+  }
+  /** ***
+  *  @param {boolean, event} hovered, evt
+  *  sets hover state
+  *  @return {}
+  */
+  _setHoverState(hovered, evt) {
+    if (this._checkOverflow(evt.target) || !hovered) {
+      this.setState({ hovered });
     }
   }
 
@@ -142,6 +176,7 @@ class LabbookHeader extends Component {
     const labbookHeaderCSS = classNames({
       LabbookHeader: true,
       'LabbookHeader--sticky': this.props.isSticky,
+      'LabbookHeader--expanded': this.props.isExpanded,
     });
 
     const branchesErrorCSS = classNames({
@@ -171,6 +206,9 @@ class LabbookHeader extends Component {
                 self={this}
                 branchesOpen={branchesOpen}
                 branchName={branchName}
+                description={this.props.description}
+                hovered={this.state.hovered}
+                setHoverState={this._setHoverState}
               />
             </div>
 
@@ -232,6 +270,27 @@ class LabbookHeader extends Component {
 
           </ErrorBoundary>
 
+          {
+            this.props.isExpanded &&
+            <div className="LabbookHeader__navContainer--expanded">
+
+              <ul className="LabbookHeader__nav flex flex--row">
+                {
+                  Config.navigation_items.map((item, index) => (
+                    <NavItem
+                      self={this}
+                      item={item}
+                      index={index}
+                      key={item.id}
+                    />))
+                }
+
+                <hr className={`LabbookHeader__navSlider LabbookHeader__navSlider--${selectedIndex}`} />
+              </ul>
+
+            </div>
+          }
+
         </div>
 
         <div className="LabbookHeader__navContainer flex-0-0-auto">
@@ -263,6 +322,7 @@ const LabbookTitle = ({
   const labbookLockCSS = classNames({
     [`LabbookHeader__${visibility}`]: true,
     [`LabbookHeader__${visibility}--sticky`]: self.props.isSticky,
+    [`LabbookHeader__${visibility}--expanded`]: self.props.isExpanded,
   });
 
   const title = `${labbook.owner}/${labbookName}${self.props.isSticky ? '/ ' : ''}`;
@@ -288,7 +348,14 @@ const LabbookTitle = ({
   );
 };
 
-const BranchName = ({ self, branchesOpen, branchName }) => {
+const BranchName = ({
+  self,
+  branchesOpen,
+  branchName,
+  description,
+  hovered,
+  setHoverState,
+}) => {
   const branchNameCSS = classNames({
     LabbookHeader__branchTitle: true,
     'LabbookHeader__branchTitle--open': branchesOpen,
@@ -297,20 +364,21 @@ const BranchName = ({ self, branchesOpen, branchName }) => {
 
   return (
     <div className={branchNameCSS}>
-
-      <div
-        className="LabbookHeader__name"
-        onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
-      >
-        {branchName}
+      <div className="LabbookHeader__name-container">
+        <div
+          onMouseEnter={evt => setHoverState(true, evt)}
+          onMouseLeave={evt => setHoverState(false, evt)}
+          className="LabbookHeader__name"
+          onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
+        >
+          {branchName}
+        </div>
+        <ToolTip section="branchView" />
       </div>
-
-      <div
-        onClick={() => self.props.toggleBranchesView(!branchesOpen, false)}
-        className="LabbookHeader__branchToggle"
+      <Description
+        hovered={hovered}
+        description={description}
       />
-
-      <ToolTip section="branchView" />
     </div>
   );
 };
