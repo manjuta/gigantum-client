@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import classNames from 'classnames';
 
 export default class User extends Component {
   constructor(props) {
@@ -57,6 +58,13 @@ export default class User extends Component {
 
 
   render() {
+    const usernameCSS = classNames({
+      User__name: !this.state.dropdownVisible,
+      'User__name--active': this.state.dropdownVisible,
+      'User__name--long': this.state.username.length >= 10,
+    });
+
+
     return (
       <div
         id="user"
@@ -66,7 +74,8 @@ export default class User extends Component {
         <h6
           id="username"
           onClick={() => { this._toggleDropdown(); }}
-          className={this.state.dropdownVisible ? 'User__name--active' : 'User__name'}
+          className={usernameCSS}
+          data-tooltip={this.state.username}
         >
           {this.state.username}
 

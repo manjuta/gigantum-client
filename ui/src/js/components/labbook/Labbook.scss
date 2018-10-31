@@ -2,7 +2,7 @@
 
 .Labbook {
   width: auto;
-  min-width: 820px;
+  min-width: 960px;
   max-width: 1285px;
   height: auto;
   min-height: calc(100% - 230px);
@@ -33,7 +33,7 @@
   }
 
   &--demo-mode{
-    margin-top: 100px;
+    margin-top: 70px;
   }
 }
 

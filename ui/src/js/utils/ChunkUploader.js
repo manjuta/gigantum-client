@@ -28,10 +28,8 @@ const updateTotalStatus = (file, labbookName, owner, transactionId) => {
   setUploadMessageUpdate(`Uploaded ${fileCount} of ${totalFiles} files`, fileCount, progressBarPercentage);
 
   if (fileCount === totalFiles) {
-    setTimeout(() => {
-      setFinishedUploading();
-      setUploadMessageUpdate(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
-    }, 1000);
+    setFinishedUploading();
+    setUploadMessageUpdate(`Uploaded ${totalFiles} files. Please wait while upload is finalizing.`, null, progressBarPercentage);
 
     CompleteBatchUploadTransactionMutation(
       'connectionKey',
@@ -59,9 +57,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
 
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
     setFinishedUploading();
-    setTimeout(() => {
-      setUploadMessageUpdate('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
-    }, 1000);
+    setUploadMessageUpdate('Please wait while upload is finalizing.', null, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
 
     CompleteBatchUploadTransactionMutation(
       'connectionKey',

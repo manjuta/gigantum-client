@@ -282,6 +282,7 @@ export default createPaginationContainer(
             name
             description
             owner
+            creationDateUtc
           }
           cursor
         }
