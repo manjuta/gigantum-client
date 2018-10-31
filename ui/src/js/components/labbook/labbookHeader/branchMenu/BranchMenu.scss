@@ -224,6 +224,12 @@
   text-align: center;
 }
 
+.BranchMenu__btn{
+  &:focus {
+    color: $romanSilver;
+  }
+}
+
 
 .BranchMenu__btn{
   &--flat{
