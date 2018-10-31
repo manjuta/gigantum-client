@@ -325,6 +325,7 @@ class Folder extends Component {
                         mutations={this.props.mutations}
                         addFolderVisible={this._addFolderVisible}
                         renameEditMode={ () => {} }
+                        folder
                       />
                     </div>
                 </div>

@@ -151,11 +151,14 @@ export default class ActionsMenu extends Component {
             className={favoriteCSS}
             name="Favorite">
           </div>
-          <div
-            onClick={() => { this.props.addFolderVisible(true); }}
-            className="ActionsMenu__item ActionsMenu__item--AddSubfolder"
-            name="Add Folder">
-          </div>
+          {
+            this.props.folder &&
+            <div
+              onClick={() => { this.props.addFolderVisible(true); }}
+              className="ActionsMenu__item ActionsMenu__item--AddSubfolder"
+              name="Add Folder">
+            </div>
+          }
         </div>
     );
   }
