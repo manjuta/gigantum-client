@@ -16,14 +16,14 @@ const dragSource = {
 
  isDragging(props, monitor) {
     return monitor.getItem().key === props.key;
-  },
+ },
 
-  beginDrag(props, monitor) {
-    return {
-      isDragging: true,
-      data: props.data,
-    };
-  },
+ beginDrag(props, monitor) {
+  return {
+    isDragging: true,
+    data: props.data,
+  };
+ },
 
   endDrag(props, monitor, component) {
     if (!monitor.didDrop()) {
@@ -55,9 +55,8 @@ const dragSource = {
       newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
 
       if (newKeyPath !== fileKeyPath) {
-        if ((newKey !== props.data.edge.node.key)) {
-          console.log(newKeyPath)
-          console.log(newKey)
+        if (newKey !== props.data.edge.node.key) {
+
           const moveLabbookFileData = {
             newKey,
             edge: props.data.edge,
@@ -120,6 +119,7 @@ const targetSource = {
         files;
 
     if (dndItem && props.data) {
+          console.log(dndItem.dirContent, !dndItem.dirContent);
           if (!dndItem.dirContent) {
               fileKey = props.data.edge.node.key;
 
@@ -129,14 +129,13 @@ const targetSource = {
               newPath = newKey + fileName;
               fileKey = props.fileKey;
           } else {
-              dndItem.dirContent.then((fileList: Object[]) => {
+              dndItem.dirContent.then((fileList) => {
+                  console.log(fileList);
                   if (fileList.length) {
                     let key = props.data.edge.node.key || props.fileKey;
                     path = key.substr(0, key.lastIndexOf('/') || key.length);
-                     if (fileList) {
-                        CreateFiles.createFiles(fileList, `${path}/`, props.mutationData);
-                     }
-                     files = fileList;
+                    CreateFiles.createFiles(fileList.flat(), `${path}/`, props.mutationData);
+
                   } else if (dndItem.files && dndItem.files.length) {
 
                        // handle dragged files

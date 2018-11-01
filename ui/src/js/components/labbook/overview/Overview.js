@@ -139,15 +139,6 @@ class Overview extends Component {
     this.setState({ editingReadme: true });
   }
 
-  /**
-    *  @param {Object} nextprops
-    *  fires when component recieves props
-    *  changes the description text, particularly used when switching branches
-  */
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ descriptionText: nextProps.description.replace(/\n/g, ' '), lastSavedDescription: nextProps.description.replace(/\n/g, ' ') });
-  }
-
   render() {
     const overviewCSS = classNames({
         Overview: true,
@@ -216,7 +207,7 @@ class Overview extends Component {
                 id="markDown"
               />
 
-              <div className="Overview__readme--editing-buttons Card Card--auto Card--no-hover">
+              <div className="Overview__readme--editing-buttons">
 
                 <button
                   className="Overview__readme-save"

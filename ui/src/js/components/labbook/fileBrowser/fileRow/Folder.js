@@ -39,11 +39,18 @@ class Folder extends Component {
         this._addFolderVisible = this._addFolderVisible.bind(this);
     }
 
-    static getDerivedStateFromProps(props, state) {
+
+    static getDerivedStateFromProps(nextProps, state) {
+      let isSelected = (nextProps.multiSelect === 'all')
+        ? true
+        : (nextProps.multiSelect === 'none')
+        ? false
+        : state.isSelected;
       return {
         ...state,
-        isOver: props.isOver,
+        isOver: nextProps.isOver,
         prevIsOverState: state.isOver,
+        isSelected,
       };
     }
 
@@ -258,7 +265,7 @@ class Folder extends Component {
 
     render() {
         const { node } = this.props.data.edge,
-              { children } = this.props.data,
+              { children, index } = this.props.data,
               childrenKeys = children ? Object.keys(children) : [],
               isOver = this._checkRefs(),
               splitKey = node.key.split('/'),
@@ -289,8 +296,9 @@ class Folder extends Component {
                 'Folder--highlight': isOver,
                 'Folder--hover': this.state.hover,
                 'Folder--background': this.props.isDragging,
-              });
-
+              }),
+              paddingLeft = 40 * index,
+              rowStyle = { paddingLeft: `${paddingLeft}px` };
 
         let folder = this.props.connectDragPreview(<div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -300,6 +308,7 @@ class Folder extends Component {
           className={folderCSS}>
                 <div
                     className={folderRowCSS}
+                    style={rowStyle}
                     onClick={evt => this._expandSection(evt)}>
                     <button
                         className={buttonCSS}
@@ -340,9 +349,7 @@ class Folder extends Component {
                     />
                     {
                         childrenKeys.map((file) => {
-
                             if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
-                                // console.log(children[file].edge)
                                 return (
                                     <FolderDND
                                         filename={file}
@@ -352,10 +359,12 @@ class Folder extends Component {
                                         mutationData={this.props.mutationData}
                                         data={children[file]}
                                         isSelected={this.state.isSelected}
+                                        multiSelect={this.props.multiSelect}
                                         setIncomplete={this._setIncomplete}
                                         checkParent={this._checkParent}
                                         setState={this._setState}
                                         setParentHoverState={this._setHoverState}
+                                        expanded={this.state.expanded}
                                         updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
@@ -369,7 +378,9 @@ class Folder extends Component {
                                       data={children[file]}
                                       key={children[file].edge.node.key}
                                       isSelected={this.state.isSelected}
+                                      multiSelect={this.props.multiSelect}
                                       checkParent={this._checkParent}
+                                      expanded={this.state.expanded}
                                       setParentHoverState={this._setHoverState}
                                       updateChildState={this.props.updateChildState}>
                                   </File>

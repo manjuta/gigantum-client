@@ -31,6 +31,7 @@
     cursor: pointer;
     -webkit-line-clamp: 3;
     display: -webkit-box;
+    max-height: 80px;
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -117,3 +118,27 @@
     }
 }
 
+@-moz-document url-prefix() {
+    .Description__container {
+        overflow: hidden;
+        position: relative;
+    }
+    .Description__container:before {
+        background: $background-color;
+        bottom: 4px;
+        position: absolute;
+        right: 0;
+        float: right;
+        content: '\2026';
+        margin-left: -2rem;
+        width: 22px;
+    }
+    .Description__container:after {
+        content: '';
+        background: $background-color;
+        position: absolute;
+        height: 50px;
+        width: 100%;
+        z-index: 1;
+    }
+}

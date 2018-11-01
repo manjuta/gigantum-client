@@ -42,8 +42,8 @@ export const setMultiInfoMessage = (id, message, isLast, error, messageBody) => 
   id, message, isLast, error, messageBody,
 });
 export const setUploadMessageSetter = (uploadMessage, id, totalFiles) => dispatcher(UPLOAD_MESSAGE_SETTER, { uploadMessage, id, totalFiles });
-export const setUploadMessageUpdate = (uploadMessage, id, percentage, uploadError) => dispatcher(UPLOAD_MESSAGE_UPDATE, {
-  uploadMessage, id, percentage, uploadError,
+export const setUploadMessageUpdate = (uploadMessage, fileCount, progessBarPercentage, uploadError) => dispatcher(UPLOAD_MESSAGE_UPDATE, {
+  uploadMessage, fileCount, progessBarPercentage, uploadError,
 });
 export const setUploadMessageRemove = (uploadMessage, id, progessBarPercentage) => dispatcher(UPLOAD_MESSAGE_REMOVE, { uploadMessage, id, progessBarPercentage });
 export const setHelperVisible = helperVisible => dispatcher(HELPER_VISIBLE, { helperVisible });
@@ -249,7 +249,7 @@ export default(state = {
     const message = {
       message: action.payload.uploadMessage,
       id: action.payload.id,
-      progessBarPercentage: action.payload.percentage,
+      progessBarPercentage: action.payload.progessBarPercentage,
     };
 
     const uploadStack = state.uploadStack.map((messageItem) => {

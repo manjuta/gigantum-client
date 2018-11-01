@@ -101,6 +101,28 @@ button:disabled {
      }
    }
 
+   &--uncheck {
+     background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+     background-size: 30px;
+     &:hover,
+     &:focus {
+       background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+       background-size: 34px;
+       border: 0px;
+     }
+   }
+
+   &--partial {
+     background: url(~Images/icons/minus.svg) no-repeat center center;
+     background-size: 30px;
+     &:hover,
+     &:focus {
+       background: url(~Images/icons/minus.svg) no-repeat center center;
+       background-size: 34px;
+       border: 0px;
+     }
+   }
+
    &--close {
      background: url(~Images/icons/close.svg) no-repeat center center;
      background-size: 30px;
@@ -115,28 +137,26 @@ button:disabled {
    }
 
    &--delete {
-     margin: 0 43px 0 8px;
-     background: $azure url(~Images/icons/trash-white.svg) no-repeat center center;
+     background: url(~Images/icons/trash-dark.svg) no-repeat center center;
      background-size: 20px;
-     border: 2px solid $azure;
+     border: 0px;
 
      &:focus {
-       background: $azure url(~Images/icons/trash-white.svg) no-repeat center center;
+       background: url(~Images/icons/trash-dark.svg) no-repeat center center;
        background-size: 20px;
-       border: 2px solid $azure;
+       border: 0px;
      }
 
      &:hover {
-       background: $turquise url(~Images/icons/trash-white.svg) no-repeat center center;
+       background: url(~Images/icons/trash-azure.svg) no-repeat center center;
        background-size: 20px;
-       margin: 0 43px 0 8px;
-       border: 2px solid $turquise;
+       border: 0px;
      }
 
      &:disabled {
-       background: $grey-light url(~Images/icons/trash.svg) no-repeat center center;
+       background: url(~Images/icons/trash.svg) no-repeat center center;
        background-size: 20px;
-       border: 2px solid $romanSilver;
+       border: 0px;
      }
   }
 }

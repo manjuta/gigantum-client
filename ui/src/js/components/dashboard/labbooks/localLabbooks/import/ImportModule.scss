@@ -29,6 +29,12 @@
   @include flex(center, row);
 }
 
+.Import_paragraph {
+  color: $grey;
+  font-size: 16px;
+  line-height: 2;
+}
+
 .Import__labbook-icon {
   width: 50px;
   height: 50px;
@@ -44,7 +50,7 @@
 .Import__add-icon{
   position: absolute;
   top: 53px;
-  left: 54px;
+  left: 43px;
 
   width: 20px;
   height: 20px;
@@ -105,7 +111,7 @@ input.Import__input--paste{
 
     color: $azure !important;
     border-radius: 20px !important;
-    background: $tintBlue !important;
+    background: $lightBlue !important;
 
     font-size: 20px;
 
@@ -227,11 +233,11 @@ input.Import__input--paste{
   font-weight: 400;
 
   &--margin{
-    margin: 10px 30px;
+    margin: 10px 30px 0 30px;
   }
 }
 
-.Import__paragraph{
+.Import_paragraph{
   color: $grey;
 
   font-size: 16px;
@@ -243,8 +249,6 @@ input.Import__input--paste{
 
   cursor: pointer;
   text-decoration: underline;
-
-  color: $tintBlue;
 
   font-size: 16px;
 }

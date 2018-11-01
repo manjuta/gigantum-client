@@ -16,10 +16,10 @@ class CodeFavoriteList extends Component {
     this.moveCard = this.moveCard.bind(this);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const favorites = this.state.favorites;
+  static getDerivedStateFromProps(props, state) {
+    const favorites = state.favorites;
     const newFavorites = [];
-    const nextPropsFavorites = nextProps.favorites;
+    const nextPropsFavorites = props.favorites;
 
     const favoritesIds = [];
     const nextPropsFavoritesIds = [];
@@ -42,8 +42,10 @@ class CodeFavoriteList extends Component {
         newFavorites.push(fav);
       }
     });
-
-    this.setState({ favorites: newFavorites });
+    return {
+      ...state,
+      favorites: newFavorites,
+    };
   }
 
   moveCard(dragIndex, hoverIndex) {

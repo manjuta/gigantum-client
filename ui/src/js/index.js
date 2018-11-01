@@ -11,11 +11,13 @@ import Routes from './components/Routes';
 import store from 'JS/redux/store';
 
 const auth = new Auth();
+let routes;
 
 UserIdentity.getUserIdentity().then((response) => {
   const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
   let forceLoginScreen = true;
   let loadingRenew = false;
+  let validSession = false;
 
   if (response.data) {
     if (response.data.userIdentity && ((response.data.userIdentity.isSessionValid && navigator.onLine) || !navigator.onLine)) {
@@ -24,12 +26,17 @@ UserIdentity.getUserIdentity().then((response) => {
       localStorage.setItem('email', response.data.userIdentity.email);
       localStorage.setItem('username', response.data.userIdentity.username);
       localStorage.setItem('expires_at', expiresAt);
-
+      validSession = true;
       forceLoginScreen = false;
     } else if (response.data.userIdentity && localStorage.getItem('access_token')) {
       loadingRenew = true;
-      auth.renewToken(null, null, null, true, () => {
-        routes.setState({ loadingRenew: false });
+      auth.renewToken(null, null, () => {
+        setTimeout(() => {
+          routes.setState({ loadingRenew: false });
+        }, 2000);
+        validSession = true;
+      }, true, () => {
+        routes.setState({ forceLoginScreen: true, loadingRenew: false });
       });
     } else {
       localStorage.removeItem('family_name');
@@ -45,12 +52,14 @@ UserIdentity.getUserIdentity().then((response) => {
 
   }
 
-  let routes = render(
+  render(
     <Provider store={store}>
       <Routes
+        ref={el => routes = el}
         auth={auth}
         forceLoginScreen={forceLoginScreen}
         loadingRenew={loadingRenew}
+        validSession={validSession}
       />
     </Provider>
     , document.getElementById('root') || document.createElement('div'),

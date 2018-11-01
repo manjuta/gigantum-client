@@ -1,7 +1,6 @@
 @import '~Styles/_imports.scss';
 
 .LabbookHeader__wrapper {
-  z-index: index($elements, labbookHeader);
 
   min-height: 30px;
 
@@ -133,6 +132,9 @@
         height: 0px;
     }
   }
+  &--expanded {
+    height: 100px;
+  }
 }
 
 .LabbookHeader__columnContainer{
@@ -190,7 +192,8 @@
   font-weight: 100;
   line-height: 48px;
   &:hover {
-    overflow: visible;
+    width: 78%;
+    position: absolute;
   }
 }
 
@@ -221,13 +224,6 @@
 
   h2:hover {
     color: $turquise;
-  }
-
-  &--open{
-    .LabbookHeader__name {
-      background: url('~Images/icons/up-arrow-silver.svg') no-repeat center right 5px;
-      background-size: 16px;
-    }
   }
 }
 
@@ -281,6 +277,15 @@
   margin-top: 154px;
 
   transition: 0.5s all;
+  &--expanded {
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+    width: 100%;
+    .LabbookHeader__nav{
+      border: none;
+    }
+  }
 }
 
 .LabbookHeader__nav {
@@ -312,11 +317,7 @@
   &--selected a {
     position: relative;
     z-index: index($elements, button);
-    bottom: -2px;
-
     color: $selected-blue;
-
-    line-height: 15px;
   }
 }
 
@@ -360,8 +361,8 @@
       margin-left: $i * 14% + 1%;
     }
     @if $i == 5 {
-      width: 13%;
-      margin-left: $i * 14% ;
+      width: 12%;
+      margin-left: 71% ;
     }
   }
 }

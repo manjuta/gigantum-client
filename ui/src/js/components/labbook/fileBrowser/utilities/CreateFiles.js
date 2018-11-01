@@ -118,12 +118,14 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
 
   createFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData, mutationData);
   // loop through files and upload if file is a file
+  console.log(files);
   files.forEach((file, index) => {
+    console.log(file)
     if (file.isDirectory) {
       folderFiles.push(file);
     } else if (file.name) {
       const isFileAllowed = fileSizeData.fileSizeNotAllowed.filter(largeFile => largeFile.name === file.name).length === 0;
-
+      console.log(isFileAllowed)
       if (isFileAllowed) {
         let newKey = prefix;
 
@@ -133,9 +135,9 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
 
         newKey += file.name;
 
-        const fileReader = new FileReader();
+        // const fileReader = new FileReader();
 
-        fileReader.onloadend = function (evt) {
+        // fileReader.onloadend = function (evt) {
           const filepath = newKey;
 
           const data = {
@@ -150,10 +152,10 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
 
           ChunkUploader.chunkFile(data, (data) => {
 
-          }, index);
-        };
+          }, 0);
+        // };
 
-        fileReader.readAsArrayBuffer(file);
+       // fileReader.readAsArrayBuffer(file);
       } else {
         // WARNING_MESSAGE
       }

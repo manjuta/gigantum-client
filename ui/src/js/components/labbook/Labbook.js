@@ -67,7 +67,7 @@ class Labbook extends Component {
   	super(props);
 
     localStorage.setItem('owner', store.getState().routes.owner);
-
+    this.state = {};
     // bind functions here
     this._setBuildingState = this._setBuildingState.bind(this);
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
@@ -90,6 +90,15 @@ class Labbook extends Component {
     set unsubcribe for store
   */
   componentDidMount() {
+    this.props.auth.isAuthenticated().then((response) => {
+      let isAuthenticated = response;
+      if (isAuthenticated === null) {
+        isAuthenticated = false;
+      }
+      if (isAuthenticated !== this.state.authenticated) {
+        this.setState({ authenticated: isAuthenticated });
+      }
+    });
     this._setStickHeader();
 
     window.addEventListener('scroll', this._setStickHeader);
@@ -185,7 +194,6 @@ class Labbook extends Component {
   }
 
   render() {
-    const { isAuthenticated } = this.props.auth;
     const isLockedBrowser = {
       locked: (this.props.isPublishing || this.props.isSyncing || this.props.isExporting), isPublishing: this.props.isPublishing, isExporting: this.props.isExporting, isSyncing: this.props.isSyncing,
     };
@@ -207,12 +215,12 @@ class Labbook extends Component {
 
           <div className="Labbook__spacer flex flex--column">
 
-
             <LabbookHeader
               description={labbook.description}
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
+              isExpanded={this.props.isExpanded}
               {...this.props}
             />
 
@@ -381,7 +389,7 @@ class Labbook extends Component {
         </div>);
     }
 
-    if (isAuthenticated()) {
+    if (this.state.authenticated) {
       return (<Loader />);
     }
 
@@ -451,7 +459,7 @@ const backend = (manager: Object) => {
   backend.handleTopDropCapture = (e) => {
     if (backend.currentNativeSource) {
       orgTopDropCapture.call(backend, e);
-
+      console.log(backend)
       backend.currentNativeSource.item.dirContent = getFilesFromDragEvent(e, { recursive: true }); // returns a promise
     }
   };

@@ -108,7 +108,7 @@ class TestConda3PackageManager(object):
 
         assert result[0] == '1.15.3'  # Numpy
         assert result[1] == REQUESTS_LATEST_VERSION  # Requests
-        assert result[2] == '3.0.0'  # Matplotlib
+        assert result[2] == '3.0.1'  # Matplotlib
 
     def test_latest_versions_bad_pkg(self, build_lb_image_for_env):
         """Test latest_version command"""

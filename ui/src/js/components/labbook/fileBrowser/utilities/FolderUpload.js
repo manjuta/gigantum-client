@@ -99,7 +99,7 @@ const makeDirectory = (
       (response, error) => {
         if (error) {
           console.error(error);
-          setUploadMessageUpdate('ERROR: cannot upload', labbookName + path, null, true);
+          setUploadMessageUpdate('ERROR: cannot upload', null, null, true);
           setErrorMessage(`ERROR: could not make ${path}`, error);
           reject(error);
         } else {
@@ -113,7 +113,15 @@ const makeDirectory = (
 };
 
 /**
-*  @param {string, string, string, string, string, string} variables,section
+*  @param {Array:[Object]} files - array of files
+   @param {string} connectionKey - key for relay
+   @param {string} owner - owner of laboook for file mutaions
+   @param {string} labbookName - name of labbook
+   @param {string} sectonId - unique hash for the section in relay
+   @param {string} path - root folder for the upload
+   @param {string} section - section being uploaded to
+   @param {string} prefix
+   @param {string} chunkLoader
 *  checks if a folder or file exists
 *  @return {promise}
 */
@@ -188,9 +196,13 @@ const getFolderPaths = (folderNames, prefix) => {
 };
 
 /**
-* @param {array, string, string, string, string} folderPaths,labbookName,owner,path,section
+* @param {Array:[string]} folderPaths - paths of folders to be created
+* @param {string} labbookName - name of this labbook
+* @param {string} owner - owner of the labbook
+* @param {string} section - file section that is currently being modified
 * created a promise that checks it folder exists
 * pushes promise into an array all
+* @return {Array:[Promise]} all - array of promises
 */
 const getFolderExistsQueryPromises = (folderPaths, labbookName, owner, section) => {
   const all = [];
@@ -299,6 +311,7 @@ const FolderUpload = {
     let batchCount = 0;
     let batchCallbackCount = 0;
     const transactionId = uuidv4();
+    console.log(files)
     // commented until pause functionality is available
     // let isPaused = false;
     /**

@@ -32,6 +32,19 @@ class File extends Component {
       this._clearState = this._clearState.bind(this);
       this._setHoverState = this._setHoverState.bind(this);
   }
+
+  static getDerivedStateFromProps(nextProps, state) {
+    let isSelected = (nextProps.multiSelect === 'all')
+      ? true
+      : (nextProps.multiSelect === 'none')
+      ? false
+      : state.isSelected;
+    return {
+      ...state,
+      isSelected,
+    };
+  }
+
   /**
   *  @param {boolean} isSelected - sets if file has been selected
   *  sets elements to be selected and parent
@@ -147,6 +160,7 @@ class File extends Component {
 
   render() {
     const { node } = this.props.data.edge;
+    const { index } = this.props.data;
     const splitKey = node.key.split('/');
 
     const fileName = this.props.filename;
@@ -166,7 +180,9 @@ class File extends Component {
           renameCSS = classNames({
             'File__cell File__cell--edit': true,
             hidden: !this.state.renameEditMode,
-          });
+          }),
+          paddingLeft = 40 * index,
+          rowStyle = { paddingLeft: `${paddingLeft}px` };
 
     let file = this.props.connectDragPreview(<div
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -174,7 +190,9 @@ class File extends Component {
       onMouseDown={() => { this._mouseDown(); }}
       className="File">
 
-             <div className={fileRowCSS}>
+             <div
+               className={fileRowCSS}
+               style={rowStyle}>
 
                 <button
                     className={buttonCSS}
@@ -186,12 +204,15 @@ class File extends Component {
                   <div className={`File__icon ${fileIconsJs.getClass(fileName)}`}></div>
 
                   <div className="File__text">
+                  {
+                    this.props.expanded &&
                     <TextTruncate
-                        className="File__paragragh"
-                        line={1}
-                        truncateText="…"
-                        text={fileName}
+                      className="File__paragragh"
+                      line={1}
+                      truncateText="…"
+                      text={fileName}
                     />
+                  }
                   </div>
 
                 </div>
