@@ -64,7 +64,7 @@ def process_sweep_status(result_obj: ActivityRecord, status: Dict[str, Any],
     changes.extend(status['staged'])
     for filename, change in changes:
         # skip any file in .git or .gigantum dirs
-        if ".git" in filename or ".gigantum" in filename:
+        if (".git" in filename and ".gitkeep" not in filename) or ".gigantum" in filename:
             continue
 
         activity_type, activity_detail_type, section = section_infer_method(filename)
@@ -87,7 +87,11 @@ def process_sweep_status(result_obj: ActivityRecord, status: Dict[str, Any],
             mcnt += 1
 
         adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255 - mcnt, 0), action=action)
-        adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
+        if ".gitkeep" in filename:
+            directory_name, _ = filename.split('.gitkeep')
+            adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} directory `{directory_name}`")
+        else:
+            adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
         result_obj.add_detail_object(adr)
 
     modified_section_set = set(msections)
