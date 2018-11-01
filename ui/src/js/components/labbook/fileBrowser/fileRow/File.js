@@ -24,6 +24,7 @@ class File extends Component {
           stateSwitch: false,
           newFileName: '',
           renameEditMode: false,
+          hover: false,
       };
       this._setSelected = this._setSelected.bind(this);
       this.connectDND = this.connectDND.bind(this);
@@ -39,6 +40,13 @@ class File extends Component {
       : (nextProps.multiSelect === 'none')
       ? false
       : state.isSelected;
+
+      // if (nextProps.isOverCurrent) {
+      //   console.log(nextProps.data.edge.node.key, (nextProps.isOverCurrent !== nextProps.isOverChildFile), nextProps.isDragging, state.hover);
+      // }
+      if ((nextProps.isOverCurrent !== nextProps.isOverChildFile) && !nextProps.isDragging && state.hover) {
+        nextProps.updateParentDropZone(nextProps.isOverCurrent);
+      }
     return {
       ...state,
       isSelected,
@@ -84,8 +92,8 @@ class File extends Component {
   *  @param {}
   *  sets dragging state
   */
-  _renameEditMode(value) {
-    this.setState({ renameEditMode: value });
+  _renameEditMode(renameEditMode) {
+    this.setState({ renameEditMode });
   }
 
   /**
@@ -160,6 +168,7 @@ class File extends Component {
   }
 
   render() {
+
     const { node } = this.props.data.edge;
     const { index } = this.props.data;
     const splitKey = node.key.split('/');
@@ -171,8 +180,9 @@ class File extends Component {
             'File__row--background': this.props.isDragging,
           }),
           buttonCSS = classNames({
-            File__btn: true,
-            'File__btn--selected': this.state.isSelected,
+            'Btn Btn--round': true,
+            'Btn--uncheck': !this.state.isSelected,
+            'Btn--check': this.state.isSelected,
           }),
           textIconsCSS = classNames({
             'File__cell File__cell--name': true,
@@ -185,7 +195,8 @@ class File extends Component {
           paddingLeft = 40 * index,
           rowStyle = { paddingLeft: `${paddingLeft}px` };
 
-    let file = this.props.connectDragPreview(<div
+    let file = // this.props.connectDragPreview(
+      <div
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
       onMouseOut={(evt) => { this._setHoverState(evt, false); }}
       onMouseDown={() => { this._mouseDown(); }}
@@ -259,7 +270,7 @@ class File extends Component {
 
             </div>
 
-        </div>);
+        </div>;
 
     return (
       this.connectDND(file)

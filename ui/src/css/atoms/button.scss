@@ -93,19 +93,33 @@ button:disabled {
    &--check {
      background: url(~Images/icons/check-selected.svg) no-repeat center center;
      background-size: 30px;
-     &:hover,
+
+
      &:focus {
        background: url(~Images/icons/check-selected.svg) no-repeat center center;
-       background-size: 34px;
        border: 0px;
+       background-size: 30px;
+     }
+
+     &:hover {
+       background: url(~Images/icons/check-selected.svg) no-repeat center center;
+       border: 0px;
+        background-size: 34px;
      }
    }
 
    &--uncheck {
      background: url(~Images/icons/check-unselected.svg) no-repeat center center;
      background-size: 30px;
-     &:hover,
+
+
      &:focus {
+       background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+       background-size: 30px;
+       border: 0px;
+     }
+
+     &:hover {
        background: url(~Images/icons/check-unselected.svg) no-repeat center center;
        background-size: 34px;
        border: 0px;
@@ -115,8 +129,13 @@ button:disabled {
    &--partial {
      background: url(~Images/icons/minus.svg) no-repeat center center;
      background-size: 30px;
-     &:hover,
      &:focus {
+       background: url(~Images/icons/minus.svg) no-repeat center center;
+       background-size: 30px;
+       border: 0px;
+     }
+
+     &:hover {
        background: url(~Images/icons/minus.svg) no-repeat center center;
        background-size: 34px;
        border: 0px;
@@ -128,8 +147,13 @@ button:disabled {
      background-size: 30px;
      border: 0px;
 
-     &:hover,
      &:focus {
+       background: url(~Images/icons/close.svg) no-repeat center center;
+       background-size: 30px;
+       border: 0px;
+     }
+
+     &:hover {
        background: url(~Images/icons/close.svg) no-repeat center center;
        background-size: 34px;
        border: 0px;

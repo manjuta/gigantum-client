@@ -97,8 +97,9 @@ const dragSource = {
 };
 
 function dragCollect(connect, monitor) {
+
   return {
-    connectDragPreview: connect.dragPreview(),
+    // connectDragPreview: connect.dragPreview(),
     connectDragSource: connect.dragSource(),
     isDragging: monitor.getSourceId() === monitor.sourceId,
   };
@@ -119,7 +120,7 @@ const targetSource = {
         files;
 
     if (dndItem && props.data) {
-          console.log(dndItem.dirContent, !dndItem.dirContent);
+
           if (!dndItem.dirContent) {
               fileKey = props.data.edge.node.key;
 
@@ -210,11 +211,54 @@ const targetSource = {
 };
 
 function targetCollect(connect, monitor) {
+
+  let currentTargetId = monitor.targetId;
+  let isOverCurrent = monitor.isOver({ shallow: true });
+  let isOver = monitor.isOver({});
+  let currentTarget = monitor.internalMonitor.registry.dropTargets.get(currentTargetId);
+  let canDrop = monitor.canDrop();
+  let newLastTarget;
+
+  let targetIds = monitor.internalMonitor.getTargetIds();
+
+  let targets = targetIds.map(id => monitor.internalMonitor.registry.dropTargets.get(id));
+  if (targets.length > 0) {
+    let lastTarget = targets[targets.length - 1];
+    if (lastTarget.props.data && !lastTarget.props.data.edge.node.isDir) {
+      targets.pop();
+    }
+    newLastTarget = targets[targets.length - 1];
+    isOver = (currentTargetId === newLastTarget.monitor.targetId);
+  } else {
+    isOver = false;
+  }
+
+  let dragItem;
+  monitor.internalMonitor.registry.dragSources.forEach((item) => {
+    // console.log(item.ref)
+    if (item.ref && item.ref.current && item.ref.current.props.isDragging) {
+      dragItem = item.ref.current
+    }
+  })
+
+  console.log(newLastTarget, dragItem)
+  if (dragItem && newLastTarget) {
+    let dragKeyArray = dragItem.props.data.edge.node.key.split('/')
+    dragKeyArray.pop();
+
+    let dragKeyPruned = dragKeyArray.join('/') === '' ? '' : `${dragKeyArray.join('/')}/`;
+
+    let dropKey = newLastTarget.props.files ? '' : newLastTarget.props.data.edge.node.key;
+    console.log(dragKeyPruned, dropKey);
+    canDrop = (dragKeyPruned !== dropKey);
+    isOver = isOver && canDrop;
+  }
+
   return {
     connectDropTarget: connect.dropTarget(),
-		canDrop: true,
-    isOver: monitor.isOver(),
-    isOverCurrent: monitor.isOver({ shallow: true }),
+		canDrop: monitor.canDrop(),
+    isOver,
+    isOverCurrent,
   };
 }
 

@@ -27,7 +27,12 @@ class Folder extends Component {
             hoverId: '',
             isOver: false,
             prevIsOverState: false,
+<<<<<<< HEAD
             addFolderVisible: false,
+=======
+            renameEditMode: false,
+            isOverChildFile: false,
+>>>>>>> fba4fcf7ca299f5f24591be5dbfc38b4a2a591c2
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -36,8 +41,13 @@ class Folder extends Component {
         this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
         this._setHoverState = this._setHoverState.bind(this);
+<<<<<<< HEAD
         this._addFolderVisible = this._addFolderVisible.bind(this);
         this._mouseLeave = this._mouseLeave.bind(this);
+=======
+        this._renameEditMode = this._renameEditMode.bind(this);
+        this._updateDropZone = this._updateDropZone.bind(this);
+>>>>>>> fba4fcf7ca299f5f24591be5dbfc38b4a2a591c2
     }
 
 
@@ -222,7 +232,7 @@ class Folder extends Component {
     *  @return {boolean}
     */
     _checkRefs() {
-      let isOver = this.props.isOverCurrent,
+      let isOver = this.props.isOverCurrent || this.props.isOver, // this.state.isOverChildFile,
           { refs } = this;
 
       Object.keys(refs).forEach((childname) => {
@@ -240,7 +250,8 @@ class Folder extends Component {
     }
 
     /**
-    *  @param {event, boolean}
+    *  @param {event}
+    *  @param {boolean} hover - boolean that sets if the component should show a hover state
     *  sets hover state
     *  @return {}
     */
@@ -257,23 +268,96 @@ class Folder extends Component {
         this.props.setParentHoverState(fakeEvent, false);
       }
     }
+    /**
+    *  @param {event}
+    *  sets dragging state
+    */
+    _updateFileName(evt) {
+      this.setState({
+        newFolderName: evt.target.value,
+      });
+
+      if (evt.key === 'Enter') {
+        this._triggerMutation();
+      }
+
+      if (evt.key === 'Escape') {
+        this._clearState();
+      }
+    }
+
+    /**
+    *  @param {}
+    *  sets state on a boolean value
+    *  @return {}
+    */
+    _clearState() {
+      this.setState({
+        newFolderName: '',
+        renameEditMode: false,
+      });
+
+      if (this.renameInput) {
+        this.renameInput.value = '';
+      }
+    }
+
+    /**
+    *  @param {}
+    *  sets state on a boolean value
+    *  @return {}
+    */
+    _triggerMutation() {
+      let fileKeyArray = this.props.data.edge.node.key.split('/');
+      fileKeyArray.pop();
+      fileKeyArray.pop();
+      let folderKeyArray = fileKeyArray;
+      let folderKey = folderKeyArray.join('/');
+      const data = {
+        newKey: folderKey === '' ? `${this.state.newFolderName}/` : `${folderKey}/${this.state.newFolderName}/`,
+        edge: this.props.data.edge,
+      };
+
+      this.props.mutations.moveLabbookFile(data, (response) => {
+         this._clearState();
+      });
+    }
+    /**
+    *  @param {boolean} renameEditMode -sets
+    *  sets hover state
+    *  @return {}
+    */
+    _renameEditMode(renameEditMode) {
+      this.setState({ renameEditMode });
+    }
+
+    /**
+    *  @param {boolean} isOverChildFile
+    *  update state to update drop zone
+    *  @return {}
+    */
+    _updateDropZone(isOverChildFile) {
+      this.setState({ isOverChildFile });
+    }
 
     render() {
         const { node } = this.props.data.edge,
               { children, index } = this.props.data,
               childrenKeys = children ? Object.keys(children) : [],
-              isOver = this._checkRefs(),
+              { isOver } = this.props,
               splitKey = node.key.split('/'),
               folderName = this.props.filename,
               folderRowCSS = classNames({
                 Folder__row: true,
                 'Folder__row--expanded': this.state.expanded,
+                'Folder__row--hover': this.state.hover,
               }),
 
               buttonCSS = classNames({
-                Folder__btn: true,
-                'Folder__btn--selected': this.state.isSelected,
-                'Folder__btn--incomplete': this.state.isIncomplete,
+                'Btn Btn--round': true,
+                'Btn--uncheck': !this.state.isSelected && !this.state.isIncomplete,
+                'Btn--check': this.state.isSelected && !this.state.isIncomplete,
+                'Btn--partial': this.state.isIncomplete,
               }),
 
               folderChildCSS = classNames({
@@ -284,23 +368,28 @@ class Folder extends Component {
               folderNameCSS = classNames({
                 'Folder__cell Folder__cell--name': true,
                 'Folder__cell--open': this.state.expanded,
+                hidden: this.state.renameEditMode,
               }),
 
               folderCSS = classNames({
                 Folder: true,
                 'Folder--highlight': isOver,
-                'Folder--hover': this.state.hover,
                 'Folder--background': this.props.isDragging,
+              }),
+              renameCSS = classNames({
+                'File__cell File__cell--edit': true,
+                hidden: !this.state.renameEditMode,
               }),
               paddingLeft = 40 * index,
               rowStyle = { paddingLeft: `${paddingLeft}px` };
 
-        let folder = this.props.connectDragPreview(<div
+        let folder = // this.props.connectDragPreview(
+          <div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
           onMouseOut={(evt) => { this._setHoverState(evt, false); }}
           onMouseLeave={() => { this._mouseLeave(); }}
           onMouseEnter={() => { this._mouseEnter(); }}
-          className={folderCSS}>
+          className={ folderCSS }>
                 <div
                     className={folderRowCSS}
                     style={rowStyle}
@@ -314,6 +403,27 @@ class Folder extends Component {
                       </div>
                       <div className="Folder__name">
                           {folderName}
+                      </div>
+                    </div>
+                    <div className={renameCSS}>
+
+                      <div className="File__container">
+                        <input
+                          ref={(input) => { this.reanmeInput = input; }}
+                          placeholder="Rename File"
+                          type="text"
+                          className="File__input"
+                          onKeyUp={(evt) => { this._updateFileName(evt); }}
+                        />
+                      </div>
+                      <div className="flex justify-space-around">
+                        <button
+                          className="File__btn--round File__btn--cancel"
+                          onClick={() => { this._clearState(); }} />
+                        <button
+                          className="File__btn--round File__btn--add"
+                          onClick={() => { this._triggerMutation(); }}
+                        />
                       </div>
                     </div>
                     <div className="Folder__cell Folder__cell--size">
@@ -330,6 +440,7 @@ class Folder extends Component {
                         addFolderVisible={this._addFolderVisible}
                         renameEditMode={ () => {} }
                         folder
+                        renameEditMode={ this._renameEditMode}
                       />
                     </div>
                 </div>
@@ -379,6 +490,8 @@ class Folder extends Component {
                                       expanded={this.state.expanded}
                                       setParentHoverState={this._setHoverState}
                                       setParentDragFalse={this._mouseLeave}
+                                      isOverChildFile={this.state.isOverChildFile}
+                                      updateParentDropZone={this._updateDropZone}
                                       updateChildState={this.props.updateChildState}>
                                   </File>
                               );
@@ -388,7 +501,7 @@ class Folder extends Component {
                     }
                 </div>
 
-            </div>);
+            </div>;
 
         return (
           this.connectDND(folder)
