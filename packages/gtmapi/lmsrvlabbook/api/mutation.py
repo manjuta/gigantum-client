@@ -22,7 +22,7 @@ from lmsrvlabbook.api.mutations import (CreateBranch, CheckoutBranch, CreateLabb
                                         AddPackageComponents, CreateUserNote, StopContainer,
                                         ImportLabbook, DeleteLabbook,
                                         ImportRemoteLabbook, AddLabbookRemote,
-                                        ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFile,
+                                        ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                         AddLabbookCollaborator,
@@ -112,7 +112,7 @@ class LabbookMutations(graphene.ObjectType):
     move_labbook_file = MoveLabbookFile.Field()
 
     # Delete a file or directory inside of a Labbook.
-    delete_labbook_file = DeleteLabbookFile.Field()
+    delete_labbook_files = DeleteLabbookFiles.Field()
 
     # Make a directory (with auto-included .gitkeep) inside of a Labbook
     make_labbook_directory = MakeLabbookDirectory.Field()

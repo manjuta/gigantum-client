@@ -395,13 +395,13 @@ class TestLabBookServiceMutations(object):
 
     def test_delete_file(self, mock_create_labbooks):
         query = """
-        mutation deleteLabbookFile {
-          deleteLabbookFile(
+        mutation deleteLabbookFiless {
+          deleteLabbookFiles(
             input: {
               owner: "default",
               labbookName: "labbook1",
               section: "code",
-              filePath: "sillyfile"
+              filePaths: ["sillyfile"]
             }) {
               success
             }
@@ -412,7 +412,7 @@ class TestLabBookServiceMutations(object):
         assert os.path.exists(filepath) is True
 
         res = mock_create_labbooks[2].execute(query)
-        assert res['data']['deleteLabbookFile']['success'] is True
+        assert res['data']['deleteLabbookFiles']['success'] is True
 
         assert os.path.exists(filepath) is False
 
@@ -421,31 +421,38 @@ class TestLabBookServiceMutations(object):
         lb = LabBook(mock_create_labbooks[0])
         lb.from_name('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/subdir')
+
+        test_file = os.path.join(lb.root_dir, 'code', 'subdir', 'test.txt')
+        with open(test_file, 'wt') as tf:
+            tf.write("puppers")
+
         lb.git.add_all('code/')
         lb.git.commit("blah")
 
         dir_path = os.path.join(lb.root_dir, 'code', 'subdir')
         assert os.path.exists(dir_path) is True
+        assert os.path.exists(test_file) is True
 
         # Note, deleting a file should work with and without a trailing / at the end.
         query = """
-        mutation deleteLabbookFile {
-          deleteLabbookFile(
+        mutation deleteLabbookFiles {
+          deleteLabbookFiles(
             input: {
               owner: "default",
               labbookName: "labbook1",
               section: "code",
-              filePath: "subdir/",
-              isDirectory: true
+              filePaths: ["subdir/"]
             }) {
               success
             }
         }
         """
         res = mock_create_labbooks[2].execute(query)
-        assert res['data']['deleteLabbookFile']['success'] is True
+        print(res)
+        assert res['data']['deleteLabbookFiles']['success'] is True
 
         assert os.path.exists(dir_path) is False
+        assert os.path.exists(test_file) is False
         assert os.path.exists(os.path.join(lb.root_dir, 'code')) is True
 
     def test_makedir(self, mock_create_labbooks, snapshot):

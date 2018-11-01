@@ -494,7 +494,7 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
                                        cursor=cursor))
 
 
-class DeleteLabbookFile(graphene.ClientIDMutation):
+class DeleteLabbookFiles(graphene.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
@@ -515,7 +515,7 @@ class DeleteLabbookFile(graphene.ClientIDMutation):
         with lb.lock_labbook():
             FileOperations.delete_files(lb, section, file_paths)
 
-        return DeleteLabbookFile(success=True)
+        return DeleteLabbookFiles(success=True)
 
 
 class MoveLabbookFile(graphene.ClientIDMutation):
