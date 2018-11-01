@@ -27,6 +27,7 @@ class Folder extends Component {
             hoverId: '',
             isOver: false,
             prevIsOverState: false,
+            addFolderVisible: false,
             renameEditMode: false,
             isOverChildFile: false,
         };
@@ -37,6 +38,8 @@ class Folder extends Component {
         this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
         this._setHoverState = this._setHoverState.bind(this);
+        this._addFolderVisible = this._addFolderVisible.bind(this);
+        this._mouseLeave = this._mouseLeave.bind(this);
         this._renameEditMode = this._renameEditMode.bind(this);
         this._updateDropZone = this._updateDropZone.bind(this);
     }
@@ -53,6 +56,7 @@ class Folder extends Component {
         isOver: nextProps.isOver,
         prevIsOverState: state.isOver,
         isSelected,
+        // isDragging: nextProps.isDragging,
       };
     }
 
@@ -169,6 +173,9 @@ class Folder extends Component {
       if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
         this.setState({ expanded: !this.state.expanded });
       }
+      if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
+        this.setState({ expanded: true });
+      }
     }
 
     /**
@@ -189,6 +196,9 @@ class Folder extends Component {
     *  sets dragging state
     */
     _mouseEnter() {
+      if (this.props.setParentDragFalse) {
+        this.props.setParentDragFalse();
+      }
       this.setState({ isDragging: true });
     }
 
@@ -198,6 +208,17 @@ class Folder extends Component {
     */
     _mouseLeave() {
       this.setState({ isDragging: false });
+    }
+    /**
+      *  @param {}
+      *  sets addFolderVisible state
+    */
+    _addFolderVisible(reverse) {
+      if (reverse) {
+        this.setState({ addFolderVisible: !this.state.addFolderVisible });
+      } else {
+        this.setState({ addFolderVisible: false });
+      }
     }
     /**
     *  @param {}
@@ -410,6 +431,8 @@ class Folder extends Component {
                         edge={this.props.data.edge}
                         mutationData={this.props.mutationData}
                         mutations={this.props.mutations}
+                        addFolderVisible={this._addFolderVisible}
+                        folder
                         renameEditMode={ this._renameEditMode}
                       />
                     </div>
@@ -420,6 +443,8 @@ class Folder extends Component {
                       folderKey={node.key}
                       mutationData={this.props.mutationData}
                       mutations={this.props.mutations}
+                      setAddFolderVisible={this._addFolderVisible}
+                      addFolderVisible={this.state.addFolderVisible}
                     />
                     {
                         childrenKeys.map((file) => {
@@ -438,6 +463,8 @@ class Folder extends Component {
                                         checkParent={this._checkParent}
                                         setState={this._setState}
                                         setParentHoverState={this._setHoverState}
+                                        expanded={this.state.expanded}
+                                        setParentDragFalse={this._mouseLeave}
                                         updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
@@ -453,7 +480,9 @@ class Folder extends Component {
                                       isSelected={this.state.isSelected}
                                       multiSelect={this.props.multiSelect}
                                       checkParent={this._checkParent}
+                                      expanded={this.state.expanded}
                                       setParentHoverState={this._setHoverState}
+                                      setParentDragFalse={this._mouseLeave}
                                       isOverChildFile={this.state.isOverChildFile}
                                       updateParentDropZone={this._updateDropZone}
                                       updateChildState={this.props.updateChildState}>

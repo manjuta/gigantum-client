@@ -41,11 +41,11 @@ export default class ActionsMenu extends Component {
 
      if (this.props.edge.node.isFavorite) {
        this.props.mutations.removeFavorite(data, (response) => {
-         console.log(response);
+        //  console.log(response);
        });
      } else {
        this.props.mutations.addFavorite(data, (response) => {
-         console.log(response);
+        //  console.log(response);
        });
      }
   }
@@ -151,6 +151,14 @@ export default class ActionsMenu extends Component {
             className={favoriteCSS}
             name="Favorite">
           </div>
+          {
+            this.props.folder &&
+            <div
+              onClick={() => { this.props.addFolderVisible(true); }}
+              className="ActionsMenu__item ActionsMenu__item--AddSubfolder"
+              name="Add Folder">
+            </div>
+          }
         </div>
     );
   }

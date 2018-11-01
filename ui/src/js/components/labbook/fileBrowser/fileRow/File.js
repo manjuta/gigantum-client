@@ -148,6 +148,7 @@ class File extends Component {
     };
 
     this.props.mutations.moveLabbookFile(data, (response) => {
+      console.log(response);
        this._clearState();
     });
   }
@@ -214,12 +215,15 @@ class File extends Component {
                   <div className={`File__icon ${fileIconsJs.getClass(fileName)}`}></div>
 
                   <div className="File__text">
+                  {
+                    this.props.expanded &&
                     <TextTruncate
-                        className="File__paragragh"
-                        line={1}
-                        truncateText="…"
-                        text={fileName}
+                      className="File__paragragh"
+                      line={1}
+                      truncateText="…"
+                      text={fileName}
                     />
+                  }
                   </div>
 
                 </div>

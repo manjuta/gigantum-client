@@ -51,12 +51,11 @@ const dragSource = {
 
       let newKeyPath = newKeyArray.join('/');
       let fileKeyPath = fileKeyArray.join('/');
-
       newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
+      const trimmedFilePath = fileKeyPath.split('/').slice(0, -1).join();
 
-      if (newKeyPath !== fileKeyPath) {
+      if ((newKeyPath !== fileKeyPath) && (trimmedFilePath !== newKeyPath)) {
         if (newKey !== props.data.edge.node.key) {
-
           const moveLabbookFileData = {
             newKey,
             edge: props.data.edge,
@@ -97,12 +96,12 @@ const dragSource = {
 };
 
 function dragCollect(connect, monitor) {
-  console.log(monitor, monitor.isDraggingSource(monitor.sourceId), monitor.isDragging())
+  console.log(monitor, connect)
 
   return {
     // connectDragPreview: connect.dragPreview(),
     connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging(),
+    isDragging: monitor.sourceId === monitor.getSoureId(),
   };
 
 }
@@ -243,7 +242,6 @@ function targetCollect(connect, monitor) {
     }
   })
 
- // console.log(newLastTarget, dragItem)
   if (dragItem && newLastTarget) {
     let dragKeyArray = dragItem.props.data.edge.node.key.split('/')
     dragKeyArray.pop();

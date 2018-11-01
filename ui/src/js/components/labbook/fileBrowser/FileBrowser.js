@@ -147,7 +147,6 @@ class FileBrowser extends Component {
               });
            }
         });
-
         return fileObject;
   }
   /**
@@ -397,6 +396,7 @@ class FileBrowser extends Component {
                                   mutationData={mutationData}
                                   data={files[file]}
                                   mutations={this.state.mutations}
+                                  expanded
                                   isOverChildFile={this.state.isOverChildFile}
                                   updateParentDropZone={this._updateDropZone}
                                   updateChildState={this._updateChildState}>
