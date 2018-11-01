@@ -257,76 +257,43 @@ class FileOperations(object):
                                               show=True)
 
     @classmethod
-    def delete_file(cls, labbook: LabBook, section: str, relative_path: str) -> bool:
+    def delete_files(cls, labbook: LabBook, section: str, relative_paths: List[str]) -> None:
         """Delete file (or directory) from inside lb section.
 
+        The list of paths is deleted in series. Only provide "parent" nodes in the file tree. This is because deletes
+        on directories will remove all child objects, so subsequent deletes of individual files will then fail.
 
-        Part of the intention is to mirror the unix "rm" command. Thus, there
-        needs to be some extra arguments in order to delete a directory, especially
-        one with contents inside of it. In this case, `directory` must be true in order
-        to delete a directory at the given path.
 
         Args:
-            labbook: Subject LabBook
-            section: Section name (code, input, output)
-            relative_path: Relative path from labbook root to target
+            labbook(LabBook): Subject LabBook
+            section(str): Section name (code, input, output)
+            relative_paths(list(str)): a list of relative paths from labbook root to target
 
         Returns:
             None
         """
         labbook.validate_section(section)
-        relative_path = LabBook.make_path_relative(relative_path)
-        target_path = os.path.join(labbook.root_dir, section, relative_path)
-        if not os.path.exists(target_path):
-            raise ValueError(f"Attempted to delete non-existent path at `{target_path}`")
-        else:
-            target_type = 'file' if os.path.isfile(target_path) else 'directory'
-            logger.info(f"Removing {target_type} at `{target_path}`")
+        is_untracked = shims.in_untracked(labbook.root_dir, section=section)
 
-            if shims.in_untracked(labbook.root_dir, section=section):
-                logger.info(f"Removing untracked target {target_path}")
-                if os.path.isdir(target_path):
-                    shutil.rmtree(target_path)
-                else:
-                    os.remove(target_path)
-                return True
-
-            commit_msg = f"Removed {target_type} {relative_path}."
-            labbook.git.remove(target_path, force=True, keep_file=False)
-            assert not os.path.exists(target_path)
-            commit = labbook.git.commit(commit_msg)
-
-            if os.path.isfile(target_path):
-                _, ext = os.path.splitext(target_path)
-            else:
-                ext = 'directory'
-
-            # Get LabBook section
-            activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
-
-            # Create detail record
-            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                       action=ActivityAction.DELETE)
-            adr.add_value('text/plain', commit_msg)
-
-            # Create activity record
-            ar = ActivityRecord(activity_type,
-                                message=commit_msg,
-                                linked_commit=commit.hexsha,
-                                show=True,
-                                importance=255,
-                                tags=[ext])
-            ar.add_detail_object(adr)
-
-            # Store
-            ars = ActivityStore(labbook)
-            ars.create_activity_record(ar)
-
+        for file_path in relative_paths:
+            relative_path = LabBook.make_path_relative(file_path)
+            target_path = os.path.join(labbook.root_dir, section, relative_path)
             if not os.path.exists(target_path):
-                return True
+                raise ValueError(f"Attempted to delete non-existent path at `{target_path}`")
             else:
-                logger.error(f"{target_path} should have been deleted, but remains.")
-                return False
+                if is_untracked:
+                    if os.path.isdir(target_path):
+                        shutil.rmtree(target_path)
+                    else:
+                        os.remove(target_path)
+                else:
+                    labbook.git.remove(target_path, force=True, keep_file=False)
+
+                if os.path.exists(target_path):
+                    raise IOError(f"Failed to delete path: {target_path}")
+
+        if not is_untracked:
+            labbook.sweep_uncommitted_changes(show=True)
 
     @classmethod
     def move_file(cls, labbook: LabBook, section: str, src_rel_path: str, dst_rel_path: str) -> Dict[str, Any]:

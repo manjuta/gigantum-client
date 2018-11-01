@@ -133,7 +133,7 @@ class TestLabBook(object):
         remote_lb = LabBook(mock_config_file[0])
         remote_lb.from_directory(remote_labbook_repo)
         remote_lb.checkout_branch("testing-branch")
-        FileOperations.delete_file(remote_lb, "code", "codefile.c")
+        FileOperations.delete_files(remote_lb, "code", "codefile.c")
 
         r = lb.get_commits_behind_remote("origin")
         assert r[0] == 'testing-branch'

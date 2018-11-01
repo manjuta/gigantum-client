@@ -104,7 +104,7 @@ class TestLabbookFileOperations(object):
         base_name = os.path.basename(new_file_data['key'])
 
         assert os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
-        FO.delete_file(lb, 'code', base_name)
+        FO.delete_files(lb, 'code', [base_name])
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
 
     def test_remove_file_fail(self, mock_config_file, sample_src_file):
@@ -113,7 +113,7 @@ class TestLabbookFileOperations(object):
         FO.insert_file(lb, "code", sample_src_file)
         new_file_path = os.path.join('blah', 'invalid.txt')
         with pytest.raises(ValueError):
-            FO.delete_file(lb, 'code', new_file_path)
+            FO.delete_files(lb, 'code', [new_file_path])
 
     def test_remove_dir(self, mock_config_file, sample_src_file):
         lb = LabBook(mock_config_file[0])
@@ -125,9 +125,27 @@ class TestLabbookFileOperations(object):
         assert os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
         # Note! Now that remove() uses force=True, no special action is needed for directories.
         # Delete the directory
-        FO.delete_file(lb, "output", "testdir")
+        FO.delete_files(lb, "output", ["testdir"])
         assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
         assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir'))
+
+    def test_remove_many_files(self, mock_config_file, sample_src_file):
+        lb = LabBook(mock_config_file[0])
+        lb.new(owner={"username": "test"}, name="test-remove-dir-1", description="validate tests.")
+
+        test_files = [f"testfile{x}.txt" for x in range(15)]
+        for test_file in test_files:
+            with open(os.path.join(lb.root_dir, 'code', test_file), 'wt') as sample_f:
+                sample_f.write("blah")
+
+            assert os.path.exists(os.path.join(lb.root_dir, 'code', test_file))
+        lb.git.add_all()
+        lb.git.commit("making test data")
+
+        FO.delete_files(lb, "code", test_files)
+
+        for test_file in test_files:
+            assert not os.path.exists(os.path.join(lb.root_dir, 'code', test_file))
 
     def test_move_file_as_rename_in_same_dir(self, mock_config_file, sample_src_file):
         # Create lb

@@ -537,13 +537,14 @@ class LabBook(object):
                                 tags=['save'])
             if upload:
                 ar.tags.append('upload')
-            ar, newcnt, modcnt = shims.process_sweep_status(
-                ar, result_status, LabBook.infer_section_from_relative_path)
+            ar, newcnt, modcnt, delcnt = shims.process_sweep_status(ar, result_status,
+                                                                    LabBook.infer_section_from_relative_path)
             nmsg = f"{newcnt} new file(s). " if newcnt > 0 else ""
             mmsg = f"{modcnt} modified file(s). " if modcnt > 0 else ""
+            dmsg = f"{delcnt} deleted file(s). " if delcnt > 0 else ""
             ar.message = f"{extra_msg or ''}" \
                          f"{'Uploaded ' if upload else ''}" \
-                         f"{nmsg}{mmsg}"
+                         f"{nmsg}{mmsg}{dmsg}"
             ars = ActivityStore(self)
             ars.create_activity_record(ar)
         else:
