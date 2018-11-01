@@ -115,6 +115,17 @@ class TestLabbookFileOperations(object):
         with pytest.raises(ValueError):
             FO.delete_files(lb, 'code', [new_file_path])
 
+    def test_remove_file_fail_old_prototype(self, mock_config_file, sample_src_file):
+        lb = LabBook(mock_config_file[0])
+        lb.new(owner={"username": "test"}, name="test-insert-files-1", description="validate tests.")
+        new_file_data = FO.insert_file(lb, "code", sample_src_file)
+        base_name = os.path.basename(new_file_data['key'])
+
+        assert os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
+
+        with pytest.raises(ValueError):
+            FO.delete_files(lb, 'code', base_name)
+
     def test_remove_dir(self, mock_config_file, sample_src_file):
         lb = LabBook(mock_config_file[0])
         lb.new(owner={"username": "test"}, name="test-remove-dir-1", description="validate tests.")
