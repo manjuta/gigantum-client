@@ -96,12 +96,10 @@ const dragSource = {
 };
 
 function dragCollect(connect, monitor) {
-  console.log(monitor, connect)
-
   return {
-    // connectDragPreview: connect.dragPreview(),
+    connectDragPreview: connect.dragPreview(),
     connectDragSource: connect.dragSource(),
-    isDragging: monitor.sourceId === monitor.getSoureId(),
+    isDragging: monitor.sourceId === monitor.getSourceId(),
   };
 
 }
@@ -253,10 +251,6 @@ function targetCollect(connect, monitor) {
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;
   }
-  // if (!canDrop) {
-  //   console.log(currentTarget);
-  // }
-   // console.log(currentTarget);
   return {
     connectDropTarget: connect.dropTarget(),
 		canDrop,
