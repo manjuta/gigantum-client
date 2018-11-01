@@ -25,6 +25,14 @@ class AddSubfolder extends Component {
   componentWillUnmount() {
     window.removeEventListener('click', this._clickedOffInput);
   }
+  /*
+    sets auto focus on visibility change
+  */
+  componentDidUpdate() {
+    if (this.props.addFolderVisible) {
+      this.subfolderInput.focus();
+    }
+  }
 
   /**
   *  @param {event}
@@ -48,8 +56,9 @@ class AddSubfolder extends Component {
   _updateStateBoolean(key, value) {
     this.setState({
       [key]: value,
+    }, () => {
+      this.subfolderInput.focus();
     });
-    this.subfolderInput.focus();
   }
 
   /**
