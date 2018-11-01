@@ -9,11 +9,6 @@
       background-color: transparent !important;
     }
   }
-
-  &--hover {
-    @include boxShadowDark();
-  }
-
   &--background {
     background: $white;
   }
@@ -56,6 +51,11 @@
         }
       }
     }
+
+    &--hover {
+      @include boxShadowDark();
+    }
+
 }
 
 

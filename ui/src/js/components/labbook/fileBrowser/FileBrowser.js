@@ -24,12 +24,14 @@ class FileBrowser extends Component {
         childrenState: {},
         multiSelect: 'none',
         search: '',
+        isOverChildFile: false,
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
       this._setState = this._setState.bind(this);
       this._updateChildState = this._updateChildState.bind(this);
       this._checkChildState = this._checkChildState.bind(this);
+      this._updateDropZone = this._updateDropZone.bind(this);
     }
     static getDerivedStateFromProps(props, state) {
         let childrenState = {};
@@ -249,21 +251,19 @@ class FileBrowser extends Component {
   *  @return {boolean}
   */
   _checkRefs() {
-    let isOver = this.props.isOverCurrent,
+    let isOver = this.props.isOverCurrent || this.props.isOver, // this.state.isOverChildFile,
         { refs } = this;
 
-    Object.keys(refs).forEach((childname) => {
-      if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
-        const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-
-        if (child.props.data && !child.props.data.edge.node.isDir) {
-          if (child.props.isOverCurrent) {
-            isOver = true;
+        Object.keys(refs).forEach((childname) => {
+          if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+            const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
+            if (child.props.data && !child.props.data.edge.node.isDir) {
+              if (child.props.isOverCurrent) {
+                isOver = true;
+              }
+            }
           }
-        }
-      }
-    });
-
+        });
     return ({
       isOver,
     });
@@ -293,12 +293,19 @@ class FileBrowser extends Component {
     this.setState({ search: evt.target.value });
   }
 
+  /**
+  *  @param {boolean} isOverChildFile
+  *  update state to update drop zone
+  *  @return {}
+  */
+  _updateDropZone(isOverChildFile) {
+    this.setState({ isOverChildFile });
+  }
+
   render() {
     const files = this._processFiles(),
           { mutationData } = this.state,
-          {
-            isOver,
-          } = this._checkRefs();
+          { isOver } = this.props;
 
    const { isSelected } = this._checkChildState();
 
@@ -390,7 +397,10 @@ class FileBrowser extends Component {
                                   mutationData={mutationData}
                                   data={files[file]}
                                   mutations={this.state.mutations}
+                                  isOverChildFile={this.state.isOverChildFile}
+                                  updateParentDropZone={this._updateDropZone}
                                   updateChildState={this._updateChildState}>
+
                               </File>
                           );
                         }
