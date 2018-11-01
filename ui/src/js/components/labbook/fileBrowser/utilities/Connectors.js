@@ -97,19 +97,21 @@ const dragSource = {
 };
 
 function dragCollect(connect, monitor) {
+  console.log(monitor, monitor.isDraggingSource(monitor.sourceId), monitor.isDragging())
 
   return {
     // connectDragPreview: connect.dragPreview(),
     connectDragSource: connect.dragSource(),
-    isDragging: monitor.getSourceId() === monitor.sourceId,
+    isDragging: monitor.isDragging(),
   };
+
 }
 
 const targetSource = {
   canDrop(props, monitor) {
      // You can disallow drop based on props or item
      const item = monitor.getItem();
-     return monitor.isOver({ shallow: true });
+     return true;
   },
   drop(props, monitor, component) {
     const dndItem = monitor.getItem();
@@ -241,7 +243,7 @@ function targetCollect(connect, monitor) {
     }
   })
 
-  console.log(newLastTarget, dragItem)
+ // console.log(newLastTarget, dragItem)
   if (dragItem && newLastTarget) {
     let dragKeyArray = dragItem.props.data.edge.node.key.split('/')
     dragKeyArray.pop();
@@ -249,14 +251,17 @@ function targetCollect(connect, monitor) {
     let dragKeyPruned = dragKeyArray.join('/') === '' ? '' : `${dragKeyArray.join('/')}/`;
 
     let dropKey = newLastTarget.props.files ? '' : newLastTarget.props.data.edge.node.key;
-    console.log(dragKeyPruned, dropKey);
+    // console.log(dragKeyPruned, dropKey);
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;
   }
-
+  // if (!canDrop) {
+  //   console.log(currentTarget);
+  // }
+   // console.log(currentTarget);
   return {
     connectDropTarget: connect.dropTarget(),
-		canDrop: monitor.canDrop(),
+		canDrop,
     isOver,
     isOverCurrent,
   };

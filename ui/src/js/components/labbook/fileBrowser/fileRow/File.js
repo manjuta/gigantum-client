@@ -194,8 +194,7 @@ class File extends Component {
           paddingLeft = 40 * index,
           rowStyle = { paddingLeft: `${paddingLeft}px` };
 
-    let file = // this.props.connectDragPreview(
-      <div
+    let file = this.props.connectDragPreview(<div
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
       onMouseOut={(evt) => { this._setHoverState(evt, false); }}
       onMouseDown={() => { this._mouseDown(); }}
@@ -266,7 +265,7 @@ class File extends Component {
 
             </div>
 
-        </div>;
+        </div>);
 
     return (
       this.connectDND(file)
