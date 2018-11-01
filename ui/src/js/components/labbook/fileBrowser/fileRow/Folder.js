@@ -27,12 +27,9 @@ class Folder extends Component {
             hoverId: '',
             isOver: false,
             prevIsOverState: false,
-<<<<<<< HEAD
             addFolderVisible: false,
-=======
             renameEditMode: false,
             isOverChildFile: false,
->>>>>>> fba4fcf7ca299f5f24591be5dbfc38b4a2a591c2
         };
 
         this._setSelected = this._setSelected.bind(this);
@@ -41,13 +38,10 @@ class Folder extends Component {
         this._checkRefs = this._checkRefs.bind(this);
         this._setState = this._setState.bind(this);
         this._setHoverState = this._setHoverState.bind(this);
-<<<<<<< HEAD
         this._addFolderVisible = this._addFolderVisible.bind(this);
         this._mouseLeave = this._mouseLeave.bind(this);
-=======
         this._renameEditMode = this._renameEditMode.bind(this);
         this._updateDropZone = this._updateDropZone.bind(this);
->>>>>>> fba4fcf7ca299f5f24591be5dbfc38b4a2a591c2
     }
 
 
