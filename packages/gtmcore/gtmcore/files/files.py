@@ -275,6 +275,9 @@ class FileOperations(object):
         labbook.validate_section(section)
         is_untracked = shims.in_untracked(labbook.root_dir, section=section)
 
+        if not isinstance(relative_paths, list):
+            raise ValueError("Must provide list of paths to remove")
+
         for file_path in relative_paths:
             relative_path = LabBook.make_path_relative(file_path)
             target_path = os.path.join(labbook.root_dir, section, relative_path)
