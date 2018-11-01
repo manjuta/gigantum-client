@@ -111,15 +111,12 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
 
     def resolve_has_files(self, info, kwargs):
         def _hf(lb):
-            if 'section' in kwargs:
-                file_cxns = self.helper_resolve_files(lb, kwargs['section'])
-                return len(file_cxns.edges) > 0
-            else:
-                raise ValueError('File section not provided')
+            file_cxns = self.helper_resolve_files(lb, self.section)
+            return len(file_cxns.edges) > 0
+
         lb = info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _hf
         )
-
 
     def helper_resolve_all_files(self, labbook, kwargs):
         """Helper method to populate the LabbookFileConnection"""
