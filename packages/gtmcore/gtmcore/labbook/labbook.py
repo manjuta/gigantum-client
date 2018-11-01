@@ -542,9 +542,14 @@ class LabBook(object):
             nmsg = f"{newcnt} new file(s). " if newcnt > 0 else ""
             mmsg = f"{modcnt} modified file(s). " if modcnt > 0 else ""
             dmsg = f"{delcnt} deleted file(s). " if delcnt > 0 else ""
-            ar.message = f"{extra_msg or ''}" \
-                         f"{'Uploaded ' if upload else ''}" \
-                         f"{nmsg}{mmsg}{dmsg}"
+            message = f"{extra_msg or ''}" \
+                      f"{'Uploaded ' if upload else ''}" \
+                      f"{nmsg}{mmsg}{dmsg}"
+
+            # This is used to handle if you try to delete an empty directory. This shouldn't technically happen, but if
+            # a user manages to create an empty dir outside the client, we should handle it gracefully
+            ar.message = "No detected changes" if not message else message
+
             ars = ActivityStore(self)
             ars.create_activity_record(ar)
         else:

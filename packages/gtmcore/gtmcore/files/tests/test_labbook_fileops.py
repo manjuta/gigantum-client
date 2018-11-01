@@ -140,6 +140,20 @@ class TestLabbookFileOperations(object):
         assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
         assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir'))
 
+    def test_remove_empty_dir(self, mock_config_file, sample_src_file):
+        lb = LabBook(mock_config_file[0])
+        lb.new(owner={"username": "test"}, name="test-remove-dir-1", description="validate tests.")
+        FO.makedir(lb, "output/testdir")
+        new_file_path = FO.insert_file(lb, "output", sample_src_file, "testdir")
+        base_name = os.path.basename(new_file_path['key'])
+
+        assert os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
+        # Note! Now that remove() uses force=True, no special action is needed for directories.
+        # Delete the directory
+        FO.delete_files(lb, "output", ["testdir"])
+        assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir', base_name))
+        assert not os.path.exists(os.path.join(lb.root_dir, 'output', 'testdir'))
+
     def test_remove_many_files(self, mock_config_file, sample_src_file):
         lb = LabBook(mock_config_file[0])
         lb.new(owner={"username": "test"}, name="test-remove-dir-1", description="validate tests.")
