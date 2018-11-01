@@ -37,6 +37,7 @@ class Folder extends Component {
         this._setState = this._setState.bind(this);
         this._setHoverState = this._setHoverState.bind(this);
         this._addFolderVisible = this._addFolderVisible.bind(this);
+        this._mouseLeave = this._mouseLeave.bind(this);
     }
 
 
@@ -51,6 +52,7 @@ class Folder extends Component {
         isOver: nextProps.isOver,
         prevIsOverState: state.isOver,
         isSelected,
+        // isDragging: nextProps.isDragging,
       };
     }
 
@@ -166,16 +168,6 @@ class Folder extends Component {
     _expandSection(evt) {
       if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
         this.setState({ expanded: !this.state.expanded });
-        console.log(this.props.data.children);
-        console.log(this.refs);
-        Object.keys(this.refs).forEach((ref) => {
-          console.log(ref);
-          // console.log(this.refs[ref]);
-          this.refs[ref].setState({ ForceRerender: true }, () => {
-            console.log(this.refs[ref])
-
-          })
-        });
       }
       if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
         this.setState({ expanded: true });
@@ -200,6 +192,9 @@ class Folder extends Component {
     *  sets dragging state
     */
     _mouseEnter() {
+      if (this.props.setParentDragFalse) {
+        this.props.setParentDragFalse();
+      }
       this.setState({ isDragging: true });
     }
 
@@ -365,6 +360,7 @@ class Folder extends Component {
                                         setState={this._setState}
                                         setParentHoverState={this._setHoverState}
                                         expanded={this.state.expanded}
+                                        setParentDragFalse={this._mouseLeave}
                                         updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
@@ -382,6 +378,7 @@ class Folder extends Component {
                                       checkParent={this._checkParent}
                                       expanded={this.state.expanded}
                                       setParentHoverState={this._setHoverState}
+                                      setParentDragFalse={this._mouseLeave}
                                       updateChildState={this.props.updateChildState}>
                                   </File>
                               );

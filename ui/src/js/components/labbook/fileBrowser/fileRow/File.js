@@ -140,6 +140,7 @@ class File extends Component {
     };
 
     this.props.mutations.moveLabbookFile(data, (response) => {
+      console.log(response);
        this._clearState();
     });
   }

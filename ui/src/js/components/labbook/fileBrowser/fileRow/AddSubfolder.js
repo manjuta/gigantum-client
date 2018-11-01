@@ -114,6 +114,9 @@ class AddSubfolder extends Component {
 
     this.props.mutations.makeLabbookDirectory(data, (response) => {
        this._clearState();
+       if (this.props.setAddFolderVisible) {
+        this.props.setAddFolderVisible(false);
+       }
     });
   }
 
