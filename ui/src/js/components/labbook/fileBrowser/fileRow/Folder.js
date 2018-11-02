@@ -170,7 +170,8 @@ class Folder extends Component {
     *  @return {}
     */
     _expandSection(evt) {
-      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item')) {
+      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') &&
+      !evt.target.classList.contains('File__btn--round')) {
         this.setState({ expanded: !this.state.expanded });
       }
       if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
