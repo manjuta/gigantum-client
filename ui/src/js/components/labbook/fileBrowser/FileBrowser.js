@@ -179,13 +179,35 @@ class FileBrowser extends Component {
   */
   _deleteSelectedFiles() {
     let self = this;
+    let filePaths = [];
+    let dirList = [];
+    let comparePaths = [];
+    let edges = [];
+
     for (let key in this.state.childrenState) {
       if (this.state.childrenState[key].isSelected) {
         let { edge } = this.state.childrenState[key];
         delete this.state.childrenState[key];
-        self._deleteMutation(edge.node.key, edge);
+        comparePaths.push(edge.node.key)
+        filePaths.push(edge.node.key)
+        edges.push(edge)
+        if (edge.node.isDir) {
+          dirList.push(edge.node.key)
+        }
       }
     }
+
+    let filteredPaths = filePaths.filter((key) => {
+      let folderKey = key.substr(0, key.lastIndexOf('/'));
+      folderKey = `${folderKey}/`;
+
+      let index = dirList.indexOf(folderKey)
+      console.log(folderKey, dirList)
+      console.log(dirList[index], folderKey)
+      return ((dirList[index] === key) && (dirList.indexOf(folderKey) > 0)) || (dirList.indexOf(folderKey) < -1)
+    })
+    console.log(filteredPaths, comparePaths, edges, dirList)
+    // self._deleteMutation(filteredPaths, edges);
   }
 
   /**
@@ -226,13 +248,13 @@ class FileBrowser extends Component {
   *  triggers delete muatation
   *  @return {}
   */
-  _deleteMutation(key, edge) {
+  _deleteMutation(filePaths, edges) {
     const data = {
-      key,
-      edge,
+      filePaths,
+      edges,
     };
 
-    this.state.mutations.deleteLabbookFile(data, (response) => {
+    this.state.mutations.deleteLabbookFiles(data, (response) => {
       console.log(response, edge);
     });
   }

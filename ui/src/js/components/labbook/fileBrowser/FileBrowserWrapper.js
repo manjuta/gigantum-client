@@ -6,7 +6,7 @@ import uuidv4 from 'uuid/v4';
 import DetailPanel from './../detail/DetailPanel';
 import Modal from 'Components/shared/Modal';
 // mutations
-import DeleteLabbookFileMutation from 'Mutations/fileBrowser/DeleteLabbookFileMutation';
+import DeleteLabbookFilesMutation from 'Mutations/fileBrowser/DeleteLabbookFilesMutation';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
 import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';

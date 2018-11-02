@@ -130,7 +130,7 @@ const ChunkUploader = {
       componentCallback = (response) => { // callback to trigger postMessage from initializer
         postMessage(response, false);
       };
-    console.log(data);
+
     const id = uuidv4(),
       chunkSize = 1000 * 1000 * 48,
       fileSize = file.size,

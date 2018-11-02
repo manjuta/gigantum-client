@@ -7,8 +7,8 @@ import environment from 'JS/createRelayEnvironment';
 
 
 const mutation = graphql`
-  mutation DeleteLabbookFileMutation($input: DeleteLabbookFileInput!){
-    deleteLabbookFile(input: $input){
+  mutation DeleteLabbookFilesMutation($input: DeleteLabbookFilesInput!){
+    deleteLabbookFiles(input: $input){
       success
       clientMutationId
     }
@@ -17,26 +17,23 @@ const mutation = graphql`
 
 let tempID = 0;
 
-export default function DeleteLabbookFileMutation(
+export default function DeleteLabbookFilesMutation(
   connectionKey,
   owner,
   labbookName,
   labbookId,
-  deleteLabbookFileId,
-  filePath,
+  filePaths,
   section,
   edgesToDelete,
   callback,
 ) {
-  const isDirectory = (filePath.indexOf('.') < 0);
 
   const variables = {
     input: {
       owner,
       labbookName,
-      filePath,
+      filePaths,
       section,
-      isDirectory,
       clientMutationId: `${tempID++}`,
     },
   };
@@ -69,7 +66,7 @@ export default function DeleteLabbookFileMutation(
       variables,
       configs: [{
         type: 'NODE_DELETE',
-        deletedIDFieldName: deleteLabbookFileId,
+        // deletedIDFieldName: deleteLabbookFileId,
         connectionKeys: [{
           key: connectionKey,
         }, {
@@ -87,21 +84,20 @@ export default function DeleteLabbookFileMutation(
       onError: err => console.error(err),
 
       updater: (store) => {
-        sharedUpdater(store, labbookId, deleteLabbookFileId, connectionKey);
-        sharedUpdater(store, labbookId, deleteLabbookFileId, recentConnectionKey);
-
-        if (Array.isArray(edgesToDelete)) {
           edgesToDelete.forEach((edge) => {
             if (edge) {
               sharedUpdater(store, labbookId, edge.node.id, connectionKey);
-              sharedUpdater(store, labbookId, deleteLabbookFileId, recentConnectionKey);
+              sharedUpdater(store, labbookId, edge.node.id, recentConnectionKey);
             }
           });
-        }
       },
       optimisticUpdater: (store) => {
-        sharedUpdater(store, labbookId, deleteLabbookFileId, connectionKey);
-        sharedUpdater(store, labbookId, deleteLabbookFileId, recentConnectionKey);
+        edgesToDelete.forEach((edge) => {
+          if (edge) {
+            sharedUpdater(store, labbookId, edge.node.id, connectionKey);
+            sharedUpdater(store, labbookId, edge.node.id, recentConnectionKey);
+          }
+        });
       },
     },
   );

@@ -1,5 +1,5 @@
 // mutations
-import DeleteLabbookFileMutation from 'Mutations/fileBrowser/DeleteLabbookFileMutation';
+import DeleteLabbookFilesMutation from 'Mutations/fileBrowser/DeleteLabbookFilesMutation';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
 import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
@@ -176,13 +176,12 @@ class FileBrowserMutations {
   *  @param {object, function}
   *  remove file or folder from directory
   */
-  deleteLabbookFile(data, callback) {
+  deleteLabbookFiles(data, callback) {
     const {
-          key,
-          edge,
-        } = data,
-        edgeId = edge.node.id;
-
+          filePaths,
+          edges,
+        } = data;
+    console.log(filePaths, edges)
     const {
         connection,
         owner,
@@ -191,15 +190,14 @@ class FileBrowserMutations {
         section,
       } = this.state;
 
-    DeleteLabbookFileMutation(
+    DeleteLabbookFilesMutation(
       connection,
       owner,
       labbookName,
       parentId,
-      edgeId,
-      key,
+      filePaths,
       section,
-      edge,
+      edges,
       (response, error) => {
         if (error) {
           console.error(error);
