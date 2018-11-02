@@ -495,7 +495,7 @@ class Folder extends Component {
                     }
                 </div>
 
-            </div>;
+            </div>
 
         return (
           this.connectDND(folder)
