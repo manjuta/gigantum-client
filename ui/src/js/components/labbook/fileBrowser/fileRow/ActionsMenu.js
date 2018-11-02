@@ -115,6 +115,11 @@ export default class ActionsMenu extends Component {
           deleteCSS = classNames({
             'ActionsMenu__item ActionsMenu__item--delete': true,
             'ActionsMenu__popup-visible': this.state.popupVisible,
+          }),
+          folderCSS = classNames({
+            ActionsMenu__item: true,
+            'ActionsMenu__item--AddSubfolder': true,
+            'visibility-hidden': !this.props.folder,
           });
 
     return (
@@ -122,6 +127,11 @@ export default class ActionsMenu extends Component {
           className="ActionsMenu"
           key={`${this.props.edge.node.id}-action-menu}`}
           ref={this._setWrapperRef}>
+          <div
+            onClick={() => { this.props.folder && this.props.addFolderVisible(true); }}
+            className={folderCSS}
+            name="Add Folder">
+          </div>
           <div
             className={deleteCSS}
             name="Delete"
@@ -151,14 +161,6 @@ export default class ActionsMenu extends Component {
             className={favoriteCSS}
             name="Favorite">
           </div>
-          {
-            this.props.folder &&
-            <div
-              onClick={() => { this.props.addFolderVisible(true); }}
-              className="ActionsMenu__item ActionsMenu__item--AddSubfolder"
-              name="Add Folder">
-            </div>
-          }
         </div>
     );
   }

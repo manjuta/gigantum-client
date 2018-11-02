@@ -168,7 +168,6 @@ class File extends Component {
   }
 
   render() {
-
     const { node } = this.props.data.edge;
     const { index } = this.props.data;
     const splitKey = node.key.split('/');
