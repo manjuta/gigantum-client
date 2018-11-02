@@ -111,8 +111,8 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
 
     def resolve_has_files(self, info, **kwargs):
         def _hf(lb):
-            file_cxns = self.helper_resolve_files(lb, self.section)
-            return len(file_cxns.edges) > 0
+            file_list = os.listdir(os.path.join(lb.root_dir, self.section))
+            return len([f for f in file_list if f != '.gitkeep']) > 0
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _hf
@@ -186,8 +186,7 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
 
     def resolve_has_favorites(self, info, **kwargs):
         def _hf(lb):
-            fav_cxns = self.helper_resolve_favorites(lb, kwargs)
-            return len(fav_cxns.edges) > 0
+            return len(lb.get_favorites(self.section).items()) > 0
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _hf
