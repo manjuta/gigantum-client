@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+import platform
 import re
 import glob
 import datetime
@@ -30,6 +31,7 @@ import yaml
 from gtm.common.console import ask_question
 from gtm.dockerutils import get_docker_client
 from gtm.common import get_client_root
+from gtm.dockerutils import dockerize_windows_path
 
 
 class ClientBuilder(object):
@@ -199,8 +201,7 @@ class ClientBuilder(object):
 
         build_args items:
             supervisor_file: The path to the target supervisor file to move into build dir
-            config_override_file: The path to the target config file override file to use to render
-                                  the
+            config_override_file: The path to the target config file override file
 
         docker_args items:
             CLIENT_CONFIG_FILE: The client config file
@@ -212,6 +213,14 @@ class ClientBuilder(object):
         Returns:
             None
         """
+        # Check if *nix or windows
+        # Doing this at the top of the function so it's clear this variable is
+        # available
+        if platform.system() == 'Windows':
+            is_windows = True
+        else:
+            is_windows = False
+
         self.docker_client = get_docker_client()
         client_root_dir = get_client_root()
         build_dir = os.path.join(client_root_dir, build_args['build_dir'])
@@ -276,19 +285,21 @@ priority=0""")
         # Build image
         dockerfile_path = os.path.join(client_root_dir, 'resources', 'docker', 'Dockerfile')
         print("\n\n*** Building Gigantum Client image `{}`, please wait...\n\n".format(self.image_name))
-        if show_output:
-            [print(ln[list(ln.keys())[0]],
-                   end='') for ln in self.docker_client.api.build(path=client_root_dir,
-                                                                  dockerfile=dockerfile_path,
-                                                                  tag=named_image,
-                                                                  labels=labels, nocache=no_cache,
-                                                                  pull=True, rm=True,
-                                                                  decode=True,
-                                                                  buildargs=docker_args)]
-        else:
-            self.docker_client.images.build(path=client_root_dir, dockerfile=dockerfile_path,
-                                            tag=named_image, nocache=no_cache,
-                                            pull=True, labels=labels, buildargs=docker_args)
+
+        if is_windows:
+            dockerfile_path = dockerize_windows_path(os.path.relpath(dockerfile_path, client_root_dir))
+            client_root_dir = dockerize_windows_path(client_root_dir)
+            for path_var in ['CLIENT_CONFIG_FILE', 'SUPERVISOR_CONFIG']:
+                docker_args[path_var] = dockerize_windows_path(docker_args[path_var]) 
+
+        [print(ln[list(ln.keys())[0]],
+               end='') for ln in self.docker_client.api.build(path=client_root_dir,
+                                                              dockerfile=dockerfile_path,
+                                                              tag=named_image,
+                                                              labels=labels, nocache=no_cache,
+                                                              pull=True, rm=True,
+                                                              decode=True,
+                                                              buildargs=docker_args)]
 
         # Tag with `latest` for auto-detection of image on launch
         # TODO: Rename container to gigantum/client

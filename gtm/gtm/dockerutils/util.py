@@ -62,10 +62,15 @@ def get_docker_client(check_server_version=True, fallback=True):
 
 
 def dockerize_windows_path(dkrpath: str) -> str:
-    """Returns a path that can be mounted as a docker volume on windows
-       Docker uses non-standard formats for windows mounts. Note that different components of the docker ecosystem may
-       support a different set of formats for paths. This one seems to work across docker cp, docker compose and
-       command-line volume mounts on Windows. Specifically, this routine converts C:\a\b -> /C/a/b
+    """Returns a path that can be mounted as a docker volume on windows Docker
+    uses non-standard formats for windows mounts. Note that different
+    components of the docker ecosystem may support a different set of formats
+    for paths. This one seems to work across docker cp, docker compose and
+    command-line volume mounts on Windows. Specifically, this routine converts
+    C:\a\b -> C:/a/b
+
+    Note that the above colon + forward-slash notation is *necessary* to build
+    images with docker-py.
 
     Args:
         dkrpath(str): a python path
@@ -73,4 +78,4 @@ def dockerize_windows_path(dkrpath: str) -> str:
     Returns:
         str: path that can be handed to Docker for a volume mount
     """
-    return re.sub('(^[A-Z]):(.*$)', '/\g<1>\g<2>', dkrpath.replace('\\', '/'))
+    return dkrpath.replace('\\', '/')
