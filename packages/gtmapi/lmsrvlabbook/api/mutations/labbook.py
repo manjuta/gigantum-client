@@ -494,20 +494,17 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
                                        cursor=cursor))
 
 
-class DeleteLabbookFile(graphene.ClientIDMutation):
+class DeleteLabbookFiles(graphene.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         section = graphene.String(required=True)
-        file_path = graphene.String(required=True)
-        is_directory = graphene.Boolean(required=False)
+        file_paths = graphene.List(graphene.String, required=True)
 
     success = graphene.Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section,
-                               file_path, is_directory=False,
-                               client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, file_paths, client_mutation_id=None):
         username = get_logged_in_username()
         working_directory = Configuration().config['git']['working_directory']
         inferred_lb_directory = os.path.join(working_directory, username,
@@ -516,9 +513,9 @@ class DeleteLabbookFile(graphene.ClientIDMutation):
         lb.from_directory(inferred_lb_directory)
 
         with lb.lock_labbook():
-            FileOperations.delete_file(lb, section=section, relative_path=file_path)
+            FileOperations.delete_files(lb, section, file_paths)
 
-        return DeleteLabbookFile(success=True)
+        return DeleteLabbookFiles(success=True)
 
 
 class MoveLabbookFile(graphene.ClientIDMutation):
