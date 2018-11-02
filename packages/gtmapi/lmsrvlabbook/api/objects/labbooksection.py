@@ -111,8 +111,12 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
 
     def resolve_has_files(self, info, **kwargs):
         def _hf(lb):
-            file_list = os.listdir(os.path.join(lb.root_dir, self.section))
-            return len([f for f in file_list if f != '.gitkeep']) > 0
+            p = os.path.join(lb.root_dir, self.section)
+            for rootd, dirs, files in os.walk(p):
+                for f in files:
+                    if f != '.gitkeep':
+                        return True
+            return False
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _hf
