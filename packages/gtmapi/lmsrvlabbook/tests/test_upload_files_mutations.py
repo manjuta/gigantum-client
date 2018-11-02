@@ -212,7 +212,7 @@ class TestUploadFilesMutations(object):
         assert os.path.isfile(target_file) is False
         assert os.path.exists(target_file) is False
 
-    def test_add_file_errors(self, mock_create_labbooks, snapshot):
+    def test_add_file_errors(self, mock_create_labbooks):
         """Test new file error handling"""
 
         class DummyContext(object):
@@ -251,13 +251,3 @@ class TestUploadFilesMutations(object):
         # Fail because no file
         r = client.execute(query, context_value=DummyContext(None))
         assert 'errors' in r
-        # DMK - commenting out test because check is currently disabled
-        # test_file = os.path.join(tempfile.gettempdir(), "myfile.txt")
-
-        # with open(test_file, 'wt') as tf:
-        #     tf.write("THIS IS A FILE I MADE!")
-
-        # with open(test_file, 'rb') as tf:
-        #     file = FileStorage(tf)
-        #     # Fail because filenames don't match
-        #     snapshot.assert_match(client.execute(query, context_value=DummyContext(file)))

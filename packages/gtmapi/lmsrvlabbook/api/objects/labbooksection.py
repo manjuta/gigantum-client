@@ -109,12 +109,12 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_files(labbook, kwargs))
 
-    def resolve_has_files(self, info, kwargs):
+    def resolve_has_files(self, info, **kwargs):
         def _hf(lb):
             file_cxns = self.helper_resolve_files(lb, self.section)
             return len(file_cxns.edges) > 0
 
-        lb = info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _hf
         )
 
@@ -184,7 +184,7 @@ class LabbookSection(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRe
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_favorites(labbook, kwargs))
 
-    def resolve_has_favorites(self, info, kwargs):
+    def resolve_has_favorites(self, info, **kwargs):
         def _hf(lb):
             fav_cxns = self.helper_resolve_favorites(lb, kwargs)
             return len(fav_cxns.edges) > 0
