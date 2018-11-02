@@ -77,7 +77,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
 const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, username, filepath, section, getChunkCallback, componentCallback) => {
   let { footer, fileBrowser } = store.getState();
   console.log(footer.totalFiles, fileBrowser.pause)
-  if (fileBrowser.pause || (footer.totalFiles > 1)) {
+  if (fileBrowser.pause || (footer.totalFiles > 0)) {
 
     AddLabbookFileMutation(
       data.connectionKey,
