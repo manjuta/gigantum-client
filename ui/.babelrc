@@ -6,6 +6,7 @@
  "plugins": [
    "relay",
    "transform-class-properties",
+   "@babel/plugin-syntax-dynamic-import",
    [
      "module-resolver",
      {

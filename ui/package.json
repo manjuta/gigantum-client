@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "auth0-js": "^9.3.0",
     "autoprefixer": "^7.2.6",
     "babel-core": "^6.26.3",
