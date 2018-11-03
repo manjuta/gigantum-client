@@ -316,11 +316,11 @@ module.exports = {
       minimize: true,
       minimizer: [
         new UglifyJsPlugin({
-          sourceMap: false,
+          sourceMap: true,
           uglifyOptions: {
               compress: {
-                  unused: false,
-                  dead_code: false,
+                  unused: true,
+                  dead_code: true,
                   warnings: true
               },
               output: {
