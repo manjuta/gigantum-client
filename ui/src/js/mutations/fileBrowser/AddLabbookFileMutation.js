@@ -169,7 +169,8 @@ export default function AddLabbookFileMutation(
               if (index === responseKeyArr.length - 1) {
                 temp += key;
               } else {
-                temp = `${temp + key}/`;
+                const newKey = temp + key;
+                temp = `${newKey}/`;
               }
 
               if (index === responseKeyArr.length - 1) {

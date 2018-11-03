@@ -88,8 +88,8 @@ class CollaboratorButton extends Component {
         collaboratorSubText.pop();
         collaboratorSubText = collaboratorSubText.join(', ');
       }
-
-      collaboratorSubText += `...+${collaboratorFilteredArr.length - lastParsedIndex - 1}`;
+      const collaboratorLength = collaboratorFilteredArr.length - lastParsedIndex - 1;
+      collaboratorSubText += `...+${collaboratorLength}`;
     }
     return collaboratorSubText;
   }

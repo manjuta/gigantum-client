@@ -26,7 +26,8 @@ export const humanFileSize = (bytes) => {
     bytes /= thresh;
     ++u;
   } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-  return `${bytes.toFixed(1)} ${units[u]}`;
+  const fixedBytes = bytes.toFixed(1);
+  return `${fixedBytes} ${units[u]}`;
 };
 
 
