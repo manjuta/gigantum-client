@@ -88,7 +88,7 @@ export default class ActivityCard extends Component {
         'ActivityCard__start-node': this.props.isExpandedHead,
         'ActivityCard__end-node': this.props.isExpandedEnd,
       });
-    const expandedHeight = 110 * (this.props.attachedCluster.length - 1);
+    const expandedHeight = this.props.attachedCluster ? 110 * (this.props.attachedCluster.length - 1) : 0;
     const expandedStyle = this.props.attachedCluster && {
       height: `${expandedHeight}px`,
     };

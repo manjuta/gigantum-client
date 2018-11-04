@@ -1,12 +1,17 @@
-{
+module.exports = {
  "presets": [
-   "react-app",
-   "env"
+   "@babel/preset-react",
+   "@babel/preset-env",
+   "react-app"
  ],
  "plugins": [
    "relay",
-   "transform-class-properties",
+   "@babel/plugin-proposal-class-properties",
    "@babel/plugin-syntax-dynamic-import",
+   ["@babel/plugin-proposal-decorators", {
+    "legacy": true
+   }],
+   ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }],
    [
      "module-resolver",
      {

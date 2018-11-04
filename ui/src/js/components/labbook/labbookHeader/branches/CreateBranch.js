@@ -21,7 +21,7 @@ export default class CreateBranchModal extends Component {
   constructor(props) {
     super(props);
     const formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A');
-    const formatedTimestamp = Moment(Date.parse(this.props.selected.timestamp)).format('M/DD/YY h:mm:ss A');
+    const formatedTimestamp = props.selected ? Moment(Date.parse(props.selected.timestamp)).format('M/DD/YY h:mm:ss A') : '';
     this.state = {
       modalVisible: props.modalVisible,
       showLoginPrompt: false,
@@ -29,7 +29,7 @@ export default class CreateBranchModal extends Component {
       textLength: 0,
       showError: false,
       branchName: '',
-      branchDescription: this.props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback workspace to ${formatedTimestamp}.` : this.props.description ? this.props.description : '',
+      branchDescription: props.selected ? `Branch created on ${formatedCurrentTimestamp} to rollback workspace to ${formatedTimestamp}.` : props.description ? props.description : '',
       createButtonClicked: false,
       buttonLoaderCreateBranch: '',
     };
@@ -208,7 +208,7 @@ export default class CreateBranchModal extends Component {
       });
 
     const formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A'),
-      formatedTimestamp = Moment(Date.parse(this.props.selected.timestamp)).format('M/DD/YY h:mm:ss A');
+      formatedTimestamp = this.props.selected ? Moment(Date.parse(this.props.selected.timestamp)).format('M/DD/YY h:mm:ss A') : '';
 
     return (
       <div>

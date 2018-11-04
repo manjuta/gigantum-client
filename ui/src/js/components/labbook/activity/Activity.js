@@ -574,7 +574,7 @@ class Activity extends Component {
     const isLastPage = !this.props.labbook.activityRecords.pageInfo.hasNextPage;
     const rollbackableDetails = obj.edge.node.detailObjects.filter(detailObjs => detailObjs.type !== 'RESULT' && detailObjs.type !== 'CODE_EXECUTED');
     const isCompressed = this.state.compressedElements.has(obj.flatIndex);
-    const activtyBarHeight = ((obj.attachedCluster.length - 1) * 7.5) + 30;
+    const activtyBarHeight = obj.attachedCluster ? ((obj.attachedCluster.length - 1) * 7.5) + 30 : 0;
     return (
       <Fragment key={obj.edge.node.id}>
         <div className="ActivityCard__wrapper">
