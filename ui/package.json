@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "autobind-decorator": "2.1.0",
     "auth0-js": "^9.3.0",
     "autoprefixer": "^7.2.6",
     "babel-core": "^6.26.3",
@@ -86,6 +85,7 @@
     "react": "^16.3.2",
     "react-dnd": "^5.0.0",
     "react-dnd-html5-backend": "4.0.6",
+    "autobind-decorator": "2.1.0",
     "react-dom": "^16.3.2",
     "react-highlight-words": "^0.11.0",
     "react-loadable": "^5.5.0",
