@@ -213,17 +213,17 @@ module.exports = {
       // use the "style" loader inside the async code so CSS from them won't be
       // in the main CSS file.
       {
-          test: /\.(scss|css)$/,
-          loaders: [
-            'style-loader',
-            'css-loader',
-            {
-              loader: 'sass-loader',
-              options:{
-                sourceMap: true
-              }
-            }
-          ]
+        test: /\.(scss|css)$/,
+        loaders: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
       // TODO: fix #101, code commented out until issue is fixed
       // {
@@ -312,23 +312,23 @@ module.exports = {
   //   // ],
   // },
 
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new UglifyJsPlugin({
-          sourceMap: true,
-          uglifyOptions: {
-              compress: {
-                  unused: true,
-                  dead_code: true,
-                  warnings: true
-              },
-              output: {
-                  comments: true
-              }
-          }
-        })
-      ]
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new UglifyJsPlugin({
+        sourceMap: true,
+        uglifyOptions: {
+          compress: {
+            unused: true,
+            dead_code: true,
+            warnings: true,
+          },
+          output: {
+            comments: true,
+          },
+        },
+      }),
+    ],
   },
   plugins: [
     new ProgressBarPlugin(),
@@ -364,7 +364,7 @@ module.exports = {
     new webpack.DefinePlugin(env.stringified),
     // Minify the code.
 
-    //deprecated
+    // deprecated
     // new webpack.optimize.UglifyJsPlugin({
     //   splitChunks: {
     //    chunks: 'all'
