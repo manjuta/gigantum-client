@@ -5,6 +5,8 @@ MAINTAINER Gigantum <support@gigantum.com>
 # Install system level dependencies
 RUN apt-get -y update && apt-get -y install git curl gosu nodejs npm
 
+RUN node stable
+
 # Install Yarn
 RUN npm install yarn --global
 
