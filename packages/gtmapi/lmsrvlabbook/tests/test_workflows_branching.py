@@ -262,7 +262,7 @@ class TestWorkflowsBranching(object):
 
         # Make sure activity record was created when description was changed
         log_data = lb.git.log()
-        assert "_GTM_ACTIVITY_START_**\nmsg:Updated description of LabBook" in log_data[0]['message']
+        assert "_GTM_ACTIVITY_START_**\nmsg:Updated description of Project" in log_data[0]['message']
 
     def test_delete_feature_branch_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
@@ -349,7 +349,7 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 branchName: "{b1}"
-            }}) {{            
+            }}) {{
                 labbook{{
                     name
                     description
@@ -379,7 +379,7 @@ class TestWorkflowsBranching(object):
         assert og_hash != branch_hash
 
         bm.workon_branch(bm.workspace_branch)
-        assert lb.git.log()[0]['commit'] == og_hash 
+        assert lb.git.log()[0]['commit'] == og_hash
         assert not os.path.exists(os.path.join(lb.root_dir, 'code/sillydir1'))
 
         merge_q = f"""
@@ -387,8 +387,8 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{b1}"                
-            }}) {{                
+                otherBranchName: "{b1}"
+            }}) {{
                 labbook{{
                     name
                     description
@@ -430,7 +430,7 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{bm.workspace_branch}"                
+                otherBranchName: "{bm.workspace_branch}"
             }}) {{
                 labbook{{
                     name
@@ -472,8 +472,8 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{nb}"                
-            }}) {{                
+                otherBranchName: "{nb}"
+            }}) {{
                 labbook{{
                     name
                     description
@@ -510,8 +510,8 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 otherBranchName: "{nb}",
-                force: true            
-            }}) {{                         
+                force: true
+            }}) {{
                 labbook{{
                     name
                     description
@@ -548,7 +548,7 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 otherBranchName: "{nb}",
-                force: false            
+                force: false
             }}) {{
                 labbook{{
                     name

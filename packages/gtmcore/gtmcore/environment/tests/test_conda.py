@@ -96,7 +96,7 @@ class TestConda3PackageManager(object):
 
         # numpy is a non-installed package
         result = mrg.latest_version("numpy", lb, username)
-        assert result == '1.15.3'
+        assert result == '1.15.4'
 
     def test_latest_versions(self, build_lb_image_for_env_conda):
         """Test latest_version command"""
@@ -106,7 +106,7 @@ class TestConda3PackageManager(object):
         pkgs = ["numpy", "requests", "matplotlib"]
         result = mrg.latest_versions(pkgs, lb, username)
 
-        assert result[0] == '1.15.3'  # Numpy
+        assert result[0] == '1.15.4'  # Numpy
         assert result[1] == REQUESTS_LATEST_VERSION  # Requests
         assert result[2] == '3.0.1'  # Matplotlib
 
@@ -226,7 +226,7 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "plotly"
-        assert result[1].version == "3.3.0"
+        assert result[1].version == "3.4.0"
         assert result[1].error is False
 
 
@@ -240,7 +240,7 @@ class TestConda2PackageManager(object):
         pkgs = ["numpy", "requests"]
         result = mrg.latest_versions(pkgs, lb, username)
 
-        assert result[0] == '1.15.3'  # Numpy
+        assert result[0] == '1.15.4'  # Numpy
         assert result[1] == '2.20.0'  # Requests
 
     def test_is_valid_errors(self, build_lb_image_for_env):
@@ -286,5 +286,5 @@ class TestConda2PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "plotly"
-        assert result[1].version == "3.3.0"
+        assert result[1].version == "3.4.0"
         assert result[1].error is False
