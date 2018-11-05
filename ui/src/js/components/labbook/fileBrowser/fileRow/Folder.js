@@ -51,11 +51,14 @@ class Folder extends Component {
         : (nextProps.multiSelect === 'none')
         ? false
         : state.isSelected;
+        let isIncomplete = (nextProps.multiSelect === 'none') ? false : state.isIncomplete;
+        console.log(nextProps.multiSelect)
       return {
         ...state,
         isOver: nextProps.isOver,
         prevIsOverState: state.isOver,
         isSelected,
+        isIncomplete,
         // isDragging: nextProps.isDragging,
       };
     }

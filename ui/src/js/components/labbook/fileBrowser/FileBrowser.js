@@ -249,11 +249,8 @@ class FileBrowser extends Component {
       filePaths,
       edges,
     };
-
-    let self = this;
-    this.state.mutations.deleteLabbookFiles(data, (response) => {
-      self.setState({ multiSelect: 'none' });
-    });
+    this.setState({ multiSelect: 'none' });
+    this.state.mutations.deleteLabbookFiles(data, (response) => {});
   }
   /**
   *  @param {string, boolean}
