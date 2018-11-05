@@ -379,11 +379,11 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
 
             # Create detail record
             adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
-            adr.add_value('text/plain', "Updated description of LabBook")
+            adr.add_value('text/plain', "Updated description of Project")
 
             # Create activity record
             ar = ActivityRecord(ActivityType.LABBOOK,
-                                message="Updated description of LabBook",
+                                message="Updated description of Project",
                                 linked_commit=commit.hexsha,
                                 tags=["labbook"],
                                 show=False)

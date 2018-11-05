@@ -69,7 +69,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
 
                 # Create activity record
                 ar = ActivityRecord(ActivityType.LABBOOK,
-                                    message="Updated description of LabBook",
+                                    message="Updated description of Project",
                                     linked_commit=commit.hexsha,
                                     tags=["labbook"],
                                     show=False)
