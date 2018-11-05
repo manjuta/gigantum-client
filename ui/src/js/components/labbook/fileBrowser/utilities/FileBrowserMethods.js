@@ -45,9 +45,7 @@ const createFiles = (files, prefix, mutationData) => {
             transactionId,
           };
 
-          ChunkUploader.chunkFile(data, (response) => {
-            console.log(response);
-          });
+          ChunkUploader.chunkFile(data, (response) => {});
         };
 
         fileReader.readAsArrayBuffer(file);
@@ -62,7 +60,7 @@ const createFiles = (files, prefix, mutationData) => {
   // if (folderFiles.length > 0) {
   //   self._startFolderUpload(folderFiles, prefix, totalFiles);
   // }
-}
+};
 
 /**
 * @param {array} files

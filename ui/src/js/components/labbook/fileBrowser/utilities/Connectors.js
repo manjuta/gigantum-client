@@ -62,9 +62,7 @@ const dragSource = {
           };
 
           if (props.mutations) {
-            props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
-              console.log(response);
-            });
+            props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
           } else {
             const {
               parentId,
@@ -85,9 +83,7 @@ const dragSource = {
 
             const mutations = new FileBrowserMutations(mutationData);
 
-            mutations.moveLabbookFile(moveLabbookFileData, (response) => {
-              console.log(response);
-            });
+            mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
           }
         }
       }
@@ -101,14 +97,35 @@ function dragCollect(connect, monitor) {
     connectDragSource: connect.dragSource(),
     isDragging: monitor.sourceId === monitor.getSourceId(),
   };
-
 }
+
+const uploadDirContent = (dndItem, props, mutationData) => {
+  let path;
+  dndItem.dirContent.then((fileList) => {
+      if (fileList.length) {
+        let key = props.data ? props.data.edge.node.key : props.fileKey ? props.fileKey : '';
+        path = key === '' ? '' : key.substr(0, key.lastIndexOf('/') || key.length);
+        CreateFiles.createFiles(fileList.flat(), `${path}/`, mutationData);
+      } else if (dndItem.files && dndItem.files.length) {
+           // handle dragged files
+           let key = props.newKey || props.fileKey;
+           path = key.substr(0, key.lastIndexOf('/') || key.length);
+           let item = monitor.getItem();
+
+           if (item && item.files && props.browserProps.createFiles) {
+             CreateFiles.createFiles(item.files, `${path}/`, mutationData);
+           }
+           newPath = null;
+           fileKey = null;
+      }
+  });
+};
 
 const targetSource = {
   canDrop(props, monitor) {
      // You can disallow drop based on props or item
      const item = monitor.getItem();
-     return true;
+     return monitor.isOver({ shallow: true });
   },
   drop(props, monitor, component) {
     const dndItem = monitor.getItem();
@@ -117,9 +134,7 @@ const targetSource = {
         fileKey,
         path,
         files;
-
     if (dndItem && props.data) {
-
           if (!dndItem.dirContent) {
               fileKey = props.data.edge.node.key;
 
@@ -129,40 +144,47 @@ const targetSource = {
               newPath = newKey + fileName;
               fileKey = props.fileKey;
           } else {
-              dndItem.dirContent.then((fileList) => {
-                  console.log(fileList);
-                  if (fileList.length) {
-                    let key = props.data.edge.node.key || props.fileKey;
-                    path = key.substr(0, key.lastIndexOf('/') || key.length);
-                    CreateFiles.createFiles(fileList.flat(), `${path}/`, props.mutationData);
-
-                  } else if (dndItem.files && dndItem.files.length) {
-
-                       // handle dragged files
-                       let key = props.newKey || props.fileKey;
-                       path = key.substr(0, key.lastIndexOf('/') || key.length);
-                       let item = monitor.getItem();
-
-                       if (item && item.files && props.browserProps.createFiles) {
-                         CreateFiles.createFiles(item.files, `${path}/`, props.mutationData);
-                       }
-                       newPath = null;
-                       fileKey = null;
-                  }
-              });
+              uploadDirContent(dndItem, props, props.mutationData);
           }
       } else {
+          const {
+            parentId,
+            connection,
+            favoriteConnection,
+            section,
+          } = props;
+          const { owner, labbookName } = store.getState().routes;
+
+          const mutationData = {
+            owner,
+            labbookName,
+            parentId,
+            connection,
+            favoriteConnection,
+            section,
+          };
           // uploads to root directory
           let item = monitor.getItem();
-
           if (item.files) {
-            CreateFiles.createFiles(item.files, '', component.state.mutationData);
+            if (dndItem.dirContent) {
+               uploadDirContent(dndItem, props, mutationData);
+            } else {
+              CreateFiles.createFiles(item.files, '', component.state.mutationData);
+            }
           } else {
             const dropResult = monitor.getDropResult();
             let currentKey = item.data.edge.node.key;
             let splitKey = currentKey.split('/');
-            let newKey = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
-            newKey = `${newKey}/`;
+            let newKeyTemp = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
+            let splitFolder = dropResult.data ? dropResult.data.edge.node.key.split('/') : '';
+            if (splitFolder !== '') {
+              splitFolder.pop();
+            }
+
+            let dropFolderKey = splitFolder.join('/');
+
+            let newKey = item.data && item.data.edge.node.isDir ? `${dropFolderKey}/${newKeyTemp}/` : `${dropFolderKey}/${newKeyTemp}`;
+            newKey = dropResult.data ? newKey : `${newKeyTemp}`;
 
             if ((newKey !== item.data.edge.node.key)) {
               const moveLabbookFileData = {
@@ -171,11 +193,8 @@ const targetSource = {
               };
 
               if (props.mutations) {
-                props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {
-                  console.log(response);
-                });
+                props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
               } else {
-
                 const {
                   parentId,
                   connection,
@@ -195,9 +214,7 @@ const targetSource = {
 
                 const mutations = new FileBrowserMutations(mutationData);
 
-                mutations.moveLabbookFile(moveLabbookFileData, (response) => {
-                  console.log(response);
-                });
+                mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
               }
             }
           }
@@ -210,7 +227,6 @@ const targetSource = {
 };
 
 function targetCollect(connect, monitor) {
-
   let currentTargetId = monitor.targetId;
   let isOverCurrent = monitor.isOver({ shallow: true });
   let isOver = monitor.isOver({});
@@ -234,20 +250,18 @@ function targetCollect(connect, monitor) {
 
   let dragItem;
   monitor.internalMonitor.registry.dragSources.forEach((item) => {
-    // console.log(item.ref)
     if (item.ref && item.ref.current && item.ref.current.props.isDragging) {
-      dragItem = item.ref.current
+      dragItem = item.ref.current;
     }
-  })
+  });
 
   if (dragItem && newLastTarget) {
-    let dragKeyArray = dragItem.props.data.edge.node.key.split('/')
+    let dragKeyArray = dragItem.props.data.edge.node.key.split('/');
     dragKeyArray.pop();
 
     let dragKeyPruned = dragKeyArray.join('/') === '' ? '' : `${dragKeyArray.join('/')}/`;
 
     let dropKey = newLastTarget.props.files ? '' : newLastTarget.props.data.edge.node.key;
-    // console.log(dragKeyPruned, dropKey);
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;
   }

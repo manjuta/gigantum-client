@@ -11,7 +11,6 @@ import { setFinishedUploading, setPauseChunkUpload } from 'JS/redux/reducers/lab
 import config from 'JS/config';
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
-  console.log(file, chunk, accessToken, getChunkCallback);
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
     if (result && (error === undefined)) {
       getChunkCallback(file, result);
@@ -76,9 +75,7 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
 
 const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, username, filepath, section, getChunkCallback, componentCallback) => {
   let { footer, fileBrowser } = store.getState();
-  console.log(footer.totalFiles, fileBrowser.pause)
   if (fileBrowser.pause || (footer.totalFiles > 0)) {
-
     AddLabbookFileMutation(
       data.connectionKey,
       username,
@@ -120,7 +117,6 @@ const ChunkUploader = {
     @param {object} data includes file filepath username and accessToken
   */
   chunkFile: (data, postMessage, passedChunkIndex) => {
-
     let {
         file,
         filepath,
@@ -144,7 +140,6 @@ const ChunkUploader = {
       @param{object, object} response result
     */
     const getChunk = (response, result) => {
-      console.log(response)
       if (response.name) { // checks if response is a file
         let sliceUpperBound = (fileSize > (fileLoadedSize + chunkSize))
             ? (fileLoadedSize + chunkSize)
@@ -164,7 +159,6 @@ const ChunkUploader = {
           filename: file.name,
           uploadId: id,
         };
-        console.log(chunkIndex, totalChunks)
         if (chunkIndex <= totalChunks) { // if  there is still chunks to process do next chunk
           // select type of mutation
           if (file.name.indexOf('.lbk') > -1 || file.name.indexOf('.zip') > -1) {

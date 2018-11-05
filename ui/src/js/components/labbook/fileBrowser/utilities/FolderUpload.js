@@ -311,7 +311,6 @@ const FolderUpload = {
     let batchCount = 0;
     let batchCallbackCount = 0;
     const transactionId = uuidv4();
-    console.log(files)
     // commented until pause functionality is available
     // let isPaused = false;
     /**

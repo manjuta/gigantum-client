@@ -117,15 +117,12 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
     folderFiles = [];
 
   createFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData, mutationData);
-  // loop through files and upload if file is a file
-  console.log(files);
+  // loop through files and upload if file is a file;
   files.forEach((file, index) => {
-    console.log(file)
     if (file.isDirectory) {
       folderFiles.push(file);
     } else if (file.name) {
       const isFileAllowed = fileSizeData.fileSizeNotAllowed.filter(largeFile => largeFile.name === file.name).length === 0;
-      console.log(isFileAllowed)
       if (isFileAllowed) {
         let newKey = prefix;
 
@@ -226,7 +223,6 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData, 
     const fileSizeNotAllowedString = fileSizeNotAllowedNames.join(', ');
 
     if (fileSizeNotAllowedString.length > 0) {
-      console.log(mutationData)
       const size = mutationData.section === 'code' ? '100 MB' : '1.8 GB';
       const message = `Cannot upload files over ${size} to the ${mutationData.section} directory. The following files have not been added ${fileSizeNotAllowedString}`;
 

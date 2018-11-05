@@ -490,12 +490,11 @@ class Folder extends Component {
                                   </File>
                               );
                             }
-                            return (<div>Loading</div>)
+                            return (<div>Loading</div>);
                         })
                     }
                 </div>
-
-            </div>
+            </div>;
 
         return (
           this.connectDND(folder)

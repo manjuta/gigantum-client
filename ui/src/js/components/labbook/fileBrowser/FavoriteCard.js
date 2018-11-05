@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
 import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
-import TextTruncate from 'react-text-truncate'
+import TextTruncate from 'react-text-truncate';
 // Mutations
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import UpdateFavoriteMutation from 'Mutations/fileBrowser/UpdateFavoriteMutation';

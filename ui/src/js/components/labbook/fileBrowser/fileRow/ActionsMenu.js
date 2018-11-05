@@ -41,11 +41,9 @@ export default class ActionsMenu extends Component {
 
      if (this.props.edge.node.isFavorite) {
        this.props.mutations.removeFavorite(data, (response) => {
-        //  console.log(response);
        });
      } else {
        this.props.mutations.addFavorite(data, (response) => {
-        //  console.log(response);
        });
      }
   }
@@ -84,9 +82,7 @@ export default class ActionsMenu extends Component {
       edge: this.props.edge,
     };
 
-    this.props.mutations.deleteLabbookFile(deleteFileData, (reponse) => {
-      console.log(response);
-    });
+    this.props.mutations.deleteLabbookFile(deleteFileData, (reponse) => {});
 
     this._togglePopup(evt, false);
   }

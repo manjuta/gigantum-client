@@ -83,7 +83,6 @@ class FileBrowserMutations {
         section,
         (response, error) => {
           callback(response, error);
-          console.log(response, error, edge, newKey);
         },
       );
   }
@@ -181,7 +180,6 @@ class FileBrowserMutations {
           filePaths,
           edges,
         } = data;
-    console.log(filePaths, edges)
     const {
         connection,
         owner,
@@ -201,7 +199,8 @@ class FileBrowserMutations {
       (response, error) => {
         if (error) {
           console.error(error);
-          setErrorMessage(`ERROR: could not delete folder ${key}`, error);
+          let keys = filePaths.join(' ');
+          setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
         }
       },
     );

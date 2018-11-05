@@ -41,9 +41,6 @@ class File extends Component {
       ? false
       : state.isSelected;
 
-      // if (nextProps.isOverCurrent) {
-      //   console.log(nextProps.data.edge.node.key, (nextProps.isOverCurrent !== nextProps.isOverChildFile), nextProps.isDragging, state.hover);
-      // }
       if ((nextProps.isOverCurrent !== nextProps.isOverChildFile) && !nextProps.isDragging && state.hover) {
         nextProps.updateParentDropZone(nextProps.isOverCurrent);
       }
@@ -148,7 +145,6 @@ class File extends Component {
     };
 
     this.props.mutations.moveLabbookFile(data, (response) => {
-      console.log(response);
        this._clearState();
     });
   }

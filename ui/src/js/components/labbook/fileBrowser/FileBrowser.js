@@ -188,11 +188,11 @@ class FileBrowser extends Component {
       if (this.state.childrenState[key].isSelected) {
         let { edge } = this.state.childrenState[key];
         delete this.state.childrenState[key];
-        comparePaths.push(edge.node.key)
-        filePaths.push(edge.node.key)
-        edges.push(edge)
+        comparePaths.push(edge.node.key);
+        filePaths.push(edge.node.key);
+        edges.push(edge);
         if (edge.node.isDir) {
-          dirList.push(edge.node.key)
+          dirList.push(edge.node.key);
         }
       }
     }
@@ -201,13 +201,10 @@ class FileBrowser extends Component {
       let folderKey = key.substr(0, key.lastIndexOf('/'));
       folderKey = `${folderKey}/`;
 
-      let index = dirList.indexOf(folderKey)
-      console.log(folderKey, dirList)
-      console.log(dirList[index], folderKey)
-      return ((dirList[index] === key) && (dirList.indexOf(folderKey) > 0)) || (dirList.indexOf(folderKey) < -1)
-    })
-    console.log(filteredPaths, comparePaths, edges, dirList)
-    // self._deleteMutation(filteredPaths, edges);
+      let hasDir = dirList.some(dir => ((key.indexOf(dir) > -1) && (dir !== key)));
+      return !hasDir;
+    });
+    self._deleteMutation(filteredPaths, edges);
   }
 
   /**
@@ -232,11 +229,10 @@ class FileBrowser extends Component {
     let multiSelect = (count === selectedCount) ? 'none' : 'all';
 
     let { childrenState } = this.state;
+
     for (let key in childrenState) {
       if (childrenState[key]) {
-        console.log(childrenState[key], key);
         childrenState[key].isSelected = (multiSelect === 'all');
-
         count++;
       }
     }
@@ -254,8 +250,9 @@ class FileBrowser extends Component {
       edges,
     };
 
+    let self = this;
     this.state.mutations.deleteLabbookFiles(data, (response) => {
-      console.log(response, edge);
+      self.setState({ multiSelect: 'none' });
     });
   }
   /**
