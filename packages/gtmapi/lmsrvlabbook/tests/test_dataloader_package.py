@@ -58,7 +58,7 @@ class TestDataloaderPackage(object):
         assert len(version_list) == 3
         assert version_list[0] == "2.10.6"
         assert version_list[1] == "0.13"
-        assert version_list[2] == "1.15.3"
+        assert version_list[2] == "1.15.4"
 
     def test_load_many_conda(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
@@ -73,7 +73,7 @@ class TestDataloaderPackage(object):
 
         assert version_list[0] == "5.0.0"
         assert version_list[1] == "1.1.0"
-        assert version_list[2] == "1.15.3"
+        assert version_list[2] == "1.15.4"
 
     def test_load_many_conda2(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
@@ -87,7 +87,7 @@ class TestDataloaderPackage(object):
         assert len(version_list) == 3
         assert version_list[0] == "5.0.0"
         assert version_list[1] == "1.1.0"
-        assert version_list[2] == "1.15.3"
+        assert version_list[2] == "1.15.4"
 
     def test_load_many_mixed(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
@@ -101,7 +101,7 @@ class TestDataloaderPackage(object):
         assert len(version_list) == 3
         assert version_list[0] == "5.0.0"
         assert version_list[1] == "1.1.0"
-        assert version_list[2] == "1.15.3"
+        assert version_list[2] == "1.15.4"
 
     def test_load_invalid_package(self, build_image_for_jupyterlab):
         """Test loading many labbooks"""
