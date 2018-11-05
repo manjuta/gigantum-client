@@ -113,7 +113,7 @@ class FileBrowserMutations {
       labbookName,
       key,
       '',
-      false,
+      edge.node.isDir,
       edge,
       section,
       (response, error) => {

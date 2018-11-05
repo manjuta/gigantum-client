@@ -173,48 +173,51 @@ const targetSource = {
             }
           } else {
             const dropResult = monitor.getDropResult();
-            let currentKey = item.data.edge.node.key;
-            let splitKey = currentKey.split('/');
-            let newKeyTemp = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
-            let splitFolder = dropResult.data ? dropResult.data.edge.node.key.split('/') : '';
-            if (splitFolder !== '') {
-              splitFolder.pop();
-            }
 
-            let dropFolderKey = splitFolder.join('/');
+            if (dropResult) {
+              let currentKey = item.data.edge.node.key;
+              let splitKey = currentKey.split('/');
+              let newKeyTemp = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
+              let splitFolder = dropResult.data ? dropResult.data.edge.node.key.split('/') : '';
+              if (splitFolder !== '') {
+                splitFolder.pop();
+              }
 
-            let newKey = item.data && item.data.edge.node.isDir ? `${dropFolderKey}/${newKeyTemp}/` : `${dropFolderKey}/${newKeyTemp}`;
-            newKey = dropResult.data ? newKey : `${newKeyTemp}`;
+              let dropFolderKey = splitFolder.join('/');
 
-            if ((newKey !== item.data.edge.node.key)) {
-              const moveLabbookFileData = {
-                newKey,
-                edge: item.data.edge,
-              };
+              let newKey = item.data && item.data.edge.node.isDir ? `${dropFolderKey}/${newKeyTemp}/` : `${dropFolderKey}/${newKeyTemp}`;
+              newKey = dropResult.data ? newKey : `${newKeyTemp}`;
 
-              if (props.mutations) {
-                props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
-              } else {
-                const {
-                  parentId,
-                  connection,
-                  favoriteConnection,
-                  section,
-                } = props;
-                const { owner, labbookName } = store.getState().routes;
-
-                const mutationData = {
-                  owner,
-                  labbookName,
-                  parentId,
-                  connection,
-                  favoriteConnection,
-                  section,
+              if ((newKey !== item.data.edge.node.key)) {
+                const moveLabbookFileData = {
+                  newKey,
+                  edge: item.data.edge,
                 };
 
-                const mutations = new FileBrowserMutations(mutationData);
+                if (props.mutations) {
+                  props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                } else {
+                  const {
+                    parentId,
+                    connection,
+                    favoriteConnection,
+                    section,
+                  } = props;
+                  const { owner, labbookName } = store.getState().routes;
 
-                mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                  const mutationData = {
+                    owner,
+                    labbookName,
+                    parentId,
+                    connection,
+                    favoriteConnection,
+                    section,
+                  };
+
+                  const mutations = new FileBrowserMutations(mutationData);
+
+                  mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                }
               }
             }
           }
