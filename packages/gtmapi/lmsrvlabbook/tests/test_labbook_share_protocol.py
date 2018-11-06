@@ -30,15 +30,18 @@ from werkzeug.wrappers import Request
 
 from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
                                mock_config_file, _MOCK_create_remote_repo2)
-from gtmcore.labbook import LabBook, loaders, InventoryManager
+from gtmcore.labbook import LabBook, loaders
+from gtmcore.inventory.inventory import InventoryManager
+
 from gtmcore.workflows import GitWorkflow
 from gtmcore.files import FileOperations
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook("default", "default", "labbook1",
+                           description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
@@ -53,8 +56,9 @@ def mock_create_labbooks(fixture_working_dir):
 @pytest.fixture()
 def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir_lfs_disabled[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir_lfs_disabled[0])
+    lb = im.create_labbook("default", "default", "labbook1",
+                           description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir_lfs_disabled[1], 'sillyfile'), 'w') as sf:

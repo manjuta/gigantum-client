@@ -32,17 +32,18 @@ from gtmcore.dispatcher import jobs
 import gtmcore.fixtures
 from gtmcore.fixtures import mock_config_file, mock_config_with_repo
 from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.labbook import LabBook, InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
-class NoTestJobs(object):
-    def notest_success_import_export_zip(self, mock_config_with_repo):
+class TestJobs(object):
+    def test_success_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="unittest-lb-for-export-import-test", description="Testing import-export.",
-                             owner={"username": 'unittester'})
+        im = InventoryManager(mock_config_with_repo[0])
+        lb = im.create_labbook('unittester', 'unittester', 'unittest-lb-for-export-import-test',
+                               'Testing import-export.')
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -51,7 +52,7 @@ class NoTestJobs(object):
         ib.assemble_dockerfile()
 
         # Make sure the destination user exists locally
-        working_dir = lb.labmanager_config.config['git']['working_directory']
+        working_dir = lb.client_config.config['git']['working_directory']
         os.makedirs(os.path.join(working_dir, 'unittester2', 'unittester2', 'labbooks'), exist_ok=True)
 
         lb_root = lb.root_dir
@@ -104,7 +105,7 @@ class NoTestJobs(object):
             assert not import_lb2.has_remote
 
             build_kwargs = {
-                'path': labbook_dir,
+                'path': lb.root_dir,
                 'username': 'unittester',
                 'nocache': True
             }
@@ -116,12 +117,12 @@ class NoTestJobs(object):
                 pprint.pprint(e)
                 raise
 
-    def notest_success_import_export_lbk(self, mock_config_with_repo):
+    def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="unittest-lb-for-export-import-test-lbk", description="Testing import-export.",
-                             owner={"username": 'unittester'})
+        lb = InventoryManager(mock_config_with_repo[0]).create_labbook('unittester', 'unittester',
+                                                                       "unittest-lb-for-export-import-test-lbk",
+                                                                       description="Testing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -130,7 +131,7 @@ class NoTestJobs(object):
         ib.assemble_dockerfile()
 
         # Make sure the destination user exists locally
-        working_dir = lb.labmanager_config.config['git']['working_directory']
+        working_dir = lb.client_config.config['git']['working_directory']
         os.makedirs(os.path.join(working_dir, 'unittester2', 'unittester2', 'labbooks'), exist_ok=True)
 
         lb_root = lb.root_dir
@@ -172,12 +173,12 @@ class NoTestJobs(object):
             assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
-    def notest_fail_import_export_zip(self, mock_config_with_repo):
+    def test_fail_import_export_zip(self, mock_config_with_repo):
 
         # Create new LabBook to be exported
-        lb = LabBook(mock_config_with_repo[0])
-        labbook_dir = lb.new(name="lb-fail-export-import-test", description="Failing import-export.",
-                             owner={"username": "test"})
+        lb = InventoryManager(mock_config_with_repo[0]).create_labbook('test', 'test',
+                                                                       "lb-fail-export-import-test",
+                                                                       description="Failing import-export.")
         cm = ComponentManager(lb)
         cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                     gtmcore.fixtures.ENV_UNIT_TEST_REV)
@@ -208,8 +209,3 @@ class NoTestJobs(object):
                 assert False, f"Should not be able to import LabBook from strange directory /t"
             except Exception as e:
                 pass
-
-            shutil.rmtree(lb.root_dir)
-            assert not os.path.exists(lb_root), f"LabBook at {lb_root} should not exist."
-            imported_lb_path = jobs.import_labboook_from_zip(archive_path=exported_archive_path, username="test",
-                                                             owner="test", config_file=mock_config_with_repo[0])

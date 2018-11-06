@@ -214,12 +214,12 @@ class Labbook extends Component {
 
           <div className="Labbook__spacer flex flex--column">
 
-
             <LabbookHeader
               description={labbook.description}
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
+              isExpanded={this.props.isExpanded}
               {...this.props}
             />
 

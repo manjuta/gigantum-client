@@ -18,7 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import responses
-from gtmcore.labbook import LabBook, InventoryManager
+
+from gtmcore.inventory.inventory import InventoryManager
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir
@@ -137,8 +138,10 @@ class TestLabBookRemoteOperations(object):
                             }],
                       status=204)
 
-        lb = LabBook(fixture_working_dir[0])
-        lb.new(owner={'username': 'default'}, name='new-labbook', username='default')
+
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook("default", "default", "new-labbook")
+
         delete_query = f"""
         mutation delete {{
             deleteRemoteLabbook(input: {{

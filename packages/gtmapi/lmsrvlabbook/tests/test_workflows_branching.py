@@ -31,6 +31,8 @@ from gtmcore.auth.identity import get_identity_manager
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import BranchManager
 from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
+
 from gtmcore.files import FileOperations
 
 from lmsrvcore.middleware import LabBookLoaderMiddleware, error_middleware
@@ -46,8 +48,8 @@ UT_LBNAME = "unittest-workflow-branch-1"
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
     config_file = fixture_working_dir[0]
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": UT_USERNAME}, name=UT_LBNAME, description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook(UT_USERNAME, UT_USERNAME, UT_LBNAME, description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'unittest-examplefile'), 'w') as sf:
@@ -262,7 +264,7 @@ class TestWorkflowsBranching(object):
 
         # Make sure activity record was created when description was changed
         log_data = lb.git.log()
-        assert "_GTM_ACTIVITY_START_**\nmsg:Updated description of LabBook" in log_data[0]['message']
+        assert "_GTM_ACTIVITY_START_**\nmsg:Updated description of Project" in log_data[0]['message']
 
     def test_delete_feature_branch_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
@@ -349,7 +351,7 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 branchName: "{b1}"
-            }}) {{            
+            }}) {{
                 labbook{{
                     name
                     description
@@ -379,7 +381,7 @@ class TestWorkflowsBranching(object):
         assert og_hash != branch_hash
 
         bm.workon_branch(bm.workspace_branch)
-        assert lb.git.log()[0]['commit'] == og_hash 
+        assert lb.git.log()[0]['commit'] == og_hash
         assert not os.path.exists(os.path.join(lb.root_dir, 'code/sillydir1'))
 
         merge_q = f"""
@@ -387,8 +389,8 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{b1}"                
-            }}) {{                
+                otherBranchName: "{b1}"
+            }}) {{
                 labbook{{
                     name
                     description
@@ -430,7 +432,7 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{bm.workspace_branch}"                
+                otherBranchName: "{bm.workspace_branch}"
             }}) {{
                 labbook{{
                     name
@@ -472,8 +474,8 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{nb}"                
-            }}) {{                
+                otherBranchName: "{nb}"
+            }}) {{
                 labbook{{
                     name
                     description
@@ -510,8 +512,8 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 otherBranchName: "{nb}",
-                force: true            
-            }}) {{                         
+                force: true
+            }}) {{
                 labbook{{
                     name
                     description
@@ -548,7 +550,7 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 otherBranchName: "{nb}",
-                force: false            
+                force: false
             }}) {{
                 labbook{{
                     name
