@@ -26,6 +26,7 @@ import flask
 import graphene
 import requests
 
+
 from gtmcore.configuration import Configuration
 from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
@@ -39,7 +40,7 @@ from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetail
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.environment import ComponentManager
 
-from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
+from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput, ListBasedConnection
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
 
@@ -522,11 +523,25 @@ class MoveLabbookFile(graphene.ClientIDMutation):
                                              author=get_logged_in_author())
 
         with lb.lock():
-            file_info = FileOperations.move_file(lb, section, src_path, dst_path)
+            mv_results = file_info = FileOperations.move_file(lb, section, src_path, dst_path)
 
+        file_edges = list()
+        for file_dict in mv_results:
+            file_edges.append(LabbookFile(section=section,
+                                          key=file_dict['key'],
+                                          is_dir=file_dict['is_dir'],
+                                          is_favorite=file_dict['is_favorite'],
+                                          modified_at=file_dict['modified_at'],
+                                          size=str(file_dict['size'])))
+
+        cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
+                   for cnt, x in enumerate(file_edges)]
+        
         # Prime dataloader with labbook you already loaded
         dataloader = LabBookLoader()
         dataloader.prime(f"{owner}&{labbook_name}&{lb.name}", lb)
+
+        lbc = ListBasedConnection()
 
         # Create data to populate edge
         create_data = {'owner': owner,
@@ -549,6 +564,7 @@ class MakeLabbookDirectory(graphene.ClientIDMutation):
         section = graphene.String(required=True)
         directory = graphene.String(required=True)
 
+    updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
     new_labbook_file_edge = graphene.Field(LabbookFileConnection.Edge)
 
     @classmethod
