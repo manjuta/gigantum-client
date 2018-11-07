@@ -132,7 +132,30 @@ class TestLabbookFileOperations(object):
         assert os.path.exists(os.path.join(lb.root_dir, 'code', f'{base_name}.MOVED'))
         assert os.path.isfile(os.path.join(lb.root_dir, 'code', f'{base_name}.MOVED'))
 
-    def test_move_file_subdirectory(self, mock_labbook, sample_src_file):
+    def test_move_single_file(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+        f = FO.insert_file(lb, 'code', sample_src_file)['key']
+        FO.makedir(lb, 'code/target_dir')
+
+        results = FO.move_file(lb, 'code', f, 'target_dir')
+        assert len(results) == 1
+        assert results[0]['is_dir'] == False
+        assert os.path.dirname(results[0]['key']) == 'target_dir'
+
+    def test_move_empty_directory(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+
+        FO.makedir(lb, 'code/stable_dir')
+        FO.makedir(lb, 'code/empty_dir')
+
+        # We'll move "empty_dir" into "stable_dir" - there should only be one element in returned list
+        res = FO.move_file(lb, 'code', 'empty_dir', 'stable_dir')
+        assert len(res) == 1
+        assert res[0]['is_dir'] is True
+        # Must have trailing-/
+        assert res[0]['key'] == 'stable_dir/empty_dir/'
+
+    def test_move_loaded_directory_with_one_file(self, mock_labbook, mock_config_file, sample_src_file):
         lb = mock_labbook[2]
         new_file_data = FO.insert_file(lb, "code", sample_src_file)
         base_name = os.path.basename(new_file_data['key'])
@@ -140,38 +163,33 @@ class TestLabbookFileOperations(object):
 
         # make new subdir
         os.makedirs(os.path.join(lb.root_dir, 'code', 'subdir'))
+        # .. and then put a file in it
+        mv_file_res = FO.move_file(lb, "code", base_name, os.path.join('subdir', base_name))
+        pprint.pprint(mv_file_res)
+        assert len(mv_file_res) == 1
 
-        moved_abs_data = FO.move_file(lb, 'code',
-                                      base_name,
-                                      os.path.join('subdir', base_name))
-
-        assert moved_abs_data['key'] == os.path.join('subdir', base_name)
-        assert moved_abs_data['is_dir'] is False
-
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir'))
-        assert os.path.isdir(os.path.join(lb.root_dir, 'code', 'subdir'))
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir', base_name))
-        assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'subdir', base_name))
-        assert not os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
-
-    def test_move_loaded_directory(self, mock_labbook, sample_src_file):
-        lb = mock_labbook[2]
-        new_file_data = FO.insert_file(lb, "code", sample_src_file)
-        base_name = os.path.basename(new_file_data['key'])
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', base_name))
-
-        # make new subdir with a file in it
-        os.makedirs(os.path.join(lb.root_dir, 'code', 'subdir'))
-        FO.move_file(lb, "code", base_name, os.path.join('subdir', base_name))
-
-        # Move entire directory
-        FO.move_file(lb, "code", 'subdir', 'subdir_moved')
+        # Move "subdir" into "target_dir", there should be two activity records
+        # There should be two edges - one for the dir and one for the leaf file
+        FO.makedir(lb, "code/target_dir", create_activity_record=True)
+        mv_dir_res = FO.move_file(lb, "code", 'subdir', 'target_dir')
+        assert len(mv_dir_res) == 2
 
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir'))
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir_moved'))
-        assert os.path.isdir(os.path.join(lb.root_dir, 'code', 'subdir_moved'))
-        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir_moved', base_name))
-        assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'subdir_moved', base_name))
+        assert os.path.exists(os.path.join(lb.root_dir, 'code', 'target_dir/subdir'))
+
+    def test_move_loaded_directory_with_full_tree(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+        FO.makedir(lb, 'code/level_1/level_2A', create_activity_record=True)
+        FO.makedir(lb, 'code/level_1/level_2B', create_activity_record=True)
+        FO.makedir(lb, 'code/target_dir', create_activity_record=True)
+        FO.makedir(lb, 'code/target_dir/existing_dir_counted_anyway', create_activity_record=True)
+        FO.makedir(lb, 'code/this-dir-must-be-ignored', create_activity_record=True)
+        FO.insert_file(lb, 'code', sample_src_file, dst_path='level_1/level_2B')
+
+        # Move "level_1" into target_dir
+        results = FO.move_file(lb, 'code', 'level_1', 'target_dir')
+        pprint.pprint(results)
+        assert len(results) == 5
 
     def test_makedir_simple(self, mock_labbook):
         # Note that "score" refers to the count of .gitkeep files.
