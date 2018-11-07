@@ -513,6 +513,8 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         src_path = graphene.String(required=True)
         dst_path = graphene.String(required=True)
 
+
+    updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
     new_labbook_file_edge = graphene.Field(LabbookFileConnection.Edge)
 
     @classmethod
@@ -536,7 +538,7 @@ class MoveLabbookFile(graphene.ClientIDMutation):
 
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
                    for cnt, x in enumerate(file_edges)]
-        
+
         # Prime dataloader with labbook you already loaded
         dataloader = LabBookLoader()
         dataloader.prime(f"{owner}&{labbook_name}&{lb.name}", lb)
@@ -564,7 +566,6 @@ class MakeLabbookDirectory(graphene.ClientIDMutation):
         section = graphene.String(required=True)
         directory = graphene.String(required=True)
 
-    updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
     new_labbook_file_edge = graphene.Field(LabbookFileConnection.Edge)
 
     @classmethod
