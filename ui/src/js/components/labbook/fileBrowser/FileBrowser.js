@@ -420,8 +420,9 @@ class FileBrowser extends Component {
 
                               </File>
                           );
+                        } else if (files[file]) {
+                          return (<div/>)
                         }
-
                         return (<div>Loading</div>);
                     })
                 }

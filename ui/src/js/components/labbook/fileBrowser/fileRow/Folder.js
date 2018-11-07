@@ -52,7 +52,7 @@ class Folder extends Component {
         ? false
         : state.isSelected;
         let isIncomplete = (nextProps.multiSelect === 'none') ? false : state.isIncomplete;
-        console.log(nextProps.multiSelect)
+
       return {
         ...state,
         isOver: nextProps.isOver,
@@ -497,6 +497,8 @@ class Folder extends Component {
                                       updateChildState={this.props.updateChildState}>
                                   </File>
                               );
+                            } else if (children[file]) {
+                              return (<div/>);
                             }
                             return (<div>Loading</div>);
                         })
