@@ -8,6 +8,8 @@ import MostRecent from 'Components/labbook/filesShared/MostRecentInput';
 import ToolTip from 'Components/shared/ToolTip';
 // store
 import store from 'JS/redux/store';
+// assets
+import './../code/Code.scss';
 
 class InputData extends Component {
   constructor(props) {
@@ -36,21 +38,41 @@ class InputData extends Component {
     }
   }
 
+  /**
+  *  @param {Object}
+  *  set state with selected filter
+  *  @return {}
+  */
   _setSelectedFiles(evt) {
     const files = [...evt.target.files];
     this.setState({ selectedFiles: files });
   }
 
+  /**
+  *  @param {}
+  *  clear selected files
+  *  @return {}
+  */
   _clearSelectedFiles() {
     this.setState({ selectedFiles: [] });
   }
 
+  /**
+  *  @param {result}
+  *  udate loading status if state is not the same as result
+  *  @return {}
+  */
   _loadStatus(res) {
     if (res !== this.state.loadingStatus) {
       this.setState({ loadingStatus: res });
     }
   }
 
+  /**
+  *  @param {string} filterName - Filter for favorites & most recent view.
+  *  update filterName and toggle view
+  *  @return {}
+  */
   _selectFilter(filterName) {
     this.setState({ selectedFilter: filterName });
   }
@@ -69,7 +91,6 @@ class InputData extends Component {
             </div>
           }
           <div className="Code__header">
-            <h5 className="Code__subtitle">Input Files  <ToolTip section="inputDataFiles" /></h5>
             <div className="Code__toolbar">
               <a ref="favorites" className="Code__filter" onClick={() => this._selectFilter('favorites')}>Favorites</a>
               <a ref="recent" className="Code__filter" onClick={() => this._selectFilter('recent')}>Most Recent</a>
@@ -92,36 +113,8 @@ class InputData extends Component {
             />
           }
           </div>
-          <div className="Code__header">
-            <div className="Code__subtitle-container">
-              <h5 className="Code__subtitle">Input Browser
-                <ToolTip section="inputDataBrowser" />
-                {
-                  this.state.loadingStatus &&
-                  <div className="Code__loading" />
-                }
-              </h5>
-              <p className="Code__subtitle-sub">Currently only files under 1.8GB are supported.</p>
-            </div>
-            <div className="Code__toolbar end">
-              <p className="Code__import-text" id="Code__">
-                <label
-                  className="Code__import-file"
-                  htmlFor="file__input"
-                >
-                  Upload File
-                </label>
-                <input
-                  id="file__input"
-                  className="hidden"
-                  type="file"
-                  onChange={(evt) => { this._setSelectedFiles(evt); }}
-                />
-                or Drag and Drop File Below
-              </p>
-            </div>
-          </div>
-          <div className="Code__file-browser">
+          <hr />
+          <div className="Code__file-browser Card column-12-1">
             <InputDataBrowser
               selectedFiles={this.state.selectedFiles}
               clearSelectedFiles={this._clearSelectedFiles}

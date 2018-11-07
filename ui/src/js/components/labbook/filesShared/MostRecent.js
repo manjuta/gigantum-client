@@ -5,6 +5,8 @@ import FileEmpty from 'Components/labbook/overview/FileEmpty';
 import MostRecentList from './MostRecentList';
 // store
 import store from 'JS/redux/store';
+// assets
+import './MostRecent.scss';
 
 export default class MostRecent extends Component {
   constructor(props) {
@@ -94,15 +96,6 @@ export default class MostRecent extends Component {
               showAmount={this.state.showAmount}
               edgeId={this.props.edgeId}
             />
-
-            <div className={loadingClass}>
-              <button
-                className="Recent__load-more"
-                onClick={() => { this._showMore(); }}
-              >
-                Load More
-              </button>
-            </div>
           </div>
 
         );

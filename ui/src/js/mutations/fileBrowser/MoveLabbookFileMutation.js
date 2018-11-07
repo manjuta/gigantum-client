@@ -79,7 +79,7 @@ export default function MoveLabbookFileMutation(
         parentID: labbookId,
         connectionInfo: [{
           key: connectionKey,
-          rangeBehavior: 'prepend',
+          rangeBehavior: 'append',
         }],
         edgeName: 'newLabbookFileEdge',
       }, {
@@ -87,7 +87,7 @@ export default function MoveLabbookFileMutation(
         parentID: labbookId,
         connectionInfo: [{
           key: recentConnectionKey,
-          rangeBehavior: 'prepend',
+          rangeBehavior: 'append',
         }],
         edgeName: 'newLabbookFileEdge',
       }],
@@ -134,6 +134,7 @@ export default function MoveLabbookFileMutation(
         }
       },
       updater: (store, response) => {
+        console.log(response)
         sharedDeleteUpdater(store, labbookId, edge.node.id, connectionKey);
         sharedDeleteUpdater(store, labbookId, edge.node.id, recentConnectionKey);
       },

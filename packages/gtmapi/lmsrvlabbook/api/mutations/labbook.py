@@ -26,7 +26,6 @@ import flask
 import graphene
 import requests
 
-
 from gtmcore.configuration import Configuration
 from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
@@ -374,7 +373,6 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         lb.description = description_content
-        
         with lb.lock():
             lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
             commit = lb.git.commit('Updating description')
@@ -481,27 +479,25 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
                                        cursor=cursor))
 
 
-class DeleteLabbookFile(graphene.ClientIDMutation):
+class DeleteLabbookFiles(graphene.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         section = graphene.String(required=True)
-        file_path = graphene.String(required=True)
-        is_directory = graphene.Boolean(required=False)
+        file_paths = graphene.List(graphene.String, required=True)
 
     success = graphene.Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section,
-                               file_path, is_directory=False,
-                               client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, file_paths, client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        with lb.lock():
-            FileOperations.delete_file(lb, section=section, relative_path=file_path)
 
-        return DeleteLabbookFile(success=True)
+        with lb.lock():
+            FileOperations.delete_files(lb, section, file_paths)
+
+        return DeleteLabbookFiles(success=True)
 
 
 class MoveLabbookFile(graphene.ClientIDMutation):

@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Oct 18 2018 13:48:42 GMT-0400 (EDT)
+# timestamp: Fri Nov 02 2018 14:06:16 GMT-0400 (Eastern Daylight Time)
 
 schema {
   query: LabbookQuery
@@ -375,16 +375,15 @@ type DeleteLabbookCollaboratorPayload {
   clientMutationId: String
 }
 
-input DeleteLabbookFileInput {
+input DeleteLabbookFilesInput {
   owner: String!
   labbookName: String!
   section: String!
-  filePath: String!
-  isDirectory: Boolean
+  filePaths: [String]!
   clientMutationId: String
 }
 
-type DeleteLabbookFilePayload {
+type DeleteLabbookFilesPayload {
   success: Boolean
   clientMutationId: String
 }
@@ -702,7 +701,7 @@ type LabbookMutations {
   addLabbookFile(input: AddLabbookFileInput!): AddLabbookFilePayload
   completeBatchUploadTransaction(input: CompleteBatchUploadTransactionInput!): CompleteBatchUploadTransactionPayload
   moveLabbookFile(input: MoveLabbookFileInput!): MoveLabbookFilePayload
-  deleteLabbookFile(input: DeleteLabbookFileInput!): DeleteLabbookFilePayload
+  deleteLabbookFiles(input: DeleteLabbookFilesInput!): DeleteLabbookFilesPayload
   makeLabbookDirectory(input: MakeLabbookDirectoryInput!): MakeLabbookDirectoryPayload
   removeUserIdentity(input: RemoveUserIdentityInput!): RemoveUserIdentityPayload
   addFavorite(input: AddLabbookFavoriteInput!): AddLabbookFavoritePayload

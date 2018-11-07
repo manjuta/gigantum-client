@@ -537,7 +537,7 @@ class TestWorkflowsBranching(object):
 
         nb = bm.create_branch('new-branch')
         assert os.path.exists(os.path.join(lb.root_dir, 'code', 's1.txt'))
-        FileOperations.delete_file(lb, 'code', 's1.txt')
+        FileOperations.delete_files(lb, 'code', ['s1.txt'])
         assert lb.is_repo_clean
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 's1.txt'))
 

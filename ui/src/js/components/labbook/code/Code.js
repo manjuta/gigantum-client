@@ -6,6 +6,8 @@ import CodeBrowser from './CodeBrowser';
 import CodeFavorites from './CodeFavorites';
 import MostRecent from 'Components/labbook/filesShared/MostRecentCode';
 import ToolTip from 'Components/shared/ToolTip';
+// assets
+import './Code.scss';
 
 class Code extends Component {
   constructor(props) {
@@ -27,21 +29,41 @@ class Code extends Component {
       }
     }
   }
-
+  /**
+  *  @param {Object}
+  *  set state with selected filter
+  *  @return {}
+  */
   _setSelectedFiles(evt) {
     const files = [...evt.target.files];
     this.setState({ selectedFiles: files });
   }
 
+  /**
+  *  @param {}
+  *  clear selected files
+  *  @return {}
+  */
   _clearSelectedFiles() {
     this.setState({ selectedFiles: [] });
   }
 
-  _loadStatus(res) {
-    if (res !== this.state.loadingStatus) {
-      this.setState({ loadingStatus: res });
+  /**
+  *  @param {result}
+  *  udate loading status if state is not the same as result
+  *  @return {}
+  */
+  _loadStatus(result) {
+    if (result !== this.state.loadingStatus) {
+      this.setState({ loadingStatus: result });
     }
   }
+
+  /**
+  *  @param {string} filterName - Filter for favorites & most recent view.
+  *  update filterName and toggle view
+  *  @return {}
+  */
   _selectFilter(filterName) {
     this.setState({ selectedFilter: filterName });
   }
@@ -52,58 +74,32 @@ class Code extends Component {
 
         <div className="Code">
           <div className="Code__header">
-            <h5 className="Code__subtitle">Code Files <ToolTip section="codeFiles" /></h5>
             <div className="Code__toolbar">
               <a ref="favorites" className="Code__filter" onClick={() => this._selectFilter('favorites')}>Favorites</a>
               <a ref="recent" className="Code__filter" onClick={() => this._selectFilter('recent')}>Most Recent</a>
             </div>
+
+            <div className="Code__search"></div>
+
           </div>
+
           <div className="Code__files">
             {
             this.state.selectedFilter === 'favorites' &&
-            <CodeFavorites
-              codeId={this.props.labbook.code.id}
-              code={this.props.labbook.code}
-            />
-          }
+              <CodeFavorites
+                codeId={this.props.labbook.code.id}
+                code={this.props.labbook.code}
+              />
+            }
             {
             this.state.selectedFilter === 'recent' &&
-            <MostRecent
-              edgeId={this.props.labbook.code.id}
-              code={this.props.labbook.code}
-            />
-          }
+              <MostRecent
+                edgeId={this.props.labbook.code.id}
+                code={this.props.labbook.code}
+              />
+            }
           </div>
-          <div className="Code__header">
-            <div className="Code__subtitle-container">
-              <h5 className="Code__subtitle">Code Browser
-                <ToolTip section="codeBrowser" />
-                {
-                  this.state.loadingStatus &&
-                  <div className="Code__loading" />
-                }
-              </h5>
-              <p className="Code__subtitle-sub">To view and edit files, open JupyterLab. If in the "Stopped" state, click the container status button to "Run".</p>
-            </div>
-
-            <div className="Code__toolbar end">
-              <p className="Code__import-text" id="Code__">
-                <label
-                  className="Code__import-file"
-                  htmlFor="file__code"
-                >
-                  Upload File
-                </label>
-                <input
-                  id="file__code"
-                  className="hidden"
-                  type="file"
-                  onChange={(evt) => { this._setSelectedFiles(evt); }}
-                />
-                or Drag and Drop File Below
-              </p>
-            </div>
-          </div>
+          <hr />
           <div className="Code__file-browser">
             <CodeBrowser
               selectedFiles={this.state.selectedFiles}
