@@ -52,7 +52,7 @@ const dragSource = {
       let newKeyPath = newKeyArray.join('/');
       let fileKeyPath = fileKeyArray.join('/');
       newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
-      const trimmedFilePath = fileKeyPath.split('/').slice(0, -1).join();
+      const trimmedFilePath = fileKeyPath.split('/').slice(0, -1).join('/');
 
       if ((newKeyPath !== fileKeyPath) && (trimmedFilePath !== newKeyPath)) {
         if (newKey !== props.data.edge.node.key) {

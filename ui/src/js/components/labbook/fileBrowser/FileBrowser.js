@@ -399,6 +399,7 @@ class FileBrowser extends Component {
                                     data={files[file]}
                                     mutations={this.state.mutations}
                                     setState={this._setState}
+                                    rowStyle={{}}
                                     updateChildState={this._updateChildState}>
                                 </Folder>
                             );

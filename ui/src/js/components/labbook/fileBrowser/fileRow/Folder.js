@@ -379,7 +379,11 @@ class Folder extends Component {
                 hidden: !this.state.renameEditMode,
               }),
               paddingLeft = 40 * index,
-              rowStyle = { paddingLeft: `${paddingLeft}px` };
+              rowStyle = { paddingLeft: `${paddingLeft}px` },
+              addRowStyle = {
+                paddingLeft: `${paddingLeft + 120}px`,
+                backgroundPositionX: `${99 + paddingLeft}px`,
+              };
 
         let folder = // this.props.connectDragPreview(
           <div
@@ -443,6 +447,7 @@ class Folder extends Component {
                 </div>
                 <div className={folderChildCSS}>
                     <AddSubfolder
+                      rowStyle={addRowStyle}
                       key={`${node.key}__subfolder`}
                       folderKey={node.key}
                       mutationData={this.props.mutationData}
