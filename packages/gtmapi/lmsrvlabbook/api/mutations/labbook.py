@@ -510,9 +510,7 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         src_path = graphene.String(required=True)
         dst_path = graphene.String(required=True)
 
-
     updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
-    #new_labbook_file_edge = graphene.Field(LabbookFileConnection.Edge)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, src_path, dst_path,
