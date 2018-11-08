@@ -291,6 +291,7 @@ class TestLabBookServiceMutations(object):
                 updatedEdges {
                     edges {
                         node {
+                            id
                             key
                             isDir
                             size
@@ -324,6 +325,7 @@ class TestLabBookServiceMutations(object):
                 updatedEdges {
                     edges {
                         node {
+                            id
                             section
                             key
                             isDir
