@@ -299,7 +299,31 @@ class FileOperations(object):
             labbook.sweep_uncommitted_changes(show=True)
 
     @classmethod
-    def move_file(cls, labbook: LabBook, section: str, src_rel_path: str, dst_rel_path: str) -> Dict[str, Any]:
+    def _make_move_activity_record(cls, labbook: LabBook, section: str, dst_abs_path: str,
+                                   commit_msg: str) -> None:
+        if os.path.isdir(dst_abs_path):
+            labbook.git.add_all(dst_abs_path)
+        else:
+            labbook.git.add(dst_abs_path)
+
+        commit = labbook.git.commit(commit_msg)
+        activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
+        adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
+                                   action=ActivityAction.EDIT)
+        adr.add_value('text/markdown', commit_msg)
+        ar = ActivityRecord(activity_type,
+                            message=commit_msg,
+                            linked_commit=commit.hexsha,
+                            show=True,
+                            importance=255,
+                            tags=['file-move'])
+        ar.add_detail_object(adr)
+        ars = ActivityStore(labbook)
+        ars.create_activity_record(ar)
+
+    @classmethod
+    def move_file(cls, labbook: LabBook, section: str, src_rel_path: str, dst_rel_path: str) \
+            -> List[Dict[str, Any]]:
 
         """Move a file or directory within a labbook, but not outside of it. Wraps
         underlying "mv" call.
@@ -340,36 +364,22 @@ class FileOperations(object):
 
             if not is_untracked:
                 commit_msg = f"Moved {src_type} `{src_rel_path}` to `{dst_rel_path}`"
+                cls._make_move_activity_record(labbook, section, dst_abs_path, commit_msg)
 
-                if os.path.isdir(dst_abs_path):
-                    labbook.git.add_all(dst_abs_path)
-                else:
-                    labbook.git.add(dst_abs_path)
-
-                commit = labbook.git.commit(commit_msg)
-
-                # Get LabBook section
-                activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
-
-                # Create detail record
-                adr = ActivityDetailRecord(activity_detail_type, show=False, importance=0,
-                                           action=ActivityAction.EDIT)
-                adr.add_value('text/markdown', commit_msg)
-
-                # Create activity record
-                ar = ActivityRecord(activity_type,
-                                    message=commit_msg,
-                                    linked_commit=commit.hexsha,
-                                    show=True,
-                                    importance=255,
-                                    tags=['file-move'])
-                ar.add_detail_object(adr)
-
-                # Store
-                ars = ActivityStore(labbook)
-                ars.create_activity_record(ar)
-
-            return cls.get_file_info(labbook, section, dst_rel_path)
+            if os.path.isdir(dst_abs_path):
+                moved_files = list()
+                for root, dirs, files in os.walk(dst_abs_path):
+                    rt = root.replace(os.path.join(labbook.root_dir, section) + '/', '')
+                    for d in dirs:
+                        print('*'*40, d)
+                        dinfo = cls.get_file_info(labbook, section, os.path.join(rt, d))
+                        moved_files.append(dinfo)
+                    for f in filter(lambda n: n != '.gitkeep', files):
+                        finfo = cls.get_file_info(labbook, section, os.path.join(rt, f))
+                        moved_files.append(finfo)
+                return moved_files
+            else:
+                return [cls.get_file_info(labbook, section, dst_rel_path)]
         except Exception as e:
             logger.critical("Failed moving file in labbook. Repository may be in corrupted state.")
             logger.exception(e)

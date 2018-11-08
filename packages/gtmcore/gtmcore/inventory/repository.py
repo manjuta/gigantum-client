@@ -444,7 +444,6 @@ class Repository(object):
             # This is used to handle if you try to delete an empty directory. This shouldn't technically happen, but if
             # a user manages to create an empty dir outside the client, we should handle it gracefully
             ar.message = "No detected changes" if not message else message
-
             ars = ActivityStore(self)
             ars.create_activity_record(ar)
         else:
@@ -1036,5 +1035,4 @@ class Repository(object):
         if os.path.exists(readme_file):
             with open(readme_file, 'rt') as rf:
                 contents = rf.read()
-
         return contents
