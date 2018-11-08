@@ -71,7 +71,6 @@ class TestLabbookFileOperations(object):
         lb = mock_labbook[2]
         git_hash_1 = lb.git.commit_hash
         lines = [l.strip() for l in open(os.path.join(lb.root_dir, '.gitignore')).readlines()]
-        pprint.pprint(lines)
         assert any(['.DS_Store' in l for l in lines])
 
         # Note: .DS_Store is in the gitignore directory.
@@ -177,9 +176,25 @@ class TestLabbookFileOperations(object):
         f = FO.insert_file(lb, 'code', sample_src_file)['key']
         FO.makedir(lb, 'code/target_dir')
         results = FO.move_file(lb, 'code', f, 'target_dir')
-        assert len(results) == 1
-        assert results[0]['is_dir'] == False
-        assert os.path.dirname(results[0]['key']) == 'target_dir'
+        assert len(results) == 2
+        assert results[0]['is_dir'] == True
+        assert results[0]['key'] == 'target_dir/'
+        assert results[1]['is_dir'] == False
+        assert results[1]['key'] == 'target_dir/' + os.path.basename(sample_src_file)
+
+    def test_move_single_file_to_section_top(self, mock_labbook, mock_config_file, sample_src_file):
+        lb = mock_labbook[2]
+        FO.makedir(lb, 'code/inner_dir')
+        f = FO.insert_file(lb, 'code', sample_src_file, 'inner_dir')['key']
+        # Move file to top of code section
+        results = FO.move_file(lb, 'code', f, dst_rel_path='')
+
+        # Results should be returned for "code" -- the file just moved there and the
+        assert len(results) == 3
+        assert results[0]['is_dir'] == True
+        assert os.path.dirname(results[0]['key']) == '/'
+        assert results[-1]['is_dir'] == False
+        assert results[-1]['key'] == os.path.basename(f)
 
     def test_move_empty_directory(self, mock_labbook, mock_config_file, sample_src_file):
         lb = mock_labbook[2]
@@ -189,10 +204,11 @@ class TestLabbookFileOperations(object):
 
         # We'll move "empty_dir" into "stable_dir" - there should only be one element in returned list
         res = FO.move_file(lb, 'code', 'empty_dir', 'stable_dir')
-        assert len(res) == 1
+        assert len(res) == 2
         assert res[0]['is_dir'] is True
-        # Must have trailing-/
-        assert res[0]['key'] == 'stable_dir/empty_dir/'
+        assert res[0]['key'] == 'stable_dir/'
+        assert res[1]['is_dir'] is True
+        assert res[1]['key'] == 'stable_dir/empty_dir/'
 
     def test_move_loaded_directory_with_one_file(self, mock_labbook, mock_config_file, sample_src_file):
         lb = mock_labbook[2]
@@ -204,14 +220,14 @@ class TestLabbookFileOperations(object):
         os.makedirs(os.path.join(lb.root_dir, 'code', 'subdir'))
         # .. and then put a file in it
         mv_file_res = FO.move_file(lb, "code", base_name, os.path.join('subdir', base_name))
-        pprint.pprint(mv_file_res)
-        assert len(mv_file_res) == 1
+        # Should be 2, because it returns the info of the directory it was moved into
+        assert len(mv_file_res) == 2
 
         # Move "subdir" into "target_dir", there should be two activity records
         # There should be two edges - one for the dir and one for the leaf file
         FO.makedir(lb, "code/target_dir", create_activity_record=True)
         mv_dir_res = FO.move_file(lb, "code", 'subdir', 'target_dir')
-        assert len(mv_dir_res) == 2
+        assert len(mv_dir_res) == 3
 
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 'subdir'))
         assert os.path.exists(os.path.join(lb.root_dir, 'code', 'target_dir/subdir'))
@@ -227,8 +243,7 @@ class TestLabbookFileOperations(object):
 
         # Move "level_1" into target_dir
         results = FO.move_file(lb, 'code', 'level_1', 'target_dir')
-        pprint.pprint(results)
-        assert len(results) == 5
+        assert len(results) == 6
 
     def test_makedir_simple(self, mock_labbook):
         # Note that "score" refers to the count of .gitkeep files.
