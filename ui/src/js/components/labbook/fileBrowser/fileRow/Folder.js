@@ -456,7 +456,7 @@ class Folder extends Component {
                       addFolderVisible={this.state.addFolderVisible}
                     />
                     {
-                        childrenKeys.map((file) => {
+                        childrenKeys.map((file, index) => {
                             if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
                                 return (
                                     <FolderDND
@@ -498,9 +498,19 @@ class Folder extends Component {
                                   </File>
                               );
                             } else if (children[file]) {
-                              return (<div/>);
+                              return (
+                                <div
+                                  key={file + index}
+                                />
+                                );
                             }
-                            return (<div>Loading</div>);
+                            return (
+                              <div
+                                  key={file + index}
+                              >
+                                Loading
+                              </div>
+                              );
                         })
                     }
                 </div>
