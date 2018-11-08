@@ -371,7 +371,6 @@ class FileOperations(object):
                 for root, dirs, files in os.walk(dst_abs_path):
                     rt = root.replace(os.path.join(labbook.root_dir, section) + '/', '')
                     for d in dirs:
-                        print('*'*40, d)
                         dinfo = cls.get_file_info(labbook, section, os.path.join(rt, d))
                         moved_files.append(dinfo)
                     for f in filter(lambda n: n != '.gitkeep', files):

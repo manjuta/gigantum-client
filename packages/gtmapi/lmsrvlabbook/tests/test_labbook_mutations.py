@@ -337,7 +337,6 @@ class TestLabBookServiceMutations(object):
         }
         """
         result_2 = mock_create_labbooks[2].execute(query)
-        pprint.pprint(result_2)
         assert 'errors' not in result_2
         nodes = result_2['data']['moveLabbookFile']['updatedEdges']['edges']
         assert len(nodes) == 1
