@@ -162,7 +162,6 @@ class TestLabBookServiceMutations(object):
         """
         variables = {'content': desc_md}
         r = fixture_working_dir_env_repo_scoped[2].execute(description_query, variable_values=variables)
-        pprint.pprint(r)
         assert 'errors' not in r
         assert r['data']['setLabbookDescription']['success'] is True
 
@@ -176,7 +175,6 @@ class TestLabBookServiceMutations(object):
         }
         """
         r = fixture_working_dir_env_repo_scoped[2].execute(query)
-        pprint.pprint(r['data']['labbook']['description'])
         assert 'errors' not in r
         # There's a lot of weird characters getting filtered out, make sure the bulk of the text remains
         assert abs(1.0 * len(r['data']['labbook']['description']) / len(desc_md)) > 0.75
@@ -293,6 +291,7 @@ class TestLabBookServiceMutations(object):
                 updatedEdges {
                     edges {
                         node {
+                            id
                             key
                             isDir
                             size
@@ -326,6 +325,7 @@ class TestLabBookServiceMutations(object):
                 updatedEdges {
                     edges {
                         node {
+                            id
                             section
                             key
                             isDir

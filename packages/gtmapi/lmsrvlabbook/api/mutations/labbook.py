@@ -524,7 +524,9 @@ class MoveLabbookFile(graphene.ClientIDMutation):
 
         file_edges = list()
         for file_dict in mv_results:
-            file_edges.append(LabbookFile(section=section,
+            file_edges.append(LabbookFile(owner=owner,
+                                          name=labbook_name,
+                                          section=section,
                                           key=file_dict['key'],
                                           is_dir=file_dict['is_dir'],
                                           is_favorite=file_dict['is_favorite'],
