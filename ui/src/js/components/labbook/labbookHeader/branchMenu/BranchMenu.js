@@ -219,34 +219,40 @@ class BranchMenu extends Component {
 
                 this._showContainerMenuMessage('syncing');
 
+                const failureCall = (errorMessage) => {
+                  this.props.setSyncingState(false);
+                  if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
+                    self._toggleSyncModal();
+                  }
+                };
+
+                const successCall = () => {
+                  this.props.setSyncingState(false);
+                  BuildImageMutation(
+                    this.state.labbookName,
+                    this.state.owner,
+                    false,
+                    (response, error) => {
+                      if (error) {
+                        console.error(error);
+
+                        setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
+                      }
+                    },
+                  );
+
+                  setContainerMenuVisibility(false);
+                };
+
                 SyncLabbookMutation(
                   this.state.owner,
                   this.state.labbookName,
                   false,
+                  successCall,
+                  failureCall,
                   (error) => {
-                    this.props.setSyncingState(false);
-
                     if (error) {
-                      setMultiInfoMessage(id, `Could not sync ${this.state.labbookName}`, true, true, error);
-
-                      if ((error[0].message.indexOf('MergeError') > -1) || (error[0].message.indexOf('Cannot merge') > -1) || (error[0].message.indexOf('Merge conflict') > -1)) {
-                        self._toggleSyncModal();
-                      }
-                    } else {
-                      BuildImageMutation(
-                        this.state.labbookName,
-                        this.state.owner,
-                        false,
-                        (response, error) => {
-                          if (error) {
-                            console.error(error);
-
-                            setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
-                          }
-                        },
-                      );
-
-                      setContainerMenuVisibility(false);
+                      failureCall();
                     }
                   },
                 );
