@@ -389,7 +389,7 @@ class FileBrowser extends Component {
                   mutations={this.state.mutations}
                 />
                 {
-                    fileKeys.map((file) => {
+                    fileKeys.map((file, index) => {
                         if (files[file] && files[file].edge && files[file].edge.node.isDir) {
                             return (
                                 <Folder
@@ -401,6 +401,7 @@ class FileBrowser extends Component {
                                     data={files[file]}
                                     mutations={this.state.mutations}
                                     setState={this._setState}
+                                    rowStyle={{}}
                                     updateChildState={this._updateChildState}>
                                 </Folder>
                             );
@@ -421,15 +422,23 @@ class FileBrowser extends Component {
 
                               </File>
                           );
+                        } else if (files[file]) {
+                          return (
+                            <div
+                              key={file + index}
+                            />
+                            );
                         }
-
-                        return (<div>Loading</div>);
+                        return (
+                          <div
+                              key={file + index}
+                          >
+                            Loading
+                          </div>
+                          );
                     })
                 }
             </div>
-            {/* <div className={drogTargetCSS}>
-              <h3 className="FileBrowser__h3">Add file to root</h3>
-            </div> */}
         </div>)
     );
   }

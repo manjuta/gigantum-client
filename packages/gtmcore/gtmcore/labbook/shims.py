@@ -18,102 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Optional
 
 from gtmcore.logging import LMLogger
-from gtmcore.activity import ActivityAction, ActivityRecord, ActivityDetailRecord, ActivityType
-
 logger = LMLogger.get_logger()
-
-
-def process_sweep_status(result_obj: ActivityRecord, status: Dict[str, Any],
-                         section_infer_method: Callable) -> Tuple[ActivityRecord, int, int, int]:
-    sections = []
-    ncnt = 0
-    for filename in status['untracked']:
-        # skip any file in .git or .gigantum dirs
-        if ".git" in filename or ".gigantum" in filename:
-            continue
-        activity_type, activity_detail_type, section = section_infer_method(filename)
-        adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255 - ncnt, 0),
-                                   action=ActivityAction.CREATE)
-        sections.append(section)
-        if section == "LabBook Root":
-            msg = f"Created new file `{filename}` in the Project Root."
-            msg = f"{msg}Note, it is best practice to use the Code, Input, and Output sections exclusively."
-        else:
-            msg = f"Created new {section} file `{filename}`"
-        adr.add_value('text/markdown', msg)
-        result_obj.add_detail_object(adr)
-        ncnt += 1
-
-    # If all additions were of same section
-    new_section_set = set(sections)
-    if ncnt > 0 and len(new_section_set) == 1:
-        if "Code" in new_section_set:
-            result_obj.type = ActivityType.CODE
-        elif "Input Data" in new_section_set:
-            result_obj.type = ActivityType.INPUT_DATA
-        elif "Output Data" in new_section_set:
-            result_obj.type = ActivityType.OUTPUT_DATA
-
-    mcnt = 0
-    dcnt = 0
-    msections = []
-    changes = status['unstaged']
-    changes.extend(status['staged'])
-    for filename, change in changes:
-        # skip any file in .git or .gigantum dirs
-        if (".git" in filename and ".gitkeep" not in filename) or ".gigantum" in filename:
-            continue
-
-        activity_type, activity_detail_type, section = section_infer_method(filename)
-        msections.append(section)
-
-        if change == "deleted":
-            action = ActivityAction.DELETE
-            dcnt += 1
-        elif change == "added":
-            action = ActivityAction.CREATE
-            mcnt += 1
-        elif change == "modified":
-            action = ActivityAction.EDIT
-            mcnt += 1
-        elif change == "renamed":
-            action = ActivityAction.EDIT
-            mcnt += 1
-        else:
-            action = ActivityAction.NOACTION
-            mcnt += 1
-
-        adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255 - mcnt, 0), action=action)
-        if ".gitkeep" in filename:
-            directory_name, _ = filename.split('.gitkeep')
-            adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} directory `{directory_name}`")
-        else:
-            adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
-        result_obj.add_detail_object(adr)
-
-    modified_section_set = set(msections)
-    if result_obj.type == ActivityType.LABBOOK:
-        # If new files are from different sections or no new files, you'll still be LABBOOK type
-        if (mcnt+dcnt) > 0 and len(modified_section_set) == 1:
-            # If there have been modified files and they are all from the same section
-            if len(new_section_set) == 0 or new_section_set == modified_section_set:
-                # If there have been only modified files from a single section, or new files are from the same section
-                if "Code" in modified_section_set:
-                    result_obj.type = ActivityType.CODE
-                elif "Input Data" in modified_section_set:
-                    result_obj.type = ActivityType.INPUT_DATA
-                elif "Output Data" in modified_section_set:
-                    result_obj.type = ActivityType.OUTPUT_DATA
-    elif (mcnt+dcnt) > 0:
-        if len(modified_section_set) > 1 or new_section_set != modified_section_set:
-            # Mismatch between new and modify or within modify, just use catchall LABBOOK
-            result_obj.type = ActivityType.LABBOOK
-
-    # Return additionally new file cnt (ncnt) and modified (mcnt) and deleted (dcnt)
-    return result_obj, ncnt, mcnt, dcnt
 
 
 def to_workspace_branch(labbook, username: Optional[str] = None) -> str:
@@ -133,7 +41,7 @@ def to_workspace_branch(labbook, username: Optional[str] = None) -> str:
     if labbook.active_branch != 'master':
         raise ValueError('Shim expects LabBook {str(labbook)} active branch as master')
 
-    with labbook.lock_labbook():
+    with labbook.lock():
         logger.warning(f"Upgrading {str(labbook)} to new gm.workspace branch model")
         labbook.sweep_uncommitted_changes()
         labbook.checkout_branch('gm.workspace', new=True)

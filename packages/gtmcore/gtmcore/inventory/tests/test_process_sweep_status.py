@@ -22,20 +22,19 @@ import os
 import copy
 
 from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.activity import ActivityType, ActivityRecord, ActivityDetailType
-
-from gtmcore.labbook.shims import process_sweep_status
 
 from gtmcore.fixtures import mock_config_file
 
 
 @pytest.fixture
 def mock_lb(mock_config_file):
-    lb = LabBook(mock_config_file[0])
-    lb.new(username="test", name="sweep-test", description="sweepin", owner={"username": "test"})
+    im = InventoryManager(mock_config_file[0])
+    lb = im.create_labbook('test', 'test', 'sweep-test', description='sweepin')
     yield lb
-    
-    
+
+
 def helper_gen_record():
     return ActivityRecord(ActivityType.LABBOOK,
                         message="--overwritten--",
@@ -66,8 +65,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 1
         assert modified_count == 0
@@ -80,8 +78,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'code', 'f4.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 3
         assert modified_count == 0
@@ -96,8 +93,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'input', 'f1.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 1
         assert modified_count == 0
@@ -110,8 +106,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'input', 'f4.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 3
         assert modified_count == 0
@@ -125,8 +120,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f1.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 1
         assert modified_count == 0
@@ -139,8 +133,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f4.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 3
         assert modified_count == 0
@@ -156,8 +149,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'catdog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert modified_count == 1
@@ -176,8 +168,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'code', 'f4.txt', 'pupper')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert len(ar.detail_objects) == 3
@@ -195,8 +186,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'input', 'f1.txt', 'catdog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert modified_count == 1
@@ -215,8 +205,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'input', 'f4.txt', 'pupper')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert len(ar.detail_objects) == 3
@@ -234,8 +223,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f1.txt', 'catdog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert modified_count == 1
@@ -254,8 +242,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f4.txt', 'pupper')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert len(ar.detail_objects) == 3
@@ -273,8 +260,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f3.txt', 'cat')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 3
         assert modified_count == 0
@@ -297,8 +283,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f3.txt', 'pupper')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
         assert modified_count == 3
@@ -321,8 +306,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'input', 'f22.txt', 'dog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 2
         assert modified_count == 2
@@ -349,8 +333,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'code', 'f22.txt', 'dog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 2
         assert modified_count == 3
@@ -376,8 +359,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'output', 'f22.txt', 'dog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 2
         assert modified_count == 2
@@ -402,8 +384,7 @@ class TestShims(object):
         helper_write_file(mock_lb, 'code', 'f22.txt', 'dog')
         git_status, lb, ar = helper_commit(mock_lb, helper_gen_record())
 
-        ar, new_count, modified_count, deleted_count = process_sweep_status(ar, git_status,
-                                                                            LabBook.infer_section_from_relative_path)
+        ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 2
         assert modified_count == 2

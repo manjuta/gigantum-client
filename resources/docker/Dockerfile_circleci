@@ -34,7 +34,7 @@ RUN apt-get -y update && \
 RUN useradd -ms /bin/bash circleci
 
 # Install jest for UI tests
-RUN npm install -g babel-cli@6.26.0 jest@21.2.1 relay-compiler@1.6.0 webpack@3.3.0 jsdom-global@3.0.2 jsdom@>=10.0.0
+RUN npm install -g babel-cli@6.26.0 jest@21.2.1 yarn@1.12.3 relay-compiler@1.6.0 webpack@3.3.0 jsdom-global@3.0.2 jsdom@>=10.0.0
 
 # Install fossa
 RUN curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
@@ -44,6 +44,9 @@ RUN mkdir -p /mnt/gigantum && chown -R circleci:circleci /mnt/gigantum && \
     mkdir /home/circleci/gigantum && chown -R circleci:circleci /home/circleci/gigantum && \
     mkdir /mnt/share && chown -R circleci:circleci /mnt/share && \
     mkdir /opt/redis && chown -R circleci:circleci /opt/redis
+
+# Setup gtmcore config file - should be written by automation before copy
+COPY build/circleci/labmanager.yaml /etc/gigantum/labmanager.yaml
 
 # Finish setting up user
 USER circleci

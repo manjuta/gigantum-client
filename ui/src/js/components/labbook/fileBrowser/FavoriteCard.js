@@ -207,7 +207,7 @@ class FavoriteCard extends Component {
       connectDropTarget,
       isDragging,
   	} = this.props;
-    console.log(this.props)
+
     const favoriteCardCSS = classNames({
       'Favorite__card Card': (this.props.favorite.index !== undefined),
       'Favorite__card--opaque Card': !(this.props.favorite.index !== undefined),

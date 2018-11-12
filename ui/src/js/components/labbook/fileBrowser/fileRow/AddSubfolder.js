@@ -146,6 +146,7 @@ class AddSubfolder extends Component {
     return (
       <div
           onClick={() => { this._updateStateBoolean('editMode', true); }}
+          style={this.props.rowStyle}
           className={addFolderCSS}>
           <div className={subfolderTextCSS}>
             Add Folder
@@ -166,11 +167,16 @@ class AddSubfolder extends Component {
                      Clear
                    </button>
                  }
-             </div>
-             <button
-               className="AddSubfolder__btn AddSubfolder__btn--add"
-               onClick={() => { this._triggerMutation(); }}
-             />
+            </div>
+            <div className="flex justify--space-around">
+              <button
+                className="File__btn--round File__btn--cancel"
+                onClick={(evt) => { this._clearInput() }} />
+              <button
+                className="File__btn--round File__btn--add"
+                onClick={(evt) => { this._triggerMutation(); }}
+              />
+            </div>
           </div>
       </div>
     );

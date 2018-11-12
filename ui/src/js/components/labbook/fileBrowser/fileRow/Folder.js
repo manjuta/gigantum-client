@@ -378,7 +378,11 @@ class Folder extends Component {
                 hidden: !this.state.renameEditMode,
               }),
               paddingLeft = 40 * index,
-              rowStyle = { paddingLeft: `${paddingLeft}px` };
+              rowStyle = { paddingLeft: `${paddingLeft}px` },
+              addRowStyle = {
+                paddingLeft: `${paddingLeft + 120}px`,
+                backgroundPositionX: `${99 + paddingLeft}px`,
+              };
 
         let folder = // this.props.connectDragPreview(
           <div
@@ -442,6 +446,7 @@ class Folder extends Component {
                 </div>
                 <div className={folderChildCSS}>
                     <AddSubfolder
+                      rowStyle={addRowStyle}
                       key={`${node.key}__subfolder`}
                       folderKey={node.key}
                       mutationData={this.props.mutationData}
@@ -450,7 +455,7 @@ class Folder extends Component {
                       addFolderVisible={this.state.addFolderVisible}
                     />
                     {
-                        childrenKeys.map((file) => {
+                        childrenKeys.map((file, index) => {
                             if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
                                 return (
                                     <FolderDND
@@ -491,8 +496,20 @@ class Folder extends Component {
                                       updateChildState={this.props.updateChildState}>
                                   </File>
                               );
+                            } else if (children[file]) {
+                              return (
+                                <div
+                                  key={file + index}
+                                />
+                                );
                             }
-                            return (<div>Loading</div>);
+                            return (
+                              <div
+                                  key={file + index}
+                              >
+                                Loading
+                              </div>
+                              );
                         })
                     }
                 </div>

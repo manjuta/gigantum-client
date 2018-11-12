@@ -52,7 +52,7 @@ const dragSource = {
       let newKeyPath = newKeyArray.join('/');
       let fileKeyPath = fileKeyArray.join('/');
       newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
-      const trimmedFilePath = fileKeyPath.split('/').slice(0, -1).join();
+      const trimmedFilePath = fileKeyPath.split('/').slice(0, -1).join('/');
 
       if ((newKeyPath !== fileKeyPath) && (trimmedFilePath !== newKeyPath)) {
         if (newKey !== props.data.edge.node.key) {
@@ -173,51 +173,48 @@ const targetSource = {
             }
           } else {
             const dropResult = monitor.getDropResult();
+            let currentKey = item.data.edge.node.key;
+            let splitKey = currentKey.split('/');
+            let newKeyTemp = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
+            let splitFolder = dropResult && dropResult.data ? dropResult.data.edge.node.key.split('/') : [''];
+            if (splitFolder !== '') {
+              splitFolder.pop();
+            }
 
-            if (dropResult) {
-              let currentKey = item.data.edge.node.key;
-              let splitKey = currentKey.split('/');
-              let newKeyTemp = (splitKey[splitKey.length - 1] !== '') ? splitKey[splitKey.length - 1] : splitKey[splitKey.length - 2];
-              let splitFolder = dropResult.data ? dropResult.data.edge.node.key.split('/') : '';
-              if (splitFolder !== '') {
-                splitFolder.pop();
-              }
+            let dropFolderKey = splitFolder.join('/');
 
-              let dropFolderKey = splitFolder.join('/');
+            let newKey = item.data && item.data.edge.node.isDir ? `${dropFolderKey}/${newKeyTemp}/` : `${dropFolderKey}/${newKeyTemp}`;
+            newKey = dropResult && dropResult.data ? newKey : `${newKeyTemp}`;
 
-              let newKey = item.data && item.data.edge.node.isDir ? `${dropFolderKey}/${newKeyTemp}/` : `${dropFolderKey}/${newKeyTemp}`;
-              newKey = dropResult.data ? newKey : `${newKeyTemp}`;
+            if ((newKey !== item.data.edge.node.key)) {
+              const moveLabbookFileData = {
+                newKey,
+                edge: item.data.edge,
+              };
 
-              if ((newKey !== item.data.edge.node.key)) {
-                const moveLabbookFileData = {
-                  newKey,
-                  edge: item.data.edge,
+              if (props.mutations) {
+                props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+              } else {
+                const {
+                  parentId,
+                  connection,
+                  favoriteConnection,
+                  section,
+                } = props;
+                const { owner, labbookName } = store.getState().routes;
+
+                const mutationData = {
+                  owner,
+                  labbookName,
+                  parentId,
+                  connection,
+                  favoriteConnection,
+                  section,
                 };
 
-                if (props.mutations) {
-                  props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
-                } else {
-                  const {
-                    parentId,
-                    connection,
-                    favoriteConnection,
-                    section,
-                  } = props;
-                  const { owner, labbookName } = store.getState().routes;
+                const mutations = new FileBrowserMutations(mutationData);
 
-                  const mutationData = {
-                    owner,
-                    labbookName,
-                    parentId,
-                    connection,
-                    favoriteConnection,
-                    section,
-                  };
-
-                  const mutations = new FileBrowserMutations(mutationData);
-
-                  mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
-                }
+                mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
               }
             }
           }
