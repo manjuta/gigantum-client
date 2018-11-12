@@ -311,7 +311,7 @@ class TestLabBookServiceMutations(object):
         assert nodes[0]['node']['size'] == '7'
         assert nodes[0]['node']['section'] == 'code'
 
-
+        os.makedirs(os.path.join(labbook_dir, 'code', 'subdir2'))
         query = """
         mutation MoveLabbookFile {
             moveLabbookFile(
@@ -319,8 +319,8 @@ class TestLabBookServiceMutations(object):
                 owner: "default",
                 labbookName: "labbook1",
                 section: "code",
-                srcPath: "subdir/",
-                dstPath: "subdir2/"
+                srcPath: "subdir",
+                dstPath: "subdir2"
             }) {
                 updatedEdges {
                     edges {
@@ -339,13 +339,15 @@ class TestLabBookServiceMutations(object):
         result_2 = mock_create_labbooks[2].execute(query)
         assert 'errors' not in result_2
         nodes = result_2['data']['moveLabbookFile']['updatedEdges']['edges']
-        assert len(nodes) == 1
-        assert nodes[0]['node']['key'] == 'subdir2/sillyfile'
-        assert nodes[0]['node']['isDir'] is False
-        assert nodes[0]['node']['size'] == '7'
+        assert len(nodes) == 2
+        assert nodes[0]['node']['key'] == 'subdir2/subdir/'
+        assert nodes[0]['node']['isDir'] is True
         assert nodes[0]['node']['section'] == 'code'
+        assert nodes[1]['node']['key'] == 'subdir2/subdir/sillyfile'
+        assert nodes[1]['node']['isDir'] is False
+        assert nodes[1]['node']['section'] == 'code'
 
-        assert os.path.exists(os.path.join(labbook_dir, 'code', 'subdir2', 'sillyfile')) is True
+        assert os.path.exists(os.path.join(labbook_dir, 'code', 'subdir2', 'subdir', 'sillyfile')) is True
 
     def test_move_file_many_times(self, mock_create_labbooks):
         """Test moving a file around a bunch"""

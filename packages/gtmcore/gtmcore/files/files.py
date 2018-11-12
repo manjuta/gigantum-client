@@ -371,12 +371,6 @@ class FileOperations(object):
                 return [cls.get_file_info(labbook, section, t or "/")]
             else:
                 moved_files = list()
-                # if os.path.isdir(dst_abs_path):
-                #     top_path = dst_abs_path
-                #     moved_files.append(cls.get_file_info(labbook, section, dst_rel_path or "/"))
-                # else:
-                #     top_path = os.path.dirname(dst_abs_path)
-                #     moved_files.append(cls.get_file_info(labbook, section, os.path.dirname(dst_rel_path) or "/"))
                 t = final_dest.replace(os.path.join(labbook.root_dir, section), '')
                 moved_files.append(cls.get_file_info(labbook, section, t or "/"))
                 for root, dirs, files in os.walk(final_dest):
