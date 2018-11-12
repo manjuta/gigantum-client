@@ -1,9 +1,9 @@
-from lmsrvlabbook.api.mutations.ref import CreateBranch, CheckoutBranch
+
 from lmsrvlabbook.api.mutations.labbook import (CreateLabbook, DeleteLabbook, DeleteRemoteLabbook,
                                                 SetLabbookDescription, ExportLabbook, ImportLabbook,
                                                 ImportRemoteLabbook,
                                                 MakeLabbookDirectory, AddLabbookRemote,
-                                                AddLabbookFile, MoveLabbookFile, DeleteLabbookFile,
+                                                AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                                 AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                                 AddLabbookCollaborator, DeleteLabbookCollaborator,
                                                 WriteReadme, CompleteBatchUploadTransaction, FetchLabbookEdge)

@@ -21,6 +21,7 @@ import LabbookHeader from './labbookHeader/LabbookHeader';
 import Login from 'Components/login/Login';
 import Loader from 'Components/shared/Loader';
 import ErrorBoundary from 'Components/shared/ErrorBoundary';
+
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 // assets
@@ -458,7 +459,6 @@ const backend = (manager: Object) => {
   backend.handleTopDropCapture = (e) => {
     if (backend.currentNativeSource) {
       orgTopDropCapture.call(backend, e);
-
       backend.currentNativeSource.item.dirContent = getFilesFromDragEvent(e, { recursive: true }); // returns a promise
     }
   };

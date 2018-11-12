@@ -6,6 +6,8 @@ import OutputDataBrowser from './OutputDataBrowser';
 import OutputFavorites from './OutputFavorites';
 import MostRecent from 'Components/labbook/filesShared/MostRecentOutput';
 import ToolTip from 'Components/shared/ToolTip';
+// assets
+import './../code/Code.scss';
 
 class OutputData extends Component {
   constructor(props) {
@@ -28,22 +30,38 @@ class OutputData extends Component {
       }
     }
   }
-
+  /**
+  *  @param {Object}
+  *  set state with selected filter
+  *  @return {}
+  */
   _setSelectedFiles(evt) {
     const files = [...evt.target.files];
     this.setState({ selectedFiles: files });
   }
-
+  /**
+  *  @param {}
+  *  clear selected files
+  *  @return {}
+  */
   _clearSelectedFiles() {
     this.setState({ selectedFiles: [] });
   }
-
+  /**
+  *  @param {object} result
+  *  udate loading status if state is not the same as result
+  *  @return {}
+  */
   _loadStatus(res) {
     if (res !== this.state.loadingStatus) {
       this.setState({ loadingStatus: res });
     }
   }
-
+  /**
+  *  @param {string} filterName - Filter for favorites & most recent view.
+  *  update filterName and toggle view
+  *  @return {}
+  */
   _selectFilter(filterName) {
     this.setState({ selectedFilter: filterName });
   }
@@ -62,7 +80,6 @@ class OutputData extends Component {
             </div>
           }
           <div className="Code__header">
-            <h5 className="Code__subtitle">Output Files  <ToolTip section="outputDataFiles" /></h5>
             <div className="Code__toolbar">
               <a ref="favorites" className="Code__filter" onClick={() => this._selectFilter('favorites')}>Favorites</a>
               <a ref="recent" className="Code__filter" onClick={() => this._selectFilter('recent')}>Most Recent</a>
@@ -85,35 +102,7 @@ class OutputData extends Component {
             />
           }
           </div>
-          <div className="Code__header">
-            <div className="Code__subtitle-container">
-              <h5 className="Code__subtitle">Output Browser
-                <ToolTip section="outputDataBrowser" />
-                {
-                this.state.loadingStatus &&
-                <div className="Code__loading" />
-              }
-              </h5>
-              <p className="Code__subtitle-sub">Currently only files under 1.8GB are supported.</p>
-            </div>
-            <div className="Code__toolbar end">
-              <p className="Code__import-text" id="Code__">
-                <label
-                  className="Code__import-file"
-                  htmlFor="file__output"
-                >
-                  Upload File
-                </label>
-                <input
-                  id="file__output"
-                  className="hidden"
-                  type="file"
-                  onChange={(evt) => { this._setSelectedFiles(evt); }}
-                />
-                or Drag and Drop File Below
-              </p>
-            </div>
-          </div>
+          <hr />
           <div className="Code__file-browser">
             <OutputDataBrowser
               selectedFiles={this.state.selectedFiles}

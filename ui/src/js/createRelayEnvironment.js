@@ -30,7 +30,6 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   const headers = {
     accept: '*/*',
   };
-
   if (process.env.NODE_ENV === 'development') {
     headers['Access-Control-Allow-Origin'] = '*';
   }

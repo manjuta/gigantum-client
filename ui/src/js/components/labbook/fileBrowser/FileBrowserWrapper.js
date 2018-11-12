@@ -1,12 +1,12 @@
 // vendor
 import React, { Component } from 'react';
-import FileBrowser from 'Submodules/react-keyed-file-browser/FileBrowser/src/browser';
+import FileBrowser from './fileBrowserCore/FileBrowser';
 import uuidv4 from 'uuid/v4';
 // components
 import DetailPanel from './../detail/DetailPanel';
 import Modal from 'Components/shared/Modal';
 // mutations
-import DeleteLabbookFileMutation from 'Mutations/fileBrowser/DeleteLabbookFileMutation';
+import DeleteLabbookFilesMutation from 'Mutations/fileBrowser/DeleteLabbookFilesMutation';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
 import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
@@ -16,7 +16,6 @@ import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/Comple
 import FolderUpload from './FolderUpload';
 // Config
 import config from 'JS/config';
-
 // utilities
 import ChunkUploader from 'JS/utils/ChunkUploader';
 // store
@@ -157,7 +156,7 @@ export default class FileBrowserWrapper extends Component {
   *  @param {array, boolean}
   *  updates footer message depending on the type of upload
   */
-  _creteFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData) {
+  _createFilesFooterMessage(totalFiles, hasDirectoryUpload, fileSizeData) {
     if (totalFiles > 0) {
       setStartedUploading();
       setUploadMessageSetter(`Preparing Upload for ${totalFiles} files`, Math.random() * 10000, totalFiles);
@@ -733,6 +732,7 @@ export default class FileBrowserWrapper extends Component {
               size: edge.node.size,
               isFavorite: edge.node.isFavorite,
               id: edge.node.id,
+              isDir: edge.node.isDir,
             });
             idExists.push(edge.node.id);
           }
