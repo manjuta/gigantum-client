@@ -8,7 +8,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     className="grid"
   >
     <div
-      className="ImportModule Card Card--add Card--import column-4-span-3"
+      className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
       id="dropZone"
       onDragEnd={[Function]}
       onDragOver={[Function]}
@@ -155,7 +155,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
         >
-          Created by cbutler
+          cbutler
+        </p>
+        <p
+          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+        >
+          Created on 11/06/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -214,7 +219,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
         >
-          Created by cbutler
+          cbutler
+        </p>
+        <p
+          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+        >
+          Created on 11/06/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -273,7 +283,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
         >
-          Created by cbutler
+          cbutler
+        </p>
+        <p
+          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+        >
+          Created on 11/06/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -332,7 +347,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
         >
-          Created by cbutler
+          cbutler
+        </p>
+        <p
+          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+        >
+          Created on 11/06/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -391,7 +411,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
         >
-          Created by dmk
+          dmk
+        </p>
+        <p
+          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+        >
+          Created on 11/06/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"

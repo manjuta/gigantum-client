@@ -11,12 +11,17 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
       disabled={false}
       onClick={[Function]}
-    />
+    >
+      Import
+    </button>
     <button
       className="RemoteLabbooks__icon RemoteLabbooks__icon--delete-disabled"
-      disabled={false}
+      data-tooltip="Can only delete remote projects created by you"
+      disabled={true}
       onClick={[Function]}
-    />
+    >
+      Delete
+    </button>
   </div>
   <div
     className="RemoteLabbooks__row RemoteLabbooks__row--text"
@@ -42,7 +47,17 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
     >
-      Created by dmk
+      dmk
+    </p>
+    <p
+      className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+    >
+      Created on 11/06/18
+    </p>
+    <p
+      className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+    >
+      Modified a few seconds ago
     </p>
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"

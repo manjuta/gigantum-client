@@ -365,7 +365,6 @@ export default class ImportModule extends Component {
     const self = this;
 
     this._importingState();
-    console.log(this.state.files[0]);
     const filepath = this.state.files[0].filename;
 
     const data = {

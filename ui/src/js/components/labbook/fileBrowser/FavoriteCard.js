@@ -205,13 +205,15 @@ class FavoriteCard extends Component {
     const {
 	    connectDragSource,
       connectDropTarget,
+      isDragging,
   	} = this.props;
-
+    console.log(this.props)
     const favoriteCardCSS = classNames({
       'Favorite__card Card': (this.props.favorite.index !== undefined),
       'Favorite__card--opaque Card': !(this.props.favorite.index !== undefined),
       'column-3-span-4': true,
       'Favorite__card--hidden': this.props.isOverCurrent,
+      'Favorite__card--isDragging': isDragging,
     });
     return (
       connectDragSource(connectDropTarget(<div

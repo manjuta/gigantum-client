@@ -19,12 +19,17 @@
 
 }
 .Favorite__card {
+  cursor: grab;
   &--opaque {
     opacity: 0.1;
     animation: fluxuateLoad 3s infinite;
   }
   &--hidden{
     opacity: 0;
+  }
+
+  &--dragging {
+    cursor: grabbing;
   }
 }
 

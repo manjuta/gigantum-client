@@ -339,6 +339,8 @@ class FileBrowser extends Component {
            'Btn--partial': this.state.multiSelect === 'partial',
          });
 
+     let fileKeys = Object.keys(files);
+
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
 
@@ -387,7 +389,7 @@ class FileBrowser extends Component {
                   mutations={this.state.mutations}
                 />
                 {
-                    Object.keys(files).map((file) => {
+                    fileKeys.map((file) => {
                         if (files[file] && files[file].edge && files[file].edge.node.isDir) {
                             return (
                                 <Folder

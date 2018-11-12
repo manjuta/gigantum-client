@@ -71,7 +71,6 @@ class CodeFavoriteList extends Component {
     const {
       favorites,
     } = this.state;
-
     return (
 
       <div className="Favorite__list grid">
