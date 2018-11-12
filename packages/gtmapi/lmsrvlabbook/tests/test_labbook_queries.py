@@ -1410,6 +1410,7 @@ class TestLabBookServiceQueries(object):
         """
         # Uses an invalid string
         r = fixture_working_dir[2].execute(query)
+        pprint.pprint(r)
         assert 'errors' in r
         snapshot.assert_match(r)
 
@@ -1464,7 +1465,7 @@ class TestLabBookServiceQueries(object):
         }
         """
         r = fixture_working_dir[2].execute(query)
-        assert 'errors' not in r
+        assert 'errors'  in r
         snapshot.assert_match(r)
 
     def test_get_activity_records_with_details(self, fixture_working_dir, snapshot, fixture_test_file):
