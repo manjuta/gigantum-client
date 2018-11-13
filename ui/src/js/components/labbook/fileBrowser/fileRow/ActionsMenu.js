@@ -78,11 +78,11 @@ export default class ActionsMenu extends Component {
   */
   _triggerDeleteMutation(evt) {
     const deleteFileData = {
-      key: this.props.edge.node.key,
-      edge: this.props.edge,
+      filePaths: [this.props.edge.node.key],
+      edges: [this.props.edge],
     };
 
-    this.props.mutations.deleteLabbookFile(deleteFileData, (reponse) => {});
+    this.props.mutations.deleteLabbookFiles(deleteFileData, (reponse) => {});
 
     this._togglePopup(evt, false);
   }

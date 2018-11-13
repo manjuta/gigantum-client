@@ -2,8 +2,6 @@
 .Card {
   position: relative;
 
-  height: 300px;
-
   cursor: pointer;
   transition: box-shadow 0.5s;
   text-align: left;
@@ -28,6 +26,10 @@
   }
 
   @include boxShadow();
+}
+
+.Card--300 {
+  height: 300px;
 }
 
 

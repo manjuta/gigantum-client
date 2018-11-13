@@ -6,14 +6,24 @@
     position: relative;
     z-index: 1;
 
-    &--highlight{
-      background-color: rgba(0,126,168, 0.5);
+    &--highlight {
+      background-color: rgba(0,126,168, 0.2);
       border: 1px solid $azure;
 
       .AddSubfolder {
         background-color: transparent !important;
       }
     }
+
+    &--dropzone {
+      border: 1px dashed $romanSilver;
+    }
+}
+
+.FileBrowser__empty{
+  display: flex;
+  align-content: center;
+  justify-content: center;
 }
 
 .FileBrowser__tools {

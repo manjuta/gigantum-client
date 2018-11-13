@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Nov 08 2018 11:39:00 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Nov 12 2018 15:42:42 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -766,6 +766,8 @@ type LabbookSection implements Node & GitRepository {
   allFiles(before: String, after: String, first: Int, last: Int): LabbookFileConnection
   favorites(before: String, after: String, first: Int, last: Int): LabbookFavoriteConnection
   isUntracked: Boolean
+  hasFiles: Boolean
+  hasFavorites: Boolean
 }
 
 input MakeLabbookDirectoryInput {

@@ -1,6 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
+import classNames from 'classnames';
 // components
 import OutputDataBrowser from './OutputDataBrowser';
 import OutputFavorites from './OutputFavorites';
@@ -14,7 +15,7 @@ class OutputData extends Component {
     super(props);
     this.state = {
       selectedFiles: [],
-      selectedFilter: 'favorites',
+      selectedFilter: 'recent',
     };
     this._setSelectedFiles = this._setSelectedFiles.bind(this);
     this._clearSelectedFiles = this._clearSelectedFiles.bind(this);
@@ -22,13 +23,9 @@ class OutputData extends Component {
     this._selectFilter = this._selectFilter.bind(this);
   }
 
-  componentDidUpdate() {
-    this.refs[this.state.selectedFilter].classList.add('Code__filter--selected');
-    for (const key in this.refs) {
-      if (key !== this.state.selectedFilter) {
-        this.refs[key].classList.remove('Code__filter--selected');
-      }
-    }
+  componentDidMount() {
+    let selectedFilter = this.props.labbook && this.props.labbook.output && this.props.labbook.output.hasFavorites ? 'favorites' : this.state.selectedFilter;
+    this.setState({ selectedFilter });
   }
   /**
   *  @param {Object}
@@ -68,6 +65,16 @@ class OutputData extends Component {
 
   render() {
     if (this.props.labbook) {
+      const { labbook } = this.props,
+            favoritesCSS = classNames({
+              Code__filter: true,
+              'Code__filter--selected': this.state.selectedFilter === 'favoites',
+            }),
+            recentCSS = classNames({
+              Code__filter: true,
+              'Code__filter--selected': this.state.selectedFilter === 'recent',
+            });
+
       return (
 
         <div className="Code">
@@ -79,35 +86,40 @@ class OutputData extends Component {
               </div>
             </div>
           }
-          <div className="Code__header">
-            <div className="Code__toolbar">
-              <a ref="favorites" className="Code__filter" onClick={() => this._selectFilter('favorites')}>Favorites</a>
-              <a ref="recent" className="Code__filter" onClick={() => this._selectFilter('recent')}>Most Recent</a>
-            </div>
-          </div>
-          <div className="Code__files">
-            {
-            this.state.selectedFilter === 'favorites' &&
-            <OutputFavorites
-              outputId={this.props.labbook.output.id}
-              labbookId={this.props.labbookId}
-              output={this.props.labbook.output}
-            />
-          }
-            {
-            this.state.selectedFilter === 'recent' &&
-            <MostRecent
-              edgeId={this.props.labbook.output.id}
-              output={this.props.labbook.output}
-            />
-          }
-          </div>
+          { (labbook.output.hasFiles || labbook.output.hasFavorites) &&
+            <div>
+              <div className="Code__header">
+                <div className="Code__toolbar">
+                  <a ref="favorites" className={favoritesCSS} onClick={() => this._selectFilter('favorites')}>Favorites</a>
+                  <a ref="recent" className={recentCSS} onClick={() => this._selectFilter('recent')}>Most Recent</a>
+                </div>
+              </div>
+
+              <div className="Code__files">
+                {
+                this.state.selectedFilter === 'favorites' &&
+                  <OutputFavorites
+                    outputId={labbook.output.id}
+                    labbookId={this.props.labbookId}
+                    output={labbook.output}
+                  />
+                 }
+                 {
+                  this.state.selectedFilter === 'recent' &&
+                    <MostRecent
+                      edgeId={labbook.output.id}
+                      output={labbook.output}
+                    />
+                  }
+                </div>
+              </div>
+            }
           <hr />
           <div className="Code__file-browser">
             <OutputDataBrowser
               selectedFiles={this.state.selectedFiles}
               clearSelectedFiles={this._clearSelectedFiles}
-              outputId={this.props.labbook.output.id}
+              outputId={labbook.output.id}
               labbookId={this.props.labbookId}
               output={this.props.labbook.output}
               loadStatus={this._loadStatus}
@@ -128,6 +140,8 @@ export default createFragmentContainer(
     fragment OutputData_labbook on Labbook {
       output{
         id
+        hasFiles
+        hasFavorites
         ...OutputDataBrowser_output
         ...OutputFavorites_output
         ...MostRecentOutput_output

@@ -1,6 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
+import classNames from 'classnames';
 // components
 import InputDataBrowser from './InputDataBrowser';
 import InputFavorites from './InputFavorites';
@@ -20,7 +21,7 @@ class InputData extends Component {
       owner,
       labbookName,
       selectedFiles: [],
-      selectedFilter: 'favorites',
+      selectedFilter: 'recent',
     };
 
     this._setSelectedFiles = this._setSelectedFiles.bind(this);
@@ -29,13 +30,9 @@ class InputData extends Component {
     this._selectFilter = this._selectFilter.bind(this);
   }
 
-  componentDidUpdate() {
-    this.refs[this.state.selectedFilter].classList.add('Code__filter--selected');
-    for (const key in this.refs) {
-      if (key !== this.state.selectedFilter) {
-        this.refs[key].classList.remove('Code__filter--selected');
-      }
-    }
+  componentDidMount() {
+    let selectedFilter = this.props.labbook && this.props.labbook.input && this.props.labbook.input.hasFavorites ? 'favorites' : this.state.selectedFilter;
+    this.setState({ selectedFilter });
   }
 
   /**
@@ -58,7 +55,7 @@ class InputData extends Component {
   }
 
   /**
-  *  @param {result}
+  *  @param { result }
   *  udate loading status if state is not the same as result
   *  @return {}
   */
@@ -79,6 +76,15 @@ class InputData extends Component {
 
   render() {
     if (this.props.labbook) {
+      const { labbook } = this.props,
+            favoritesCSS = classNames({
+              Code__filter: true,
+              'Code__filter--selected': this.state.selectedFilter === 'favoites',
+            }),
+            recentCSS = classNames({
+              Code__filter: true,
+              'Code__filter--selected': this.state.selectedFilter === 'recent',
+            });
       return (
 
         <div className="Code">
@@ -90,35 +96,40 @@ class InputData extends Component {
               </div>
             </div>
           }
-          <div className="Code__header">
-            <div className="Code__toolbar">
-              <a ref="favorites" className="Code__filter" onClick={() => this._selectFilter('favorites')}>Favorites</a>
-              <a ref="recent" className="Code__filter" onClick={() => this._selectFilter('recent')}>Most Recent</a>
+          { (labbook.input.hasFiles || labbook.input.hasFavorites) &&
+            <div>
+              <div className="Code__header">
+                <div className="Code__toolbar">
+                  <a ref="favorites" className={favoritesCSS} onClick={() => this._selectFilter('favorites')}>Favorites</a>
+                  <a ref="recent" className={recentCSS} onClick={() => this._selectFilter('recent')}>Most Recent</a>
+                </div>
+              </div>
+
+              <div className="Code__files">
+                {
+                this.state.selectedFilter === 'favorites' &&
+                  <InputFavorites
+                    inputId={labbook.input.id}
+                    labbookId={this.props.labbookId}
+                    input={labbook.input}
+                  />
+                }
+                {
+                this.state.selectedFilter === 'recent' &&
+                  <MostRecent
+                    edgeId={labbook.input.id}
+                    input={labbook.input}
+                  />
+                }
+              </div>
+              <hr />
             </div>
-          </div>
-          <div className="Code__files">
-            {
-            this.state.selectedFilter === 'favorites' &&
-            <InputFavorites
-              inputId={this.props.labbook.input.id}
-              labbookId={this.props.labbookId}
-              input={this.props.labbook.input}
-            />
           }
-            {
-            this.state.selectedFilter === 'recent' &&
-            <MostRecent
-              edgeId={this.props.labbook.input.id}
-              input={this.props.labbook.input}
-            />
-          }
-          </div>
-          <hr />
           <div className="Code__file-browser Card column-12-1">
             <InputDataBrowser
               selectedFiles={this.state.selectedFiles}
               clearSelectedFiles={this._clearSelectedFiles}
-              inputId={this.props.labbook.input.id}
+              inputId={labbook.input.id}
               labbookId={this.props.labbookId}
               input={this.props.labbook.input}
               loadStatus={this._loadStatus}
@@ -139,6 +150,8 @@ export default createFragmentContainer(
     fragment InputData_labbook on Labbook {
       input{
         id
+        hasFiles
+        hasFavorites
         ...InputDataBrowser_input
         ...InputFavorites_input
         ...MostRecentInput_input

@@ -321,12 +321,14 @@ class FileBrowser extends Component {
     const files = this._processFiles(),
           { mutationData } = this.state,
           { isOver } = this.props;
+   let fileKeys = Object.keys(files);
 
    const { isSelected } = this._checkChildState();
 
    const fileBrowserCSS = classNames({
            FileBrowser: true,
            'FileBrowser--highlight': isOver,
+           'FileBrowser--dropzone': fileKeys.length === 0,
          }),
          deleteButtonCSS = classNames({
            'Btn Btn--round Btn--delete': true,
@@ -338,8 +340,6 @@ class FileBrowser extends Component {
            'Btn--uncheck': this.state.multiSelect === 'none',
            'Btn--partial': this.state.multiSelect === 'partial',
          });
-
-     let fileKeys = Object.keys(files);
 
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
@@ -437,6 +437,11 @@ class FileBrowser extends Component {
                           </div>
                           );
                     })
+                }
+                { (fileKeys.length === 0) &&
+                  <div className="FileBrowser__empty">
+                    <h5>Upload Files by Dragging & Dropping Here</h5>
+                  </div>
                 }
             </div>
         </div>)
