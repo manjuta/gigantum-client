@@ -3,6 +3,7 @@ jobs:
   mypy-gtmcore:
     docker:
       - image: gigantum/circleci-client:60dde21884-2018-11-04
+      - image: gigantum/circleci-client:e255fd09fd-2018-11-05
     working_directory: ~/repo
     steps:
       - checkout

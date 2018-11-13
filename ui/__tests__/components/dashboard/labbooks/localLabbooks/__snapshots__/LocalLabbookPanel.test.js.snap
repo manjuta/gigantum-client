@@ -45,7 +45,12 @@ exports[`Test LocalLabbooks rendering 1`] = `
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
     >
-      Created by cbutler
+      cbutler
+    </p>
+    <p
+      className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
+    >
+      Created on 11/06/18
     </p>
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"

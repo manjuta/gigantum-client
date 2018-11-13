@@ -1,8 +1,8 @@
 // vendor
 import React, { Component } from 'react';
 import { createPaginationContainer, graphql } from 'react-relay';
-// Config
-import FileBrowserWrapper from 'Components/labbook/fileBrowser/FileBrowserWrapper';
+// Components
+import FileBrowser from 'Components/labbook/fileBrowser/FileBrowser';
 // store
 import store from 'JS/redux/store';
 
@@ -84,7 +84,7 @@ class OutputDataBrowser extends Component {
         };
       }
       return (
-        <FileBrowserWrapper
+        <FileBrowser
           ref="OutputBrowser"
           files={outputFiles}
           section="output"

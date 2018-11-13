@@ -18,11 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import graphene
-from lmsrvlabbook.api.mutations import (CreateBranch, CheckoutBranch, CreateLabbook, BuildImage, StartContainer,
+from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContainer,
                                         AddPackageComponents, CreateUserNote, StopContainer,
                                         ImportLabbook, DeleteLabbook,
                                         ImportRemoteLabbook, AddLabbookRemote,
-                                        ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFile,
+                                        ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                         AddLabbookCollaborator,
@@ -65,12 +65,6 @@ class LabbookMutations(graphene.ObjectType):
     # Sync a Labbook with remote (for collaboration)
     sync_labbook = SyncLabbook.Field()
 
-    # Create a new git branch for a given labbook.
-    create_branch = CreateBranch.Field()
-
-    # Update a given labbook to be at the tip of a particular git branch.
-    checkout_branch = CheckoutBranch.Field()
-
     # Add a remote to the labbook
     add_labbook_remote = AddLabbookRemote.Field()
 
@@ -112,7 +106,7 @@ class LabbookMutations(graphene.ObjectType):
     move_labbook_file = MoveLabbookFile.Field()
 
     # Delete a file or directory inside of a Labbook.
-    delete_labbook_file = DeleteLabbookFile.Field()
+    delete_labbook_files = DeleteLabbookFiles.Field()
 
     # Make a directory (with auto-included .gitkeep) inside of a Labbook
     make_labbook_directory = MakeLabbookDirectory.Field()

@@ -11,7 +11,7 @@ RUN n latest
 RUN npm install yarn --global
 
 # Install babel-node
-RUN npm install -g @babel/cli @babel/core jest@21.2.1 relay-compiler@1.6.0 webpack@4.24.0 jsdom-global@3.0.2 jsdom@>=10.0.0
+RUN npm install -g @babel/cli @babel/core jest@23.0.0 relay-compiler@1.6.0 webpack@4.24.0 jsdom-global@3.0.2 jsdom@>=10.0.0
 
 # Make build location dir
 RUN mkdir /opt/ui

@@ -8,7 +8,7 @@ import pytest
 from graphene.test import Client
 from werkzeug.datastructures import FileStorage
 
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 from lmsrvcore.middleware import LabBookLoaderMiddleware
@@ -18,8 +18,8 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fix
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook("default", "default", "labbook1", description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
@@ -62,8 +62,7 @@ class TestUploadFilesMutations(object):
 
         target_file = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks',
                                    'labbook1', 'code', 'newdir', "myValidFile.dat")
-        lb = LabBook(mock_create_labbooks[0])
-        lb.from_directory(os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1'))
+        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         txid = "000-unitest-transaction"
@@ -158,8 +157,7 @@ class TestUploadFilesMutations(object):
             os.remove(target_file)
         except:
             pass
-        lb = LabBook(mock_create_labbooks[0])
-        lb.from_directory(os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1'))
+        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         with open(test_file, 'rb') as tf:
@@ -212,7 +210,7 @@ class TestUploadFilesMutations(object):
         assert os.path.isfile(target_file) is False
         assert os.path.exists(target_file) is False
 
-    def test_add_file_errors(self, mock_create_labbooks, snapshot):
+    def test_add_file_errors(self, mock_create_labbooks):
         """Test new file error handling"""
 
         class DummyContext(object):
@@ -251,13 +249,3 @@ class TestUploadFilesMutations(object):
         # Fail because no file
         r = client.execute(query, context_value=DummyContext(None))
         assert 'errors' in r
-        # DMK - commenting out test because check is currently disabled
-        # test_file = os.path.join(tempfile.gettempdir(), "myfile.txt")
-
-        # with open(test_file, 'wt') as tf:
-        #     tf.write("THIS IS A FILE I MADE!")
-
-        # with open(test_file, 'rb') as tf:
-        #     file = FileStorage(tf)
-        #     # Fail because filenames don't match
-        #     snapshot.assert_match(client.execute(query, context_value=DummyContext(file)))

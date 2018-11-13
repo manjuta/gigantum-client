@@ -1,14 +1,15 @@
 // vendor
 import React, { Component } from 'react';
 import Moment from 'moment';
+import TextTruncate from 'react-text-truncate'
 // Mutations
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';
-// utils
-import { humanFileSize } from 'JS/utils/ChunkUploader';
+// config
+import config from 'JS/config';
 
 export default class RecentCard extends Component {
   constructor(props) {
@@ -74,14 +75,21 @@ export default class RecentCard extends Component {
         className="Recent__card-wrapper"
       >
         <div
-          className="Recent__card card"
+          className="Recent__card Card"
         >
           <div
             onClick={evt => this.handleFileFavoriting(evt, this.props.file)}
             className={this.props.file.node.isFavorite ? 'Favorite__star' : 'Favorite__star--off'}
           />
           <div className="Recent__header-section">
-            <h6 className="Recent__card-header">{filename}</h6>
+            <h6 className="Recent__card-header">
+              <TextTruncate
+                 className="Favorite__card-header"
+                 line={1}
+                 truncateText="…"
+                 text={filename}
+               />
+              </h6>
           </div>
 
           <div className="Recent__path-section">
@@ -89,12 +97,8 @@ export default class RecentCard extends Component {
           </div>
 
           <div className="Recent__description-section">
-            <p>
-                            Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}
-            </p>
-            <p>
-                            Size: {humanFileSize(this.props.file.node.size / 1000)}
-            </p>
+            <p>Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}</p>
+            <p>Size: {config.humanFileSize(this.props.file.node.size / 1000)} </p>
 
           </div>
 

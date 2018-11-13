@@ -366,7 +366,6 @@ export default class ImportModule extends Component {
     const self = this;
 
     this._importingState();
-    console.log(this.state.files[0]);
     const filepath = this.state.files[0].filename;
 
     const data = {
@@ -669,7 +668,7 @@ export default class ImportModule extends Component {
 
     return (<Fragment>
 
-      <div id="dropZone" className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="addLabbook" ref={div => this.dropZone = div} type="file" onDragEnd={evt => this._dragendHandler(evt)} onDrop={evt => this._dropHandler(evt)} onDragOver={evt => this._dragoverHandler(evt)}>
+      <div id="dropZone" className="ImportModule Card Card-300 Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="addLabbook" ref={div => this.dropZone = div} type="file" onDragEnd={evt => this._dragendHandler(evt)} onDrop={evt => this._dropHandler(evt)} onDragOver={evt => this._dragoverHandler(evt)}>
 
         {
           !this.state.importingScreen

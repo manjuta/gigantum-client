@@ -7,6 +7,7 @@ import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/Comple
 import store from 'JS/redux/store';
 import { setUploadMessageUpdate, setUploadMessageRemove, setWarningMessage } from 'JS/redux/reducers/footer';
 import { setFinishedUploading, setPauseChunkUpload } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
+import config from 'JS/config';
 
 /**
   @param {number} bytes
@@ -30,9 +31,7 @@ export const humanFileSize = (bytes) => {
   return `${fixedBytes} ${units[u]}`;
 };
 
-
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
-  console.log(file, chunk, accessToken, getChunkCallback);
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
     if (result && (error === undefined)) {
       getChunkCallback(file, result);
@@ -72,8 +71,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
     chunkSize,
   } = chunkData;
   const chunkIndex = chunkData.chunkIndex + 1;
-  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? humanFileSize(fileSizeKb) : humanFileSize((chunkSize / 1000) * chunkIndex);
-  const fileSize = humanFileSize(fileSizeKb);
+  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? config.humanFileSize(fileSizeKb) : config.humanFileSize((chunkSize / 1000) * chunkIndex);
+  const fileSize = config.humanFileSize(fileSizeKb);
   setUploadMessageUpdate(`${uploadedChunkSize} of ${fileSize} files`, 1, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
 
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
@@ -96,7 +95,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
 
 
 const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, username, filepath, section, getChunkCallback, componentCallback) => {
-  if (!store.getState().fileBrowser.pause || (store.getState().footer.totalFiles > 1)) {
+  let { footer, fileBrowser } = store.getState();
+  if (fileBrowser.pause || (footer.totalFiles > 0)) {
     AddLabbookFileMutation(
       data.connectionKey,
       username,
@@ -138,10 +138,12 @@ const ChunkUploader = {
     @param {object} data includes file filepath username and accessToken
   */
   chunkFile: (data, postMessage, passedChunkIndex) => {
-    let file = data.file,
-      filepath = data.filepath,
-      username = data.username,
-      section = data.section,
+    let {
+        file,
+        filepath,
+        username,
+        section,
+      } = data,
       componentCallback = (response) => { // callback to trigger postMessage from initializer
         postMessage(response, false);
       };
@@ -178,7 +180,6 @@ const ChunkUploader = {
           filename: file.name,
           uploadId: id,
         };
-
         if (chunkIndex <= totalChunks) { // if  there is still chunks to process do next chunk
           // select type of mutation
           if (file.name.indexOf('.lbk') > -1 || file.name.indexOf('.zip') > -1) {
@@ -189,11 +190,11 @@ const ChunkUploader = {
                 data.accessToken,
                 getChunk,
               );
-
               postMessage(chunkData, false); // post progress back to worker instantiator file
             }
           } else {
             // if(store.getState().fileBrowser.pause === false){
+            // sasd
             uploadFileBrowserChunk(
               data,
               chunkData,
