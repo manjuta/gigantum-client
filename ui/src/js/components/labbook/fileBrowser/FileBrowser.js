@@ -25,6 +25,9 @@ class FileBrowser extends Component {
         multiSelect: 'none',
         search: '',
         isOverChildFile: false,
+        sort: 'az',
+        reverse: false,
+        count: 0,
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
@@ -34,6 +37,8 @@ class FileBrowser extends Component {
       this._updateDropZone = this._updateDropZone.bind(this);
     }
     static getDerivedStateFromProps(props, state) {
+        let previousCount = state.count;
+        let count = props.files.edges.length;
         let childrenState = {};
         props.files.edges.forEach((edge) => {
           if (edge.node && edge.node.key) {
@@ -48,7 +53,18 @@ class FileBrowser extends Component {
         return {
           ...state,
           childrenState,
+          search: count === previousCount ? state.search : '',
+          count,
         };
+    }
+    /*
+      resets search
+    */
+    componentDidUpdate() {
+      let element = document.getElementsByClassName('FileBrowser__input')[0];
+      if (this.state.search === '' && element.value !== '') {
+        element.value = '';
+      }
     }
     /**
     *  @param {string} key - key of file to be updated
@@ -316,12 +332,57 @@ class FileBrowser extends Component {
   _updateDropZone(isOverChildFile) {
     this.setState({ isOverChildFile });
   }
+  /**
+  *  @param {Array, String, Boolean, Object, String} array, type, reverse, children, section
+  *  returns sorted children
+  *  @return {}
+  */
+ _childSort(array, type, reverse, children, section) {
+  array.sort((a, b) => {
+    let lowerA,
+    lowerB;
+    if (type === 'az' || type === 'size' && section === 'folder') {
+      lowerA = a.toLowerCase();
+      lowerB = b.toLowerCase();
+      if (type === 'size' || !reverse) {
+        return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
+      }
+      return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
+    } else if (type === 'modified') {
+      lowerA = children[a].edge.node.modifiedAt;
+      lowerB = children[b].edge.node.modifiedAt;
+      return reverse ? lowerB - lowerA : lowerA - lowerB;
+    } else if (type === 'size') {
+      lowerA = children[a].edge.node.size;
+      lowerB = children[b].edge.node.size;
+      return reverse ? lowerB - lowerA : lowerA - lowerB;
+    }
+    return 0;
+  });
+  return array;
+}
+  /**
+  *  @param {String} Type
+  *  handles state changes for type
+  *  @return {}
+  */
+  _handleSort(type) {
+    if (type === this.state.sort) {
+      this.setState({ reverse: !this.state.reverse });
+    } else {
+      this.setState({ sort: type, reverse: false });
+    }
+  }
 
   render() {
     const files = this._processFiles(),
           { mutationData } = this.state,
           { isOver } = this.props;
-   let fileKeys = Object.keys(files);
+    let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
+    folderKeys = this._childSort(folderKeys, this.state.sort, this.state.reverse, files, 'folder');
+    let fileKeys = files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir) || [];
+    fileKeys = this._childSort(fileKeys, this.state.sort, this.state.reverse, files, 'files');
+    let childrenKeys = folderKeys.concat(fileKeys);
 
    const { isSelected } = this._checkChildState();
 
@@ -339,6 +400,21 @@ class FileBrowser extends Component {
            'Btn--check': this.state.multiSelect === 'all',
            'Btn--uncheck': this.state.multiSelect === 'none',
            'Btn--partial': this.state.multiSelect === 'partial',
+         }),
+         nameHeaderCSS = classNames({
+          'FileBrowser__name-text': true,
+          'FileBroser__sort--asc': this.state.sort === 'az' && !this.state.reverse,
+          'FileBroser__sort--desc': this.state.sort === 'az' && this.state.reverse,
+         }),
+         sizeHeaderCSS = classNames({
+          'FileBrowser__header--size': true,
+          'FileBroser__sort--asc': this.state.sort === 'size' && !this.state.reverse,
+          'FileBroser__sort--desc': this.state.sort === 'size' && this.state.reverse,
+         }),
+         modifiedHeaderCSS = classNames({
+          'FileBrowser__header--date': true,
+          'FileBroser__sort--asc': this.state.sort === 'modified' && !this.state.reverse,
+          'FileBroser__sort--desc': this.state.sort === 'modified' && this.state.reverse,
          });
 
    return (
@@ -364,17 +440,28 @@ class FileBrowser extends Component {
                   </div>
                 </div>
                 <div className="FileBrowser__header">
-                    <div className="FileBrowser__header--name flex justify--start">
-                      <div className="FileBrowser__name-text">
+                    <div
+                      className="FileBrowser__header--name flex justify--start"
+                      onClick={() => this._handleSort('az')}
+                    >
+                      <div
+                        className={nameHeaderCSS}
+                      >
                         File
                       </div>
                     </div>
 
-                    <div className="FileBrowser__header--size">
+                    <div
+                      className={sizeHeaderCSS}
+                      onClick={() => this._handleSort('size')}
+                    >
                         Size
                     </div>
 
-                    <div className="FileBrowser__header--date">
+                    <div
+                      className={modifiedHeaderCSS}
+                      onClick={() => this._handleSort('modified')}
+                    >
                         Modified
                     </div>
 
@@ -389,7 +476,7 @@ class FileBrowser extends Component {
                   mutations={this.state.mutations}
                 />
                 {
-                    fileKeys.map((file, index) => {
+                    childrenKeys.map((file, index) => {
                         if (files[file] && files[file].edge && files[file].edge.node.isDir) {
                             return (
                                 <Folder
@@ -402,6 +489,8 @@ class FileBrowser extends Component {
                                     mutations={this.state.mutations}
                                     setState={this._setState}
                                     rowStyle={{}}
+                                    sort={this.state.sort}
+                                    reverse={this.state.reverse}
                                     updateChildState={this._updateChildState}>
                                 </Folder>
                             );
@@ -438,7 +527,7 @@ class FileBrowser extends Component {
                           );
                     })
                 }
-                { (fileKeys.length === 0) &&
+                { (childrenKeys.length === 0) &&
                   <div className="FileBrowser__empty">
                     <h5>Upload Files by Dragging & Dropping Here</h5>
                   </div>

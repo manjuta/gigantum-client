@@ -60,6 +60,7 @@ class FileBrowserMutations {
       const {
         edge,
         newKey,
+        removeIds,
       } = data;
 
       const {
@@ -81,6 +82,7 @@ class FileBrowserMutations {
         key,
         newKey,
         section,
+        removeIds || [],
         (response, error) => {
           callback(response, error);
         },

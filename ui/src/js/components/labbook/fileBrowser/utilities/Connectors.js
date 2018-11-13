@@ -52,13 +52,30 @@ const dragSource = {
       let newKeyPath = newKeyArray.join('/');
       let fileKeyPath = fileKeyArray.join('/');
       newKeyPath = newKeyPath.replace(/\/\/\/g/, '/');
-      const trimmedFilePath = fileKeyPath.split('/').slice(0, -1).join('/');
+      const trimmedFilePath = (fileKeyPath + (fileName.length ? `/${fileName}` : '')).split('/').slice(0, -1).join('/');
 
       if ((newKeyPath !== fileKeyPath) && (trimmedFilePath !== newKeyPath)) {
         if (newKey !== props.data.edge.node.key) {
+          let removeIds = [props.data.edge.node.id];
+          let currentHead = props.data;
+
+          const searchChildren = (parent) => {
+            if (parent.children) {
+              Object.keys(parent.children).forEach((childKey) => {
+                if (parent.children[childKey].edge) {
+                  removeIds.push(parent.children[childKey].edge.node.id);
+                  searchChildren(parent.children[childKey]);
+                }
+              });
+            }
+          };
+
+          searchChildren(currentHead);
+
           const moveLabbookFileData = {
             newKey,
             edge: props.data.edge,
+            removeIds,
           };
 
           if (props.mutations) {
@@ -187,9 +204,27 @@ const targetSource = {
             newKey = dropResult && dropResult.data ? newKey : `${newKeyTemp}`;
 
             if ((newKey !== item.data.edge.node.key)) {
+
+              let removeIds = [item.data.edge.node.id];
+              let currentHead = item.data;
+
+              const searchChildren = (parent) => {
+                if (parent.children) {
+                  Object.keys(parent.children).forEach((childKey) => {
+                    if (parent.children[childKey].edge) {
+                      removeIds.push(parent.children[childKey].edge.node.id);
+                      searchChildren(parent.children[childKey]);
+                    }
+                  });
+                }
+              };
+
+              searchChildren(currentHead);
+
               const moveLabbookFileData = {
                 newKey,
                 edge: item.data.edge,
+                removeIds,
               };
 
               if (props.mutations) {

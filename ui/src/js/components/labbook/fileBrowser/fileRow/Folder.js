@@ -40,6 +40,7 @@ class Folder extends Component {
         this._setHoverState = this._setHoverState.bind(this);
         this._addFolderVisible = this._addFolderVisible.bind(this);
         this._mouseLeave = this._mouseLeave.bind(this);
+        this._checkHover = this._checkHover.bind(this);
         this._renameEditMode = this._renameEditMode.bind(this);
         this._updateDropZone = this._updateDropZone.bind(this);
     }
@@ -58,7 +59,6 @@ class Folder extends Component {
         prevIsOverState: state.isOver,
         isSelected,
         isIncomplete,
-        // isDragging: nextProps.isDragging,
       };
     }
 
@@ -186,7 +186,7 @@ class Folder extends Component {
     *  sets elements to be selected and parent
     */
     connectDND(render) {
-      if (this.state.isDragging) {
+      if (this.state.isDragging || this.props.parentIsDragged) {
         render = this.props.connectDragSource(render);
       } else {
         render = this.props.connectDropTarget(render);
@@ -202,7 +202,7 @@ class Folder extends Component {
       if (this.props.setParentDragFalse) {
         this.props.setParentDragFalse();
       }
-      this.setState({ isDragging: true });
+      this.setState({ isDragging: true, isHovered: true });
     }
 
     /**
@@ -210,7 +210,19 @@ class Folder extends Component {
     *  sets dragging state
     */
     _mouseLeave() {
-      this.setState({ isDragging: false });
+      if (this.props.setParentDragTrue) {
+        this.props.setParentDragTrue();
+      }
+      this.setState({ isDragging: false, isHovered: false });
+    }
+    /**
+    *  @param {}
+    *  sets dragging state to true
+    */
+    _checkHover() {
+      if (this.state.isHovered && !this.state.isDragging) {
+        this.setState({ isDragging: true });
+      }
     }
     /**
       *  @param {}
@@ -336,11 +348,39 @@ class Folder extends Component {
     _updateDropZone(isOverChildFile) {
       this.setState({ isOverChildFile });
     }
+    /**
+    *  @param {Array, String, Boolean, Object, String} array, type, reverse, children, section
+    *  returns sorted children
+    *  @return {}
+    */
+    _childSort(array, type, reverse, children, section) {
+      array.sort((a, b) => {
+        let lowerA,
+        lowerB;
+        if (type === 'az' || type === 'size' && section === 'folder') {
+          lowerA = a.toLowerCase();
+          lowerB = b.toLowerCase();
+          if (type === 'size' || !reverse) {
+            return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
+          }
+          return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
+        } else if (type === 'modified') {
+          lowerA = children[a].edge.node.modifiedAt;
+          lowerB = children[b].edge.node.modifiedAt;
+          return reverse ? lowerB - lowerA : lowerA - lowerB;
+        } else if (type === 'size') {
+          lowerA = children[a].edge.node.size;
+          lowerB = children[b].edge.node.size;
+          return reverse ? lowerB - lowerA : lowerA - lowerB;
+        }
+        return 0;
+      });
+      return array;
+    }
 
     render() {
         const { node } = this.props.data.edge,
               { children, index } = this.props.data,
-              childrenKeys = children ? Object.keys(children) : [],
               { isOver } = this.props,
               splitKey = node.key.split('/'),
               folderName = this.props.filename,
@@ -349,7 +389,6 @@ class Folder extends Component {
                 'Folder__row--expanded': this.state.expanded,
                 'Folder__row--hover': this.state.hover,
               }),
-
               buttonCSS = classNames({
                 'Btn Btn--round': true,
                 'Btn--uncheck': !this.state.isSelected && !this.state.isIncomplete,
@@ -383,6 +422,11 @@ class Folder extends Component {
                 paddingLeft: `${paddingLeft + 120}px`,
                 backgroundPositionX: `${99 + paddingLeft}px`,
               };
+        let folderKeys = children && Object.keys(children).filter(child => children[child].edge && children[child].edge.node.isDir) || [];
+        folderKeys = this._childSort(folderKeys, this.props.sort, this.props.reverse, children, 'folder');
+        let fileKeys = children && Object.keys(children).filter(child => children[child].edge && !children[child].edge.node.isDir) || [];
+        fileKeys = this._childSort(fileKeys, this.props.sort, this.props.reverse, children, 'files');
+        let childrenKeys = folderKeys.concat(fileKeys);
 
         let folder = // this.props.connectDragPreview(
           <div
@@ -472,7 +516,9 @@ class Folder extends Component {
                                         setState={this._setState}
                                         setParentHoverState={this._setHoverState}
                                         expanded={this.state.expanded}
-                                        setParentDragFalse={this._mouseLeave}
+                                        setParentDragFalse={() => this.setState({ isDragging: false })}
+                                        setParentDragTrue={this._checkHover}
+                                        parentIsDragged={this.state.isDragging || this.props.parentIsDragged}
                                         updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
@@ -490,7 +536,8 @@ class Folder extends Component {
                                       checkParent={this._checkParent}
                                       expanded={this.state.expanded}
                                       setParentHoverState={this._setHoverState}
-                                      setParentDragFalse={this._mouseLeave}
+                                      setParentDragFalse={(() => this.setState({ isDragging: false }))}
+                                      setParentDragTrue={this._checkHover}
                                       isOverChildFile={this.state.isOverChildFile}
                                       updateParentDropZone={this._updateDropZone}
                                       updateChildState={this.props.updateChildState}>

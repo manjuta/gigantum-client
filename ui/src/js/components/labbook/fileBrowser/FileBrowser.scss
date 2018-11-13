@@ -45,7 +45,7 @@
 }
 
 .FileBrowser__name-text {
-
+  position: relative;
 }
 
 .FileBrowser__header {
@@ -58,7 +58,7 @@
     font-weight: bold;
     font-size: 18px;
     text-align: left;
-
+    cursor: pointer;
 
     &--name{
         margin: 0 60px;
@@ -68,10 +68,15 @@
 
     &--size{
         width: 100px;
+        position: relative;
     }
 
     &--date{
         width: 140px;
+        position: relative;
+        &:before{
+          left: 100px !important;
+        }
     }
 
     &--menu{
@@ -119,4 +124,27 @@
   color: $white;
   font-weight: 100;
   text-align: center;
+}
+
+.FileBroser__sort {
+  &--asc:before {
+    background: url('~Images/icons/up-arrow-silver.svg') no-repeat center center;
+    background-size: 15px;
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    left: 50px;
+    top: 4px;
+  }
+  &--desc:before {
+    background: url('~Images/icons/down-arrow-silver.svg') no-repeat center center;
+    background-size: 15px;
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    left: 50px;
+    top: 4px;
+  }
 }

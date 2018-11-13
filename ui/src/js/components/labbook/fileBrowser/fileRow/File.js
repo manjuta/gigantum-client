@@ -32,6 +32,7 @@ class File extends Component {
       this._triggerMutation = this._triggerMutation.bind(this);
       this._clearState = this._clearState.bind(this);
       this._setHoverState = this._setHoverState.bind(this);
+      this._checkHover = this._checkHover.bind(this);
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -70,19 +71,41 @@ class File extends Component {
   *  sets elements to be selected and parent
   */
   connectDND(render) {
-    if (this.state.isDragging) {
+    if (this.state.isDragging || this.props.parentIsDragged) {
       render = this.props.connectDragSource(render);
     } else {
       render = this.props.connectDropTarget(render);
     }
     return render;
   }
+      /**
+    *  @param {}
+    *  sets dragging state
+    */
+   _mouseEnter() {
+    if (this.props.setParentDragFalse) {
+      this.props.setParentDragFalse();
+    }
+    this.setState({ isDragging: true, isHovered: true });
+  }
   /**
   *  @param {}
   *  sets dragging state
   */
-  _mouseDown() {
-    this.setState({ isDragging: !this.state.isDragging });
+  _mouseLeave() {
+    if (this.props.setParentDragTrue) {
+      this.props.setParentDragTrue();
+    }
+    this.setState({ isDragging: false, isHovered: false });
+  }
+  /**
+  *  @param {}
+  *  sets dragging state to true
+  */
+  _checkHover() {
+    if (this.state.isHovered && !this.state.isDragging) {
+      this.setState({ isDragging: true });
+    }
   }
 
   /**
@@ -193,7 +216,8 @@ class File extends Component {
     let file = <div
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
       onMouseOut={(evt) => { this._setHoverState(evt, false); }}
-      onMouseDown={() => { this._mouseDown(); }}
+      onMouseLeave={() => { this._mouseLeave(); }}
+      onMouseEnter={() => { this._mouseEnter(); }}
       className="File">
 
              <div
