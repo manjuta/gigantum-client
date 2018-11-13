@@ -360,30 +360,29 @@ class FileOperations(object):
             if not is_untracked:
                 labbook.git.remove(src_abs_path, keep_file=True)
 
-            shutil.move(src_abs_path, dst_abs_path)
+            final_dest = shutil.move(src_abs_path, dst_abs_path)
 
             if not is_untracked:
                 commit_msg = f"Moved {src_type} `{src_rel_path}` to `{dst_rel_path}`"
                 cls._make_move_activity_record(labbook, section, dst_abs_path, commit_msg)
 
-            moved_files = list()
-            if os.path.isdir(dst_abs_path):
-                top_path = dst_abs_path
-                moved_files.append(cls.get_file_info(labbook, section, dst_rel_path or "/"))
+            if os.path.isfile(final_dest):
+                t = final_dest.replace(os.path.join(labbook.root_dir, section), '')
+                return [cls.get_file_info(labbook, section, t or "/")]
             else:
-                top_path = os.path.dirname(dst_abs_path)
-                moved_files.append(cls.get_file_info(labbook, section, os.path.dirname(dst_rel_path) or "/"))
-
-            for root, dirs, files in os.walk(top_path):
-                rt = root.replace(os.path.join(labbook.root_dir, section), '')
-                rt = _make_path_relative(rt)
-                for d in sorted(dirs):
-                    dinfo = cls.get_file_info(labbook, section, os.path.join(rt, d))
-                    moved_files.append(dinfo)
-                for f in filter(lambda n: n != '.gitkeep', sorted(files)):
-                    finfo = cls.get_file_info(labbook, section, os.path.join(rt, f))
-                    moved_files.append(finfo)
-            return moved_files
+                moved_files = list()
+                t = final_dest.replace(os.path.join(labbook.root_dir, section), '')
+                moved_files.append(cls.get_file_info(labbook, section, t or "/"))
+                for root, dirs, files in os.walk(final_dest):
+                    rt = root.replace(os.path.join(labbook.root_dir, section), '')
+                    rt = _make_path_relative(rt)
+                    for d in sorted(dirs):
+                        dinfo = cls.get_file_info(labbook, section, os.path.join(rt, d))
+                        moved_files.append(dinfo)
+                    for f in filter(lambda n: n != '.gitkeep', sorted(files)):
+                        finfo = cls.get_file_info(labbook, section, os.path.join(rt, f))
+                        moved_files.append(finfo)
+                return moved_files
 
         except Exception as e:
             logger.critical("Failed moving file in labbook. Repository may be in corrupted state.")
