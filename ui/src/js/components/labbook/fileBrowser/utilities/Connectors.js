@@ -203,7 +203,7 @@ const targetSource = {
             let newKey = item.data && item.data.edge.node.isDir ? `${dropFolderKey}/${newKeyTemp}/` : `${dropFolderKey}/${newKeyTemp}`;
             newKey = dropResult && dropResult.data ? newKey : `${newKeyTemp}`;
 
-            if ((newKey !== item.data.edge.node.key)) {
+            if ((newKey !== item.data.edge.node.key) && ((`${newKey}/`) !== item.data.edge.node.key)) {
 
               let removeIds = [item.data.edge.node.id];
               let currentHead = item.data;
