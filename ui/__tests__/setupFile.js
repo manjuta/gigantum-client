@@ -1,14 +1,21 @@
-import { JSDOM } from 'jsdom';
-import fs from 'fs';
-import fetch from 'isomorphic-fetch';
-import FormData from 'form-data';
-import 'raf/polyfill';
+// var { JSOM } = require('jsdom');
+var fetch = require('isomorphic-fetch');
+var FormData = require('form-data');
+require('raf/polyfill');
 
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-console.log('asasdadsadsadsadsas');
+var { configure } = require('enzyme');
+var Adapter = require('enzyme-adapter-react-16');
+
 configure({ adapter: new Adapter() });
+class JSDOM {
+  constructor(props) {
+    console.log(props);
+  }
 
+  winodw() {
+    console.log(window);
+  }
+}
 // need to add root to JSDOM for mounting react
 const window = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>').window;
 
@@ -84,4 +91,8 @@ global.requestAnimationFrame = function (callback) {
     }
 }());
 
-export default () => global;
+const oneHundredSeconds = 1 * 1000 * 100
+// set timout to one hundred seconds
+jasmine.DEFAULT_TIMEOUT_INTERVAL = oneHundredSeconds
+
+// export default () => global;

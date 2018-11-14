@@ -1,7 +1,13 @@
 module.exports = {
  "presets": [
    "@babel/preset-react",
-   "@babel/preset-env",
+   "@babel/preset-flow",
+   ["@babel/preset-env", {
+      "targets": {
+          "esmodules": true
+       }
+    }
+  ],
    "react-app"
  ],
  "plugins": [
@@ -27,5 +33,18 @@ module.exports = {
        }
      }
    ]
- ]
+ ],
+ "env": {
+  "test": {
+    "presets": [
+      '@babel/preset-env',
+      '@babel/preset-react',
+    ],
+    "plugins": [
+      '@babel/plugin-proposal-class-properties',
+      '@babel/plugin-transform-modules-commonjs',
+      'babel-plugin-dynamic-import-node-babel-7',
+    ],
+  },
+},
 }
