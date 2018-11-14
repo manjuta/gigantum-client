@@ -22,6 +22,8 @@ export default function PublishLabbookMutation(
   labbookName,
   labbookId,
   setPublic,
+  successCall,
+  failureCall,
   callback,
 ) {
   const variables = {
@@ -48,7 +50,7 @@ export default function PublishLabbookMutation(
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
         if (response) {
-          FooterUtils.getJobStatus(response, 'publishLabbook', 'jobKey');
+          FooterUtils.getJobStatus(response, 'publishLabbook', 'jobKey', successCall, failureCall);
         }
       },
     },

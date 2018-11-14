@@ -21,6 +21,8 @@ export default function SyncLabbookMutation(
   owner,
   labbookName,
   force,
+  successCall,
+  failureCall,
   callback,
 ) {
   const variables = {
@@ -50,7 +52,7 @@ export default function SyncLabbookMutation(
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
         if (response) {
-          FooterUtils.getJobStatus(response, 'syncLabbook', 'jobKey');
+          FooterUtils.getJobStatus(response, 'syncLabbook', 'jobKey', successCall, failureCall);
         }
       },
     },
