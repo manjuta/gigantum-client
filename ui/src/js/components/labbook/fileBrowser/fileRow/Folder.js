@@ -125,6 +125,7 @@ class Folder extends Component {
         });
 
         if (checkCount === 0) {
+            this.props.updateChildState(this.props.data.edge.node.key, false);
             this.setState(
               {
                 isIncomplete: false,
@@ -136,7 +137,8 @@ class Folder extends Component {
                 }
               },
             );
-        } else if (checkCount === Object.keys(this.refs).length) {
+        } else if (checkCount === Object.keys(this.refs).length && this.state.isSelected) {
+            this.props.updateChildState(this.props.data.edge.node.key, true);
             this.setState(
               {
                 isIncomplete: false,
@@ -148,10 +150,8 @@ class Folder extends Component {
                 }
               },
             );
-            if (this.props.checkParent) {
-                this.props.checkParent();
-            }
         } else {
+            this.props.updateChildState(this.props.data.edge.node.key, false);
             this.setState(
               {
                 isIncomplete: true,
