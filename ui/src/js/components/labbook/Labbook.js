@@ -148,12 +148,11 @@ class Labbook extends Component {
     dispatches sticky state to redux to update state
   */
   _setStickHeader() {
-    const isExpanded = (window.pageYOffset < this.offsetDistance) && (window.pageYOffset > 120);
     this.offsetDistance = window.pageYOffset;
     const sticky = 50;
     const isSticky = window.pageYOffset >= sticky;
-    if ((store.getState().labbook.isSticky !== isSticky) || (store.getState().labbook.isExpanded !== isExpanded)) {
-      setStickyDate(isSticky, isExpanded);
+    if (store.getState().labbook.isSticky !== isSticky) {
+      setStickyDate(isSticky);
     }
 
     if (isSticky) {
@@ -219,7 +218,6 @@ class Labbook extends Component {
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
-              isExpanded={this.props.isExpanded}
               {...this.props}
             />
 
