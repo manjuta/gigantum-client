@@ -21,11 +21,11 @@ export default class ForceSync extends Component {
       owner,
       labbookName,
       true,
+      () => {},
+      () => {},
       (error) => {
         if (error) {
           setMultiInfoMessage(id, `Could not 'force' sync ${labbookName}`, true, true, error);
-        } else {
-          setMultiInfoMessage(id, `Successfully 'force' synced ${labbookName}`, true, false);
         }
       },
     );

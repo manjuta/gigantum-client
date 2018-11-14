@@ -115,30 +115,33 @@ export default class PublishModal extends Component {
 
                 self.props.showContainerMenuMessage('publishing');
 
+                const failureCall = () => {
+                  self.props.setPublishingState(false);
+                  setContainerMenuVisibility(false);
+                  self.props.resetPublishState(false);
+                };
+
+                const successCall = () => {
+                  self.props.setPublishingState(false);
+                  setContainerMenuVisibility(false);
+                  self.props.resetPublishState(false);
+                  self.props.remountCollab();
+
+                  setMultiInfoMessage(id, `Added remote https://gigantum.com/${self.props.owner}/${self.props.labbookName}`, true, false);
+
+                  self.props.setRemoteSession();
+                };
+
                 PublishLabbookMutation(
                   owner,
                   labbookName,
                   labbookId,
                   this.state.isPublic,
+                  successCall,
+                  failureCall,
                   (response, error) => {
-                    self.props.setPublishingState(false);
-
-                    setContainerMenuVisibility(false);
-
                     if (error) {
-                      console.log(error);
-
-                      setErrorMessage('Publish failed', error);
-                    }
-
-                    self.props.resetPublishState(false);
-
-                    if (response.publishLabbook && response.publishLabbook.success) {
-                      self.props.remountCollab();
-
-                      setMultiInfoMessage(id, `Added remote https://gigantum.com/${self.props.owner}/${self.props.labbookName}`, true, false);
-
-                      self.props.setRemoteSession();
+                      failureCall();
                     }
                   },
                 );
