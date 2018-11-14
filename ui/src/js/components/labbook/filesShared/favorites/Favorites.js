@@ -70,6 +70,7 @@ export default class Favorites extends Component {
 
   render() {
     if (this.props[this.props.section] && this.props[this.props.section].favorites) {
+      const capitalSection = this.props.section[0].toUpperCase() + this.props.section.slice(1);
       if (this.props[this.props.section].favorites.edges.length > 0) {
         const favorites = this.props[this.props.section].favorites.edges.filter(edge => edge && (edge.node !== undefined));
 
@@ -90,7 +91,7 @@ export default class Favorites extends Component {
       return (
         <div className="Favorite__none flex flex--column justify--center">
           <div className="Favorite__icon--star"></div>
-          <p className="Favorite__p"><b>No Code Favorites</b></p>
+          <p className="Favorite__p"><b>No {capitalSection} Favorites</b></p>
           <p className="Favorite__p">Add a favorite and enter a description to highlight important items.</p>
         </div>
       );
