@@ -89,7 +89,8 @@
     "arrow-body-style": 1,
     "keyword-spacing": 1,
     "padded-blocks": 1,
-    "no-debugger": 1
+    "no-debugger": 1,
+    "import/no-dynamic-require": 0
   },
   "settings": {
     "import/resolver": {

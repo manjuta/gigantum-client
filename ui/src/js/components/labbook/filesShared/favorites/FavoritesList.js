@@ -1,9 +1,11 @@
 // vendor
 import React, { Component } from 'react';
 // componenets
-import FavoriteCard from './../fileBrowser/FavoriteCard';
+import FavoriteCard from '../../fileBrowser/FavoriteCard';
+// assets
+import './Favorites.scss';
 
-class OutputFavoriteList extends Component {
+class FavoriteList extends Component {
   constructor(props) {
   	super(props);
     this.state = {
@@ -69,6 +71,8 @@ class OutputFavoriteList extends Component {
     const {
       favorites,
     } = this.state;
+    const capitalSection = this.props.section[0].toUpperCase() + this.props.section.slice(1);
+
 
     return (
 
@@ -81,9 +85,9 @@ class OutputFavoriteList extends Component {
               id={edge.node.id}
               index={index}
               labbookName={this.props.labbookName}
-              parentId={this.props.outputId}
-              section="output"
-              connection="OutputFavorites_favorites"
+              parentId={this.props.sectionId}
+              section={this.props.section}
+              connection={`${capitalSection}Favorites_favorites`}
               favorite={edge.node}
               owner={this.props.owner}
               moveCard={this.moveCard}
@@ -94,4 +98,4 @@ class OutputFavoriteList extends Component {
   }
 }
 
-export default OutputFavoriteList;
+export default FavoriteList;

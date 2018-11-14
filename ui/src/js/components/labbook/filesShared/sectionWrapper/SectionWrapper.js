@@ -1,16 +1,11 @@
 // vendor
 import React, { Component } from 'react';
-import { createFragmentContainer, graphql } from 'react-relay';
 import classNames from 'classnames';
-// components
-import CodeBrowser from './CodeBrowser';
-import CodeFavorites from './CodeFavorites';
-import MostRecent from 'Components/labbook/filesShared/MostRecentCode';
-import ToolTip from 'Components/shared/ToolTip';
-// assets
-import './Code.scss';
 
-class Code extends Component {
+// assets
+import './SectionWrapper.scss';
+
+export default class SectionWrapper extends Component {
   constructor(props) {
   	super(props);
     this.state = {
@@ -24,7 +19,7 @@ class Code extends Component {
   }
 
   componentDidMount() {
-    let selectedFilter = this.props.labbook && this.props.labbook.code && this.props.labbook.code.hasFavorites ? 'favorites' : this.state.selectedFilter;
+    let selectedFilter = this.props.labbook && this.props.labbook[this.props.section] && this.props.labbook[this.props.section].hasFavorites ? 'favorites' : this.state.selectedFilter;
     this.setState({ selectedFilter });
   }
 
@@ -71,57 +66,76 @@ class Code extends Component {
     if (this.props.labbook) {
       const { labbook } = this.props,
             favoritesCSS = classNames({
-              Code__filter: true,
-              'Code__filter--selected': this.state.selectedFilter === 'favorites',
+              SectionWrapper__filter: true,
+              'SectionWrapper__filter--selected': this.state.selectedFilter === 'favorites',
             }),
             recentCSS = classNames({
-              Code__filter: true,
-              'Code__filter--selected': this.state.selectedFilter === 'recent',
-            });
+              SectionWrapper__filter: true,
+              'SectionWrapper__filter--selected': this.state.selectedFilter === 'recent',
+            }),
+            capitalSection = this.props.section[0].toUpperCase() + this.props.section.slice(1),
+            Favorites = require(`../favorites/favoritesContainers/${capitalSection}Favorites`).default,
+            MostRecent = require(`../mostRecent/mostRecentContainers/MostRecent${capitalSection}`).default,
+            Browser = require(`../sectionBrowser/sectionBrowserContainers/${capitalSection}Browser`).default,
+            sectionProp = {
+                [this.props.section]: this.props.labbook && this.props.labbook[this.props.section],
+                }
 
       return (
 
-        <div className="Code">
-          { (labbook.code.hasFiles || labbook.code.hasFavorites) &&
+        <div className="SectionWrapper">
+          {
+            this.props.labbook[this.props.section].isUntracked &&
+            <div className="SectionWrapper__tracked-container">
+              <div className="SectionWrapper__tracked">
+                Version Tracking Disabled
+              </div>
+            </div>
+          }
+          { (labbook[this.props.section].hasFiles || labbook[this.props.section].hasFavorites) &&
             <div>
-              <div className="Code__header">
-                <div className="Code__toolbar">
+              <div className="SectionWrapper__header">
+                <div className="SectionWrapper__toolbar">
                   <a ref="favorites" className={favoritesCSS} onClick={() => this._selectFilter('favorites')}>Favorites</a>
                   <a ref="recent" className={recentCSS} onClick={() => this._selectFilter('recent')}>Most Recent</a>
                 </div>
 
               </div>
 
-              <div className="Code__files">
+              <div className="SectionWrapper__files">
                 {
                 this.state.selectedFilter === 'favorites' &&
-                  <CodeFavorites
-                    codeId={labbook.code.id}
+                <Favorites
+                    sectionId={this.props.labbook[this.props.section].id}
                     labbookId={this.props.labbookId}
-                    code={labbook.code}
-                  />
+                    section={this.props.section}
+                    {...sectionProp}
+                />
                 }
                 {
                 this.state.selectedFilter === 'recent' &&
                   <MostRecent
-                    edgeId={labbook.code.id}
-                    code={labbook.code}
+                    edgeId={labbook[this.props.section].id}
                     selectedFilter={this.state.selectedFilter}
+                    section={this.props.section}
+                    {...sectionProp}
+
                   />
                 }
               </div>
               <hr />
             </div>
           }
-          <div className="Code__file-browser">
-            <CodeBrowser
+          <div className="SectionWrapper__file-browser">
+            <Browser
               selectedFiles={this.state.selectedFiles}
               clearSelectedFiles={this._clearSelectedFiles}
               labbookId={this.props.labbookId}
-              codeId={labbook.code.id}
-              code={labbook.code}
+              sectionId={labbook[this.props.section].id}
+              section={this.props.section}
               loadStatus={this._loadStatus}
               isLocked={this.props.isLocked}
+              {...sectionProp}
             />
           </div>
         </div>
@@ -130,20 +144,3 @@ class Code extends Component {
     return (<div>No Files Found</div>);
   }
 }
-
-
-export default createFragmentContainer(
-  Code,
-  graphql`
-    fragment Code_labbook on Labbook{
-      code{
-        id
-        hasFiles
-        hasFavorites
-        ...CodeBrowser_code
-        ...CodeFavorites_code
-        ...MostRecentCode_code
-      }
-    }
-  `,
-);

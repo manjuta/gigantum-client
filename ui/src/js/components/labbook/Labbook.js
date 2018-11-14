@@ -42,17 +42,17 @@ const Activity = Loadable({
   delay: 500,
 });
 const Code = Loadable({
-  loader: () => import('./code/Code'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperContainers/Code'),
   loading: Loading,
   delay: 500,
 });
 const InputData = Loadable({
-  loader: () => import('./inputData/InputData'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperContainers/Input'),
   loading: Loading,
   delay: 500,
 });
 const OutputData = Loadable({
-  loader: () => import('./outputData/OutputData'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperContainers/Output'),
   loading: Loading,
   delay: 500,
 });
@@ -335,6 +335,7 @@ class Labbook extends Component {
                                labbookId={labbook.id}
                                setContainerState={this._setContainerState}
                                isLocked={isLockedBrowser}
+                               section={'code'}
                              />
 
                         </ErrorBoundary>)}
@@ -352,6 +353,7 @@ class Labbook extends Component {
                                labbook={labbook}
                                labbookId={labbook.id}
                                isLocked={isLockedBrowser}
+                               section={'input'}
                              />
 
                         </ErrorBoundary>)}
@@ -369,6 +371,7 @@ class Labbook extends Component {
                                labbook={labbook}
                                labbookId={labbook.id}
                                isLocked={isLockedBrowser}
+                               section={'output'}
                              />
 
                         </ErrorBoundary>)}
@@ -444,8 +447,8 @@ const LabbookFragmentContainer = createFragmentContainer(
           ...Overview_labbook
           ...Activity_labbook
           ...Code_labbook
-          ...InputData_labbook
-          ...OutputData_labbook
+          ...Input_labbook
+          ...Output_labbook
 
       }`,
   },

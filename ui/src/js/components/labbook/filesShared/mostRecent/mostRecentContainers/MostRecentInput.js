@@ -1,16 +1,17 @@
 // vendor
 import { createPaginationContainer, graphql } from 'react-relay';
 // component
-import MostRecent from './MostRecent';
+import MostRecent from '../MostRecent';
 // store
 import store from 'JS/redux/store';
+
 
 export default createPaginationContainer(
   MostRecent,
   {
-    output: graphql`
-        fragment MostRecentOutput_output on LabbookSection{
-            allFiles(after: $cursor, first: $first)@connection(key: "MostRecentOutput_allFiles"){
+    input: graphql`
+        fragment MostRecentInput_input on LabbookSection{
+            allFiles(after: $cursor, first: $first)@connection(key: "MostRecentInput_allFiles"){
             edges{
                 node{
                     id
@@ -34,7 +35,7 @@ export default createPaginationContainer(
   {
     direction: 'forward',
     getConnectionFromProps(props) {
-      return props.output && props.output.allFiles;
+      return props.input && props.input.allFiles;
     },
     getFragmentVariables(prevVars, totalCount) {
       return {
@@ -52,7 +53,7 @@ export default createPaginationContainer(
       };
     },
     query: graphql`
-        query MostRecentOutputPaginationQuery(
+        query MostRecentInputPaginationQuery(
             $first: Int
             $cursor: String
             $owner: String!
@@ -62,8 +63,8 @@ export default createPaginationContainer(
                 id
                 description
                 # You could reference the fragment defined previously.
-                output{
-                ...MostRecentOutput_output
+                input{
+                ...MostRecentInput_input
                 }
             }
         }

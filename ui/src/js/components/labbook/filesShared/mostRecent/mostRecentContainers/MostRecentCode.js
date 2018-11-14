@@ -1,7 +1,7 @@
 // vendor
 import { createPaginationContainer, graphql } from 'react-relay';
 // component
-import MostRecent from './MostRecent';
+import MostRecent from '../MostRecent';
 // store
 import store from 'JS/redux/store';
 
