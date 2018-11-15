@@ -1,18 +1,15 @@
 
-      import React from 'react'
-      import renderer from 'react-test-renderer'
-      import {mount} from 'enzyme'
-      import json from './../__relaydata__/LocalLabbooks.json'
       import ContainerLookup from 'Components/dashboard/labbooks/localLabbooks/lookups/ContainerLookup';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
+      import json from '../__relaydata__/LocalLabbooks.json';
 
-      test('Test ContainerLookup', async () => {
-
-        let id = json.data.labbookList.localLabbooks.edges[0].node.id
-        ContainerLookup.query([id]).then((response)=>{
-
-          expect(response.data.ids.length).toEqual(0)
+      describe('Test ContainerLookup', () => {
+        it('returns a labbookList', async () => {
+        let id = json.data.labbookList.localLabbooks.edges[0].node.id;
+          await ContainerLookup.query([id]).then((response, error) => {
+            console.log(response, error)
+            expect(response.data.ids.length).toEqual(0);
+          });
         })
-
-      })
+      });

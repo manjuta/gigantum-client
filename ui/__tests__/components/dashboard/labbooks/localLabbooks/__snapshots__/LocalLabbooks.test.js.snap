@@ -8,7 +8,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     className="grid"
   >
     <div
-      className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
+      className="ImportModule Card Card-300 Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
       id="dropZone"
       onDragEnd={[Function]}
       onDragOver={[Function]}
@@ -102,8 +102,8 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="hidden importLabbook"
           >
             Clicking on the Import Existing' button transition the card to Import mode. 
-             You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
-             You can also directly import Projects that have been shared with you in the Cloud view.
+ You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
+ You can also directly import Projects that have been shared with you in the Cloud view.
           </div>
         </div>
       </div>
@@ -112,7 +112,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
       />
     </div>
     <a
-      className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       href="/projects/cbutler/zab"
       onClick={[Function]}
     >
@@ -140,12 +140,9 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="LocalLabbooks__panel-title"
             onClick={[Function]}
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 zab
               </span>
@@ -160,14 +157,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/15/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -176,7 +171,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
       />
     </a>
     <a
-      className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       href="/projects/cbutler/untracked-labbook"
       onClick={[Function]}
     >
@@ -204,12 +199,9 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="LocalLabbooks__panel-title"
             onClick={[Function]}
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 untracked-labbook
               </span>
@@ -224,14 +216,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/15/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -240,7 +230,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
       />
     </a>
     <a
-      className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       href="/projects/cbutler/untracked-2"
       onClick={[Function]}
     >
@@ -268,12 +258,9 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="LocalLabbooks__panel-title"
             onClick={[Function]}
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 untracked-2
               </span>
@@ -288,14 +275,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/15/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -304,7 +289,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
       />
     </a>
     <a
-      className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       href="/projects/cbutler/untracked"
       onClick={[Function]}
     >
@@ -332,12 +317,9 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="LocalLabbooks__panel-title"
             onClick={[Function]}
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 untracked
               </span>
@@ -352,14 +334,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/15/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -368,7 +348,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
       />
     </a>
     <a
-      className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       href="/projects/dmk/trump-tweets"
       onClick={[Function]}
     >
@@ -396,12 +376,9 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="LocalLabbooks__panel-title"
             onClick={[Function]}
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 trump-tweets
               </span>
@@ -416,17 +393,14 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/15/18
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          >
+          <span>
             <span
               className=""
-              style={undefined}
             >
               A LabBook to analyze Trumps stupid tweets
             </span>

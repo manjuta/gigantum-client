@@ -1,5 +1,7 @@
-// var { JSOM } = require('jsdom');
-var fetch = require('isomorphic-fetch');
+// var jsdom = require('jsdom');
+// console.log(jsdom)
+// var { JSDOM } = jsdom
+require('fetch-reply-with');
 var FormData = require('form-data');
 require('raf/polyfill');
 
@@ -7,24 +9,20 @@ var { configure } = require('enzyme');
 var Adapter = require('enzyme-adapter-react-16');
 
 configure({ adapter: new Adapter() });
-class JSDOM {
-  constructor(props) {
-    console.log(props);
-  }
-
-  winodw() {
-    console.log(window);
-  }
-}
 // need to add root to JSDOM for mounting react
-const window = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>').window;
 
 // set variables for the api
 window.location.hostname = 'localhost';
 window.location.protocol = 'https:';
 
+// window.location.assign.mockClear();
+// window.location.assign('https://localhost:10000');
+var document = window.document;
+
+var newDiv = document.createElement('div');
+newDiv.setAttribute('id', 'root');
 // set for proxy
-process.env.GIGANTUM_API = process.env.USE_PROXY ? ':10010/labbook/' : ':10001/labbook/';
+process.env.GIGANTUM_API = process.env.USE_PROXY ? ':10010/api/labbook/' : ':10000/api/labbook/';
 
 // add document globally
 global.document = window.document;
@@ -37,9 +35,10 @@ global.window.resizeTo = function (width, height) {
   global.window.innerHeight = width || global.window.innerHeight;
   global.window.dispatchEvent(new Event('resize'));
 };
+.0
 
 // add node fetch for environment
-global.fetch = fetch;
+// global.fetch = fetch;
 
 // add formdata api for multipart forms
 global.FormData = FormData;
@@ -91,8 +90,8 @@ global.requestAnimationFrame = function (callback) {
     }
 }());
 
-const oneHundredSeconds = 1 * 1000 * 100
-// set timout to one hundred seconds
-jasmine.DEFAULT_TIMEOUT_INTERVAL = oneHundredSeconds
+// const oneHundredSeconds = 1 * 1000 * 100
+// // set timout to one hundred seconds
+// jasmine.DEFAULT_TIMEOUT_INTERVAL = oneHundredSeconds
 
 // export default () => global;
