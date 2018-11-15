@@ -29,7 +29,7 @@ export const setPublishingState = isPublishing => dispatcher(IS_PUBLISHING, { is
 export const setExportingState = isExporting => dispatcher(IS_EXPORTING, { isExporting });
 export const setModalVisible = modalVisible => dispatcher(MODAL_VISIBLE, { modalVisible });
 export const setUpdateDetailView = detailMode => dispatcher(UPDATE_DETAIL_VIEW, { detailMode });
-export const setStickyDate = (isSticky, isExpanded) => dispatcher(UPDATE_STICKY_STATE, { isSticky, isExpanded });
+export const setStickyDate = isSticky => dispatcher(UPDATE_STICKY_STATE, { isSticky });
 
 
 export default (
@@ -47,7 +47,6 @@ export default (
     previousDetailMode: false,
     branchesOpen: false,
     isSticky: false,
-    isExpanded: false,
     mergeFilter: false,
   },
   action,
@@ -64,7 +63,6 @@ export default (
     return {
       ...state,
       isSticky: action.payload.isSticky,
-      isExpanded: action.payload.isExpanded,
     };
   } else if (action.type === MERGE_MODE) {
     return {
