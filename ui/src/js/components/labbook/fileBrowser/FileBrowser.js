@@ -12,6 +12,8 @@ import Folder from './fileRow/Folder';
 import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
+// util
+import WebWorker, { fileHandler } from './utilities/WebWorker';
 
 class FileBrowser extends Component {
     constructor(props) {
@@ -28,6 +30,7 @@ class FileBrowser extends Component {
         sort: 'az',
         reverse: false,
         count: 0,
+        files: {},
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
@@ -42,9 +45,10 @@ class FileBrowser extends Component {
         let childrenState = {};
         props.files.edges.forEach((edge) => {
           if (edge.node && edge.node.key) {
-            let key = edge.node.key.split('/').join('');
+            let key = edge.node.key;
             childrenState[key] = {
               isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
+              isIncomplete: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isIncomplete : false,
               edge,
             };
           }
@@ -57,6 +61,12 @@ class FileBrowser extends Component {
           count,
         };
     }
+    /**
+      sets worker
+    */
+    componentDidMount() {
+      this.fileHandler = new WebWorker(fileHandler);
+    }
     /*
       resets search
     */
@@ -65,19 +75,27 @@ class FileBrowser extends Component {
       if (this.state.search === '' && element.value !== '') {
         element.value = '';
       }
+      this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
+      this.fileHandler.addEventListener('message', (evt) => {
+        if (this.state.fileHash !== evt.data.hash) {
+          console.log('THIS FORCED RE RENDER')
+          this.setState({ fileHash: evt.data.hash, files: evt.data.files })
+        }
+      })
     }
     /**
     *  @param {string} key - key of file to be updated
     *  @param {boolean} isSelected - update if the value is selected
+    *  @param {boolean} isIncomplete - update if the value is incomplete
     *  @return {}
     */
-    _updateChildState(key, isSelected) {
+    _updateChildState(key, isSelected, isIncomplete) {
       let isChildSelected = false;
       let count = 0;
       let selectedCount = 0;
       let { childrenState } = this.state;
-      let santizedKey = key.split('/').join('');
-      childrenState[santizedKey].isSelected = isSelected;
+      childrenState[key].isSelected = isSelected;
+      childrenState[key].isIncomplete = isIncomplete;
 
       for (let key in childrenState) {
         if (childrenState[key]) {
@@ -101,70 +119,6 @@ class FileBrowser extends Component {
     _setState(stateKey, value) {
        this.setState({ [stateKey]: value });
     }
-    /**
-    *  @param {}
-    *  sorts files into an object for rendering
-    *  @return {}
-    */
-    _processFiles() {
-        let edges = this.props.files.edges;
-        let edgesToSort = JSON.parse(JSON.stringify(edges));
-        let fileObject = {};
-        const { search } = this.state;
-        const searchLowerCase = search.toLowerCase();
-
-        if (search !== '') {
-          let edgesSearchMatch = edgesToSort.filter((edge) => {
-            const lowerCaseKey = edge.node.key.toLowerCase();
-            return (lowerCaseKey.indexOf(searchLowerCase) > -1);
-          });
-
-          edgesToSort = edgesToSort.filter((edge) => {
-            let keyMatch = false;
-            edgesSearchMatch.forEach((matchEdge) => {
-              if (matchEdge.node.key.indexOf(edge.node.key) > -1) {
-                keyMatch = true;
-              }
-            });
-            return keyMatch;
-          });
-        }
-
-        edgesToSort.forEach((edge, index) => {
-            let key = edge.node.key.toLowerCase();
-            let searchLowerCase = search.toLowerCase();
-
-
-            if (edge.node) {
-              let currentObject = fileObject;
-              let splitKey = edge.node.key.split('/').filter(key => key.length);
-
-              splitKey.forEach((key, index) => {
-                  if (currentObject && (index === (splitKey.length - 1))) {
-                      if (!currentObject[key]) {
-                        currentObject[key] = {
-                          edge,
-                          index,
-                        };
-                      } else {
-                        currentObject[key].edge = edge;
-                      }
-                  } else if (currentObject && !currentObject[key]) {
-                      currentObject[key] = {
-                        children: {},
-                      };
-                      currentObject = currentObject[key].children;
-                  } else if (currentObject && currentObject[key] && !currentObject[key].children) {
-                      currentObject[key].children = {};
-                      currentObject = currentObject[key].children;
-                  } else {
-                    currentObject = currentObject[key].children;
-                  }
-              });
-           }
-        });
-        return fileObject;
-  }
   /**
   *  @param {}
   *  sorts files into an object for rendering
@@ -338,27 +292,27 @@ class FileBrowser extends Component {
   *  @return {}
   */
  _childSort(array, type, reverse, children, section) {
-  array.sort((a, b) => {
-    let lowerA,
-    lowerB;
-    if (type === 'az' || type === 'size' && section === 'folder') {
-      lowerA = a.toLowerCase();
-      lowerB = b.toLowerCase();
-      if (type === 'size' || !reverse) {
-        return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
-      }
-      return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
-    } else if (type === 'modified') {
-      lowerA = children[a].edge.node.modifiedAt;
-      lowerB = children[b].edge.node.modifiedAt;
-      return reverse ? lowerB - lowerA : lowerA - lowerB;
-    } else if (type === 'size') {
-      lowerA = children[a].edge.node.size;
-      lowerB = children[b].edge.node.size;
-      return reverse ? lowerB - lowerA : lowerA - lowerB;
-    }
-    return 0;
-  });
+  // array.sort((a, b) => {
+  //   let lowerA,
+  //   lowerB;
+  //   if (type === 'az' || type === 'size' && section === 'folder') {
+  //     lowerA = a.toLowerCase();
+  //     lowerB = b.toLowerCase();
+  //     if (type === 'size' || !reverse) {
+  //       return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
+  //     }
+  //     return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
+  //   } else if (type === 'modified') {
+  //     lowerA = children[a].edge.node.modifiedAt;
+  //     lowerB = children[b].edge.node.modifiedAt;
+  //     return reverse ? lowerB - lowerA : lowerA - lowerB;
+  //   } else if (type === 'size') {
+  //     lowerA = children[a].edge.node.size;
+  //     lowerB = children[b].edge.node.size;
+  //     return reverse ? lowerB - lowerA : lowerA - lowerB;
+  //   }
+  //   return 0;
+  // });
   return array;
 }
   /**
@@ -375,7 +329,7 @@ class FileBrowser extends Component {
   }
 
   render() {
-    const files = this._processFiles(),
+    const files = this.state.files,
           { mutationData } = this.state,
           { isOver } = this.props;
     let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
@@ -491,6 +445,7 @@ class FileBrowser extends Component {
                                     rowStyle={{}}
                                     sort={this.state.sort}
                                     reverse={this.state.reverse}
+                                    childrenState={this.state.childrenState}
                                     updateChildState={this._updateChildState}>
                                 </Folder>
                             );
@@ -503,6 +458,7 @@ class FileBrowser extends Component {
                                   multiSelect={this.state.multiSelect}
                                   mutationData={mutationData}
                                   data={files[file]}
+                                  childrenState={this.state.childrenState}
                                   mutations={this.state.mutations}
                                   expanded
                                   isOverChildFile={this.state.isOverChildFile}
@@ -529,7 +485,15 @@ class FileBrowser extends Component {
                 }
                 { (childrenKeys.length === 0) &&
                   <div className="FileBrowser__empty">
-                    <h5>Upload Files by Dragging & Dropping Here</h5>
+                    {
+                      this.state.search !== '' ?
+                        <h5>No files match your search.</h5>
+                        :
+                        this.props.files.edges.length ?
+                        <h5>Loading Files...</h5>
+                        :
+                        <h5>Upload Files by Dragging & Dropping Here</h5>
+                  }
                   </div>
                 }
             </div>

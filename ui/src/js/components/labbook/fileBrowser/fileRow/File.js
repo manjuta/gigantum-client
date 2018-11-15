@@ -20,14 +20,13 @@ class File extends Component {
 
       this.state = {
           isDragging: props.isDragging,
-          isSelected: props.isSelected || false,
+          isSelected: (props.isSelected || this.props.childrenState[this.props.data.edge.node.key].isSelected) || false,
           stateSwitch: false,
           newFileName: '',
           renameEditMode: false,
           hover: false,
       };
       this._setSelected = this._setSelected.bind(this);
-      this.connectDND = this.connectDND.bind(this);
       this._renameEditMode = this._renameEditMode.bind(this);
       this._triggerMutation = this._triggerMutation.bind(this);
       this._clearState = this._clearState.bind(this);
@@ -56,7 +55,7 @@ class File extends Component {
   *  sets elements to be selected and parent
   */
   _setSelected(isSelected) {
-      this.props.updateChildState(this.props.data.edge.node.key, isSelected);
+      this.props.updateChildState(this.props.data.edge.node.key, isSelected, false);
       this.setState({ isSelected }, () => {
           Object.keys(this.refs).forEach((ref) => {
               this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected();
@@ -66,19 +65,7 @@ class File extends Component {
           }
       });
   }
-  /**
-  *  @param {}
-  *  sets elements to be selected and parent
-  */
-  connectDND(render) {
-    if (this.state.isDragging || this.props.parentIsDragged) {
-      render = this.props.connectDragSource(render);
-    } else {
-      render = this.props.connectDropTarget(render);
-    }
-    return render;
-  }
-      /**
+    /**
     *  @param {}
     *  sets dragging state
     */
@@ -189,8 +176,6 @@ class File extends Component {
   render() {
     const { node } = this.props.data.edge;
     const { index } = this.props.data;
-    const splitKey = node.key.split('/');
-
     const fileName = this.props.filename;
     const fileRowCSS = classNames({
             File__row: true,
@@ -291,12 +276,12 @@ class File extends Component {
         </div>
 
     return (
-      this.connectDND(file)
+      this.props.connectDragSource(file)
     );
   }
 }
-// export default File
-export default DragSource(
+
+const FolderDND = DragSource(
   'card',
   Connectors.dragSource,
   Connectors.dragCollect,
@@ -305,3 +290,6 @@ export default DragSource(
     Connectors.targetSource,
     Connectors.targetCollect,
   )(File));
+
+
+export default FolderDND;

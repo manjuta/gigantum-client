@@ -22,8 +22,8 @@ class Folder extends Component {
         this.state = {
             isDragging: props.isDragging,
             expanded: false,
-            isSelected: props.isSelected || false,
-            isIncomplete: false,
+            isSelected: (props.isSelected || this.props.childrenState[this.props.data.edge.node.key].isSelected) || false,
+            isIncomplete: this.props.childrenState[this.props.data.edge.node.key].isIncomplete || false,
             hoverId: '',
             isOver: false,
             prevIsOverState: false,
@@ -76,7 +76,7 @@ class Folder extends Component {
     *  @return {}
     */
     _setSelected(isSelected) {
-        this.props.updateChildState(this.props.data.edge.node.key, isSelected);
+        this.props.updateChildState(this.props.data.edge.node.key, isSelected, false);
         this.setState(
           {
             isSelected,
@@ -118,14 +118,19 @@ class Folder extends Component {
     */
     _checkParent() {
         let checkCount = 0;
+        let incompleteCount = 0;
         Object.keys(this.refs).forEach((ref) => {
-            if (this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state.isSelected) {
+            let state = this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state;
+            if (state.isSelected) {
                 checkCount += 1;
+            }
+            if (state.isIncomplete) {
+              incompleteCount += 1;
             }
         });
 
-        if (checkCount === 0) {
-            this.props.updateChildState(this.props.data.edge.node.key, false);
+        if (checkCount === 0 && incompleteCount === 0) {
+            this.props.updateChildState(this.props.data.edge.node.key, false, false);
             this.setState(
               {
                 isIncomplete: false,
@@ -138,7 +143,7 @@ class Folder extends Component {
               },
             );
         } else if (checkCount === Object.keys(this.refs).length && this.state.isSelected) {
-            this.props.updateChildState(this.props.data.edge.node.key, true);
+            this.props.updateChildState(this.props.data.edge.node.key, true, false);
             this.setState(
               {
                 isIncomplete: false,
@@ -151,7 +156,7 @@ class Folder extends Component {
               },
             );
         } else {
-            this.props.updateChildState(this.props.data.edge.node.key, false);
+            this.props.updateChildState(this.props.data.edge.node.key, false, true);
             this.setState(
               {
                 isIncomplete: true,
@@ -488,7 +493,9 @@ class Folder extends Component {
                       />
                     </div>
                 </div>
-                <div className={folderChildCSS}>
+                {
+                  this.state.expanded &&
+                  <div className={folderChildCSS}>
                     <AddSubfolder
                       rowStyle={addRowStyle}
                       key={`${node.key}__subfolder`}
@@ -519,6 +526,7 @@ class Folder extends Component {
                                         setParentDragFalse={() => this.setState({ isDragging: false })}
                                         setParentDragTrue={this._checkHover}
                                         parentIsDragged={this.state.isDragging || this.props.parentIsDragged}
+                                        childrenState={this.props.childrenState}
                                         updateChildState={this.props.updateChildState}>
                                     </FolderDND>
                                 );
@@ -540,6 +548,7 @@ class Folder extends Component {
                                       setParentDragTrue={this._checkHover}
                                       isOverChildFile={this.state.isOverChildFile}
                                       updateParentDropZone={this._updateDropZone}
+                                      childrenState={this.props.childrenState}
                                       updateChildState={this.props.updateChildState}>
                                   </File>
                               );
@@ -560,6 +569,7 @@ class Folder extends Component {
                         })
                     }
                 </div>
+                }
             </div>;
 
         return (
@@ -578,5 +588,5 @@ const FolderDND = DragSource(
     Connectors.targetCollect,
   )(Folder));
 
-// export default File
+
 export default FolderDND;
