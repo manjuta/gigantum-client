@@ -4,10 +4,10 @@ set -e
 
 # Update node
 cd /opt/ui
-yarn install
+npm install
 
 # Run relay
-yarn relay
+npm run relay
 
 # Run build
-yarn build
+npm run build
