@@ -1,7 +1,7 @@
 // var jsdom = require('jsdom');
 // console.log(jsdom)
 // var { JSDOM } = jsdom
-require('fetch-reply-with');
+var fetch = require('isomorphic-fetch');
 var FormData = require('form-data');
 require('raf/polyfill');
 
@@ -35,10 +35,9 @@ global.window.resizeTo = function (width, height) {
   global.window.innerHeight = width || global.window.innerHeight;
   global.window.dispatchEvent(new Event('resize'));
 };
-.0
 
 // add node fetch for environment
-// global.fetch = fetch;
+global.fetch = fetch;
 
 // add formdata api for multipart forms
 global.FormData = FormData;
