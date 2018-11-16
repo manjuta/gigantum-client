@@ -332,7 +332,6 @@ class Activity extends Component {
     let isDemo = window.location.hostname === config.demoHostName,
       upperBound = isDemo ? 170 : 120,
       lowerBound = isDemo ? 130 : 80,
-      isExpanded = (window.pageYOffset < this.offsetDistance) && (window.pageYOffset > upperBound),
       stickyDate = null;
 
     this.offsetDistance = window.pageYOffset;
@@ -341,7 +340,7 @@ class Activity extends Component {
       if (date && date.e) {
         const bounds = date.e.getBoundingClientRect();
 
-        if ((!isExpanded && bounds.top < lowerBound) || (isExpanded && bounds.top < upperBound)) {
+        if (bounds.top < upperBound) {
           stickyDate = date.time;
           date.e.classList.add('not-visible');
           date.e.nextSibling && date.e.nextSibling.classList.add('next-element');
@@ -753,7 +752,6 @@ class Activity extends Component {
       const stickyDateCSS = classNames({
         'Activity__date-tab': true,
         fixed: this.state.stickyDate,
-        'is-expanded': store.getState().labbook.isExpanded,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       return (

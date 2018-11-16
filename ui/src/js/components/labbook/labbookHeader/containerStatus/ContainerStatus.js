@@ -414,7 +414,7 @@ class ContainerStatus extends Component {
     newStatus = this.state.isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
     newStatus = this.state.isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
 
-    newStatus = this.props.isBuilding ? 'Building' : this.state.isSyncing ? 'Syncing' : this.state.isPublishing ? 'Publishing' : newStatus;
+    newStatus = this.props.isBuilding ? 'Building' : this.props.isSyncing ? 'Syncing' : this.props.isPublishing ? 'Publishing' : newStatus;
 
     return newStatus;
   }
@@ -479,7 +479,7 @@ class ContainerStatus extends Component {
       Publishing: this.props.isPublishing,
       LookingUp: this.props.isLookingUpPackages,
       'ContainerStatus__container-state--expanded': this.state.isMouseOver && notExcluded && !this.props.isBuilding && !(this.state.imageStatus === 'BUILD_IN_PROGRESS'),
-      'ContainerStatus__container-remove-pointer': !notExcluded || this.props.isBuilding || (this.state.imageStatus === 'BUILD_IN_PROGRESS') || this.state.isSyncing || this.state.isPublishing,
+      'ContainerStatus__container-remove-pointer': !notExcluded || this.props.isBuilding || (this.state.imageStatus === 'BUILD_IN_PROGRESS') || this.props.isSyncing || this.props.isPublishing,
     });
 
     const containerMenuIconCSS = classNames({

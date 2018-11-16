@@ -15,7 +15,7 @@ const FooterUtils = {
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
-  getJobStatus: (result, type, key, relayStore) => {
+  getJobStatus: (result, type, key, successCall, failureCall) => {
     /**
       *  @param {}
       *  refetches job status
@@ -80,6 +80,7 @@ const FooterUtils = {
             } else if (response.data.jobStatus.status === 'finished') {
               setMultiInfoMessage(response.data.jobStatus.id, message, true, null, [{ message: html }]);
               if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
+                successCall();
                 const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).labbook.split('|');
                 const owner = metaDataArr[1];
                 const labbookName = metaDataArr[2];
@@ -98,6 +99,10 @@ const FooterUtils = {
               let errorMessage = response.data.jobStatus.failureMessage;
               if (method === 'build_image') {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
+              }
+              if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
+                console.log(response.data);
+                failureCall(response.data.jobStatus.failureMessage);
               }
               html += `\n<span style="color:rgb(255,85,85)">${response.data.jobStatus.failureMessage}</span>`;
               setMultiInfoMessage(response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
