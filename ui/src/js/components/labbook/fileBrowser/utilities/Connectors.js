@@ -300,6 +300,7 @@ function targetCollect(connect, monitor) {
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;
   }
+
   return {
     connectDropTarget: connect.dropTarget(),
 		canDrop,

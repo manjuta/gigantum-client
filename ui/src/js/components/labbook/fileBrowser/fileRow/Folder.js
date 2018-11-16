@@ -21,13 +21,13 @@ class Folder extends Component {
 
         this.state = {
             isDragging: props.isDragging,
-            expanded: false,
+            expanded: this.props.childrenState[this.props.data.edge.node.key].isExpanded || false,
             isSelected: (props.isSelected || this.props.childrenState[this.props.data.edge.node.key].isSelected) || false,
             isIncomplete: this.props.childrenState[this.props.data.edge.node.key].isIncomplete || false,
             hoverId: '',
             isOver: false,
             prevIsOverState: false,
-            addFolderVisible: false,
+            addFolderVisible: this.props.childrenState[this.props.data.edge.node.key].isAddingFolder || false,
             renameEditMode: false,
             isOverChildFile: false,
         };
@@ -76,7 +76,7 @@ class Folder extends Component {
     *  @return {}
     */
     _setSelected(isSelected) {
-        this.props.updateChildState(this.props.data.edge.node.key, isSelected, false);
+        this.props.updateChildState(this.props.data.edge.node.key, isSelected, false, this.state.expanded, this.state.addFolderVisible);
         this.setState(
           {
             isSelected,
@@ -130,7 +130,7 @@ class Folder extends Component {
         });
 
         if (checkCount === 0 && incompleteCount === 0) {
-            this.props.updateChildState(this.props.data.edge.node.key, false, false);
+            this.props.updateChildState(this.props.data.edge.node.key, false, false, this.state.expanded, this.state.addFolderVisible);
             this.setState(
               {
                 isIncomplete: false,
@@ -143,7 +143,7 @@ class Folder extends Component {
               },
             );
         } else if (checkCount === Object.keys(this.refs).length && this.state.isSelected) {
-            this.props.updateChildState(this.props.data.edge.node.key, true, false);
+            this.props.updateChildState(this.props.data.edge.node.key, true, false, this.state.expanded, this.state.addFolderVisible);
             this.setState(
               {
                 isIncomplete: false,
@@ -156,7 +156,7 @@ class Folder extends Component {
               },
             );
         } else {
-            this.props.updateChildState(this.props.data.edge.node.key, false, true);
+            this.props.updateChildState(this.props.data.edge.node.key, false, true, this.state.expanded, this.state.addFolderVisible);
             this.setState(
               {
                 isIncomplete: true,
@@ -179,10 +179,16 @@ class Folder extends Component {
     _expandSection(evt) {
       if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') &&
       !evt.target.classList.contains('File__btn--round')) {
-        this.setState({ expanded: !this.state.expanded });
+        this.setState({ expanded: !this.state.expanded }, () => {
+          this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
+          this.props.listRef.recomputeGridSize()
+        });
       }
       if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
-        this.setState({ expanded: true });
+        this.setState({ expanded: true }, () => {
+          this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
+          this.props.listRef.recomputeGridSize()
+        });
       }
     }
 
@@ -235,8 +241,11 @@ class Folder extends Component {
     */
     _addFolderVisible(reverse) {
       if (reverse) {
+        this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, !this.state.addFolderVisible);
+
         this.setState({ addFolderVisible: !this.state.addFolderVisible });
       } else {
+        this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, false);
         this.setState({ addFolderVisible: false });
       }
     }

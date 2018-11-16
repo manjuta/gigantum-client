@@ -54,7 +54,7 @@ export default class ActionsMenu extends Component {
   *  @return {}
   */
   _closePopup(evt) {
-    if (this[this.props.edge.node.id] && !this[this.props.edge.node.id].contains(evt.target)) {
+    if (this.state.popupVisible && this[this.props.edge.node.id] && !this[this.props.edge.node.id].contains(evt.target)) {
       this.setState({ popupVisible: false });
     }
   }
