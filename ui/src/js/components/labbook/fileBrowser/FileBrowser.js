@@ -91,7 +91,6 @@ class FileBrowser extends Component {
     componentDidUpdate() {
       if (this.list) {
       this.list.recomputeGridSize()
-
       }
       if (window.innerWidth < 1240) {
         this.refs.windowScroller.updatePosition()
@@ -348,21 +347,19 @@ class FileBrowser extends Component {
       this.setState({ sort: type, reverse: false });
     }
   }
-  _getRowHeight(index, keys) {
+  _getRowHeight(index, keys, files, totalSize = 50) {
     let file = keys[index];
-    let files = this.state.files;
-
-    let reference = file;
-    const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
-    reference = isDir ? `${reference}/` : reference;
-    const isExpanded = reference && this.state.childrenState[reference].isExpanded
-
-    const addFolderSize = this.state.childrenState[reference].isAddingFolder ? 50 : 0;
-
-    if (!isDir || !isExpanded) {
-      return 50;
+    const reference = files[file] && files[file].edge && files[file].edge.node.key || file;
+    const isExpanded = reference && this.state.childrenState[reference] && this.state.childrenState[reference].isExpanded || false
+    const addFolderSize = this.state.childrenState[reference] && this.state.childrenState[reference].isAddingFolder ? 50 : 0;
+    let newTotalSize = totalSize
+    if (isExpanded && files[file].children) {
+      let childKeys = Object.keys(files[file].children)
+      childKeys.forEach((child, index) => {
+        newTotalSize += this._getRowHeight(index, childKeys, files[file].children, totalSize)
+      })
     }
-    return 50 + (50 * (files[file].children && Object.keys(files[file].children).length || 0)) + addFolderSize;
+    return newTotalSize + addFolderSize;
   }
 
   render() {
@@ -428,6 +425,7 @@ class FileBrowser extends Component {
           {
             isDir ?
               <Folder
+                index={index}
                 style={style}
                 ref={file}
                 filename={file}
@@ -555,7 +553,7 @@ class FileBrowser extends Component {
                         scrollTop={scrollTop}
                         width={width}
                         rowCount={childrenKeys.length}
-                        rowHeight={({ index }) => this._getRowHeight(index, childrenKeys)}
+                        rowHeight={({ index }) => this._getRowHeight(index, childrenKeys, this.state.files)}
                         rowRenderer={(rowRenderer)}
                         deferredMeasurementCache={this.cache}
                         overscanRowCount={20}

@@ -43,6 +43,7 @@ class Folder extends Component {
         this._checkHover = this._checkHover.bind(this);
         this._renameEditMode = this._renameEditMode.bind(this);
         this._updateDropZone = this._updateDropZone.bind(this);
+        this._getRowHeight = this._getRowHeight.bind(this);
     }
 
 
@@ -181,17 +182,13 @@ class Folder extends Component {
       !evt.target.classList.contains('File__btn--round')) {
         this.setState({ expanded: !this.state.expanded }, () => {
           this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
-          if (this.props.listRef) {
-            this.props.listRef.recomputeGridSize()
-          }
+          this.props.listRef.recomputeGridSize()
         });
       }
       if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
         this.setState({ expanded: true }, () => {
           this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
-          if (this.props.listRef) {
-            this.props.listRef.recomputeGridSize()
-          }
+          this.props.listRef.recomputeGridSize()
         });
       }
     }
@@ -395,6 +392,23 @@ class Folder extends Component {
       });
       return array;
     }
+    _getRowHeight(index, keys) {
+      let file = keys[index];
+      let files = this.props.data;
+
+      let reference = file;
+      const isDir = files.edge.node.isDir;
+      reference = isDir ? `${reference}/` : reference;
+      const isExpanded = reference && this.props.childrenState[reference] && this.props.childrenState[reference].isExpanded
+      // console.log(files[file].children && Object.keys(files[file].children).length)
+
+      const addFolderSize = this.props.childrenState[reference] && this.props.childrenState[reference].isAddingFolder ? 50 : 0;
+
+      if (!isDir || !isExpanded) {
+        return 50;
+      }
+      return 50 + (50 * (files.children && Object.keys(files.children).length || 0)) + addFolderSize;
+    }
 
     render() {
         const { node } = this.props.data.edge,
@@ -507,9 +521,9 @@ class Folder extends Component {
                       />
                     </div>
                 </div>
+                <div className={folderChildCSS}>
                 {
                   this.state.expanded &&
-                  <div className={folderChildCSS}>
                     <AddSubfolder
                       rowStyle={addRowStyle}
                       key={`${node.key}__subfolder`}
@@ -519,71 +533,74 @@ class Folder extends Component {
                       setAddFolderVisible={this._addFolderVisible}
                       addFolderVisible={this.state.addFolderVisible}
                     />
-                    {
-                        childrenKeys.map((file, index) => {
-                            if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
-                                return (
-                                    <FolderDND
-                                        filename={file}
-                                        key={children[file].edge.node.key}
-                                        ref={children[file].edge.node.key}
-                                        mutations={this.props.mutations}
-                                        mutationData={this.props.mutationData}
-                                        data={children[file]}
-                                        isSelected={this.state.isSelected}
-                                        multiSelect={this.props.multiSelect}
-                                        setIncomplete={this._setIncomplete}
-                                        checkParent={this._checkParent}
-                                        setState={this._setState}
-                                        setParentHoverState={this._setHoverState}
-                                        expanded={this.state.expanded}
-                                        setParentDragFalse={() => this.setState({ isDragging: false })}
-                                        setParentDragTrue={this._checkHover}
-                                        parentIsDragged={this.state.isDragging || this.props.parentIsDragged}
-                                        childrenState={this.props.childrenState}
-                                        updateChildState={this.props.updateChildState}>
-                                    </FolderDND>
-                                );
-                            } else if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
+                }
+                  {
+                    this.state.expanded &&
+                      childrenKeys.map((file, index) => {
+                          if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
                               return (
-                                  <File
+                                  <FolderDND
                                       filename={file}
+                                      index={index}
+                                      key={children[file].edge.node.key}
+                                      ref={children[file].edge.node.key}
                                       mutations={this.props.mutations}
                                       mutationData={this.props.mutationData}
-                                      ref={children[file].edge.node.key}
                                       data={children[file]}
-                                      key={children[file].edge.node.key}
                                       isSelected={this.state.isSelected}
                                       multiSelect={this.props.multiSelect}
+                                      setIncomplete={this._setIncomplete}
                                       checkParent={this._checkParent}
-                                      expanded={this.state.expanded}
+                                      setState={this._setState}
                                       setParentHoverState={this._setHoverState}
-                                      setParentDragFalse={(() => this.setState({ isDragging: false }))}
+                                      expanded={this.state.expanded}
+                                      setParentDragFalse={() => this.setState({ isDragging: false })}
                                       setParentDragTrue={this._checkHover}
-                                      isOverChildFile={this.state.isOverChildFile}
-                                      updateParentDropZone={this._updateDropZone}
+                                      parentIsDragged={this.state.isDragging || this.props.parentIsDragged}
                                       childrenState={this.props.childrenState}
+                                      listRef={this.props.listRef}
                                       updateChildState={this.props.updateChildState}>
-                                  </File>
+                                  </FolderDND>
                               );
-                            } else if (children[file]) {
-                              return (
-                                <div
-                                  key={file + index}
-                                />
-                                );
-                            }
+                          } else if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
+                            return (
+                                <File
+                                    filename={file}
+                                    mutations={this.props.mutations}
+                                    mutationData={this.props.mutationData}
+                                    ref={children[file].edge.node.key}
+                                    data={children[file]}
+                                    key={children[file].edge.node.key}
+                                    isSelected={this.state.isSelected}
+                                    multiSelect={this.props.multiSelect}
+                                    checkParent={this._checkParent}
+                                    expanded={this.state.expanded}
+                                    setParentHoverState={this._setHoverState}
+                                    setParentDragFalse={(() => this.setState({ isDragging: false }))}
+                                    setParentDragTrue={this._checkHover}
+                                    isOverChildFile={this.state.isOverChildFile}
+                                    updateParentDropZone={this._updateDropZone}
+                                    childrenState={this.props.childrenState}
+                                    updateChildState={this.props.updateChildState}>
+                                </File>
+                            );
+                          } else if (children[file]) {
                             return (
                               <div
-                                  key={file + index}
-                              >
-                                Loading
-                              </div>
+                                key={file + index}
+                              />
                               );
-                        })
-                    }
+                          }
+                          return (
+                            <div
+                                key={file + index}
+                            >
+                              Loading
+                            </div>
+                            );
+                      })
+                  }
                 </div>
-                }
             </div>;
 
         return (
