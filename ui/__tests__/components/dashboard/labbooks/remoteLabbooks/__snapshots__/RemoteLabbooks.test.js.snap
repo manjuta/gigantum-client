@@ -8,7 +8,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     className="grid"
   >
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -38,12 +38,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 update-test
               </span>
@@ -58,7 +55,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -68,9 +65,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -79,7 +74,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -109,12 +104,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 trump-tweets
               </span>
@@ -129,7 +121,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -139,9 +131,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -150,7 +140,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -180,12 +170,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 tpub
               </span>
@@ -200,7 +187,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -210,9 +197,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -221,7 +206,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -251,12 +236,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 test-lb
               </span>
@@ -271,7 +253,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -281,9 +263,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -292,7 +272,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -322,12 +302,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 testing-notifications
               </span>
@@ -342,7 +319,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -352,9 +329,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -363,7 +338,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -393,12 +368,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 testing-activity-feed
               </span>
@@ -413,7 +385,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -423,9 +395,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -434,7 +404,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -464,12 +434,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 test-book
               </span>
@@ -484,7 +451,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -494,9 +461,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -505,7 +470,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -535,12 +500,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 temp-labook22
               </span>
@@ -555,7 +517,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -565,9 +527,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -576,7 +536,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -606,12 +566,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 temp
               </span>
@@ -626,7 +583,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -636,9 +593,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -647,7 +602,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -677,12 +632,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 t3
               </span>
@@ -697,7 +649,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -707,9 +659,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -718,7 +668,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -748,12 +698,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 spade
               </span>
@@ -768,7 +715,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -778,9 +725,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -789,7 +734,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -819,12 +764,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 snappy
               </span>
@@ -839,7 +781,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -849,9 +791,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -860,7 +800,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -890,12 +830,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 set-public-test-calum-true
               </span>
@@ -910,7 +847,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -920,9 +857,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -931,7 +866,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -961,12 +896,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 set-public-test-calum
               </span>
@@ -981,7 +913,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -991,9 +923,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -1002,7 +932,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -1032,12 +962,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 sdfdsfsdfsdf
               </span>
@@ -1052,7 +979,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1062,9 +989,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -1073,7 +998,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -1103,12 +1028,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 rootpy3
               </span>
@@ -1123,7 +1045,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1133,9 +1055,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -1144,7 +1064,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -1174,12 +1094,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 rootpy3
               </span>
@@ -1194,7 +1111,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1204,9 +1121,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -1215,7 +1130,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -1245,12 +1160,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 random-picture-generator
               </span>
@@ -1265,7 +1177,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1275,9 +1187,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -1286,7 +1196,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -1316,12 +1226,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 python-data-science-handbook
               </span>
@@ -1336,7 +1243,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1346,9 +1253,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div
@@ -1357,7 +1262,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       />
     </div>
     <div
-      className="Card column-4-span-3 flex flex--column justify--space-between"
+      className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -1387,12 +1292,9 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           <h6
             className="RemoteLabbooks__panel-title"
           >
-            <span
-              className={undefined}
-            >
+            <span>
               <span
                 className=""
-                style={undefined}
               >
                 pulish-temp4
               </span>
@@ -1407,7 +1309,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
         >
-          Created on 11/06/18
+          Created on 11/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
@@ -1417,9 +1319,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
         >
-          <span
-            className={undefined}
-          />
+          <span />
         </p>
       </div>
       <div

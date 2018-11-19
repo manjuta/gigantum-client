@@ -73,7 +73,7 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
     ? 'localhost:10000'
     : window.location.host;
   const apiURL = `${window.location.protocol}//${apiHost}${process.env.GIGANTUM_API}`;
-
+  console.log(apiURL)
   return fetch(apiURL, {
     method: 'POST',
     headers,

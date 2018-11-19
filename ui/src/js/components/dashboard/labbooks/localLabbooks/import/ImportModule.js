@@ -73,7 +73,8 @@ const dispatchLoadingProgress = (wokerData) => {
   });
 
   if (document.getElementById('footerProgressBar')) {
-    document.getElementById('footerProgressBar').style.width = `${Math.floor((bytesUploaded / totalBytes) * 100)}%`;
+    const width = Math.floor((bytesUploaded / totalBytes) * 100);
+    document.getElementById('footerProgressBar').style.width = `${width}%`;
   }
 };
 

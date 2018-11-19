@@ -20,11 +20,12 @@ export default function ExportLabbookMutation(
   labbookName,
   callback,
 ) {
+  temp++;
   const variables = {
     input: {
       owner,
       labbookName,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: `${tempID}`,
     },
   };
   commitMutation(
