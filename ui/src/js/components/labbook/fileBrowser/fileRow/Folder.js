@@ -181,13 +181,17 @@ class Folder extends Component {
       !evt.target.classList.contains('File__btn--round')) {
         this.setState({ expanded: !this.state.expanded }, () => {
           this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
-          this.props.listRef.recomputeGridSize()
+          if (this.props.listRef) {
+            this.props.listRef.recomputeGridSize()
+          }
         });
       }
       if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
         this.setState({ expanded: true }, () => {
           this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
-          this.props.listRef.recomputeGridSize()
+          if (this.props.listRef) {
+            this.props.listRef.recomputeGridSize()
+          }
         });
       }
     }
@@ -448,6 +452,7 @@ class Folder extends Component {
           onMouseOut={(evt) => { this._setHoverState(evt, false); }}
           onMouseLeave={() => { this._mouseLeave(); }}
           onMouseEnter={() => { this._mouseEnter(); }}
+          style={this.props.style}
           className={ folderCSS }>
                 <div
                     className={folderRowCSS}

@@ -207,7 +207,9 @@ class File extends Component {
       className="File">
 
              <div
-               className={fileRowCSS}>
+               className={fileRowCSS}
+               style={rowStyle}
+               >
 
                 <button
                     className={buttonCSS}

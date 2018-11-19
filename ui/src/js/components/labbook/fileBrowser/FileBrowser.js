@@ -356,7 +356,6 @@ class FileBrowser extends Component {
     const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
     reference = isDir ? `${reference}/` : reference;
     const isExpanded = reference && this.state.childrenState[reference].isExpanded
-    console.log(files[file].children && Object.keys(files[file].children).length)
 
     const addFolderSize = this.state.childrenState[reference].isAddingFolder ? 50 : 0;
 
