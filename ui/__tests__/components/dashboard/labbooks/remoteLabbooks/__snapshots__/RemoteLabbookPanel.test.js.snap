@@ -49,7 +49,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
     >
-      Created on 11/15/18
+      Created on 11/16/18
     </p>
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"

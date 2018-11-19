@@ -47,7 +47,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner"
     >
-      Created on 11/15/18
+      Created on 11/16/18
     </p>
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
