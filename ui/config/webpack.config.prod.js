@@ -315,7 +315,7 @@ module.exports = {
     minimize: true,
     minimizer: [
       new UglifyJsPlugin({
-        sourceMap: true,
+        sourceMap: false,
         uglifyOptions: {
           compress: {
             unused: true,
@@ -323,7 +323,7 @@ module.exports = {
             warnings: true,
           },
           output: {
-            comments: true,
+            comments: false,
           },
         },
       }),
