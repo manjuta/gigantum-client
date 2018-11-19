@@ -10,7 +10,6 @@ export const fileHandler = () => {
     /* eslint-disable */
     self.addEventListener('message', (evt) => {
     /* eslint-enable */
-    console.time('worker')
         let edges = evt.data.files;
         let edgesToSort = JSON.parse(JSON.stringify(edges));
         let fileObject = {};
@@ -67,7 +66,6 @@ export const fileHandler = () => {
            }
         });
         const hash = JSON.stringify(fileObject) + search;
-        console.timeEnd('worker')
         postMessage({ files: fileObject, hash });
     })
 }

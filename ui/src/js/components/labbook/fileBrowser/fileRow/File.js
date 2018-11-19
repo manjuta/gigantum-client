@@ -199,6 +199,7 @@ class File extends Component {
           rowStyle = { paddingLeft: `${paddingLeft}px` };
 
     let file = <div
+      style={this.props.style}
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
       onMouseOut={(evt) => { this._setHoverState(evt, false); }}
       onMouseLeave={() => { this._mouseLeave(); }}
@@ -207,7 +208,8 @@ class File extends Component {
 
              <div
                className={fileRowCSS}
-               style={rowStyle}>
+               style={rowStyle}
+               >
 
                 <button
                     className={buttonCSS}

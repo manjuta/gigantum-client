@@ -99,6 +99,7 @@
     "react-syntax-highlighter": "^7.0.3",
     "react-tag-input": "^4.9.1",
     "react-text-truncate": "^0.13.1",
+    "react-virtualized": "^9.21.0",
     "react-youtube": "^7.6.0",
     "redux": "^3.7.2",
     "run-options": "0.0.4",

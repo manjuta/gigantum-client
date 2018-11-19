@@ -4,6 +4,7 @@ import store from 'JS/redux/store';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
+import { List, WindowScroller, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 // assets
 import './FileBrowser.scss';
 // components
@@ -31,13 +32,20 @@ class FileBrowser extends Component {
         reverse: false,
         count: 0,
         files: {},
+        aboveSize: window.innerWidth > 1240,
       };
+
+      this.cache = new CellMeasurerCache({
+        fixedWidth: true,
+        defaultHeight: 50,
+      });
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
       this._setState = this._setState.bind(this);
       this._updateChildState = this._updateChildState.bind(this);
       this._checkChildState = this._checkChildState.bind(this);
       this._updateDropZone = this._updateDropZone.bind(this);
+      this._getRowHeight = this._getRowHeight.bind(this);
     }
     static getDerivedStateFromProps(props, state) {
         let previousCount = state.count;
@@ -49,6 +57,8 @@ class FileBrowser extends Component {
             childrenState[key] = {
               isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
               isIncomplete: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isIncomplete : false,
+              isExpanded: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isExpanded : false,
+              isAddingFolder: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isAddingFolder : false,
               edge,
             };
           }
@@ -65,23 +75,31 @@ class FileBrowser extends Component {
       sets worker
     */
     componentDidMount() {
+      // window.addEventListener('resize', this._forceScrollerUpdate.bind(this));
       this.fileHandler = new WebWorker(fileHandler);
+      this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
+      this.fileHandler.addEventListener('message', (evt) => {
+        if (this.state.fileHash !== evt.data.hash) {
+          this.setState({ fileHash: evt.data.hash, files: evt.data.files })
+        }
+      })
     }
+
     /*
       resets search
     */
     componentDidUpdate() {
+      if (this.list) {
+      this.list.recomputeGridSize()
+      }
+      if (window.innerWidth < 1240) {
+        this.refs.windowScroller.updatePosition()
+      }
       let element = document.getElementsByClassName('FileBrowser__input')[0];
       if (this.state.search === '' && element.value !== '') {
         element.value = '';
       }
       this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
-      this.fileHandler.addEventListener('message', (evt) => {
-        if (this.state.fileHash !== evt.data.hash) {
-          console.log('THIS FORCED RE RENDER')
-          this.setState({ fileHash: evt.data.hash, files: evt.data.files })
-        }
-      })
     }
     /**
     *  @param {string} key - key of file to be updated
@@ -89,13 +107,15 @@ class FileBrowser extends Component {
     *  @param {boolean} isIncomplete - update if the value is incomplete
     *  @return {}
     */
-    _updateChildState(key, isSelected, isIncomplete) {
+    _updateChildState(key, isSelected, isIncomplete, isExpanded, isAddingFolder) {
       let isChildSelected = false;
       let count = 0;
       let selectedCount = 0;
       let { childrenState } = this.state;
       childrenState[key].isSelected = isSelected;
       childrenState[key].isIncomplete = isIncomplete;
+      childrenState[key].isExpanded = isExpanded;
+      childrenState[key].isAddingFolder = isAddingFolder;
 
       for (let key in childrenState) {
         if (childrenState[key]) {
@@ -292,27 +312,27 @@ class FileBrowser extends Component {
   *  @return {}
   */
  _childSort(array, type, reverse, children, section) {
-  // array.sort((a, b) => {
-  //   let lowerA,
-  //   lowerB;
-  //   if (type === 'az' || type === 'size' && section === 'folder') {
-  //     lowerA = a.toLowerCase();
-  //     lowerB = b.toLowerCase();
-  //     if (type === 'size' || !reverse) {
-  //       return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
-  //     }
-  //     return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
-  //   } else if (type === 'modified') {
-  //     lowerA = children[a].edge.node.modifiedAt;
-  //     lowerB = children[b].edge.node.modifiedAt;
-  //     return reverse ? lowerB - lowerA : lowerA - lowerB;
-  //   } else if (type === 'size') {
-  //     lowerA = children[a].edge.node.size;
-  //     lowerB = children[b].edge.node.size;
-  //     return reverse ? lowerB - lowerA : lowerA - lowerB;
-  //   }
-  //   return 0;
-  // });
+    array.sort((a, b) => {
+      let lowerA,
+      lowerB;
+      if (type === 'az' || type === 'size' && section === 'folder') {
+        lowerA = a.toLowerCase();
+        lowerB = b.toLowerCase();
+        if (type === 'size' || !reverse) {
+          return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
+        }
+        return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
+      } else if (type === 'modified') {
+        lowerA = children[a].edge.node.modifiedAt;
+        lowerB = children[b].edge.node.modifiedAt;
+        return reverse ? lowerB - lowerA : lowerA - lowerB;
+      } else if (type === 'size') {
+        lowerA = children[a].edge.node.size;
+        lowerB = children[b].edge.node.size;
+        return reverse ? lowerB - lowerA : lowerA - lowerB;
+      }
+      return 0;
+    });
   return array;
 }
   /**
@@ -326,6 +346,20 @@ class FileBrowser extends Component {
     } else {
       this.setState({ sort: type, reverse: false });
     }
+  }
+  _getRowHeight(index, keys, files, totalSize = 50) {
+    let file = keys[index];
+    const reference = files[file] && files[file].edge && files[file].edge.node.key || file;
+    const isExpanded = reference && this.state.childrenState[reference] && this.state.childrenState[reference].isExpanded || false
+    const addFolderSize = this.state.childrenState[reference] && this.state.childrenState[reference].isAddingFolder ? 50 : 0;
+    let newTotalSize = totalSize
+    if (isExpanded && files[file].children) {
+      let childKeys = Object.keys(files[file].children)
+      childKeys.forEach((child, index) => {
+        newTotalSize += this._getRowHeight(index, childKeys, files[file].children, totalSize)
+      })
+    }
+    return newTotalSize + addFolderSize;
   }
 
   render() {
@@ -341,35 +375,106 @@ class FileBrowser extends Component {
    const { isSelected } = this._checkChildState();
 
    const fileBrowserCSS = classNames({
-           FileBrowser: true,
-           'FileBrowser--highlight': isOver,
-           'FileBrowser--dropzone': fileKeys.length === 0,
-         }),
-         deleteButtonCSS = classNames({
-           'Btn Btn--round Btn--delete': true,
-           hidden: !isSelected,
-         }),
-         multiSelectButtonCSS = classNames({
-           'Btn Btn--round': true,
-           'Btn--check': this.state.multiSelect === 'all',
-           'Btn--uncheck': this.state.multiSelect === 'none',
-           'Btn--partial': this.state.multiSelect === 'partial',
-         }),
-         nameHeaderCSS = classNames({
-          'FileBrowser__name-text': true,
-          'FileBroser__sort--asc': this.state.sort === 'az' && !this.state.reverse,
-          'FileBroser__sort--desc': this.state.sort === 'az' && this.state.reverse,
-         }),
-         sizeHeaderCSS = classNames({
-          'FileBrowser__header--size': true,
-          'FileBroser__sort--asc': this.state.sort === 'size' && !this.state.reverse,
-          'FileBroser__sort--desc': this.state.sort === 'size' && this.state.reverse,
-         }),
-         modifiedHeaderCSS = classNames({
-          'FileBrowser__header--date': true,
-          'FileBroser__sort--asc': this.state.sort === 'modified' && !this.state.reverse,
-          'FileBroser__sort--desc': this.state.sort === 'modified' && this.state.reverse,
-         });
+        FileBrowser: true,
+        'FileBrowser--highlight': isOver,
+        'FileBrowser--dropzone': fileKeys.length === 0,
+      }),
+      deleteButtonCSS = classNames({
+        'Btn Btn--round Btn--delete': true,
+        hidden: !isSelected,
+      }),
+      multiSelectButtonCSS = classNames({
+        'Btn Btn--round': true,
+        'Btn--check': this.state.multiSelect === 'all',
+        'Btn--uncheck': this.state.multiSelect === 'none',
+        'Btn--partial': this.state.multiSelect === 'partial',
+      }),
+      nameHeaderCSS = classNames({
+      'FileBrowser__name-text': true,
+      'FileBroser__sort--asc': this.state.sort === 'az' && !this.state.reverse,
+      'FileBroser__sort--desc': this.state.sort === 'az' && this.state.reverse,
+      }),
+      sizeHeaderCSS = classNames({
+      'FileBrowser__header--size': true,
+      'FileBroser__sort--asc': this.state.sort === 'size' && !this.state.reverse,
+      'FileBroser__sort--desc': this.state.sort === 'size' && this.state.reverse,
+      }),
+      modifiedHeaderCSS = classNames({
+      'FileBrowser__header--date': true,
+      'FileBroser__sort--asc': this.state.sort === 'modified' && !this.state.reverse,
+      'FileBroser__sort--desc': this.state.sort === 'modified' && this.state.reverse,
+      });
+   const rowRenderer = ({
+      index, // Index of row
+      key, // Unique key within array of rendered rows
+      style, // Style object to be applied to row (to position it);
+      parent,
+    }) => {
+      let file = childrenKeys[index];
+      const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
+      const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
+      this.list = parent;
+      return (
+        <CellMeasurer
+          key={key}
+          cache={this.cache}
+          parent={parent}
+          columnIndex={0}
+          rowIndex={index}
+        >
+          {
+            isDir ?
+              <Folder
+                index={index}
+                style={style}
+                ref={file}
+                filename={file}
+                key={files[file].edge.node.key}
+                multiSelect={this.state.multiSelect}
+                mutationData={mutationData}
+                data={files[file]}
+                mutations={this.state.mutations}
+                setState={this._setState}
+                rowStyle={{}}
+                sort={this.state.sort}
+                reverse={this.state.reverse}
+                childrenState={this.state.childrenState}
+                listRef={parent}
+                updateChildState={this._updateChildState}>
+              </Folder>
+            :
+            isFile ?
+            <File
+              style={style}
+              ref={file}
+              filename={file}
+              key={files[file].edge.node.key}
+              multiSelect={this.state.multiSelect}
+              mutationData={mutationData}
+              data={files[file]}
+              childrenState={this.state.childrenState}
+              mutations={this.state.mutations}
+              expanded
+              isOverChildFile={this.state.isOverChildFile}
+              updateParentDropZone={this._updateDropZone}
+              updateChildState={this._updateChildState}>
+
+            </File>
+            : (children[file]) ?
+            <div
+              style={style}
+              key={file + index}
+            />
+          :
+            <div
+              key={file + index}
+              style={style}
+            >
+              Loading
+            </div>
+          }
+      </CellMeasurer>);
+    };
 
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
@@ -429,60 +534,34 @@ class FileBrowser extends Component {
                   mutationData={mutationData}
                   mutations={this.state.mutations}
                 />
-                {
-                    childrenKeys.map((file, index) => {
-                        if (files[file] && files[file].edge && files[file].edge.node.isDir) {
-                            return (
-                                <Folder
-                                    ref={file}
-                                    filename={file}
-                                    key={files[file].edge.node.key}
-                                    multiSelect={this.state.multiSelect}
-                                    mutationData={mutationData}
-                                    data={files[file]}
-                                    mutations={this.state.mutations}
-                                    setState={this._setState}
-                                    rowStyle={{}}
-                                    sort={this.state.sort}
-                                    reverse={this.state.reverse}
-                                    childrenState={this.state.childrenState}
-                                    updateChildState={this._updateChildState}>
-                                </Folder>
-                            );
-                        } else if (files[file] && files[file].edge && !files[file].edge.node.isDir) {
-                          return (
-                              <File
-                                  ref={file}
-                                  filename={file}
-                                  key={files[file].edge.node.key}
-                                  multiSelect={this.state.multiSelect}
-                                  mutationData={mutationData}
-                                  data={files[file]}
-                                  childrenState={this.state.childrenState}
-                                  mutations={this.state.mutations}
-                                  expanded
-                                  isOverChildFile={this.state.isOverChildFile}
-                                  updateParentDropZone={this._updateDropZone}
-                                  updateChildState={this._updateChildState}>
-
-                              </File>
-                          );
-                        } else if (files[file]) {
-                          return (
-                            <div
-                              key={file + index}
-                            />
-                            );
-                        }
-                        return (
-                          <div
-                              key={file + index}
-                          >
-                            Loading
-                          </div>
-                          );
-                    })
-                }
+                <WindowScroller
+                  ref="windowScroller"
+                >
+                  {({
+                    height,
+                    isScrolling,
+                    onChildScroll,
+                    scrollTop,
+                  }) => (
+                    <AutoSizer disableHeight>
+                    {({ width }) => (
+                      <List
+                        isScrolling={isScrolling}
+                        onScroll={onChildScroll}
+                        autoHeight
+                        height={height}
+                        scrollTop={scrollTop}
+                        width={width}
+                        rowCount={childrenKeys.length}
+                        rowHeight={({ index }) => this._getRowHeight(index, childrenKeys, this.state.files)}
+                        rowRenderer={(rowRenderer)}
+                        deferredMeasurementCache={this.cache}
+                        overscanRowCount={20}
+                      />
+                    )}
+                  </AutoSizer>
+                  )}
+                </WindowScroller>
                 { (childrenKeys.length === 0) &&
                   <div className="FileBrowser__empty">
                     {

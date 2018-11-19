@@ -25,7 +25,7 @@ import time
 import json
 from typing import Callable, Optional
 
-from gtmcore.configuration import get_docker_client
+from gtmcore.configuration import get_docker_client, Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory  import InventoryManager
@@ -247,7 +247,7 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     # run with nvidia if we have GPU support in the labmanager 
     # CUDA must be set (not None) and version must match between labbook and labmanager
-    cudav = lb.client_config.config["container"].get("cuda_version")
+    cudav = Configuration().config['container'].get('cuda_version')
     logger.info(f"Host CUDA version {cudav}, LabBook CUDA ver {lb.cuda_version}")
     if cudav and lb.cuda_version:
         logger.info(f"Launching container with GPU support CUDA version {lb.cuda_version}")
