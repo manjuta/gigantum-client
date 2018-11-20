@@ -22,7 +22,7 @@ import graphene
 
 from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
-from gtmcore.workflows import BranchManager
+from gtmcore.inventory.branching import BranchManager
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.files import FileOperations
@@ -33,7 +33,6 @@ from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.identity import parse_token
-
 
 from lmsrvlabbook.api.objects.jobstatus import JobStatus
 from lmsrvlabbook.api.connections.ref import LabbookRefConnection
@@ -195,8 +194,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """Get number of commits the active_branch is behind its remote counterpart.
         Returns 0 if up-to-date or if local only."""
         # Note, by default using remote "origin"
+        def _gc(lb):
+            bm = BranchManager(lb, get_logged_in_username())
+            return bm.get_commits_behind_remote()[1]
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: labbook.get_commits_behind_remote("origin")[1])
+            _gc)
 
     def resolve_active_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
@@ -207,12 +209,22 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).workspace_branch)
 
     def resolve_available_branch_names(self, info):
+        fltr = lambda labbook: \
+            BranchManager(labbook=labbook, username=get_logged_in_username()).available_branches
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).branches)
+            fltr)
 
     def resolve_mergeable_branch_names(self, info):
+        def _mergeable(lb):
+            username = get_logged_in_username()
+            bm = BranchManager(lb, username=username)
+            if bm.active_branch == bm.workspace_branch:
+                return [b for b in bm.branches if f'gm.workspace-{username}.' in b]
+            else:
+                return [bm.workspace_branch]
+
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).mergeable_branches)
+            _mergeable)
 
     def helper_resolve_active_branch(self, labbook):
         active_branch_name = BranchManager(labbook=labbook, username=get_logged_in_username()).active_branch

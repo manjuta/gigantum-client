@@ -209,7 +209,8 @@ class TestInventory(object):
         lb_loaded = inv_manager.load_labbook("test", "test", "labbook1")
 
         assert lb_loaded.active_branch == 'gm.workspace-test'
-        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
+        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test",
+                                                  "test", "labbooks", "labbook1")
         assert type(lb) == LabBook
 
         # Validate labbook data file

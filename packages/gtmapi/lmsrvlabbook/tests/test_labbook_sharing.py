@@ -17,13 +17,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import io
-import math
+
 import os
-import tempfile
-import datetime
+
 import pprint
-from zipfile import ZipFile
+
 from pkg_resources import resource_filename
 import getpass
 import responses
@@ -40,10 +38,10 @@ from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 from werkzeug.datastructures import FileStorage
 
-from gtmcore.configuration import Configuration
-from gtmcore.dispatcher.jobs import export_labbook_as_zip
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
+from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.configuration import Configuration
 from gtmcore.files import FileOperations
 
 @pytest.fixture()
@@ -67,12 +65,14 @@ class TestLabbookSharing(object):
 
     @responses.activate
     def test_import_remote_labbook(self, remote_labbook_repo, fixture_working_dir, property_mocks_fixture,
-                                   docker_socket_fixture):
+                                   docker_socket_fixture, monkeypatch):
 
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
         env = builder.get_environ()
         req = Request(environ=env)
+
+        monkeypatch.setattr(Configuration, 'find_default_config', lambda x : fixture_working_dir[0])
 
         query = f"""
         mutation importFromRemote {{
@@ -98,6 +98,7 @@ class TestLabbookSharing(object):
         assert r['data']['importRemoteLabbook']['newLabbookEdge']['node']['name'] == 'sample-repo-lb'
         assert 'errors' not in r
 
+        # TODO - Need to make sure logic to change owner is correct.
         new_owner = r['data']['importRemoteLabbook']['newLabbookEdge']['node']['owner']
 
         ## Now we want to validate that when we import a labbook from a remote url, we also track the default branch.
@@ -117,6 +118,8 @@ class TestLabbookSharing(object):
         """
         r = fixture_working_dir[2].execute(list_all_branches_q, context_value=req)
         pprint.pprint(r)
+        assert 'errors' not in r
+
         nodes = r['data']['labbook']['branches']['edges']
         for n in [x['node'] for x in nodes]:
             # Make sure that the user's local branch was created
@@ -154,9 +157,12 @@ class TestLabbookSharing(object):
         conf_file, working_dir = _create_temp_work_dir(lfs_enabled=False)
         lb = InventoryManager(conf_file).create_labbook("default", "default", "default-owned-repo-lb",
                                                         description="my first labbook")
+        bm = BranchManager(lb, username='default')
+        bm.workon_branch("gm.workspace")
         labbook_dir = lb.root_dir
 
-        lb.checkout_branch("gm.workspace")
+        bm.workon_branch("gm.workspace")
+
 
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})

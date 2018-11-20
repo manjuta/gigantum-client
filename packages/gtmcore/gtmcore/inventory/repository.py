@@ -99,7 +99,8 @@ class Repository(object):
     def _validate_git(method_ref):  #type: ignore
         """Definition of decorator that validates git operations.
 
-        Note! The approach here is taken from Stack Overflow answer https://stackoverflow.com/a/1263782
+        Note! The approach here is taken from Stack Overflow answer:
+         https://stackoverflow.com/a/1263782
         """
         def __validator(self, *args, **kwargs):
             # Note, `create_activity_record` indicates whether this filesystem operation should be immediately
@@ -601,40 +602,6 @@ class Repository(object):
         except ValueError as e:
             logger.error(f"Cannot checkout branch {branch_name}: {e}")
             raise GigantumException(e)
-
-    def get_commits_behind_remote(self, remote_name: str = "origin") -> Tuple[str, int]:
-        """Return the number of commits local branch is behind remote. Note, only works with
-        currently checked-out branch.
-
-        Args:
-            remote_name: Name of remote, e.g., "origin"
-
-        Returns:
-            tuple containing branch name, and number of commits behind (zero implies up-to-date)
-        """
-        try:
-            if remote_name in [n['name'] for n in self.git.list_remotes()]:
-                self.git.fetch(remote=remote_name)
-            result_str = self.git.repo.git.status().replace('\n', ' ')
-        except Exception as e:
-            logger.exception(e)
-            raise GigantumException(e)
-
-        logger.info(f"Checking state of branch {self.active_branch}: {result_str}")
-
-        if 'branch is up-to-date' in result_str:
-            return self.active_branch, 0
-        elif 'branch is behind' in result_str:
-            m = re.search(' by ([\d]+) commit', result_str)
-            if m:
-                assert int(m.groups()[0]) > 0
-                return self.active_branch, int(m.groups()[0])
-            else:
-                logger.error("Could not find count in: {result_str}")
-                raise GigantumException("Unable to determine commit behind-count")
-        else:
-            # This branch is local-only
-            return self.active_branch, 0
 
     def add_remote(self, remote_name: str, url: str) -> None:
         """Add a new git remote

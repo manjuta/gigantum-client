@@ -19,7 +19,6 @@
 # SOFTWARE.
 import base64
 import os
-from docker.errors import ImageNotFound
 import shutil
 
 import flask
@@ -29,8 +28,9 @@ import requests
 from gtmcore.configuration import Configuration
 from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
-from gtmcore.labbook import LabBook, loaders
+from gtmcore.labbook import LabBook
 
+from gtmcore.inventory import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
@@ -372,24 +372,18 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         lb.description = description_content
-        
         with lb.lock():
             lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
             commit = lb.git.commit('Updating description')
 
-            # Create detail record
             adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
             adr.add_value('text/plain', "Updated description of Project")
-
-            # Create activity record
             ar = ActivityRecord(ActivityType.LABBOOK,
                                 message="Updated description of Project",
                                 linked_commit=commit.hexsha,
                                 tags=["labbook"],
                                 show=False)
             ar.add_detail_object(adr)
-
-            # Store
             ars = ActivityStore(lb)
             ars.create_activity_record(ar)
         return SetLabbookDescription(success=True)
@@ -701,8 +695,10 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, username,
                                client_mutation_id=None):
+        #TODO(billvb/dmk) - Here "username" refers to the intended recipient username.
+        # it should probably be renamed here and in the frontend to "collaboratorUsername"
         logged_in_username = get_logged_in_username()
-        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+        lb = InventoryManager().load_labbook(logged_in_username, owner, labbook_name,
                                              author=get_logged_in_author())
 
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
@@ -726,7 +722,7 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
 
         # Prime dataloader with labbook you just created
         dataloader = LabBookLoader()
-        dataloader.prime(f"{username}&{username}&{lb.name}", lb)
+        dataloader.prime(f"{logged_in_username}&{owner}&{lb.name}", lb)
 
         create_data = {"owner": owner,
                        "name": labbook_name}
@@ -745,7 +741,7 @@ class DeleteLabbookCollaborator(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, username, client_mutation_id=None):
         logged_in_username = get_logged_in_username()
-        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+        lb = InventoryManager().load_labbook(logged_in_username, owner, labbook_name,
                                              author=get_logged_in_author())
 
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.

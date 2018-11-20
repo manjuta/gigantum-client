@@ -23,7 +23,7 @@ import graphene
 from gtmcore.logging import LMLogger
 
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.workflows import BranchManager
+from gtmcore.inventory.branching import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
@@ -45,40 +45,38 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
     labbook = graphene.Field(Labbook)
 
     @classmethod
+    def _update_branch_description(cls, lb: Labbook, description: str):
+        # Update the description on branch creation
+        lb.description = description
+        lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
+        commit = lb.git.commit('Updating description')
+
+        adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
+        adr.add_value('text/plain', description)
+        ar = ActivityRecord(ActivityType.LABBOOK,
+                            message="Updated description of Project",
+                            linked_commit=commit.hexsha,
+                            tags=["labbook"],
+                            show=False)
+        ar.add_detail_object(adr)
+        ars = ActivityStore(lb)
+        ars.create_activity_record(ar)
+
+    @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, revision=None,
                                description=None, client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-        bm = BranchManager(labbook=lb, username=username)
-        full_branch_title = bm.create_branch(title=branch_name, revision=revision)
-        logger.info(f"In {str(lb)} created new experimental feature branch {full_branch_title}")
+        with lb.lock():
+            bm = BranchManager(labbook=lb, username=username)
+            full_branch_title = bm.create_branch(title=f'gm.workspace-{username}.{branch_name}',
+                                                 revision=revision)
+            logger.info(f"In {str(lb)} created new experimental feature branch: "
+                        f"{full_branch_title}")
 
-        # TODO: Refactor description implementation into BranchManager.create_branch()
-        if description:
-            # Update the description on branch creation
-            lb.description = description
-
-            with lb.lock():
-                lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
-                commit = lb.git.commit('Updating description')
-
-                # Create detail record
-                adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
-                adr.add_value('text/plain', description)
-
-                # Create activity record
-                ar = ActivityRecord(ActivityType.LABBOOK,
-                                    message="Updated description of Project",
-                                    linked_commit=commit.hexsha,
-                                    tags=["labbook"],
-                                    show=False)
-                ar.add_detail_object(adr)
-
-                # Store
-                ars = ActivityStore(lb)
-                ars.create_activity_record(ar)
-                logger.info(f"In {str(lb)} update description")
+            if description:
+                cls._update_branch_description(lb, description)
 
         return CreateExperimentalBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
                                                         name=labbook_name, owner=owner))
