@@ -30,8 +30,9 @@ from werkzeug.wrappers import Request
 
 from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
                                mock_config_file, _MOCK_create_remote_repo2)
-from gtmcore.labbook import LabBook, loaders
+from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory import loaders
 
 from gtmcore.workflows import GitWorkflow
 from gtmcore.files import FileOperations
@@ -121,7 +122,8 @@ class TestLabbookShareProtocol(object):
         assert remote_url
 
         sally_lb = LabBook(mock_config_file[0])
-        loaders.from_remote(remote_url, username="sally", owner="default", labbook_name="labbook1", labbook=sally_lb)
+        sally_lb = loaders.from_remote(remote_url, username="sally", owner="default",
+                                       labbook_name="labbook1", labbook=sally_lb)
         sally_wf = GitWorkflow(sally_lb)
         assert sally_lb.active_branch == "gm.workspace-sally"
         FileOperations.makedir(sally_lb, relative_path='code/sally-dir', create_activity_record=True)

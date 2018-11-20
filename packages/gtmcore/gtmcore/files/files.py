@@ -22,7 +22,6 @@ import os
 from typing import Any, Dict, List, Optional
 
 from gtmcore.labbook import LabBook
-from gtmcore.labbook import shims
 from gtmcore.logging import LMLogger
 from gtmcore.activity import (ActivityDetailRecord, ActivityRecord,
                                ActivityStore, ActivityAction)
@@ -193,7 +192,7 @@ class FileOperations(object):
                                         src_file=src_file, dst_path=dst_path)
 
         rel_path = os.path.join(section, finfo['key'])
-        if shims.in_untracked(labbook.root_dir, section):
+        if in_untracked(labbook.root_dir, section):
             logger.warning(f"Inserted file {rel_path} ({finfo['size']} bytes)"
                            f" to untracked section {section}. This will not"
                            f" be tracked by commits or activity records.")
@@ -343,7 +342,7 @@ class FileOperations(object):
         if dst_rel_path is None:
             raise ValueError("dst_rel_path cannot be None or empty")
 
-        is_untracked = shims.in_untracked(labbook.root_dir, section)
+        is_untracked = in_untracked(labbook.root_dir, section)
         src_rel_path = LabBook.make_path_relative(src_rel_path)
         dst_rel_path = LabBook.make_path_relative(dst_rel_path)
 
@@ -409,7 +408,7 @@ class FileOperations(object):
         relative_path = LabBook.make_path_relative(relative_path)
         new_directory_path = os.path.join(labbook.root_dir, relative_path)
         section = relative_path.split(os.sep)[0]
-        git_untracked = shims.in_untracked(labbook.root_dir, section)
+        git_untracked = in_untracked(labbook.root_dir, section)
         if os.path.exists(new_directory_path):
             return
         else:

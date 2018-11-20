@@ -19,23 +19,17 @@
 import pytest
 import shutil
 import tempfile
-import time
 import subprocess
 import os
 from pkg_resources import resource_filename
 
-from gtmcore.labbook import LabBook, loaders
 from gtmcore.inventory.inventory  import InventoryManager, InventoryException
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import ZipExporter, ZipWorkflowException
-from gtmcore.files import FileOperations
+
 from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
                                sample_src_file, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
                                mock_config_lfs_disabled)
-
-@pytest.fixture(scope="function")
-def pause_wait_for_redis():
-    time.sleep(2)
 
 
 class TestLabbookImportZipping(object):
@@ -168,4 +162,3 @@ class TestLabbookImportZipping(object):
             assert lb2.owner['username'] == 'unittester'
             assert lb2.is_repo_clean
             assert lb2.active_branch == 'gm.workspace-unittester'
-

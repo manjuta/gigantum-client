@@ -29,8 +29,7 @@ from mock import patch
 
 from gtmcore.auth.identity import get_identity_manager
 from gtmcore.configuration import Configuration
-from gtmcore.workflows import BranchManager
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager
 
 from gtmcore.files import FileOperations
@@ -105,14 +104,15 @@ class TestWorkflowsBranching(object):
         r = client.execute(q)
         pprint.pprint(r)
         assert 'errors' not in r
-        assert r['data']['labbook']['availableBranchNames'] == bm.branches
+        avail_branches = [b for b in bm.branches if f'gm.workspace-{UT_USERNAME}' in b]
+        assert r['data']['labbook']['availableBranchNames'] == avail_branches
 
     def test_query_mergeable_branches_from_main(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
-        b2 = bm.create_branch("tester2")
+        b2 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester2")
         bm.workon_branch(bm.workspace_branch)
         assert bm.active_branch == bm.workspace_branch
 
@@ -130,11 +130,12 @@ class TestWorkflowsBranching(object):
         assert set(r['data']['labbook']['mergeableBranchNames']).issubset(set([b1, b2]))
 
     def test_query_mergeable_branches_from_feature_branch(self, mock_create_labbooks):
+        # Per current branch model, can only merge in workspace branch
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
-        b2 = bm.create_branch("tester2")
+        b2 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester2")
 
         q = f"""
         {{
@@ -145,7 +146,6 @@ class TestWorkflowsBranching(object):
         }}
         """
         r = client.execute(q)
-        pprint.pprint(r)
         assert 'errors' not in r
         assert len(r['data']['labbook']['mergeableBranchNames']) == 1
         assert r['data']['labbook']['mergeableBranchNames'] == [bm.workspace_branch]
@@ -181,7 +181,7 @@ class TestWorkflowsBranching(object):
     def test_create_feature_branch_from_feature_branch_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
 
         q = f"""
         mutation makeFeatureBranch {{
@@ -200,10 +200,10 @@ class TestWorkflowsBranching(object):
         assert bm.active_branch == b1
         assert lb.is_repo_clean
 
-    def test_create_feature_branch_success(self, mock_create_labbooks, snapshot):
+    def test_create_feature_branch_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
 
         q = f"""
@@ -224,8 +224,11 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(q)
         assert 'errors' not in r
-        r['data']['createExperimentalBranch']['labbook']['activeBranchName'] == 'gm.workspace-default.valid-branch-name-working1'
-        snapshot.assert_match(r)
+        assert r['data']['createExperimentalBranch']['labbook']['activeBranchName'] \
+            == 'gm.workspace-default.valid-branch-name-working1'
+        assert set(r['data']['createExperimentalBranch']['labbook']['availableBranchNames']) \
+            == set(['gm.workspace-default', 'gm.workspace-default.tester1',
+                    'gm.workspace-default.valid-branch-name-working1'])
 
         assert lb.active_branch == 'gm.workspace-default.valid-branch-name-working1'
         assert lb.is_repo_clean
@@ -233,7 +236,7 @@ class TestWorkflowsBranching(object):
     def test_create_feature_branch_success_update_description(self, mock_create_labbooks, snapshot):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
 
         q = f"""
@@ -255,9 +258,10 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(q)
         assert 'errors' not in r
-        r['data']['createExperimentalBranch']['labbook']['activeBranchName'] == 'gm.workspace-default.valid-branch-name-working1'
-        r['data']['createExperimentalBranch']['labbook']['description'] == "Updated description"
-        snapshot.assert_match(r)
+        assert r['data']['createExperimentalBranch']['labbook']['activeBranchName'] \
+               == 'gm.workspace-default.valid-branch-name-working1'
+        assert r['data']['createExperimentalBranch']['labbook']['description'] \
+               == "Updated description"
 
         assert bm.active_branch == 'gm.workspace-default.valid-branch-name-working1'
         assert lb.is_repo_clean
@@ -269,7 +273,7 @@ class TestWorkflowsBranching(object):
     def test_delete_feature_branch_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
 
         q = f"""
         mutation makeFeatureBranch {{
@@ -292,7 +296,7 @@ class TestWorkflowsBranching(object):
     def test_delete_feature_branch_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
 
         q = f"""
@@ -316,7 +320,7 @@ class TestWorkflowsBranching(object):
     def test_workon_feature_branch_bad_name_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
 
         q = f"""
@@ -337,10 +341,10 @@ class TestWorkflowsBranching(object):
         assert bm.active_branch == bm.workspace_branch
         assert lb.is_repo_clean
 
-    def test_workon_feature_branch_success(self, mock_create_labbooks, snapshot):
+    def test_workon_feature_branch_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
-        b1 = bm.create_branch("tester1")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.tester1")
         bm.workon_branch(bm.workspace_branch)
 
         assert bm.active_branch == 'gm.workspace-default'
@@ -363,17 +367,19 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(q)
         assert 'errors' not in r
-        r['data']['workonExperimentalBranch']['labbook']['activeBranchName'] == 'gm.workspace-default.tester1'
-        snapshot.assert_match(r)
+        assert r['data']['workonExperimentalBranch']['labbook']['activeBranchName'] \
+               == 'gm.workspace-default.tester1'
+        assert set(r['data']['workonExperimentalBranch']['labbook']['availableBranchNames']) \
+            == set(['gm.workspace-default', 'gm.workspace-default.tester1'])
 
         assert bm.active_branch == 'gm.workspace-default.tester1'
         assert lb.is_repo_clean
 
-    def test_merge_into_workspace_from_simple_success(self, mock_create_labbooks, snapshot):
+    def test_merge_into_workspace_from_simple_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
         og_hash = lb.git.commit_hash
-        b1 = bm.create_branch("test-branch")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.test-branch")
         FileOperations.makedir(lb, 'code/sillydir1', create_activity_record=True)
         FileOperations.makedir(lb, 'code/sillydir2', create_activity_record=True)
         branch_hash = lb.git.commit_hash
@@ -402,8 +408,10 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(merge_q)
         assert 'errors' not in r
-        r['data']['mergeFromBranch']['labbook']['activeBranchName'] == 'gm.workspace-default'
-        snapshot.assert_match(r)
+        assert r['data']['mergeFromBranch']['labbook']['activeBranchName'] \
+               == 'gm.workspace-default'
+        assert set(r['data']['mergeFromBranch']['labbook']['availableBranchNames']) \
+            == set(['gm.workspace-default', 'gm.workspace-default.test-branch'])
 
         assert lb.active_branch == bm.workspace_branch
         assert os.path.exists(os.path.join(lb.root_dir, 'code/sillydir1'))
@@ -413,7 +421,7 @@ class TestWorkflowsBranching(object):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
         bm = BranchManager(lb, username=UT_USERNAME)
         og_hash = lb.git.commit_hash
-        b1 = bm.create_branch("test-branch")
+        b1 = bm.create_branch(f"gm.workspace-{UT_USERNAME}.test-branch")
         bm.workon_branch(bm.workspace_branch)
         assert lb.active_branch == bm.workspace_branch
         og2_hash = lb.git.commit_hash
@@ -459,7 +467,7 @@ class TestWorkflowsBranching(object):
         FileOperations.insert_file(lb, section='code', src_file=s1.name)
         bm = BranchManager(lb, username=UT_USERNAME)
 
-        nb = bm.create_branch('new-branch')
+        nb = bm.create_branch(f'gm.workspace-{UT_USERNAME}.new-branch')
         with open('/tmp/s1.txt', 'w') as s1:
             s1.write('branch-conflict-data')
         FileOperations.insert_file(lb, section='code', src_file=s1.name)
@@ -496,7 +504,7 @@ class TestWorkflowsBranching(object):
         FileOperations.insert_file(lb, section='code', src_file=s1.name)
         bm = BranchManager(lb, username=UT_USERNAME)
 
-        nb = bm.create_branch('new-branch')
+        nb = bm.create_branch(f'gm.workspace-{UT_USERNAME}.new-branch')
         with open('/tmp/s1.txt', 'w') as s1:
             s1.write('branch-conflict-data')
         FileOperations.insert_file(lb, section='code', src_file=s1.name)
@@ -535,7 +543,7 @@ class TestWorkflowsBranching(object):
         FileOperations.insert_file(lb, section='code', src_file=s1.name)
         bm = BranchManager(lb, username=UT_USERNAME)
 
-        nb = bm.create_branch('new-branch')
+        nb = bm.create_branch(f'gm.workspace-{UT_USERNAME}.new-branch')
         assert os.path.exists(os.path.join(lb.root_dir, 'code', 's1.txt'))
         FileOperations.delete_files(lb, 'code', ['s1.txt'])
         assert lb.is_repo_clean

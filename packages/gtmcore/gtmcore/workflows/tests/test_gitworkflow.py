@@ -23,26 +23,22 @@ import mock
 import os
 
 
-from gtmcore.labbook import LabBook, loaders
+from gtmcore.labbook import LabBook
+from gtmcore.inventory import loaders
 from gtmcore.workflows import GitWorkflow, MergeError
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
                                sample_src_file, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
                                mock_config_lfs_disabled)
+from gtmcore.inventory.branching import BranchManager
 
 # If importing from remote, does new user's branch get created and does it push properly?
-
-
-@pytest.fixture(scope="session")
-def pause_wait_for_redis():
-    import time
-    time.sleep(3)
 
 
 class TestLabbookShareProtocol(object):
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_simple_publish_new_one_user(self, pause_wait_for_redis, remote_bare_repo, mock_labbook_lfs_disabled):
+    def  test_simple_publish_new_one_user(self, remote_bare_repo, mock_labbook_lfs_disabled):
         # Make sure you cannot clobber a remote branch with your local branch of the same name.
 
         ## 1 - Make initial set of contributions to Labbook.
@@ -73,12 +69,13 @@ class TestLabbookShareProtocol(object):
         wf.sync('test')
         assert lb.active_branch == "gm.workspace-test"
 
-        lb.checkout_branch('gm.workspace')
+        bm = BranchManager(lb, username='test')
+        bm.workon_branch('gm.workspace')
         assert os.path.exists(os.path.join(lb.root_dir, 'input', 'new-input-dir'))
         assert not os.path.exists(os.path.join(lb.root_dir, 'code', 'testy-tacked-dir'))
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_simple_single_user_two_instances(self, pause_wait_for_redis, remote_bare_repo, mock_labbook_lfs_disabled,
+    def test_simple_single_user_two_instances(self, remote_bare_repo, mock_labbook_lfs_disabled,
                                               mock_config_file, mock_config_lfs_disabled):
         """This mocks up a single user using a single labbook at two locations (i.e., home and work). """
 
@@ -88,7 +85,8 @@ class TestLabbookShareProtocol(object):
         wf = GitWorkflow(workplace_lb)
         wf.publish('test')
 
-        FileOperations.makedir(workplace_lb, relative_path='code/dir-created-after-publish', create_activity_record=True)
+        FileOperations.makedir(workplace_lb, relative_path='code/dir-created-after-publish',
+                               create_activity_record=True)
         wf.sync('test')
         assert os.path.exists(os.path.join(workplace_lb.root_dir, 'code', 'dir-created-after-publish'))
 
@@ -96,7 +94,8 @@ class TestLabbookShareProtocol(object):
 
         ## "home_lb" represents the user's home computer -- same Labbook, just in a different LM instance.
         home_lb = LabBook(mock_config_lfs_disabled[0])
-        loaders.from_remote(repo_location, username="test", owner="test", labbook_name="labbook1", labbook=home_lb)
+        home_lb = loaders.from_remote(repo_location, username="test", owner="test",
+                            labbook_name="labbook1", labbook=home_lb)
         assert home_lb.active_branch == "gm.workspace-test"
         assert os.path.exists(os.path.join(home_lb.root_dir, 'code', 'testy-tracked-dir'))
         assert os.path.exists(os.path.join(home_lb.root_dir, 'code', 'dir-created-after-publish'))
@@ -111,7 +110,7 @@ class TestLabbookShareProtocol(object):
         assert os.path.exists(os.path.join(workplace_lb.root_dir, 'input/stuff-for-inputs'))
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_two_users_alternate_changes(self, pause_wait_for_redis, remote_bare_repo, mock_labbook_lfs_disabled,
+    def test_two_users_alternate_changes(self, remote_bare_repo, mock_labbook_lfs_disabled,
                                          mock_config_file, mock_config_lfs_disabled):
         ## 1 - Make initial set of contributions to Labbook.
         test_user_lb = mock_labbook_lfs_disabled[2]
@@ -123,7 +122,8 @@ class TestLabbookShareProtocol(object):
         assert remote_repo is not None
 
         bob_user_lb = LabBook(mock_config_lfs_disabled[0])
-        loaders.from_remote(remote_repo, username="bob", owner="test", labbook_name="labbook1", labbook=bob_user_lb)
+        bob_user_lb = loaders.from_remote(remote_repo, username="bob", owner="test",
+                                          labbook_name="labbook1", labbook=bob_user_lb)
         bob_wf = GitWorkflow(bob_user_lb)
         assert bob_user_lb.active_branch == "gm.workspace-bob"
         FileOperations.makedir(bob_user_lb, relative_path='output/sample-output-dir-xxx', create_activity_record=True)
@@ -136,7 +136,7 @@ class TestLabbookShareProtocol(object):
         assert test_user_lb.active_branch == "gm.workspace-test"
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_two_users_attempt_conflict(self, pause_wait_for_redis, mock_labbook_lfs_disabled, mock_config_file,
+    def test_two_users_attempt_conflict(self, mock_labbook_lfs_disabled, mock_config_file,
                                         sample_src_file, mock_config_lfs_disabled):
         test_user_lb = mock_labbook_lfs_disabled[2]
         FileOperations.makedir(test_user_lb, relative_path='code/testy-tracked-dir', create_activity_record=True)
@@ -146,8 +146,9 @@ class TestLabbookShareProtocol(object):
         remote_repo = test_user_lb.remote
 
         bob_user_lb = LabBook(mock_config_lfs_disabled[0])
+        bob_user_lb = loaders.from_remote(remote_repo, username="bob", owner="test",
+                                          labbook_name="labbook1", labbook=bob_user_lb)
         bob_wf = GitWorkflow(bob_user_lb)
-        loaders.from_remote(remote_repo, username="bob", owner="test", labbook_name="labbook1", labbook=bob_user_lb)
         assert bob_user_lb.active_branch == "gm.workspace-bob"
         FileOperations.makedir(bob_user_lb, relative_path='output/sample-output-dir-xxx', create_activity_record=True)
         FileOperations.makedir(bob_user_lb, relative_path='input/stuff-for-inputs-yyy', create_activity_record=True)
@@ -163,7 +164,7 @@ class TestLabbookShareProtocol(object):
         assert os.path.exists(os.path.join(bob_user_lb.root_dir, 'code', 'testy-tracked-dir'))
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_attempt_another_conflict(self, pause_wait_for_redis, mock_labbook_lfs_disabled,
+    def test_attempt_another_conflict(self, mock_labbook_lfs_disabled,
                                       mock_config_file, sample_src_file, mock_config_lfs_disabled):
         with open('/tmp/s1.txt', 'w') as s1:
             s1.write('aaaaa\nbbbbbb\nccccc')
@@ -175,7 +176,9 @@ class TestLabbookShareProtocol(object):
         remote_repo = test_user_lb.remote
 
         bob_user_lb = LabBook(mock_config_lfs_disabled[0])
-        loaders.from_remote(remote_repo, username="bob", owner="test", labbook_name="labbook1", labbook=bob_user_lb)
+        bob_user_lb = loaders.from_remote(remote_repo, username="bob",
+                                          owner="test", labbook_name="labbook1",
+                                          labbook=bob_user_lb)
         wf_bob_user = GitWorkflow(bob_user_lb)
         assert bob_user_lb.active_branch == "gm.workspace-bob"
         with open(os.path.join(bob_user_lb.root_dir, 'code', 's1.txt'), 'w') as f:
@@ -208,7 +211,7 @@ class TestLabbookShareProtocol(object):
         assert 'zzzzz' in lines
 
     @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_two_users_have_one_remove_a_file(self, pause_wait_for_redis, remote_bare_repo, mock_labbook_lfs_disabled,
+    def test_two_users_have_one_remove_a_file(self, remote_bare_repo, mock_labbook_lfs_disabled,
                                          mock_config_file, mock_config_lfs_disabled):
         ## 1 - Make initial set of contributions to Labbook.
         test_user_lb = mock_labbook_lfs_disabled[2]
@@ -219,7 +222,8 @@ class TestLabbookShareProtocol(object):
         remote_repo = test_user_lb.remote
 
         bob_user_lb = LabBook(mock_config_lfs_disabled[0])
-        loaders.from_remote(remote_repo, username="bob", owner="test", labbook_name="labbook1", labbook=bob_user_lb)
+        bob_user_lb = loaders.from_remote(remote_repo, username="bob", owner="test",
+                                          labbook_name="labbook1", labbook=bob_user_lb)
         bob_wf = GitWorkflow(bob_user_lb)
         assert bob_user_lb.active_branch == "gm.workspace-bob"
         FileOperations.delete_files(bob_user_lb, 'code', ['testy-tracked-dir'])

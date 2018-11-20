@@ -15,6 +15,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
+from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
 
 logger = LMLogger.get_logger()
@@ -187,11 +188,13 @@ class InventoryManager(object):
 
     def create_labbook_disabled_lfs(self, username: str, owner: str, labbook_name: str,
                                     description: Optional[str] = None,
-                                    author: Optional[GitAuthor] = None):
+                                    author: Optional[GitAuthor] = None) -> LabBook:
         path = self._new_labbook(username=username, owner={'username': owner},
                                  name=labbook_name, description=description,
                                  author=author, bypass_lfs=True)
-        return self.load_labbook_from_directory(path, author=author)
+        lb = self.load_labbook_from_directory(path, author=author)
+        assert lb.active_branch == f'gm.workspace-{username}'
+        return lb
 
     def create_labbook(self, username: str, owner: str, labbook_name: str,
                        description: Optional[str] = None, author: Optional[GitAuthor] = None) -> LabBook:
@@ -214,7 +217,7 @@ class InventoryManager(object):
         return self.load_labbook_from_directory(path, author=author)
 
     def _new_labbook(self, owner: Dict[str, str], name: str,
-                     username: Optional[str] = None,
+                     username: str,
                      description: Optional[str] = None,
                      bypass_lfs: bool = False,
                      author: Optional[GitAuthor] = None) -> str:
@@ -344,15 +347,13 @@ class InventoryManager(object):
             # Commit
             labbook.git.add_all()
             labbook.git.create_branch(name="gm.workspace")
-
+            bm = BranchManager(labbook, username=username)
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             labbook.git.commit(f"Creating new empty LabBook: {name}")
-
             user_workspace_branch = f"gm.workspace-{username}"
-            labbook.git.create_branch(user_workspace_branch)
-            labbook.checkout_branch(branch_name=user_workspace_branch)
+            bm.create_branch(user_workspace_branch)
 
             if labbook.active_branch != user_workspace_branch:
                 raise ValueError(f"active_branch should be '{user_workspace_branch}'")

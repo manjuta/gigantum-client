@@ -18,18 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import pytest
-import getpass
 import os
-import yaml
-import time
 
-from gtmcore.files import FileOperations
 from gtmcore.labbook import LabBook
-from gtmcore.exceptions import GigantumException
-
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
-from gtmcore.fixtures import mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file
+from gtmcore.fixtures import (mock_config_file, mock_labbook, remote_labbook_repo, sample_src_file,
+                              mock_labbook_lfs_disabled)
 
 
 class TestLabBook(object):
@@ -229,3 +224,15 @@ class TestLabBook(object):
 
         assert lb.get_readme() == ""
         assert os.path.exists(os.path.join(lb.root_dir, 'README.md')) is True
+
+    def test_is_labbook_clean(self, mock_config_file, mock_labbook_lfs_disabled):
+        lb = mock_labbook_lfs_disabled[2]
+        assert lb.is_repo_clean
+        # Make a new file in the input directory, but do not add/commit it.
+        with open(os.path.join(lb.root_dir, 'input', 'catfile'), 'wb') as f:
+            f.write(b"data.")
+        assert not lb.is_repo_clean
+        # Now, make sure that new file is added and tracked, and then try making the new branch again.
+        lb.git.add(os.path.join(lb.root_dir, 'input', 'catfile'))
+        lb.git.commit("Added file")
+        assert lb.is_repo_clean

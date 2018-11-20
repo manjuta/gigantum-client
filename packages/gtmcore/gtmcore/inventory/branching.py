@@ -17,18 +17,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import git
+import re
 import subprocess
-from typing import Optional, List
 
+import git
+from typing import Optional, List, Tuple
+
+from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
-from gtmcore.workflows.core import call_subprocess
+from gtmcore.configuration.utils import call_subprocess
 
 logger = LMLogger.get_logger()
 
 
-class BranchException(Exception):
+class BranchException(GigantumException):
     pass
 
 
@@ -41,15 +44,27 @@ class InvalidBranchName(BranchException):
 
 
 class BranchManager(object):
+    """Responsible for all Git branch and merge operations.
+
+    Intended to be the sole entrypoint for operations to query for
+    and perform basic Git branching operations. The Workflows package
+    in particular is intended to be the main user of this class, which
+    will use the methods provided here to support conflict-free distributed
+    workflow among users.
+
+    TODO(billvb): Finish removing all workflow-specific fields
+    """
+
     def __init__(self, labbook: LabBook, username: str) -> None:
         self.labbook = labbook
         self.username = username
 
     @classmethod
     def is_branch_name_valid(cls, new_branch_name: str) -> bool:
+        """Query if the given branch name is can be the name of a new branch"""
         if len(new_branch_name) > 80:
             return False
-        return all([e.isalnum() and e == e.lower() for e in new_branch_name.split('-')])
+        return all([(e.replace('.', '').isalnum() and e == e.lower()) for e in new_branch_name.split('-')])
 
     @property
     def active_branch(self) -> str:
@@ -58,37 +73,33 @@ class BranchManager(object):
 
     @property
     def workspace_branch(self) -> str:
-        """Return the user's primary branch name"""
+        """Return the user's primary branch name
+
+        TODO(billvb): Migrate to Workflows (does not belong here).
+        """
         b = f'gm.workspace-{self.username}'
         if b not in self.branches:
             raise BranchException(f'Cannot find user workspace branch {b}')
         return b
 
     @property
-    def branches(self) -> List[str]:
-        """List all gigantum-managed feature branches available for checkout. """
-        return [b for b in self.labbook.get_branches()['local'] if f'workspace-{self.username}' in b]
+    def available_branches(self) -> List[str]:
+        # TODO(billvb): Migrate to Workflows
+        return [b for b in self.branches if f'gm.workspace-{self.username}' in b]
 
     @property
-    def mergeable_branches(self) -> List[str]:
-        if self.active_branch == self.workspace_branch:
-            # Anythign with a workspace and a dot (indicating it is a feature/rollback branch)
-            return [b for b in self.branches if f'{self.workspace_branch}.' in b]
-        else:
-            # If on a feature branch, can only return
-            return [self.workspace_branch]
+    def branches(self) -> List[str]:
+        """List all branches (local AND remote) available for checkout"""
+        return sorted(list(set(self.labbook.get_branches()['local']
+                               + self.labbook.get_branches()['remote'])))
 
-    def create_branch(self, title: str, description: Optional[str] = None, revision: Optional[str] = None) -> str:
+    def create_branch(self, title: str, revision: Optional[str] = None) -> str:
         """Create and checkout (work on) a new managed branch."""
         if not self.is_branch_name_valid(title):
-            raise InvalidBranchName('New branch name `{title}` invalid pattern')
+            raise InvalidBranchName(f'Branch name `{title}` invalid pattern')
 
-        if self.active_branch != f'gm.workspace-{self.username}':
-            raise BranchWorkflowViolation('Must be on main user workspace branch to create new branch')
-
-        full_branch_name = f'gm.workspace-{self.username}.{title}'
-        if full_branch_name in self.branches:
-            raise InvalidBranchName('Branch with title {title} already exists')
+        if title in self.branches:
+            raise InvalidBranchName(f'Branch name `{title}` already exists')
 
         self.labbook.sweep_uncommitted_changes()
         if revision:
@@ -103,10 +114,10 @@ class BranchManager(object):
             logger.info(f"Creating rollback branch from revision {revision} in {str(self.labbook)}")
             r = subprocess.check_output(f'git checkout {revision}', cwd=self.labbook.root_dir, shell=True)
             logger.info(r)
-        self.labbook.checkout_branch(branch_name=full_branch_name, new=True)
+        self.labbook.checkout_branch(branch_name=title, new=True)
         logger.info(f'Activated new branch {self.active_branch} in {str(self.labbook)}')
 
-        return full_branch_name
+        return title
 
     def remove_branch(self, target_branch: str) -> None:
         """Delete a local feature branch that is NOT the active branch.
@@ -133,24 +144,34 @@ class BranchManager(object):
         if target_branch in self.branches:
             raise BranchWorkflowViolation(f'Removal of branch `{target_branch}` in {str(self.labbook)} failed.')
 
-    def workon_branch(self, branch_name: str):
+    def _workon_branch(self, branch_name: str) -> None:
         """Checkouts a branch as the working revision. """
 
-        if branch_name not in self.branches:
-            raise InvalidBranchName(f'Target branch to work on `{branch_name}` does not exist')
+        #if branch_name not in self.branches:
+        #    raise InvalidBranchName(f'Target branch `{branch_name}` does not exist')
 
         self.labbook.sweep_uncommitted_changes()
         self.labbook.checkout_branch(branch_name=branch_name)
-        logger.info(f'Activated new branch {self.active_branch} in {str(self.labbook)}')
+        logger.info(f'Checked out branch {self.active_branch} in {str(self.labbook)}')
 
-    def merge_from(self, other_branch: str, force: bool = False):
-        """Pulls/merges `other_branch` into current branch. """
+    def workon_branch(self, branch_name: str) -> None:
+        """Performs a Git checkout on the given branch_name"""
+        try:
+            self._workon_branch(branch_name)
+        except Exception as e:
+            logger.error(e)
+            raise BranchException(e)
+
+    def merge_from(self, other_branch: str, force: bool = False) -> None:
+        """Pulls/merges `other_branch` into current branch.
+
+        Args:
+            other_branch: Name of other branch to merge from
+            force: Force overwrite if conflicts occur
+        """
 
         if other_branch not in self.branches:
             raise InvalidBranchName(f'Other branch {other_branch} not found')
-
-        if other_branch not in self.mergeable_branches:
-            raise InvalidBranchName(f'Other branch {other_branch} not mergeable into {self.active_branch}')
 
         logger.info(f"In {str(self.labbook)} merging branch `{other_branch}` into `{self.active_branch}`...")
         try:
@@ -171,3 +192,50 @@ class BranchManager(object):
         except Exception as e:
             call_subprocess(['git', 'reset', '--hard'], cwd=self.labbook.root_dir)
             raise e
+
+    def get_commits_behind_remote(self, remote_name: str = "origin") -> Tuple[str, int]:
+        """Return the number of commits local branch is behind remote. Note, only works with
+        currently checked-out branch. If the local branch is AHEAD of the remote, returns a negative
+        value.
+
+        Args:
+            remote_name: Name of remote, e.g., "origin"
+
+        Returns:
+            tuple containing branch name, and number of commits behind (zero implies up-to-date,
+                negative implies local branch is ahead.)
+        """
+        # TODO(billvb/dmk/?) - This can be one-lined using some versions of GitPython
+        # https://stackoverflow.com/questions/17224134/check-status-of-local-python-relative-to-remote-with-gitpython/21431791
+        # However, it's not clear we will continue to use GitPython going forward or that this implementation
+        # needs to change right now.
+        try:
+            if self.labbook.has_remote:
+                self.labbook.git.fetch(remote=remote_name)
+            result_str = self.labbook.git.repo.git.status().replace('\n', ' ')
+        except Exception as e:
+            logger.exception(e)
+            raise GigantumException(e)
+
+        if 'branch is up-to-date' in result_str:
+            return self.active_branch, 0
+        elif 'branch is behind' in result_str:
+            m = re.search(' by ([\d]+) commit', result_str)
+            if m:
+                assert int(m.groups()[0]) > 0
+                return self.active_branch, int(m.groups()[0])
+            else:
+                logger.error(f"Could not find count in: {result_str}")
+                raise GigantumException("Unable to determine commit behind-count")
+        elif 'branch is ahead of' in result_str:
+            # Return NEGATIVE if your branch is ahead of remote
+            m = re.search(' by ([\d]+) commit', result_str)
+            if m:
+                assert int(m.groups()[0]) > 0
+                return self.active_branch, -1 * int(m.groups()[0])
+            else:
+                logger.error(f"Could not find count in: {result_str}")
+                raise GigantumException("Unable to determine commit behind-count")
+        else:
+            # This branch is local-only
+            return self.active_branch, 0
