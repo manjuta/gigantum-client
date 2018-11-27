@@ -1,4 +1,4 @@
-export default class WebWorker {
+export default class FileFormatter {
     constructor(worker) {
         const code = worker.toString();
         const blob = new Blob([`(${code})()`]);

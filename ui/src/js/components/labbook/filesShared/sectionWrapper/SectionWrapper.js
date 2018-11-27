@@ -77,7 +77,7 @@ export default class SectionWrapper extends Component {
             Favorites = require(`../favorites/favoritesContainers/${capitalSection}Favorites`).default,
             MostRecent = require(`../mostRecent/mostRecentContainers/MostRecent${capitalSection}`).default,
             Browser = require(`../sectionBrowser/sectionBrowserContainers/${capitalSection}Browser`).default,
-            sectionProp = {
+            sectionProps = {
                 [this.props.section]: this.props.labbook && this.props.labbook[this.props.section],
                 }
 
@@ -109,7 +109,7 @@ export default class SectionWrapper extends Component {
                     sectionId={this.props.labbook[this.props.section].id}
                     labbookId={this.props.labbookId}
                     section={this.props.section}
-                    {...sectionProp}
+                    {...sectionProps}
                 />
                 }
                 {
@@ -118,7 +118,7 @@ export default class SectionWrapper extends Component {
                     edgeId={labbook[this.props.section].id}
                     selectedFilter={this.state.selectedFilter}
                     section={this.props.section}
-                    {...sectionProp}
+                    {...sectionProps}
 
                   />
                 }
@@ -135,7 +135,7 @@ export default class SectionWrapper extends Component {
               section={this.props.section}
               loadStatus={this._loadStatus}
               isLocked={this.props.isLocked}
-              {...sectionProp}
+              {...sectionProps}
             />
           </div>
         </div>

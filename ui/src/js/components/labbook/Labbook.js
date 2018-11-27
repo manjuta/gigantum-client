@@ -42,17 +42,17 @@ const Activity = Loadable({
   delay: 500,
 });
 const Code = Loadable({
-  loader: () => import('./filesShared/sectionWrapper/sectionWrapperContainers/Code'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Code'),
   loading: Loading,
   delay: 500,
 });
 const InputData = Loadable({
-  loader: () => import('./filesShared/sectionWrapper/sectionWrapperContainers/Input'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Input'),
   loading: Loading,
   delay: 500,
 });
 const OutputData = Loadable({
-  loader: () => import('./filesShared/sectionWrapper/sectionWrapperContainers/Output'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Output'),
   loading: Loading,
   delay: 500,
 });

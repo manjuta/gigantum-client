@@ -14,7 +14,7 @@ import AddSubfolder from './fileRow/AddSubfolder';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 // util
-import WebWorker, { fileHandler } from './utilities/WebWorker';
+import FileFormatter, { fileHandler } from './utilities/FileFormatter';
 
 class FileBrowser extends Component {
     constructor(props) {
@@ -76,7 +76,7 @@ class FileBrowser extends Component {
     */
     componentDidMount() {
       // window.addEventListener('resize', this._forceScrollerUpdate.bind(this));
-      this.fileHandler = new WebWorker(fileHandler);
+      this.fileHandler = new FileFormatter(fileHandler);
       this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
       this.fileHandler.addEventListener('message', (evt) => {
         if (this.state.fileHash !== evt.data.hash) {
@@ -90,7 +90,7 @@ class FileBrowser extends Component {
     */
     componentDidUpdate() {
       if (this.list) {
-      this.list.recomputeGridSize()
+        this.list.recomputeGridSize()
       }
       if (window.innerWidth < 1240) {
         this.refs.windowScroller.updatePosition()
