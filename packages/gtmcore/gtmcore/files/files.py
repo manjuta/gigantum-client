@@ -272,7 +272,7 @@ class FileOperations(object):
             None
         """
         labbook.validate_section(section)
-        is_untracked = shims.in_untracked(labbook.root_dir, section=section)
+        is_untracked = in_untracked(labbook.root_dir, section=section)
 
         if not isinstance(relative_paths, list):
             raise ValueError("Must provide list of paths to remove")
