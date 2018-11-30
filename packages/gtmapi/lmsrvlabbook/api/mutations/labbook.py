@@ -328,10 +328,10 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         logger.info(f"Getting from remote, make_owner = {make_owner}")
         lb = loaders.from_remote(remote_url, username, owner, labbook_name, labbook=lb,
                                  make_owner=make_owner)
-
+        import_owner = InventoryManager().query_labbook_owner(lb)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=Labbook(owner=lb.owner['username'], name=labbook_name),
+        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=labbook_name),
                                         cursor=cursor)
         return ImportRemoteLabbook(new_labbook_edge=lbedge)
 
@@ -803,7 +803,7 @@ class FetchLabbookEdge(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
 
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=Labbook(owner=lb.owner['username'], name=labbook_name),
+        lbedge = LabbookConnection.Edge(node=Labbook(owner=owner, name=labbook_name),
                                         cursor=cursor)
 
         return FetchLabbookEdge(new_labbook_edge=lbedge)

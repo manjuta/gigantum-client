@@ -169,6 +169,6 @@ class SetVisibility(graphene.relay.ClientIDMutation):
             mgr.set_visibility(namespace=owner, labbook_name=labbook_name, visibility=visibility)
 
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=LabbookObject(owner=lb.owner['username'], name=labbook_name),
+        lbedge = LabbookConnection.Edge(node=LabbookObject(owner, name=labbook_name),
                                         cursor=cursor)
         return SetVisibility(new_labbook_edge=lbedge)

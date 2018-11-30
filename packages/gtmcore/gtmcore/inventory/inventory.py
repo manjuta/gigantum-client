@@ -45,6 +45,13 @@ class InventoryManager(object):
         return isinstance(other, InventoryManager) \
                and self.inventory_root == other.inventory_root
 
+    def query_labbook_owner(self, labbook: LabBook) -> str:
+        """Returns the LabBook's owner in the Inventory. """
+        tokens = labbook.root_dir.rsplit('/', 3)
+        if tokens[-2] != 'labbooks':
+            raise InventoryException(f'Unexpected root in {str(labbook)}')
+        return tokens[-3]
+
     def _put_labbook(self, path: str, username: str, owner: str) -> LabBook:
         # Validate that given path contains labbook
         temp_lb = self.load_labbook_from_directory(path)

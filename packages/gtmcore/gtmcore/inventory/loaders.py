@@ -74,6 +74,12 @@ def from_remote(remote_url: str, username: str, owner: str,
         path = _clone(s_labbook, remote_url=remote_url, working_dir=tempdir)
         inv_manager = InventoryManager(s_labbook.client_config.config_file)
         candidate_lb = inv_manager.load_labbook_from_directory(path)
+
+        if os.environ.get('WINDOWS_HOST'):
+            logger.warning("Imported on Windows host - set fileMode to false")
+            call_subprocess("git config core.fileMode false".split(),
+                            cwd=candidate_lb.root_dir)
+
         bm = BranchManager(candidate_lb, username=username)
         bm.workon_branch("gm.workspace")
         user_workspace = f'gm.workspace-{username}'

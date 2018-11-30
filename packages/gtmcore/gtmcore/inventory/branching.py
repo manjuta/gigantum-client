@@ -150,7 +150,7 @@ class BranchManager(object):
         #if branch_name not in self.branches:
         #    raise InvalidBranchName(f'Target branch `{branch_name}` does not exist')
 
-        self.labbook.sweep_uncommitted_changes()
+        self.labbook.sweep_uncommitted_changes(extra_msg="Save state on branch change")
         self.labbook.checkout_branch(branch_name=branch_name)
         logger.info(f'Checked out branch {self.active_branch} in {str(self.labbook)}')
 

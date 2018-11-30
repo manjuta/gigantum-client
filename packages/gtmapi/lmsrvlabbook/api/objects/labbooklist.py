@@ -103,11 +103,12 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
             raise ValueError(f"Unsupported sort_str: {sort}. Use `desc`, `asc`")
 
         # Collect all labbooks for all owners
-        local_lbs = InventoryManager().list_labbooks(username=username, sort_mode=order_by)
+        inv_manager = InventoryManager()
+        local_lbs = inv_manager.list_labbooks(username=username, sort_mode=order_by)
         if reverse:
             local_lbs.reverse()
 
-        edges = [(lb.owner['username'], lb.name) for lb in local_lbs]
+        edges = [(inv_manager.query_labbook_owner(lb), lb.name) for lb in local_lbs]
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in enumerate(edges)]
 
         # Process slicing and cursor args
