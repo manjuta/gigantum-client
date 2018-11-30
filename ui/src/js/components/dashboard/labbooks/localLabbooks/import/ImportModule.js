@@ -16,37 +16,11 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
+// config
+import config from 'JS/config'
 // assets
 import './ImportModule.scss';
-/**
-  @param {number} bytes
-  converts bytes into suitable units
-*/
-const _humanFileSize = (bytes) => {
-  const thresh = 1000;
 
-  if (Math.abs(bytes) < thresh) {
-    return `${bytes} kB`;
-  }
-
-  const units = [
-    'MB',
-    'GB',
-    'TB',
-    'PB',
-    'EB',
-    'ZB',
-    'YB',
-  ];
-
-  let u = -1;
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-
-  return `${bytes.toFixed(1)} ${units[u]}`;
-};
 /*
  @param {object} workerData
  uses redux to dispatch file upload to the footer
@@ -57,8 +31,8 @@ const dispatchLoadingProgress = (wokerData) => {
   bytesUploaded = bytesUploaded < totalBytes
     ? bytesUploaded
     : totalBytes;
-  const totalBytesString = _humanFileSize(totalBytes);
-  const bytesUploadedString = _humanFileSize(bytesUploaded);
+  const totalBytesString = config.humanFileSize(totalBytes);
+  const bytesUploadedString = config.humanFileSize(bytesUploaded);
 
   store.dispatch({
     type: 'UPLOAD_MESSAGE_UPDATE',

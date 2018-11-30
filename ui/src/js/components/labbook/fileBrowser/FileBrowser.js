@@ -47,6 +47,7 @@ class FileBrowser extends Component {
       this._updateDropZone = this._updateDropZone.bind(this);
       this._getRowHeight = this._getRowHeight.bind(this);
     }
+
     static getDerivedStateFromProps(props, state) {
         let previousCount = state.count;
         let count = props.files.edges.length;
@@ -363,6 +364,7 @@ class FileBrowser extends Component {
   }
 
   render() {
+    console.log('render file browser')
     const files = this.state.files,
           { mutationData } = this.state,
           { isOver } = this.props;

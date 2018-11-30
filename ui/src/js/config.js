@@ -65,18 +65,18 @@ const CONFIG = {
     converts bytes into suitable units
   */
   humanFileSize: (bytes) => {
-    const thresh = 1000;
-
+    let si = true;
+    let thresh = si ? 1000 : 1024;
     if (Math.abs(bytes) < thresh) {
-      return `${bytes} kB`;
+        return `${bytes}B`;
     }
-
-    const units = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    let u = -1;
+    var units = si
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    var u = -1;
     do {
-      bytes /= thresh;
-      ++u;
+        bytes /= thresh;
+        ++u;
     } while (Math.abs(bytes) >= thresh && u < units.length - 1);
     return `${bytes.toFixed(1)} ${units[u]}`;
   },

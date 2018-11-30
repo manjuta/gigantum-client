@@ -27,13 +27,13 @@ import store from 'JS/redux/store';
 *  creates a file using AddLabbookFileMutation by passing a blob
 *  @return {}
 */
-const createFiles = (files, prefix, mutationData) => {
+const createFiles = (files, prefix, mutationData, dropZoneProps) => {
   // if (!this.state.uploading) {
     if (mutationData.section === 'code') {
       const fileSizeData = checkFileSize(files);
 
       if (fileSizeData.fileSizePrompt.length === 0) {
-        startFileUpload(files, prefix, fileSizeData, mutationData);
+        startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);
       } else {
         // this.setState({
         //   uploadData: {
@@ -47,7 +47,7 @@ const createFiles = (files, prefix, mutationData) => {
       }
     } else {
       const fileSizeData = checkFileSize(files, true);
-      startFileUpload(files, prefix, fileSizeData, mutationData);
+      startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);
     }
   // }
 };
@@ -108,7 +108,7 @@ const startFolderUpload = (folderFiles, prefix, totalFiles, mutationData) => {
 *  sets upload message
 *  @return {}
 */
-const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
+const startFileUpload = (files, prefix, fileSizeData, mutationData, dropZoneProps) => {
   let fileMetaData = getTotalFileLength(files),
     transactionId = uuidv4(),
     totalFiles = fileMetaData.fileCount - fileSizeData.fileSizeNotAllowed,
@@ -133,10 +133,17 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
         newKey += file.name;
 
         // const fileReader = new FileReader();
-
+          let deleteId = dropZoneProps.childrenState ? dropZoneProps.childrenState[file.name] : null;
+          if (deleteId === null && dropZoneProps.files) {
+            dropZoneProps.files.edges.forEach((edge) => {
+              if (edge.node.key === file.name) {
+                deleteId = edge.node.id;
+              }
+            });
+          }
         // fileReader.onloadend = function (evt) {
           const filepath = newKey;
-
+          console.log(deleteId);
           const data = {
             file,
             filepath,
@@ -145,6 +152,8 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData) => {
             ...mutationData,
             username: mutationData.owner,
             connectionKey: mutationData.connection,
+            favoriteConnectionKey: mutationData.favoriteConnection,
+            deleteId,
           };
 
           ChunkUploader.chunkFile(data, (data) => {

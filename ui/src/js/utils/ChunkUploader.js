@@ -13,23 +13,23 @@ import config from 'JS/config';
   @param {number} bytes
   converts bytes into suitable units
 */
-export const humanFileSize = (bytes) => {
-  const thresh = 1000;
-
-  if (Math.abs(bytes) < thresh) {
-    return `${bytes} kB`;
-  }
-
-  const units = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  let u = -1;
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-  const fixedBytes = bytes.toFixed(1);
-  return `${fixedBytes} ${units[u]}`;
-};
+// export const humanFileSize = (bytes) => {
+//   const thresh = 1000;
+//
+//   if (Math.abs(bytes) < thresh) {
+//     return `${bytes} kB`;
+//   }
+//
+//   const units = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+//
+//   let u = -1;
+//   do {
+//     bytes /= thresh;
+//     ++u;
+//   } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+//   const fixedBytes = bytes.toFixed(1);
+//   return `${fixedBytes} ${units[u]}`;
+// };
 
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
@@ -71,8 +71,8 @@ const updateChunkStatus = (file, chunkData, labbookName, owner, transactionId) =
     chunkSize,
   } = chunkData;
   const chunkIndex = chunkData.chunkIndex + 1;
-  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? config.humanFileSize(fileSizeKb) : config.humanFileSize((chunkSize / 1000) * chunkIndex);
-  const fileSize = config.humanFileSize(fileSizeKb);
+  const uploadedChunkSize = ((chunkSize / 1000) * chunkIndex) > fileSizeKb ? config.humanFileSize(fileSizeKb * 1000) : config.humanFileSize((chunkSize) * chunkIndex);
+  const fileSize = config.humanFileSize(fileSizeKb * 1000);
   setUploadMessageUpdate(`${uploadedChunkSize} of ${fileSize} files`, 1, (((chunkSize * chunkIndex) / (fileSizeKb * 1000)) * 100));
 
   if ((chunkSize * chunkIndex) >= (fileSizeKb * 1000)) {
@@ -107,6 +107,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
       accessToken,
       section,
       data.transactionId,
+      data.deleteId,
       (result, error) => {
         setFinishedUploading();
 

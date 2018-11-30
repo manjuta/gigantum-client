@@ -98,10 +98,8 @@ export default class RecentCard extends Component {
 
           <div className="Recent__description-section">
             <p>Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}</p>
-            <p>Size: {config.humanFileSize(this.props.file.node.size / 1000)} </p>
-
+            <p>Size: {config.humanFileSize(this.props.file.node.size)} </p>
           </div>
-
         </div>
       </div>
     );

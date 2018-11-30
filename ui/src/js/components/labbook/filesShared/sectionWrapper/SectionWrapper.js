@@ -19,7 +19,8 @@ export default class SectionWrapper extends Component {
   }
 
   componentDidMount() {
-    let selectedFilter = this.props.labbook && this.props.labbook[this.props.section] && this.props.labbook[this.props.section].hasFavorites ? 'favorites' : this.state.selectedFilter;
+    const { section } = this.props;
+    let selectedFilter = this.props.labbook && this.props.labbook[section] && this.props.labbook[section].hasFavorites ? 'favorites' : this.state.selectedFilter;
     this.setState({ selectedFilter });
   }
 
@@ -64,7 +65,7 @@ export default class SectionWrapper extends Component {
 
   render() {
     if (this.props.labbook) {
-      const { labbook } = this.props,
+      const { labbook, section } = this.props,
             favoritesCSS = classNames({
               SectionWrapper__filter: true,
               'SectionWrapper__filter--selected': this.state.selectedFilter === 'favorites',
@@ -73,26 +74,26 @@ export default class SectionWrapper extends Component {
               SectionWrapper__filter: true,
               'SectionWrapper__filter--selected': this.state.selectedFilter === 'recent',
             }),
-            capitalSection = this.props.section[0].toUpperCase() + this.props.section.slice(1),
-            Favorites = require(`../favorites/favoritesContainers/${capitalSection}Favorites`).default,
-            MostRecent = require(`../mostRecent/mostRecentContainers/MostRecent${capitalSection}`).default,
-            Browser = require(`../sectionBrowser/sectionBrowserContainers/${capitalSection}Browser`).default,
+            sectionUpperCase = section[0].toUpperCase() + section.slice(1),
+            Favorites = require(`../favorites/favoritesContainers/${sectionUpperCase}Favorites`).default,
+            MostRecent = require(`../mostRecent/mostRecentContainers/MostRecent${sectionUpperCase}`).default,
+            Browser = require(`../sectionBrowser/sectionBrowserContainers/${sectionUpperCase}Browser`).default,
             sectionProps = {
-                [this.props.section]: this.props.labbook && this.props.labbook[this.props.section],
+                [section]: this.props.labbook && this.props.labbook[section],
                 }
 
       return (
 
         <div className="SectionWrapper">
           {
-            this.props.labbook[this.props.section].isUntracked &&
+            this.props.labbook[section].isUntracked &&
             <div className="SectionWrapper__tracked-container">
               <div className="SectionWrapper__tracked">
                 Version Tracking Disabled
               </div>
             </div>
           }
-          { (labbook[this.props.section].hasFiles || labbook[this.props.section].hasFavorites) &&
+          { (labbook[section].hasFiles || labbook[section].hasFavorites) &&
             <div>
               <div className="SectionWrapper__header">
                 <div className="SectionWrapper__toolbar">
@@ -106,18 +107,18 @@ export default class SectionWrapper extends Component {
                 {
                 this.state.selectedFilter === 'favorites' &&
                 <Favorites
-                    sectionId={this.props.labbook[this.props.section].id}
+                    sectionId={this.props.labbook[section].id}
                     labbookId={this.props.labbookId}
-                    section={this.props.section}
+                    section={section}
                     {...sectionProps}
                 />
                 }
                 {
                 this.state.selectedFilter === 'recent' &&
                   <MostRecent
-                    edgeId={labbook[this.props.section].id}
+                    edgeId={labbook[section].id}
                     selectedFilter={this.state.selectedFilter}
-                    section={this.props.section}
+                    section={section}
                     {...sectionProps}
 
                   />
@@ -131,8 +132,8 @@ export default class SectionWrapper extends Component {
               selectedFiles={this.state.selectedFiles}
               clearSelectedFiles={this._clearSelectedFiles}
               labbookId={this.props.labbookId}
-              sectionId={labbook[this.props.section].id}
-              section={this.props.section}
+              sectionId={labbook[section].id}
+              section={section}
               loadStatus={this._loadStatus}
               isLocked={this.props.isLocked}
               {...sectionProps}

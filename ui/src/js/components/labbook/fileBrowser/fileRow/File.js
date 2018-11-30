@@ -287,11 +287,7 @@ const FolderDND = DragSource(
   'card',
   Connectors.dragSource,
   Connectors.dragCollect,
-)(DropTarget(
-    ['card', NativeTypes.FILE],
-    Connectors.targetSource,
-    Connectors.targetCollect,
-  )(File));
+)((File));
 
 
 export default FolderDND;
