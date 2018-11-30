@@ -17,11 +17,14 @@ export default class MostRecentList extends Component {
   }
 
   componentDidMount() {
-    this.setState({ shownFiles: this.state.sortedFiles.slice(0, this.state.showAmount) });
+    this.setState({ shownFiles: this.state.sortedFiles.slice(0, 3) });
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ shownFiles: nextProps.allFiles.slice(0, nextProps.showAmount) });
+  static getDerivedStateFromProps(props, state) {
+    return ({
+      ...state,
+      shownFiles: props.allFiles.slice(0, 3),
+    });
   }
 
   render() {

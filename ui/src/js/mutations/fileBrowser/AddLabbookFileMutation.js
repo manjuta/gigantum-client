@@ -139,14 +139,14 @@ export default function AddLabbookFileMutation(
       onError: err => console.error(err),
       optimisticUpdater: (store) => {
 
-        if (deleteId) {
+        if (deleteId && store.get(deleteId)) {
           let node = store.get(deleteId)
           node.setValue(modifiedAt, 'modifiedAt');
           node.setValue(size, 'size');
         } else {
           if (store.get(optimisticId)) {
             deleteEdge(store, sectionId, optimisticId, connectionKey)
-            deleteEdge(store, sectionId, optimisticId, recentConnectionKey)
+            // deleteEdge(store, sectionId, optimisticId, recentConnectionKey)
           }
           let nodeExists = store.get(optimisticId);
           const node = store.create(optimisticId, 'LabbookFile')
@@ -156,7 +156,7 @@ export default function AddLabbookFileMutation(
           node.setValue(modifiedAt, 'modifiedAt');
           node.setValue(size, 'size');
           sharedUpdater(store, sectionId, connectionKey, node);
-          sharedUpdater(store, sectionId, recentConnectionKey, node);
+          // sharedUpdater(store, sectionId, recentConnectionKey, node);
         }
       },
       updater: (store, response) => {

@@ -73,7 +73,10 @@ class File extends Component {
     if (this.props.setParentDragFalse) {
       this.props.setParentDragFalse();
     }
-    this.setState({ isDragging: true, isHovered: true });
+
+    if (this.state.isDragging && this.state.isHovered) {
+      this.setState({ isDragging: true, isHovered: true });
+    }
   }
   /**
   *  @param {}
@@ -83,7 +86,9 @@ class File extends Component {
     if (this.props.setParentDragTrue) {
       this.props.setParentDragTrue();
     }
-    this.setState({ isDragging: false, isHovered: false });
+    if (!this.state.isDragging && !this.state.isHovered) {
+      this.setState({ isDragging: false, isHovered: false });
+    }
   }
   /**
   *  @param {}
@@ -166,7 +171,10 @@ class File extends Component {
   */
   _setHoverState(evt, hover) {
     evt.preventDefault();
-    this.setState({ hover });
+
+    if (this.state.hover !== hover) {
+      this.setState({ hover });
+    }
 
     if (this.props.setParentHoverState && hover) {
       this.props.setParentHoverState(evt, !hover);
@@ -174,6 +182,8 @@ class File extends Component {
   }
 
   render() {
+
+    console.log('file render')
     const { node } = this.props.data.edge;
     const { index } = this.props.data;
     const fileName = this.props.filename;

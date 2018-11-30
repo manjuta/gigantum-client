@@ -89,8 +89,10 @@ class Folder extends Component {
 
                     if (folder._setSelected) {
                       folder._setSelected(isSelected);
-                    } else {
+                    } else if (folder.getDecoratedComponentInstance && folder.getDecoratedComponentInstance().getDecoratedComponentInstance) {
                       folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected);
+                    } else {
+                      folder.getDecoratedComponentInstance()._setSelected(isSelected);
                     }
               });
               if (this.props.checkParent) {
@@ -121,7 +123,8 @@ class Folder extends Component {
         let checkCount = 0;
         let incompleteCount = 0;
         Object.keys(this.refs).forEach((ref) => {
-            let state = this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state;
+            console.log(this.refs[ref])
+            let state = (this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance) ? this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state : this.refs[ref].getDecoratedComponentInstance().state;
             if (state.isSelected) {
                 checkCount += 1;
             }
@@ -182,13 +185,13 @@ class Folder extends Component {
       !evt.target.classList.contains('File__btn--round')) {
         this.setState({ expanded: !this.state.expanded }, () => {
           this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
-          this.props.listRef.recomputeGridSize()
+          // this.props.listRef.recomputeGridSize()
         });
       }
       if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
         this.setState({ expanded: true }, () => {
           this.props.updateChildState(this.props.data.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
-          this.props.listRef.recomputeGridSize()
+          // this.props.listRef.recomputeGridSize()
         });
       }
     }

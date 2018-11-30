@@ -109,7 +109,7 @@ export default function MoveLabbookFileMutation(
     {
       mutation,
       variables,
-      configs,
+      // configs,
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
@@ -118,38 +118,40 @@ export default function MoveLabbookFileMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
-      optimisticUpdater: (store, response) => {
-        sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
-        sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
-        if (response && response.moveLabbookFile && response.moveLabbookFile.updatedEdges && response.moveLabbookFile.updatedEdges.edges) {
-          response.moveLabbookFile.updatedEdges.edges.forEach((edge) => {
-            const labbookProxy = store.get(labbookId);
-            if (labbookProxy) {
-              const conn = RelayRuntime.ConnectionHandler.getConnection(
-                labbookProxy,
-                connectionKey,
-              );
-              store.delete(edge.node.id)
-              const node = store.create(edge.node.id, 'MoveFile');
-              node.setValue(edge.node.id, 'id');
-              node.setValue(edge.node.isDir, 'isDir');
-              node.setValue(edge.node.key, 'key');
-              node.setValue(edge.node.modifiedAt, 'modifiedAt');
-              node.setValue(edge.node.size, 'size');
-              const newEdge = RelayRuntime.ConnectionHandler.createEdge(
-                store,
-                conn,
-                node,
-                'newLabbookFileEdge',
-              );
-              RelayRuntime.ConnectionHandler.insertEdgeAfter(
-                conn,
-                newEdge,
-                edge.cursor,
-              );
-            }
-          });
-        }
+      optimisticUpdater: (store) => {
+        // sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
+        // sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
+        // removeIds.forEach((id) => {
+        //   store.delete(id)
+        // })
+
+        //
+        //   const labbookProxy = store.get(labbookId);
+        //   if (labbookProxy) {
+        //     const conn = RelayRuntime.ConnectionHandler.getConnection(
+        //       labbookProxy,
+        //       connectionKey,
+        //     );
+        //     store.delete(edge.node.id)
+        //     const node = store.create(edge.node.id, 'MoveFile');
+        //     node.setValue(edge.node.id, 'id');
+        //     node.setValue(edge.node.isDir, 'isDir');
+        //     node.setValue(edge.node.key, 'key');
+        //     node.setValue(edge.node.modifiedAt, 'modifiedAt');
+        //     node.setValue(edge.node.size, 'size');
+        //     const newEdge = RelayRuntime.ConnectionHandler.createEdge(
+        //       store,
+        //       conn,
+        //       node,
+        //       'newLabbookFileEdge',
+        //     );
+        //     RelayRuntime.ConnectionHandler.insertEdgeAfter(
+        //       conn,
+        //       newEdge,
+        //       edge.cursor,
+        //     );
+        //   }
+        // });
       },
       updater: (store, response) => {
         sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
@@ -162,8 +164,9 @@ export default function MoveLabbookFileMutation(
                 labbookProxy,
                 connectionKey,
               );
-              store.delete(edge.node.id)
-              const node = store.create(edge.node.id, 'MoveFile');
+
+              const node = store.get(edge.node.id);
+              console.log(node)
               node.setValue(edge.node.id, 'id');
               node.setValue(edge.node.isDir, 'isDir');
               node.setValue(edge.node.key, 'key');

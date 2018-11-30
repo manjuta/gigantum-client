@@ -5,6 +5,7 @@ import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { List, WindowScroller, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
+import shallowCompare from 'react-addons-shallow-compare'; // ES6
 // assets
 import './FileBrowser.scss';
 // components
@@ -71,6 +72,9 @@ class FileBrowser extends Component {
           search: count === previousCount ? state.search : '',
           count,
         };
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+      return shallowCompare(this, nextProps, nextState);
     }
     /**
       sets worker
@@ -254,29 +258,6 @@ class FileBrowser extends Component {
   /**
   *  @param {}
   *  checks if folder refs has props.isOver === true
-  *  @return {boolean}
-  */
-  _checkRefs() {
-    let isOver = this.props.isOverCurrent || this.props.isOver, // this.state.isOverChildFile,
-        { refs } = this;
-
-        Object.keys(refs).forEach((childname) => {
-          if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
-            const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-            if (child.props.data && !child.props.data.edge.node.isDir) {
-              if (child.props.isOverCurrent) {
-                isOver = true;
-              }
-            }
-          }
-        });
-    return ({
-      isOver,
-    });
-  }
-  /**
-  *  @param {}
-  *  checks if folder refs has props.isOver === true
   *  @return {boolean} isSelected - returns true if a child has been selected
   */
   _checkChildState() {
@@ -416,6 +397,8 @@ class FileBrowser extends Component {
       const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
       const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
       this.list = parent;
+
+      console.log('CellMeasurer')
       return (
         <CellMeasurer
           key={key}
@@ -536,7 +519,63 @@ class FileBrowser extends Component {
                   mutationData={mutationData}
                   mutations={this.state.mutations}
                 />
-                <WindowScroller
+
+
+                {
+
+                  childrenKeys.map((file) => {
+                    const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
+                    const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
+
+                      if (isDir) {
+                        return(<Folder
+                          ref={file}
+                          filename={file}
+                          key={files[file].edge.node.key}
+                          multiSelect={this.state.multiSelect}
+                          mutationData={mutationData}
+                          data={files[file]}
+                          mutations={this.state.mutations}
+                          setState={this._setState}
+                          rowStyle={{}}
+                          sort={this.state.sort}
+                          reverse={this.state.reverse}
+                          childrenState={this.state.childrenState}
+                          updateChildState={this._updateChildState}>
+                        </Folder>)
+                      } else if (isFile) {
+
+                        return (<File
+                          ref={file}
+                          filename={file}
+                          key={files[file].edge.node.key}
+                          multiSelect={this.state.multiSelect}
+                          mutationData={mutationData}
+                          data={files[file]}
+                          childrenState={this.state.childrenState}
+                          mutations={this.state.mutations}
+                          expanded
+                          isOverChildFile={this.state.isOverChildFile}
+                          updateParentDropZone={this._updateDropZone}
+                          updateChildState={this._updateChildState}>
+                        </File>);
+                      } else if (children[file]) {
+
+                        return (<div
+                          style={style}
+                          key={file + index}
+                        />);
+                      }
+
+                      return (<div
+                        key={file + index}
+                        style={style}>
+                        Loading
+                      </div>);
+                  })
+                }
+
+                { /* <WindowScroller
                   ref="windowScroller"
                 >
                   {({
@@ -563,7 +602,7 @@ class FileBrowser extends Component {
                     )}
                   </AutoSizer>
                   )}
-                </WindowScroller>
+                </WindowScroller> */}
                 { (childrenKeys.length === 0) &&
                   <div className="FileBrowser__empty">
                     {
