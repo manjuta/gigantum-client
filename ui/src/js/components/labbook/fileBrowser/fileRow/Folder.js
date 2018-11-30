@@ -123,7 +123,6 @@ class Folder extends Component {
         let checkCount = 0;
         let incompleteCount = 0;
         Object.keys(this.refs).forEach((ref) => {
-            console.log(this.refs[ref])
             let state = (this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance) ? this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state : this.refs[ref].getDecoratedComponentInstance().state;
             if (state.isSelected) {
                 checkCount += 1;
@@ -402,8 +401,7 @@ class Folder extends Component {
       let reference = file;
       const isDir = files.edge.node.isDir;
       reference = isDir ? `${reference}/` : reference;
-      const isExpanded = reference && this.props.childrenState[reference] && this.props.childrenState[reference].isExpanded
-      // console.log(files[file].children && Object.keys(files[file].children).length)
+      const isExpanded = reference && this.props.childrenState[reference] && this.props.childrenState[reference].isExpanded;
 
       const addFolderSize = this.props.childrenState[reference] && this.props.childrenState[reference].isAddingFolder ? 50 : 0;
 

@@ -4,7 +4,6 @@ import store from 'JS/redux/store';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
-import { List, WindowScroller, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import shallowCompare from 'react-addons-shallow-compare'; // ES6
 // assets
 import './FileBrowser.scss';
@@ -35,11 +34,6 @@ class FileBrowser extends Component {
         files: {},
         aboveSize: window.innerWidth > 1240,
       };
-
-      this.cache = new CellMeasurerCache({
-        fixedWidth: true,
-        defaultHeight: 50,
-      });
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
       this._setState = this._setState.bind(this);
@@ -85,9 +79,9 @@ class FileBrowser extends Component {
       this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
       this.fileHandler.addEventListener('message', (evt) => {
         if (this.state.fileHash !== evt.data.hash) {
-          this.setState({ fileHash: evt.data.hash, files: evt.data.files })
+          this.setState({ fileHash: evt.data.hash, files: evt.data.files });
         }
-      })
+      });
     }
 
     /*
@@ -95,11 +89,9 @@ class FileBrowser extends Component {
     */
     componentDidUpdate() {
       if (this.list) {
-        this.list.recomputeGridSize()
+        this.list.recomputeGridSize();
       }
-      if (window.innerWidth < 1240) {
-        this.refs.windowScroller.updatePosition()
-      }
+
       let element = document.getElementsByClassName('FileBrowser__input')[0];
       if (this.state.search === '' && element.value !== '') {
         element.value = '';
@@ -332,20 +324,19 @@ class FileBrowser extends Component {
   _getRowHeight(index, keys, files, totalSize = 50) {
     let file = keys[index];
     const reference = files[file] && files[file].edge && files[file].edge.node.key || file;
-    const isExpanded = reference && this.state.childrenState[reference] && this.state.childrenState[reference].isExpanded || false
+    const isExpanded = reference && this.state.childrenState[reference] && this.state.childrenState[reference].isExpanded || false;
     const addFolderSize = this.state.childrenState[reference] && this.state.childrenState[reference].isAddingFolder ? 50 : 0;
-    let newTotalSize = totalSize
+    let newTotalSize = totalSize;
     if (isExpanded && files[file].children) {
-      let childKeys = Object.keys(files[file].children)
+      let childKeys = Object.keys(files[file].children);
       childKeys.forEach((child, index) => {
-        newTotalSize += this._getRowHeight(index, childKeys, files[file].children, totalSize)
-      })
+        newTotalSize += this._getRowHeight(index, childKeys, files[file].children, totalSize);
+      });
     }
     return newTotalSize + addFolderSize;
   }
 
   render() {
-    console.log('render file browser')
     const files = this.state.files,
           { mutationData } = this.state,
           { isOver } = this.props;
@@ -387,79 +378,6 @@ class FileBrowser extends Component {
       'FileBroser__sort--asc': this.state.sort === 'modified' && !this.state.reverse,
       'FileBroser__sort--desc': this.state.sort === 'modified' && this.state.reverse,
       });
-   const rowRenderer = ({
-      index, // Index of row
-      key, // Unique key within array of rendered rows
-      style, // Style object to be applied to row (to position it);
-      parent,
-    }) => {
-      let file = childrenKeys[index];
-      const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
-      const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
-      this.list = parent;
-
-      console.log('CellMeasurer')
-      return (
-        <CellMeasurer
-          key={key}
-          cache={this.cache}
-          parent={parent}
-          columnIndex={0}
-          rowIndex={index}
-        >
-          {
-            isDir ?
-              <Folder
-                index={index}
-                style={style}
-                ref={file}
-                filename={file}
-                key={files[file].edge.node.key}
-                multiSelect={this.state.multiSelect}
-                mutationData={mutationData}
-                data={files[file]}
-                mutations={this.state.mutations}
-                setState={this._setState}
-                rowStyle={{}}
-                sort={this.state.sort}
-                reverse={this.state.reverse}
-                childrenState={this.state.childrenState}
-                listRef={parent}
-                updateChildState={this._updateChildState}>
-              </Folder>
-            :
-            isFile ?
-            <File
-              style={style}
-              ref={file}
-              filename={file}
-              key={files[file].edge.node.key}
-              multiSelect={this.state.multiSelect}
-              mutationData={mutationData}
-              data={files[file]}
-              childrenState={this.state.childrenState}
-              mutations={this.state.mutations}
-              expanded
-              isOverChildFile={this.state.isOverChildFile}
-              updateParentDropZone={this._updateDropZone}
-              updateChildState={this._updateChildState}>
-
-            </File>
-            : (children[file]) ?
-            <div
-              style={style}
-              key={file + index}
-            />
-          :
-            <div
-              key={file + index}
-              style={style}
-            >
-              Loading
-            </div>
-          }
-      </CellMeasurer>);
-    };
 
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
@@ -528,7 +446,7 @@ class FileBrowser extends Component {
                     const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
 
                       if (isDir) {
-                        return(<Folder
+                        return (<Folder
                           ref={file}
                           filename={file}
                           key={files[file].edge.node.key}
@@ -542,9 +460,8 @@ class FileBrowser extends Component {
                           reverse={this.state.reverse}
                           childrenState={this.state.childrenState}
                           updateChildState={this._updateChildState}>
-                        </Folder>)
+                        </Folder>);
                       } else if (isFile) {
-
                         return (<File
                           ref={file}
                           filename={file}
@@ -560,7 +477,6 @@ class FileBrowser extends Component {
                           updateChildState={this._updateChildState}>
                         </File>);
                       } else if (children[file]) {
-
                         return (<div
                           style={style}
                           key={file + index}
@@ -574,35 +490,6 @@ class FileBrowser extends Component {
                       </div>);
                   })
                 }
-
-                { /* <WindowScroller
-                  ref="windowScroller"
-                >
-                  {({
-                    height,
-                    isScrolling,
-                    onChildScroll,
-                    scrollTop,
-                  }) => (
-                    <AutoSizer disableHeight>
-                    {({ width }) => (
-                      <List
-                        isScrolling={isScrolling}
-                        onScroll={onChildScroll}
-                        autoHeight
-                        height={height}
-                        scrollTop={scrollTop}
-                        width={width}
-                        rowCount={childrenKeys.length}
-                        rowHeight={({ index }) => this._getRowHeight(index, childrenKeys, this.state.files)}
-                        rowRenderer={(rowRenderer)}
-                        deferredMeasurementCache={this.cache}
-                        overscanRowCount={20}
-                      />
-                    )}
-                  </AutoSizer>
-                  )}
-                </WindowScroller> */}
                 { (childrenKeys.length === 0) &&
                   <div className="FileBrowser__empty">
                     {

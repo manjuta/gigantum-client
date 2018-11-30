@@ -166,7 +166,6 @@ export default function MoveLabbookFileMutation(
               );
 
               const node = store.get(edge.node.id);
-              console.log(node)
               node.setValue(edge.node.id, 'id');
               node.setValue(edge.node.isDir, 'isDir');
               node.setValue(edge.node.key, 'key');

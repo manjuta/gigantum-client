@@ -118,7 +118,6 @@ function dragCollect(connect, monitor) {
 
 const uploadDirContent = (dndItem, props, mutationData) => {
   let path;
-  console.log(props)
   dndItem.dirContent.then((fileList) => {
       if (fileList.length) {
         let key = props.data ? props.data.edge.node.key : props.fileKey ? props.fileKey : '';
@@ -142,7 +141,6 @@ const uploadDirContent = (dndItem, props, mutationData) => {
 
 const targetSource = {
   canDrop(props, monitor) {
-     console.log(monitor, monitor.isOver({ shallow: true }))
      return monitor.isOver({ shallow: true });
   },
   drop(props, monitor, component) {
@@ -267,13 +265,11 @@ function targetCollect(connect, monitor) {
   let isOverCurrent = monitor.isOver({ shallow: true });
   let isOver = monitor.isOver({});
   let canDrop = monitor.canDrop();
-  console.log(monitor, isOverCurrent, monitor.internalMonitor.isOverTarget(currentTargetId), monitor.internalMonitor.isOverTarget(currentTargetId, { shallow: true }), canDrop)
   let currentTarget = monitor.internalMonitor.registry.dropTargets.get(currentTargetId);
 
   let newLastTarget;
 
   let targetIds = monitor.internalMonitor.getTargetIds();
-  // console.log(monitor, currentTarget)
   let targets = targetIds.map(id => monitor.internalMonitor.registry.dropTargets.get(id));
   if (targets.length > 0) {
     let lastTarget = targets[targets.length - 1];
@@ -303,9 +299,7 @@ function targetCollect(connect, monitor) {
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;
   }
-  // console.log(isOverCurrent, isOver)
 
-  // isOver = isOverCurrent
   return {
     connectDropTarget: connect.dropTarget(),
 		canDrop,

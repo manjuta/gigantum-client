@@ -182,8 +182,6 @@ class File extends Component {
   }
 
   render() {
-
-    console.log('file render')
     const { node } = this.props.data.edge;
     const { index } = this.props.data;
     const fileName = this.props.filename;

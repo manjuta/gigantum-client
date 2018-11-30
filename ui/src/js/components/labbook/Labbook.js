@@ -454,7 +454,6 @@ const LabbookFragmentContainer = createFragmentContainer(
 );
 
 const backend = (manager) => {
-  console.log(manager);
   const backend = HTML5Backend(manager),
     orgTopDropCapture = backend.handleTopDropCapture;
 

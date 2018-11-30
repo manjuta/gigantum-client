@@ -132,36 +132,32 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData, dropZoneProp
 
         newKey += file.name;
 
-        // const fileReader = new FileReader();
-          let deleteId = dropZoneProps.childrenState ? dropZoneProps.childrenState[file.name] : null;
-          if (deleteId === null && dropZoneProps.files) {
-            dropZoneProps.files.edges.forEach((edge) => {
-              if (edge.node.key === file.name) {
-                deleteId = edge.node.id;
-              }
-            });
-          }
-        // fileReader.onloadend = function (evt) {
-          const filepath = newKey;
-          console.log(deleteId);
-          const data = {
-            file,
-            filepath,
-            accessToken: localStorage.getItem('access_token'),
-            transactionId,
-            ...mutationData,
-            username: mutationData.owner,
-            connectionKey: mutationData.connection,
-            favoriteConnectionKey: mutationData.favoriteConnection,
-            deleteId,
-          };
+        let deleteId = dropZoneProps.childrenState ? dropZoneProps.childrenState[file.name] : null;
+        if (deleteId === null && dropZoneProps.files) {
+          dropZoneProps.files.edges.forEach((edge) => {
+            if (edge.node.key === file.name) {
+              deleteId = edge.node.id;
+            }
+          });
+        }
 
-          ChunkUploader.chunkFile(data, (data) => {
+        const filepath = newKey;
+        const data = {
+          file,
+          filepath,
+          accessToken: localStorage.getItem('access_token'),
+          transactionId,
+          ...mutationData,
+          username: mutationData.owner,
+          connectionKey: mutationData.connection,
+          favoriteConnectionKey: mutationData.favoriteConnection,
+          deleteId,
+        };
 
-          }, 0);
-        // };
+        ChunkUploader.chunkFile(data, (data) => {
 
-       // fileReader.readAsArrayBuffer(file);
+        }, 0);
+
       } else {
         // WARNING_MESSAGE
       }
