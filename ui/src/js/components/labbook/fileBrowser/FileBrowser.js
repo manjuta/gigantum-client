@@ -33,6 +33,7 @@ class FileBrowser extends Component {
         count: 0,
         files: {},
         aboveSize: window.innerWidth > 1240,
+        popupVisible: false,
       };
 
       this._deleteSelectedFiles = this._deleteSelectedFiles.bind(this);
@@ -159,6 +160,14 @@ class FileBrowser extends Component {
     };
   }
   /**
+  *  @param {boolean} popupVisible
+  *  triggers favoirte unfavorite mutation
+  *  @return {}
+  */
+  _togglePopup(popupVisible) {
+    this.setState({ popupVisible });
+  }
+  /**
   *  @param {}
   *  loops through selcted files and deletes them
   *  @return {}
@@ -190,6 +199,7 @@ class FileBrowser extends Component {
       let hasDir = dirList.some(dir => ((key.indexOf(dir) > -1) && (dir !== key)));
       return !hasDir;
     });
+    self._togglePopup(false);
     self._deleteMutation(filteredPaths, edges);
   }
 
@@ -362,7 +372,12 @@ class FileBrowser extends Component {
       'FileBrowser__header--date': true,
       'FileBroser__sort--asc': this.state.sort === 'modified' && !this.state.reverse,
       'FileBroser__sort--desc': this.state.sort === 'modified' && this.state.reverse,
-      });
+    }),
+    popupCSS = classNames({
+      FileBrowser__popup: true,
+      hidden: !this.state.popupVisible,
+      ToolTip__message: true,
+    });
 
    return (
        this.props.connectDropTarget(<div className={fileBrowserCSS}>
@@ -374,7 +389,21 @@ class FileBrowser extends Component {
                       onClick={() => { this._selectFiles(); }} />
                     <button
                       className={deleteButtonCSS}
-                      onClick={() => { this._deleteSelectedFiles(); }} />
+                      onClick={() => { this._togglePopup(true); }} />
+
+                    <div className={popupCSS}>
+                      <div className="ToolTip__pointer"></div>
+                      <p>Are you sure?</p>
+                      <div className="flex justify--space-around">
+                        <button
+                          className="File__btn--round File__btn--cancel"
+                          onClick={(evt) => { this._togglePopup(false); }} />
+                        <button
+                          className="File__btn--round File__btn--add"
+                          onClick={() => { this._deleteSelectedFiles(); }}
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div className="FileBrowser__search flex-1">
                     <input
