@@ -32,13 +32,13 @@ const mutation = graphql`
 
 function sharedUpdater(store, parentId, connectionKey, node, tempId) {
   const labbookProxy = store.get(parentId);
-
+  console.log(labbookProxy)
   if (labbookProxy) {
     const conn = RelayRuntime.ConnectionHandler.getConnection(
       labbookProxy,
       connectionKey,
     );
-
+    console.log(conn)
     if (conn) {
       if (tempId) {
         RelayRuntime.ConnectionHandler.deleteNode(
@@ -115,6 +115,7 @@ export default function AddFavoriteMutation(
 
       updater: (store, response) => {
         if (response.addFavorite && response.addFavorite.newFavoriteEdge) {
+          console.log(response, favoriteKey)
           const node = store.get(response.addFavorite.newFavoriteEdge.node.id);
           node.setValue(response.addFavorite.newFavoriteEdge.node.id, 'id');
           node.setValue(false, 'isDir');

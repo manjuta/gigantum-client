@@ -154,6 +154,7 @@ export default function MoveLabbookFileMutation(
         // });
       },
       updater: (store, response) => {
+        console.log(removeIds)
         sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
         sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
         if (response && response.moveLabbookFile && response.moveLabbookFile.updatedEdges && response.moveLabbookFile.updatedEdges.edges) {

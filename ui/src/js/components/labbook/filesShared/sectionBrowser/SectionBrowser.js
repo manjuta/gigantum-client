@@ -92,7 +92,7 @@ export default class SectionBrowser extends Component {
           files={files}
           parentId={this.props.sectionId}
           connection={`${capitalSection}Browser_allFiles`}
-          favoriteConnection={`${capitalSection}_favorites`}
+          favoriteConnection={`${capitalSection}Favorites_favorites`}
           favorites={this.props.favorites}
           isLocked={this.props.isLocked}
           {...this.props}
@@ -102,4 +102,3 @@ export default class SectionBrowser extends Component {
     return (<div>No Files Found</div>);
   }
 }
-

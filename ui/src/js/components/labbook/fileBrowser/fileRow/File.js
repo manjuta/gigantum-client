@@ -22,7 +22,7 @@ class File extends Component {
           isDragging: props.isDragging,
           isSelected: (props.isSelected || this.props.childrenState[this.props.data.edge.node.key].isSelected) || false,
           stateSwitch: false,
-          newFileName: '',
+          newFileName: props.filename,
           renameEditMode: false,
           hover: false,
       };
@@ -113,6 +113,7 @@ class File extends Component {
   *  sets dragging state
   */
   _updateFileName(evt) {
+    console.log(evt.target.value)
     this.setState({
       newFileName: evt.target.value,
     });
@@ -133,7 +134,7 @@ class File extends Component {
   */
   _clearState() {
     this.setState({
-      newFileName: '',
+      newFileName: this.props.filename,
       renameEditMode: false,
     });
 
@@ -153,10 +154,11 @@ class File extends Component {
     let folderKeyArray = fileKeyArray;
 
     let folderKey = folderKeyArray.join('/');
-
+    console.log(this.props)
     const data = {
       newKey: `${folderKey}/${this.state.newFileName}`,
       edge: this.props.data.edge,
+      removeIds: [this.props.data.edge.node.id],
     };
 
     this.props.mutations.moveLabbookFile(data, (response) => {
@@ -247,10 +249,10 @@ class File extends Component {
                   <div className="File__container">
                     <input
                       ref={(input) => { this.reanmeInput = input; }}
-                      placeholder="Rename File"
+                      value={this.state.newFileName}
                       type="text"
                       className="File__input"
-                      onKeyUp={(evt) => { this._updateFileName(evt); }}
+                      onChange={(evt) => { this._updateFileName(evt); }}
                     />
                   </div>
                   <div className="flex justify-space-around">

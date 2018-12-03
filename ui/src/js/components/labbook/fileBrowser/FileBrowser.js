@@ -40,7 +40,6 @@ class FileBrowser extends Component {
       this._updateChildState = this._updateChildState.bind(this);
       this._checkChildState = this._checkChildState.bind(this);
       this._updateDropZone = this._updateDropZone.bind(this);
-      this._getRowHeight = this._getRowHeight.bind(this);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -307,8 +306,8 @@ class FileBrowser extends Component {
       }
       return 0;
     });
-  return array;
-}
+    return array;
+  }
   /**
   *  @param {String} Type
   *  handles state changes for type
@@ -320,20 +319,6 @@ class FileBrowser extends Component {
     } else {
       this.setState({ sort: type, reverse: false });
     }
-  }
-  _getRowHeight(index, keys, files, totalSize = 50) {
-    let file = keys[index];
-    const reference = files[file] && files[file].edge && files[file].edge.node.key || file;
-    const isExpanded = reference && this.state.childrenState[reference] && this.state.childrenState[reference].isExpanded || false;
-    const addFolderSize = this.state.childrenState[reference] && this.state.childrenState[reference].isAddingFolder ? 50 : 0;
-    let newTotalSize = totalSize;
-    if (isExpanded && files[file].children) {
-      let childKeys = Object.keys(files[file].children);
-      childKeys.forEach((child, index) => {
-        newTotalSize += this._getRowHeight(index, childKeys, files[file].children, totalSize);
-      });
-    }
-    return newTotalSize + addFolderSize;
   }
 
   render() {

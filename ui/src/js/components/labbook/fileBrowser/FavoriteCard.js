@@ -200,7 +200,7 @@ class FavoriteCard extends Component {
   render() {
     const fileDirectories = this.props.favorite.key.split('/');
     const filename = fileDirectories[fileDirectories.length - 1];
-    const path = this.props.favorite.key.replace(filename, '');
+    const path = `${this.props.section}/${this.props.favorite.key.replace(filename, '')}`;
 
     const {
 	    connectDragSource,
