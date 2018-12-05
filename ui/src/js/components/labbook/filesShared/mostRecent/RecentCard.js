@@ -56,7 +56,6 @@ export default class RecentCard extends Component {
         file.node.key,
         file.node.id,
         file,
-        this.props.favorites,
         (response, error) => {
           if (error) {
             console.error(error);

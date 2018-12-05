@@ -181,7 +181,6 @@ class FavoriteCard extends Component {
       node.key,
       node.id,
       node,
-      null,
       (response, error) => {
         if (error) {
           console.error(error);

@@ -135,10 +135,8 @@ class FileBrowserMutations {
     const {
         key,
         edge,
-        favorites,
       } = data,
       edgeId = edge.node.id;
-
    const {
         favoriteConnection,
         owner,
@@ -156,7 +154,6 @@ class FileBrowserMutations {
       key,
       edgeId,
       edge,
-      favorites,
       (response, error) => {
         if (error) {
           console.error(error);
@@ -189,6 +186,16 @@ class FileBrowserMutations {
         parentId,
         section,
       } = this.state;
+
+    edges.forEach((edge) => {
+      if (edge.node.isFavorite) {
+        let data = {
+          key: edge.node.key,
+          edge,
+        };
+        this.removeFavorite(data, () => {});
+      }
+    });
 
     DeleteLabbookFilesMutation(
       connection,
