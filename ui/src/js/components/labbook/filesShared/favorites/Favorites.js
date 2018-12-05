@@ -14,10 +14,9 @@ export default class Favorites extends Component {
     update component when props are reloaded
   */
   UNSAFE_componentWillReceiveProps(nextProps) {
-    // this._loadMore() //routes query only loads 2, call loadMore
     if (nextProps[this.props.section] && nextProps[this.props.section].favorites && nextProps[this.props.section].favorites.pageInfo.hasNextPage && nextProps[this.props.section].favorites.edges.length < 3) {
       this.props.relay.loadMore(
-        1, // Fetch the next 10 feed items
+        1, // Fetch the next 1 feed items
         (response, error) => {
           if (error) {
             console.error(error);

@@ -50,6 +50,12 @@ class File extends Component {
     };
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.state.renameEditMode) {
+           this.reanmeInput.focus();
+      }
+  }
+
   /**
   *  @param {boolean} isSelected - sets if file has been selected
   *  sets elements to be selected and parent
@@ -113,11 +119,16 @@ class File extends Component {
   *  sets dragging state
   */
   _updateFileName(evt) {
-    console.log(evt.target.value)
     this.setState({
       newFileName: evt.target.value,
     });
-
+  }
+  /**
+  *  @param {evt}
+  *  sets dragging state
+  *  @return {}
+  */
+  _submitRename(evt) {
     if (evt.key === 'Enter') {
       this._triggerMutation();
     }
@@ -137,10 +148,6 @@ class File extends Component {
       newFileName: this.props.filename,
       renameEditMode: false,
     });
-
-    if (this.renameInput) {
-      this.renameInput.value = '';
-    }
   }
 
   /**
@@ -152,18 +159,21 @@ class File extends Component {
     let fileKeyArray = this.props.data.edge.node.key.split('/');
     fileKeyArray.pop();
     let folderKeyArray = fileKeyArray;
-
     let folderKey = folderKeyArray.join('/');
-    console.log(this.props)
-    const data = {
-      newKey: `${folderKey}/${this.state.newFileName}`,
-      edge: this.props.data.edge,
-      removeIds: [this.props.data.edge.node.id],
-    };
+    let newKey = (folderKey.length > 0) ? `${folderKey}/${this.state.newFileName}` : this.state.newFileName;
+    if (this.props.data.edge.node.key !== newKey) {
+      const data = {
+        newKey: `${folderKey}/${this.state.newFileName}`,
+        edge: this.props.data.edge,
+        removeIds: [this.props.data.edge.node.id],
+      };
 
-    this.props.mutations.moveLabbookFile(data, (response) => {
-       this._clearState();
-    });
+      this.props.mutations.moveLabbookFile(data, (response) => {
+         this._clearState();
+      });
+    } else {
+      this._clearState();
+    }
   }
 
   /**
@@ -253,6 +263,7 @@ class File extends Component {
                       type="text"
                       className="File__input"
                       onChange={(evt) => { this._updateFileName(evt); }}
+                      onKeyDown={(evt) => { this._submitRename(evt); }}
                     />
                   </div>
                   <div className="flex justify-space-around">

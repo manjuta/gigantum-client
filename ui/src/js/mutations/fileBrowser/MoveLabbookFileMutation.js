@@ -154,19 +154,20 @@ export default function MoveLabbookFileMutation(
         // });
       },
       updater: (store, response) => {
-        console.log(removeIds)
         sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
         sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
         if (response && response.moveLabbookFile && response.moveLabbookFile.updatedEdges && response.moveLabbookFile.updatedEdges.edges) {
           response.moveLabbookFile.updatedEdges.edges.forEach((edge) => {
             const labbookProxy = store.get(labbookId);
-            if (labbookProxy) {
+
+            if (labbookProxy && (edge.node !== null)) {
               const conn = RelayRuntime.ConnectionHandler.getConnection(
                 labbookProxy,
                 connectionKey,
               );
 
-              const node = store.get(edge.node.id);
+              const node = store.get(edge.node.id) ? store.get(edge.node.id) : store.create(edge.node.id, 'LabbookFile');
+
               node.setValue(edge.node.id, 'id');
               node.setValue(edge.node.isDir, 'isDir');
               node.setValue(edge.node.key, 'key');

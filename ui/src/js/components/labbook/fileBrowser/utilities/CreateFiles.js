@@ -27,24 +27,10 @@ import store from 'JS/redux/store';
 *  creates a file using AddLabbookFileMutation by passing a blob
 *  @return {}
 */
-const createFiles = (files, prefix, mutationData, dropZoneProps) => {
+const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) => {
   // if (!this.state.uploading) {
     if (mutationData.section === 'code') {
-      const fileSizeData = checkFileSize(files);
-
-      if (fileSizeData.fileSizePrompt.length === 0) {
-        startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);
-      } else {
-        // this.setState({
-        //   uploadData: {
-        //     files,
-        //     prefix,
-        //     fileSizeData,
-        //   },
-        // });
-
-        promptUserToAcceptUpload();
-      }
+      startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);
     } else {
       const fileSizeData = checkFileSize(files, true);
       startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);

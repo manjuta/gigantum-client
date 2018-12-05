@@ -6,6 +6,53 @@ import FileBrowserMutations from './FileBrowserMutations';
 import CreateFiles from './../utilities/CreateFiles';
 // store
 import store from 'JS/redux/store';
+// config
+import config from 'JS/config';
+
+
+/**
+* @param {array} files
+*
+* @return {number} totalFiles
+*/
+const checkFileSize = (files, prompt) => {
+  const tenMB = 10 * 1000 * 1000;
+  const oneHundredMB = 100 * 1000 * 1000;
+  const eighteenHundredMB = oneHundredMB * 18;
+  const fileSizePrompt = [];
+  const fileSizeNotAllowed = [];
+
+  function filesRecursionCount(file) {
+    if (Array.isArray(file)) {
+      file.forEach((nestedFile) => {
+        filesRecursionCount(nestedFile);
+      });
+    } else if (file.file && Array.isArray(file.file) && (file.file.length > 0)) {
+      file.file.forEach((nestedFile) => {
+        filesRecursionCount(nestedFile);
+      });
+    } else {
+      const extension = file.name ? file.name.replace(/.*\./, '') : file.entry.fullPath.replace(/.*\./, '');
+
+      if ((config.fileBrowser.excludedFiles.indexOf(extension) < 0) && ((file.entry && file.entry.isFile) || (typeof file.type === 'string'))) {
+        if (prompt) {
+          if (file.size > oneHundredMB) {
+            fileSizeNotAllowed.push(file);
+          }
+
+          if ((file.size > tenMB) && (file.size < oneHundredMB)) {
+            fileSizePrompt.push(file);
+          }
+        } else if (file.size > eighteenHundredMB) {
+          fileSizeNotAllowed.push(file);
+        }
+      }
+    }
+  }
+  filesRecursionCount(files);
+
+  return { fileSizeNotAllowed, fileSizePrompt };
+};
 
 const dragSource = {
 
@@ -116,14 +163,14 @@ function dragCollect(connect, monitor) {
   };
 }
 
-const uploadDirContent = (dndItem, props, mutationData) => {
+const uploadDirContent = (dndItem, props, mutationData, fileSizeData) => {
   let path;
   dndItem.dirContent.then((fileList) => {
       if (fileList.length) {
         let key = props.data ? props.data.edge.node.key : props.fileKey ? props.fileKey : '';
         path = key === '' ? '' : key.substr(0, key.lastIndexOf('/') || key.length);
 
-        CreateFiles.createFiles(fileList.flat(), `${path}/`, mutationData, props);
+        CreateFiles.createFiles(fileList.flat(), `${path}/`, mutationData, props, fileSizeData);
       } else if (dndItem.files && dndItem.files.length) {
            // handle dragged files
            let key = props.newKey || props.fileKey;
@@ -131,7 +178,7 @@ const uploadDirContent = (dndItem, props, mutationData) => {
            let item = monitor.getItem();
 
            if (item && item.files && props.browserProps.createFiles) {
-             CreateFiles.createFiles(item.files, `${path}/`, mutationData, props);
+             CreateFiles.createFiles(item.files, `${path}/`, mutationData, props, fileSizeData);
            }
            newPath = null;
            fileKey = null;
@@ -145,6 +192,7 @@ const targetSource = {
   },
   drop(props, monitor, component) {
     const dndItem = monitor.getItem();
+    const prompt = (props.section === 'code') || (props.mutationData.section === 'code');
 
     let newPath,
         fileKey,
@@ -160,7 +208,12 @@ const targetSource = {
               newPath = newKey + fileName;
               fileKey = props.fileKey;
           } else {
-              uploadDirContent(dndItem, props, props.mutationData);
+            let fileSizeData = checkFileSize(dndItem.files, prompt);
+            if (fileSizeData.fileSizePrompt.length === 0) {
+               uploadDirContent(dndItem, props, props.mutationData, fileSizeData);
+            } else {
+               props.codeDirUpload(dndItem, props, props.mutationData, uploadDirContent, fileSizeData);
+            }
           }
       } else {
           const {
@@ -182,10 +235,17 @@ const targetSource = {
           // uploads to root directory
           let item = monitor.getItem();
           if (item.files) {
-            if (dndItem.dirContent) {
-               uploadDirContent(dndItem, props, mutationData);
+            let fileSizeData = checkFileSize(item.files, prompt);
+            if (fileSizeData.fileSizePrompt.length === 0) {
+              if (dndItem.dirContent) {
+                 uploadDirContent(dndItem, props, mutationData, fileSizeData);
+              } else {
+                 CreateFiles.createFiles(item.files, '', component.state.mutationData, props, fileSizeData);
+              }
+            } else if (dndItem.dirContent) {
+                component._codeDirUpload(dndItem, props, mutationData, uploadDirContent, fileSizeData);
             } else {
-              CreateFiles.createFiles(item.files, '', component.state.mutationData, props);
+                component._codeFileUpload(item.files, props, component.state.mutationData, CreateFiles.createFiles, fileSizeData);
             }
           } else {
             const dropResult = monitor.getDropResult();

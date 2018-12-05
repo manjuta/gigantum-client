@@ -560,7 +560,8 @@ class Folder extends Component {
                                       parentIsDragged={this.state.isDragging || this.props.parentIsDragged}
                                       childrenState={this.props.childrenState}
                                       listRef={this.props.listRef}
-                                      updateChildState={this.props.updateChildState}>
+                                      updateChildState={this.props.updateChildState}
+                                      codeDirUpload={this.props.codeDirUpload}>
                                   </FolderDND>
                               );
                           } else if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
