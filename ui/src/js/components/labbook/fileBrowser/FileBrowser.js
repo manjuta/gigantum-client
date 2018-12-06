@@ -480,8 +480,10 @@ class FileBrowser extends Component {
           { isOver } = this.props;
     let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
     folderKeys = this._childSort(folderKeys, this.state.sort, this.state.reverse, files, 'folder');
+
     let fileKeys = files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir) || [];
     fileKeys = this._childSort(fileKeys, this.state.sort, this.state.reverse, files, 'files');
+
     let childrenKeys = folderKeys.concat(fileKeys);
 
     const { isSelected } = this._checkChildState();
@@ -678,9 +680,6 @@ class FileBrowser extends Component {
                {
                 this.state.search !== '' ?
                   <h5>No files match your search.</h5>
-                  :
-                  this.props.files.edges.length ?
-                  <h5>Loading Files...</h5>
                   :
                   <h5>Upload Files by Dragging & Dropping Here</h5>
                }

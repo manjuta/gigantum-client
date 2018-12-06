@@ -4,6 +4,10 @@ import uuidv4 from 'uuid/v4';
 import ChunkUploader from 'JS/utils/ChunkUploader';
 import config from 'JS/config';
 import FolderUpload from './FolderUpload';
+import ignore from 'ignore'
+import gitIgnoreJson from 'JS/data/gitignore.json'
+console.log(gitIgnoreJson)
+const ig = ignore().add(gitIgnoreJson.gitIgnore)
 
 // store
 import {
@@ -28,12 +32,27 @@ import store from 'JS/redux/store';
 *  @return {}
 */
 const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) => {
+    let filenames = files.map((file) => {
+      let filename = file.entry ? `D:/${file.entry.fullPath}` : file.name;
+      return filename;
+    });
+    let filteredFileNames = ig.filter(filenames);
+    let filteredFiles = files.filter((file) => {
+      let filename = file.entry ? `D:/${file.entry.fullPath}` : file.name;
+      return (filteredFileNames.indexOf(filename) > -1);
+    });
   // if (!this.state.uploading) {
     if (mutationData.section === 'code') {
-      startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);
+      startFileUpload(filteredFiles, prefix, fileSizeData, mutationData, dropZoneProps);
     } else {
       const fileSizeData = checkFileSize(files, true);
-      startFileUpload(files, prefix, fileSizeData, mutationData, dropZoneProps);
+      startFileUpload(filteredFiles, prefix, fileSizeData, mutationData, dropZoneProps);
+    }
+
+    if (filenames.length !== filteredFiles.length) {
+      let ignoredFiles = filenames.filter(filename => filteredFileNames.indexOf(filename) < 0);
+      let ignoredFilesString = ignoredFiles.join(', ').replace(/D:\//g, '');
+      setWarningMessage(`The following files have been ignored: ${ignoredFilesString}`);
     }
   // }
 };

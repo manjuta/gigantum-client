@@ -111,7 +111,7 @@ function build(previousFileSizes) {
         );
         return reject(new Error(messages.warnings.join('\n\n')));
       }
-      
+
       return resolve({
         stats,
         previousFileSizes,

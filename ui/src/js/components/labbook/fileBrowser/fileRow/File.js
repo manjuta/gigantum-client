@@ -261,6 +261,8 @@ class File extends Component {
                       value={this.state.newFileName}
                       type="text"
                       className="File__input"
+                      onClick={(evt) => { evt.stopPropagation(); }}
+                      onDrag={(evt) => { evt.stopPropagation(); }}
                       onChange={(evt) => { this._updateFileName(evt); }}
                       onKeyDown={(evt) => { this._submitRename(evt); }}
                     />
