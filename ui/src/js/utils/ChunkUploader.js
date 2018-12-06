@@ -109,7 +109,6 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
       data.transactionId,
       data.deleteId,
       (result, error) => {
-        setFinishedUploading();
 
         if (result && (error === undefined)) {
           getChunkCallback(file, result);

@@ -45,7 +45,7 @@ function sharedDeleteUpdater(store, labbookID, removeIds, connectionKey) {
         );
         store.delete(deletedID);
       }
-    })
+    });
   }
 }
 
@@ -94,7 +94,7 @@ export default function MoveLabbookFileMutation(
     edgeName: 'newLabbookFileEdge',
   }];
 
-  if (removeIds.length) {
+  if (removeIds && removeIds.length) {
     removeIds.forEach((id) => {
       configs.unshift({
         type: 'NODE_DELETE',
@@ -119,13 +119,42 @@ export default function MoveLabbookFileMutation(
       },
       onError: err => console.error(err),
       optimisticUpdater: (store) => {
+        console.log(store)
+        // sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
+        // sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
+
+        const labbookProxy = store.get(labbookId);
+
+        if (labbookProxy && (edge.node !== null)) {
+          const conn = RelayRuntime.ConnectionHandler.getConnection(
+            labbookProxy,
+            connectionKey,
+          );
+
+          const node = store.get(edge.node.id);
+          console.log(srcPath)
+          node.setValue(edge.node.id, 'id');
+          node.setValue(edge.node.isDir, 'isDir');
+          node.setValue(srcPath, 'key');
+          node.setValue(edge.node.modifiedAt, 'modifiedAt');
+          node.setValue(edge.node.size, 'size');
+          const newEdge = RelayRuntime.ConnectionHandler.createEdge(
+            store,
+            conn,
+            node,
+            'newLabbookFileEdge',
+          );
+          RelayRuntime.ConnectionHandler.insertEdgeAfter(
+            conn,
+            newEdge,
+            edge.cursor,
+          );
+        }
         // sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
         // sharedDeleteUpdater(store, labbookId, removeIds, recentConnectionKey);
         // removeIds.forEach((id) => {
         //   store.delete(id)
         // })
-
-        //
         //   const labbookProxy = store.get(labbookId);
         //   if (labbookProxy) {
         //     const conn = RelayRuntime.ConnectionHandler.getConnection(

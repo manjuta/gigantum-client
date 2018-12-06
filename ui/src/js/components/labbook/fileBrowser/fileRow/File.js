@@ -161,6 +161,8 @@ class File extends Component {
     let folderKeyArray = fileKeyArray;
     let folderKey = folderKeyArray.join('/');
     let newKey = (folderKey.length > 0) ? `${folderKey}/${this.state.newFileName}` : this.state.newFileName;
+
+    this._clearState();
     if (this.props.data.edge.node.key !== newKey) {
       const data = {
         newKey: `${folderKey}/${this.state.newFileName}`,
@@ -169,10 +171,7 @@ class File extends Component {
       };
 
       this.props.mutations.moveLabbookFile(data, (response) => {
-         this._clearState();
       });
-    } else {
-      this._clearState();
     }
   }
 

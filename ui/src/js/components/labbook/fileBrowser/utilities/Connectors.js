@@ -188,11 +188,12 @@ const uploadDirContent = (dndItem, props, mutationData, fileSizeData) => {
 
 const targetSource = {
   canDrop(props, monitor) {
-     return monitor.isOver({ shallow: true });
+     const { uploading } = store.getState().fileBrowser;
+     return monitor.isOver({ shallow: true }) && !uploading;
   },
   drop(props, monitor, component) {
     const dndItem = monitor.getItem();
-    const prompt = (props.section === 'code') || (props.mutationData.section === 'code');
+    const prompt = (props.section === 'code') || (props.mutationData && (props.mutationData.section === 'code'));
 
     let newPath,
         fileKey,
@@ -359,6 +360,8 @@ function targetCollect(connect, monitor) {
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;
   }
+  const { uploading } = store.getState().fileBrowser;
+  isOver = isOver && !uploading;
 
   return {
     connectDropTarget: connect.dropTarget(),

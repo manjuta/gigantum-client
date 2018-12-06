@@ -342,6 +342,7 @@ class Folder extends Component {
       const data = {
         newKey: folderKey === '' ? `${this.state.newFolderName}/` : `${folderKey}/${this.state.newFolderName}/`,
         edge: this.props.data.edge,
+        removeIds: [],
       };
 
       this.props.mutations.moveLabbookFile(data, (response) => {

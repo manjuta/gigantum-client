@@ -131,7 +131,6 @@ export default function MakeLabbookDirectoryMutation(
         const id = `client:newCodeFile:${tempID++}`;
         const node = store.create(id, 'CodeFile');
 
-        // deleteOptimisticEdge(store, labbookId, tempNodeId, connectionKey)
 
         if (response.makeLabbookDirectory && response.makeLabbookDirectory.newLabbookFileEdge) {
           node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.id, 'id');
@@ -140,7 +139,7 @@ export default function MakeLabbookDirectoryMutation(
           node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
           node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.size, 'size');
 
-          // sharedUpdater(store, labbookId, connectionKey, node)
+          sharedUpdater(store, labbookId, connectionKey, node)
         }
       },
     },
