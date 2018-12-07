@@ -240,7 +240,8 @@ class TestDispatcher(object):
 
         try:
             from gtmcore.container.utils import infer_docker_image_name
-            client.images.remove(infer_docker_image_name(labbook_name=lb.name, owner=lb.owner['username'],
+            owner = InventoryManager().query_labbook_owner(lb)
+            client.images.remove(infer_docker_image_name(labbook_name=lb.name, owner=owner,
                                                          username='unittester'))
         except:
             pass

@@ -35,7 +35,8 @@ class TestInventory(object):
                 l = inv_manager.create_labbook(ut_username, ow, lbname)
                 created_lbs.append(l)
 
-        condensed_lbs = [(ut_username, l.owner['username'], l.name) for l in created_lbs]
+        get_owner = lambda x: InventoryManager(mock_config_file[0]).query_labbook_owner(x)
+        condensed_lbs = [(ut_username, get_owner(l), l.name) for l in created_lbs]
         inv_manager = InventoryManager(mock_config_file[0])
         t0 = time.time()
         result_under_test = inv_manager.list_repository_ids(username=ut_username, repository_type="labbook")
@@ -219,6 +220,11 @@ class TestInventory(object):
         assert lb_loaded.name == lb.name
         assert lb_loaded.description == lb.description
         assert lb_loaded.key == 'test|test|labbook1'
+
+    def test_query_labbookowner(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
+        assert "test" == inv_manager.query_labbook_owner(lb)
 
 
 class TestCreateLabbooks(object):

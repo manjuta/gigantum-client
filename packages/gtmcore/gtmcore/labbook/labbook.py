@@ -135,13 +135,6 @@ class LabBook(Repository):
         self._save_gigantum_data()
 
     @property
-    def owner(self) -> Dict[str, str]:
-        if self._data:
-            return self._data["owner"]
-        else:
-            raise ValueError("No owner assigned to Lab Book.")
-
-    @property
     def cuda_version(self) -> Optional[str]:
         if self._data and self._data.get("cuda_version"):
             return self._data.get("cuda_version")

@@ -97,7 +97,8 @@ def sync_labbook(labbook_path: str, username: str, remote: str = "origin",
             wf = GitWorkflow(labbook)
             cnt = wf.sync(username=username, remote=remote, force=force,
                           feedback_callback=update_meta)
-            return cnt
+        logger.info(f"(Job {p} Completed sync_labbook with cnt={cnt}")
+        return cnt
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_labbook: {e}")
         raise

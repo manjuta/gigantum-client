@@ -23,6 +23,7 @@ import graphene
 from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.files import FileOperations
@@ -590,7 +591,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            d = mgr.repo_details(namespace=labbook.owner['username'], labbook_name=labbook.name)
+            owner = InventoryManager().query_labbook_owner(labbook)
+            d = mgr.repo_details(namespace=owner, labbook_name=labbook.name)
             return d.get('visibility')
         except ValueError:
             return "local"

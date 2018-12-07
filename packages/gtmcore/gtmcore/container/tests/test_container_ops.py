@@ -29,6 +29,7 @@ from gtmcore.configuration import get_docker_client
 
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
 
@@ -112,8 +113,10 @@ class TestContainerOps(object):
             ContainerOperations.build_image(labbook=my_lb, username="unittester")
 
         with pytest.raises(docker.errors.ImageNotFound):
-            get_docker_client().images.get(infer_docker_image_name(labbook_name=my_lb.name, owner=my_lb.owner['username'],
-                                                      username="unittester"))
+            owner = InventoryManager().query_labbook_owner(my_lb)
+            get_docker_client().images.get(infer_docker_image_name(labbook_name=my_lb.name,
+                                                                   owner=owner,
+                                                                   username="unittester"))
 
         with pytest.raises(requests.exceptions.HTTPError):
             # Image not found so container cannot be started

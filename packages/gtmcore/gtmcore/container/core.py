@@ -27,7 +27,6 @@ from typing import Callable, Optional
 
 from gtmcore.configuration import get_docker_client, Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerBuildException
@@ -151,8 +150,9 @@ def build_docker_image(root_dir: str, override_image_tag: Optional[str],
     lb = InventoryManager().load_labbook_from_directory(root_dir)
 
     # Build image
+    owner = InventoryManager().query_labbook_owner(lb)
     image_name = override_image_tag or infer_docker_image_name(labbook_name=lb.name,
-                                                               owner=lb.owner['username'],
+                                                               owner=owner,
                                                                username=username)
 
     reuse_image_id = _get_cached_image(env_dir, image_name)
@@ -215,7 +215,8 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     lb = InventoryManager(config_file=config_path).load_labbook_from_directory(labbook_root)
     if not override_image_id:
-        tag = infer_docker_image_name(lb.name, lb.owner['username'], username)
+        owner = InventoryManager().query_labbook_owner(lb)
+        tag = infer_docker_image_name(lb.name, owner, username)
     else:
         tag = override_image_id
 

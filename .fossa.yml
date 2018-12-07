@@ -6,21 +6,25 @@ cli:
   server: https://app.fossa.io
   fetcher: custom
   project: Gigantum Client
-
 analyze:
   modules:
-  - name: lab-manager-ui
+  - name: ui
     type: npm
-    path: ./ui/
-  - name: confhttpproxy
-    type: pip
-    path: ./packages/confhttpproxy/
-  - name: gtmapi
-    type: pip
-    path: ./packages/gtmapi/
-  - name: gtmcore
-    type: pip
-    path: ./packages/gtmcore/
+    target: ui
+    path: ui
   - name: gtm
     type: pip
-    path: ./gtm/
+    target: gtm
+    path: gtm
+  - name: confhttpproxy
+    type: pip
+    target: packages/confhttpproxy
+    path: packages/confhttpproxy
+  - name: gtmapi
+    type: pip
+    target: packages/gtmapi
+    path: packages/gtmapi
+  - name: gtmcore
+    type: pip
+    target: packages/gtmcore
+    path: packages/gtmcore

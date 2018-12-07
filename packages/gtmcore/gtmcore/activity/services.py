@@ -25,6 +25,7 @@ from docker.errors import NotFound
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import get_docker_client
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.environment import ComponentManager
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.activity.monitors import DevEnvMonitorManager
@@ -92,8 +93,9 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
 
     if dev_env_mgr.is_available(dev_tool):
         # Add record to redis for Dev Env Monitor
+        owner = InventoryManager().query_labbook_owner(labbook)
         dev_env_monitor_key = "dev_env_monitor:{}:{}:{}:{}".format(username,
-                                                                   labbook.owner['username'],
+                                                                   owner,
                                                                    labbook.name,
                                                                    dev_tool)
 
@@ -103,8 +105,9 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
                   'key': dev_env_monitor_key}
         job_key = d.schedule_task(run_dev_env_monitor, kwargs=kwargs, repeat=None, interval=3)
 
+        owner = InventoryManager().query_labbook_owner(labbook)
         redis_conn.hset(dev_env_monitor_key, "container_name", infer_docker_image_name(labbook.name,
-                                                                                       labbook.owner['username'],
+                                                                                       owner,
                                                                                        username))
         redis_conn.hset(dev_env_monitor_key, "process_id", job_key.key_str)
         redis_conn.hset(dev_env_monitor_key, "labbook_root", labbook.root_dir)
@@ -179,8 +182,9 @@ def stop_labbook_monitor(labbook: LabBook, username: str, database: int = 1) -> 
     base_data = cm.base_fields
 
     for dt in base_data['development_tools']:
+        owner = InventoryManager().query_labbook_owner(labbook)
         dev_env_monitor_key = "dev_env_monitor:{}:{}:{}:{}".format(username,
-                                                                   labbook.owner['username'],
+                                                                   owner,
                                                                    labbook.name,
                                                                    dt)
 

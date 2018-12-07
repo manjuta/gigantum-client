@@ -141,13 +141,14 @@ class TestContainerMutations(object):
 
         try:
             lb = build_image_for_jupyterlab[0]
+
             docker_client = build_image_for_jupyterlab[2]
             client = build_image_for_jupyterlab[4]
-
+            owner = build_image_for_jupyterlab[-1]
             q = f"""
             mutation x {{
                 startDevTool(input: {{
-                    owner: "{lb.owner['username']}",
+                    owner: "{owner}",
                     labbookName: "{lb.name}",
                     devTool: "jupyterlab"
                 }}) {{

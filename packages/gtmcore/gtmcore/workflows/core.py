@@ -24,6 +24,7 @@ from typing import Optional, Callable
 
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.exceptions import GigantumException
 
 from gtmcore.logging import LMLogger
@@ -116,7 +117,8 @@ def create_remote_gitlab_repo(labbook: LabBook, username: str, visibility: str,
         mgr = GitLabManager(default_remote, admin_service,
                             access_token=access_token or 'invalid')
         mgr.configure_git_credentials(default_remote, username)
-        mgr.create_labbook(namespace=labbook.owner['username'], labbook_name=labbook.name,
+        mgr.create_labbook(namespace=InventoryManager().query_labbook_owner(labbook),
+                           labbook_name=labbook.name,
                            visibility=visibility)
         labbook.add_remote("origin", f"https://{default_remote}/{username}/{labbook.name}.git")
     except Exception as e:
@@ -235,6 +237,7 @@ def sync_with_remote(labbook: LabBook, username: str, remote: str,
             raise GigantumException('Merge conflict pulling upstream changes')
 
         feedback_callback("Merging with upstream changes...")
+        labbook.sweep_uncommitted_changes()
         checkpoint2 = labbook.git.commit_hash
         # TODO - A lot of this can be removed
         call_subprocess(['git', 'checkout', 'gm.workspace'], cwd=labbook.root_dir)
