@@ -4,7 +4,7 @@
       import {mount} from 'enzyme'
       import VisibilityLookup from 'Components/dashboard/labbooks/localLabbooks/lookups/VisibilityLookup';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils';
 
       test('Test VisibilityLookup', () => {
 
