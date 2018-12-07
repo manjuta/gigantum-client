@@ -57,7 +57,7 @@ class FileBrowser extends Component {
         props.files.edges.forEach((edge) => {
           if (edge.node && edge.node.key) {
             let key = edge.node.key;
-            let splitKey = key.split('/');
+            let splitKey = key.split('/').filter(n => n);
             splitKey.forEach((key, index) => {
               if (index !== splitKey.length) {
                 const tempKey = `${splitKey.slice(0, index).join('/')}/`;
@@ -512,8 +512,10 @@ class FileBrowser extends Component {
           { isOver } = this.props;
     let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
     folderKeys = this._childSort(folderKeys, this.state.sort, this.state.reverse, files, 'folder');
+
     let fileKeys = files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir) || [];
     fileKeys = this._childSort(fileKeys, this.state.sort, this.state.reverse, files, 'files');
+
     let childrenKeys = folderKeys.concat(fileKeys);
     const { isSelected } = this._checkChildState();
 

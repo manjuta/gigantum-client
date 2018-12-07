@@ -57,11 +57,12 @@ export const fileHandler = () => {
                         },
                         edge: {
                           node: {
-                            key: `${key}/`,
+                            key: `${splitKey.slice(0, index + 1).join('/')}/`,
                             isDir: true,
                             modifiedAt: Math.floor(Date.now() / 1000),
                           },
                         },
+                        index,
                       };
                       currentObject = currentObject[key].children;
                   } else if (currentObject && currentObject[key] && !currentObject[key].children) {
