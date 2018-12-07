@@ -19,7 +19,6 @@ test('Test Dashboard datasets', () => {
         <Dashboard match={{ params: { id: 'datasets' } }} history={history}/>
       </Router>
     </Provider>,
-
   );
   let tree = dashboard.toJSON();
   expect(tree).toMatchSnapshot();
