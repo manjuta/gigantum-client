@@ -53,7 +53,15 @@ export const fileHandler = () => {
                       }
                   } else if (currentObject && !currentObject[key]) {
                       currentObject[key] = {
-                        children: {},
+                        children: {
+                        },
+                        edge: {
+                          node: {
+                            key: `${key}/`,
+                            isDir: true,
+                            modifiedAt: Math.floor(Date.now() / 1000),
+                          },
+                        },
                       };
                       currentObject = currentObject[key].children;
                   } else if (currentObject && currentObject[key] && !currentObject[key].children) {

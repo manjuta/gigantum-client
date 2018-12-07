@@ -18,7 +18,6 @@ import Connectors from './../utilities/Connectors';
 class Folder extends Component {
     constructor(props) {
         super(props);
-
         this.state = {
             isDragging: props.isDragging,
             expanded: this.props.childrenState[this.props.data.edge.node.key].isExpanded || false,
