@@ -13,6 +13,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -314,19 +315,22 @@ module.exports = {
   optimization: {
     minimize: true,
     minimizer: [
-      new UglifyJsPlugin({
-        sourceMap: false,
-        uglifyOptions: {
-          compress: {
-            unused: true,
-            dead_code: true,
-            warnings: true,
-          },
-          output: {
-            comments: false,
-          },
-        },
-      }),
+      new TerserPlugin({
+        extractComments: true
+      })
+      // new UglifyJsPlugin({
+      //   sourceMap: false,
+      //   uglifyOptions: {
+      //     compress: {
+      //       unused: true,
+      //       dead_code: true,
+      //       warnings: true,
+      //     },
+      //     output: {
+      //       comments: false,
+      //     },
+      //   },
+      // }),
     ],
   },
   plugins: [

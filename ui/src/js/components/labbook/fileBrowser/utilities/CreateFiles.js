@@ -6,9 +6,6 @@ import config from 'JS/config';
 import FolderUpload from './FolderUpload';
 import ignore from 'ignore'
 import gitIgnoreJson from 'JS/data/gitignore.json'
-console.log(gitIgnoreJson)
-const ig = ignore().add(gitIgnoreJson.gitIgnore)
-
 // store
 import {
   setErrorMessage,
@@ -26,6 +23,7 @@ import {
 import { setUpdateDetailView } from 'JS/redux/reducers/labbook/labbook';
 import store from 'JS/redux/store';
 
+const ig = ignore().add(gitIgnoreJson.gitIgnore)
 /**
 *  @param {string, string} key,prefix  file key, prefix is root folder -
 *  creates a file using AddLabbookFileMutation by passing a blob
