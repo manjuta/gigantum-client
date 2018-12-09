@@ -95,9 +95,11 @@
     height: 30px;
   }
   .Recent__path-section{
-    height: 30px;
     .Recent__path{
       margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
 

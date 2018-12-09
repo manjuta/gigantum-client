@@ -338,10 +338,27 @@ class Folder extends Component {
       fileKeyArray.pop();
       let folderKeyArray = fileKeyArray;
       let folderKey = folderKeyArray.join('/');
+
+      let removeIds = [this.props.data.edge.node.id];
+      let currentHead = this.props.data;
+
+      const searchChildren = (parent) => {
+        if (parent.children) {
+          Object.keys(parent.children).forEach((childKey) => {
+            if (parent.children[childKey].edge) {
+              removeIds.push(parent.children[childKey].edge.node.id);
+              searchChildren(parent.children[childKey]);
+            }
+          });
+        }
+      };
+
+      searchChildren(currentHead);
+
       const data = {
         newKey: folderKey === '' ? `${this.state.newFolderName}/` : `${folderKey}/${this.state.newFolderName}/`,
         edge: this.props.data.edge,
-        removeIds: [],
+        removeIds,
       };
 
       this.props.mutations.moveLabbookFile(data, (response) => {
