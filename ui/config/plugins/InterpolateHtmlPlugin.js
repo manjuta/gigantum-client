@@ -16,7 +16,6 @@ const escapeStringRegexp = require('escape-string-regexp');
 let tapped = 0;
 class InterpolateHtmlPlugin {
   constructor(replacements) {
-    console.log('asdsadasdasda');
     this.replacements = replacements;
   }
 

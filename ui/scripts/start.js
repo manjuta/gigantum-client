@@ -46,7 +46,6 @@ var gitIgnorePromise = new Promise(function(resolve, reject){
 })
 
 gitIgnorePromise.then(function(resolved){
-  console.log(resolved)
   if(resolved){
     start();
   } else{
