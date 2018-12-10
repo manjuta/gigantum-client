@@ -95,7 +95,6 @@ class CollaboratorButton extends Component {
   }
 
   render() {
-    // console.log('here in render')
     const self = this;
     const { labbookName, owner } = this.props;
     let { collaborators, canManageCollaborators } = store.getState().collaborators;

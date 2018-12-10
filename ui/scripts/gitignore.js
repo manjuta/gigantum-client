@@ -1,24 +1,34 @@
 const parse = require('parse-gitignore');
 const fs = require('fs');
 
-const updateGitIgnore = function() {
+const updateGitIgnore = function(resolve, reject) {
   let ignoreFiles = parse(fs.readFileSync('./../packages/gtmcore/gtmcore/labbook/gitignore.default'));
   let filePath = './src/js/data/gitignore.json'
   let fileContent = JSON.stringify({ gitIgnore: ignoreFiles });
 
   fs.exists(filePath, function(exists) {
-    console.log(exists)
+    console.log('updating src/js/data/gitignore.json ...')
     if (exists) {
       //open existing file
       fs.open(filePath, 'w', (err, fd) => {
 
-        if (err) throw err;
+        if(err){
+          console.log(err)
+          reject(false);
+          console.log('failed to open file', err)
+          throw err;
+        }
         // write to the file
         fs.write(fd, fileContent, 0, fileContent.length, function(err) {
-            if (err) throw 'error writing file: ' + err;
+            if(err){
+              reject(false);
+              console.log('failed to write file', err)
+              throw 'error writing file: ' + err;
+            }
             // close file
             fs.close(fd, function() {
                 console.log(`${fd} updated`);
+                resolve(true)
             })
         });
       });
@@ -26,7 +36,13 @@ const updateGitIgnore = function() {
 
       // create new files
       fs.writeFile(filePath, fileContent, { flag: 'wx' }, (err) => {
-        console.log(err)
+        if(err){
+          reject(false);
+          console.log('failed to create and write file', err)
+          if (err) throw err;
+        }else{
+          resolve(true)
+        }
       })
     }
   });
