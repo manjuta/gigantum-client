@@ -66,7 +66,6 @@ export default function DeleteLabbookFilesMutation(
       variables,
       configs: [{
         type: 'NODE_DELETE',
-        // deletedIDFieldName: deleteLabbookFileId,
         connectionKeys: [{
           key: connectionKey,
         }, {

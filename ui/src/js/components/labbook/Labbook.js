@@ -31,35 +31,33 @@ import Config from 'JS/config';
 
 const Loading = () => <Loader />;
 
+/*
+ * Code splitting imports intended to boost initial load speed
+*/
+
 const Overview = Loadable({
   loader: () => import('./overview/Overview'),
   loading: Loading,
-  delay: 500,
 });
 const Activity = Loadable({
   loader: () => import('./activity/Activity'),
   loading: Loading,
-  delay: 500,
 });
 const Code = Loadable({
   loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Code'),
   loading: Loading,
-  delay: 500,
 });
 const InputData = Loadable({
   loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Input'),
   loading: Loading,
-  delay: 500,
 });
 const OutputData = Loadable({
   loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Output'),
   loading: Loading,
-  delay: 500,
 });
 const Environment = Loadable({
   loader: () => import('./environment/Environment'),
   loading: Loading,
-  delay: 500,
 });
 
 class Labbook extends Component {
@@ -452,6 +450,11 @@ const LabbookFragmentContainer = createFragmentContainer(
   },
 
 );
+
+/** *
+  * @param {Object} manager
+  * data object for reactDND
+*/
 
 const backend = (manager) => {
   const backend = HTML5Backend(manager),

@@ -9,28 +9,6 @@ import { setUploadMessageUpdate, setUploadMessageRemove, setWarningMessage } fro
 import { setFinishedUploading, setPauseChunkUpload } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
 import config from 'JS/config';
 
-/**
-  @param {number} bytes
-  converts bytes into suitable units
-*/
-// export const humanFileSize = (bytes) => {
-//   const thresh = 1000;
-//
-//   if (Math.abs(bytes) < thresh) {
-//     return `${bytes} kB`;
-//   }
-//
-//   const units = ['MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-//
-//   let u = -1;
-//   do {
-//     bytes /= thresh;
-//     ++u;
-//   } while (Math.abs(bytes) >= thresh && u < units.length - 1);
-//   const fixedBytes = bytes.toFixed(1);
-//   return `${fixedBytes} ${units[u]}`;
-// };
-
 const uploadLabbookChunk = (file, chunk, accessToken, getChunkCallback) => {
   ImportLabbookMutation(chunk.blob, chunk, accessToken, (result, error) => {
     if (result && (error === undefined)) {
@@ -193,8 +171,6 @@ const ChunkUploader = {
               postMessage(chunkData, false); // post progress back to worker instantiator file
             }
           } else {
-            // if(store.getState().fileBrowser.pause === false){
-            // sasd
             uploadFileBrowserChunk(
               data,
               chunkData,
