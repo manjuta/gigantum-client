@@ -11,7 +11,8 @@ import config from 'JS/config';
 
 
 /**
-* @param {array} files
+* @param {Array:[Object]} files
+* @param {Boolean} prompt
 *
 * @return {number} totalFiles
 */
@@ -83,8 +84,10 @@ const dragSource = {
     let fileNameParts = props.data.edge.node.key.split('/');
 
     let fileName = fileNameParts[fileNameParts.length - 1];
+
     if (dropResult.data) {
       let pathArray = dropResult.data.edge.node.key.split('/');
+      // remove filename or empty string
       pathArray.pop();
       let path = pathArray.join('/');
 
@@ -105,7 +108,7 @@ const dragSource = {
         if (newKey !== props.data.edge.node.key) {
           let removeIds = [props.data.edge.node.id];
           let currentHead = props.data;
-
+          // check if folder has children and push id into array to removed by optomistic updater
           const searchChildren = (parent) => {
             if (parent.children) {
               Object.keys(parent.children).forEach((childKey) => {
@@ -192,6 +195,7 @@ const targetSource = {
      return monitor.isOver({ shallow: true }) && !uploading;
   },
   drop(props, monitor, component) {
+    // TODO: clean up this code, some of this logic is being duplicated. make better use of functions
     const dndItem = monitor.getItem();
     const prompt = (props.section === 'code') || (props.mutationData && (props.mutationData.section === 'code'));
 
@@ -199,6 +203,7 @@ const targetSource = {
         fileKey,
         path,
         files;
+    // non root folder drop
     if (dndItem && props.data) {
           if (!dndItem.dirContent) {
               fileKey = props.data.edge.node.key;
@@ -209,6 +214,7 @@ const targetSource = {
               newPath = newKey + fileName;
               fileKey = props.fileKey;
           } else {
+            // check if user needs to be prompted to accept some files in upload
             let fileSizeData = checkFileSize(dndItem.files, prompt);
             if (fileSizeData.fileSizePrompt.length === 0) {
                uploadDirContent(dndItem, props, props.mutationData, fileSizeData);
@@ -217,6 +223,7 @@ const targetSource = {
             }
           }
       } else {
+          // root folder upload
           const {
             parentId,
             connection,
@@ -235,7 +242,9 @@ const targetSource = {
           };
           // uploads to root directory
           let item = monitor.getItem();
+          // check to see if it is an upload
           if (item.files) {
+            // check to see if user needs to be prompted for upload
             let fileSizeData = checkFileSize(item.files, prompt);
             if (fileSizeData.fileSizePrompt.length === 0) {
               if (dndItem.dirContent) {
@@ -248,7 +257,7 @@ const targetSource = {
             } else {
                 component._codeFileUpload(item.files, props, component.state.mutationData, CreateFiles.createFiles, fileSizeData);
             }
-          } else {
+          } else { // else it's a move
             const dropResult = monitor.getDropResult();
             let currentKey = item.data.edge.node.key;
             let splitKey = currentKey.split('/');
@@ -264,7 +273,6 @@ const targetSource = {
             newKey = dropResult && dropResult.data ? newKey : `${newKeyTemp}`;
 
             if ((newKey !== item.data.edge.node.key) && ((`${newKey}/`) !== item.data.edge.node.key)) {
-
               let removeIds = [item.data.edge.node.id];
               let currentHead = item.data;
 
@@ -322,6 +330,8 @@ const targetSource = {
 };
 
 function targetCollect(connect, monitor) {
+  // TODO: clean up this code, removal of file drop containers removes the need for some of this logic.
+  // decide if drop zone should appear;
   let currentTargetId = monitor.targetId;
   let isOverCurrent = monitor.isOver({ shallow: true });
   let isOver = monitor.isOver({});
@@ -329,33 +339,36 @@ function targetCollect(connect, monitor) {
   let currentTarget = monitor.internalMonitor.registry.dropTargets.get(currentTargetId);
 
   let newLastTarget;
-
+  // get a list of drop target ids
   let targetIds = monitor.internalMonitor.getTargetIds();
   let targets = targetIds.map(id => monitor.internalMonitor.registry.dropTargets.get(id));
+  // if targets found
   if (targets.length > 0) {
+    // get the last target
     let lastTarget = targets[targets.length - 1];
+    // if last target is a file remove it
     if (lastTarget.props.data && !lastTarget.props.data.edge.node.isDir) {
       targets.pop();
     }
     newLastTarget = targets[targets.length - 1];
+    // check if current targe is over last target
     isOver = (currentTargetId === newLastTarget.monitor.targetId);
   } else {
     isOver = false;
   }
-
+  // check if item is dragging
   let dragItem;
   monitor.internalMonitor.registry.dragSources.forEach((item) => {
     if (item.ref && item.ref.current && item.ref.current.props.isDragging) {
       dragItem = item.ref.current;
     }
   });
-
+  // compare dragItem and lastTarget
   if (dragItem && newLastTarget) {
     let dragKeyArray = dragItem.props.data.edge.node.key.split('/');
     dragKeyArray.pop();
-
+    // check if file drag key is the same
     let dragKeyPruned = dragKeyArray.join('/') === '' ? '' : `${dragKeyArray.join('/')}/`;
-
     let dropKey = newLastTarget.props.files ? '' : newLastTarget.props.data.edge.node.key;
     canDrop = (dragKeyPruned !== dropKey);
     isOver = isOver && canDrop;

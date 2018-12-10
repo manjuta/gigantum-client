@@ -96,7 +96,6 @@ class FileBrowser extends Component {
       sets worker
     */
     componentDidMount() {
-      // window.addEventListener('resize', this._forceScrollerUpdate.bind(this));
       this.fileHandler = new FileFormatter(fileHandler);
       this.fileHandler.postMessage({ files: this.props.files.edges, search: this.state.search });
       this.fileHandler.addEventListener('message', (evt) => {
@@ -124,6 +123,8 @@ class FileBrowser extends Component {
     *  @param {string} key - key of file to be updated
     *  @param {boolean} isSelected - update if the value is selected
     *  @param {boolean} isIncomplete - update if the value is incomplete
+    *  @param {boolean} isExpanded - update if the value is incomplete
+    *  @param {boolean} isAddingFolder - update if the value is incomplete
     *  @return {}
     */
     _updateChildState(key, isSelected, isIncomplete, isExpanded, isAddingFolder) {
@@ -151,12 +152,13 @@ class FileBrowser extends Component {
       this.setState({ childrenState, multiSelect });
     }
     /**
-    *  @param {}
+    *  @param {string} stateKey
+    *  @param {string || boolean || number} value
     *  update state of component for a given key value pair
     *  @return {}
     */
-    _setState(stateKey, value) {
-       this.setState({ [stateKey]: value });
+    _setState(key, value) {
+       this.setState({ [key]: value });
     }
   /**
   *  @param {}
@@ -275,7 +277,8 @@ class FileBrowser extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Array:[string]} filePaths
+  *  @param {Array:[Object]} edges
   *  triggers delete muatation
   *  @return {}
   */
@@ -288,7 +291,8 @@ class FileBrowser extends Component {
     this.state.mutations.deleteLabbookFiles(data, (response) => {});
   }
   /**
-  *  @param {string, boolean}
+  *  @param {string} key
+  *  @param {boolean} value
   *  updates boolean state of a given key
   *  @return {}
   */
@@ -329,7 +333,11 @@ class FileBrowser extends Component {
     this.setState({ isOverChildFile });
   }
   /**
-  *  @param {Array, String, Boolean, Object, String} array, type, reverse, children, section
+  *  @param {Array:[Object]} array
+  *  @param {string} type
+  *  @param {boolean} reverse
+  *  @param {Object} children
+  *  @param {string} section
   *  returns sorted children
   *  @return {}
   */

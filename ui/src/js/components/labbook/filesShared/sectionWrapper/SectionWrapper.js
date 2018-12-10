@@ -25,7 +25,7 @@ export default class SectionWrapper extends Component {
   }
 
   /**
-  *  @param {Object}
+  *  @param {Object} evt
   *  set state with selected filter
   *  @return {}
   */
@@ -44,7 +44,7 @@ export default class SectionWrapper extends Component {
   }
 
   /**
-  *  @param {result}
+  *  @param {Object} result
   *  udate loading status if state is not the same as result
   *  @return {}
   */

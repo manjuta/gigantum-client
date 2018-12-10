@@ -107,7 +107,7 @@ class File extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {boolean} renameEditMode
   *  sets dragging state
   */
   _renameEditMode(renameEditMode) {
@@ -115,7 +115,7 @@ class File extends Component {
   }
 
   /**
-  *  @param {event}
+  *  @param {Object} evt
   *  sets dragging state
   */
   _updateFileName(evt) {
@@ -124,7 +124,7 @@ class File extends Component {
     });
   }
   /**
-  *  @param {evt}
+  *  @param {Object} evt
   *  sets dragging state
   *  @return {}
   */
@@ -151,8 +151,8 @@ class File extends Component {
   }
 
   /**
-  *  @param {string, boolean}
-  *  sets state on a boolean value
+  *  @param {}
+  *  triggers move mutation and clearState function
   *  @return {}
   */
   _triggerMutation() {
@@ -176,7 +176,8 @@ class File extends Component {
   }
 
   /**
-  *  @param {event, boolean}
+  *  @param {object} event
+  *  @param {boolean} hover - hover state for mouseover
   *  sets hover state
   *  @return {}
   */
@@ -296,8 +297,7 @@ class File extends Component {
                 </div>
 
             </div>
-
-        </div>
+        </div>;
 
     return (
       this.props.connectDragSource(file)

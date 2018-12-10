@@ -35,7 +35,7 @@ class AddSubfolder extends Component {
   }
 
   /**
-  *  @param {event}
+  *  @param {Object} evt
   *  clears state on click other subfolders
   *  @return {}
   */
@@ -49,7 +49,8 @@ class AddSubfolder extends Component {
   }
 
   /**
-  *  @param {string, boolean}
+  *  @param {string} key - key for the state object
+  *  @param {boolean} value - value for key
   *  sets state on a boolean value
   *  @return {}
   */
@@ -171,7 +172,7 @@ class AddSubfolder extends Component {
             <div className="flex justify--space-around">
               <button
                 className="File__btn--round File__btn--cancel"
-                onClick={(evt) => { this._clearInput() }} />
+                onClick={(evt) => { this._clearInput(); }} />
               <button
                 className="File__btn--round File__btn--add"
                 onClick={(evt) => { this._triggerMutation(); }}

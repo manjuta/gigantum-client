@@ -13,7 +13,7 @@ class FavoriteList extends Component {
       favorites: this.props.favorites,
     };
 
-    this.moveCard = this.moveCard.bind(this);
+    this._moveCard = this._moveCard.bind(this);
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -47,14 +47,23 @@ class FavoriteList extends Component {
       favorites: newFavorites,
     };
   }
-
-  moveCard(dragIndex, hoverIndex) {
+  /**
+  *  @param {number} dragIndex
+  *  @param {number} hoverIndex
+  *  updates index of card
+  */
+  _moveCard(dragIndex, hoverIndex) {
     const { favorites } = this.state;
     const newFavoritesList = this._arrayMove(favorites, dragIndex, hoverIndex);
 
     this.setState({ favorites: newFavoritesList });
   }
-
+  /**
+  *  @param {Array:[Object]} arr
+  *  @param {number} oldIndex
+  *  @param {number} newIndex
+  *  updates index of card
+  */
   _arrayMove(arr, oldIndex, newIndex) {
     if (newIndex >= arr.length) {
       let k = newIndex - arr.length + 1;
@@ -90,7 +99,7 @@ class FavoriteList extends Component {
               connection={`${capitalSection}Favorites_favorites`}
               favorite={edge.node}
               owner={this.props.owner}
-              moveCard={this.moveCard}
+              moveCard={this._moveCard}
             />))
         }
       </div>

@@ -11,7 +11,13 @@ import { setErrorMessage } from 'JS/redux/reducers/footer';
 
 class FileBrowserMutations {
    /**
-    * @param {props = {owner, labbookName, section, connection, favoriteConnection, parentId}}
+    * @param {Object} props
+    *        {string} props.owner
+    *        {string} props.labbookName
+    *        {string} props.section
+    *        {string} props.connection
+    *        {string} props.favoriteConnection
+    *        {string} props.parentId
     * pass above props to state
     */
    constructor(props) {
@@ -19,7 +25,9 @@ class FileBrowserMutations {
    }
 
    /**
-   *  @param {object, function}
+   *  @param {Object} data
+   *         {string} data.key
+   *  @param {function} callback
    *  creates a dirctory using MakeLabbookDirectoryMutation
    */
    makeLabbookDirectory(data, callback) {
@@ -53,7 +61,11 @@ class FileBrowserMutations {
      );
    }
    /**
-   *  @param {object, function}
+   *  @param {Object} data
+   *         {string} data.newKey
+   *         {Object} data.edge
+   *         {Array[string]} data.removeIds
+   *  @param {function} callback
    *  moves file from old folder to a new folder
    */
    moveLabbookFile(data, callback) {
@@ -89,7 +101,10 @@ class FileBrowserMutations {
       );
   }
   /**
-  *  @param {object, function}
+  *  @param {Object} data
+  *         {string} data.key
+  *         {Object} data.edge
+  *  @param {function} callback
   *  add file favorite to appear in favorite section
   */
   addFavorite(data, callback) {
@@ -128,7 +143,10 @@ class FileBrowserMutations {
   }
 
   /**
-  *  @param {object, function}
+  *  @param {Object} data
+  *         {string} data.key
+  *         {Object} data.edge
+  *  @param {function} callback
   *  remove file from favorite section
   */
   removeFavorite(data, callback) {
@@ -171,7 +189,10 @@ class FileBrowserMutations {
   }
 
   /**
-  *  @param {object, function}
+  *  @param {Object} data
+  *         {Array[string]} data.filePaths
+  *         {Array[Object]} data.edges
+  *  @param {function} callback
   *  remove file or folder from directory
   */
   deleteLabbookFiles(data, callback) {
@@ -215,7 +236,8 @@ class FileBrowserMutations {
     );
   }
   /**
-  *  @param {object, function}
+  *  @param {undefined} data
+  *  @param {function} callback
   *  remove file from favorite section
   */
   completeBatchUploadTransaction(data, callback) {

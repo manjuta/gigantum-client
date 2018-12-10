@@ -5,7 +5,11 @@ export default class FileFormatter {
         return new Worker(URL.createObjectURL(blob));
     }
 }
-
+/**
+*  @param {}
+*  Worker that handles the formating and grouping of files
+*  @return {}
+*/
 export const fileHandler = () => {
     /* eslint-disable */
     self.addEventListener('message', (evt) => {
@@ -76,5 +80,5 @@ export const fileHandler = () => {
         });
         const hash = JSON.stringify(fileObject) + search;
         postMessage({ files: fileObject, hash });
-    })
-}
+    });
+};

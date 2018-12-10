@@ -39,9 +39,12 @@ export default class MostRecent extends Component {
       this._loadMore(); // routes query only loads 2, call loadMore
     }
   }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    this.setState({ files: nextProps[this.state.selectedPath] });
+  }
 
   /**
-    @param
+    @param {}
     triggers relay pagination function loadMore
     increments by 10
     logs callback
@@ -67,19 +70,22 @@ export default class MostRecent extends Component {
       },
     );
   }
-
+  /**
+  *  @param {}
+  *  sets state for more
+  *  @return {}
+  */
   _showMore() {
     this.setState({ showAmount: this.state.showAmount + 3 });
   }
-
+  /**
+  *  @param {Array:[Object]} files
+  *  sorts by modified date
+  *  @return {}
+  */
   _sortFiles(files) {
     return files.sort((a, b) => b.node.modifiedAt - a.node.modifiedAt);
   }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ files: nextProps[this.state.selectedPath] });
-  }
-
 
   render() {
     if (this.state.files && this.state.files.allFiles) {

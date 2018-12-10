@@ -76,7 +76,12 @@ const checkIfFolderExists = (variables, section) => {
 };
 
 /**
-*  @param {string, string, string, string, string, string} variables,section
+*  @param {string} connectionKey
+*  @param {string} owner
+*  @param {string} labbookName
+*  @param {string} sectionId
+*  @param {string} path
+*  @param {string} section
 *  checks if a folder or file exists
 *  @return {promise}
 */
@@ -169,7 +174,8 @@ const addFiles = (
   });
 };
 /**
-*  @param {array} folderNames
+*  @param {Array:[string]} folderNames
+*  @param {string} prefix
 *  gets every possible folder combinations for a filepath
 *  input [root,folder,subfolder] => root/folder/subfolder/
 *  output [root, root/folder, root/folder/subfolder]
@@ -299,7 +305,16 @@ const CreateFolders = (files, prefix, section, labbookName, owner, sectionId, co
 
 const FolderUpload = {
   /**
-  *  @param {array, string, string, string} files,prefix,labbbookName,section
+  *  @param {Array:[Object]} files
+  *  @param {string} prefix
+  *  @param {string} labbookName
+  *  @param {string} owner
+  *  @param {string} section
+  *  @param {string} connectionKey
+  *  @param {string} sectionId
+  *  @param {function} chunkLoader
+  *  @param {Int} totalFiles
+  *  @param {Int} count
   *  sorts files and folders
   *  checks if files and folders exist
   *  uploads file and folder if checks pass
@@ -314,7 +329,14 @@ const FolderUpload = {
     // commented until pause functionality is available
     // let isPaused = false;
     /**
-    *  @param {object} fileItem
+    *  @param {Array:[Object]} files
+    *  @param {string} prefix
+    *  @param {string} labbookName
+    *  @param {string} owner
+    *  @param {string} sectionId
+    *  @param {string} connectionKey
+    *  @param {function} fileCheck
+    *  @param {Int} totalFiles
     *  recursive function that loops through a object that replicates a folders structure
     *  pushes fileItems into an array to make a flat keyed structure - similar to s3
     *  @return {boolean}

@@ -12,7 +12,7 @@ export default class SectionBrowser extends Component {
       moreLoading: false,
     };
 
-    this.setRootFolder = this.setRootFolder.bind(this);
+    this._setRootFolder = this._setRootFolder.bind(this);
     this._loadMore = this._loadMore.bind(this);
   }
 
@@ -39,7 +39,7 @@ export default class SectionBrowser extends Component {
     }
   }
   /*
-    @param
+    @param {}
     triggers relay pagination function loadMore
     increments by 100
     logs callback
@@ -68,7 +68,7 @@ export default class SectionBrowser extends Component {
     sets root folder by key
     loads more files
   */
-  setRootFolder(key) {
+  _setRootFolder(key) {
     this.setState({ rootFolder: key });
   }
 
@@ -88,7 +88,7 @@ export default class SectionBrowser extends Component {
           section={this.props.section}
           selectedFiles={this.props.selectedFiles}
           clearSelectedFiles={this.props.clearSelectedFiles}
-          setRootFolder={this.setRootFolder}
+          setRootFolder={this._setRootFolder}
           files={files}
           parentId={this.props.sectionId}
           connection={`${capitalSection}Browser_allFiles`}

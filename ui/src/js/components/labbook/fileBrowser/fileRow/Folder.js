@@ -42,7 +42,6 @@ class Folder extends Component {
         this._checkHover = this._checkHover.bind(this);
         this._renameEditMode = this._renameEditMode.bind(this);
         this._updateDropZone = this._updateDropZone.bind(this);
-        this._getRowHeight = this._getRowHeight.bind(this);
     }
 
 
@@ -63,15 +62,16 @@ class Folder extends Component {
     }
 
     /**
-    *  @param {}
+    *  @param {string} key
+    *  @param {string || boolean} value - updates key value in state
     *  update state of component for a given key value pair
     *  @return {}
     */
-    _setState(stateKey, value) {
-       this.setState({ [stateKey]: value });
+    _setState(key, value) {
+       this.setState({ [key]: value });
     }
     /**
-    *  @param {boolean}
+    *  @param {boolean} isSelected
     *  sets child elements to be selected and current folder item
     *  @return {}
     */
@@ -174,7 +174,7 @@ class Folder extends Component {
     }
 
     /**
-    *  @param {event}
+    *  @param {Object} evt
     *  sets item to expanded
     *  @return {}
     */
@@ -195,7 +195,7 @@ class Folder extends Component {
     }
 
     /**
-    *  @param {}
+    *  @param {jsx} render
     *  sets elements to be selected and parent
     */
     connectDND(render) {
@@ -221,6 +221,7 @@ class Folder extends Component {
     /**
     *  @param {}
     *  sets dragging state
+    *  @return {}
     */
     _mouseLeave() {
       if (this.props.setParentDragTrue) {
@@ -231,6 +232,7 @@ class Folder extends Component {
     /**
     *  @param {}
     *  sets dragging state to true
+    *  @return {}
     */
     _checkHover() {
       if (this.state.isHovered && !this.state.isDragging) {
@@ -240,6 +242,7 @@ class Folder extends Component {
     /**
       *  @param {}
       *  sets addFolderVisible state
+      *  @return {}
     */
     _addFolderVisible(reverse) {
       if (reverse) {
@@ -296,6 +299,7 @@ class Folder extends Component {
     /**
     *  @param {event}
     *  sets dragging state
+    *  @return {}
     */
     _updateFileName(evt) {
       this.setState({
@@ -383,7 +387,11 @@ class Folder extends Component {
       this.setState({ isOverChildFile });
     }
     /**
-    *  @param {Array, String, Boolean, Object, String} array, type, reverse, children, section
+    *  @param {Array} array
+    *  @param {String} type
+    *  @param {Boolean} reverse
+    *  @param {Object} children
+    *  @param {String} section
     *  returns sorted children
     *  @return {}
     */
@@ -410,22 +418,6 @@ class Folder extends Component {
         return 0;
       });
       return array;
-    }
-    _getRowHeight(index, keys) {
-      let file = keys[index];
-      let files = this.props.data;
-
-      let reference = file;
-      const isDir = files.edge.node.isDir;
-      reference = isDir ? `${reference}/` : reference;
-      const isExpanded = reference && this.props.childrenState[reference] && this.props.childrenState[reference].isExpanded;
-
-      const addFolderSize = this.props.childrenState[reference] && this.props.childrenState[reference].isAddingFolder ? 50 : 0;
-
-      if (!isDir || !isExpanded) {
-        return 50;
-      }
-      return 50 + (50 * (files.children && Object.keys(files.children).length || 0)) + addFolderSize;
     }
 
     render() {

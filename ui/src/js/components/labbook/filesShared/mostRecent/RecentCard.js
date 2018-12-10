@@ -1,7 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import Moment from 'moment';
-import TextTruncate from 'react-text-truncate'
+import TextTruncate from 'react-text-truncate';
 // Mutations
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
@@ -23,10 +23,10 @@ export default class RecentCard extends Component {
       labbookName,
     };
 
-    this.handleFileFavoriting = this.handleFileFavoriting.bind(this);
+    this._handleFileFavoriting = this._handleFileFavoriting.bind(this);
   }
 
-  handleFileFavoriting(evt, file) {
+  _handleFileFavoriting(evt, file) {
     if (!file.node.isFavorite) {
       AddFavoriteMutation(
         this.props.favoriteConnection,
@@ -77,7 +77,7 @@ export default class RecentCard extends Component {
           className="Recent__card Card"
         >
           <div
-            onClick={evt => this.handleFileFavoriting(evt, this.props.file)}
+            onClick={evt => this._handleFileFavoriting(evt, this.props.file)}
             className={this.props.file.node.isFavorite ? 'Favorite__star' : 'Favorite__star--off'}
           />
           <div className="Recent__header-section">

@@ -4,8 +4,8 @@ import uuidv4 from 'uuid/v4';
 import ChunkUploader from 'JS/utils/ChunkUploader';
 import config from 'JS/config';
 import FolderUpload from './FolderUpload';
-import ignore from 'ignore'
-import gitIgnoreJson from 'JS/data/gitignore.json'
+import ignore from 'ignore';
+import gitIgnoreJson from 'JS/data/gitignore.json';
 // store
 import {
   setErrorMessage,
@@ -23,9 +23,10 @@ import {
 import { setUpdateDetailView } from 'JS/redux/reducers/labbook/labbook';
 import store from 'JS/redux/store';
 
-const ig = ignore().add(gitIgnoreJson.gitIgnore)
+const ig = ignore().add(gitIgnoreJson.gitIgnore);
 /**
-*  @param {string, string} key,prefix  file key, prefix is root folder -
+*  @param {string} key - file key
+*  @param {string} prefix - prefix is root folder -
 *  creates a file using AddLabbookFileMutation by passing a blob
 *  @return {}
 */
@@ -39,7 +40,7 @@ const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) =
       let filename = file.entry ? `D:/${file.entry.fullPath}` : file.name;
       return (filteredFileNames.indexOf(filename) > -1);
     });
-  // if (!this.state.uploading) {
+
     if (mutationData.section === 'code') {
       startFileUpload(filteredFiles, prefix, fileSizeData, mutationData, dropZoneProps);
     } else {
@@ -52,17 +53,12 @@ const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) =
       let ignoredFilesString = ignoredFiles.join(', ').replace(/D:\//g, '');
       setWarningMessage(`The following files have been ignored: ${ignoredFilesString}`);
     }
-  // }
 };
 /**
-*  @param {}
-*  show modal assking user if they want to upload files between 10-100 MB
-*/
-const promptUserToAcceptUpload = () => {
-  // this.setState({ fileSizePromptVisible: true });
-};
-/**
-*  @param {array, string, Int}
+*  @param {Array[Object]} folderFiles
+*  @param {string} prefix
+*  @param {Int} totalFiles
+*  @param {Object} mutationData
 *  flattens file Array
 *  filters file Array
 *  kicks off upload function
@@ -106,7 +102,11 @@ const startFolderUpload = (folderFiles, prefix, totalFiles, mutationData) => {
   );
 };
 /**
-*  @param {array, string}
+*  @param {Array[Object]} files
+*  @param {string} prefix
+*  @param {Object} fileSizeData
+*  @param {Object} mutationData
+*  @param {Object} dropZoneProps
 *  gets file count and upload type
 *  sets upload message
 *  @return {}
@@ -160,9 +160,6 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData, dropZoneProp
         ChunkUploader.chunkFile(data, (data) => {
 
         }, 0);
-
-      } else {
-        // WARNING_MESSAGE
       }
     } else {
       folderFiles.push(file);
@@ -212,7 +209,10 @@ const getTotalFileLength = (files) => {
 };
 
 /**
-*  @param {array, boolean}
+*  @param {Int} totalFiles
+*  @param {boolean} hasDirectoryUpload
+*  @param {Object} fileSizeData
+*  @param {Object} mutationData
 *  updates footer message depending on the type of upload
 */
 const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData, mutationData) => {
@@ -242,7 +242,8 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData, 
 };
 
  /**
-  * @param {array} files
+  * @param {Array[Object]} files
+  * @param {boolean} noPrompt
   *
   * @return {number} totalFiles
   */

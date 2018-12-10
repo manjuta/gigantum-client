@@ -49,7 +49,7 @@ export default class ActionsMenu extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Object} event
   *  closes popup when clicking
   *  @return {}
   */
@@ -60,7 +60,8 @@ export default class ActionsMenu extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Obect} evt
+  *  @param {boolean} popupVisible - boolean value for hiding and showing popup state
   *  triggers favoirte unfavorite mutation
   *  @return {}
   */

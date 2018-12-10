@@ -101,7 +101,7 @@ class FavoriteCard extends Component {
   }
 
   /*
-		@param {num}
+		@param {Int} newIndex
 		sets editMode to true or false
 		displays textarea if true
 	*/
@@ -168,7 +168,7 @@ class FavoriteCard extends Component {
   }
 
   /**
-    @param {object} node
+    @param {Object} node
     triggers remove favorite mutation
   */
   _removeFavorite(node) {

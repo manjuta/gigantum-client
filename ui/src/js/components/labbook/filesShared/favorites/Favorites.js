@@ -44,7 +44,7 @@ export default class Favorites extends Component {
   }
 
   /**
-    @param
+    @param {}
     triggers relay pagination function loadMore
     increments by 10
     logs callback
