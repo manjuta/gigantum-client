@@ -145,18 +145,16 @@ export default function AddLabbookFileMutation(
           node.setValue(size, 'size');
         } else {
           if (store.get(optimisticId)) {
-            deleteEdge(store, sectionId, optimisticId, connectionKey)
-            // deleteEdge(store, sectionId, optimisticId, recentConnectionKey)
+            deleteEdge(store, sectionId, optimisticId, connectionKey);
           }
           let nodeExists = store.get(optimisticId);
-          const node = store.create(optimisticId, 'LabbookFile')
+          const node = store.create(optimisticId, 'LabbookFile');
           node.setValue(optimisticId, 'id');
           node.setValue(false, 'isDir');
           node.setValue(filePath, 'key');
           node.setValue(modifiedAt, 'modifiedAt');
           node.setValue(size, 'size');
           sharedUpdater(store, sectionId, connectionKey, node);
-          // sharedUpdater(store, sectionId, recentConnectionKey, node);
         }
       },
       updater: (store, response) => {
