@@ -3,7 +3,7 @@ from lmsrvlabbook.api.mutations.labbook import (CreateLabbook, DeleteLabbook, De
                                                 SetLabbookDescription, ExportLabbook, ImportLabbook,
                                                 ImportRemoteLabbook,
                                                 MakeLabbookDirectory, AddLabbookRemote,
-                                                AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
+                                                AddLabbookFile, MoveLabbookFile, DeleteLabbookFile,
                                                 AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                                 AddLabbookCollaborator, DeleteLabbookCollaborator,
                                                 WriteReadme, CompleteBatchUploadTransaction, FetchLabbookEdge)
