@@ -55,9 +55,9 @@ const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) =
     }
 };
 /**
-*  @param {Array[Object]} folderFiles
+*  @param {Array:[Object]} folderFiles
 *  @param {string} prefix
-*  @param {Int} totalFiles
+*  @param {number} totalFiles
 *  @param {Object} mutationData
 *  flattens file Array
 *  filters file Array
@@ -102,7 +102,7 @@ const startFolderUpload = (folderFiles, prefix, totalFiles, mutationData) => {
   );
 };
 /**
-*  @param {Array[Object]} files
+*  @param {Array:[Object]} files
 *  @param {string} prefix
 *  @param {Object} fileSizeData
 *  @param {Object} mutationData
@@ -173,7 +173,7 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData, dropZoneProp
 
 
 /**
-* @param {array} files
+* @param {Array:[Object]} files
 *
 * @return {number} totalFiles
 */
@@ -209,7 +209,7 @@ const getTotalFileLength = (files) => {
 };
 
 /**
-*  @param {Int} totalFiles
+*  @param {number} totalFiles
 *  @param {boolean} hasDirectoryUpload
 *  @param {Object} fileSizeData
 *  @param {Object} mutationData
@@ -242,7 +242,7 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData, 
 };
 
  /**
-  * @param {Array[Object]} files
+  * @param {Array:[Object]} files
   * @param {boolean} noPrompt
   *
   * @return {number} totalFiles

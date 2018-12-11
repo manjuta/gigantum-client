@@ -113,8 +113,8 @@ class AddSubfolder extends Component {
   }
 
   /**
-  *  @param {string, boolean}
-  *  sets state on a boolean value
+  *  @param {}
+  *  trigger MakeLabbookDirectoryMutation
   *  @return {}
   */
   _triggerMutation() {
