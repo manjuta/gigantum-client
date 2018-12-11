@@ -313,8 +313,8 @@ const FolderUpload = {
   *  @param {string} connectionKey
   *  @param {string} sectionId
   *  @param {function} chunkLoader
-  *  @param {Int} totalFiles
-  *  @param {Int} count
+  *  @param {number} totalFiles
+  *  @param {number} count
   *  sorts files and folders
   *  checks if files and folders exist
   *  uploads file and folder if checks pass
@@ -336,7 +336,7 @@ const FolderUpload = {
     *  @param {string} sectionId
     *  @param {string} connectionKey
     *  @param {function} fileCheck
-    *  @param {Int} totalFiles
+    *  @param {number} totalFiles
     *  recursive function that loops through a object that replicates a folders structure
     *  pushes fileItems into an array to make a flat keyed structure - similar to s3
     *  @return {boolean}

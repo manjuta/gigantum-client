@@ -11,7 +11,7 @@ const ansi_up = new AnsiUp();
 
 const FooterUtils = {
   /**
-   *  @param {Int}
+   *  @param {number}
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */

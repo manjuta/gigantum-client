@@ -101,7 +101,7 @@ class FavoriteCard extends Component {
   }
 
   /*
-		@param {Int} newIndex
+		@param {number} newIndex
 		sets editMode to true or false
 		displays textarea if true
 	*/

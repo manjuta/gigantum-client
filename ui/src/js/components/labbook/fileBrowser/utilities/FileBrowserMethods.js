@@ -3,6 +3,13 @@ import config from 'JS/config';
 // utilities
 import ChunkUploader from 'JS/utils/ChunkUploader';
 
+/**
+ * @param {Array:[Object]} files
+ * @param {string} prefix
+ * @param {Object} mutationData
+ *
+ * @return {number} totalFiles
+ */
 const createFiles = (files, prefix, mutationData) => {
   const fileSizeData = checkFileSize(files),
         fileMetaData = getTotalFileLength(files),
@@ -56,10 +63,6 @@ const createFiles = (files, prefix, mutationData) => {
       folderFiles.push(file);
     }
   });
-
-  // if (folderFiles.length > 0) {
-  //   self._startFolderUpload(folderFiles, prefix, totalFiles);
-  // }
 };
 
 /**
@@ -101,6 +104,7 @@ const getTotalFileLength = (files) => {
 
 /**
 * @param {array} files
+* @param {boolean} noPrompt
 *
 * @return {number} totalFiles
 */
