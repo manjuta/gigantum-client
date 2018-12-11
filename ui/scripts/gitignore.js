@@ -2,7 +2,28 @@ const parse = require('parse-gitignore');
 const fs = require('fs');
 
 const updateGitIgnore = function(resolve, reject) {
-  let ignoreFiles = parse(fs.readFileSync('./../packages/gtmcore/gtmcore/labbook/gitignore.default'));
+
+  fs.readdir(__dirname + '/../../../', function(err, items) {
+    console.log(items);
+
+    for (var i=0; i<items.length; i++) {
+        console.log(items[i]);
+    }
+});
+console.log('asdasad')
+fs.readdir(__dirname + '/../../', function(err, items) {
+    console.log(items);
+
+    for (var i=0; i<items.length; i++) {
+        console.log(items[i]);
+    }
+});
+
+resolve(true);
+return;
+  console.log(__dirname)
+  let filepath = __dirname.indexOf('opt') > -1 ? __dirname + '/../../../packages/gtmcore/gtmcore/labbook/gitignore.default' : __dirname + '/../../../packages/gtmcore/gtmcore/labbook/gitignore.default'
+  let ignoreFiles = parse(fs.readFileSync(filepath));
   let filePath = './src/js/data/gitignore.json'
   let fileContent = JSON.stringify({ gitIgnore: ignoreFiles });
 
