@@ -78,7 +78,7 @@ export default class ActionsMenu extends Component {
   */
   _getEdges(data) {
     let edges = [data.edge];
-
+    console.log(data)
     function getEdges(data) {
       Object.keys(data).forEach((name) => {
         edges.push(data[name].edge);
@@ -88,8 +88,9 @@ export default class ActionsMenu extends Component {
       });
       return edges;
     }
-
-    getEdges(data.children);
+    if (data.children) {
+      getEdges(data.children);
+    }
     return edges;
   }
   /**
