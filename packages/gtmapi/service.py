@@ -36,7 +36,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.environment import RepositoryManager
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager
 from gtmcore.labbook.lock import reset_all_locks
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.auth.user import get_logged_in_author
 
 
@@ -103,6 +103,17 @@ def ping():
     return jsonify(config.config['build_info'])
 
 
+@app.route(f"{api_prefix}/version/")
+@cross_origin(headers=["Content-Type", "Authorization"], max_age=7200)
+def version():
+    """Unauthorized endpoint for validating the API is up.
+
+    Note: /api/version endpoint added due to popup blockers starting to block /api/ping/
+
+    """
+    return jsonify(config.config['build_info'])
+
+
 @app.route(f'{api_prefix}/savehook/<username>/<owner>/<labbook_name>')
 def savehook(username, owner, labbook_name):
     try:
@@ -128,9 +139,9 @@ def savehook(username, owner, labbook_name):
             logger.info(f"Skipping jupyter savehook for {username}/{owner}/{labbook_name} due to active kernel")
             return 'success'
 
-        lb = LabBook(author=get_logged_in_author())
-        lb.from_name(username, owner, labbook_name)
-        with lb.lock_labbook():
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
             lb.sweep_uncommitted_changes()
 
         logger.info(f"Jupyter save hook saved {changed_file} from {str(lb)}")

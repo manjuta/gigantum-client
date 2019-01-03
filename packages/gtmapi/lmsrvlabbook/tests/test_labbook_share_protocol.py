@@ -30,15 +30,19 @@ from werkzeug.wrappers import Request
 
 from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
                                mock_config_file, _MOCK_create_remote_repo2)
-from gtmcore.labbook import LabBook, loaders
+from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory import loaders
+
 from gtmcore.workflows import GitWorkflow
 from gtmcore.files import FileOperations
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir[0])
+    lb = im.create_labbook("default", "default", "labbook1",
+                           description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
@@ -53,8 +57,9 @@ def mock_create_labbooks(fixture_working_dir):
 @pytest.fixture()
 def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
     # Create a labbook in the temporary directory
-    lb = LabBook(fixture_working_dir_lfs_disabled[0])
-    lb.new(owner={"username": "default"}, name="labbook1", description="Cats labbook 1")
+    im = InventoryManager(fixture_working_dir_lfs_disabled[0])
+    lb = im.create_labbook("default", "default", "labbook1",
+                           description="Cats labbook 1")
 
     # Create a file in the dir
     with open(os.path.join(fixture_working_dir_lfs_disabled[1], 'sillyfile'), 'w') as sf:
@@ -76,8 +81,8 @@ class TestLabbookShareProtocol(object):
         env = builder.get_environ()
         req = Request(environ=env)
 
-        test_user_lb = LabBook(mock_create_labbooks_no_lfs[0])
-        test_user_lb.from_name('default', 'default', 'labbook1')
+        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        test_user_lb = im.load_labbook('default', 'default', 'labbook1')
 
         publish_query = f"""
         mutation c {{
@@ -103,8 +108,8 @@ class TestLabbookShareProtocol(object):
         responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
                       json={'key': 'afaketoken'}, status=200)
 
-        test_user_lb = LabBook(mock_create_labbooks_no_lfs[0])
-        test_user_lb.from_name('default', 'default', 'labbook1')
+        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        test_user_lb = im.load_labbook('default', 'default', 'labbook1')
         test_user_wf = GitWorkflow(test_user_lb)
         test_user_wf.publish('default')
 
@@ -117,7 +122,8 @@ class TestLabbookShareProtocol(object):
         assert remote_url
 
         sally_lb = LabBook(mock_config_file[0])
-        loaders.from_remote(remote_url, username="sally", owner="default", labbook_name="labbook1", labbook=sally_lb)
+        sally_lb = loaders.from_remote(remote_url, username="sally", owner="default",
+                                       labbook_name="labbook1", labbook=sally_lb)
         sally_wf = GitWorkflow(sally_lb)
         assert sally_lb.active_branch == "gm.workspace-sally"
         FileOperations.makedir(sally_lb, relative_path='code/sally-dir', create_activity_record=True)

@@ -90,17 +90,3 @@ snapshots['TestLabBookOverviewQueries.test_no_remote_url 1'] = {
         }
     }
 }
-
-snapshots['TestLabBookOverviewQueries.test_custom_counts 1'] = {
-    'data': {
-        'labbook': {
-            'overview': {
-                'numAptPackages': 0,
-                'numConda2Packages': 0,
-                'numConda3Packages': 0,
-                'numCustomDependencies': 3,
-                'numPipPackages': 0
-            }
-        }
-    }
-}

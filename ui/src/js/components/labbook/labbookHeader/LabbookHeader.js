@@ -176,7 +176,6 @@ class LabbookHeader extends Component {
     const labbookHeaderCSS = classNames({
       LabbookHeader: true,
       'LabbookHeader--sticky': this.props.isSticky,
-      'LabbookHeader--expanded': this.props.isExpanded,
     });
 
     const branchesErrorCSS = classNames({
@@ -235,6 +234,7 @@ class LabbookHeader extends Component {
 
                 <ContainerStatus
                   ref="ContainerStatus"
+                  auth={this.props.auth}
                   base={labbook.environment.base}
                   containerStatus={labbook.environment.containerStatus}
                   imageStatus={labbook.environment.imageStatus}
@@ -270,47 +270,25 @@ class LabbookHeader extends Component {
 
           </ErrorBoundary>
 
-          {
-            this.props.isExpanded &&
-            <div className="LabbookHeader__navContainer--expanded">
+          <div className="LabbookHeader__navContainer flex-0-0-auto">
 
-              <ul className="LabbookHeader__nav flex flex--row">
-                {
-                  Config.navigation_items.map((item, index) => (
-                    <NavItem
-                      self={this}
-                      item={item}
-                      index={index}
-                      key={item.id}
-                    />))
-                }
+            <ul className="LabbookHeader__nav flex flex--row">
+              {
+                Config.navigation_items.map((item, index) => (
+                  <NavItem
+                    self={this}
+                    item={item}
+                    index={index}
+                    key={item.id}
+                  />))
+              }
 
-                <hr className={`LabbookHeader__navSlider LabbookHeader__navSlider--${selectedIndex}`} />
-              </ul>
+              <hr className={`LabbookHeader__navSlider LabbookHeader__navSlider--${selectedIndex}`} />
+            </ul>
 
-            </div>
-          }
+          </div>
 
         </div>
-
-        <div className="LabbookHeader__navContainer flex-0-0-auto">
-
-          <ul className="LabbookHeader__nav flex flex--row">
-            {
-              Config.navigation_items.map((item, index) => (
-                <NavItem
-                  self={this}
-                  item={item}
-                  index={index}
-                  key={item.id}
-                />))
-            }
-
-            <hr className={`LabbookHeader__navSlider LabbookHeader__navSlider--${selectedIndex}`} />
-          </ul>
-
-        </div>
-
       </div>
     );
   }
@@ -322,7 +300,6 @@ const LabbookTitle = ({
   const labbookLockCSS = classNames({
     [`LabbookHeader__${visibility}`]: true,
     [`LabbookHeader__${visibility}--sticky`]: self.props.isSticky,
-    [`LabbookHeader__${visibility}--expanded`]: self.props.isExpanded,
   });
 
   const title = `${labbook.owner}/${labbookName}${self.props.isSticky ? '/ ' : ''}`;
@@ -396,12 +373,12 @@ const NavItem = ({ self, item, index }) => {
     [`LabbookHeader__navItem LabbookHeader__navItem--${item.id}`]: !selectedPath !== item.id,
     [`LabbookHeader__navItem--${index}`]: true,
   });
-
   return (
     <li
       id={item.id}
       className={navItemCSS}
       onClick={() => self._setSelectedComponent(item.id)}
+      title={Config.navTitles[item.id]}
     >
 
       <Link

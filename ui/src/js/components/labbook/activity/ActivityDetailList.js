@@ -55,7 +55,8 @@ export default class ActivityDefaultList extends Component {
   _getTimeOfDay(timestamp) {
     const time = (timestamp !== undefined) ? new Date(timestamp) : new Date();
     const hour = (time.getHours() % 12 === 0) ? 12 : time.getHours() % 12;
-    const minutes = (time.getMinutes() > 9) ? time.getMinutes() : `0${time.getMinutes()}`;
+    const unformatedMinutes = time.getMinutes();
+    const minutes = (time.getMinutes() > 9) ? time.getMinutes() : `0${unformatedMinutes}`;
     const ampm = time.getHours() >= 12 ? 'pm' : 'am';
     return `${hour}:${minutes}${ampm}`;
   }
@@ -67,7 +68,8 @@ export default class ActivityDefaultList extends Component {
   */
   _formatTitle(key) {
     const tempTitle = key.split('_').join(' ') && key.split('_').join(' ').toLowerCase();
-    const title = tempTitle.charAt(0) && tempTitle.charAt(0).toUpperCase() + tempTitle.slice(1);
+    let title = tempTitle.charAt(0) && tempTitle.charAt(0).toUpperCase() + tempTitle.slice(1);
+    title = title === 'Labbook' ? 'Project' : title;
     return `${title} (${this.props.categorizedDetails.detailObjects[this.props.itemKey].length})`;
   }
 

@@ -22,7 +22,8 @@ import graphene
 
 from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
-from gtmcore.workflows import BranchManager
+from gtmcore.inventory.branching import BranchManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.gitlab import GitLabManager
 from gtmcore.files import FileOperations
@@ -33,7 +34,6 @@ from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.identity import parse_token
-
 
 from lmsrvlabbook.api.objects.jobstatus import JobStatus
 from lmsrvlabbook.api.connections.ref import LabbookRefConnection
@@ -195,8 +195,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """Get number of commits the active_branch is behind its remote counterpart.
         Returns 0 if up-to-date or if local only."""
         # Note, by default using remote "origin"
+        def _gc(lb):
+            bm = BranchManager(lb, get_logged_in_username())
+            return bm.get_commits_behind_remote()[1]
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: labbook.get_commits_behind_remote("origin")[1])
+            _gc)
 
     def resolve_active_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
@@ -207,12 +210,22 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).workspace_branch)
 
     def resolve_available_branch_names(self, info):
+        fltr = lambda labbook: \
+            BranchManager(labbook=labbook, username=get_logged_in_username()).available_branches
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).branches)
+            fltr)
 
     def resolve_mergeable_branch_names(self, info):
+        def _mergeable(lb):
+            username = get_logged_in_username()
+            bm = BranchManager(lb, username=username)
+            if bm.active_branch == bm.workspace_branch:
+                return [b for b in bm.branches if f'gm.workspace-{username}.' in b]
+            else:
+                return [bm.workspace_branch]
+
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: BranchManager(labbook=labbook, username=get_logged_in_username()).mergeable_branches)
+            _mergeable)
 
     def helper_resolve_active_branch(self, labbook):
         active_branch_name = BranchManager(labbook=labbook, username=get_logged_in_username()).active_branch
@@ -427,11 +440,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = labbook.labmanager_config.config['git']['default_remote']
+        default_remote = labbook.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in labbook.labmanager_config.config['git']['remotes']:
+        for remote in labbook.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = labbook.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = labbook.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token
@@ -562,11 +575,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     @staticmethod
     def helper_resolve_visibility(labbook, info):
         # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = labbook.labmanager_config.config['git']['default_remote']
+        default_remote = labbook.client_config.config['git']['default_remote']
         admin_service = None
-        for remote in labbook.labmanager_config.config['git']['remotes']:
+        for remote in labbook.client_config.config['git']['remotes']:
             if default_remote == remote:
-                admin_service = labbook.labmanager_config.config['git']['remotes'][remote]['admin_service']
+                admin_service = labbook.client_config.config['git']['remotes'][remote]['admin_service']
                 break
 
         # Extract valid Bearer token
@@ -578,7 +591,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            d = mgr.repo_details(namespace=labbook.owner['username'], labbook_name=labbook.name)
+            owner = InventoryManager().query_labbook_owner(labbook)
+            d = mgr.repo_details(namespace=owner, labbook_name=labbook.name)
             return d.get('visibility')
         except ValueError:
             return "local"

@@ -187,7 +187,7 @@ export default class RemoteLabbookPanel extends Component {
    return (
      <div
        key={edge.node.name}
-       className="Card column-4-span-3 flex flex--column justify--space-between"
+       className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
      >
        {
 
@@ -256,7 +256,7 @@ export default class RemoteLabbookPanel extends Component {
          </p>
        </div>
        { !(edge.node.visibility === 'local') &&
-       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip RemoteLabbooks__${edge.node.visibility}`} />
+       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}`} />
         }
        {
           this.state.isImporting &&

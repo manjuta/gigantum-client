@@ -9,9 +9,11 @@ import requests
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import get_docker_client
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.environment import ComponentManager
 from gtmcore.container.core import infer_docker_image_name, get_container_ip
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
 
 logger = LMLogger.get_logger()
 
@@ -27,13 +29,14 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
     Returns:
         Path to jupyter (e.g., "/lab?token=xyz")
     """
+    owner = InventoryManager().query_labbook_owner(labbook)
     lb_key = tag or infer_docker_image_name(labbook_name=labbook.name,
-                                            owner=labbook.owner['username'],
+                                            owner=owner,
                                             username=username)
     docker_client = get_docker_client()
     lb_container = docker_client.containers.get(lb_key)
     if lb_container.status != 'running':
-        raise LabbookException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
+        raise GigantumException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
 
     search_sh = f'sh -c "ps aux | grep \'jupyter lab\' | grep -v \' grep \'"'
     ec, jupyter_tokens = lb_container.exec_run(search_sh)
@@ -48,7 +51,7 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
         # Get token from PS in container
         t = re.search("token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
         if not t:
-            raise LabbookException('Cannot detect Jupyter Lab token')
+            raise GigantumException('Cannot detect Jupyter Lab token')
         token = t.groups()[0]
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
 
@@ -85,9 +88,9 @@ def _start_jupyter_process(labbook: LabBook, lb_container,
                            proxy_prefix: Optional[str] = None) -> None:
     use_savehook = os.path.exists('/mnt/share/jupyterhooks') \
                    and not _shim_skip_python2_savehook(labbook)
-    un = labbook.owner['username']
+    owner = InventoryManager().query_labbook_owner(labbook)
     cmd = (f"export PYTHONPATH=/mnt/share:$PYTHONPATH && "
-           f'echo "{username},{un},{labbook.name},{token}" > /home/giguser/jupyter_token && '
+           f'echo "{username},{owner},{labbook.name},{token}" > /home/giguser/jupyter_token && '
            f"cd /mnt/labbook && "
            f"jupyter lab --port={DEFAULT_JUPYTER_PORT} --ip=0.0.0.0 "
            f"--NotebookApp.token='{token}' --no-browser "
@@ -135,4 +138,4 @@ def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
             # Assume API isn't up at all yet, so no connection can be made
             time.sleep(0.5)
     else:
-        raise LabbookException(f'Could not reach JupyterLab at {test_url} after timeout')
+        raise GigantumException(f'Could not reach JupyterLab at {test_url} after timeout')

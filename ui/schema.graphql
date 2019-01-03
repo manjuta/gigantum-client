@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Oct 18 2018 13:48:42 GMT-0400 (EDT)
+# timestamp: Thu Jan 03 2019 14:00:12 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -38,6 +38,7 @@ type ActivityDetailObject implements Node & GitRepository {
 
 """Enumeration representing the type of Activity Detail Record"""
 enum ActivityDetailType {
+  DATASET
   NOTE
   LABBOOK
   INPUT_DATA
@@ -85,6 +86,7 @@ enum ActivityType {
   MILESTONE
   BRANCH
   LABBOOK
+  DATASET
 }
 
 input AddCustomDockerInput {
@@ -232,19 +234,6 @@ type BuildImagePayload {
   clientMutationId: String
 }
 
-input CheckoutBranchInput {
-  owner: String!
-  labbookName: String!
-  branchName: String!
-  clientMutationId: String
-}
-
-"""Mutation checkout an existing branch branch"""
-type CheckoutBranchPayload {
-  labbook: Labbook
-  clientMutationId: String
-}
-
 """
 Input Object for params needed for a chunked upload
 
@@ -278,19 +267,6 @@ enum ContainerStatus {
   NOT_RUNNING
   STARTING
   RUNNING
-}
-
-input CreateBranchInput {
-  owner: String!
-  labbookName: String!
-  branchName: String!
-  clientMutationId: String
-}
-
-"""Mutation create a NEW branch for a LabBook LOCALLY"""
-type CreateBranchPayload {
-  branch: LabbookRef
-  clientMutationId: String
 }
 
 input CreateExperimentalBranchInput {
@@ -375,16 +351,15 @@ type DeleteLabbookCollaboratorPayload {
   clientMutationId: String
 }
 
-input DeleteLabbookFileInput {
+input DeleteLabbookFilesInput {
   owner: String!
   labbookName: String!
   section: String!
-  filePath: String!
-  isDirectory: Boolean
+  filePaths: [String]!
   clientMutationId: String
 }
 
-type DeleteLabbookFilePayload {
+type DeleteLabbookFilesPayload {
   success: Boolean
   clientMutationId: String
 }
@@ -687,8 +662,6 @@ type LabbookMutations {
   setLabbookDescription(input: SetLabbookDescriptionInput!): SetLabbookDescriptionPayload
   publishLabbook(input: PublishLabbookInput!): PublishLabbookPayload
   syncLabbook(input: SyncLabbookInput!): SyncLabbookPayload
-  createBranch(input: CreateBranchInput!): CreateBranchPayload
-  checkoutBranch(input: CheckoutBranchInput!): CheckoutBranchPayload
   addLabbookRemote(input: AddLabbookRemoteInput!): AddLabbookRemotePayload
   buildImage(input: BuildImageInput!): BuildImagePayload
   startContainer(input: StartContainerInput!): StartContainerPayload
@@ -702,7 +675,7 @@ type LabbookMutations {
   addLabbookFile(input: AddLabbookFileInput!): AddLabbookFilePayload
   completeBatchUploadTransaction(input: CompleteBatchUploadTransactionInput!): CompleteBatchUploadTransactionPayload
   moveLabbookFile(input: MoveLabbookFileInput!): MoveLabbookFilePayload
-  deleteLabbookFile(input: DeleteLabbookFileInput!): DeleteLabbookFilePayload
+  deleteLabbookFiles(input: DeleteLabbookFilesInput!): DeleteLabbookFilesPayload
   makeLabbookDirectory(input: MakeLabbookDirectoryInput!): MakeLabbookDirectoryPayload
   removeUserIdentity(input: RemoveUserIdentityInput!): RemoveUserIdentityPayload
   addFavorite(input: AddLabbookFavoriteInput!): AddLabbookFavoritePayload
@@ -793,6 +766,8 @@ type LabbookSection implements Node & GitRepository {
   allFiles(before: String, after: String, first: Int, last: Int): LabbookFileConnection
   favorites(before: String, after: String, first: Int, last: Int): LabbookFavoriteConnection
   isUntracked: Boolean
+  hasFiles: Boolean
+  hasFavorites: Boolean
 }
 
 input MakeLabbookDirectoryInput {
@@ -838,7 +813,7 @@ Method to move/rename a file or directory. If file, both src_path and dst_path s
 If a directory, be sure to include the trailing slash
 """
 type MoveLabbookFilePayload {
-  newLabbookFileEdge: LabbookFileEdge
+  updatedEdges(before: String, after: String, first: Int, last: Int): LabbookFileConnection
   clientMutationId: String
 }
 

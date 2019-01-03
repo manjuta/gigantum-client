@@ -332,7 +332,6 @@ class Activity extends Component {
     let isDemo = window.location.hostname === config.demoHostName,
       upperBound = isDemo ? 170 : 120,
       lowerBound = isDemo ? 130 : 80,
-      isExpanded = (window.pageYOffset < this.offsetDistance) && (window.pageYOffset > upperBound),
       stickyDate = null;
 
     this.offsetDistance = window.pageYOffset;
@@ -341,7 +340,7 @@ class Activity extends Component {
       if (date && date.e) {
         const bounds = date.e.getBoundingClientRect();
 
-        if ((!isExpanded && bounds.top < lowerBound) || (isExpanded && bounds.top < upperBound)) {
+        if (bounds.top < upperBound) {
           stickyDate = date.time;
           date.e.classList.add('not-visible');
           date.e.nextSibling && date.e.nextSibling.classList.add('next-element');
@@ -394,7 +393,12 @@ class Activity extends Component {
     activityRecords.edges.forEach((edge, index) => {
       if (edge && edge.node) {
         const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date();
-        const timeHash = `${date.getFullYear()}_${date.getMonth()}_${date.getDate()}`;
+
+        const year = date.getFullYear(),
+          month = date.getMonth(),
+          day = date.getDate();
+
+        const timeHash = `${year}_${month}_${day}`;
         count = edge.node.show || (previousTimeHash && timeHash !== previousTimeHash) ? 0 : count + 1;
         previousTimeHash = timeHash;
 
@@ -569,6 +573,7 @@ class Activity extends Component {
     const isLastPage = !this.props.labbook.activityRecords.pageInfo.hasNextPage;
     const rollbackableDetails = obj.edge.node.detailObjects.filter(detailObjs => detailObjs.type !== 'RESULT' && detailObjs.type !== 'CODE_EXECUTED');
     const isCompressed = this.state.compressedElements.has(obj.flatIndex);
+    const activtyBarHeight = obj.attachedCluster ? ((obj.attachedCluster.length - 1) * 7.5) + 30 : 0;
     return (
       <Fragment key={obj.edge.node.id}>
         <div className="ActivityCard__wrapper">
@@ -608,11 +613,11 @@ class Activity extends Component {
           }
           {
             obj.isExpandedHead && isCompressed &&
-              <div className="Activity__compressed-bar--top" style={{ height: `${((obj.attachedCluster.length - 1) * 7.5) + 30}px` }} />
+              <div className="Activity__compressed-bar--top" style={{ height: `${activtyBarHeight}px` }} />
           }
           {
             obj.isExpandedEnd && isCompressed &&
-              <div className="Activity__compressed-bar--bottom" style={{ height: `${((obj.attachedCluster.length - 1) * 7.5) + 30}px` }} />
+              <div className="Activity__compressed-bar--bottom" style={{ height: `${activtyBarHeight}px` }} />
           }
           <ErrorBoundary type="activityCardError" key={`activityCard${obj.edge.node.id}`}>
             <ActivityCard
@@ -747,7 +752,6 @@ class Activity extends Component {
       const stickyDateCSS = classNames({
         'Activity__date-tab': true,
         fixed: this.state.stickyDate,
-        'is-expanded': store.getState().labbook.isExpanded,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       return (

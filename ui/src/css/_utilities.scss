@@ -126,6 +126,10 @@
     flex-wrap: column-reverse;
 }
 
+.align-items--center {
+  align-items: center;
+}
+
 /*
   .text-align: center, left, right
 */
@@ -225,4 +229,10 @@
       opacity:1;
       transform:  translate(0px,0px)  ;
   }
+}
+
+@keyframes delayed-fade-in{
+  0% { opacity:0; }
+  75% { opacity:0; }
+  100% { opacity:1; }
 }

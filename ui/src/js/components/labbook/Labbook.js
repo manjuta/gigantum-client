@@ -21,6 +21,7 @@ import LabbookHeader from './labbookHeader/LabbookHeader';
 import Login from 'Components/login/Login';
 import Loader from 'Components/shared/Loader';
 import ErrorBoundary from 'Components/shared/ErrorBoundary';
+
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 // assets
@@ -30,35 +31,33 @@ import Config from 'JS/config';
 
 const Loading = () => <Loader />;
 
+/*
+ * Code splitting imports intended to boost initial load speed
+*/
+
 const Overview = Loadable({
   loader: () => import('./overview/Overview'),
   loading: Loading,
-  delay: 500,
 });
 const Activity = Loadable({
   loader: () => import('./activity/Activity'),
   loading: Loading,
-  delay: 500,
 });
 const Code = Loadable({
-  loader: () => import('./code/Code'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Code'),
   loading: Loading,
-  delay: 500,
 });
 const InputData = Loadable({
-  loader: () => import('./inputData/InputData'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Input'),
   loading: Loading,
-  delay: 500,
 });
 const OutputData = Loadable({
-  loader: () => import('./outputData/OutputData'),
+  loader: () => import('./filesShared/sectionWrapper/sectionWrapperFragments/Output'),
   loading: Loading,
-  delay: 500,
 });
 const Environment = Loadable({
   loader: () => import('./environment/Environment'),
   loading: Loading,
-  delay: 500,
 });
 
 class Labbook extends Component {
@@ -148,12 +147,11 @@ class Labbook extends Component {
     dispatches sticky state to redux to update state
   */
   _setStickHeader() {
-    const isExpanded = (window.pageYOffset < this.offsetDistance) && (window.pageYOffset > 120);
     this.offsetDistance = window.pageYOffset;
     const sticky = 50;
     const isSticky = window.pageYOffset >= sticky;
-    if ((store.getState().labbook.isSticky !== isSticky) || (store.getState().labbook.isExpanded !== isExpanded)) {
-      setStickyDate(isSticky, isExpanded);
+    if (store.getState().labbook.isSticky !== isSticky) {
+      setStickyDate(isSticky);
     }
 
     if (isSticky) {
@@ -219,7 +217,6 @@ class Labbook extends Component {
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               branchName={branchName}
-              isExpanded={this.props.isExpanded}
               {...this.props}
             />
 
@@ -334,6 +331,7 @@ class Labbook extends Component {
                                labbookId={labbook.id}
                                setContainerState={this._setContainerState}
                                isLocked={isLockedBrowser}
+                               section={'code'}
                              />
 
                         </ErrorBoundary>)}
@@ -351,6 +349,7 @@ class Labbook extends Component {
                                labbook={labbook}
                                labbookId={labbook.id}
                                isLocked={isLockedBrowser}
+                               section={'input'}
                              />
 
                         </ErrorBoundary>)}
@@ -368,6 +367,7 @@ class Labbook extends Component {
                                labbook={labbook}
                                labbookId={labbook.id}
                                isLocked={isLockedBrowser}
+                               section={'output'}
                              />
 
                         </ErrorBoundary>)}
@@ -443,22 +443,26 @@ const LabbookFragmentContainer = createFragmentContainer(
           ...Overview_labbook
           ...Activity_labbook
           ...Code_labbook
-          ...InputData_labbook
-          ...OutputData_labbook
+          ...Input_labbook
+          ...Output_labbook
 
       }`,
   },
 
 );
 
-const backend = (manager: Object) => {
+/** *
+  * @param {Object} manager
+  * data object for reactDND
+*/
+
+const backend = (manager) => {
   const backend = HTML5Backend(manager),
     orgTopDropCapture = backend.handleTopDropCapture;
 
   backend.handleTopDropCapture = (e) => {
     if (backend.currentNativeSource) {
       orgTopDropCapture.call(backend, e);
-
       backend.currentNativeSource.item.dirContent = getFilesFromDragEvent(e, { recursive: true }); // returns a promise
     }
   };

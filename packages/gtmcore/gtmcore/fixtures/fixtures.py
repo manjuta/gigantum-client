@@ -26,14 +26,16 @@ import collections
 import git
 from pkg_resources import resource_filename
 import pytest
+import uuid
 
 from gtmcore.configuration import Configuration
 from gtmcore.environment import RepositoryManager, ComponentManager
-from gtmcore.labbook import LabBook
+from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.activity.detaildb import ActivityDetailDB
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.files import FileOperations
+from gtmcore.inventory.branching import BranchManager
 import requests
 
 
@@ -110,10 +112,9 @@ def _MOCK_create_remote_repo2(labbook, username: str, visibility, access_token =
             ...
     ```
     """
-    import tempfile, uuid
-    working_dir = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()))
+    rand = str(uuid.uuid4())[:6]
+    working_dir = os.path.join(tempfile.gettempdir(), rand, labbook.name)
     os.makedirs(working_dir, exist_ok=True)
-    import git
     r = git.Repo.init(path=working_dir, bare=True)
     assert r.bare is True
     labbook.add_remote(remote_name="origin", url=working_dir)
@@ -155,6 +156,7 @@ def mock_config_with_repo():
     erm = RepositoryManager(conf_file)
     erm.update_repositories()
     erm.index_repositories()
+
     yield conf_file, working_dir
     shutil.rmtree(working_dir)
 
@@ -289,8 +291,9 @@ def mock_config_with_activitystore():
     """A pytest fixture that creates a ActivityStore (and labbook) and deletes directory after test"""
     # Create a temporary working directory
     conf_file, working_dir = _create_temp_work_dir()
-    lb = LabBook(conf_file, author=GitAuthor("default", "default@test.com"))
-    lb.new({"username": "default"}, "labbook1", username="default", description="my first labbook")
+    im = InventoryManager(conf_file)
+    lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook",
+                           author=GitAuthor("default", "default@test.com"))
     store = ActivityStore(lb)
 
     yield store, lb
@@ -304,8 +307,8 @@ def mock_config_with_detaildb():
     """A pytest fixture that creates a detail db (and labbook) and deletes directory after test"""
     # Create a temporary working directory
     conf_file, working_dir = _create_temp_work_dir()
-    lb = LabBook(conf_file)
-    lb.new({"username": "default"}, "labbook1", username="default", description="my first labbook")
+    im = InventoryManager(conf_file)
+    lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook")
     db = ActivityDetailDB(lb.root_dir, lb.checkout_id)
 
     yield db, lb
@@ -319,10 +322,10 @@ def mock_labbook():
     """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
 
     conf_file, working_dir = _create_temp_work_dir()
-    lb = LabBook(conf_file)
-    labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
-                             owner={"username": "test"})
-    yield conf_file, labbook_dir, lb
+    im = InventoryManager(conf_file)
+    # description was "my first labbook1"
+    lb = im.create_labbook('test', 'test', 'labbook1', description="my test description")
+    yield conf_file, lb.root_dir, lb
     shutil.rmtree(working_dir)
 
 
@@ -331,10 +334,10 @@ def mock_labbook_lfs_disabled():
     """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
 
     conf_file, working_dir = _create_temp_work_dir(lfs_enabled=False)
-    lb = LabBook(conf_file)
-    labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
-                             owner={"username": "test"})
-    yield conf_file, labbook_dir, lb
+    im = InventoryManager(conf_file)
+    lb = im.create_labbook_disabled_lfs('test', 'test', 'labbook1', description="my first labbook")
+    assert lb.is_repo_clean
+    yield conf_file, lb.root_dir, lb
     shutil.rmtree(working_dir)
 
 
@@ -349,10 +352,9 @@ def mock_duplicate_labbook():
     """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
 
     conf_file, working_dir = _create_temp_work_dir()
-    lb = LabBook(conf_file)
-    labbook_dir = lb.new(username="test", name="labbook1", description="my first labbook",
-                             owner={"username": "test"})
-    yield conf_file, labbook_dir, lb
+    im = InventoryManager(conf_file)
+    lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook")
+    yield conf_file, lb.root_dir, lb
     shutil.rmtree(working_dir)
 
 
@@ -361,11 +363,12 @@ def remote_labbook_repo():
 
     # TODO: Remove after integration tests with LFS support are available
     conf_file, working_dir = _create_temp_work_dir(lfs_enabled=False)
+    im = InventoryManager(conf_file)
+    lb = im.create_labbook('test', 'test', 'sample-repo-lb', description="my first labbook")
+    bm = BranchManager(lb, username='test')
+    bm.create_branch('gm.workspace-test.testing-branch')
 
-    lb = LabBook(conf_file)
-    labbook_dir = lb.new(username="test", name="sample-repo-lb", description="my first labbook",
-                             owner={"username": "test"})
-    lb.checkout_branch("testing-branch", new=True)
+
     #with tempfile.TemporaryDirectory() as tmpdirname:
     with open(os.path.join('/tmp', 'codefile.c'), 'wb') as codef:
         codef.write(b'// Cody McCodeface ...')
@@ -373,7 +376,7 @@ def remote_labbook_repo():
     FileOperations.insert_file(lb, "code", "/tmp/codefile.c")
 
     assert lb.is_repo_clean
-    lb.checkout_branch("gm.workspace")
+    bm.workon_branch('gm.workspace')
 
     # Location of the repo to push/pull from
     yield lb.root_dir

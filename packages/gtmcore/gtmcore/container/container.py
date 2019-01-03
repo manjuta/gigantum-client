@@ -26,7 +26,9 @@ import docker.errors
 
 from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
-from gtmcore.labbook import LabBook, LabbookException
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.labbook import LabBook
+from gtmcore.exceptions import GigantumException
 
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerException
@@ -79,8 +81,9 @@ class ContainerOperations(object):
         Returns:
             A tuple containing the labbook, docker image id.
         """
+        owner = InventoryManager().query_labbook_owner(labbook)
         image_name = override_image_tag or infer_docker_image_name(labbook_name=labbook.name,
-                                                                   owner=labbook.owner['username'],
+                                                                   owner=owner,
                                                                    username=username)
         # We need to remove any images pertaining to this labbook before triggering a build.
         try:
@@ -111,8 +114,9 @@ class ContainerOperations(object):
         """
         image_name = override_image_tag
         if not image_name:
+            owner = InventoryManager().query_labbook_owner(labbook)
             image_name = infer_docker_image_name(labbook_name=labbook.name,
-                                                 owner=labbook.owner['username'],
+                                                 owner=owner,
                                                  username=username)
         # Get a docker client instance
         client = get_docker_client()
@@ -169,7 +173,7 @@ class ContainerOperations(object):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
         container_id = start_labbook_container(labbook_root=labbook.root_dir,
-                                               config_path=labbook.labmanager_config.config_file,
+                                               config_path=labbook.client_config.config_file,
                                                override_image_id=override_image_tag, username=username)
         return labbook, container_id
 
@@ -185,8 +189,9 @@ class ContainerOperations(object):
         Returns:
             A tuple of (Labbook, boolean indicating whether a container was successfully stopped).
         """
+        owner = InventoryManager().query_labbook_owner(labbook)
         n = infer_docker_image_name(labbook_name=labbook.name,
-                                    owner=labbook.owner['username'],
+                                    owner=owner,
                                     username=username)
         logger.info(f"Stopping {str(labbook)} ({n})")
 
@@ -209,8 +214,9 @@ class ContainerOperations(object):
         Returns:
             Externally facing IP
         """
+        owner = InventoryManager().query_labbook_owner(labbook)
         docker_key = infer_docker_image_name(labbook_name=labbook.name,
-                                             owner=labbook.owner['username'],
+                                             owner=owner,
                                              username=username)
         return get_container_ip(docker_key)
 
@@ -238,7 +244,7 @@ class ContainerOperations(object):
         # A dictionary of dev tools and the port IN THE CONTAINER
         supported_dev_tools = ['jupyterlab']
         if dev_tool_name not in supported_dev_tools:
-            raise LabbookException(f"'{dev_tool_name}' not currently supported")
+            raise GigantumException(f"'{dev_tool_name}' not currently supported")
         suffix = start_jupyter(labbook, username, tag, check_reachable,
                                proxy_prefix)
         return labbook, suffix

@@ -68,7 +68,7 @@
   background: $white;
 
   font-weight: lighter;
-  @include flex(center, row)
+  @include flex(center, row);
 
   &.note {
     z-index: index($elements, card) !important;
@@ -86,7 +86,7 @@
   &.fixed{
     position: fixed;
     z-index: index($elements, fixedDate) +1;
-    top: 50px;
+    top: 90px;
 
     &:before {
       display: none !important;
@@ -104,10 +104,6 @@
 
   &.is-demo{
     top: 100px;
-  }
-
-  &.is-expanded{
-    top: 90px;
   }
 
   &.is-expanded.is-demo{
