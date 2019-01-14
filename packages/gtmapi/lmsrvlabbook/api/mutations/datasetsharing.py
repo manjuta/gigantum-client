@@ -9,7 +9,7 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token

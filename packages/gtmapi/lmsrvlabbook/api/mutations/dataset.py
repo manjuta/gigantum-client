@@ -23,13 +23,10 @@ import base64
 import shutil
 import pathlib
 import flask
-import subprocess
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
-from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType,\
-    ActivityAction
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.dataset.io.manager import IOManager
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author

@@ -26,7 +26,7 @@ from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.activity import ActivityStore
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 

@@ -19,13 +19,14 @@
 # SOFTWARE.
 import time
 
-from typing import Optional, Callable
+from typing import Optional, Callable, cast
 
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.logging import LMLogger
+from gtmcore.labbook import LabBook
 from gtmcore.workflows import core, loaders
 from gtmcore.exceptions import GigantumException
-from gtmcore.inventory import Repository
+from gtmcore.inventory import Repository, InventoryManager
 from gtmcore.dataset import Dataset
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.manifest import Manifest
@@ -58,12 +59,22 @@ class GitWorkflow(object):
         self.repository = repository
 
     @classmethod
-    def import_remote_dataset(cls) -> 'GitWorkflow':
-        loaders.labbook_from_remote()
+    def import_remote_dataset(cls, remote_url: str, username: str) -> 'GitWorkflow':
+        inv_manager = InventoryManager()
+        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
+                                  load_repository=inv_manager.load_dataset,
+                                  put_repository=inv_manager.put_dataset)
+        return cls(cast(Dataset, repo))
 
     @classmethod
-    def import_remote_labbook(cls) -> 'GitWorkflow':
-        pass
+    def import_remote_labbook(cls, remote_url: str, username: str) -> 'GitWorkflow':
+        inv_manager = InventoryManager()
+        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
+                                  load_repository=inv_manager.load_dataset,
+                                  put_repository=inv_manager.put_dataset)
+        return cls(cast(LabBook, repo))
 
     @property
     def remote(self) -> Optional[str]:

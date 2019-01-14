@@ -3,7 +3,7 @@ import tempfile
 import os
 
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook.labbook import LabBook
+from gtmcore.configuration import Configuration
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.inventory.branching import BranchManager
@@ -14,13 +14,11 @@ from gtmcore.logging import LMLogger
 logger = LMLogger.get_logger()
 
 
-def _clone(repo: Repository, remote_url: str, working_dir: str) -> str:
-    if repo.client_config.config["git"]["lfs_enabled"]:
+def _clone(remote_url: str, working_dir: str) -> str:
+    if Configuration().config['git']['lfs_enabled']:
         clone_tokens = f"git lfs clone {remote_url} --branch gm.workspace".split()
     else:
         clone_tokens = f"git clone {remote_url} --branch gm.workspace".split()
-    print('INSIDE _clone')
-    print(clone_tokens)
 
     # Perform a Git clone
     call_subprocess(clone_tokens, cwd=working_dir)
@@ -28,9 +26,12 @@ def _clone(repo: Repository, remote_url: str, working_dir: str) -> str:
     # Affirm there is only one directory created
     dirs = os.listdir(working_dir)
     if len(dirs) != 1:
-        assert False
+        raise GigantumException('Git clone produced extra directories')
+
     p = os.path.join(working_dir, dirs[0])
-    assert os.path.exists(p)
+    if not os.path.exists(p):
+        raise GigantumException('Could not find expected path of repo after clone')
+
     return p
 
 
@@ -50,15 +51,15 @@ def _switch_owner(repository: Repository, username: str) -> Repository:
     return repository
 
 
-def _from_remote(remote_url: str, username: str, owner: str,
-                 repository: Repository, load_repository: Callable[[str], Any],
-                 put_repository: Callable[[str, str, str], Any],
-                 make_owner: bool = False) -> Repository:
+def clone_repo(remote_url: str, username: str, owner: str,
+               load_repository: Callable[[str], Any],
+               put_repository: Callable[[str, str, str], Any],
+               make_owner: bool = False) -> Repository:
 
     with tempfile.TemporaryDirectory() as tempdir:
         # Clone into a temporary directory, such that if anything
         # gets messed up, then this directory will be cleaned up.
-        path = _clone(repository, remote_url=remote_url, working_dir=tempdir)
+        path = _clone(remote_url=remote_url, working_dir=tempdir)
         candidate_repo = load_repository(path)
 
         if os.environ.get('WINDOWS_HOST'):
@@ -86,26 +87,6 @@ def _from_remote(remote_url: str, username: str, owner: str,
     return repository
 
 
-def labbook_from_remote(remote_url: str, username: str, owner: str,
-
-                        make_owner: bool = False) -> LabBook:
-    """Clone a labbook from a remote Git repository.
-
-    Args:
-        remote_url: URL or path of remote repo
-        username: Username of logged in user
-        owner: Owner/namespace of labbook
-        labbook: Optional LabBook instance with config
-
-    Returns:
-        LabBook
-    """
-
-    return cast(LabBook, _from_remote(remote_url, username, owner, labbook,
-                                      inv_manager.load_labbook_from_directory,
-                                      inv_manager.put_labbook))
-
-
 def dataset_from_remote(remote_url: str, username: str, owner: str,
                         dataset: Optional[Dataset] = None,
                         make_owner: bool = False) -> Dataset:
@@ -126,6 +107,6 @@ def dataset_from_remote(remote_url: str, username: str, owner: str,
     else:
         s_dataset = dataset  # type: ignore
     inv_manager = InventoryManager(s_dataset.client_config.config_file)
-    return cast(Dataset, _from_remote(remote_url, username, owner, s_dataset,
-                                      inv_manager.load_dataset_from_directory,
-                                      inv_manager.put_dataset, make_owner))
+    return cast(Dataset, clone_repo(remote_url, username, owner, s_dataset,
+                                    inv_manager.load_dataset_from_directory,
+                                    inv_manager.put_dataset, make_owner))

@@ -22,7 +22,7 @@ import time
 import os
 from typing import Optional, Callable
 
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 # from gtmcore.labbook import LabBook
 from gtmcore.inventory import Repository
 from gtmcore.inventory.inventory import InventoryManager
