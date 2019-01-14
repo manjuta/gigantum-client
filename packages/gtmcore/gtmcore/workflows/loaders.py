@@ -15,10 +15,10 @@ logger = LMLogger.get_logger()
 
 
 def _clone(remote_url: str, working_dir: str) -> str:
-    if Configuration().config['git']['lfs_enabled']:
-        clone_tokens = f"git lfs clone {remote_url} --branch gm.workspace".split()
+    if Configuration().config['git']['lfs_enabled'] and False:
+        clone_tokens = f"git lfs clone {remote_url}".split()
     else:
-        clone_tokens = f"git clone {remote_url} --branch gm.workspace".split()
+        clone_tokens = f"git clone {remote_url}".split()
 
     # Perform a Git clone
     call_subprocess(clone_tokens, cwd=working_dir)
@@ -68,21 +68,8 @@ def clone_repo(remote_url: str, username: str, owner: str,
                             cwd=candidate_repo.root_dir)
 
         bm = BranchManager(candidate_repo, username=username)
-        bm.workon_branch("gm.workspace")
-        user_workspace = f'gm.workspace-{username}'
-        if user_workspace in bm.branches:
-            bm.workon_branch(user_workspace)
-        else:
-            bm.create_branch(user_workspace)
 
-        if make_owner:
-            # Make the owner of the imported labbook the username
-            candidate_repo = _switch_owner(candidate_repo, username)
-            new_owner = username
-        else:
-            new_owner = owner
-
-        repository = put_repository(candidate_repo.root_dir, username, new_owner)
+        repository = put_repository(candidate_repo.root_dir, username, owner)
 
     return repository
 

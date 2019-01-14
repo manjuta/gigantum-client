@@ -37,7 +37,7 @@ from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.inventory  import Repository
 
 from gtmcore.logging import LMLogger
-from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
+from gtmcore.workflows import GitWorkflow, ZipExporter
 from gtmcore.container.core import (build_docker_image as build_image,
                                      start_labbook_container as start_container,
                                      stop_labbook_container as stop_container)

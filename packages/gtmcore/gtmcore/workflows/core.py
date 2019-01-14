@@ -126,11 +126,6 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
         raise GitLabRemoteError(e)
 
 
-def delete_remote_gitlab_repo(repository: Repository, username: str,
-                              access_token: Optional[str] = None) -> None:
-    pass
-
-
 def publish_to_remote(repository: Repository, username: str, remote: str,
                       feedback_callback: Callable) -> None:
     bm = BranchManager(repository, username=username)
@@ -193,10 +188,6 @@ def sync_with_remote(repository: Repository, username: str, remote: str,
         if repository.active_branch != f'gm.workspace-{username}':
             raise ValueError(f"Must be on user workspace (gm.workspace-{username}) to sync")
 
-        if not repository.has_remote:
-            sync_locally(repository, username)
-            return 0
-
         feedback_callback(f"Sweeping {str(repository)} uncommitted changes...")
         repository.sweep_uncommitted_changes()
         git_garbage_collect(repository)
@@ -248,39 +239,3 @@ def sync_with_remote(repository: Repository, username: str, remote: str,
     finally:
         # We should (almost) always have the user's personal workspace checked out.
         bm.workon_branch(f"gm.workspace-{username}")
-
-
-def sync_locally(repository: Repository, username: Optional[str] = None) -> None:
-    """Sync locally only to gm.workspace branch - don't do anything with remote. Creates a user's
-     local workspace if necessary.
-
-    Args:
-        repository: Subject repository instance
-        username: Active username
-
-    Returns:
-        None
-
-    Raises:
-        GigantumException
-    """
-    try:
-        repository.sweep_uncommitted_changes()
-        git_garbage_collect(repository)
-        bm = BranchManager(repository, username=username or "WORKAROUND")
-        if username and f"gm.workspace-{username}" not in bm.branches:
-            bm.workon_branch("gm.workspace")
-            bm.create_branch(f"gm.workspace-{username}")
-            bm.merge_from("gm.workspace")
-            # TODO - Git commit needs a wrapper in BranchManager
-            repository.git.commit(f"Created and merged new user workspace gm.workspace-{username}")
-        else:
-            orig_branch = repository.active_branch
-            bm.workon_branch("gm.workspace")
-            bm.merge_from(orig_branch)
-            # TODO - Git commit needs a wrapper in BranchManager
-            repository.git.commit(f"Merged from local workspace")
-            bm.workon_branch(orig_branch)
-    except Exception as e:
-        logger.error(e)
-        raise GigantumException(e)

@@ -96,6 +96,9 @@ class Repository(object):
         # Persisted Favorites data for more efficient file listing operations
         self._favorite_keys: Optional[Dict[str, Any]] = None
 
+    def __eq__(self, other):
+        return type(other) == type(self) and other.root_dir == self.root_dir
+
     def _validate_git(method_ref):  #type: ignore
         """Definition of decorator that validates git operations.
 

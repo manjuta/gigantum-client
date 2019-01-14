@@ -113,7 +113,7 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     ```
     """
     rand = str(uuid.uuid4())[:6]
-    working_dir = os.path.join(tempfile.gettempdir(), rand, repository.name)
+    working_dir = os.path.join(tempfile.gettempdir(), rand, 'testuser', repository.name)
     os.makedirs(working_dir, exist_ok=True)
     r = git.Repo.init(path=working_dir, bare=True)
     assert r.bare is True

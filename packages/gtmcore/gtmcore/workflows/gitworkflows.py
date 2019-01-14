@@ -22,6 +22,7 @@ import time
 from typing import Optional, Callable, cast
 
 from gtmcore.configuration.utils import call_subprocess
+from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
 from gtmcore.workflows import core, loaders
@@ -58,6 +59,10 @@ class GitWorkflow(object):
     def __init__(self, repository: Repository) -> None:
         self.repository = repository
 
+    @property
+    def remote(self) -> Optional[str]:
+        return self.repository.remote
+
     @classmethod
     def import_remote_dataset(cls, remote_url: str, username: str) -> 'GitWorkflow':
         inv_manager = InventoryManager()
@@ -68,17 +73,14 @@ class GitWorkflow(object):
         return cls(cast(Dataset, repo))
 
     @classmethod
-    def import_remote_labbook(cls, remote_url: str, username: str) -> 'GitWorkflow':
-        inv_manager = InventoryManager()
+    def import_remote_labbook(cls, remote_url: str, username: str,
+                              config: Configuration = None) -> 'GitWorkflow':
+        inv_manager = InventoryManager(config_file=config)
         _, namespace, repo_name = remote_url.rsplit('/', 2)
         repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
-                                  load_repository=inv_manager.load_dataset,
-                                  put_repository=inv_manager.put_dataset)
+                                  load_repository=inv_manager.load_labbook_from_directory,
+                                  put_repository=inv_manager.put_labbook)
         return cls(cast(LabBook, repo))
-
-    @property
-    def remote(self) -> Optional[str]:
-        return self.repository.remote
 
     def garbagecollect(self):
         """ Run a `git gc` on the repository. """
@@ -101,7 +103,7 @@ class GitWorkflow(object):
         """
 
         logger.info(f"Publishing {str(self.repository)} for user {username} to remote {remote}")
-        if not self.remote:
+        if self.remote:
             raise GitWorkflowException("Cannot publish Labbook when remote already set.")
 
         branch_mgr = BranchManager(self.repository, username=username)
@@ -122,12 +124,6 @@ class GitWorkflow(object):
             logger.error(f"Publish failed {e}: {str(self.repository)} may be in corrupted Git state!")
             call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
             raise e
-
-    def unpublish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
-                  public: bool = False, feedback_callback: Callable = lambda _ : None,
-                  id_token: Optional[str] = None) -> None:
-        """ Delete the repository on the remote"""
-        pass
 
     def pull(self):
         pass

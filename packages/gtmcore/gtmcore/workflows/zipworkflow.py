@@ -46,8 +46,6 @@ class ZipExporter(object):
         if not os.path.isdir(export_directory):
             os.makedirs(export_directory, exist_ok=True)
 
-        core.sync_locally(repo)
-
         repo_dir, _ = repo.root_dir.rsplit(os.path.sep, 1)
 
         repo_zip_name = f'{repo.name}-' \
@@ -113,9 +111,6 @@ class ZipExporter(object):
             repo = fetch_method(unzipped_path)
             statusmsg = f'{statusmsg}\nCreating workspace branch...'
             update_meta(statusmsg)
-
-            # This makes sure the working directory is set properly.
-            core.sync_locally(repo, username=username)
 
             if 'owner' in repo._data:
                 repo._data['owner']['username'] = owner
