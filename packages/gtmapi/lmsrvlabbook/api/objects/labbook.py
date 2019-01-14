@@ -215,18 +215,16 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     def resolve_available_branch_names(self, info):
         fltr = lambda labbook: \
-            BranchManager(labbook, username=get_logged_in_username()).available_branches
+            BranchManager(labbook, username=get_logged_in_username()).branches
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             fltr)
 
     def resolve_mergeable_branch_names(self, info):
         def _mergeable(lb):
+            # TODO(billvb) - Refactor for new branch model.
             username = get_logged_in_username()
             bm = BranchManager(lb, username=username)
-            if bm.active_branch == bm.workspace_branch:
-                return [b for b in bm.branches if f'gm.workspace-{username}.' in b]
-            else:
-                return [bm.workspace_branch]
+            return [b for b in bm.branches if bm.active_branch != b]
 
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             _mergeable)
