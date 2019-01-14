@@ -1,8 +1,5 @@
 from typing import Optional, Callable, Any, cast
-import subprocess
-import shutil
 import tempfile
-import time
 import os
 
 from gtmcore.configuration.utils import call_subprocess
@@ -90,7 +87,7 @@ def _from_remote(remote_url: str, username: str, owner: str,
 
 
 def labbook_from_remote(remote_url: str, username: str, owner: str,
-                        labbook: Optional[LabBook] = None,
+
                         make_owner: bool = False) -> LabBook:
     """Clone a labbook from a remote Git repository.
 
@@ -99,19 +96,14 @@ def labbook_from_remote(remote_url: str, username: str, owner: str,
         username: Username of logged in user
         owner: Owner/namespace of labbook
         labbook: Optional LabBook instance with config
-        make_owner: After cloning, make the owner the "username"
 
     Returns:
         LabBook
     """
-    if labbook is None:
-        s_labbook = LabBook()
-    else:
-        s_labbook = labbook  # type: ignore
-    inv_manager = InventoryManager(s_labbook.client_config.config_file)
-    return cast(LabBook, _from_remote(remote_url, username, owner, s_labbook,
+
+    return cast(LabBook, _from_remote(remote_url, username, owner, labbook,
                                       inv_manager.load_labbook_from_directory,
-                                      inv_manager.put_labbook, make_owner))
+                                      inv_manager.put_labbook))
 
 
 def dataset_from_remote(remote_url: str, username: str, owner: str,

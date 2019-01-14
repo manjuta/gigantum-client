@@ -126,19 +126,18 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
         raise GitLabRemoteError(e)
 
 
+def delete_remote_gitlab_repo(repository: Repository, username: str,
+                              access_token: Optional[str] = None) -> None:
+    pass
+
+
 def publish_to_remote(repository: Repository, username: str, remote: str,
                       feedback_callback: Callable) -> None:
-    # TODO - This should be called from the dispatcher
-    # Current branch must be the user's workspace.
     bm = BranchManager(repository, username=username)
-    if f'gm.workspace-{username}' != repository.active_branch:
-        raise ValueError('User workspace must be active branch to publish')
+    if bm.workspace_branch != bm.active_branch:
+        raise ValueError(f'Must be on branch {bm.workspace_branch} to publish')
 
-    # The gm.workspace branch must exist (if not, then there is a problem in Labbook.new())
-    if 'gm.workspace' not in repository.get_branches()['local']:
-        raise ValueError('Branch gm.workspace does not exist in local Labbook branches')
-
-    feedback_callback("Preparing to publish")
+    feedback_callback(f"Preparing to publish {repository.name}")
     git_garbage_collect(repository)
 
     # Try five attempts to fetch - the remote repo could have been created just milliseconds
@@ -153,35 +152,17 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
     else:
         raise ValueError(f"Timed out trying to fetch repo for {str(repository)}")
 
-    # Make sure user's workspace is synced (in case they are working on it on other machines)
-    if bm.get_commits_behind_remote(remote_name=remote)[1] > 0:
-        raise ValueError(f'Cannot publish since {repository.active_branch} is not synced')
-
-    # Make sure the master workspace is synced before attempting to publish.
-    feedback_callback("Checking out primary branch...")
-    bm.workon_branch("gm.workspace")
-
-    if bm.get_commits_behind_remote(remote_name=remote)[1] > 0:
-        raise ValueError(f'Cannot publish since {repository.active_branch} is not synced')
-
-    feedback_callback("Merging with user workspace...")
-    # Now, it should be safe to pull the user's workspace into the master workspace.
-    call_subprocess(['git', 'merge', f'gm.workspace-{username}'], cwd=repository.root_dir)
-    repository.git.add_all(repository.root_dir)
-    repository.git.commit(f"Merged gm.workspace-{username}")
-
     feedback_callback("Pushing up regular objects...")
-    call_subprocess(['git', 'push', '--set-upstream', 'origin', 'gm.workspace'], cwd=repository.root_dir)
+    call_subprocess(['git', 'push', '--set-upstream', 'origin', bm.workspace_branch],
+                    cwd=repository.root_dir)
 
-    feedback_callback("Pushing up large objects...")
     if repository.client_config.config["git"]["lfs_enabled"] is True:
+        feedback_callback("Pushing up large objects...")
         t0 = time.time()
-        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', 'gm.workspace'], cwd=repository.root_dir)
+        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', bm.workspace_branch],
+                        cwd=repository.root_dir)
         logger.info(f"Ran in {str(repository)} `git lfs push --all` in {t0-time.time()}s")
 
-    feedback_callback(f"Returning to {username} workspace ...")
-    # Return to the user's workspace, merge it with the global workspace (as a precaution)
-    bm.workon_branch(f'gm.workspace-{username}')
     feedback_callback(f"Publish complete.")
 
 

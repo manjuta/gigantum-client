@@ -153,7 +153,7 @@ class TestDatasetImportZipping(object):
             assert not os.path.exists(path)
             assert 'unittester2' == InventoryManager(mock_config_file[0]).query_owner(newds)
             assert newds.is_repo_clean
-            assert newds.active_branch == 'gm.workspace-unittester2'
+            assert newds.active_branch == 'unittester2'
 
             # Now try with same user as exporter
             path2 = ZipExporter.export_dataset(ds.root_dir, tempd)
@@ -162,4 +162,4 @@ class TestDatasetImportZipping(object):
                                              mock_config_file[0])
             assert 'unittester' == InventoryManager(mock_config_file[0]).query_owner(lb2)
             assert lb2.is_repo_clean
-            assert lb2.active_branch == 'gm.workspace-unittester'
+            assert lb2.active_branch == 'unittester'

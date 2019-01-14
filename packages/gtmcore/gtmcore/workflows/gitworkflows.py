@@ -23,7 +23,8 @@ from typing import Optional, Callable
 
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.logging import LMLogger
-from gtmcore.workflows import core
+from gtmcore.workflows import core, loaders
+from gtmcore.exceptions import GigantumException
 from gtmcore.inventory import Repository
 from gtmcore.dataset import Dataset
 from gtmcore.inventory.branching import BranchManager
@@ -44,6 +45,10 @@ def helper_push_objects(dataset, logged_in_username, feedback_callback, access_t
     iom.manifest.link_revision()
 
 
+class GitWorkflowException(GigantumException):
+    pass
+
+
 class GitWorkflow(object):
     """Manages all aspects of interaction with Git remote server
 
@@ -51,6 +56,18 @@ class GitWorkflow(object):
 
     def __init__(self, repository: Repository) -> None:
         self.repository = repository
+
+    @classmethod
+    def import_remote_dataset(cls) -> 'GitWorkflow':
+        loaders.labbook_from_remote()
+
+    @classmethod
+    def import_remote_labbook(cls) -> 'GitWorkflow':
+        pass
+
+    @property
+    def remote(self) -> Optional[str]:
+        return self.repository.remote
 
     def garbagecollect(self):
         """ Run a `git gc` on the repository. """
@@ -73,34 +90,36 @@ class GitWorkflow(object):
         """
 
         logger.info(f"Publishing {str(self.repository)} for user {username} to remote {remote}")
-        if self.repository.has_remote:
-            raise ValueError("Cannot publish Labbook when remote already set.")
+        if not self.remote:
+            raise GitWorkflowException("Cannot publish Labbook when remote already set.")
 
         branch_mgr = BranchManager(self.repository, username=username)
-        if branch_mgr.active_branch != f'gm.workspace-{username}':
-            raise ValueError(f"Must be on user workspace (gm.workspace-{username}) to sync")
+        if branch_mgr.active_branch != branch_mgr.workspace_branch:
+            raise GitWorkflowException(f"Must be on branch {branch_mgr.workspace_branch} to publish")
 
         try:
             self.repository.sweep_uncommitted_changes()
             vis = "public" if public is True else "private"
-            t0 = time.time()
             core.create_remote_gitlab_repo(repository=self.repository, username=username,
                                            access_token=access_token, visibility=vis)
-            logger.info(f"Created remote repo for {str(self.repository)} in {time.time()-t0:.1f}sec")
-            t0 = time.time()
             core.publish_to_remote(repository=self.repository, username=username,
                                    remote=remote, feedback_callback=feedback_callback)
-            logger.info(f"Published {str(self.repository)} in {time.time()-t0:.1f}sec")
-
             if isinstance(self.repository, Dataset):
                 helper_push_objects(self.repository, username, feedback_callback, access_token, id_token)
         except Exception as e:
             # Unsure what specific exception add_remote creates, so make a catchall.
             logger.error(f"Publish failed {e}: {str(self.repository)} may be in corrupted Git state!")
             call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
-
-            branch_mgr.workon_branch(f"gm.workspace-{username}")
             raise e
+
+    def unpublish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
+                  public: bool = False, feedback_callback: Callable = lambda _ : None,
+                  id_token: Optional[str] = None) -> None:
+        """ Delete the repository on the remote"""
+        pass
+
+    def pull(self):
+        pass
 
     def sync(self, username: str, remote: str = "origin", force: bool = False,
              feedback_callback: Callable = lambda _ : None,

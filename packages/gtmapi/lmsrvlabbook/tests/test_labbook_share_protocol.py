@@ -20,21 +20,16 @@
 import os
 import responses
 
-from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir, \
-    fixture_working_dir_lfs_disabled
-
 import pytest
 from mock import patch
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
-from gtmcore.fixtures import (remote_labbook_repo, remote_bare_repo, mock_labbook,
-                               mock_config_file, _MOCK_create_remote_repo2)
+from gtmcore.fixtures import (_MOCK_create_remote_repo2)
 from gtmcore.labbook import LabBook
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.inventory import loaders
 
-from gtmcore.workflows import GitWorkflow
+from gtmcore.workflows import GitWorkflow, loaders
 from gtmcore.files import FileOperations
 
 @pytest.fixture()

@@ -30,7 +30,7 @@ from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory import loaders
+from gtmcore.workflows import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger

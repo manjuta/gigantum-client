@@ -4,7 +4,7 @@ import flask
 import os
 
 from gtmcore.dataset import Dataset
-from gtmcore.inventory import loaders
+from gtmcore.workflows import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
@@ -18,7 +18,6 @@ from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
 
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.dataset import Dataset as DatasetObject
-from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 
 logger = LMLogger.get_logger()
 

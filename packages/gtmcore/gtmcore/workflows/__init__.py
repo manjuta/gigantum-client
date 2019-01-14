@@ -19,5 +19,5 @@
 # SOFTWARE.
 
 from gtmcore.workflows.zipworkflow import ZipWorkflowException, ZipExporter
-from gtmcore.workflows.gitworkflows import GitWorkflow
+from gtmcore.workflows.gitworkflows import GitWorkflow, GitWorkflowException
 from gtmcore.workflows.core import WorkflowsException, sync_locally, MergeError, GitLabRemoteError

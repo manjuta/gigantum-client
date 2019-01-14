@@ -24,12 +24,9 @@ import os
 
 
 from gtmcore.labbook import LabBook
-from gtmcore.inventory import loaders
-from gtmcore.workflows import GitWorkflow, MergeError
+from gtmcore.workflows import GitWorkflow, MergeError, loaders
 from gtmcore.files import FileOperations
-from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
-                               sample_src_file, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
-                               mock_config_lfs_disabled)
+from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo)
 from gtmcore.inventory.branching import BranchManager
 
 # If importing from remote, does new user's branch get created and does it push properly?
@@ -43,23 +40,17 @@ class TestLabbookShareProtocol(object):
 
         ## 1 - Make initial set of contributions to Labbook.
         lb = mock_labbook_lfs_disabled[2]
-
-        assert lb.active_branch == "gm.workspace-test"
+        assert lb.active_branch == "master"
+        
         FileOperations.makedir(lb, relative_path='code/testy-tacked-dir', create_activity_record=True)
 
         wf = GitWorkflow(lb)
         # Now publish to remote (creating it in the process).
         wf.publish(username='test')
 
-        assert lb.active_branch == "gm.workspace-test"
+        assert lb.active_branch == "master"
         b = lb.get_branches()
-        assert len(b['local']) == 2
-        #assert len(b['remote']) == 2
-
-        assert any(['gm.workspace' in str(x) for x in b['remote']])
-
-        # Local branch should not be manifested in remote (FOR NOW)
-        assert not any(['gm.workspace-test' in str(x) for x in b['remote']])
+        assert len(b['local']) == 1
 
         ## 2 - Now make more updates and do it again
         FileOperations.delete_files(lb, "code", ["testy-tacked-dir"])
