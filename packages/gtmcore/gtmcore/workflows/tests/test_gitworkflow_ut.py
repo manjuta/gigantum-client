@@ -99,3 +99,11 @@ class TestGitWorkflowsMethods(object):
         assert 'new-branch-to-push' not in bm.branches_remote
         wf.sync('test')
         assert 'new-branch-to-push' in bm.branches_remote
+
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    def test_reset__no_op(self, mock_labbook_lfs_disabled, mock_config_file):
+        """ test import_remote_labbook method """
+        username = 'test'
+        lb = mock_labbook_lfs_disabled[2]
+        wf = GitWorkflow(lb)
+        wf.reset(username=username)

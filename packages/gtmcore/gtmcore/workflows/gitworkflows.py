@@ -128,9 +128,6 @@ class GitWorkflow(object):
 
         TODO: Implementation must be placed here from mutation. """
 
-    def pull(self):
-        pass
-
     def sync(self, username: str, remote: str = "origin", force: bool = False,
              feedback_callback: Callable = lambda _ : None,
              access_token: Optional[str] = None, id_token: Optional[str] = None) -> int:
@@ -156,3 +153,11 @@ class GitWorkflow(object):
         #
         # return result
 
+    def reset(self, username: str):
+        """ Perform a Git reset to undo all local changes"""
+        bm = BranchManager(self.repository, username)
+        if self.remote and bm.active_branch in bm.branches_remote:
+            self.repository.git.fetch()
+            call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
+                            cwd=self.repository.root_dir)
+            call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)

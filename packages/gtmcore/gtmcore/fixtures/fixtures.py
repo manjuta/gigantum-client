@@ -122,11 +122,11 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     # Push branches
     # TODO: @billvb - need to refactor this once new branch model is in effect.
     original_branch = repository.git.repo.head.ref.name
-    repository.git.repo.heads['gm.workspace'].checkout()
-    repository.git.repo.git.push("origin", "gm.workspace")
+    repository.git.repo.heads['master'].checkout()
+    repository.git.repo.git.push("origin", "master")
 
     # Set the head to gm.workspace on the remote
-    r.git.symbolic_ref('HEAD', 'refs/heads/gm.workspace')
+    r.git.symbolic_ref('HEAD', 'refs/heads/master')
 
     # Check back out the original user branch
     repository.git.repo.heads[original_branch].checkout()
