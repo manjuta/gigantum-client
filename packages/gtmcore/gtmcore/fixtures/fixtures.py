@@ -119,6 +119,18 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     assert r.bare is True
     repository.add_remote(remote_name="origin", url=working_dir)
 
+    # Push branches
+    # TODO: @billvb - need to refactor this once new branch model is in effect.
+    original_branch = repository.git.repo.head.ref.name
+    repository.git.repo.heads['gm.workspace'].checkout()
+    repository.git.repo.git.push("origin", "gm.workspace")
+
+    # Set the head to gm.workspace on the remote
+    r.git.symbolic_ref('HEAD', 'refs/heads/gm.workspace')
+
+    # Check back out the original user branch
+    repository.git.repo.heads[original_branch].checkout()
+
 
 @pytest.fixture()
 def sample_src_file():

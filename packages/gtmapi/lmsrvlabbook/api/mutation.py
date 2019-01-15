@@ -36,7 +36,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
-                                        LinkDataset)
+                                        ModifyDatasetLink)
 
 from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
@@ -191,5 +191,5 @@ class LabbookMutations(graphene.ObjectType):
     # Download dataset files locally
     download_dataset_files = DownloadDatasetFiles.Field()
 
-    # Link a dataset to a project
-    link_dataset = LinkDataset.Field()
+    # Link/Unlink a dataset to a project
+    modify_dataset_link = ModifyDatasetLink.Field()

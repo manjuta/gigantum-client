@@ -4,9 +4,11 @@ import classNames from 'classnames';
 import uuidv4 from 'uuid/v4';
 // assets
 import './DatasetActionsMenu.scss';
+// mutations
+import ModifyDatasetLinkMutation from 'Mutations/ModifyDatasetLinkMutation';
 // store
 import store from 'JS/redux/store';
-import { setMultiInfoMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 
 export default class DatasetActionsMenu extends Component {
   constructor(props) {
@@ -41,6 +43,32 @@ export default class DatasetActionsMenu extends Component {
     if (this.state.popupVisible && this[this.props.edge.node.id] && !this[this.props.edge.node.id].contains(evt.target)) {
       this.setState({ popupVisible: false });
     }
+  }
+
+  /**
+  *  @param {}
+  *  unlinks a dataset
+  *  @return {}
+  */
+  _unlinkDataset() {
+    const labbookOwner = store.getState().routes.owner;
+    const labbookName = store.getState().routes.labbookName;
+    const datasetOwner = this.props.edge.node.owner;
+    const datasetName = this.props.edge.node.datasetName;
+    this.setState({ buttonState: 'loading' });
+    ModifyDatasetLinkMutation(
+        labbookOwner,
+        labbookName,
+        datasetOwner,
+        datasetName,
+        'unlink',
+        null,
+        (response, error) => {
+            if (error) {
+                setErrorMessage('Unable to unlink dataset', error);
+            }
+        },
+    );
   }
 
   /**
@@ -196,7 +224,11 @@ export default class DatasetActionsMenu extends Component {
             'DatasetActionsMenu__item--downloaded-grey': (this.props.edge.node.isLocal || isLocal) && this.props.section === 'data' && !this.state.fileDownloading,
             'DatasetActionsMenu__item--loading': this.state.fileDownloading,
           }),
-          downloadText = isLocal ? 'Downloaded' : this.props.isParent ? 'Download All' : this.props.folder ? 'Download Directory' : 'Download';
+          downloadText = isLocal ? 'Downloaded' : this.props.isParent ? 'Download All' : this.props.folder ? 'Download Directory' : 'Download',
+          unlinkCSS = classNames({
+            'DatasetActionsMenu__item DatasetActionsMenu__item--unlink': true,
+            'DatasetActionsMenu__popup-visible': this.state.popupVisible,
+          });
 
 
     return (
@@ -227,7 +259,28 @@ export default class DatasetActionsMenu extends Component {
               </div>
             </div>
           }
+          {
+            this.props.isParent &&
+              <div
+                className={unlinkCSS}
+                name="Unlink Dataset"
+                onClick={(evt) => { this._togglePopup(evt, true); }} >
 
+                <div className={popupCSS}>
+                  <div className="ToolTip__pointer"></div>
+                  <p>Are you sure?</p>
+                  <div className="flex justify--space-around">
+                    <button
+                      className="File__btn--round File__btn--cancel"
+                      onClick={(evt) => { this._togglePopup(evt, false); }} />
+                    <button
+                      className="File__btn--round File__btn--add"
+                      onClick={(evt) => { this._unlinkDataset(); }}
+                    />
+                  </div>
+                </div>
+            </div>
+          }
           <div
             onClick={() => this._downloadFile(this.props.edge.node.isLocal || isLocal)}
             className={downloadCSS}

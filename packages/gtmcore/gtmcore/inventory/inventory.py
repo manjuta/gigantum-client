@@ -652,17 +652,30 @@ class InventoryManager(object):
         else:
             raise InventoryException(f"Invalid sort mode {sort_mode}")
 
-    def link_dataset_to_labbook(self, dataset_url: str, dataset_namespace: str, dataset_name: str, labbook: LabBook):
+    def link_dataset_to_labbook(self, dataset_url: str, dataset_namespace: str, dataset_name: str,
+                                labbook: LabBook) -> Dataset:
+        """
+
+        Args:
+            dataset_url:
+            dataset_namespace:
+            dataset_name:
+            labbook:
+
+        Returns:
+
+        """
         # add submodule and init
         submodules_root = os.path.join(labbook.root_dir, '.gigantum', 'datasets')
         submodule_dir = os.path.join(submodules_root, dataset_namespace, dataset_name)
         if not os.path.exists(os.path.join(submodules_root, dataset_namespace)):
             pathlib.Path(os.path.join(submodules_root, dataset_namespace)).mkdir(parents=True, exist_ok=True)
 
-        url, _ = dataset_url.split('.git')
-        subprocess.run(['git', 'submodule', 'add', '--name', f"{dataset_namespace}&{dataset_name}", url,
+        subprocess.run(['git', 'submodule', 'add', '--name', f"{dataset_namespace}&{dataset_name}", dataset_url,
                         os.path.join('.gigantum', 'datasets', dataset_namespace, dataset_name)],
-                       check=True, cwd=labbook.root_dir)
+                       check=True, cwd=labbook.root_dir, stderr=subprocess.STDOUT)
+
+        labbook.git.add_all()
         commit = labbook.git.commit("adding submodule ref")
         labbook.git.update_submodules(init=True)
 
@@ -684,3 +697,39 @@ class InventoryManager(object):
         ars.create_activity_record(ar)
 
         return ds
+
+    def unlink_dataset_from_labbook(self, dataset_namespace: str, dataset_name: str, labbook: LabBook) -> None:
+        """Method to removed a dataset reference from a labbook
+
+        Args:
+            dataset_namespace:
+            dataset_name:
+            labbook:
+
+        Returns:
+
+        """
+        # add submodule and init
+        submodule_dir = os.path.join('.gigantum', 'datasets', dataset_namespace, dataset_name)
+
+        subprocess.run(['git', 'submodule', 'deinit', '-f', submodule_dir],
+                       check=True, cwd=labbook.root_dir)
+
+        shutil.rmtree(os.path.join(labbook.root_dir, '.git', 'modules', f"{dataset_namespace}&{dataset_name}"))
+
+        subprocess.run(['git', 'rm', '-f', submodule_dir], check=True, cwd=labbook.root_dir)
+
+        labbook.git.add_all()
+        commit = labbook.git.commit("removing submodule ref")
+
+        # Add Activity Record
+        adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.DELETE)
+        adr.add_value('text/markdown', f"Unlinked Dataset `{dataset_namespace}/{dataset_name}` from project")
+        ar = ActivityRecord(ActivityType.DATASET,
+                            message=f"Unlinked Dataset {dataset_namespace}/{dataset_name} from project.",
+                            linked_commit=commit.hexsha,
+                            tags=["dataset"],
+                            show=True)
+        ar.add_detail_object(adr)
+        ars = ActivityStore(labbook)
+        ars.create_activity_record(ar)

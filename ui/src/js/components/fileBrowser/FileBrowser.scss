@@ -215,8 +215,8 @@
     background: $background-color url(~Images/icons/folder-add-new.svg) no-repeat center center;
     background-size: 30px;
     &:hover {
-      background: $grey url(~Images/icons/folder-add-new.svg) no-repeat center center;
-      background-size: 30px;
+      border: 2px solid $azure;
+      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
     }
   }
 
@@ -224,8 +224,8 @@
     background: $background-color url(~Images/icons/database-add.svg) no-repeat center center;
     background-size: 30px;
     &:hover {
-      background: $grey url(~Images/icons/database-add.svg) no-repeat center center;
-      background-size: 30px;
+      border: 2px solid $azure;
+      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
     }
   }
 }
