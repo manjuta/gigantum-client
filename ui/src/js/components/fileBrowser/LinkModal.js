@@ -5,7 +5,7 @@ import store from 'JS/redux/store';
 import environment from 'JS/createRelayEnvironment';
 import classNames from 'classnames';
 // mutations
-import LinkDatasetMutation from 'Mutations/LinkDatasetMutation';
+import ModifyDatasetLinkMutation from 'Mutations/ModifyDatasetLinkMutation';
 // component
 import Modal from 'Components/shared/Modal';
 import Loader from 'Components/shared/Loader';
@@ -58,9 +58,12 @@ export default class LinkModal extends Component {
   _linkDataset() {
     const { owner, labbookName } = store.getState().routes;
     this.setState({ buttonState: 'loading' });
-    LinkDatasetMutation(
+    ModifyDatasetLinkMutation(
         owner,
         labbookName,
+        this.state.selectedDataset.owner,
+        this.state.selectedDataset.name,
+        'link',
         this.state.selectedUrl,
         (response, error) => {
             if (error) {
@@ -72,7 +75,7 @@ export default class LinkModal extends Component {
             } else {
                 this.setState({ buttonState: 'finished' });
                 setTimeout(() => {
-                    window.location.reload();
+                    this.props.closeLinkModal();
                 }, 2000);
             }
         },
@@ -115,11 +118,13 @@ export default class LinkModal extends Component {
                     if (error) {
                         console.log(error);
                     } else if (props) {
+                        const existingDatasets = this.props.linkedDatasets.map(dataset => dataset.name);
+                        const localDatasetEdges = props.datasetList.localDatasets.edges.filter(dataset => existingDatasets.indexOf(dataset.node.name) === -1);
                         return (
                             <div className="LinkModal__flex flex flex--column justify--space-between">
                                 <div className="LinkModal__container">
                                     {
-                                        props.datasetList.localDatasets.edges.map((edge) => {
+                                        localDatasetEdges.map((edge) => {
                                                 const LinkModalCard = classNames({
                                                   'LinkModal__card--border': this.state.selectedDataset && this.state.selectedDataset.owner === edge.node.owner && this.state.selectedDataset.name === edge.node.name,
                                                   LinkModal__card: true,

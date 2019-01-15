@@ -591,6 +591,7 @@ class FileBrowser extends Component {
           this.state.showLinkModal &&
           <LinkModal
             closeLinkModal={() => this.setState({ showLinkModal: false })}
+            linkedDatasets={this.props.linkedDatasets}
           />
         }
          {

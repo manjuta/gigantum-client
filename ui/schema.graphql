@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Jan 07 2019 15:58:23 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Jan 11 2019 14:09:42 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -931,7 +931,7 @@ type LabbookMutations {
   setDatasetVisibility(input: SetDatasetVisibilityInput!): SetDatasetVisibilityPayload
   syncDataset(input: SyncDatasetInput!): SyncDatasetPayload
   downloadDatasetFiles(input: DownloadDatasetFilesInput!): DownloadDatasetFilesPayload
-  linkDataset(input: LinkDatasetInput!): LinkDatasetPayload
+  modifyDatasetLink(input: ModifyDatasetLinkInput!): ModifyDatasetLinkPayload
 }
 
 """
@@ -1015,18 +1015,6 @@ type LabbookSection implements Node & GitRepository {
   hasFavorites: Boolean
 }
 
-input LinkDatasetInput {
-  owner: String!
-  labbookName: String!
-  datasetUrl: String!
-  clientMutationId: String
-}
-
-type LinkDatasetPayload {
-  newDatasetEdge: DatasetEdge
-  clientMutationId: String
-}
-
 input MakeLabbookDirectoryInput {
   owner: String!
   labbookName: String!
@@ -1053,6 +1041,21 @@ Merge from another branch into the current active branch. Force if necessary.
 """
 type MergeFromBranchPayload {
   labbook: Labbook
+  clientMutationId: String
+}
+
+input ModifyDatasetLinkInput {
+  labbookOwner: String!
+  labbookName: String!
+  datasetOwner: String!
+  datasetName: String!
+  action: String!
+  datasetUrl: String
+  clientMutationId: String
+}
+
+type ModifyDatasetLinkPayload {
+  newLabbookEdge: LabbookEdge
   clientMutationId: String
 }
 

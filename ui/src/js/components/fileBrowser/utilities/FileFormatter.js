@@ -46,7 +46,6 @@ export const fileHandler = () => {
             const keyToSplit = datasetName ? `${datasetName}/${edge.node.key}` : edge.node.key;
             let splitKey = keyToSplit.split('/').filter(key => key.length);
             splitKey.forEach((key, index) => {
-              console.log(key, index)
                 if (currentObject && (index === (splitKey.length - 1))) {
                     if (!currentObject[key]) {
                       currentObject[key] = {
@@ -67,17 +66,6 @@ export const fileHandler = () => {
                       }
                     }
                 } else if (currentObject && !currentObject[key]) {
-                  console.log('CREATED A PARENT')
-                  console.log({
-                    node: {
-                      key: `${splitKey.slice(0, index + 1).join('/')}/`,
-                      isDir: true,
-                      isDataset: !!datasetName,
-                      modifiedAt: Math.floor(Date.now() / 1000),
-                      owner: datasetOwner || null,
-                      datasetName: datasetName || null,
-                     },
-                  })
                     currentObject[key] = {
                       children: {
                       },

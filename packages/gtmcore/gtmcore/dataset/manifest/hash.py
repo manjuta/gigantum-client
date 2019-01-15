@@ -129,23 +129,24 @@ class SmartHash(object):
         Returns:
 
         """
-        loop = get_event_loop()
-        tasks = [asyncio.ensure_future(self.async_stat(path)) for path in path_list]
-        loop.run_until_complete(asyncio.ensure_future(asyncio.wait(tasks)))
-
         fast_hash_result = list()
-        for p, r in zip(path_list, tasks):
-            stat_data = r.result()
-            if stat_data:
-                hash_val = f"{p}||{stat_data[6]}||{stat_data[8]}||{stat_data[9]}"
-                fast_hash_result.append(HashResult(filename=p,
-                                                   hash=None,
-                                                   fast_hash=hash_val))
-                if save:
-                    self.fast_hash_data[p] = hash_val
+        if len(path_list) > 0:
+            loop = get_event_loop()
+            tasks = [asyncio.ensure_future(self.async_stat(path)) for path in path_list]
+            loop.run_until_complete(asyncio.ensure_future(asyncio.wait(tasks)))
 
-        if save:
-            self._save_fast_hash_file()
+            for p, r in zip(path_list, tasks):
+                stat_data = r.result()
+                if stat_data:
+                    hash_val = f"{p}||{stat_data[6]}||{stat_data[8]}||{stat_data[9]}"
+                    fast_hash_result.append(HashResult(filename=p,
+                                                       hash=None,
+                                                       fast_hash=hash_val))
+                    if save:
+                        self.fast_hash_data[p] = hash_val
+
+            if save:
+                self._save_fast_hash_file()
 
         return fast_hash_result
 

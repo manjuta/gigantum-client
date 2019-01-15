@@ -171,8 +171,3 @@ workflows:
       - fossa:
           requires:
             - test-confhttpproxy
-        #filters:
-        #  branches:
-        #    only:
-        #      - master
-        #      - integration
