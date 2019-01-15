@@ -17,15 +17,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import time
-
 from typing import Optional, Callable, cast
 
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
-from gtmcore.workflows import core, loaders
+from gtmcore.workflows import gitworkflows_utils, loaders
 from gtmcore.exceptions import GigantumException
 from gtmcore.inventory import Repository
 from gtmcore.inventory.inventory import InventoryManager
@@ -37,24 +35,12 @@ from gtmcore.dataset.io.manager import IOManager
 logger = LMLogger.get_logger()
 
 
-def helper_push_objects(dataset, logged_in_username, feedback_callback, access_token, id_token):
-    dataset.backend.set_default_configuration(logged_in_username, access_token, id_token)
-    m = Manifest(dataset, logged_in_username)
-    iom = IOManager(dataset, m)
-
-    iom.push_objects(status_update_fn=feedback_callback)
-
-    # Relink all files
-    iom.manifest.link_revision()
-
-
 class GitWorkflowException(GigantumException):
     pass
 
 
 class GitWorkflow(object):
     """Manages all aspects of interaction with Git remote server
-
     """
 
     def __init__(self, repository: Repository) -> None:
@@ -66,17 +52,19 @@ class GitWorkflow(object):
 
     @classmethod
     def import_remote_dataset(cls, remote_url: str, username: str) -> 'GitWorkflow':
+        """Take a URL of a remote dataset and manifest it locally on this system. """
         inv_manager = InventoryManager()
         _, namespace, repo_name = remote_url.rsplit('/', 2)
         repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
-                                  load_repository=inv_manager.load_dataset,
+                                  load_repository=inv_manager.load_dataset_from_directory,
                                   put_repository=inv_manager.put_dataset)
         return cls(cast(Dataset, repo))
 
     @classmethod
     def import_remote_labbook(cls, remote_url: str, username: str,
-                              config: Configuration = None) -> 'GitWorkflow':
-        inv_manager = InventoryManager(config_file=config)
+                              config_file: str = None) -> 'GitWorkflow':
+        """Take a URL of a remote project and manifest it locally on this system. """
+        inv_manager = InventoryManager(config_file=config_file)
         _, namespace, repo_name = remote_url.rsplit('/', 2)
         repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
                                   load_repository=inv_manager.load_labbook_from_directory,
@@ -85,7 +73,15 @@ class GitWorkflow(object):
 
     def garbagecollect(self):
         """ Run a `git gc` on the repository. """
-        core.git_garbage_collect(self.repository)
+        gitworkflows_utils.git_garbage_collect(self.repository)
+
+    def _push_dataset_objects(self, dataset: Dataset, logged_in_username: str,
+                              feedback_callback: Callable, access_token: str, id_token: str) -> None:
+        dataset.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        m = Manifest(dataset, logged_in_username)
+        iom = IOManager(dataset, m)
+        iom.push_objects(status_update_fn=feedback_callback)
+        iom.manifest.link_revision()
 
     def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
                 public: bool = False, feedback_callback: Callable = lambda _ : None,
@@ -114,17 +110,23 @@ class GitWorkflow(object):
         try:
             self.repository.sweep_uncommitted_changes()
             vis = "public" if public is True else "private"
-            core.create_remote_gitlab_repo(repository=self.repository, username=username,
-                                           access_token=access_token, visibility=vis)
-            core.publish_to_remote(repository=self.repository, username=username,
-                                   remote=remote, feedback_callback=feedback_callback)
+            gitworkflows_utils.create_remote_gitlab_repo(repository=self.repository, username=username,
+                                                         access_token=access_token, visibility=vis)
+            gitworkflows_utils.publish_to_remote(repository=self.repository, username=username,
+                                                 remote=remote, feedback_callback=feedback_callback)
             if isinstance(self.repository, Dataset):
-                helper_push_objects(self.repository, username, feedback_callback, access_token, id_token)
+                self._push_dataset_objects(self.repository, username, feedback_callback, # type: ignore
+                                           access_token, id_token) # type: ignore
         except Exception as e:
             # Unsure what specific exception add_remote creates, so make a catchall.
             logger.error(f"Publish failed {e}: {str(self.repository)} may be in corrupted Git state!")
             call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
             raise e
+
+    def unpublish(self):
+        """Deletes the remote repository...
+
+        TODO: Implementation must be placed here from mutation. """
 
     def pull(self):
         pass
@@ -144,13 +146,13 @@ class GitWorkflow(object):
         Returns:
             Integer number of commits pulled down from remote.
         """
-        result = core.sync_with_remote(repository=self.repository, username=username, remote=remote,
-                                       force=force, feedback_callback=feedback_callback)
+        gitworkflows_utils.sync_branch(self.repository, username=username, feedback_callback=feedback_callback)
 
-        if isinstance(self.repository, Dataset):
-            helper_push_objects(self.repository, username, feedback_callback, access_token, id_token)
+        # result = gitworkflows_utils.sync_with_remote(repository=self.repository, username=username, remote=remote,
+        #                                              force=force, feedback_callback=feedback_callback)
+        #
+        # if isinstance(self.repository, Dataset):
+        #     self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
+        #
+        # return result
 
-        return result
-
-    def _add_remote(self, remote_name: str, url: str):
-        self.repository.add_remote(remote_name=remote_name, url=url)

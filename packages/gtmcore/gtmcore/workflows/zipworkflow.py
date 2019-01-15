@@ -28,7 +28,7 @@ from gtmcore.inventory.inventory import InventoryManager, Repository
 from gtmcore.labbook import LabBook
 from gtmcore.dataset import Dataset
 from gtmcore.logging import LMLogger
-from gtmcore.workflows import core
+from gtmcore.workflows import gitworkflows_utils
 
 logger = LMLogger.get_logger()
 

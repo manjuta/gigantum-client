@@ -68,7 +68,7 @@ def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
 
 
 class TestLabbookShareProtocol(object):
-    @patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
     def test_publish_basic(self, fixture_working_dir, remote_bare_repo, mock_create_labbooks_no_lfs):
 
         # Mock the request context so a fake authorization header is present
@@ -96,7 +96,7 @@ class TestLabbookShareProtocol(object):
         #assert r['data']['publishLabbook']['success'] is True
 
     @responses.activate
-    @patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
     def test_sync_1(self, remote_bare_repo, mock_create_labbooks_no_lfs, mock_config_file):
 
         # Setup responses mock for this test

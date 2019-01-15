@@ -20,4 +20,4 @@
 
 from gtmcore.workflows.zipworkflow import ZipWorkflowException, ZipExporter
 from gtmcore.workflows.gitworkflows import GitWorkflow, GitWorkflowException
-from gtmcore.workflows.core import WorkflowsException, MergeError, GitLabRemoteError
+from gtmcore.workflows.gitworkflows_utils import WorkflowsException, MergeError, GitLabRemoteError

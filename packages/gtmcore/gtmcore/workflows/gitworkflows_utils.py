@@ -161,6 +161,49 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
     feedback_callback(f"Publish complete.")
 
 
+def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: Callable):
+    set_upstream_tokens = ['git', 'push', '--set-upstream', 'origin', branch_name]
+    call_subprocess(set_upstream_tokens, cwd=repository.root_dir)
+
+    if repository.client_config.config["git"]["lfs_enabled"] is True:
+        feedback_cb('Pushing large files')
+        t0 = time.time()
+        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name], cwd=repository.root_dir)
+        logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time()}s')
+
+
+def _sync_pull_push(repository: Repository, branch_name: str, feedback_cb: Callable):
+
+    # Pull regular Git objects, then LFS
+    call_subprocess(['git', 'pull', 'origin', branch_name],
+                    cwd=repository.root_dir)
+    if repository.client_config.config["git"]["lfs_enabled"] is True:
+        feedback_cb("Pulling large files...")
+        call_subprocess(['git', 'lfs', 'pull', 'origin', branch_name],
+                        cwd=repository.root_dir)
+
+    # Push regular Git objects, then LFS objects
+    call_subprocess(['git', 'push', 'origin', branch_name], cwd=repository.root_dir)
+    if repository.client_config.config["git"]["lfs_enabled"] is True:
+        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
+                        cwd=repository.root_dir)
+
+
+def sync_branch(repository: Repository, username: str, feedback_callback: Callable) -> int:
+    """"""
+    repository.sweep_uncommitted_changes()
+    repository.git.fetch()
+
+    bm = BranchManager(repository, username=username)
+    if bm.active_branch not in bm.branches_remote:
+        _set_upstream_branch(repository, bm.active_branch, feedback_callback)
+        return 0
+    else:
+        _, pulled_updates_count = bm.get_commits_behind_remote()
+        _sync_pull_push(repository, bm.active_branch, feedback_callback)
+        return pulled_updates_count
+
+
 def sync_with_remote(repository: Repository, username: str, remote: str,
                      force: bool, feedback_callback: Callable) -> int:
     """Sync workspace and personal workspace with the remote.

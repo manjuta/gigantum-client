@@ -21,7 +21,7 @@ import json
 import os
 import shutil
 import tempfile
-import uuid
+import requests
 import collections
 import git
 from pkg_resources import resource_filename
@@ -29,14 +29,14 @@ import pytest
 import uuid
 
 from gtmcore.configuration import Configuration
-from gtmcore.environment import RepositoryManager, ComponentManager
+from gtmcore.environment import RepositoryManager
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.activity.detaildb import ActivityDetailDB
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.files import FileOperations
 from gtmcore.inventory.branching import BranchManager
-import requests
+
 
 
 ENV_UNIT_TEST_REPO = 'gigantum_base-images-testing'

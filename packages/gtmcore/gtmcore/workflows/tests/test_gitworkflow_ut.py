@@ -16,24 +16,19 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CO
-
 import pytest
-
 import mock
 import os
 
-from gtmcore.configuration import Configuration
 from gtmcore.workflows import GitWorkflow, GitWorkflowException
 from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
 from gtmcore.inventory.branching import BranchManager
 
-# If importing from remote, does new user's branch get created and does it push properly?
-
 
 class TestGitWorkflowsMethods(object):
 
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_publish_simple(self, mock_labbook_lfs_disabled):
         """Test a simple publish and ensuring master is active branch. """
         username = 'test'
@@ -52,7 +47,6 @@ class TestGitWorkflowsMethods(object):
 
         # Once we return to master branch, then we can publish.
         bm.workon_branch(bm.workspace_branch)
-        print('---', wf.remote, type(wf.remote))
         wf.publish(username=username)
         assert os.path.exists(wf.remote)
 
@@ -60,7 +54,7 @@ class TestGitWorkflowsMethods(object):
         assert bm.branches_local == ['master', 'test-local-only']
         assert bm.branches_remote == ['master']
 
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_publish_cannot_overwrite(self, mock_labbook_lfs_disabled):
         """ Test cannot publish a project already published. """
         username = 'test'
@@ -70,7 +64,7 @@ class TestGitWorkflowsMethods(object):
         with pytest.raises(GitWorkflowException):
             wf.publish(username=username)
 
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_import_remote_labbook(self, mock_labbook_lfs_disabled, mock_config_file):
         """ test import_remote_labbook method """
         username = 'testuser'
@@ -80,7 +74,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user2'
         wf_other = GitWorkflow.import_remote_labbook(wf.remote, username=other_user,
-                                                     config=mock_config_file[0])
+                                                     config_file=mock_config_file[0])
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == wf.remote
         # The actual path on disk will be different, though
@@ -88,12 +82,20 @@ class TestGitWorkflowsMethods(object):
         # Check imported into namespace of original owner (testuser)
         assert 'testuser/labbooks/labbook1' in wf_other.repository.root_dir
 
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_import_remote_dataset(self, mock_labbook_lfs_disabled, mock_config_file):
         """ test import_remote_labbook method """
         assert False
 
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_sync_branch(self, mock_labbook_lfs_disabled, mock_config_file):
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    def test_sync___push_up_new_branch(self, mock_labbook_lfs_disabled, mock_config_file):
         """ test import_remote_labbook method """
-        assert False
+        username = 'test'
+        lb = mock_labbook_lfs_disabled[2]
+        wf = GitWorkflow(lb)
+        wf.publish(username=username)
+        bm = BranchManager(lb, username='test')
+        bm.create_branch('new-branch-to-push')
+        assert 'new-branch-to-push' not in bm.branches_remote
+        wf.sync('test')
+        assert 'new-branch-to-push' in bm.branches_remote
