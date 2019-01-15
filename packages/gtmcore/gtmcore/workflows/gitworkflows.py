@@ -27,7 +27,8 @@ from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
 from gtmcore.workflows import core, loaders
 from gtmcore.exceptions import GigantumException
-from gtmcore.inventory import Repository, InventoryManager
+from gtmcore.inventory import Repository
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dataset import Dataset
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.manifest import Manifest
