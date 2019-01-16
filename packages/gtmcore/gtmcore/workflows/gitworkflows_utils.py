@@ -149,8 +149,8 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
         logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time()}s')
 
 
-def _sync_pull_push(repository: Repository, branch_name: str, feedback_cb: Callable):
-
+def _pull(repository: Repository, branch_name: str, feedback_cb: Callable):
+    feedback_cb(f"Pulling upstream changes from {branch_name}")
     # Pull regular Git objects, then LFS
     try:
         call_subprocess(['git', 'pull', 'origin', branch_name],
@@ -166,12 +166,22 @@ def _sync_pull_push(repository: Repository, branch_name: str, feedback_cb: Calla
         call_subprocess(['git', 'lfs', 'pull', 'origin', branch_name],
                         cwd=repository.root_dir)
 
+
+def _sync_pull_push(repository: Repository, branch_name: str, feedback_cb: Callable):
+    _pull(repository, branch_name, feedback_cb)
     # Push regular Git objects, then LFS objects
     call_subprocess(['git', 'push', 'origin', branch_name], cwd=repository.root_dir)
     if repository.client_config.config["git"]["lfs_enabled"] is True:
         call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
                         cwd=repository.root_dir)
 
+
+def pull_branch(repository: Repository, username: str, branch_name: str,
+                feedback_callback: Callable) -> None:
+    """"""
+    repository.sweep_uncommitted_changes()
+    repository.git.fetch()
+    _pull(repository, branch_name, feedback_callback)
 
 def sync_branch(repository: Repository, username: str, feedback_callback: Callable) -> int:
     """"""
