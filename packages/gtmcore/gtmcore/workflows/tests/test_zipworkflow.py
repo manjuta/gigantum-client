@@ -109,7 +109,7 @@ class TestLabbookImportZipping(object):
         x = z.import_labbook(dup_import, 'test', 'test', mock_config_file[0])
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
-        assert x.active_branch == 'gm.workspace-test'
+        assert x.active_branch == 'gm.workspace-vitaled-2'
 
     def test_success_import_valid_labbook_from_macos(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
@@ -125,7 +125,7 @@ class TestLabbookImportZipping(object):
         x = z.import_labbook(dup_import, 'test', 'test', mock_config_file[0])
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
-        assert x.active_branch == 'gm.workspace-test'
+        assert x.active_branch == 'gm.workspace-vitaled2'
 
     def test_fail_cannot_import_labbook_to_overwrite_name(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows'),

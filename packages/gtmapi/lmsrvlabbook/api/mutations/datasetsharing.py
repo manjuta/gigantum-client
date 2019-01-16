@@ -4,12 +4,13 @@ import flask
 import os
 
 from gtmcore.dataset import Dataset
-from gtmcore.workflows import loaders
+from gtmcore.workflows import DatasetWorkflow
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows import DatasetWorkflow
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -128,6 +129,8 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         logger.info(f"Importing remote dataset from {remote_url}")
         ds = Dataset(author=get_logged_in_author())
+
+        # TODO(dmk?) Refactor this so we dont need to load a dataset to get config data.
         default_remote = ds.client_config.config['git']['default_remote']
         admin_service = None
         for remote in ds.client_config.config['git']['remotes']:
@@ -141,25 +144,13 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.configure_git_credentials(default_remote, username)
-        try:
-            collaborators = [collab[1] for collab in mgr.get_collaborators(owner, dataset_name) or []]
-            is_collab = any([username == c for c in collaborators])
-        except:
-            is_collab = username == owner
+        wf = DatasetWorkflow.import_from_remote(remote_url, username=username)
+        ds = wf.dataset
 
-        # IF user is collaborator, then clone in order to support collaboration
-        # ELSE, this means we are cloning a public repo and can't push back
-        #       so we change to owner to the given user so they can (re)publish
-        #       and do whatever with it.
-        make_owner = not is_collab
-        logger.info(f"Getting from remote, make_owner = {make_owner}")
-        ds = loaders.dataset_from_remote(remote_url, username, owner, dataset=ds, make_owner=make_owner)
         import_owner = InventoryManager().query_owner(ds)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        dsedge = DatasetConnection.Edge(node=DatasetObject(owner=import_owner, name=dataset_name),
+        dsedge = DatasetConnection.Edge(node=DatasetObject(owner=import_owner, name=ds.name),
                                         cursor=cursor)
         return ImportRemoteDataset(new_dataset_edge=dsedge)
 

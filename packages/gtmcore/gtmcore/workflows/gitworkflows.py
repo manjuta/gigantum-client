@@ -17,10 +17,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from abc import ABC, abstractmethod
 from typing import Optional, Callable, cast
 
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
 from gtmcore.workflows import gitworkflows_utils, loaders
@@ -39,7 +39,7 @@ class GitWorkflowException(GigantumException):
     pass
 
 
-class GitWorkflow(object):
+class GitWorkflow(ABC):
     """Manages all aspects of interaction with Git remote server
     """
 
@@ -51,37 +51,13 @@ class GitWorkflow(object):
         return self.repository.remote
 
     @classmethod
-    def import_remote_dataset(cls, remote_url: str, username: str) -> 'GitWorkflow':
-        """Take a URL of a remote dataset and manifest it locally on this system. """
-        inv_manager = InventoryManager()
-        _, namespace, repo_name = remote_url.rsplit('/', 2)
-        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
-                                  load_repository=inv_manager.load_dataset_from_directory,
-                                  put_repository=inv_manager.put_dataset)
-        return cls(cast(Dataset, repo))
-
-    @classmethod
-    def import_remote_labbook(cls, remote_url: str, username: str,
-                              config_file: str = None) -> 'GitWorkflow':
-        """Take a URL of a remote project and manifest it locally on this system. """
-        inv_manager = InventoryManager(config_file=config_file)
-        _, namespace, repo_name = remote_url.rsplit('/', 2)
-        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
-                                  load_repository=inv_manager.load_labbook_from_directory,
-                                  put_repository=inv_manager.put_labbook)
-        return cls(cast(LabBook, repo))
+    @abstractmethod
+    def import_from_remote(cls, remote_url: str, username: str) -> 'GitWorkflow':
+        pass
 
     def garbagecollect(self):
         """ Run a `git gc` on the repository. """
         gitworkflows_utils.git_garbage_collect(self.repository)
-
-    def _push_dataset_objects(self, dataset: Dataset, logged_in_username: str,
-                              feedback_callback: Callable, access_token: str, id_token: str) -> None:
-        dataset.backend.set_default_configuration(logged_in_username, access_token, id_token)
-        m = Manifest(dataset, logged_in_username)
-        iom = IOManager(dataset, m)
-        iom.push_objects(status_update_fn=feedback_callback)
-        iom.manifest.link_revision()
 
     def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
                 public: bool = False, feedback_callback: Callable = lambda _ : None,
@@ -94,7 +70,7 @@ class GitWorkflow(object):
             remote: Name of Git remote (always "origin" for now).
             public: Allow public read access
             feedback_callback: Callback to give user-facing realtime feedback
-
+            id_token: Dataset credentials
         Returns:
             None
         """
@@ -114,9 +90,6 @@ class GitWorkflow(object):
                                                          access_token=access_token, visibility=vis)
             gitworkflows_utils.publish_to_remote(repository=self.repository, username=username,
                                                  remote=remote, feedback_callback=feedback_callback)
-            if isinstance(self.repository, Dataset):
-                self._push_dataset_objects(self.repository, username, feedback_callback, # type: ignore
-                                           access_token, id_token) # type: ignore
         except Exception as e:
             # Unsure what specific exception add_remote creates, so make a catchall.
             logger.error(f"Publish failed {e}: {str(self.repository)} may be in corrupted Git state!")
@@ -143,15 +116,9 @@ class GitWorkflow(object):
         Returns:
             Integer number of commits pulled down from remote.
         """
-        gitworkflows_utils.sync_branch(self.repository, username=username, feedback_callback=feedback_callback)
-
-        # result = gitworkflows_utils.sync_with_remote(repository=self.repository, username=username, remote=remote,
-        #                                              force=force, feedback_callback=feedback_callback)
-        #
-        # if isinstance(self.repository, Dataset):
-        #     self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
-        #
-        # return result
+        updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
+                                                     feedback_callback=feedback_callback)
+        return updates_cnt
 
     def reset(self, username: str):
         """ Perform a Git reset to undo all local changes"""
@@ -161,3 +128,61 @@ class GitWorkflow(object):
             call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
                             cwd=self.repository.root_dir)
             call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
+
+
+class LabbookWorkflow(GitWorkflow):
+    @property
+    def labbook(self):
+        return cast(LabBook, self.repository)
+
+    @classmethod
+    def import_from_remote(cls, remote_url: str, username: str,
+                           config_file: str = None) -> 'LabbookWorkflow':
+        """Take a URL of a remote Dataset and manifest it locally on this system. """
+        inv_manager = InventoryManager(config_file=config_file)
+        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
+                                  load_repository=inv_manager.load_labbook_from_directory,
+                                  put_repository=inv_manager.put_labbook)
+        return cls(repo)
+
+
+class DatasetWorkflow(GitWorkflow):
+    @property
+    def dataset(self):
+        return cast(Dataset, self.repository)
+
+    @classmethod
+    def import_from_remote(cls, remote_url: str, username: str,
+                           config_file: str = None) -> 'DatasetWorkflow':
+        """Take a URL of a remote Dataset and manifest it locally on this system. """
+        inv_manager = InventoryManager(config_file=config_file)
+        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
+                                  load_repository=inv_manager.load_dataset_from_directory,
+                                  put_repository=inv_manager.put_dataset)
+        return cls(repo)
+
+    def _push_dataset_objects(self, dataset: Dataset, logged_in_username: str,
+                              feedback_callback: Callable, access_token, id_token) -> None:
+        dataset.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        m = Manifest(dataset, logged_in_username)
+        iom = IOManager(dataset, m)
+        iom.push_objects(status_update_fn=feedback_callback)
+        iom.manifest.link_revision()
+
+    def publish(self, username: str, access_token: Optional[str] = None, remote: str = "origin",
+                public: bool = False, feedback_callback: Callable = lambda _ : None,
+                id_token: Optional[str] = None):
+        super().publish(username, access_token, remote, public, feedback_callback, id_token)
+        if isinstance(self.repository, Dataset):
+            self._push_dataset_objects(self.repository, username, feedback_callback,
+                                       access_token, id_token)
+
+    def sync(self, username: str, remote: str = "origin", force: bool = False,
+             feedback_callback: Callable = lambda _ : None,
+             access_token: Optional[str] = None, id_token: Optional[str] = None):
+        v = super().sync(username, remote, force, feedback_callback, access_token, id_token)
+        if isinstance(self.repository, Dataset):
+            self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
+        return v

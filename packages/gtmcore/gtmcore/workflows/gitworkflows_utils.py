@@ -175,8 +175,15 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
 def _sync_pull_push(repository: Repository, branch_name: str, feedback_cb: Callable):
 
     # Pull regular Git objects, then LFS
-    call_subprocess(['git', 'pull', 'origin', branch_name],
+    try:
+        call_subprocess(['git', 'pull', 'origin', branch_name],
                     cwd=repository.root_dir)
+    except subprocess.CalledProcessError as cp_error:
+        if 'Automatic merge failed' in cp_error.stdout.decode():
+            raise MergeError(f"Merge conflict pulling in branch {branch_name}")
+        else:
+            raise
+
     if repository.client_config.config["git"]["lfs_enabled"] is True:
         feedback_cb("Pulling large files...")
         call_subprocess(['git', 'lfs', 'pull', 'origin', branch_name],

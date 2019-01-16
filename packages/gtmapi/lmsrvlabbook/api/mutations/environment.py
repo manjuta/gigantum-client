@@ -28,7 +28,7 @@ from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.utils import infer_docker_image_name
-from gtmcore.workflows import GitWorkflow
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.logging import LMLogger
 from gtmcore.activity.services import stop_labbook_monitor
 
@@ -154,7 +154,7 @@ class StopContainer(graphene.relay.ClientIDMutation):
             # TODO: Why only 1? what if there's more?
             pr.remove(est_target[0][1:])
 
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.garbagecollect()
 
         # Clean up empty bind mount dirs from datasets if needed
