@@ -95,12 +95,6 @@ class BranchManager(object):
     def branches_local(self) -> List[str]:
         return sorted(self.repository.get_branches()['local'])
 
-    @property
-    def branches(self) -> List[str]:
-        """List all branches (local AND remote) available for checkout"""
-        return sorted(list(set(self.repository.get_branches()['local']
-                               + self.repository.get_branches()['remote'])))
-
     def create_branch(self, title: str, revision: Optional[str] = None) -> str:
         """Create and checkout (work on) a new managed branch.
 
@@ -114,7 +108,7 @@ class BranchManager(object):
         if not self.is_branch_name_valid(title):
             raise InvalidBranchName(f'Branch name `{title}` invalid pattern')
 
-        if title in self.branches:
+        if title in self.branches_local:
             raise InvalidBranchName(f'Branch name `{title}` already exists')
 
         self.repository.sweep_uncommitted_changes()
@@ -144,7 +138,7 @@ class BranchManager(object):
         Returns:
             None
         """
-        if target_branch not in self.branches:
+        if target_branch not in self.branches_local:
             raise InvalidBranchName(f'Cannot delete `{target_branch}`; does not exist')
 
         if target_branch == self.workspace_branch:
@@ -157,7 +151,7 @@ class BranchManager(object):
         # Note use "force=True" to prevent warning on merge.
         self.repository.git.delete_branch(target_branch, force=True)
 
-        if target_branch in self.branches:
+        if target_branch in self.branches_local:
             raise BranchWorkflowViolation(f'Removal of branch `{target_branch}` in {str(self.repository)} failed.')
 
     def _workon_branch(self, branch_name: str) -> None:
@@ -186,7 +180,7 @@ class BranchManager(object):
             force: Force overwrite if conflicts occur
         """
 
-        if other_branch not in self.branches:
+        if other_branch not in self.branches_local:
             raise InvalidBranchName(f'Other branch {other_branch} not found')
 
         logger.info(f"In {str(self.repository)} merging branch `{other_branch}` into `{self.active_branch}`...")

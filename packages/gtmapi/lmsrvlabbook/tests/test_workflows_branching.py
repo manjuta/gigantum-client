@@ -104,7 +104,7 @@ class TestWorkflowsBranching(object):
         r = client.execute(q)
         pprint.pprint(r)
         assert 'errors' not in r
-        assert r['data']['labbook']['availableBranchNames'] == bm.branches
+        assert r['data']['labbook']['availableBranchNames'] == bm.branches_local
 
     def test_query_mergeable_branches_from_main(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]

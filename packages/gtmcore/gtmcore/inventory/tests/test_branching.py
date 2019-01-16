@@ -81,11 +81,11 @@ class TestBranching(object):
 
         t = 'branch-to-make-and-then-delete'
         branch_name_to_delete = bm.create_branch(title=t)
-        assert branch_name_to_delete in bm.branches
+        assert branch_name_to_delete in bm.branches_local
 
         bm.workon_branch(bm.workspace_branch)
         bm.remove_branch(branch_name_to_delete)
-        assert branch_name_to_delete not in bm.branches
+        assert branch_name_to_delete not in bm.branches_local
 
     def test_fail_remove_branch_not_exist(self, mock_labbook_lfs_disabled):
         """ Test remove branch does raises exception when deleting nonexisting branch """
