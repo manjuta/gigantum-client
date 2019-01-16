@@ -769,7 +769,6 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--remote"
-                disabled={true}
                 onClick={() => this._togglePublishModal()}
               >
                 Publish
@@ -798,7 +797,6 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--sync"
-                disabled={true}
                 onClick={() => this._sync()}
               >
                 Sync Branch
