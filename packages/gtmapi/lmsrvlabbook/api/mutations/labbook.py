@@ -314,15 +314,6 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.configure_git_credentials(default_remote, username)
-        try:
-            collaborators = [collab[1] for collab in mgr.get_collaborators(owner, labbook_name) or []]
-            is_collab = any([username == c for c in collaborators])
-        except:
-            is_collab = username == owner
-
-
         wf = LabbookWorkflow.import_from_remote(remote_url, username=username)
         import_owner = InventoryManager().query_owner(wf.labbook)
         # TODO: Fix cursor implementation, this currently doesn't make sense
