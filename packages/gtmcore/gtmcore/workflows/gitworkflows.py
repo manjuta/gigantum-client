@@ -143,15 +143,13 @@ class GitWorkflow(object):
         Returns:
             Integer number of commits pulled down from remote.
         """
-        gitworkflows_utils.sync_branch(self.repository, username=username, feedback_callback=feedback_callback)
+        updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
+                                                     feedback_callback=feedback_callback)
 
-        # result = gitworkflows_utils.sync_with_remote(repository=self.repository, username=username, remote=remote,
-        #                                              force=force, feedback_callback=feedback_callback)
-        #
-        # if isinstance(self.repository, Dataset):
-        #     self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
-        #
-        # return result
+        if isinstance(self.repository, Dataset):
+            self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
+
+        return updates_cnt
 
     def reset(self, username: str):
         """ Perform a Git reset to undo all local changes"""
@@ -161,3 +159,20 @@ class GitWorkflow(object):
             call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
                             cwd=self.repository.root_dir)
             call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
+
+
+class LbWorkflow(GitWorkflow):
+    pass
+
+
+class DatasetWorkflow(GitWorkflow):
+    @classmethod
+    def import_from_remote(cls, remote_url: str, username: str,
+                           config_file: str = None) -> 'GitWorkflow':
+        """Take a URL of a remote project and manifest it locally on this system. """
+        inv_manager = InventoryManager(config_file=config_file)
+        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
+                                  load_repository=inv_manager.load_labbook_from_directory,
+                                  put_repository=inv_manager.put_labbook)
+        return cls(cast(LabBook, repo))

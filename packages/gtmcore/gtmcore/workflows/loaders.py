@@ -74,26 +74,26 @@ def clone_repo(remote_url: str, username: str, owner: str,
     return repository
 
 
-# def dataset_from_remote(remote_url: str, username: str, owner: str,
-#                         dataset: Optional[Dataset] = None,
-#                         make_owner: bool = False) -> Dataset:
-#     """Clone a dataset from a remote Git repository.
-#
-#     Args:
-#         remote_url: URL or path of remote repo
-#         username: Username of logged in user
-#         owner: Owner/namespace of labbook
-#         dataset: Optional Dataset instance with config
-#         make_owner: After cloning, make the owner the "username"
-#
-#     Returns:
-#         Dataset
-#     """
-#     if dataset is None:
-#         s_dataset = Dataset()
-#     else:
-#         s_dataset = dataset  # type: ignore
-#     inv_manager = InventoryManager(s_dataset.client_config.config_file)
-#     return cast(Dataset, clone_repo(remote_url, username, owner, s_dataset,
-#                                     inv_manager.load_dataset_from_directory,
-#                                     inv_manager.put_dataset, make_owner))
+def dataset_from_remote(remote_url: str, username: str, owner: str,
+                        dataset: Optional[Dataset] = None,
+                        make_owner: bool = False) -> Dataset:
+    """Clone a dataset from a remote Git repository.
+
+    Args:
+        remote_url: URL or path of remote repo
+        username: Username of logged in user
+        owner: Owner/namespace of labbook
+        dataset: Optional Dataset instance with config
+        make_owner: After cloning, make the owner the "username"
+
+    Returns:
+        Dataset
+    """
+    if dataset is None:
+        s_dataset = Dataset()
+    else:
+        s_dataset = dataset  # type: ignore
+    inv_manager = InventoryManager(s_dataset.client_config.config_file)
+    return cast(Dataset, clone_repo(remote_url, username, owner, s_dataset,
+                                    inv_manager.load_dataset_from_directory,
+                                    inv_manager.put_dataset, make_owner))

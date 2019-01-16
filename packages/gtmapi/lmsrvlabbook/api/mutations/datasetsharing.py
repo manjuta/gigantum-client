@@ -10,6 +10,7 @@ from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows import GitWorkflow
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -155,7 +156,9 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         #       and do whatever with it.
         make_owner = not is_collab
         logger.info(f"Getting from remote, make_owner = {make_owner}")
-        ds = loaders.dataset_from_remote(remote_url, username, owner, dataset=ds, make_owner=make_owner)
+        wf = GitWorkflow.import_remote_dataset(remote_url, username=username)
+        #ds = loaders.dataset_from_remote(remote_url, username, owner, dataset=ds, make_owner=make_owner)
+
         import_owner = InventoryManager().query_owner(ds)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))

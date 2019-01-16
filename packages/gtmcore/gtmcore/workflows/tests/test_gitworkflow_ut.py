@@ -99,8 +99,6 @@ class TestGitWorkflowsMethods(object):
         wf.sync(username=username)
         assert wf.repository.git.commit_hash == commit_hash
 
-
-
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_import_remote_labbook__nominal(self, mock_labbook_lfs_disabled, mock_config_file):
         """ test import_remote_labbook method """
