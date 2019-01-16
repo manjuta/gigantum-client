@@ -10,7 +10,7 @@ from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
-from gtmcore.workflows import GitWorkflow
+from gtmcore.workflows import DatasetWorkflow
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -129,6 +129,8 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         logger.info(f"Importing remote dataset from {remote_url}")
         ds = Dataset(author=get_logged_in_author())
+
+        # TODO(dmk?) Refactor this so we dont need to load a dataset to get config data.
         default_remote = ds.client_config.config['git']['default_remote']
         admin_service = None
         for remote in ds.client_config.config['git']['remotes']:
@@ -156,8 +158,8 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         #       and do whatever with it.
         make_owner = not is_collab
         logger.info(f"Getting from remote, make_owner = {make_owner}")
-        wf = GitWorkflow.import_remote_dataset(remote_url, username=username)
-        #ds = loaders.dataset_from_remote(remote_url, username, owner, dataset=ds, make_owner=make_owner)
+        wf = DatasetWorkflow.import_remote_dataset(remote_url, username=username)
+        ds = wf.dataset
 
         import_owner = InventoryManager().query_owner(ds)
         # TODO: Fix cursor implementation, this currently doesn't make sense

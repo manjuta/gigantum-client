@@ -21,7 +21,7 @@ import mock
 import os
 
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.workflows import GitWorkflow, GitWorkflowException
+from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow
 from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
 from gtmcore.inventory.branching import BranchManager
@@ -39,7 +39,7 @@ class TestGitWorkflowsMethods(object):
         assert bm.branches_remote == []
         assert bm.branches_local == ['master', 'test-local-only']
 
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
 
         # Test you can only publish on master.
         with pytest.raises(GitWorkflowException):
@@ -60,7 +60,7 @@ class TestGitWorkflowsMethods(object):
         """ Test cannot publish a project already published. """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
         with pytest.raises(GitWorkflowException):
             wf.publish(username=username)
@@ -70,12 +70,12 @@ class TestGitWorkflowsMethods(object):
         """ Test cannot publish a project already published. """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
 
         other_user = 'other-test-user'
-        wf_other = GitWorkflow.import_remote_labbook(remote_url=wf.remote, username=other_user,
-                                                     config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote_url=wf.remote, username=other_user,
+                                                      config_file=mock_config_file[0])
         lb_other = wf_other.repository
         assert lb_other.root_dir != lb.root_dir
 
@@ -84,12 +84,12 @@ class TestGitWorkflowsMethods(object):
         """ Test cannot publish a project already published. """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
 
         other_user = 'other-test-user'
-        wf_other = GitWorkflow.import_remote_labbook(remote_url=wf.remote, username=other_user,
-                                                     config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote_url=wf.remote, username=other_user,
+                                                      config_file=mock_config_file[0])
         with open(os.path.join(wf_other.repository.root_dir, 'testfile'), 'w') as f: f.write('filedata')
         wf_other.repository.sweep_uncommitted_changes()
         commit_hash = wf_other.repository.git.commit_hash
@@ -100,16 +100,16 @@ class TestGitWorkflowsMethods(object):
         assert wf.repository.git.commit_hash == commit_hash
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_import_remote_labbook__nominal(self, mock_labbook_lfs_disabled, mock_config_file):
-        """ test import_remote_labbook method """
+    def test_import_from_remote__nominal(self, mock_labbook_lfs_disabled, mock_config_file):
+        """ test import_from_remote method """
         username = 'testuser'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
 
         other_user = 'other-test-user2'
-        wf_other = GitWorkflow.import_remote_labbook(wf.remote, username=other_user,
-                                                     config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(wf.remote, username=other_user,
+                                                      config_file=mock_config_file[0])
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == wf.remote
         # The actual path on disk will be different, though
@@ -118,16 +118,16 @@ class TestGitWorkflowsMethods(object):
         assert 'testuser/labbooks/labbook1' in wf_other.repository.root_dir
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
-    def test_import_remote_dataset(self, mock_labbook_lfs_disabled, mock_config_file):
-        """ test import_remote_labbook method """
+    def test_import_from_remote__dataset(self, mock_labbook_lfs_disabled, mock_config_file):
+        """ test import_from_remote method """
         assert False
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_sync___simple_push_to_master(self, mock_labbook_lfs_disabled, mock_config_file):
-        """ test import_remote_labbook method """
+        """ test import_from_remote method """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
         fpath = os.path.join(lb.root_dir, 'input', 'testfile')
         with open(fpath, 'w') as f: f.write('filedata')
@@ -140,10 +140,10 @@ class TestGitWorkflowsMethods(object):
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_sync___push_up_new_branch(self, mock_labbook_lfs_disabled, mock_config_file):
-        """ test import_remote_labbook method """
+        """ test import_from_remote method """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
         bm = BranchManager(lb, username='test')
         bm.create_branch('new-branch-to-push')
@@ -153,10 +153,10 @@ class TestGitWorkflowsMethods(object):
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_sync___push_up_then_sync(self, mock_labbook_lfs_disabled, mock_config_file):
-        """ test import_remote_labbook method """
+        """ test import_from_remote method """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
         bm = BranchManager(lb, username='test')
         bm.create_branch('new-branch-to-push')
@@ -173,7 +173,7 @@ class TestGitWorkflowsMethods(object):
         """ test reset performs no operation when there's nothing to do """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.reset(username=username)
         wf.publish(username=username)
 
@@ -182,7 +182,7 @@ class TestGitWorkflowsMethods(object):
         """ test reset performs no operation when there's nothing to do """
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         wf.publish(username=username)
         commit_to_check = lb.git.commit_hash
 
