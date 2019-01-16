@@ -39,7 +39,7 @@ class TestLabBook(object):
         assert os.path.exists(checkout_file) is True
 
         parts = checkout_id.split("-")
-        assert len(parts) == 6
+        assert len(parts) == 5
         assert parts[0] == "test"
         assert parts[1] == "test"
         assert parts[2] == "labbook1"
