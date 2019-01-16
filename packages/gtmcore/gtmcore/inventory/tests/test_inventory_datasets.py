@@ -11,7 +11,7 @@ from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.gitlib.git import GitAuthor
 
-from gtmcore.fixtures import mock_config_file, mock_labbook
+from gtmcore.fixtures import mock_config_file, mock_labbook, _MOCK_create_remote_repo2
 
 
 @pytest.fixture()
@@ -252,3 +252,31 @@ class TestInventoryDatasets(object):
             inv_manager.create_dataset("test", "test", "dataset1", "asdfdfgh",
                                        description="my first dataset",
                                        author=auth)
+
+    def test_link_unlink_dataset(self, mock_labbook):
+        inv_manager = InventoryManager(mock_labbook[0])
+        lb = mock_labbook[2]
+        ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
+
+        # Fake publish to a local bare repo
+        _MOCK_create_remote_repo2(ds, 'test', None, None)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
+
+        inv_manager.link_dataset_to_labbook(ds.remote, 'test', 'dataset100', lb)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+
+        inv_manager.unlink_dataset_from_labbook('test', 'dataset100', lb)
+
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is False
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is False
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+
+        assert len(data) == 0
+

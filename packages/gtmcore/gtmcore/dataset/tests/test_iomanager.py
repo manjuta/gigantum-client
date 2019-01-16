@@ -379,3 +379,4 @@ class TestIOManager(object):
             source2 = dd.read()
         with open(obj2_target, 'rt') as dd:
             assert source2 == dd.read()
+

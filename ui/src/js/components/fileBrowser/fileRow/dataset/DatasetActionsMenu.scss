@@ -39,17 +39,12 @@
         font-size: 14px;
     }
 
-    &--remove {
-        background: url('~Images/icons/database-remove.svg') no-repeat 50% 50%;
+    &--unlink {
+        background: url('~Images/icons/database-remove-white.svg') no-repeat 50% 50%;
         background-size: 20px;
 
         position: relative;
 
-        &:hover{
-            //change color here
-            background: url('~Images/icons/database-remove.svg') no-repeat 50% 50%;
-            background-size: 20px;
-        }
     }
 
     &--manage {

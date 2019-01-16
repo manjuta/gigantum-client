@@ -40,6 +40,7 @@ from lmsrvlabbook.api.objects.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.connections.datasetfile import DatasetFile, DatasetFileConnection
+from lmsrvlabbook.api.connections.labbook import Labbook, LabbookConnection
 
 
 logger = LMLogger.get_logger()
@@ -195,49 +196,80 @@ class FetchDatasetEdge(graphene.relay.ClientIDMutation):
         return FetchDatasetEdge(new_dataset_edge=dsedge)
 
 
-class LinkDataset(graphene.relay.ClientIDMutation):
-    class Input:
-        owner = graphene.String(required=True)
-        labbook_name = graphene.String(required=True)
-        dataset_url = graphene.String(required=True)
+class ModifyDatasetLink(graphene.relay.ClientIDMutation):
+    """"Mutation to link and unlink Datasets from a Project"""
 
-    new_dataset_edge = graphene.Field(DatasetConnection.Edge)
+    class Input:
+        labbook_owner = graphene.String(required=True, description="Owner of the labbook")
+        labbook_name = graphene.String(required=True, description="Name of the labbook")
+        dataset_owner = graphene.String(required=True, description="Owner of the dataset to link")
+        dataset_name = graphene.String(required=True, description="Name of the dataset to link")
+        action = graphene.String(required=True, description="Action to perform, either `link` or `unlink`")
+        dataset_url = graphene.String(description="URL to the Dataset to link. Only required when `action=link`")
+
+    new_labbook_edge = graphene.Field(LabbookConnection.Edge)
+
+    @staticmethod
+    def _get_remote_domain(dataset_url, dataset_owner, dataset_name):
+        """Helper method to get the domain or return none"""
+        if "http" in dataset_url:
+            dataset_url, _ = dataset_url.split('.git')
+            _, _, remote_domain, namespace, name = dataset_url.split("/")
+            if namespace != dataset_owner:
+                raise ValueError("The dataset owner does not match url")
+            if name != dataset_name:
+                raise ValueError("The dataset name does not match url")
+        else:
+            remote_domain = None
+
+        return remote_domain
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, dataset_url, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, labbook_owner, labbook_name, dataset_owner, dataset_name, action,
+                               dataset_url=None, client_mutation_id=None):
         logged_in_username = get_logged_in_username()
         im = InventoryManager()
-        lb = im.load_labbook(logged_in_username, owner, labbook_name, author=get_logged_in_author())
+        lb = im.load_labbook(logged_in_username, labbook_owner, labbook_name, author=get_logged_in_author())
 
-        _, _, remote_domain, namespace, dataset_name = dataset_url.split("/")
-        dataset_name, _ = dataset_name.split('.git')
+        with lb.lock():
+            if action == 'link':
+                if not dataset_url:
+                    raise ValueError("datasetUrl is required when linking a dataset")
 
-        # Make sure git creds are configured for the remote
-        admin_service = None
-        for remote in lb.client_config.config['git']['remotes']:
-            if remote_domain == remote:
-                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
-                break
-        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        else:
-            raise ValueError(
-                "Authorization header not provided. Must have a valid session to query for collaborators")
-        mgr = GitLabManager(remote_domain, admin_service, token)
-        mgr.configure_git_credentials(remote_domain, logged_in_username)
+                remote_domain = cls._get_remote_domain(dataset_url, dataset_owner, dataset_name)
 
-        # Link dataset to labbook via submodule references
-        ds = im.link_dataset_to_labbook(dataset_url, namespace, dataset_name, lb)
-        ds.namespace = namespace
-        info.context.dataset_loader.prime(f"{get_logged_in_username()}&{namespace}&{dataset_name}", ds)
+                if remote_domain:
+                    # Make sure git creds are configured for the remote
+                    admin_service = None
+                    for remote in lb.client_config.config['git']['remotes']:
+                        if remote_domain == remote:
+                            admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
+                            break
+                    if "HTTP_AUTHORIZATION" in info.context.headers.environ:
+                        token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+                    else:
+                        raise ValueError(
+                            "Authorization header not provided. Must have a valid session to query for collaborators")
+                    mgr = GitLabManager(remote_domain, admin_service, token)
+                    mgr.configure_git_credentials(remote_domain, logged_in_username)
 
-        # Relink the revision
-        m = Manifest(ds, logged_in_username)
-        m.link_revision()
+                # Link dataset to labbook via submodule references
+                ds = im.link_dataset_to_labbook(dataset_url, dataset_owner, dataset_name, lb)
+                ds.namespace = dataset_owner
+                info.context.dataset_loader.prime(f"{get_logged_in_username()}&{dataset_owner}&{dataset_name}", ds)
 
-        edge = DatasetConnection.Edge(node=Dataset(owner=owner, name=dataset_name),
-                                      cursor=base64.b64encode(f"{0}".encode('utf-8')))
-        return FetchDatasetEdge(new_dataset_edge=edge)
+                # Relink the revision
+                m = Manifest(ds, logged_in_username)
+                m.link_revision()
+            elif action == 'unlink':
+                im.unlink_dataset_from_labbook(dataset_owner, dataset_name, lb)
+            else:
+                raise ValueError("Unsupported action. Use `link` or `unlink`")
+
+            edge = LabbookConnection.Edge(node=Labbook(owner=labbook_owner, name=labbook_name),
+                                          cursor=base64.b64encode(f"{0}".encode('utf-8')))
+
+        return ModifyDatasetLink(new_labbook_edge=edge)
 
 
 class DownloadDatasetFiles(graphene.relay.ClientIDMutation):
