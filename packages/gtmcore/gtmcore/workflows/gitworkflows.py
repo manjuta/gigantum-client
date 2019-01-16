@@ -120,6 +120,8 @@ class GitWorkflow(ABC):
                                                      feedback_callback=feedback_callback)
         return updates_cnt
 
+    def pull(self, username: str, feedback_callback: Callable = lambda _ : None):
+
     def reset(self, username: str):
         """ Perform a Git reset to undo all local changes"""
         bm = BranchManager(self.repository, username)
