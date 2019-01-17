@@ -1,11 +1,11 @@
 @import '~Styles/_imports.scss';
-
+$sideBarWidth: 30px;
 .Branches {
   position: relative;
 
-  max-width: calc(100% + $sideBarWidth);
+  width: calc(100% + 70px);
   height: 310px;
-  margin: 10px -20px;
+  margin: 30px -20px;
   padding: 20px 0;
 
   transition: height 0.6s;
@@ -15,7 +15,7 @@
   &--collapsed {
     height: 0px;
     padding: 0px;
-
+    margin: 10px -20px;
     transition: height 0.6s;
   }
 }
@@ -99,7 +99,7 @@
 
   &--close{
       right: 80px;
-
+      z-index: 8;
       @include close();
   }
 }
@@ -161,7 +161,11 @@
 
 @media screen and (max-width: 50000px) and (min-width: 1480px) {
   .Branches{
-    margin: 10px -35px;
+    margin: 30px -35px;
+
+    &--collapsed{
+       margin: 10px -35px;
+    }
   }
 }
 
