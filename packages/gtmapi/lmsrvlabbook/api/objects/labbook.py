@@ -82,6 +82,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # All available feature/rollback branches (Collectively known as experimental branches)
     available_branch_names = graphene.List(graphene.String)
 
+    local_branch_names = graphene.List(graphene.String)
     remote_branch_names = graphene.List(graphene.String)
 
     # Names of branches that can be merged into the current active branch
@@ -216,6 +217,12 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             lambda labbook: BranchManager(labbook, username=get_logged_in_username()).workspace_branch)
 
     def resolve_available_branch_names(self, info):
+        fltr = lambda labbook: \
+            BranchManager(labbook, username=get_logged_in_username()).branches_local
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            fltr)
+
+    def resolve_local_branch_names(self, info):
         fltr = lambda labbook: \
             BranchManager(labbook, username=get_logged_in_username()).branches_local
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
