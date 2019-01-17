@@ -25,6 +25,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.workflows import LabbookWorkflow
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.labbook import Labbook
@@ -151,3 +152,23 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
 
         return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
+
+
+class ResetBranchToRemote(graphene.relay.ClientIDMutation):
+    """ Undo all local history and then set current branch tip to match remote.
+
+    Very useful when changes are made to master that cannot be pushed. """
+
+    labbook = graphene.Field(Labbook)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            wf = LabbookWorkflow(lb)
+            wf.reset(username)
+
+        return ResetBranchToRemote(Labbook(id="{}&{}".format(owner, labbook_name),
+                                           name=labbook_name, owner=owner))

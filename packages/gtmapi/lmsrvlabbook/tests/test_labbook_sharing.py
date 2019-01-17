@@ -19,24 +19,16 @@
 # SOFTWARE.
 
 import os
-
 import pprint
-
-from pkg_resources import resource_filename
-import getpass
 import responses
 
-from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import (property_mocks_fixture, docker_socket_fixture,
     fixture_working_dir_env_repo_scoped, fixture_working_dir, _create_temp_work_dir)
 
 import pytest
-from graphene.test import Client
 from mock import patch
-from werkzeug.datastructures import FileStorage
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
-from werkzeug.datastructures import FileStorage
 
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 from gtmcore.inventory.branching import BranchManager
