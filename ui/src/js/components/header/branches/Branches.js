@@ -178,6 +178,7 @@ export default class Branches extends Component {
                       <BranchCard
                         activeBranchName={this.props.labbook.activeBranchName}
                         name={name}
+                        isRemote={labbook.remoteBranchNames.indexOf(name) !== -1}
                         labbookId={this.props.labbookId}
                         mergeFilter={this.props.mergeFilter}
                         branchesOpen={this.props.branchesOpen}

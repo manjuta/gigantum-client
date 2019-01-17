@@ -419,8 +419,8 @@ const LabbookFragmentContainer = createFragmentContainer(
             numPipPackages
           }
 
-
           availableBranchNames
+          remoteBranchNames
           mergeableBranchNames
           workspaceBranchName
           activeBranchName

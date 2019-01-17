@@ -6,6 +6,7 @@ import ForceMerge from './ForceMerge';
 import ButtonLoader from 'Components/shared/ButtonLoader';
 // mutations
 import WorkonExperimentalBranchMutation from 'Mutations/branches/WorkonExperimentalBranchMutation';
+import ResetBranchToRemoteMutation from 'Mutations/branches/ResetBranchToRemoteMutation';
 import MergeFromBranchMutation from 'Mutations/branches/MergeFromBranchMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
 // store
@@ -31,10 +32,12 @@ export default class BranchCard extends Component {
       forceMergeVisible: false,
       buttonLoaderStateSwitch: '',
       buttonLoaderStateMerge: '',
+      buttonLoaderStateReset: '',
     };
 
     this._merge = this._merge.bind(this);
     this._checkoutBranch = this._checkoutBranch.bind(this);
+    this._resetBranch = this._resetBranch.bind(this);
     this._toggleModal = this._toggleModal.bind(this);
     this._handleToggleModal = this._handleToggleModal.bind(this);
   }
@@ -88,6 +91,69 @@ export default class BranchCard extends Component {
           setTimeout(() => {
             self.setState({
               buttonLoaderStateSwitch: '',
+            });
+          }, 3000);
+
+          this.props.setBuildingState(true);
+
+          BuildImageMutation(
+            labbookName,
+            owner,
+            false,
+            (response, error) => {
+              if (error) {
+                console.log(error);
+              }
+            },
+          );
+        }
+      },
+    );
+  }
+    /**
+    @param {}
+    checkout branch using WorkonExperimentalBranchMutation
+  */
+  _resetBranch() {
+    const self = this;
+    const branchName = this.props.name;
+    const { owner, labbookName } = this.state;
+    setInfoMessage(`Reseting branch: ${branchName}`);
+
+    requestAnimationFrame(() => {
+      this.setState({
+        showLoader: true,
+        buttonLoaderStateReset: 'loading',
+      });
+    });
+
+    ResetBranchToRemoteMutation(
+      owner,
+      labbookName,
+      (response, error) => {
+        if (error) {
+          console.error(error);
+          setErrorMessage('Problem Checking out Branch, check if you have a valid session and connection', error);
+
+          self.setState({
+            showLoader: false,
+            buttonLoaderStateReset: 'error',
+          });
+          setTimeout(() => {
+            self.setState({
+              buttonLoaderStateReset: '',
+            });
+          }, 2000);
+        } else {
+          setForceCancelRefetch(true);
+          self.setState({
+            showLoader: false,
+            buttonLoaderStateReset: 'finished',
+          });
+
+          setTimeout(() => {
+            self.setState({
+              buttonLoaderStateReset: '',
             });
           }, 3000);
 
@@ -226,8 +292,17 @@ export default class BranchCard extends Component {
             className="BranchCard__btn--deleteLabbook button--flat"
           />
         }
-
         <div className="BranchCard__button">
+          {
+            isCurrentBranch && this.props.isRemote &&
+            <ButtonLoader
+              ref="buttonLoaderReset"
+              buttonState={this.state.buttonLoaderStateReset}
+              buttonText="Reset Branch"
+              buttonDisabled={showLoader}
+              clicked={this._resetBranch}
+            />
+          }
 
           {this.props.mergeFilter &&
 
@@ -243,6 +318,7 @@ export default class BranchCard extends Component {
 
           }
 
+
           {!this.props.mergeFilter &&
 
             <ButtonLoader
@@ -255,6 +331,11 @@ export default class BranchCard extends Component {
             />
 
           }
+        </div>
+        <div
+          className="BranchCard__badge"
+        >
+          {this.props.isRemote ? 'Remote' : 'Local'}
         </div>
       </div>
     );
