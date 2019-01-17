@@ -137,7 +137,7 @@ class TestLabbookShareProtocol(object):
         # TODO - Pause and wait for job to report finished
  
     @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
-    def test_reset_labbook_to_remote(self, fixture_working_dir, mock_create_labbooks_no_lfs):
+    def test_reset_branch_to_remote(self, fixture_working_dir, mock_create_labbooks_no_lfs):
 
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
@@ -148,18 +148,33 @@ class TestLabbookShareProtocol(object):
         test_user_lb = im.load_labbook('default', 'default', 'labbook1')
         wf = LabbookWorkflow(test_user_lb)
         wf.publish(username='default')
+        hash_original = wf.labbook.git.commit_hash
+
+        new_file_path = os.path.join(wf.labbook.root_dir, 'input', 'new-file')
+        with open(new_file_path, 'w') as f: f.write('File data')
+        wf.labbook.sweep_uncommitted_changes()
+        hash_before_reset = wf.labbook.git.commit_hash
 
         publish_query = f"""
         mutation c {{
-            resetLabbookToRemote(input: {{
+            resetBranchToRemote(input: {{
                 labbookName: "labbook1",
                 owner: "default"
             }}) {{
-                labbook
+                labbook {{
+                    activeBranch {{
+                        name
+                        commit {{
+                            shortHash
+                        }}
+                    }}
+                }}
             }}
         }}
         """
 
         r = mock_create_labbooks_no_lfs[2].execute(publish_query, context_value=req)
         assert 'errors' not in r
-        assert r['data']['resetLabbookToRemote']['labbook']['activeBranch'] == 'master'
+        hash_after_reset = r['data']['resetBranchToRemote']['labbook']['activeBranch']['commit']['shortHash']
+        assert hash_after_reset not in hash_before_reset
+        assert hash_after_reset in hash_original

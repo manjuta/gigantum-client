@@ -159,6 +159,10 @@ class ResetBranchToRemote(graphene.relay.ClientIDMutation):
 
     Very useful when changes are made to master that cannot be pushed. """
 
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+
     labbook = graphene.Field(Labbook)
 
     @classmethod
