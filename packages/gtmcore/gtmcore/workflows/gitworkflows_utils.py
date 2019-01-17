@@ -181,7 +181,12 @@ def pull_branch(repository: Repository, username: str, branch_name: str,
     """"""
     repository.sweep_uncommitted_changes()
     repository.git.fetch()
-    _pull(repository, branch_name, feedback_callback)
+    original_hash = repository.git.commit_hash
+    try:
+        _pull(repository, branch_name, feedback_callback)
+    except MergeError as e:
+        logger.error(f"Caught merge conflict on pull, resetting to {original_hash}")
+        call_subprocess(['git', 'reset', '--hard', original_hash], cwd=repository.root_dir)
 
 def sync_branch(repository: Repository, username: str, feedback_callback: Callable) -> int:
     """"""
