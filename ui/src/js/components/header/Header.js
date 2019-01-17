@@ -181,6 +181,7 @@ class LabbookHeader extends Component {
     const labbookHeaderCSS = classNames({
       LabbookHeader: true,
       'LabbookHeader--sticky': this.props.isSticky,
+      'LabbookHeader--branchesOpen': this.props.branchesOpen,
     });
 
     const branchesErrorCSS = classNames({

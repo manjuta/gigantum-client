@@ -138,6 +138,13 @@
         height: 0px;
     }
   }
+
+
+  &--branchesOpen{
+    .LabbookHeader__navContainer{
+      display: none;
+    }
+  }
 }
 
 .LabbookHeader__columnContainer{
