@@ -131,6 +131,7 @@ class GitWorkflow(ABC):
         bm = BranchManager(self.repository, username)
         if self.remote and bm.active_branch in bm.branches_remote:
             self.repository.git.fetch()
+            self.repository.sweep_uncommitted_changes()
             call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
                             cwd=self.repository.root_dir)
             call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
