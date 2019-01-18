@@ -69,7 +69,7 @@ const dragSource = {
  beginDrag(props, monitor) {
   return {
     isDragging: true,
-    data: props.fileData,
+    fileData: props.fileData,
   };
  },
 
@@ -324,7 +324,7 @@ const targetSource = {
       }
 
       return {
-       data: props.fileData,
+       fileData: props.fileData,
       };
   },
 };

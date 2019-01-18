@@ -27,12 +27,7 @@
     @include flex(space-between, row);
     align-items: center;
 
-    &--expanded{
-        // border-bottom: none;
-    }
-
     &:hover {
-      //@include boxShadowDark();
 
       .ActionsMenu__item {
         &--rename {
@@ -56,7 +51,7 @@
     }
 
     &--hover {
-      @include boxShadowDark();
+        background: $fileBrowserHover;
     }
 
 }
