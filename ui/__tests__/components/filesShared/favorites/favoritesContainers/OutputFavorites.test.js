@@ -1,21 +1,17 @@
+// vendor
+import React from 'react';
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+// components
+import OutputFavorites from 'Components/filesShared/favorites/favoritesContainers/OutputFavorites';
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import OutputFavorites from 'Components/filesShared/favorites/favoritesContainers/OutputFavorites';
+test('Test OutputFavorites', () => {
+  const wrapper = renderer.create(
+     <OutputFavorites />
+  );
 
-      import relayTestingUtils from 'relay-testing-utils'
+  const tree = wrapper.toJSON();
 
-      test('Test OutputFavorites', () => {
-
-        const wrapper = renderer.create(
-
-           <OutputFavorites />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+  expect(tree).toMatchSnapshot();
+});

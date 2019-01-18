@@ -164,6 +164,7 @@ export default class DatasetActionsMenu extends Component {
           labbookOwner,
         };
       }
+
       if (this.props.isParent) {
         data.allKeys = true;
       } else {
@@ -203,7 +204,8 @@ export default class DatasetActionsMenu extends Component {
     } else {
       isLocal = this.props.edge.node.isLocal;
     }
-
+    const fileIsNotLocal = (!this.props.edge.node.isLocal && !isLocal)
+    const fileIsLocal = (this.props.edge.node.isLocal && isLocal)
     const manageCSS = classNames({
             DatasetActionsMenu__item: true,
             'DatasetActionsMenu__item--manage': true,
@@ -218,10 +220,10 @@ export default class DatasetActionsMenu extends Component {
           }),
           downloadCSS = classNames({
             DatasetActionsMenu__item: true,
-            'DatasetActionsMenu__item--download': (!this.props.edge.node.isLocal && !isLocal) && this.props.section !== 'data' && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--downloaded': (this.props.edge.node.isLocal || isLocal) && this.props.section !== 'data' && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--download-grey': (!this.props.edge.node.isLocal && !isLocal) && this.props.section === 'data' && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--downloaded-grey': (this.props.edge.node.isLocal || isLocal) && this.props.section === 'data' && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--download': fileIsNotLocal && (this.props.section !== 'data') && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--downloaded': fileIsLocal && (this.props.section !== 'data') && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--download-grey': (fileIsNotLocal) && (this.props.section === 'data') && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--downloaded-grey': fileIsLocal && (this.props.section === 'data') && !this.state.fileDownloading,
             'DatasetActionsMenu__item--loading': this.state.fileDownloading,
           }),
           downloadText = isLocal ? 'Downloaded' : this.props.isParent ? 'Download All' : this.props.folder ? 'Download Directory' : 'Download',
@@ -229,7 +231,6 @@ export default class DatasetActionsMenu extends Component {
             'DatasetActionsMenu__item DatasetActionsMenu__item--unlink': true,
             'DatasetActionsMenu__popup-visible': this.state.popupVisible,
           });
-
 
     return (
 

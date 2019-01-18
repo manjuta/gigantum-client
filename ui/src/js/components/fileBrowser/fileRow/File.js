@@ -86,7 +86,6 @@ class File extends Component {
     if (this.props.setParentDragFalse) {
       this.props.setParentDragFalse();
     }
-
     if (this.state.isDragging && this.state.isHovered) {
       this.setState({ isDragging: true, isHovered: true });
     }
@@ -348,10 +347,10 @@ class File extends Component {
                   </div>
                   <div className="flex justify-space-around">
                     <button
-                      className="File__btn--round File__btn--cancel"
+                      className="File__btn--round File__btn--cancel File__btn--rename-cancel"
                       onClick={() => { this._clearState(); }} />
                     <button
-                      className="File__btn--round File__btn--add"
+                      className="File__btn--round File__btn--add File__btn--rename-add"
                       onClick={() => { this._triggerMutation(); }}
                     />
                   </div>
@@ -394,11 +393,11 @@ class File extends Component {
   }
 }
 
-const FolderDND = DragSource(
+const FileDnD = DragSource(
   'card',
   Connectors.dragSource,
   Connectors.dragCollect,
 )((File));
 
 
-export default FolderDND;
+export default FileDnD;

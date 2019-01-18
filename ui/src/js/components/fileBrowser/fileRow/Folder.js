@@ -520,10 +520,10 @@ class Folder extends Component {
                       </div>
                       <div className="flex justify-space-around">
                         <button
-                          className="File__btn--round File__btn--cancel"
+                          className="File__btn--round File__btn--cancel File__input--rename-cancel"
                           onClick={() => { this._clearState(); }} />
                         <button
-                          className="File__btn--round File__btn--add"
+                          className="File__btn--round File__btn--add File__input--rename-add"
                           onClick={() => { this._triggerMutation(); }}
                         />
                       </div>

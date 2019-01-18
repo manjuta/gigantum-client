@@ -66,6 +66,7 @@ export const fileHandler = () => {
                       }
                     }
                 } else if (currentObject && !currentObject[key]) {
+
                     currentObject[key] = {
                       children: {
                       },

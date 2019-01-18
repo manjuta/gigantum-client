@@ -102,12 +102,10 @@ class Routes extends Component {
     if (!this.state.hasError) {
       const headerCSS = classNames({
         Header: true,
-        hidden: !this.props.validSession,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({
         Routes__main: true,
-        'Routes__main-no-auth': !this.props.validSession,
       });
 
       const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";

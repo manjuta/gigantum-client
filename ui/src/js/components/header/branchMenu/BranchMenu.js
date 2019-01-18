@@ -664,8 +664,7 @@ class BranchMenu extends Component {
 
         <button
           onClick={() => { this._toggleMenu(); }}
-          className="BranchMenu__btn"
-        >
+          className="BranchMenu__btn">
           Actions
         </button>
 
@@ -694,8 +693,7 @@ class BranchMenu extends Component {
 
                 <button
                   onClick={() => { this._handleToggleModal('createBranchVisible'); }}
-                  className="BranchMenu__btn--flat"
-                >
+                  className="BranchMenu__btn--flat">
                   New Branch
                 </button>
 
@@ -705,8 +703,7 @@ class BranchMenu extends Component {
 
                 <button
                   onClick={() => this._switchBranch()}
-                  className="BranchMenu__btn--flat"
-                >
+                  className="BranchMenu__btn--flat">
                   Switch Branch
                 </button>
 
@@ -716,8 +713,7 @@ class BranchMenu extends Component {
 
                 <button
                   onClick={() => this._mergeFilter()}
-                  className="BranchMenu__btn--flat"
-                >
+                  className="BranchMenu__btn--flat">
                   Merge Branch
                 </button>
 
@@ -730,8 +726,7 @@ class BranchMenu extends Component {
               <button
                 onClick={evt => this._exportLabbook(evt)}
                 disabled={this.state.exporting}
-                className="BranchMenu__btn--flat"
-              >
+                className="BranchMenu__btn--flat">
                 Export
               </button>
 
@@ -744,8 +739,7 @@ class BranchMenu extends Component {
 
                 <button
                   onClick={evt => this._toggleModal('visibilityModalVisible')}
-                  className="BranchMenu__btn--flat"
-                >
+                  className="BranchMenu__btn--flat">
                   Change Visibility
                 </button>
 
@@ -756,8 +750,7 @@ class BranchMenu extends Component {
 
               <button
                 onClick={() => this._toggleDeleteModal()}
-                className="BranchMenu__btn--flat"
-              >
+                className="BranchMenu__btn--flat">
                 {deleteText}
               </button>
 
@@ -773,8 +766,7 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--remote"
-                onClick={() => this._togglePublishModal()}
-              >
+                onClick={() => this._togglePublishModal()}>
                 Publish
               </button>
 
@@ -801,8 +793,7 @@ class BranchMenu extends Component {
 
               <button
                 className="BranchMenu__btn--sync"
-                onClick={() => this._sync()}
-              >
+                onClick={() => this._sync()}>
                 Sync Branch
               </button>
 
@@ -840,7 +831,10 @@ class BranchMenu extends Component {
                     type="text"
                   />
 
-                  <button onClick={() => this._copyRemote()} className="BranchMenu__btn--copy fa fa-clone" />
+                  <button
+                    onClick={() => this._copyRemote()}
+                    className="BranchMenu__btn--copy fa fa-clone"
+                  />
 
                 </div>
 

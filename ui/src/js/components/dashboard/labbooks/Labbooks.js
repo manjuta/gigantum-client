@@ -390,7 +390,7 @@ class Labbooks extends Component {
 
           <div className="Labbooks__panel-bar">
             <h6 className="Labbooks__username">{localStorage.getItem('username')}</h6>
-            <h2 className="Labbooks__title" onClick={() => this.refs.wizardModal._showModal()} >
+            <h2 className="Labbooks__title">
                 Projects
             </h2>
 

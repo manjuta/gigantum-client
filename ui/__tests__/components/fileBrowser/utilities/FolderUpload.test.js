@@ -1,21 +1,31 @@
+// vendor
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+// components
+import FolderUpload from 'Components/fileBrowser/utilities/FolderUpload';
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import FolderUpload from 'Components/fileBrowser/utilities/FolderUpload';
 
-      import relayTestingUtils from 'relay-testing-utils'
+let files = [
+      { file: 'folder/file', entry: { name: 'file.js', isFile: true, fullPath: 'folder/file.js' } },
+      { file: 'folder/temp.js', entry: { name: 'temp.js', isFile: true, fullPath: 'folder/temp.js' } },
+    ],
+    prefix = '',
+    labbookName = 'ui-test-project',
+    owner = 'uitest',
+    section = 'code',
+    connectionKey = 'CodeBrowser__allFiles',
+    sectionId = 'tempID',
+    chunkLoader = jest.fn(),
+    totalFiles: 2,
+    count = 0,
+    type = '';
 
-      test('Test FolderUpload', () => {
 
-        const wrapper = renderer.create(
+describe('FolderUpload', () => {
+  it('FolderUpload upload files', async () => {
+      await FolderUpload.uploadFiles(files, prefix, labbookName, owner, section, connectionKey, sectionId, chunkLoader, totalFiles, count, type);
 
-           <FolderUpload />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+      expect(chunkLoader.mock.calls.length).toEqual(0);
+  });
+});

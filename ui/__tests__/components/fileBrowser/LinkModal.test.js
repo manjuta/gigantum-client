@@ -1,21 +1,21 @@
+// vendor
+import React from 'react';
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+// components
+import LinkModal from 'Components/fileBrowser/LinkModal';
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import LinkModal from 'Components/fileBrowser/LinkModal';
 
-      import relayTestingUtils from 'relay-testing-utils'
+const fixtures = {
+  closeLinkModal: jest.fn(),
+}
+test('Test LinkModal', () => {
+  const wrapper = renderer.create(
+     <LinkModal {...fixtures}/>
+  );
 
-      test('Test LinkModal', () => {
+  const tree = wrapper.toJSON();
 
-        const wrapper = renderer.create(
-
-           <LinkModal />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+  expect(tree).toMatchSnapshot();
+});

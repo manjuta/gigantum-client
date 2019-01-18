@@ -1,21 +1,16 @@
 
-      import React from 'react'
+      // vendor
+      import React from 'react';
       import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
+      import {mount} from 'enzyme';
+      import relayTestingUtils from 'relay-testing-utils';
+      // components;
       import FolderUpload from 'Components/labbook/fileBrowser/FolderUpload';
 
-      import relayTestingUtils from 'relay-testing-utils'
-
       test('Test FolderUpload', () => {
+        const wrapper = renderer.create(<FolderUpload />);
 
-        const wrapper = renderer.create(
+        const tree = wrapper.toJSON();
 
-           <FolderUpload />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+        expect(tree).toMatchSnapshot();
+      });

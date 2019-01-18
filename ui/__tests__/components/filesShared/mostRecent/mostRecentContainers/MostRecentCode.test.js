@@ -1,21 +1,17 @@
+// vendor
+import React from 'react';
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+// components
+import MostRecentCode from 'Components/filesShared/mostRecent/mostRecentContainers/MostRecentCode';
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import MostRecentCode from 'Components/filesShared/mostRecent/mostRecentContainers/MostRecentCode';
 
-      import relayTestingUtils from 'relay-testing-utils'
+test('Test MostRecentCode', () => {
+  const wrapper = renderer.create(
+     <MostRecentCode />
+  );
+  const tree = wrapper.toJSON();
 
-      test('Test MostRecentCode', () => {
-
-        const wrapper = renderer.create(
-
-           <MostRecentCode />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+  expect(tree).toMatchSnapshot();
+});

@@ -6,13 +6,39 @@ import './LabbookFilterBy.scss';
 
 
 class LabbookFilterBy extends Component {
+  constructor(props) {
+  	super(props);
+    this._toggleFilterMenu = this._toggleFilterMenu.bind(this);
+    this._closeFilterMenu = this._closeFilterMenu.bind(this);
+  }
+
   state = {
     filterMenuOpen: false,
+  }
+
+  componentDidMount() {
+    window.addEventListener('click', this._closeFilterMenu);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._closeFilterMenu);
+  }
+
+  /**
+    *  @param {}
+    *  closes toggle menu
+    *  @return {}
+  */
+  _closeFilterMenu(evt) {
+     if (evt.target.className.indexOf('LabbookFilterBy') < 0) {
+       this.setState({ filterMenuOpen: false });
+     }
   }
 
   /**
     *  @param {}
     *  gets filter value and displays it to the UI more clearly
+    * @return {}
   */
   _getFilter() {
     switch (this.props.filter) {
@@ -37,18 +63,16 @@ class LabbookFilterBy extends Component {
   }
 
   render() {
-    const { props, state } = this;
-
-    const labbookFilterSeclectorCSS = classNames({
-      LabbookFilterBy__selector: true,
-      'LabbookFilterBy__selector--open': state.filterMenuOpen,
-      'LabbookFilterBy__selector--collapsed': !state.filterMenuOpen,
-    });
-
-    const labbookFilterMenuCSS = classNames({
-      'LabbookFilterBy__menu box-shadow': true,
-      hidden: !state.filterMenuOpen,
-    });
+    const { props, state } = this,
+          labbookFilterSeclectorCSS = classNames({
+            LabbookFilterBy__selector: true,
+            'LabbookFilterBy__selector--open': state.filterMenuOpen,
+            'LabbookFilterBy__selector--collapsed': !state.filterMenuOpen,
+          }),
+          labbookFilterMenuCSS = classNames({
+            'LabbookFilterBy__menu box-shadow': true,
+            hidden: !state.filterMenuOpen,
+          });
 
     return (
 
@@ -56,32 +80,29 @@ class LabbookFilterBy extends Component {
         Filter by:
         <span
           className={labbookFilterSeclectorCSS}
-          onClick={() => this._toggleFilterMenu()}
-        >
+          onClick={() => this._toggleFilterMenu()}>
           {this._getFilter()}
         </span>
+
         <ul
-          className={labbookFilterMenuCSS}
-        >
+          className={labbookFilterMenuCSS}>
           <li
             className="LabbookFilterBy__list-item"
-            onClick={() => props.setFilter('all')}
-          >
+            onClick={() => props.setFilter('all')}>
             All {props.filter === 'all' ? '✓ ' : ''}
           </li>
           <li
             className="LabbookFilterBy__list-item"
-            onClick={() => props.setFilter('owner')}
-          >
+            onClick={() => props.setFilter('owner')}>
            My Projects {props.filter === 'owner' ? '✓ ' : ''}
           </li>
           <li
             className="LabbookFilterBy__list-item"
-            onClick={() => props.setFilter('others')}
-          >
+            onClick={() => props.setFilter('others')}>
             Shared with me {props.filter === 'others' ? '✓ ' : ''}
           </li>
         </ul>
+
       </div>);
   }
 }

@@ -6,8 +6,33 @@ import './LabbookSort.scss';
 
 
 class LabbookSort extends Component {
+  constructor(props) {
+    super(props);
+    this._toggleSortMenu = this._toggleSortMenu.bind(this);
+    this._closeFilterMenu = this._closeFilterMenu.bind(this);
+  }
+
   state = {
     sortMenuOpen: false,
+  }
+
+  componentDidMount() {
+    window.addEventListener('click', this._closeFilterMenu);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._closeFilterMenu);
+  }
+
+  /**
+    *  @param {}
+    *  closes toggle menu
+    *  @return {}
+  */
+  _closeFilterMenu(evt) {
+     if (evt.target.className.indexOf('LabbookSort') < 0) {
+       this.setState({ sortMenuOpen: false });
+     }
   }
 
   /**

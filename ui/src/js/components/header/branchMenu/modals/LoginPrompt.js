@@ -39,7 +39,7 @@ export default class LoginPrompt extends Component {
             </div>
           :
             <div className="LoginPrompt">
-              <div>
+              <div className="LoginPrompt__container">
                 <p>A valid internet connection is required to perform this action.</p>
               </div>
             </div>)

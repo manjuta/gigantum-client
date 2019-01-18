@@ -1,21 +1,17 @@
+// vendor
+import React from 'react';
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+// components
+import InputBrowser from 'Components/filesShared/sectionBrowser/sectionBrowserContainers/InputBrowser';
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import InputBrowser from 'Components/filesShared/sectionBrowser/sectionBrowserContainers/InputBrowser';
+test('Test InputBrowser', () => {
+  const wrapper = renderer.create(
+     <InputBrowser />
+  );
 
-      import relayTestingUtils from 'relay-testing-utils'
+  const tree = wrapper.toJSON();
 
-      test('Test InputBrowser', () => {
-
-        const wrapper = renderer.create(
-
-           <InputBrowser />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+  expect(tree).toMatchSnapshot();
+});

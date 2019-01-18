@@ -93,11 +93,11 @@
  ],
  "data": {
   "labbook": {
-   "id": "TGFiYm9vazpjYnV0bGVyJmRhdGEtc2hhZGVy",
-   "description": "",
+   "id": "TGFiYm9vazp1aXRlc3QmdWktdGVzdC1wcm9qZWN0",
+   "description": "This is a ui test project\n",
    "detailRecords": [
     {
-     "id": "QWN0aXZpdHlEZXRhaWxPYmplY3Q6Y2J1dGxlciZkYXRhLXNoYWRlciY=",
+     "id": "QWN0aXZpdHlEZXRhaWxPYmplY3Q6bGFiYm9vayZ1aXRlc3QmdWktdGVzdC1wcm9qZWN0Jg==",
      "action": null,
      "key": "",
      "data": null,

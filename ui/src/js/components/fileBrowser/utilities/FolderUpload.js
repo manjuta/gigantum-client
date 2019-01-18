@@ -171,7 +171,6 @@ const addFiles = (
           transactionId,
         };
 
-
         chunkLoader(data, chunckCallback);
       };
 
@@ -287,7 +286,6 @@ const CreateFolders = (files, prefix, section, labbookName, owner, sectionId, co
   });
 
   const uniqueFolderPaths = folderPaths.filter(onlyUnique);
-
   const directoryExistsAll = getFolderExistsQueryPromises(uniqueFolderPaths, labbookName, owner, section, type);
 
   Promise.all(directoryExistsAll).then((labbooks) => {

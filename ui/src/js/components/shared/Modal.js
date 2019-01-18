@@ -4,10 +4,14 @@ import classNames from 'classnames';
 
 export default class Modal extends Component {
   componentDidMount() {
-    document.getElementById('root').classList.add('no-overflow');
+    if (document.getElementById('root')) {
+      document.getElementById('root').classList.add('no-overflow');
+    }
   }
   componentWillUnmount() {
-    document.getElementById('root').classList.remove('no-overflow');
+    if (document.getElementById('root')) {
+      document.getElementById('root').classList.remove('no-overflow');
+    }
   }
 
   render() {
