@@ -112,16 +112,6 @@ class ZipExporter(object):
             statusmsg = f'{statusmsg}\nCreating workspace branch...'
             update_meta(statusmsg)
 
-            if 'owner' in repo._data:
-                repo._data['owner']['username'] = owner
-            repo._save_gigantum_data()
-            if not repo.is_repo_clean:
-                repo.git.add('.gigantum/labbook.yaml')
-                repo.git.commit(message="Updated owner in labbook.yaml")
-
-            #if repo._data['owner']['username'] != owner:
-            #    raise ValueError(f'Error importing LabBook {repo} - cannot set owner')
-
             # Also, remove any lingering remotes.
             # If it gets re-published, it will be to a new remote.
             if repo.has_remote:
