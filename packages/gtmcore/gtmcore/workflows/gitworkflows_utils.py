@@ -23,10 +23,8 @@ import os
 from typing import Optional, Callable
 
 from gtmcore.workflows.gitlab import GitLabManager
-# from gtmcore.labbook import LabBook
 from gtmcore.inventory import Repository
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.exceptions import GigantumException
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration.utils import call_subprocess
