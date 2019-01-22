@@ -39,7 +39,7 @@ export default class LocalDatasetPanel extends Component {
           }
         }}
         key={`local${edge.node.name}`}
-        className="Card Card--text column-4-span-3 flex flex--column justify--space-between"
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
       >
 
         <div className="LocalDatasets__row--icons">
@@ -72,21 +72,28 @@ export default class LocalDatasetPanel extends Component {
           </div>
 
           <p className="LocalDatasets__paragraph LocalDatasets__paragraph--owner ">{edge.node.owner}</p>
-          {/* waiting api fix for creation date */}
-          {/* <p className="LocalDatasets__paragraph LocalDatasets__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p> */}
+          <p className="LocalDatasets__paragraph LocalDatasets__paragraph--owner">{`Created on ${Moment(edge.node.createdOnUtc).format('MM/DD/YY')}`}</p>
           <p className="LocalDatasets__paragraph LocalDatasets__paragraph--owner">{`Modified ${Moment(edge.node.modifiedOnUtc).fromNow()}`}</p>
 
           <p
             className="LocalDatasets__paragraph LocalDatasets__paragraph--description"
           >
-
-            <Highlighter
-              highlightClassName="LocalDatasets__highlighted"
-              searchWords={[store.getState().datasetListing.filterText]}
-              autoEscape={false}
-              caseSensitive={false}
-              textToHighlight={edge.node.description}
-            />
+            {
+              edge.node.description && edge.node.description.length ?
+              <Highlighter
+                highlightClassName="LocalLabbooks__highlighted"
+                searchWords={[store.getState().labbookListing.filterText]}
+                autoEscape={false}
+                caseSensitive={false}
+                textToHighlight={edge.node.description}
+              />
+              :
+              <span
+                className="LocalDatasets__description--blank"
+              >
+              No description provided
+              </span>
+            }
 
           </p>
 

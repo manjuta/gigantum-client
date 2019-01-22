@@ -6,34 +6,6 @@ import './LabbookFilterBy.scss';
 
 
 class LabbookFilterBy extends Component {
-  constructor(props) {
-  	super(props);
-    this._toggleFilterMenu = this._toggleFilterMenu.bind(this);
-    this._closeFilterMenu = this._closeFilterMenu.bind(this);
-  }
-
-  state = {
-    filterMenuOpen: false,
-  }
-
-  componentDidMount() {
-    window.addEventListener('click', this._closeFilterMenu);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('click', this._closeFilterMenu);
-  }
-
-  /**
-    *  @param {}
-    *  closes toggle menu
-    *  @return {}
-  */
-  _closeFilterMenu(evt) {
-     if (evt.target.className.indexOf('LabbookFilterBy') < 0) {
-       this.setState({ filterMenuOpen: false });
-     }
-  }
 
   /**
     *  @param {}
@@ -53,26 +25,19 @@ class LabbookFilterBy extends Component {
     }
   }
 
-  /**
-    *  @param {}
-    *  update sort menu
-    *  @return {}
-  */
-  _toggleFilterMenu() {
-    this.setState({ filterMenuOpen: !this.state.filterMenuOpen });
-  }
-
   render() {
-    const { props, state } = this,
-          labbookFilterSeclectorCSS = classNames({
-            LabbookFilterBy__selector: true,
-            'LabbookFilterBy__selector--open': state.filterMenuOpen,
-            'LabbookFilterBy__selector--collapsed': !state.filterMenuOpen,
-          }),
-          labbookFilterMenuCSS = classNames({
-            'LabbookFilterBy__menu box-shadow': true,
-            hidden: !state.filterMenuOpen,
-          });
+    const { props } = this;
+
+    const labbookFilterSeclectorCSS = classNames({
+      LabbookFilterBy__selector: true,
+      'LabbookFilterBy__selector--open': props.filterMenuOpen,
+      'LabbookFilterBy__selector--collapsed': !props.filterMenuOpen,
+    });
+
+    const labbookFilterMenuCSS = classNames({
+      'LabbookFilterBy__menu box-shadow': true,
+      hidden: !props.filterMenuOpen,
+    });
 
     return (
 
@@ -80,7 +45,8 @@ class LabbookFilterBy extends Component {
         Filter by:
         <span
           className={labbookFilterSeclectorCSS}
-          onClick={() => this._toggleFilterMenu()}>
+          onClick={props.toggleFilterMenu}
+        >
           {this._getFilter()}
         </span>
 

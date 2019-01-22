@@ -7,7 +7,7 @@ import './datasetsPaginationLoader.scss';
 export default class DatasetPaginationLoader extends Component {
   render() {
     const PaginationLoaderCSS = classNames({
-      [`Card column-4-span-3 flex flex--column justify--space-between DatasetPaginationLoader DatasetPaginationLoader--${this.props.index}`]: this.props.isLoadingMore,
+      [`Card Card--300 column-4-span-3 flex flex--column justify--space-between DatasetPaginationLoader DatasetPaginationLoader--${this.props.index}`]: this.props.isLoadingMore,
       'DatasetPaginationLoader--hidden': !this.props.isLoadingMore,
     });
 

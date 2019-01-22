@@ -105,7 +105,6 @@ export default function MoveLabbookFileMutation(
     });
   }
 
-
   commitMutation(
     environment,
     {
@@ -135,17 +134,20 @@ export default function MoveLabbookFileMutation(
           node.setValue(dstPath, 'key');
           node.setValue(edge.node.modifiedAt, 'modifiedAt');
           node.setValue(edge.node.size, 'size');
-          const newEdge = RelayRuntime.ConnectionHandler.createEdge(
-            store,
-            conn,
-            node,
-            'newLabbookFileEdge',
-          );
-          RelayRuntime.ConnectionHandler.insertEdgeAfter(
-            conn,
-            newEdge,
-            edge.cursor,
-          );
+
+          if (!store.get(edge.node.id)) {
+            const newEdge = RelayRuntime.ConnectionHandler.createEdge(
+              store,
+              conn,
+              node,
+              'newLabbookFileEdge',
+            );
+            RelayRuntime.ConnectionHandler.insertEdgeAfter(
+              conn,
+              newEdge,
+              edge.cursor,
+            );
+          }
         }
       },
       updater: (store, response) => {
@@ -160,6 +162,10 @@ export default function MoveLabbookFileMutation(
                 labbookProxy,
                 connectionKey,
               );
+              const recentConn = RelayRuntime.ConnectionHandler.getConnection(
+                labbookProxy,
+                recentConnectionKey,
+              );
 
               const node = store.get(edge.node.id) ? store.get(edge.node.id) : store.create(edge.node.id, 'LabbookFile');
 
@@ -168,20 +174,29 @@ export default function MoveLabbookFileMutation(
               node.setValue(edge.node.key, 'key');
               node.setValue(edge.node.modifiedAt, 'modifiedAt');
               node.setValue(edge.node.size, 'size');
+              const newEdge = RelayRuntime.ConnectionHandler.createEdge(
+                store,
+                conn,
+                node,
+                'newLabbookFileEdge',
+              );
+              RelayRuntime.ConnectionHandler.insertEdgeAfter(
+                conn,
+                newEdge,
+                edge.cursor,
+              );
 
-              if(!store.get(edge.node.id)) {
-                const newEdge = RelayRuntime.ConnectionHandler.createEdge(
-                  store,
-                  conn,
-                  node,
-                  'newLabbookFileEdge',
-                );
-                RelayRuntime.ConnectionHandler.insertEdgeAfter(
-                  conn,
-                  newEdge,
-                  edge.cursor,
-                );
-              }
+              const newRecentEdge = RelayRuntime.ConnectionHandler.createEdge(
+                store,
+                recentConn,
+                node,
+                'newLabbookFileEdge',
+              );
+              RelayRuntime.ConnectionHandler.insertEdgeAfter(
+                recentConn,
+                newRecentEdge,
+                edge.cursor,
+              );
             }
           });
         }

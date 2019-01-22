@@ -240,7 +240,7 @@ export default createPaginationContainer(
             name
             description
             owner
-            #createdOnUtc
+            createdOnUtc
             modifiedOnUtc
           }
           cursor

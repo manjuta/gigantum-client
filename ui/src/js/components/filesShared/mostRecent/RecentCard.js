@@ -68,7 +68,7 @@ export default class RecentCard extends Component {
   render() {
     const fileDirectories = this.props.file.node.key.split('/');
     const filename = fileDirectories[fileDirectories.length - 1];
-    const path = this.props.file.node.key.replace(filename, '');
+    const path = `${this.props.section}/${this.props.file.node.key.replace(filename, '')}`;
     return (
       <div
         className="Recent__card-wrapper"
@@ -92,7 +92,7 @@ export default class RecentCard extends Component {
           </div>
 
           <div className="Recent__path-section">
-            <p className="Recent__path">{path.length ? path : 'root'}</p>
+            <p className="Recent__path">{path}</p>
           </div>
 
           <div className="Recent__description-section">
