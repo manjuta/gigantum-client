@@ -93,13 +93,17 @@ export default class Branches extends Component {
 
         { labbook } = this.props,
 
-        branchArrayToFilter = this.props.mergeFilter ? labbook.mergeableBranchNames : labbook.availableBranchNames,
+        totalArrays = [labbook.remoteBranchNames, labbook.localBranchNames],
+
+        allBranchNames = [...new Set([].concat(...totalArrays))],
+
+        branchArrayToFilter = this.props.mergeFilter ? labbook.mergeableBranchNames : allBranchNames,
 
         branches = this._filterBranches(branchArrayToFilter),
 
         branchesVisibleCount = this._determineVisibleBranchCount(),
 
-        showRightBumper = (listPositionIndex < (labbook.availableBranchNames.length - branchesVisibleCount)),
+        showRightBumper = (listPositionIndex < (allBranchNames.length - branchesVisibleCount)),
 
         width = listPositionIndex * (this.state.width / branches.length),
 

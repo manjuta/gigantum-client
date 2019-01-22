@@ -420,6 +420,7 @@ const LabbookFragmentContainer = createFragmentContainer(
           }
 
           availableBranchNames
+          localBranchNames
           remoteBranchNames
           mergeableBranchNames
           workspaceBranchName
