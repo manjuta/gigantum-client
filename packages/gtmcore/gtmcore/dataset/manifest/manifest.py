@@ -7,6 +7,7 @@ import asyncio
 from collections import OrderedDict, namedtuple
 from natsort import natsorted
 import copy
+from pathlib import Path
 
 from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, ActivityType,\
     ActivityAction, ActivityDetailRecord
@@ -39,8 +40,8 @@ class Manifest(object):
         cache_mgr_class = get_cache_manager_class(self.dataset.client_config)
         self.cache_mgr: CacheManager = cache_mgr_class(self.dataset, logged_in_username)
 
-        self.smarthasher = SmartHash(dataset.root_dir, self.cache_mgr.cache_root,
-                                     self.dataset.git.repo.head.commit.hexsha)
+        self.hasher = SmartHash(dataset.root_dir, self.cache_mgr.cache_root,
+                                self.dataset.git.repo.head.commit.hexsha)
 
         self.ignore_file = os.path.join(dataset.root_dir, ".gigantumignore")
 
@@ -89,7 +90,7 @@ class Manifest(object):
         Returns:
 
         """
-        return self.smarthasher.get_abs_path(relative_path)
+        return self.hasher.get_abs_path(relative_path)
 
     def queue_to_push(self, obj: str, rel_path: str, revision: str) -> None:
         """Method to queue and object for push to remote storage backend
@@ -125,8 +126,8 @@ class Manifest(object):
         Returns:
 
         """
-        if self.smarthasher.is_cached(path):
-            if self.smarthasher.has_changed_fast(path):
+        if self.hasher.is_cached(path):
+            if self.hasher.has_changed_fast(path):
                 result = FileChangeType.MODIFIED
             else:
                 result = FileChangeType.NOCHANGE
@@ -156,10 +157,24 @@ class Manifest(object):
                 if folder[0] == os.path.sep:
                     folder = folder[1:]
 
+            for d in dirs:
+                # TODO: Check for ignored
+                rel_path = os.path.join(folder, d) + os.path.sep  # All folders are represented with a trailing slash
+                all_files.append(rel_path)
+                change = self.get_change_type(rel_path)
+                if change == FileChangeType.NOCHANGE:
+                    continue
+                elif change == FileChangeType.MODIFIED:
+                    status['modified'].append(rel_path)
+                elif change == FileChangeType.CREATED:
+                    status['created'].append(rel_path)
+                else:
+                    raise ValueError(f"Invalid Change type: {change}")
+
             for file in files:
+                # TODO: Check for ignored
                 if file in ['.smarthash', '.DS_STORE']:
                     continue
-                # TODO: Check for ignored
 
                 rel_path = os.path.join(folder, file)
                 all_files.append(rel_path)
@@ -173,14 +188,18 @@ class Manifest(object):
                 else:
                     raise ValueError(f"Invalid Change type: {change}")
 
+        # De-dup and sort
+        status['created'] = list(set(status['created']))
+        status['modified'] = list(set(status['modified']))
         status['modified'] = natsorted(status['modified'])
         status['created'] = natsorted(status['created'])
 
+        all_files = list(set(all_files))
         return StatusResult(created=status.get('created'), modified=status.get('modified'),
-                            deleted=self.smarthasher.get_deleted_files(all_files))
+                            deleted=self.hasher.get_deleted_files(all_files))
 
     @staticmethod
-    def _get_object_subdirs( object_id) -> Tuple[str, str]:
+    def _get_object_subdirs(object_id) -> Tuple[str, str]:
         """
 
         Args:
@@ -222,24 +241,27 @@ class Manifest(object):
 
         """
         source = os.path.join(self.cache_mgr.cache_root, self.dataset_revision, relative_path)
-        level1, level2 = self._get_object_subdirs(hash_str)
+        if os.path.isfile(source):
+            level1, level2 = self._get_object_subdirs(hash_str)
 
-        os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1), exist_ok=True)
-        os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2), exist_ok=True)
+            os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1), exist_ok=True)
+            os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2), exist_ok=True)
 
-        destination = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
-        if os.path.isfile(destination):
-            # Object already exists, no need to store again
-            os.remove(source)
+            destination = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
+            if os.path.isfile(destination):
+                # Object already exists, no need to store again
+                os.remove(source)
+            else:
+                # Move file to new object
+                await self._async_move(source, destination)
+
+            # Link object back
+            os.link(destination, source)
+
+            # Queue new object for push
+            self.queue_to_push(destination, relative_path, self.dataset_revision)
         else:
-            # Move file to new object
-            await self._async_move(source, destination)
-
-        # Link object back
-        os.link(destination, source)
-
-        # Queue new object for push
-        self.queue_to_push(destination, relative_path, self.dataset_revision)
+            destination = source
 
         return destination
 
@@ -260,7 +282,7 @@ class Manifest(object):
 
         if update_files:
             # Hash Files
-            hash_result = self.smarthasher.hash(update_files)
+            hash_result = self.hasher.hash(update_files)
 
             # Move files into object cache and link back to the revision directory
             loop = get_event_loop()
@@ -268,7 +290,7 @@ class Manifest(object):
             loop.run_until_complete(asyncio.ensure_future(asyncio.wait(tasks)))
 
             # Update fast hash
-            self.smarthasher.fast_hash(update_files)
+            self.hasher.fast_hash(update_files)
 
             # Update manifest file
             for result in hash_result:
@@ -279,7 +301,7 @@ class Manifest(object):
                                                   'b': file_bytes}
 
         if status.deleted:
-            self.smarthasher.delete_hashes(status.deleted)
+            self.hasher.delete_hashes(status.deleted)
             for f in status.deleted:
                 del self.manifest[f]
 
@@ -298,11 +320,12 @@ class Manifest(object):
 
         """
         # TODO: Support favorites
+        abs_path = os.path.join(self.cache_mgr.cache_root, self.dataset_revision, key)
         return {'key': key,
                 'size': item.get('b'),
                 'is_favorite': False,
-                'is_local': os.path.isfile(os.path.join(self.cache_mgr.cache_root, self.dataset_revision, key)),
-                'is_dir': os.path.isdir(os.path.join(self.cache_mgr.cache_root, self.dataset_revision, key)),
+                'is_local': os.path.exists(abs_path),
+                'is_dir': os.path.isdir(abs_path),
                 'modified_at': int(item.get('m'))}
 
     def gen_file_info(self, key) -> Dict[str, Any]:
@@ -323,7 +346,7 @@ class Manifest(object):
         return {'key': key,
                 'size': str(stat.st_size) if not is_dir else '0',
                 'is_favorite': False,
-                'is_local': os.path.isfile(abs_path),
+                'is_local': os.path.exists(abs_path),
                 'is_dir': is_dir,
                 'modified_at': stat.st_mtime}
 
@@ -348,6 +371,13 @@ class Manifest(object):
         Returns:
 
         """
+        if first:
+            if first <= 0:
+                raise ValueError("`first` must be greater than 0")
+        if after_index:
+            if after_index < 0:
+                raise ValueError("`after_index` must be greater or equal than 0")
+
         result = list()
         if first is not None:
             first = min(first + after_index, len(self.manifest))
@@ -358,7 +388,136 @@ class Manifest(object):
         return result
 
     def delete(self, path_list: List[str]) -> None:
-        raise NotImplemented
+        """Method to delete a list of files/folders from the dataset
+
+        Args:
+            path_list: List of relative paths in the dataset
+
+        Returns:
+
+        """
+        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
+
+        for path in path_list:
+            target_path = os.path.join(revision_directory, path)
+            if os.path.isdir(target_path):
+                shutil.rmtree(target_path)
+            else:
+                os.remove(target_path)
+
+        self.sweep_all_changes()
+
+    def move(self, src_path: str, dest_path: str) -> List[Dict[str, Any]]:
+        """Method to move/rename a file or directory in a dataset
+
+        Args:
+            src_path: The relative path in the dataset to the source file/folder
+            dest_path: The relative path in the dataset to the destination file/folder
+
+        Returns:
+
+        """
+        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
+        src_rel_path = self.dataset.make_path_relative(src_path.replace('..', ''))
+        dest_rel_path = self.dataset.make_path_relative(dest_path.replace('..', ''))
+        src_abs_path = os.path.join(revision_directory, src_rel_path)
+        dest_abs_path = os.path.join(revision_directory, dest_rel_path)
+
+        src_type = 'directory' if os.path.isdir(src_abs_path) else 'file'
+
+        if not os.path.exists(src_abs_path):
+            raise ValueError(f"No src file or folder exists at `{src_abs_path}`")
+
+        # Move
+        result_path = shutil.move(src_abs_path, dest_abs_path)
+        msg = f"Moved {src_type} `{src_rel_path}` to `{dest_rel_path}`"
+        previous_revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
+        self.sweep_all_changes(extra_msg=msg)
+
+        # Update paths due to relinking
+        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
+        final_rel_path = self.dataset.make_path_relative(result_path.replace(previous_revision_directory, ''))
+        dest_abs_path = os.path.join(revision_directory, final_rel_path)
+
+        if os.path.isfile(dest_abs_path):
+            manifest_data = self.manifest.get(final_rel_path)
+            return [self._file_info(final_rel_path, manifest_data)]
+        elif os.path.isdir(dest_abs_path):
+            moved_files = list()
+            moved_files.append(self.gen_file_info(final_rel_path))
+            for root, dirs, files in os.walk(dest_abs_path):
+                dirs.sort()
+                rt = root.replace(revision_directory, '')
+                rt = self.dataset.make_path_relative(rt)
+                for d in dirs:
+                    if d[-1] != os.path.sep:
+                        d = d + '/'
+                    moved_files.append(self.gen_file_info(os.path.join(rt, d)))
+                for f in filter(lambda n: n != '.gitkeep', sorted(files)):
+                    rel_path = os.path.join(rt, f)
+                    manifest_data = self.manifest.get(rel_path)
+                    moved_files.append(self._file_info(rel_path, manifest_data))
+        else:
+            raise ValueError("Destination path does not exist after move operation")
+
+        logger.info(msg)
+        return moved_files
+
+    def create_directory(self, path: str) -> Dict[str, Any]:
+        """Method to create an empty directory in a dataset
+
+        Args:
+            path: Relative path to the directory
+
+        Returns:
+            dict
+        """
+        relative_path = self.dataset.make_path_relative(path)
+        new_directory_path = os.path.join(self.cache_mgr.cache_root, self.dataset_revision, relative_path)
+        previous_revision = self.dataset_revision
+
+        if os.path.exists(new_directory_path):
+            raise ValueError(f"Directory already exists: `{relative_path}`")
+        else:
+            logger.info(f"Creating new empty directory in `{new_directory_path}`")
+
+            if os.path.isdir(Path(new_directory_path).parent) is False:
+                raise ValueError(f"Parent directory does not exist. Failed to create `{new_directory_path}` ")
+
+            # create dir
+            os.makedirs(new_directory_path)
+            self.update()
+            if relative_path not in self.manifest:
+                raise ValueError("Failed to add directory to manifest")
+
+            # Create detail record
+            adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0,
+                                       action=ActivityAction.CREATE)
+
+            msg = f"Created new empty directory `{relative_path}`"
+            adr.add_value('text/markdown', msg)
+
+            commit = self.dataset.git.commit(msg)
+
+            # Create activity record
+            ar = ActivityRecord(ActivityType.DATASET,
+                                message=msg,
+                                linked_commit=commit.hexsha,
+                                show=True,
+                                importance=255,
+                                tags=['directory-create'])
+            ar.add_detail_object(adr)
+
+            # Store
+            ars = ActivityStore(self.dataset)
+            ars.create_activity_record(ar)
+
+            # Relink after the commit
+            self.link_revision()
+            if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
+                shutil.rmtree(os.path.join(self.cache_mgr.cache_root, previous_revision))
+
+            return self.gen_file_info(relative_path)
 
     def link_revision(self) -> None:
         """Method to link all the objects in the cache to the current revision directory, so that all files are
@@ -370,7 +529,7 @@ class Manifest(object):
             None
         """
         current_revision = self.dataset_revision
-        self.smarthasher.current_revision = current_revision
+        self.hasher.current_revision = current_revision
 
         revision_directory = os.path.join(self.cache_mgr.cache_root, current_revision)
 
@@ -382,24 +541,30 @@ class Manifest(object):
             level1, level2 = self._get_object_subdirs(hash_str)
 
             target = os.path.join(revision_directory, f)
-            source = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
+            if target[-1] == os.path.sep:
+                # Create directory from manifest
+                if not os.path.exists(target):
+                    os.makedirs(target)
+            else:
+                # Link file
+                source = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
 
-            target_dir = os.path.dirname(target)
-            if not os.path.exists(target_dir):
-                os.makedirs(target_dir)
+                target_dir = os.path.dirname(target)
+                if not os.path.exists(target_dir):
+                    os.makedirs(target_dir)
 
-            # Link if not already linked
-            if not os.path.exists(target):
-                try:
-                    if os.path.exists(source):
-                        # Only try to link if the source object has been materialized
-                        os.link(source, target)
-                except Exception as err:
-                    logger.exception(err)
-                    continue
+                # Link if not already linked
+                if not os.path.exists(target):
+                    try:
+                        if os.path.exists(source):
+                            # Only try to link if the source object has been materialized
+                            os.link(source, target)
+                    except Exception as err:
+                        logger.exception(err)
+                        continue
 
         # Update fast hash
-        self.smarthasher.fast_hash(list(self.manifest.keys()))
+        self.hasher.fast_hash(list(self.manifest.keys()))
 
     def sweep_all_changes(self, upload: bool = False, extra_msg: str = None) -> None:
         """
@@ -411,6 +576,12 @@ class Manifest(object):
         Returns:
 
         """
+        def _item_type(key):
+            if key[-1] == os.path.sep:
+                return 'directory'
+            else:
+                return 'file'
+
         previous_revision = self.dataset_revision
 
         # Update manifest
@@ -426,7 +597,7 @@ class Manifest(object):
                                 show=True,
                                 importance=255,
                                 linked_commit=self.dataset.git.commit_hash,
-                                tags=['save'])
+                                tags=[])
             if upload:
                 ar.tags.append('upload')
 
@@ -434,7 +605,7 @@ class Manifest(object):
                 adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=max(255 - cnt, 0),
                                            action=ActivityAction.CREATE)
 
-                msg = f"Created new file `{f}`"
+                msg = f"Created new {_item_type(f)} `{f}`"
                 adr.add_value('text/markdown', msg)
                 ar.add_detail_object(adr)
 
@@ -442,7 +613,7 @@ class Manifest(object):
                 adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=max(255 - cnt, 0),
                                            action=ActivityAction.EDIT)
 
-                msg = f"Modified file `{f}`"
+                msg = f"Modified {_item_type(f)} `{f}`"
                 adr.add_value('text/markdown', msg)
                 ar.add_detail_object(adr)
 
@@ -450,7 +621,7 @@ class Manifest(object):
                 adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=max(255 - cnt, 0),
                                            action=ActivityAction.DELETE)
 
-                msg = f"Deleted file `{f}`"
+                msg = f"Deleted {_item_type(f)} `{f}`"
                 adr.add_value('text/markdown', msg)
                 ar.add_detail_object(adr)
 

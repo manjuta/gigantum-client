@@ -63,20 +63,6 @@ export default class Modal extends Component {
 
     this.props.setTags(tags);
   }
-  /**
-    @param {number} i
-    drags tag to new position.
-  */
-  _handleDrag = (tag, currPos, newPos) => {
-    const { tags } = this.props;
-
-    // mutate array
-    tags.splice(currPos, 1);
-    tags.splice(newPos, 0, tag);
-
-    // re-render
-    this.props.setTags(tags);
-  }
 
   render() {
     const { tags } = this.props;
@@ -104,7 +90,6 @@ export default class Modal extends Component {
            placeholder="Search by keyword, tags or filters"
            handleDelete={(index) => { this._handleDelete(index); }}
            handleAddition={(tag) => { this._handleAddition(tag); }}
-           handleDrag={(tag, currPos, newPos) => { this._handleDrag(tag, currPos, newPos); }}
          />
         <div className="AdvancedSearch__filters">
         {

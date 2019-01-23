@@ -92,14 +92,17 @@ class TestDatasetQueries(object):
         query = """{
                     dataset(name: "dataset8", owner: "default") {
                       name
-                      created_on_utc
-                      modified_on_utc
+                      createdOnUtc
+                      modifiedOnUtc
                       
                     }
                     }
                 """
         result = fixture_working_dir_dataset_populated_scoped[2].execute(query)
-        print(result)
+        assert isinstance(result['data']['dataset']['createdOnUtc'], str) is True
+        assert isinstance(result['data']['dataset']['modifiedOnUtc'], str) is True
+        assert len(result['data']['dataset']['createdOnUtc']) > 10
+        assert len(result['data']['dataset']['modifiedOnUtc']) > 10
 
     def test_pagination_noargs(self, fixture_working_dir_dataset_populated_scoped, snapshot):
         query = """

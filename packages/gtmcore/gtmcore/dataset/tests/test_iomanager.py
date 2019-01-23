@@ -2,35 +2,35 @@ import pytest
 import os
 import responses
 import glob
-from collections import OrderedDict
 import uuid
 
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.io.manager import IOManager
-from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_cache_mgr, \
-    mock_dataset_with_cache_mgr_manifest, helper_append_file, USERNAME
+from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file,\
+    USERNAME
 from gtmcore.dataset.io import PushResult, PushObject
 
 
 class TestIOManager(object):
-    def test_init(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_init(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
         assert isinstance(iom, IOManager)
         assert isinstance(iom.push_dir, str)
 
-    def test_objects_to_push(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_objects_to_push(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfasdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "asfdfdfasdf")
-        helper_append_file(cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfasdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "asfdfdfasdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
         manifest.sweep_all_changes()
 
         # Modify file to have 2 objects with same key
-        helper_append_file(cache_mgr.cache_root, iom.manifest.dataset_revision, "test2.txt", "fghdfghdfghdf")
+        helper_append_file(manifest.cache_mgr.cache_root, iom.manifest.dataset_revision, "test2.txt", "fghdfghdfghdf")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -44,19 +44,20 @@ class TestIOManager(object):
 
         assert iom.num_objects_to_push() == 4
 
-    def test_objects_to_push_deduped(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_objects_to_push_deduped(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test3.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test3.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
         manifest.sweep_all_changes()
 
         # Write a .DS_Store file in the objects dir to make sure it gets skipped
-        with open(os.path.join(cache_mgr.cache_root, 'objects', '.push', '.DS_Store'), 'wt') as ff:
+        with open(os.path.join(manifest.cache_mgr.cache_root, 'objects', '.push', '.DS_Store'), 'wt') as ff:
             ff.write("")
 
         obj_to_push = iom.objects_to_push(remove_duplicates=True)
@@ -67,13 +68,14 @@ class TestIOManager(object):
 
         assert iom.num_objects_to_push(remove_duplicates=True) == 2
 
-    def test_objects_to_push_ignore_other_branch(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_objects_to_push_ignore_other_branch(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -88,7 +90,7 @@ class TestIOManager(object):
         assert bm.active_branch == "test-branch"
         assert ds.is_repo_clean is True
 
-        helper_append_file(cache_mgr.cache_root, iom.manifest.dataset_revision, "test3.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, iom.manifest.dataset_revision, "test3.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -106,13 +108,14 @@ class TestIOManager(object):
         assert obj_to_push[1].dataset_path == "test2.txt"
 
     @responses.activate
-    def test_push_objects(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_push_objects(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -160,13 +163,14 @@ class TestIOManager(object):
         assert result.success[1].object_path == obj_to_push[1].object_path
 
     @responses.activate
-    def test_push_objects_with_failure(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_push_objects_with_failure(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -212,13 +216,14 @@ class TestIOManager(object):
         assert result.failure[0].object_path == obj_to_push[1].object_path
 
     @responses.activate
-    def test_pull_objects(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_pull_objects(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -304,13 +309,14 @@ class TestIOManager(object):
             assert source2 == dd.read()
 
     @responses.activate
-    def test_pull_objects_all(self, mock_dataset_with_cache_mgr_manifest):
-        ds, cache_mgr, manifest, revision = mock_dataset_with_cache_mgr_manifest
+    def test_pull_objects_all(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
-        os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()

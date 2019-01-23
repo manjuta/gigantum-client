@@ -7,9 +7,9 @@ import RelayRuntime from 'relay-runtime';
 import uuidv4 from 'uuid/v4';
 
 const mutation = graphql`
-  mutation MakeLabbookDirectoryMutation($input: MakeLabbookDirectoryInput!){
-    makeLabbookDirectory(input: $input){
-      newLabbookFileEdge{
+  mutation MakeDatasetDirectoryMutation($input: MakeDatasetDirectoryInput!){
+    makeDatasetDirectory(input: $input){
+      newDatasetFileEdge{
         node{
           id
           isDir
@@ -41,7 +41,7 @@ function sharedUpdater(store, labbookId, connectionKey, node) {
         store,
         conn,
         node,
-        'newLabbookFileEdge',
+        'newDatasetFileEdge',
       );
 
       RelayRuntime.ConnectionHandler.insertEdgeAfter(
@@ -73,18 +73,18 @@ function deleteOptimisticEdge(store, labbookID, deletedID, connectionKey) {
 let tempID = 0;
 
 
-export default function MakeLabbookDirectoryMutation(
+export default function MakeDatasetDirectoryMutation(
   connectionKey,
-  owner,
-  labbookName,
+  datasetOwner,
+  datasetName,
   labbookId,
   key,
   callback,
 ) {
   const variables = {
     input: {
-      owner,
-      labbookName,
+      datasetOwner,
+      datasetName,
       key,
       clientMutationId: `${tempID++}`,
     },
@@ -103,7 +103,7 @@ export default function MakeLabbookDirectoryMutation(
           key: connectionKey,
           rangeBehavior: 'prepend',
         }],
-        edgeName: 'newLabbookFileEdge',
+        edgeName: 'newDatasetFileEdge',
       }],
       onCompleted: (response, error) => {
         if (error) {
@@ -117,29 +117,14 @@ export default function MakeLabbookDirectoryMutation(
 
         node.setValue(optimisticId, 'id');
         node.setValue(true, 'isDir');
-        node.setValue(directory, 'key');
+        node.setValue(key, 'key');
         node.setValue(0, 'modifiedAt');
         node.setValue(100, 'size');
 
         sharedUpdater(store, labbookId, connectionKey, node);
-
-
       },
       updater: (store, response) => {
-        // const id = `client:newCodeFile:${tempID++}`;
-        //
-        // deleteOptimisticEdge(store, labbookId, optimisticId, connectionKey);
-        // store.delete(optimisticId)
-        // if (response.makeLabbookDirectory && response.makeLabbookDirectory.newLabbookFileEdge) {
-        //   const node = store.create(id, 'CodeFile');
-        //   node.setValue(id, 'id');
-        //   node.setValue(true, 'isDir');
-        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.key, 'key');
-        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
-        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.size, 'size');
-        //
-        //   sharedUpdater(store, labbookId, connectionKey, node)
-        // }
+
       },
     },
   );

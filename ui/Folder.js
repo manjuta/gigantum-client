@@ -374,9 +374,15 @@ class Folder extends Component {
         removeIds,
       };
 
-      this.props.mutations.moveLabbookFile(data, (response) => {
-         this._clearState();
-      });
+      if (this.props.section !== 'data') {
+        this.props.mutations.moveLabbookFile(data, (response) => {
+          this._clearState();
+       });
+      } else {
+        this.props.mutations.moveDatasetFile(data, (response) => {
+          this._clearState();
+       });
+      }
     }
     /**
     *  @param {boolean} renameEditMode -sets

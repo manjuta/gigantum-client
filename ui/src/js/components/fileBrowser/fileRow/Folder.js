@@ -374,10 +374,15 @@ class Folder extends Component {
         edge: this.props.fileData.edge,
         removeIds,
       };
-
-      this.props.mutations.moveLabbookFile(data, (response) => {
-         this._clearState();
-      });
+      if (this.props.section !== 'data') {
+        this.props.mutations.moveLabbookFile(data, (response) => {
+          this._clearState();
+       });
+      } else {
+        this.props.mutations.moveDatasetFile(data, (response) => {
+          this._clearState();
+       });
+      }
     }
     /**
     *  @param {boolean} renameEditMode -sets
@@ -535,8 +540,18 @@ class Folder extends Component {
                         {Moment((node.modifiedAt * 1000), 'x').fromNow()}
                     </div>
                     <div className="Folder__cell Folder__cell--menu">
+                      <ActionsMenu
+                          edge={this.props.fileData.edge}
+                          mutationData={this.props.mutationData}
+                          mutations={this.props.mutations}
+                          addFolderVisible={this._addFolderVisible}
+                          fileData={this.props.fileData}
+                          section={this.props.section}
+                          folder
+                          renameEditMode={ this._renameEditMode}
+                        />
                     {
-                      this.props.section === 'data' ?
+                      this.props.section === 'data' &&
                         <DatasetActionsMenu
                         edge={this.props.fileData.edge}
                         mutationData={this.props.mutationData}
@@ -548,16 +563,6 @@ class Folder extends Component {
                         section={this.props.section}
                         fullEdge={this.props.fileData}
                       />
-                      :
-                        <ActionsMenu
-                          edge={this.props.fileData.edge}
-                          mutationData={this.props.mutationData}
-                          mutations={this.props.mutations}
-                          addFolderVisible={this._addFolderVisible}
-                          fileData={this.props.fileData}
-                          folder
-                          renameEditMode={ this._renameEditMode}
-                        />
                     }
                     </div>
                 </div>

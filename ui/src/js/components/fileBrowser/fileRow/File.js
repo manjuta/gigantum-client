@@ -234,8 +234,15 @@ class File extends Component {
         removeIds: [this.props.fileData.edge.node.id],
       };
 
-      this.props.mutations.moveLabbookFile(data, (response) => {
-      });
+      if (this.props.section !== 'data') {
+        this.props.mutations.moveLabbookFile(data, (response) => {
+          this._clearState();
+       });
+      } else {
+        this.props.mutations.moveDatasetFile(data, (response) => {
+          this._clearState();
+       });
+      }
     }
   }
 
@@ -365,8 +372,15 @@ class File extends Component {
                 </div>
 
                 <div className="File__cell File__cell--menu">
+                  <ActionsMenu
+                     edge={this.props.fileData.edge}
+                     mutationData={this.props.mutationData}
+                     mutations={this.props.mutations}
+                     renameEditMode={ this._renameEditMode }
+                     section={this.props.section}
+                   />
                   {
-                    this.props.section === 'data' ?
+                    this.props.section === 'data' &&
                       <DatasetActionsMenu
                       edge={this.props.fileData.edge}
                       section={this.props.section}
@@ -374,13 +388,6 @@ class File extends Component {
                       mutations={this.props.mutations}
                       renameEditMode={ this._renameEditMode }
                     />
-                     :
-                     <ActionsMenu
-                     edge={this.props.fileData.edge}
-                     mutationData={this.props.mutationData}
-                     mutations={this.props.mutations}
-                     renameEditMode={ this._renameEditMode }
-                   />
                   }
                 </div>
 

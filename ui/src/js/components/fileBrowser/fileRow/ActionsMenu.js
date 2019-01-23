@@ -174,11 +174,14 @@ export default class ActionsMenu extends Component {
             className="ActionsMenu__item ActionsMenu__item--rename"
             name="Rename">
           </div>
-          <div
-            onClick={ () => { this._triggerFavoriteMutation(); }}
-            className={favoriteCSS}
-            name="Favorite">
-          </div>
+          {
+            this.props.section !== 'data' &&
+            <div
+              onClick={ () => { this._triggerFavoriteMutation(); }}
+              className={favoriteCSS}
+              name="Favorite">
+            </div>
+          }
         </div>
     );
   }

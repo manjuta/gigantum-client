@@ -1,7 +1,10 @@
 // mutations
 import DeleteLabbookFilesMutation from 'Mutations/fileBrowser/DeleteLabbookFilesMutation';
+import DeleteDatasetFilesMutation from 'Mutations/fileBrowser/DeleteDatasetFilesMutation';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
+import MakeDatasetDirectoryMutation from 'Mutations/fileBrowser/MakeDatasetDirectoryMutation';
 import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation';
+import MoveDatasetFileMutation from 'Mutations/fileBrowser/MoveDatasetFileMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import DownloadDatasetFilesMutation from 'Mutations/DownloadDatasetFilesMutation';
@@ -64,24 +67,81 @@ class FileBrowserMutations {
        parentId,
        section,
      } = this.state;
+     if (section !== 'data') {
+      MakeLabbookDirectoryMutation(
+        connection,
+        owner,
+        labbookName,
+        parentId,
+        key,
+        section,
+        (response, error) => {
+          if (error) {
+            console.error(error);
+            setErrorMessage(`ERROR: could not create ${key}`, error);
+          }
 
-     MakeLabbookDirectoryMutation(
-       connection,
-       owner,
-       labbookName,
-       parentId,
-       key,
-       section,
-       (response, error) => {
-         if (error) {
-           console.error(error);
-           setErrorMessage(`ERROR: could not create ${key}`, error);
-         }
+          callback(response, error);
+        },
+      );
+     } else {
+      MakeDatasetDirectoryMutation(
+        connection,
+        owner,
+        labbookName,
+        parentId,
+        `${key}/`,
+        (response, error) => {
+          if (error) {
+            console.error(error);
+            setErrorMessage(`ERROR: could not create ${key}`, error);
+          }
 
-         callback(response, error);
-       },
-     );
+          callback(response, error);
+        },
+      );
+     }
    }
+    /**
+   *  @param {Object} data
+   *         {string} data.newKey
+   *         {Object} data.edge
+   *         {Array[string]} data.removeIds
+   *  @param {function} callback
+   *  moves file from old folder to a new folder
+   */
+  moveDatasetFile(data, callback) {
+    const {
+      edge,
+      newKey,
+      removeIds,
+    } = data;
+
+    const {
+      connection,
+      owner,
+      labbookName,
+      section,
+      parentId,
+    } = this.state;
+
+    const { key } = edge.node;
+
+    MoveDatasetFileMutation(
+      connection,
+      owner,
+      labbookName,
+      parentId,
+      edge,
+      key,
+      newKey,
+      section,
+      removeIds,
+      (response, error) => {
+        callback(response, error);
+      },
+    );
+}
    /**
    *  @param {Object} data
    *         {string} data.newKey
@@ -230,32 +290,52 @@ class FileBrowserMutations {
         section,
       } = this.state;
 
-    edges.forEach((edge) => {
-      if (edge && edge.node && edge.node.isFavorite) {
-        let data = {
-          key: edge.node.key,
-          edge,
-        };
-        this.removeFavorite(data, () => {});
-      }
-    });
-
-    DeleteLabbookFilesMutation(
-      connection,
-      owner,
-      labbookName,
-      parentId,
-      filePaths,
-      section,
-      edges,
-      (response, error) => {
-        if (error) {
-          console.error(error);
-          let keys = filePaths.join(' ');
-          setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
+    if (section !== 'data') {
+      edges.forEach((edge) => {
+        if (edge && edge.node && edge.node.isFavorite) {
+          let data = {
+            key: edge.node.key,
+            edge,
+          };
+          this.removeFavorite(data, () => {});
         }
-      },
-    );
+      });
+    }
+    if (section !== 'data') {
+      DeleteLabbookFilesMutation(
+        connection,
+        owner,
+        labbookName,
+        parentId,
+        filePaths,
+        section,
+        edges,
+        (response, error) => {
+          if (error) {
+            console.error(error);
+            let keys = filePaths.join(' ');
+            setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
+          }
+        },
+      );
+    } else {
+      DeleteDatasetFilesMutation(
+        connection,
+        owner,
+        labbookName,
+        parentId,
+        filePaths,
+        section,
+        edges,
+        (response, error) => {
+          if (error) {
+            console.error(error);
+            let keys = filePaths.join(' ');
+            setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
+          }
+        },
+      );
+    }
   }
   /**
   *  @param {undefined} data

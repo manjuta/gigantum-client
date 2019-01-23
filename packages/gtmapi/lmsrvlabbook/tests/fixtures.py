@@ -47,6 +47,10 @@ from gtmcore.imagebuilder import ImageBuilder
 from lmsrvlabbook.api.query import LabbookQuery
 from lmsrvlabbook.api.mutation import LabbookMutations
 
+from gtmcore.fixtures.datasets import helper_append_file
+from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.dataset import Manifest
+
 
 def _create_temp_work_dir(lfs_enabled: bool = True):
     """Helper method to create a temporary working directory and associated config file"""
@@ -318,6 +322,57 @@ def fixture_working_dir_dataset_populated_scoped():
             client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema
+
+    # Remove the temp_dir
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def fixture_single_dataset():
+    """A pytest fixture that creates a temporary working directory, a config file to match, creates the schema,
+    and populates the environment component repository.
+    Class scope modifier attached
+    """
+    # Create temp dir
+    config_file, temp_dir = _create_temp_work_dir()
+
+    # Create user identity
+    insert_cached_identity(temp_dir)
+
+    # Create test client
+    schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
+
+    # Create a bunch of lab books
+    im = InventoryManager(config_file)
+
+    ds = im.create_dataset('default', 'default', "test-dataset", storage_type="gigantum_object_v1", description="Cats 2")
+    m = Manifest(ds, 'default')
+    cm_class = get_cache_manager_class(ds.client_config)
+    cache_mgr = cm_class(ds, 'default')
+    revision = ds.git.repo.head.commit.hexsha
+
+    os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
+    helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfasdf")
+    helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "rtg")
+    helper_append_file(cache_mgr.cache_root, revision, "test3.txt", "wer")
+    helper_append_file(cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
+    helper_append_file(cache_mgr.cache_root, revision, "other_dir/test5.txt", "fdghdfgsa")
+    m.update()
+
+    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
+        # Load User identity into app context
+        app = Flask("lmsrvlabbook")
+        app.config["LABMGR_CONFIG"] = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+
+        with app.app_context():
+            # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
+            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+
+            # Create a test client
+            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+
+            yield config_file, temp_dir, client, ds, cache_mgr
 
     # Remove the temp_dir
     shutil.rmtree(temp_dir)

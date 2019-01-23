@@ -60,6 +60,7 @@ class FileBrowser extends Component {
 
 
         let files = props.files.edges;
+
         const processChildState = (edges, datasetName) => {
           edges.forEach((edge) => {
             if (edge.node && edge.node.key) {
@@ -74,7 +75,15 @@ class FileBrowser extends Component {
                       isIncomplete: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isIncomplete : false,
                       isExpanded: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isExpanded : false,
                       isAddingFolder: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isAddingFolder : false,
-                      edge,
+                      edge: {
+                        node: {
+                          isDir: true,
+                          isFavorite: false,
+                          key: tempKey,
+                          modifiedAt: Math.floor(Date.now() / 1000),
+                          id: tempKey,
+                        },
+                      },
                     };
                   }
                 }
@@ -233,7 +242,6 @@ class FileBrowser extends Component {
         }
       }
     }
-
     Object.keys(this.state.childrenState).forEach((key) => {
       deletedKeys.forEach((deletedKey) => {
         if (key.startsWith(deletedKey) && this.state.childrenState[key]) {
