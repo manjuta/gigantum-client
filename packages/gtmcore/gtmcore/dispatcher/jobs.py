@@ -23,6 +23,7 @@ import json
 import os
 import time
 from typing import Optional
+import requests
 import subprocess
 import shutil
 
@@ -33,8 +34,8 @@ from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory.inventory  import InventoryManager
-from gtmcore.inventory  import Repository
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
@@ -70,6 +71,27 @@ def publish_repository(repository: Repository, username: str, access_token: str,
             wf = GitWorkflow(repository)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta, id_token=id_token)
+
+            # update tracking service with new record
+            repo_type = 'project' if isinstance(repository, LabBook) else 'dataset'
+            tracking_service = 'yvnb2ma8id.execute-api.us-east-1.amazonaws.com/api'
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/init/{repo_type}",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/sync",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
+            # update tracking service with repo size for new record
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(repository.root_dir):
+                if '.git' in dirnames:
+                    dirnames.remove('.git')
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/repo_size/{total_size}",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
+
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise
@@ -96,6 +118,23 @@ def sync_repository(repository: Repository, username: str, remote: str = "origin
             wf = GitWorkflow(repository)
             cnt = wf.sync(username=username, remote=remote, force=force,
                           feedback_callback=update_meta, access_token=access_token, id_token=id_token)
+
+            # update tracking service
+            tracking_service = 'yvnb2ma8id.execute-api.us-east-1.amazonaws.com/api'
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/sync",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
+            # update tracking service with repo size for new record
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(repository.root_dir):
+                if '.git' in dirnames:
+                    dirnames.remove('.git')
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/repo_size/{total_size}",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:
