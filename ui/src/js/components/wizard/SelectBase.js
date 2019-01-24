@@ -62,6 +62,50 @@ const DatasetQuery = graphql`query SelectBase_DatasetQuery{
     icon
   }
 }`;
+
+/**
+  @param {Object} node
+  flattens node values into a string to make it searchable
+*/
+const flattenCombineNodeValues = ((node) => {
+  let lowercaseJSON = '';
+  Object.keys(node).forEach((key) => {
+    if (typeof node[key] === 'string' && key !== 'icon') {
+      lowercaseJSON += `${node[key].toLowerCase()} /n`;
+    }
+  });
+  return lowercaseJSON;
+});
+
+/**
+  @param {Object} node
+  @param {Array} tags
+  @param {String} lowercaseJSON
+  @param {Boolean} isReturned
+  searches node for tags and returns true is there is a match;
+*/
+const searchTagsForMatch = ((node, tags, lowercaseJSON, isReturned) => {
+  tags.forEach(({ text, className }) => {
+    if (className === 'Languages') {
+      if (node.languages.indexOf(text) === -1) {
+        isReturned = false;
+      }
+    } else if (className === 'Development Environments') {
+      if (node.developmentTools.indexOf(text) === -1) {
+        isReturned = false;
+      }
+    } else if (className === 'Tags') {
+      if (node.tags.indexOf(text) === -1) {
+        isReturned = false;
+      }
+    } else if (lowercaseJSON.indexOf(text.toLowerCase()) === -1) {
+      isReturned = false;
+    }
+  });
+
+  return isReturned;
+});
+
 export default class SelectBase extends React.Component {
   constructor(props) {
   	super(props);
@@ -233,43 +277,35 @@ export default class SelectBase extends React.Component {
     @param {Array} projects
     filters projects based on selected filters
   */
-  _filterProjects(projects, existingFilters) {
-    const tags = this.state.tags.map(tagObject => tagObject.text);
-    const mostRecent = localStorage.getItem('latest_base');
-    const defaultLanguages = existingFilters.Languages;
-    const defaultDevtools = existingFilters['Development Environments'];
-    const defaultTags = existingFilters.Tags;
+  _filterProjects(projects) {
+    const tags = this.state.tags,
+          mostRecent = localStorage.getItem('latest_base');
     let mostRecentNode;
+
+    // loop through projects for filter
     const filteredProjects = projects.filter(({ node }) => {
-      const lowercaseJSON = JSON.stringify(node);
+      let lowercaseJSON = flattenCombineNodeValues(node);
       let isReturned = true;
+      // set most recent if matches localStorage
       if (mostRecent === node.componentId) {
         isReturned = false;
-        mostRecentNode = { node };
+        mostRecentNode = node;
       }
-      tags.forEach((tag) => {
-        if (((defaultLanguages.indexOf(tag) > -1) && node.languages.indexOf(tag) === -1) ||
-          ((defaultDevtools.indexOf(tag) > -1) && node.developmentTools.indexOf(tag) === -1) ||
-          ((defaultTags.indexOf(tag) > -1) && node.tags.indexOf(tag) === -1) ||
-          (lowercaseJSON.indexOf(tag.toLowerCase()) === -1)) {
-          isReturned = false;
-        }
-      });
+      // check if tags match base image
+      isReturned = searchTagsForMatch(node, tags, lowercaseJSON, isReturned);
       return isReturned;
     });
+
+    // search most recent, move to the top if matches search query
     if (mostRecentNode) {
       let isMostRecentReturned = true;
-      const lowercaseJSON = JSON.stringify(mostRecentNode);
-      tags.forEach((tag) => {
-        if (((defaultLanguages.indexOf(tag) > -1) && mostRecentNode.node.languages.indexOf(tag) === -1) ||
-          ((defaultDevtools.indexOf(tag) > -1) && mostRecentNode.node.developmentTools.indexOf(tag) === -1) ||
-          ((defaultTags.indexOf(tag) > -1) && mostRecentNode.node.tags.indexOf(tag) === -1) ||
-          (lowercaseJSON.indexOf(tag.toLowerCase()) === -1)) {
-          isMostRecentReturned = false;
-        }
-      });
+      let lowercaseJSON = flattenCombineNodeValues(mostRecentNode);
+
+      // check if tags match base image
+      isMostRecentReturned = searchTagsForMatch(mostRecentNode, tags, lowercaseJSON, isMostRecentReturned);
+
       if (isMostRecentReturned) {
-      filteredProjects.unshift(mostRecentNode);
+        filteredProjects.unshift({ node: mostRecentNode });
       }
     }
     return filteredProjects;

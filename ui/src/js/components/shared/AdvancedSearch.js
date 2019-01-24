@@ -54,12 +54,10 @@ export default class Modal extends Component {
   */
   _handleAddition = (tag, category) => {
     const { tags } = this.props;
-
-    tags.push({
-      id: tags.length + 1,
-      text: tag,
-      className: category ? 'AdvancedSearch__filter' : '',
-    });
+    if (category) {
+      tag.className = category;
+    }
+    tags.push(tag);
 
     this.props.setTags(tags);
   }
@@ -67,10 +65,12 @@ export default class Modal extends Component {
   render() {
     const { tags } = this.props;
     const suggestions = [];
+    const rawKeys = [];
     Object.keys(this.props.filterCategories).forEach((category) => {
       this.props.filterCategories[category].forEach((key) => {
-        if (suggestions.indexOf(key) === -1) {
-          suggestions.push(key);
+        if (rawKeys.indexOf(key) === -1) {
+          rawKeys.push(key);
+          suggestions.push({ id: key, text: key, className: category });
         }
       });
     });
@@ -114,7 +114,7 @@ export default class Modal extends Component {
                         this.props.filterCategories[category].map(filter =>
                             <li
                                 key={filter}
-                                onClick={() => this._handleAddition(filter, category)}
+                                onClick={() => this._handleAddition({ id: filter, text: filter }, category)}
                             >
                                 {filter}
                             </li>)
