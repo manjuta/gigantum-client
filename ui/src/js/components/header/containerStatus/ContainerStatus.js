@@ -27,7 +27,10 @@ function Bounce(w) {
 
 class ContainerStatus extends Component {
   constructor(props) {
-  	super(props);
+    super(props);
+    const devTools = this.props.base.developmentTools.slice();
+
+    const selectedDevTool = devTools[0] === 'jupyterlab' ? 'JupyterLab' : devTools[0] === 'notebook' ? 'Notebook' : devTools[0] === 'rstudio' ? 'RStudio' : devTools[0];
     const { owner, labbookName } = store.getState().routes;
 
     const state = {
@@ -41,7 +44,7 @@ class ContainerStatus extends Component {
       rebuildAttempts: 0,
       owner,
       labbookName,
-      selectedDevTool: 'JupyterLab',
+      selectedDevTool,
       showDevList: false,
       showInitialMessage: false,
     };
@@ -484,6 +487,25 @@ class ContainerStatus extends Component {
 
     const notExcluded = excludeStatuses.indexOf(this.state.status) === -1;
 
+    const textStatus = this._getStatusText(status);
+    const devTools = this.props.base.developmentTools.slice();
+    const jupyterIndex = devTools.indexOf('jupyterlab');
+    const notebookIndex = devTools.indexOf('notebook');
+    const rstudioIndex = devTools.indexOf('rstudio');
+
+    if (jupyterIndex > -1) {
+      devTools[jupyterIndex] = 'JupyterLab';
+    }
+    if (notebookIndex > -1) {
+      devTools[notebookIndex] = 'Notebook';
+    }
+    if (rstudioIndex > -1) {
+      devTools[rstudioIndex] = 'RStudio';
+    }
+
+    devTools.splice(devTools.indexOf(this.state.selectedDevTool), 1);
+
+
     const containerStatusCss = classNames({
       'ContainerStatus__container-state--menu-open': this.props.containerMenuOpen,
       'ContainerStatus__container-state': !this.props.containerMenuOpen,
@@ -516,10 +538,10 @@ class ContainerStatus extends Component {
       'ContainerStatus__expand-tools': true,
       'ContainerStatus__expand-tools--open': this.state.showDevList,
     });
-    const textStatus = this._getStatusText(status);
-    const devTools = ['JupyterLab', 'Notebook'];
-    devTools.splice(devTools.indexOf(this.state.selectedDevTool), 1);
-
+    const containerSelectCSS = classNames({
+      'ContainerStatus__selected-tool': true,
+      'ContainerStatus__selected-tool--long': devTools.length === 0,
+    });
     return (
       <div className="ContainerStatus flex flex--row">
 
@@ -538,16 +560,19 @@ class ContainerStatus extends Component {
         <div className="ContainerStatus__plugins">
           <div className={jupyterButtonCss}>
             <div
-              className="ContainerStatus__selected-tool"
+              className={containerSelectCSS}
               onClick={() => { this._openDevToolMuation(this.state.selectedDevTool, status); }}
             >
                 {this.state.selectedDevTool}
             </div>
-            <div
-              className={expandToolsCSS}
-              onClick={() => this.setState({ showDevList: !this.state.showDevList })}
-            >
-            </div>
+            {
+              devTools.length !== 0 &&
+              <div
+                className={expandToolsCSS}
+                onClick={() => this.setState({ showDevList: !this.state.showDevList })}
+              >
+              </div>
+            }
           </div>
 
           <div className={containerMenuIconCSS} />
