@@ -249,10 +249,16 @@ class Datasets extends Component {
     return false;
   }
   /**
-   * @param {array, string} localDatasets.edges,filter
+   * @param {Object} datasetList
+   * @param {String} filter
+   * @param {Boolean} isLoading
    * @return {array} filteredDatasets
   */
-  _filterDatasets(datasets, filter) {
+  _filterDatasets(datasetList, filter, isLoading) {
+    if (isLoading) {
+      return [];
+    }
+    const datasets = datasetList.localDatasets.edges;
     const username = localStorage.getItem('username');
     let self = this,
       filteredDatasets = [];
@@ -463,6 +469,7 @@ class Datasets extends Component {
               <LocalDatasets
                 loading
                 showModal={this._showModal}
+                filterDatasets={this._filterDatasets}
                 section={this.props.section}
               />
             :
