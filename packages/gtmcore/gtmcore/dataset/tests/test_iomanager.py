@@ -163,6 +163,65 @@ class TestIOManager(object):
         assert result.success[1].object_path == obj_to_push[1].object_path
 
     @responses.activate
+    def test_push_objects_deduplicate(self, mock_dataset_with_manifest):
+        ds, manifest, working_dir = mock_dataset_with_manifest
+        iom = IOManager(ds, manifest)
+
+        revision = manifest.dataset_revision
+        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test3.txt", "fdsfgfd")
+        manifest.sweep_all_changes()
+
+        obj_to_push = iom.objects_to_push()
+        assert len(obj_to_push) == 3
+        _, obj1 = obj_to_push[0].object_path.rsplit('/', 1)
+        _, obj2 = obj_to_push[1].object_path.rsplit('/', 1)
+        _, obj3 = obj_to_push[2].object_path.rsplit('/', 1)
+        assert obj1 != obj2
+        assert obj2 == obj3
+
+        responses.add(responses.PUT, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
+                      json={
+                          "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
+                          "namespace": ds.namespace,
+                          "key_id": "hghghg",
+                          "obj_id": obj1,
+                          "dataset": ds.name
+                      },
+                      status=200)
+        responses.add(responses.PUT, f"https://dummyurl.com/{obj1}?params=1",
+                      json={},
+                      status=200)
+
+        responses.add(responses.PUT, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
+                      json={
+                          "presigned_url": f"https://dummyurl.com/{obj2}?params=1",
+                          "namespace": ds.namespace,
+                          "key_id": "hghghg",
+                          "obj_id": obj2,
+                          "dataset": ds.name
+                      },
+                      status=200)
+        responses.add(responses.PUT, f"https://dummyurl.com/{obj2}?params=1",
+                      json={},
+                      status=200)
+
+        assert len(glob.glob(f'{iom.push_dir}/*')) == 1
+        iom.dataset.backend.set_default_configuration("test-user", "abcd", '1234')
+
+        result = iom.push_objects()
+        assert len(glob.glob(f'{iom.push_dir}/*')) == 0
+
+        assert len(result.success) == 2
+        assert len(result.failure) == 0
+        assert isinstance(result, PushResult) is True
+        assert isinstance(result.success[0], PushObject) is True
+        assert result.success[0].object_path == obj_to_push[0].object_path
+        assert result.success[1].object_path == obj_to_push[1].object_path
+
+    @responses.activate
     def test_push_objects_with_failure(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
@@ -385,4 +444,3 @@ class TestIOManager(object):
             source2 = dd.read()
         with open(obj2_target, 'rt') as dd:
             assert source2 == dd.read()
-

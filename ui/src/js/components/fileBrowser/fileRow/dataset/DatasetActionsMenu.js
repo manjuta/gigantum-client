@@ -124,8 +124,10 @@ export default class DatasetActionsMenu extends Component {
             if (parent.children[childKey].edge) {
               if (!parent.children[childKey].edge.node.isDir) {
                 let key = parent.children[childKey].edge.node.key;
-                let splitKey = key.split('/');
-                key = splitKey.slice(1, splitKey.length).join('/');
+                if (this.props.section !== 'data') {
+                  let splitKey = key.split('/');
+                  key = splitKey.slice(1, splitKey.length).join('/');
+                }
                 keyArr.push(key);
               }
               searchChildren(parent.children[childKey]);
@@ -142,9 +144,10 @@ export default class DatasetActionsMenu extends Component {
       if (this.props.section === 'data') {
         owner = labbookOwner;
         datasetName = labbookName;
+      } else {
+        key = splitKey.slice(1, splitKey.length).join('/');
       }
 
-      key = splitKey.slice(1, splitKey.length).join('/');
       const keyArr = this.props.edge.node.isDir ? [] : [key];
       if (this.props.folder && !this.props.isParent) {
         searchChildren(this.props.fullEdge);
@@ -204,8 +207,9 @@ export default class DatasetActionsMenu extends Component {
     } else {
       isLocal = this.props.edge.node.isLocal;
     }
-    const fileIsNotLocal = (!this.props.edge.node.isLocal && !isLocal)
-    const fileIsLocal = (this.props.edge.node.isLocal && isLocal)
+    const fileIsNotLocal = ((!this.props.edge.node.isLocal || (this.props.folder)) && !isLocal);
+    const fileIsLocal = (this.props.edge.node.isLocal && isLocal);
+    const blockDownload = this.props.folder ? false : this.props.edge.node.isLocal || isLocal;
     const manageCSS = classNames({
             DatasetActionsMenu__item: true,
             'DatasetActionsMenu__item--manage': true,
@@ -283,7 +287,7 @@ export default class DatasetActionsMenu extends Component {
             </div>
           }
           <div
-            onClick={() => this._downloadFile(this.props.edge.node.isLocal || isLocal)}
+            onClick={() => this._downloadFile(blockDownload)}
             className={downloadCSS}
             name={downloadText}>
           </div>
