@@ -60,10 +60,33 @@ class TestStorageBackendGigantum(object):
                       },
                       status=200)
 
-        presigned_url, encryption_key = sb._gen_push_url(ds, object_id)
+        presigned_url, encryption_key, skip = sb._gen_push_url(ds, object_id)
 
         assert presigned_url == "https://dummyurl.com?params=1"
         assert encryption_key == "asdfasdf"
+        assert skip is False
+
+    @responses.activate
+    def test_gen_push_url_skip_object(self, mock_dataset_with_cache_dir):
+        sb = get_storage_backend("gigantum_object_v1")
+        ds = mock_dataset_with_cache_dir[0]
+        object_id = "abcd1234"
+
+        responses.add(responses.PUT, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                      json={
+                              "presigned_url": "https://dummyurl.com?params=1",
+                              "key_id": "asdfasdf",
+                              "namespace": ds.namespace,
+                              "obj_id": object_id,
+                              "dataset": ds.name
+                      },
+                      status=403)
+
+        presigned_url, encryption_key, skip = sb._gen_push_url(ds, object_id)
+
+        assert presigned_url == "SKIP"
+        assert encryption_key == "SKIP"
+        assert skip is True
 
     @responses.activate
     def test_gen_push_url_backoff(self, mock_dataset_with_cache_dir):
@@ -139,6 +162,24 @@ class TestStorageBackendGigantum(object):
                       status=200)
 
         assert sb._gen_pull_url(ds, object_id) == "https://dummyurl.com?params=1"
+
+    @responses.activate
+    def test_gen_pull_url_not_found(self, mock_dataset_with_cache_dir):
+        sb = get_storage_backend("gigantum_object_v1")
+        ds = mock_dataset_with_cache_dir[0]
+        object_id = "abcd1234"
+
+        responses.add(responses.GET, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                      json={
+                              "presigned_url": "https://dummyurl.com?params=1",
+                              "namespace": ds.namespace,
+                              "obj_id": object_id,
+                              "dataset": ds.name
+                      },
+                      status=404)
+
+        with pytest.raises(ValueError):
+            sb._gen_pull_url(ds, object_id)
 
     @responses.activate
     def test_gen_push_url_backoff(self, mock_dataset_with_cache_dir):
@@ -250,6 +291,52 @@ class TestStorageBackendGigantum(object):
         responses.add(responses.PUT, "https://dummyurl.com/asdf?params=1",
                       json={},
                       status=200)
+
+        responses.add(responses.PUT, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/1234',
+                      json={
+                              "presigned_url": "https://dummyurl.com/1234?params=1",
+                              "namespace": ds.namespace,
+                              "key_id": "hghghg",
+                              "obj_id": '1234',
+                              "dataset": ds.name
+                      },
+                      status=200)
+        responses.add(responses.PUT, "https://dummyurl.com/1234?params=1",
+                      json={},
+                      status=200)
+
+        result = sb.push_objects(ds, objects, updater)
+        assert len(result.success) == 2
+        assert len(result.failure) == 0
+        assert isinstance(result, PushResult) is True
+        assert isinstance(result.success[0], PushObject) is True
+        assert result.success[0].object_path == obj1
+        assert result.success[1].object_path == obj2
+
+    @responses.activate
+    def test_push_objects_with_existing(self, mock_dataset_with_cache_dir):
+        sb = get_storage_backend("gigantum_object_v1")
+        ds = mock_dataset_with_cache_dir[0]
+        obj1 = helper_write_object('asdf')
+        obj2 = helper_write_object('1234')
+
+        objects = [PushObject(object_path=obj1,
+                              revision=ds.git.repo.head.commit.hexsha,
+                              dataset_path='myfile1.txt'),
+                   PushObject(object_path=obj2,
+                              revision=ds.git.repo.head.commit.hexsha,
+                              dataset_path='myfile2.txt')
+                   ]
+
+        responses.add(responses.PUT, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/asdf',
+                      json={
+                              "presigned_url": "https://dummyurl.com/asdf?params=1",
+                              "namespace": ds.namespace,
+                              "key_id": "hghghg",
+                              "obj_id": 'asdf',
+                              "dataset": ds.name
+                      },
+                      status=403)
 
         responses.add(responses.PUT, f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/1234',
                       json={

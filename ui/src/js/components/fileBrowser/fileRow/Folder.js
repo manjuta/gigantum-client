@@ -188,7 +188,7 @@ class Folder extends Component {
     *  @return {}
     */
     _expandSection(evt) {
-      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') &&
+      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') && !evt.target.classList.contains('DatasetActionsMenu__item') &&
       !evt.target.classList.contains('File__btn--round')) {
         this.setState({ expanded: !this.state.expanded }, () => {
           this.props.updateChildState(this.props.fileData.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
@@ -484,7 +484,6 @@ class Folder extends Component {
         let fileKeys = children && Object.keys(children).filter(child => children[child].edge && !children[child].edge.node.isDir) || [];
         fileKeys = this._childSort(fileKeys, this.props.sort, this.props.reverse, children, 'files');
         let childrenKeys = folderKeys.concat(fileKeys);
-
         let folder = // this.props.connectDragPreview(
           <div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -557,7 +556,6 @@ class Folder extends Component {
                         mutationData={this.props.mutationData}
                         mutations={this.props.mutations}
                         addFolderVisible={this._addFolderVisible}
-                        fileData={this.props.fileData}
                         folder
                         renameEditMode={ this._renameEditMode}
                         section={this.props.section}

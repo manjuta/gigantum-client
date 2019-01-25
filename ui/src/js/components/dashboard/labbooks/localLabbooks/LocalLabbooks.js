@@ -283,6 +283,7 @@ export default createPaginationContainer(
             description
             owner
             creationDateUtc
+            modifiedOnUtc
           }
           cursor
         }
