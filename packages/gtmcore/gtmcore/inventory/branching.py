@@ -183,6 +183,8 @@ class BranchManager(object):
         if other_branch not in self.branches_local:
             raise InvalidBranchName(f'Other branch {other_branch} not found')
 
+        checkpoint = self.repository.git.commit_hash
+
         logger.info(f"In {str(self.repository)} merging branch `{other_branch}` into `{self.active_branch}`...")
         try:
             self.repository.sweep_uncommitted_changes()
@@ -200,7 +202,7 @@ class BranchManager(object):
             self.repository.git.commit(f'Merged from branch `{other_branch}`')
             logger.info(f"{str(self.repository)} finished merge")
         except Exception as e:
-            call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
+            call_subprocess(['git', 'reset', '--hard', checkpoint], cwd=self.repository.root_dir)
             raise e
 
     def get_commits_behind_remote(self, remote_name: str = "origin") -> Tuple[str, int]:

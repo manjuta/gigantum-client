@@ -124,8 +124,10 @@ class GitWorkflow(ABC):
                                                      feedback_callback=feedback_callback)
         return updates_cnt
 
-    def pull_branch(self, username: str, branch_name: str,
+    def pull_branch(self, username: str, branch_name: str, override: MergeOverride = MergeOverride.ABORT,
                     feedback_callback: Callable = lambda _ : None):
+        bm = BranchManager(self.repository, username)
+        bm.m
         gitworkflows_utils.pull_branch(self.repository, username=username, branch_name=branch_name,
                                        feedback_callback=feedback_callback)
         # TODO - Rollback on fail

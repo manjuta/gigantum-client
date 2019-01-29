@@ -32,7 +32,7 @@ from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.inventory  import Repository
 
 from gtmcore.logging import LMLogger
-from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow
+from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
 from gtmcore.container.core import (build_docker_image as build_image,
                                      start_labbook_container as start_container,
                                      stop_labbook_container as stop_container)
@@ -95,7 +95,7 @@ def sync_repository(repository: Repository, username: str, remote: str = "origin
                 wf = LabbookWorkflow(repository)
             else:
                 wf = DatasetWorkflow(repository) # type: ignore
-            cnt = wf.sync(username=username, remote=remote, force=force,
+            cnt = wf.sync(username=username, remote=remote, override=MergeOverride.THEIRS if force else MergeOverride.ABORT,
                           feedback_callback=update_meta, access_token=access_token, id_token=id_token)
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt

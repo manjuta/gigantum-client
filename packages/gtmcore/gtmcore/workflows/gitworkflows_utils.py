@@ -52,6 +52,8 @@ def git_garbage_collect(repository: Repository) -> None:
 
     Note!! This method assumes the subject repository has already been locked!
 
+    TODO(billvb): Refactor into BranchManager
+
     Args:
         repository: Subject Repository
 
@@ -103,6 +105,7 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
 
 def publish_to_remote(repository: Repository, username: str, remote: str,
                       feedback_callback: Callable) -> None:
+    # TODO(billvb) - Refactor all (or part) to BranchManager
     bm = BranchManager(repository, username=username)
     if bm.workspace_branch != bm.active_branch:
         raise ValueError(f'Must be on branch {bm.workspace_branch} to publish')
@@ -137,6 +140,7 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
 
 
 def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: Callable):
+    # TODO(billvb) - Refactor to BranchManager
     set_upstream_tokens = ['git', 'push', '--set-upstream', 'origin', branch_name]
     call_subprocess(set_upstream_tokens, cwd=repository.root_dir)
 
@@ -149,8 +153,7 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
 
 
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable):
-
-    print(override, type(override), repr(override))
+    # TODO(billvb) Refactor to BranchManager
     feedback_cb(f"Pulling upstream from {branch_name} with `{override}` strategy")
     # Pull regular Git objects, then LFS
     try:
