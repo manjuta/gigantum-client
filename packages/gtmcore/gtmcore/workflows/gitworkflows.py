@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Optional, Callable, cast
 
 from gtmcore.configuration.utils import call_subprocess
@@ -37,6 +38,13 @@ logger = LMLogger.get_logger()
 
 class GitWorkflowException(GigantumException):
     pass
+
+
+
+class MergeOverride(Enum):
+    #OURS = 'ours'
+    THEIRS = 'theirs'
+    ABORT = 'abort'
 
 
 class GitWorkflow(ABC):
@@ -96,12 +104,7 @@ class GitWorkflow(ABC):
             call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
             raise e
 
-    def unpublish(self):
-        """Deletes the remote repository...
-
-        TODO: Implementation must be placed here from mutation. """
-
-    def sync(self, username: str, remote: str = "origin", force: bool = False,
+    def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
              feedback_callback: Callable = lambda _ : None,
              access_token: Optional[str] = None, id_token: Optional[str] = None) -> int:
         """ Sync with remote GitLab repo (i.e., pull any upstream changes and push any new changes). Following
@@ -110,13 +113,14 @@ class GitWorkflow(ABC):
         Args:
             username: Subject user
             remote: Name of remote (usually only origin for now)
-            force: In the event of conflict, force overwrite local changes
+            override: In the event of conflict, select merge method (mine/theirs/abort)
             feedback_callback: Used to give periodic feedback
 
         Returns:
             Integer number of commits pulled down from remote.
         """
         updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
+                                                     override=override.value,
                                                      feedback_callback=feedback_callback)
         return updates_cnt
 
@@ -186,10 +190,11 @@ class DatasetWorkflow(GitWorkflow):
             self._push_dataset_objects(self.repository, username, feedback_callback,
                                        access_token, id_token)
 
-    def sync(self, username: str, remote: str = "origin", force: bool = False,
+
+    def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
              feedback_callback: Callable = lambda _ : None,
              access_token: Optional[str] = None, id_token: Optional[str] = None):
-        v = super().sync(username, remote, force, feedback_callback, access_token, id_token)
+        v = super().sync(username, remote, override, feedback_callback, access_token, id_token)
         if isinstance(self.repository, Dataset):
             self._push_dataset_objects(self.repository, username, feedback_callback, access_token, id_token)
         return v

@@ -21,7 +21,7 @@ import mock
 import os
 
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeError
+from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeError, MergeOverride
 from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
 from gtmcore.inventory.branching import BranchManager
@@ -194,8 +194,78 @@ class TestGitWorkflowsMethods(object):
 
         with open(fpath, 'w') as f: f.write('conflicting-change-original-user')
         wf.labbook.sweep_uncommitted_changes()
+        h = wf.labbook.git.commit_hash
         with pytest.raises(MergeError):
             n = wf.sync(username=username)
+        assert h == wf.labbook.git.commit_hash
+
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    def test_sync___override_merge_conflict_theirs(self, mock_labbook_lfs_disabled, mock_config_file):
+        """ test sync, with override in case of merge conflict. """
+        """ test import_from_remote method """
+        username = 'test'
+        lb = mock_labbook_lfs_disabled[2]
+        wf = LabbookWorkflow(lb)
+        wf.publish(username=username)
+        bm = BranchManager(lb, username='test')
+        bm.create_branch('test-conflict-branch')
+        fpath = os.path.join(lb.root_dir, 'input', 'testfile')
+        with open(fpath, 'w') as f: f.write('filedata')
+        lb.sweep_uncommitted_changes()
+        wf.sync('test')
+
+        other_user = 'other-test-user2'
+        wf_other = LabbookWorkflow.import_from_remote(wf.remote, username=other_user,
+                                                      config_file=mock_config_file[0])
+        bm_other = BranchManager(wf_other.labbook, username=other_user)
+        bm_other.workon_branch('test-conflict-branch')
+        with open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile'), 'w') as f:
+            f.write('conflicting-change-other-user')
+        wf_other.labbook.sweep_uncommitted_changes()
+        wf_other.sync(username=username)
+
+        with open(fpath, 'w') as f: f.write('conflicting-change-original-user')
+        wf.labbook.sweep_uncommitted_changes()
+        h = wf.labbook.git.commit_hash
+
+        n = wf.sync(username=username, override=MergeOverride.THEIRS)
+        assert h != wf.labbook.git.commit_hash
+        flines = open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile')).read()
+        assert 'conflicting-change-other-user' == flines
+
+    # @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    # def test_sync___override_merge_conflict_ours(self, mock_labbook_lfs_disabled, mock_config_file):
+    #     """ test sync, with override in case of merge conflict. """
+    #     """ test import_from_remote method """
+    #     username = 'test'
+    #     lb = mock_labbook_lfs_disabled[2]
+    #     wf = LabbookWorkflow(lb)
+    #     wf.publish(username=username)
+    #     bm = BranchManager(lb, username='test')
+    #     bm.create_branch('test-conflict-branch')
+    #     fpath = os.path.join(lb.root_dir, 'input', 'testfile')
+    #     with open(fpath, 'w') as f: f.write('filedata')
+    #     lb.sweep_uncommitted_changes()
+    #     wf.sync('test')
+    #
+    #     other_user = 'other-test-user2'
+    #     wf_other = LabbookWorkflow.import_from_remote(wf.remote, username=other_user,
+    #                                                   config_file=mock_config_file[0])
+    #     bm_other = BranchManager(wf_other.labbook, username=other_user)
+    #     bm_other.workon_branch('test-conflict-branch')
+    #     with open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile'), 'w') as f:
+    #         f.write('conflicting-change-other-user')
+    #     wf_other.labbook.sweep_uncommitted_changes()
+    #     wf_other.sync(username=username)
+    #
+    #     with open(fpath, 'w') as f: f.write('conflicting-change-original-user')
+    #     wf.labbook.sweep_uncommitted_changes()
+    #     h = wf.labbook.git.commit_hash
+    #
+    #     n = wf.sync(username=username, override=MergeOverride.OURS)
+    #     assert h != wf.labbook.git.commit_hash
+    #     flines = open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile')).read()
+    #     assert 'conflicting-change-original-user' == flines
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_reset__no_op(self, mock_labbook_lfs_disabled, mock_config_file):
