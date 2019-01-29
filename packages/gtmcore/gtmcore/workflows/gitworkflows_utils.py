@@ -28,7 +28,7 @@ from gtmcore.inventory.inventory import InventoryManager
 
 from gtmcore.logging import LMLogger
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.inventory.branching import BranchManager
+from gtmcore.inventory.branching import BranchManager, MergeConflict
 
 
 logger = LMLogger.get_logger()
@@ -169,26 +169,28 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
             raise MergeError(f"Merge conflict pulling in branch {branch_name}")
         else:
             raise
+    #
+    # if repository.client_config.config["git"]["lfs_enabled"] is True:
+    #     lfs_pull_tokens = ['git', 'lfs', 'pull', 'origin', branch_name]
+    #     if override == 'ours':
+    #         pass
+    #         #lfs_pull_tokens.extend(['-s', 'ours', '-X', 'theirs'])
+    #     elif override == 'theirs':
+    #         lfs_pull_tokens.extend(['-X', 'theirs'])
+    #
+    #     feedback_cb(f"Pulling large files with `{override}` strategy...")
+    #     try:
+    #         call_subprocess(lfs_pull_tokens, cwd=repository.root_dir)
+    #     except subprocess.CalledProcessError as cp_error:
+    #         if 'Automatic merge failed' in cp_error.stdout.decode():
+    #             raise MergeError(f"Merge conflict pulling LFS files in branch {branch_name}")
+    #         else:
+    #             raise
 
-    if repository.client_config.config["git"]["lfs_enabled"] is True:
-        lfs_pull_tokens = ['git', 'lfs', 'pull', 'origin', branch_name]
-        if override == 'ours':
-            pass
-            #lfs_pull_tokens.extend(['-s', 'ours', '-X', 'theirs'])
-        elif override == 'theirs':
-            lfs_pull_tokens.extend(['-X', 'theirs'])
-
-        feedback_cb(f"Pulling large files with `{override}` strategy...")
-        try:
-            call_subprocess(lfs_pull_tokens, cwd=repository.root_dir)
-        except subprocess.CalledProcessError as cp_error:
-            if 'Automatic merge failed' in cp_error.stdout.decode():
-                raise MergeError(f"Merge conflict pulling LFS files in branch {branch_name}")
-            else:
-                raise
-
-def _sync_pull_push(repository: Repository, branch_name: str, override: str, feedback_cb: Callable):
-    _pull(repository, branch_name, override, feedback_cb)
+def _sync_pull_push(repository: Repository, username: str, branch_name: str, override: str, feedback_cb: Callable):
+    bm = BranchManager(repository, username=username)
+    #_pull(repository, branch_name, override, feedback_cb)
+    bm.merge_from(branch_name, force=override=='theirs', pull=True)
     # Push regular Git objects, then LFS objects
     call_subprocess(['git', 'push', 'origin', branch_name], cwd=repository.root_dir)
     if repository.client_config.config["git"]["lfs_enabled"] is True:
@@ -203,10 +205,13 @@ def pull_branch(repository: Repository, username: str, branch_name: str,
     repository.git.fetch()
     original_hash = repository.git.commit_hash
     try:
+        bm = BranchManager(repository, username=username)
+        bm.merge_from(branch_name)
         _pull(repository, branch_name, feedback_callback)
-    except MergeError as e:
+    except MergeConflict as e:
         logger.error(f"Caught merge conflict on pull, resetting to {original_hash}")
         call_subprocess(['git', 'reset', '--hard', original_hash], cwd=repository.root_dir)
+        raise
 
 def sync_branch(repository: Repository, username: str, override: str, feedback_callback: Callable) -> int:
     """"""
@@ -219,5 +224,5 @@ def sync_branch(repository: Repository, username: str, override: str, feedback_c
         return 0
     else:
         _, pulled_updates_count = bm.get_commits_behind_remote()
-        _sync_pull_push(repository, bm.active_branch, override, feedback_callback)
+        _sync_pull_push(repository, username, bm.active_branch, override, feedback_callback)
         return pulled_updates_count

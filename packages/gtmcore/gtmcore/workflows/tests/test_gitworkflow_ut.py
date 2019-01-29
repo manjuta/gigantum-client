@@ -24,7 +24,7 @@ from gtmcore.configuration.utils import call_subprocess
 from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeError, MergeOverride
 from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
-from gtmcore.inventory.branching import BranchManager
+from gtmcore.inventory.branching import BranchManager, MergeConflict
 
 
 class TestGitWorkflowsMethods(object):
@@ -195,7 +195,7 @@ class TestGitWorkflowsMethods(object):
         with open(fpath, 'w') as f: f.write('conflicting-change-original-user')
         wf.labbook.sweep_uncommitted_changes()
         h = wf.labbook.git.commit_hash
-        with pytest.raises(MergeError):
+        with pytest.raises(MergeConflict):
             n = wf.sync(username=username)
         assert h == wf.labbook.git.commit_hash
 

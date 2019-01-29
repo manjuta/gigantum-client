@@ -172,7 +172,7 @@ class BranchManager(object):
             logger.error(e)
             raise BranchException(e)
 
-    def merge_from(self, other_branch: str, force: bool = False) -> None:
+    def merge_from(self, other_branch: str, force: bool = False, pull: bool = False) -> None:
         """Pulls/merges `other_branch` into current branch.
 
         Args:
@@ -180,8 +180,13 @@ class BranchManager(object):
             force: Force overwrite if conflicts occur
         """
 
-        if other_branch not in self.branches_local:
-            raise InvalidBranchName(f'Other branch {other_branch} not found')
+        merge_tokens = []
+        if other_branch in self.branches_local and not pull:
+            merge_tokens = f'git merge {other_branch}'.split()
+        elif other_branch in self.branches_remote and pull:
+            merge_tokens = f'git pull origin {other_branch}'.split()
+        else:
+            raise InvalidBranchName(f'Branch {other_branch} not found')
 
         checkpoint = self.repository.git.commit_hash
 
@@ -190,11 +195,11 @@ class BranchManager(object):
             self.repository.sweep_uncommitted_changes()
             if force:
                 logger.warning("Using force to overwrite local changes")
-                call_subprocess(['git', 'merge', '-s', 'recursive', '-X', 'theirs', other_branch],
-                                cwd=self.repository.root_dir)
+                merge_tokens.extend('-s recursive -X theirs'.split())
+                call_subprocess(merge_tokens, cwd=self.repository.root_dir)
             else:
                 try:
-                    call_subprocess(['git', 'merge', other_branch], cwd=self.repository.root_dir)
+                    call_subprocess(merge_tokens, cwd=self.repository.root_dir)
                 except (git.exc.GitCommandError, subprocess.CalledProcessError) as merge_error:
                     logger.error(f"Merge conflict syncing {str(self.repository)} - Use `force` to overwrite.")
                     # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
