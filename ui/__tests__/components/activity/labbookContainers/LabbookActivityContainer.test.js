@@ -1,21 +1,19 @@
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import LabbookActivityContainer from 'Components/activity/labbookContainers/LabbookActivityContainer';
+import React from 'react';
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import LabbookActivityContainer from 'Components/activity/labbookContainers/LabbookActivityContainer';
 
-      import relayTestingUtils from 'relay-testing-utils'
+import relayTestingUtils from '@gigantum/relay-testing-utils';
 
-      test('Test LabbookActivityContainer', () => {
+test('Test LabbookActivityContainer', () => {
 
-        const wrapper = renderer.create(
+  const wrapper = renderer.create(
+     <LabbookActivityContainer />
+  );
 
-           <LabbookActivityContainer />
+  const tree = wrapper.toJSON();
 
-        );
+  expect(tree).toMatchSnapshot();
 
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+});

@@ -42,6 +42,7 @@ export default class MostRecentList extends Component {
     const connection = selectedPath === 'code' ? 'MostRecentCode_allFiles' :
       selectedPath === 'input' ? 'MostRecentInput_allFiles' :
         'MostRecentOutput_allFiles';
+
     return (
       <div className="Recent__list">
         {

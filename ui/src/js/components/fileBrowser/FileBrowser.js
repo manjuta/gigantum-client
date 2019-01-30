@@ -60,6 +60,7 @@ class FileBrowser extends Component {
 
 
         let files = props.files.edges;
+
         const processChildState = (edges, datasetName) => {
           edges.forEach((edge) => {
             if (edge.node && edge.node.key) {
@@ -74,7 +75,15 @@ class FileBrowser extends Component {
                       isIncomplete: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isIncomplete : false,
                       isExpanded: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isExpanded : false,
                       isAddingFolder: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isAddingFolder : false,
-                      edge,
+                      edge: {
+                        node: {
+                          isDir: true,
+                          isFavorite: false,
+                          key: tempKey,
+                          modifiedAt: Math.floor(Date.now() / 1000),
+                          id: tempKey,
+                        },
+                      },
                     };
                   }
                 }
@@ -126,9 +135,9 @@ class FileBrowser extends Component {
       if (this.list) {
         this.list.recomputeGridSize();
       }
-
+      // TODO should not be using document to clear value
       let element = document.getElementsByClassName('FileBrowser__input')[0];
-      if (this.state.search === '' && element.value !== '') {
+      if (this.state.search === '' && element && element.value !== '') {
         element.value = '';
       }
       const files = this.props.files.edges;
@@ -233,7 +242,6 @@ class FileBrowser extends Component {
         }
       }
     }
-
     Object.keys(this.state.childrenState).forEach((key) => {
       deletedKeys.forEach((deletedKey) => {
         if (key.startsWith(deletedKey) && this.state.childrenState[key]) {
@@ -555,6 +563,7 @@ class FileBrowser extends Component {
         hidden: !isSelected,
       }),
       multiSelectButtonCSS = classNames({
+        'Btn--multiSelect': true,
         'Btn Btn--round': true,
         'Btn--check': this.state.multiSelect === 'all',
         'Btn--uncheck': this.state.multiSelect === 'none',
@@ -651,10 +660,10 @@ class FileBrowser extends Component {
                 <p>Are you sure?</p>
                 <div className="flex justify--space-around">
                   <button
-                    className="File__btn--round File__btn--cancel"
+                    className="File__btn--round File__btn--cancel File__btn--delete"
                     onClick={(evt) => { this._togglePopup(false); }} />
                   <button
-                    className="File__btn--round File__btn--add"
+                    className="File__btn--round File__btn--add File__btn--delete-files"
                     onClick={() => { this._deleteSelectedFiles(); }}
                   />
                 </div>
@@ -798,6 +807,7 @@ class FileBrowser extends Component {
     );
   }
 }
+
 
 export default DropTarget(
     ['card', NativeTypes.FILE],

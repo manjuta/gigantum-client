@@ -30,7 +30,8 @@
     }
 
     &--hover {
-      @include boxShadowDark();
+
+      background: $fileBrowserHover;
 
       .ActionsMenu__item {
         &--rename {
@@ -91,6 +92,7 @@
   flex: 1;
   text-align: left;
   align-self: center;
+  position: relative;
   @extend .UserSelect--none;
 }
 
@@ -233,5 +235,16 @@
       background: url(~Images/icons/close.svg) no-repeat center center;
       background-size: 26px;
     }
+  }
+}
+
+.File__paragragh--external {
+  background: url(~Images/icons/offsite-grey.svg) no-repeat right center;
+  padding-right: 20px;
+  background-size: 15px;
+  &:hover {
+    text-decoration: underline;
+    background-size: 17px;
+    padding-right: 23px;
   }
 }

@@ -124,8 +124,10 @@ export default class DatasetActionsMenu extends Component {
             if (parent.children[childKey].edge) {
               if (!parent.children[childKey].edge.node.isDir) {
                 let key = parent.children[childKey].edge.node.key;
-                let splitKey = key.split('/');
-                key = splitKey.slice(1, splitKey.length).join('/');
+                if (this.props.section !== 'data') {
+                  let splitKey = key.split('/');
+                  key = splitKey.slice(1, splitKey.length).join('/');
+                }
                 keyArr.push(key);
               }
               searchChildren(parent.children[childKey]);
@@ -142,9 +144,10 @@ export default class DatasetActionsMenu extends Component {
       if (this.props.section === 'data') {
         owner = labbookOwner;
         datasetName = labbookName;
+      } else {
+        key = splitKey.slice(1, splitKey.length).join('/');
       }
 
-      key = splitKey.slice(1, splitKey.length).join('/');
       const keyArr = this.props.edge.node.isDir ? [] : [key];
       if (this.props.folder && !this.props.isParent) {
         searchChildren(this.props.fullEdge);
@@ -164,6 +167,7 @@ export default class DatasetActionsMenu extends Component {
           labbookOwner,
         };
       }
+
       if (this.props.isParent) {
         data.allKeys = true;
       } else {
@@ -203,7 +207,9 @@ export default class DatasetActionsMenu extends Component {
     } else {
       isLocal = this.props.edge.node.isLocal;
     }
-
+    const fileIsNotLocal = ((!this.props.edge.node.isLocal || (this.props.folder)) && !isLocal);
+    const fileIsLocal = (this.props.edge.node.isLocal && isLocal);
+    const blockDownload = this.props.folder ? false : this.props.edge.node.isLocal || isLocal;
     const manageCSS = classNames({
             DatasetActionsMenu__item: true,
             'DatasetActionsMenu__item--manage': true,
@@ -218,10 +224,10 @@ export default class DatasetActionsMenu extends Component {
           }),
           downloadCSS = classNames({
             DatasetActionsMenu__item: true,
-            'DatasetActionsMenu__item--download': (!this.props.edge.node.isLocal && !isLocal) && this.props.section !== 'data' && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--downloaded': (this.props.edge.node.isLocal || isLocal) && this.props.section !== 'data' && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--download-grey': (!this.props.edge.node.isLocal && !isLocal) && this.props.section === 'data' && !this.state.fileDownloading,
-            'DatasetActionsMenu__item--downloaded-grey': (this.props.edge.node.isLocal || isLocal) && this.props.section === 'data' && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--download': fileIsNotLocal && (this.props.section !== 'data') && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--downloaded': fileIsLocal && (this.props.section !== 'data') && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--download-grey': (fileIsNotLocal) && (this.props.section === 'data') && !this.state.fileDownloading,
+            'DatasetActionsMenu__item--downloaded-grey': fileIsLocal && (this.props.section === 'data') && !this.state.fileDownloading,
             'DatasetActionsMenu__item--loading': this.state.fileDownloading,
           }),
           downloadText = isLocal ? 'Downloaded' : this.props.isParent ? 'Download All' : this.props.folder ? 'Download Directory' : 'Download',
@@ -229,7 +235,6 @@ export default class DatasetActionsMenu extends Component {
             'DatasetActionsMenu__item DatasetActionsMenu__item--unlink': true,
             'DatasetActionsMenu__popup-visible': this.state.popupVisible,
           });
-
 
     return (
 
@@ -282,7 +287,7 @@ export default class DatasetActionsMenu extends Component {
             </div>
           }
           <div
-            onClick={() => this._downloadFile(this.props.edge.node.isLocal || isLocal)}
+            onClick={() => this._downloadFile(blockDownload)}
             className={downloadCSS}
             name={downloadText}>
           </div>

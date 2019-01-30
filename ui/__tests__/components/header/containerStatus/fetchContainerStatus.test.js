@@ -1,21 +1,18 @@
+// vendor
+import React from 'react';
+import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
+import relayTestingUtils from '@gigantum/relay-testing-utils';
+// components
+import fetchContainerStatus from 'Components/header/containerStatus/fetchContainerStatus';
 
-      import React from 'react'
-      import renderer from 'react-test-renderer';
-      import {mount} from 'enzyme'
-      import fetchContainerStatus from 'Components/header/containerStatus/fetchContainerStatus';
 
-      import relayTestingUtils from 'relay-testing-utils'
+test('Test fetchContainerStatus', () => {
+  const wrapper = renderer.create(
+     <fetchContainerStatus />
+  );
 
-      test('Test fetchContainerStatus', () => {
+  const tree = wrapper.toJSON();
 
-        const wrapper = renderer.create(
-
-           <fetchContainerStatus />
-
-        );
-
-        const tree = wrapper.toJSON()
-
-        expect(tree).toMatchSnapshot()
-
-      })
+  expect(tree).toMatchSnapshot();
+});

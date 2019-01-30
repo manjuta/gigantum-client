@@ -30,6 +30,13 @@ export default class MostRecent extends Component {
     };
   }
 
+  static getDerivedStateFromProps(nextProps, state) {
+    return {
+      ...state,
+      files: nextProps[state.selectedPath],
+    };
+  }
+
   /**
     handle state and addd listeners when component mounts
   */
@@ -38,9 +45,6 @@ export default class MostRecent extends Component {
         this.state.files.allFiles.pageInfo.hasNextPage) {
       this._loadMore(); // routes query only loads 2, call loadMore
     }
-  }
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ files: nextProps[this.state.selectedPath] });
   }
 
   /**

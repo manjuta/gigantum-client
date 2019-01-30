@@ -54,37 +54,23 @@ export default class Modal extends Component {
   */
   _handleAddition = (tag, category) => {
     const { tags } = this.props;
+    if (category) {
+      tag.className = category;
+    }
+    tags.push(tag);
 
-    tags.push({
-      id: tags.length + 1,
-      text: tag,
-      className: category ? 'AdvancedSearch__filter' : '',
-    });
-
-    this.props.setTags(tags);
-  }
-  /**
-    @param {number} i
-    drags tag to new position.
-  */
-  _handleDrag = (tag, currPos, newPos) => {
-    const { tags } = this.props;
-
-    // mutate array
-    tags.splice(currPos, 1);
-    tags.splice(newPos, 0, tag);
-
-    // re-render
     this.props.setTags(tags);
   }
 
   render() {
     const { tags } = this.props;
     const suggestions = [];
+    const rawKeys = [];
     Object.keys(this.props.filterCategories).forEach((category) => {
       this.props.filterCategories[category].forEach((key) => {
-        if (suggestions.indexOf(key) === -1) {
-          suggestions.push(key);
+        if (rawKeys.indexOf(key) === -1) {
+          rawKeys.push(key);
+          suggestions.push({ id: key, text: key, className: category });
         }
       });
     });
@@ -104,7 +90,6 @@ export default class Modal extends Component {
            placeholder="Search by keyword, tags or filters"
            handleDelete={(index) => { this._handleDelete(index); }}
            handleAddition={(tag) => { this._handleAddition(tag); }}
-           handleDrag={(tag, currPos, newPos) => { this._handleDrag(tag, currPos, newPos); }}
          />
         <div className="AdvancedSearch__filters">
         {
@@ -129,7 +114,7 @@ export default class Modal extends Component {
                         this.props.filterCategories[category].map(filter =>
                             <li
                                 key={filter}
-                                onClick={() => this._handleAddition(filter, category)}
+                                onClick={() => this._handleAddition({ id: filter, text: filter }, category)}
                             >
                                 {filter}
                             </li>)

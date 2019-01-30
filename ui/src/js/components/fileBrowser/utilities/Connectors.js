@@ -69,7 +69,7 @@ const dragSource = {
  beginDrag(props, monitor) {
   return {
     isDragging: true,
-    data: props.fileData,
+    fileData: props.fileData,
   };
  },
 
@@ -129,7 +129,11 @@ const dragSource = {
           };
 
           if (props.mutations) {
-            props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+            if (props.section !== 'data') {
+              props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+            } else {
+              props.mutations.moveDatasetFile(moveLabbookFileData, (response) => {});
+            }
           } else {
             const {
               parentId,
@@ -149,8 +153,11 @@ const dragSource = {
             };
 
             const mutations = new FileBrowserMutations(mutationData);
-
-            mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+            if (section !== 'data') {
+              mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+            } else {
+              mutations.moveLDatasetFile(moveLabbookFileData, (response) => {});
+            }
           }
         }
       }
@@ -324,7 +331,7 @@ const targetSource = {
       }
 
       return {
-       data: props.fileData,
+       fileData: props.fileData,
       };
   },
 };

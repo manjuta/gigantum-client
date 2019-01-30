@@ -54,35 +54,36 @@ class IOManager(object):
         Returns:
             List[namedtuple]
         """
-        push_files = [f for f in os.listdir(self.push_dir) if os.path.isfile(os.path.join(self.push_dir, f))]
-
         objects = list()
-        object_ids: List[str] = list()
-        for pf in push_files:
-            if os.path.basename(pf) == '.DS_Store':
-                continue
+        if os.path.exists(self.push_dir):
+            push_files = [f for f in os.listdir(self.push_dir) if os.path.isfile(os.path.join(self.push_dir, f))]
 
-            if not self._commit_in_branch(pf):
-                continue
+            object_ids: List[str] = list()
+            for pf in push_files:
+                if os.path.basename(pf) == '.DS_Store':
+                    continue
 
-            with open(os.path.join(self.push_dir, pf), 'rt') as pfh:
-                lines = pfh.readlines()
+                if not self._commit_in_branch(pf):
+                    continue
 
-                for line in lines:
-                    line = line.strip()
-                    dataset_path, object_path = line.split(',')
-                    _, object_id = object_path.rsplit('/', 1)
+                with open(os.path.join(self.push_dir, pf), 'rt') as pfh:
+                    lines = pfh.readlines()
 
-                    # Handle de-duplicating objects if the backend supports it
-                    if remove_duplicates is True:
-                        if object_id in object_ids:
-                            continue
+                    for line in lines:
+                        line = line.strip()
+                        dataset_path, object_path = line.split(',')
+                        _, object_id = object_path.rsplit('/', 1)
 
-                        object_ids.append(object_id)
+                        # Handle de-duplicating objects if the backend supports it
+                        if remove_duplicates is True:
+                            if object_id in object_ids:
+                                continue
 
-                    objects.append(PushObject(dataset_path=dataset_path, object_path=object_path, revision=pf))
+                            object_ids.append(object_id)
 
-        objects = natsorted(objects, key=attrgetter('dataset_path'))
+                        objects.append(PushObject(dataset_path=dataset_path, object_path=object_path, revision=pf))
+
+            objects = natsorted(objects, key=attrgetter('dataset_path'))
 
         return objects
 
@@ -123,7 +124,7 @@ class IOManager(object):
         if not status_update_fn:
             status_update_fn = self._log_updater
 
-        objs: List[PushObject] = self.objects_to_push()
+        objs: List[PushObject] = self.objects_to_push(remove_duplicates=self.dataset.backend.client_should_dedup_on_push)
 
         try:
             self.dataset.backend.prepare_push(self.dataset, objs, status_update_fn)
@@ -195,4 +196,5 @@ class IOManager(object):
 
         """
         keys = list(self.manifest.manifest.keys())
+        keys = [key for key in keys if key[-1] != os.path.sep]  # Filter out directories
         return self.pull_objects(keys, status_update_fn)

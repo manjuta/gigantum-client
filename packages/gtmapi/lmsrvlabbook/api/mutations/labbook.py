@@ -492,7 +492,7 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         src_path = graphene.String(required=True)
         dst_path = graphene.String(required=True)
 
-    updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
+    updated_edges = graphene.List(LabbookFileConnection.Edge)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, src_path, dst_path,
@@ -518,13 +518,9 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
                    for cnt, x in enumerate(file_edges)]
 
-        lbc = ListBasedConnection(file_edges, cursors, kwargs)
-        lbc.apply()
+        edge_objs = [LabbookFileConnection.Edge(node=e, cursor=c) for e, c in zip(file_edges, cursors)]
 
-        edge_objs = []
-        for edge, cursor in zip(lbc.edges, lbc.cursors):
-            edge_objs.append(LabbookFileConnection.Edge(node=edge, cursor=cursor))
-        return MoveLabbookFile(updated_edges=LabbookFileConnection(edges=edge_objs, page_info=lbc.page_info))
+        return MoveLabbookFile(updated_edges=edge_objs)
 
 
 class MakeLabbookDirectory(graphene.ClientIDMutation):

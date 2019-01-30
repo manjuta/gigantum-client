@@ -43,18 +43,21 @@ class CollaboratorButton extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, nextState) {
-    return nextProps.checkSessionIsValid().then((res) => {
-      if (res.data && res.data.userIdentity && res.data.userIdentity.isSessionValid) {
+    if (nextProps.menuOpen) {
+      return nextProps.checkSessionIsValid().then((res) => {
+        if (res.data && res.data.userIdentity && res.data.userIdentity.isSessionValid) {
+          return {
+            ...nextState,
+            sessionValid: true,
+          };
+        }
         return {
           ...nextState,
-          sessionValid: true,
+          sessionValid: false,
         };
-      }
-      return {
-        ...nextState,
-        sessionValid: false,
-      };
-    });
+      });
+    }
+    return nextState;
   }
 
   componentDidMount() {

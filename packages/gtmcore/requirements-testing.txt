@@ -4,3 +4,5 @@ mock==2.0.0
 mockredispy==2.9.3
 mypy==0.630
 responses==0.8.1
+# Enables pdb breakpoints in redis workers
+celery==4.2.0

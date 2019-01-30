@@ -55,6 +55,7 @@ ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
 ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
 ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
 ARG ENTRYPOINT_FILE=resources/client/entrypoint.sh
+ARG REDIS_CONFIG=resources/client/redis.conf
 
 # Copy Libraries
 # TODO: Make pip installs once refactor is completed
@@ -85,7 +86,7 @@ COPY $NGINX_API_CONFIG /etc/nginx/sites-enabled/
 RUN rm /etc/nginx/sites-enabled/default
 
 # Setup Redis
-COPY resources/client/redis.conf /opt/redis/redis.conf
+COPY $REDIS_CONFIG /opt/redis/redis.conf
 
 # Setup Supervisord to launch both uwsgi and nginx
 RUN mkdir -p /opt/log/supervisor && mkdir -p /opt/log/nginx && mkdir -p /opt/run && \

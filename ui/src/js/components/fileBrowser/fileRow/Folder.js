@@ -188,7 +188,7 @@ class Folder extends Component {
     *  @return {}
     */
     _expandSection(evt) {
-      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') &&
+      if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') && !evt.target.classList.contains('DatasetActionsMenu__item') &&
       !evt.target.classList.contains('File__btn--round')) {
         this.setState({ expanded: !this.state.expanded }, () => {
           this.props.updateChildState(this.props.fileData.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, this.state.addFolderVisible);
@@ -374,10 +374,15 @@ class Folder extends Component {
         edge: this.props.fileData.edge,
         removeIds,
       };
-
-      this.props.mutations.moveLabbookFile(data, (response) => {
-         this._clearState();
-      });
+      if (this.props.section !== 'data') {
+        this.props.mutations.moveLabbookFile(data, (response) => {
+          this._clearState();
+       });
+      } else {
+        this.props.mutations.moveDatasetFile(data, (response) => {
+          this._clearState();
+       });
+      }
     }
     /**
     *  @param {boolean} renameEditMode -sets
@@ -479,7 +484,6 @@ class Folder extends Component {
         let fileKeys = children && Object.keys(children).filter(child => children[child].edge && !children[child].edge.node.isDir) || [];
         fileKeys = this._childSort(fileKeys, this.props.sort, this.props.reverse, children, 'files');
         let childrenKeys = folderKeys.concat(fileKeys);
-
         let folder = // this.props.connectDragPreview(
           <div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -520,10 +524,10 @@ class Folder extends Component {
                       </div>
                       <div className="flex justify-space-around">
                         <button
-                          className="File__btn--round File__btn--cancel"
+                          className="File__btn--round File__btn--cancel File__input--rename-cancel"
                           onClick={() => { this._clearState(); }} />
                         <button
-                          className="File__btn--round File__btn--add"
+                          className="File__btn--round File__btn--add File__input--rename-add"
                           onClick={() => { this._triggerMutation(); }}
                         />
                       </div>
@@ -535,29 +539,28 @@ class Folder extends Component {
                         {Moment((node.modifiedAt * 1000), 'x').fromNow()}
                     </div>
                     <div className="Folder__cell Folder__cell--menu">
-                    {
-                      this.props.section === 'data' ?
-                        <DatasetActionsMenu
-                        edge={this.props.fileData.edge}
-                        mutationData={this.props.mutationData}
-                        mutations={this.props.mutations}
-                        addFolderVisible={this._addFolderVisible}
-                        fileData={this.props.fileData}
-                        folder
-                        renameEditMode={ this._renameEditMode}
-                        section={this.props.section}
-                        fullEdge={this.props.fileData}
-                      />
-                      :
-                        <ActionsMenu
+                      <ActionsMenu
                           edge={this.props.fileData.edge}
                           mutationData={this.props.mutationData}
                           mutations={this.props.mutations}
                           addFolderVisible={this._addFolderVisible}
                           fileData={this.props.fileData}
+                          section={this.props.section}
                           folder
                           renameEditMode={ this._renameEditMode}
                         />
+                    {
+                      this.props.section === 'data' &&
+                        <DatasetActionsMenu
+                        edge={this.props.fileData.edge}
+                        mutationData={this.props.mutationData}
+                        mutations={this.props.mutations}
+                        addFolderVisible={this._addFolderVisible}
+                        folder
+                        renameEditMode={ this._renameEditMode}
+                        section={this.props.section}
+                        fullEdge={this.props.fileData}
+                      />
                     }
                     </div>
                 </div>

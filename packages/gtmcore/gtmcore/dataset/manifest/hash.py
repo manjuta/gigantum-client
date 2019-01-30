@@ -166,11 +166,15 @@ class SmartHash(object):
         """
         h = blake2b()
 
-        with open(self.get_abs_path(path), 'rb') as fh:
-            file_buffer = await self.read_block(fh, blocksize)
-            while len(file_buffer) > 0:
-                h.update(file_buffer)
+        abs_path = self.get_abs_path(path)
+        if os.path.isfile(abs_path):
+            with open(abs_path, 'rb') as fh:
                 file_buffer = await self.read_block(fh, blocksize)
+                while len(file_buffer) > 0:
+                    h.update(file_buffer)
+                    file_buffer = await self.read_block(fh, blocksize)
+        else:
+            h.update(abs_path.encode('utf-8'))
 
         return h.hexdigest()
 

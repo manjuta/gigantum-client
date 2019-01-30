@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Tue Jan 22 2019 15:13:56 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Jan 23 2019 17:43:01 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -495,6 +495,18 @@ type DeleteDatasetCollaboratorPayload {
   clientMutationId: String
 }
 
+input DeleteDatasetFilesInput {
+  datasetOwner: String!
+  datasetName: String!
+  keys: [String]!
+  clientMutationId: String
+}
+
+type DeleteDatasetFilesPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
 input DeleteExperimentalBranchInput {
   owner: String!
   labbookName: String!
@@ -762,6 +774,7 @@ type Labbook implements Node & GitRepository {
   branches(before: String, after: String, first: Int, last: Int): LabbookRefConnection @deprecated(reason: "Can use availableBranchNames instead")
   defaultRemote: String
   creationDateUtc: DateTime
+  modifiedOnUtc: DateTime
   collaborators: [String]
   canManageCollaborators: Boolean
   updatesAvailableCount: Int
@@ -935,6 +948,9 @@ type LabbookMutations {
   syncDataset(input: SyncDatasetInput!): SyncDatasetPayload
   downloadDatasetFiles(input: DownloadDatasetFilesInput!): DownloadDatasetFilesPayload
   modifyDatasetLink(input: ModifyDatasetLinkInput!): ModifyDatasetLinkPayload
+  deleteDatasetFiles(input: DeleteDatasetFilesInput!): DeleteDatasetFilesPayload
+  moveDatasetFile(input: MoveDatasetFileInput!): MoveDatasetFilePayload
+  makeDatasetDirectory(input: MakeDatasetDirectoryInput!): MakeDatasetDirectoryPayload
 }
 
 """
@@ -1018,6 +1034,18 @@ type LabbookSection implements Node & GitRepository {
   hasFavorites: Boolean
 }
 
+input MakeDatasetDirectoryInput {
+  datasetOwner: String!
+  datasetName: String!
+  key: String!
+  clientMutationId: String
+}
+
+type MakeDatasetDirectoryPayload {
+  newDatasetFileEdge: DatasetFileEdge
+  clientMutationId: String
+}
+
 input MakeLabbookDirectoryInput {
   owner: String!
   labbookName: String!
@@ -1074,6 +1102,19 @@ type ModifyDatasetLinkPayload {
   clientMutationId: String
 }
 
+input MoveDatasetFileInput {
+  datasetOwner: String!
+  datasetName: String!
+  srcPath: String!
+  dstPath: String!
+  clientMutationId: String
+}
+
+type MoveDatasetFilePayload {
+  updatedEdges: [DatasetFileEdge]
+  clientMutationId: String
+}
+
 input MoveLabbookFileInput {
   owner: String!
   labbookName: String!
@@ -1088,7 +1129,7 @@ Method to move/rename a file or directory. If file, both src_path and dst_path s
 If a directory, be sure to include the trailing slash
 """
 type MoveLabbookFilePayload {
-  updatedEdges(before: String, after: String, first: Int, last: Int): LabbookFileConnection
+  updatedEdges: [LabbookFileEdge]
   clientMutationId: String
 }
 

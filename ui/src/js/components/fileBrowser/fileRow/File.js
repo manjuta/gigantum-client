@@ -10,8 +10,15 @@ import TextTruncate from 'react-text-truncate';
 import Connectors from './../utilities/Connectors';
 import ActionsMenu from './ActionsMenu';
 import DatasetActionsMenu from './dataset/DatasetActionsMenu';
+// mutations
+import StartContainerMutation from 'Mutations/StartContainerMutation';
+import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
 // config
 import config from 'JS/config';
+// store
+import store from 'JS/redux/store';
+import { setMergeMode } from 'JS/redux/reducers/labbook/labbook';
+import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/reducers/footer';
 // assets
 import './File.scss';
 
@@ -79,9 +86,66 @@ class File extends Component {
     if (this.props.setParentDragFalse) {
       this.props.setParentDragFalse();
     }
-
     if (this.state.isDragging && this.state.isHovered) {
       this.setState({ isDragging: true, isHovered: true });
+    }
+  }
+    /**
+    *  @param {String} devTool
+    *  @param {Boolean} forceStart
+    *  launches dev tool to appropriate file
+    */
+   _openDevTool(devTool, forceStart) {
+    const { owner, labbookName } = store.getState().routes;
+    const status = store.getState().containerStatus.status;
+    const tabName = `${devTool}-${owner}-${labbookName}`;
+
+    if (status !== 'Stopped' && status !== 'Running') {
+      setWarningMessage('Could not launch development environment as the project is not ready.');
+    } else if (status === 'Stopped' && !forceStart) {
+      setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
+      this.setState({
+        status: 'Starting',
+        contanerMenuRunning: false,
+      });
+      setMergeMode(false, false);
+      StartContainerMutation(
+        labbookName,
+        owner,
+        'clientMutationId',
+        (response, error) => {
+          if (error) {
+            setErrorMessage(`There was a problem starting ${labbookName} container`, error);
+          } else {
+            this._openDevTool(devTool, true);
+          }
+        },
+      );
+    } else {
+      setInfoMessage(`Starting ${devTool}, make sure to allow popups.`);
+      StartDevToolMutation(
+        owner,
+        labbookName,
+        devTool,
+        (response, error) => {
+          if (response.startDevTool) {
+            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+            if (path.includes(`/lab/tree/${this.props.section}`)) {
+              path = path.replace(`/lab/tree/${this.props.section}`, `/lab/tree/${this.props.section}/${this.props.filename}`);
+            } else {
+              path = `${path}/lab/tree/${this.props.section}/${this.props.filename}`;
+            }
+
+            window[tabName] = window.open(path, tabName);
+            window[tabName].close();
+            window[tabName] = window.open(path, tabName);
+          }
+
+          if (error) {
+            setErrorMessage('Error Starting Dev tool', error);
+          }
+        },
+      );
     }
   }
   /**
@@ -170,8 +234,15 @@ class File extends Component {
         removeIds: [this.props.fileData.edge.node.id],
       };
 
-      this.props.mutations.moveLabbookFile(data, (response) => {
-      });
+      if (this.props.section !== 'data') {
+        this.props.mutations.moveLabbookFile(data, (response) => {
+          this._clearState();
+       });
+      } else {
+        this.props.mutations.moveDatasetFile(data, (response) => {
+          this._clearState();
+       });
+      }
     }
   }
 
@@ -197,6 +268,10 @@ class File extends Component {
     const { node } = this.props.fileData.edge;
     const { index } = this.props.fileData;
     const fileName = this.props.filename;
+    const isNotebook = fileName.split('.')[fileName.split('.').length - 1] === 'ipynb';
+    // TODO remove hard coded references when api is updated
+    const isRFile = fileName.split('.')[fileName.split('.').length - 1] === 'Rmd';
+    const devTool = isNotebook ? 'JupyterLab' : isRFile ? 'Rstudio' : '';
     const fileRowCSS = classNames({
             File__row: true,
             'File__row--hover': this.state.hover,
@@ -216,8 +291,11 @@ class File extends Component {
             hidden: !this.state.renameEditMode,
           }),
           paddingLeft = 40 * index,
-          rowStyle = { paddingLeft: `${paddingLeft}px` };
-
+          rowStyle = { paddingLeft: `${paddingLeft}px` },
+          truncateCSS = classNames({
+            File__paragragh: true,
+            'File__paragragh--external': isNotebook || isRFile,
+          });
     let file = <div
       style={this.props.style}
       onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -244,10 +322,15 @@ class File extends Component {
                   {
                     this.props.expanded &&
                     <TextTruncate
-                      className="File__paragragh"
+                      className={truncateCSS}
                       line={1}
                       truncateText="…"
                       text={fileName}
+                      onClick={() => {
+                        if (isNotebook || isRFile) {
+                          this._openDevTool(devTool);
+                        }
+                      }}
                     />
                   }
                   </div>
@@ -271,10 +354,10 @@ class File extends Component {
                   </div>
                   <div className="flex justify-space-around">
                     <button
-                      className="File__btn--round File__btn--cancel"
+                      className="File__btn--round File__btn--cancel File__btn--rename-cancel"
                       onClick={() => { this._clearState(); }} />
                     <button
-                      className="File__btn--round File__btn--add"
+                      className="File__btn--round File__btn--add File__btn--rename-add"
                       onClick={() => { this._triggerMutation(); }}
                     />
                   </div>
@@ -289,8 +372,15 @@ class File extends Component {
                 </div>
 
                 <div className="File__cell File__cell--menu">
+                  <ActionsMenu
+                     edge={this.props.fileData.edge}
+                     mutationData={this.props.mutationData}
+                     mutations={this.props.mutations}
+                     renameEditMode={ this._renameEditMode }
+                     section={this.props.section}
+                   />
                   {
-                    this.props.section === 'data' ?
+                    this.props.section === 'data' &&
                       <DatasetActionsMenu
                       edge={this.props.fileData.edge}
                       section={this.props.section}
@@ -298,13 +388,6 @@ class File extends Component {
                       mutations={this.props.mutations}
                       renameEditMode={ this._renameEditMode }
                     />
-                     :
-                     <ActionsMenu
-                     edge={this.props.fileData.edge}
-                     mutationData={this.props.mutationData}
-                     mutations={this.props.mutations}
-                     renameEditMode={ this._renameEditMode }
-                   />
                   }
                 </div>
 
@@ -317,11 +400,11 @@ class File extends Component {
   }
 }
 
-const FolderDND = DragSource(
+const FileDnD = DragSource(
   'card',
   Connectors.dragSource,
   Connectors.dragCollect,
 )((File));
 
 
-export default FolderDND;
+export default FileDnD;

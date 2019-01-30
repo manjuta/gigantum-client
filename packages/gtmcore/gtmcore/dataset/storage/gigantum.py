@@ -31,6 +31,7 @@ class GigantumObjectStore(StorageBackend):
                 "icon": "gigantum_object_storage.png",
                 "url": "https://docs.gigantum.com",
                 "is_managed": True,
+                "client_should_dedup_on_push": True,
                 "readme": """Gigantum Cloud Datasets are backed by a scalable object storage service that is linked to
 your Gigantum account and credentials. It provides efficient storage at the file level and works seamlessly with the 
 Client.
@@ -93,7 +94,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
                 'Identity': self.configuration.get("gigantum_id_token"),
                 'Accept': 'application/json'}
 
-    def _gen_push_url(self, dataset: Dataset, object_id: str) -> Tuple[str, str]:
+    def _gen_push_url(self, dataset: Dataset, object_id: str) -> Tuple[str, str, bool]:
         """
 
         Args:
@@ -106,21 +107,30 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         url = f"{self._get_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}/{object_id}"
 
         presigned_url: Optional[str] = None
-        encryption_key: Optional[str] = None
+        encryption_key_id: Optional[str] = None
+        skip_object = False
         for ii in range(4):
             # Get signed url with backoff
             response = requests.put(url, headers=self._get_request_headers(), timeout=20)
             if response.status_code == 200:
                 presigned_url = response.json().get("presigned_url")
-                encryption_key = response.json().get("key_id")
+                encryption_key_id = response.json().get("key_id")
                 break
+            elif response.status_code == 403:
+                # Forbidden indicates Object already exists, don't need to re-push since we deduplicate
+                presigned_url = "SKIP"
+                encryption_key_id = "SKIP"
+                skip_object = True
+                break
+
+            # If you get here, there was an actual failure server side
             logger.warning(f"Failed to get signed URL for PUT at {url}. Retrying in {2**ii} seconds")
             time.sleep(2**ii)
 
-        if not presigned_url or not encryption_key:
+        if not presigned_url or not encryption_key_id:
             raise IOError(f"Failed to get signed URL for PUT at {url}")
 
-        return presigned_url, encryption_key
+        return presigned_url, encryption_key_id, skip_object
 
     def _gen_pull_url(self, dataset: Dataset, object_id: str) -> str:
         """
@@ -141,6 +151,9 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             if response.status_code == 200:
                 presigned_url = response.json().get("presigned_url")
                 break
+            elif response.status_code == 404:
+                raise ValueError(f"Object {object_id} not found in Dataset: {dataset.namespace}/{dataset.name}")
+
             logger.warning(f"Failed to get signed URL for GET at {url}. Retrying in {2**ii} seconds")
             time.sleep(2**ii)
 
@@ -191,18 +204,21 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 
                 # Get Signed URL
                 _, obj_id = obj.object_path.rsplit('/', 1)
-                url, encryption_key = self._gen_push_url(dataset, obj_id)
+                url, encryption_key_id, skip_object = self._gen_push_url(dataset, obj_id)
+                if skip_object:
+                    # This object already exists, skip pushing it
+                    status_update_fn(f"Object {cnt + 1} already exists on the server. Skipping.")
+                else:
+                    # Put File
+                    with open(obj.object_path, 'rb') as data:
+                        response = requests.put(url,
+                                                data=data,
+                                                headers={'x-amz-server-side-encryption': 'aws:kms',
+                                                         'x-amz-server-side-encryption-aws-kms-key-id':
+                                                             encryption_key_id})
 
-                # Put File
-                with open(obj.object_path, 'rb') as data:
-
-                    response = requests.put(url,
-                                            data=data,
-                                            headers={'x-amz-server-side-encryption': 'aws:kms',
-                                                     'x-amz-server-side-encryption-aws-kms-key-id': encryption_key})
-
-                    if response.status_code != 200:
-                        raise IOError(f"Failed to push object. Backend returned {response.status_code}")
+                        if response.status_code != 200:
+                            raise IOError(f"Failed to push object. Backend returned {response.status_code}")
 
             except Exception as err:
                 logger.exception(err)
@@ -210,6 +226,8 @@ to Gigantum Cloud will count towards your storage quota and include all versions
                 message = "Some objects failed to push. Check results."
                 failures.append(obj)
                 continue
+
+            # Track successes
             successes.append(obj)
 
         return PushResult(success=successes, failure=failures, message=message)

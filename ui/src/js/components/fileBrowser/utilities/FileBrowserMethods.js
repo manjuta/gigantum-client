@@ -1,4 +1,4 @@
-import uuidv4 from 'uuid/v4';
+ import uuidv4 from 'uuid/v4';
 import config from 'JS/config';
 // utilities
 import ChunkUploader from 'JS/utils/ChunkUploader';

@@ -6,9 +6,6 @@ import './DatasetFilterBy.scss';
 
 
 class DatasetFilterBy extends Component {
-  state = {
-    filterMenuOpen: false,
-  }
 
   /**
     *  @param {}
@@ -27,27 +24,18 @@ class DatasetFilterBy extends Component {
     }
   }
 
-  /**
-    *  @param {}
-    *  update sort menu
-    *  @return {}
-  */
-  _toggleFilterMenu() {
-    this.setState({ filterMenuOpen: !this.state.filterMenuOpen });
-  }
-
   render() {
-    const { props, state } = this;
+    const { props } = this;
 
     const datasetFilterSeclectorCSS = classNames({
       DatasetFilterBy__selector: true,
-      'DatasetFilterBy__selector--open': state.filterMenuOpen,
-      'DatasetFilterBy__selector--collapsed': !state.filterMenuOpen,
+      'DatasetFilterBy__selector--open': props.filterMenuOpen,
+      'DatasetFilterBy__selector--collapsed': !props.filterMenuOpen,
     });
 
     const datasetFilterMenuCSS = classNames({
       'DatasetFilterBy__menu box-shadow': true,
-      hidden: !state.filterMenuOpen,
+      hidden: !props.filterMenuOpen,
     });
 
     return (
@@ -56,7 +44,7 @@ class DatasetFilterBy extends Component {
         Filter by:
         <span
           className={datasetFilterSeclectorCSS}
-          onClick={() => this._toggleFilterMenu()}
+          onClick={props.toggleFilterMenu}
         >
           {this._getFilter()}
         </span>

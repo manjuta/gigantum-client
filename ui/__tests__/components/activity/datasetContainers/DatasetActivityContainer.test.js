@@ -4,7 +4,7 @@
       import {mount} from 'enzyme'
       import DatasetActivityContainer from 'Components/activity/datasetContainers/DatasetActivityContainer';
 
-      import relayTestingUtils from 'relay-testing-utils'
+      import relayTestingUtils from '@gigantum/relay-testing-utils'
 
       test('Test DatasetActivityContainer', () => {
 

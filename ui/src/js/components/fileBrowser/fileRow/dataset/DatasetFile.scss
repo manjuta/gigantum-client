@@ -30,8 +30,7 @@
     }
 
     &--hover {
-      @include boxShadowDark();
-
+      background: $fileBrowserHover;
       .ActionsMenu__item {
         &--rename {
             background: url('~Images/icons/rename-dark.svg') no-repeat 50% 50%;

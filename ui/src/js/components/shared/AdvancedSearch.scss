@@ -93,7 +93,8 @@ div.ReactTags__tagInput input.ReactTags__tagInputField:focus {
     margin: 0;
     font-size: 16px;
     width: 100%;
-    border: 1px solid #eee;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 div.ReactTags__selected span.ReactTags__tag {
@@ -105,6 +106,8 @@ div.ReactTags__selected span.ReactTags__tag {
     margin: 5px 5px;
     border-radius: 2px;
     height: 37px;
+    color: $jet;
+    white-space: nowrap;
 }
 
 span.ReactTags__tag:first-child{
@@ -145,4 +148,32 @@ div.ReactTags__suggestions ul li.ReactTags__activeSuggestion {
     display: flex;
     height: auto;
     top: 100px;
+    border: 1px solid $grey;
+    border-top: 1px solid $azure;
+    padding: 0 10px;
   }
+
+.ReactTags__tag.Languages,
+.ReactTags__tag.Dataset.Type {
+    background: $azure !important;
+    color: $white !important;
+    a {
+        color: $white !important;
+    }
+}
+
+.ReactTags__tag.Development.Environments {
+    background: $slateBlue !important;
+    color: $white !important;
+    a {
+        color: $white !important;
+    }
+}
+
+.ReactTags__tag.Tags {
+    background: $lightblue !important;
+    color: $white !important;
+    a {
+        color: $white !important;
+    }
+}
