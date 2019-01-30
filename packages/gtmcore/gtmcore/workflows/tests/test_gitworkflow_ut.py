@@ -92,11 +92,13 @@ class TestGitWorkflowsMethods(object):
                                                       config_file=mock_config_file[0])
         with open(os.path.join(wf_other.repository.root_dir, 'testfile'), 'w') as f: f.write('filedata')
         wf_other.repository.sweep_uncommitted_changes()
-        commit_hash = wf_other.repository.git.commit_hash
+
         wf_other.sync(username=other_user)
+        commit_hash = wf_other.repository.git.commit_hash
 
         assert wf.repository.git.commit_hash != commit_hash
         wf.sync(username=username)
+        assert len(wf.repository.git.commit_hash) == len(commit_hash)
         assert wf.repository.git.commit_hash == commit_hash
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)

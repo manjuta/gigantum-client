@@ -95,6 +95,10 @@ class BranchManager(object):
     def branches_local(self) -> List[str]:
         return sorted(self.repository.get_branches()['local'])
 
+    def fetch(self) -> None:
+        """Perform a git fetch"""
+        self.repository.git.fetch()
+
     def create_branch(self, title: str, revision: Optional[str] = None) -> str:
         """Create and checkout (work on) a new managed branch.
 
@@ -172,7 +176,7 @@ class BranchManager(object):
             logger.error(e)
             raise BranchException(e)
 
-    def merge_from(self, other_branch: str, force: bool = False, pull: bool = False) -> None:
+    def merge_from(self, other_branch: str, force: bool = False) -> None:
         """Pulls/merges `other_branch` into current branch.
 
         Args:
@@ -180,12 +184,8 @@ class BranchManager(object):
             force: Force overwrite if conflicts occur
         """
 
-        merge_tokens = []
-        if other_branch in self.branches_local and not pull:
-            merge_tokens = f'git merge {other_branch}'.split()
-        elif other_branch in self.branches_remote and pull:
-            merge_tokens = f'git pull origin {other_branch}'.split()
-        else:
+
+        if other_branch not in self.branches_local:
             raise InvalidBranchName(f'Branch {other_branch} not found')
 
         checkpoint = self.repository.git.commit_hash
@@ -193,6 +193,7 @@ class BranchManager(object):
         logger.info(f"In {str(self.repository)} merging branch `{other_branch}` into `{self.active_branch}`...")
         try:
             self.repository.sweep_uncommitted_changes()
+            merge_tokens = 'git merge'.split()
             if force:
                 logger.warning("Using force to overwrite local changes")
                 merge_tokens.extend('-s recursive -X theirs'.split())

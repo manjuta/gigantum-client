@@ -166,7 +166,7 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
         call_subprocess(pull_tokens, cwd=repository.root_dir)
     except subprocess.CalledProcessError as cp_error:
         if 'Automatic merge failed' in cp_error.stdout.decode():
-            raise MergeError(f"Merge conflict pulling in branch {branch_name}")
+            raise MergeConflict(f"Merge conflict pulling in branch {branch_name}")
         else:
             raise
     #
@@ -188,14 +188,20 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
     #             raise
 
 def _sync_pull_push(repository: Repository, username: str, branch_name: str, override: str, feedback_cb: Callable):
+    _pull(repository, branch_name, override, feedback_cb)
+
     bm = BranchManager(repository, username=username)
-    #_pull(repository, branch_name, override, feedback_cb)
-    bm.merge_from(branch_name, force=override=='theirs', pull=True)
+    bm.fetch()
+    #bm.merge_from(branch_name, force=override=='theirs')
+
     # Push regular Git objects, then LFS objects
-    call_subprocess(['git', 'push', 'origin', branch_name], cwd=repository.root_dir)
-    if repository.client_config.config["git"]["lfs_enabled"] is True:
-        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
-                        cwd=repository.root_dir)
+    push_tokens = f'git push origin {branch_name}'.split()
+    if branch_name not in bm.branches_remote:
+        push_tokens.insert(2, "--set-upstream")
+    call_subprocess(push_tokens, cwd=repository.root_dir)
+    # if repository.client_config.config["git"]["lfs_enabled"] is True:
+    #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
+    #                     cwd=repository.root_dir)
 
 
 def pull_branch(repository: Repository, username: str, branch_name: str,
