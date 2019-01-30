@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import LocalLabbookPanel from 'Components/dashboard/labbooks/localLabbooks/LocalLabbookPanel';
-import LabbooksPaginationLoader from '../labbookLoaders/LabbookPaginationLoader';
+import LabbooksPaginationLoader from 'Components/dashboard/labbooks/labbookLoaders/LabbookPaginationLoader';
 import ImportModule from './import/ImportModule';
 // helpers
 import ContainerLookup from './lookups/ContainerLookup';
