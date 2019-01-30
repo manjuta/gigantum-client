@@ -335,7 +335,7 @@ export default class BranchCard extends Component {
         <div
           className="BranchCard__badge"
         >
-          {this.props.isRemote ? 'Remote' : 'Local'}
+          {this.props.isRemote ? this.props.isLocal ? 'Local & Remote' : 'Remote' : 'Local'}
         </div>
       </div>
     );

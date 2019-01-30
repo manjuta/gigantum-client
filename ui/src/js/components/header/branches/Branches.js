@@ -97,7 +97,7 @@ export default class Branches extends Component {
 
         allBranchNames = [...new Set([].concat(...totalArrays))],
 
-        branchArrayToFilter = this.props.mergeFilter ? labbook.mergeableBranchNames : allBranchNames,
+        branchArrayToFilter = this.props.mergeFilter ? labbook.localBranchNames : allBranchNames,
 
         branches = this._filterBranches(branchArrayToFilter),
 
@@ -183,6 +183,7 @@ export default class Branches extends Component {
                         activeBranchName={this.props.labbook.activeBranchName}
                         name={name}
                         isRemote={labbook.remoteBranchNames.indexOf(name) !== -1}
+                        isLocal={labbook.localBranchNames.indexOf(name) !== -1}
                         labbookId={this.props.labbookId}
                         mergeFilter={this.props.mergeFilter}
                         branchesOpen={this.props.branchesOpen}
