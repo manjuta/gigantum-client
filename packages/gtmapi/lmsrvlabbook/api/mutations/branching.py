@@ -129,6 +129,30 @@ class WorkonBranch(graphene.relay.ClientIDMutation):
                                             name=labbook_name, owner=owner))
 
 
+class ResetBranchToRemote(graphene.relay.ClientIDMutation):
+    """ Undo all local history and then set current branch tip to match remote.
+
+    Very useful when changes are made to master that cannot be pushed. """
+
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+
+    labbook = graphene.Field(Labbook)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            wf = LabbookWorkflow(lb)
+            wf.reset(username)
+
+        return ResetBranchToRemote(Labbook(id="{}&{}".format(owner, labbook_name),
+                                           name=labbook_name, owner=owner))
+
+
 class MergeFromBranch(graphene.relay.ClientIDMutation):
     """Merge from another branch into the current active branch. Force if necessary. """
 
@@ -153,26 +177,4 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
         return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
 
-
-class ResetBranchToRemote(graphene.relay.ClientIDMutation):
-    """ Undo all local history and then set current branch tip to match remote.
-
-    Very useful when changes are made to master that cannot be pushed. """
-
-    class Input:
-        owner = graphene.String(required=True)
-        labbook_name = graphene.String(required=True)
-
-    labbook = graphene.Field(Labbook)
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = InventoryManager().load_labbook(username, owner, labbook_name,
-                                             author=get_logged_in_author())
-        with lb.lock():
-            wf = LabbookWorkflow(lb)
-            wf.reset(username)
-
-        return ResetBranchToRemote(Labbook(id="{}&{}".format(owner, labbook_name),
-                                           name=labbook_name, owner=owner))
+class Merge
