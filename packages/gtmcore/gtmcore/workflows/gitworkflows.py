@@ -42,7 +42,7 @@ class GitWorkflowException(GigantumException):
 
 
 class MergeOverride(Enum):
-    #OURS = 'ours'
+    OURS = 'ours'
     THEIRS = 'theirs'
     ABORT = 'abort'
 
@@ -123,14 +123,6 @@ class GitWorkflow(ABC):
                                                      override=override.value,
                                                      feedback_callback=feedback_callback)
         return updates_cnt
-
-    def pull_branch(self, username: str, branch_name: str, override: MergeOverride = MergeOverride.ABORT,
-                    feedback_callback: Callable = lambda _ : None):
-        bm = BranchManager(self.repository, username)
-        bm.m
-        gitworkflows_utils.pull_branch(self.repository, username=username, branch_name=branch_name,
-                                       feedback_callback=feedback_callback)
-        # TODO - Rollback on fail
 
     def reset(self, username: str):
         """ Perform a Git reset to undo all local changes"""

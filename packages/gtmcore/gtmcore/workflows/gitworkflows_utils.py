@@ -152,21 +152,26 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
         logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time():.2f}s')
 
 
-def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable):
+def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> str:
     # TODO(billvb) Refactor to BranchManager
     feedback_cb(f"Pulling upstream from {branch_name} with `{override}` strategy")
-    # Pull regular Git objects, then LFS
+    cp = repository.git.commit_hash
     try:
-        pull_tokens = ['git', 'pull', 'origin', branch_name]
-        if override == 'ours':
-            pull_tokens.extend(['-X', 'ours'])
-        elif override == 'theirs':
-            pull_tokens.extend(['-X', 'theirs'])
-
-        call_subprocess(pull_tokens, cwd=repository.root_dir)
+        call_subprocess(f'git pull'.split(), cwd=repository.root_dir)
     except subprocess.CalledProcessError as cp_error:
         if 'Automatic merge failed' in cp_error.stdout.decode():
-            raise MergeConflict(f"Merge conflict pulling in branch {branch_name}")
+            bm = BranchManager(repository, username='')
+            conflicted_files = bm._infer_conflicted_files(cp_error.stdout.decode())
+            if 'abort' == override:
+                call_subprocess(f'git reset --hard {cp}'.split(), cwd=repository.root_dir)
+                raise MergeConflict('Merge conflict pulling upstream', conflicted_files)
+            call_subprocess(f'git checkout --{override} {" ".join(conflicted_files)}'.split(),
+                            cwd=repository.root_dir)
+            if override == 'ours':
+                n = 2
+            call_subprocess('git add .'.split(), cwd=repository.root_dir)
+            call_subprocess('git commit -m "Merge"'.split(), cwd=repository.root_dir)
+            assert repository.is_repo_clean
         else:
             raise
     #
@@ -188,10 +193,10 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
     #             raise
 
 def _sync_pull_push(repository: Repository, username: str, branch_name: str, override: str, feedback_cb: Callable):
-    _pull(repository, branch_name, override, feedback_cb)
-
     bm = BranchManager(repository, username=username)
     bm.fetch()
+    _pull(repository, branch_name, override, feedback_cb)
+
     #bm.merge_from(branch_name, force=override=='theirs')
 
     # Push regular Git objects, then LFS objects
@@ -202,22 +207,6 @@ def _sync_pull_push(repository: Repository, username: str, branch_name: str, ove
     # if repository.client_config.config["git"]["lfs_enabled"] is True:
     #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
     #                     cwd=repository.root_dir)
-
-
-def pull_branch(repository: Repository, username: str, branch_name: str,
-                feedback_callback: Callable) -> None:
-    """"""
-    repository.sweep_uncommitted_changes()
-    repository.git.fetch()
-    original_hash = repository.git.commit_hash
-    try:
-        bm = BranchManager(repository, username=username)
-        bm.merge_from(branch_name)
-        _pull(repository, branch_name, feedback_callback)
-    except MergeConflict as e:
-        logger.error(f"Caught merge conflict on pull, resetting to {original_hash}")
-        call_subprocess(['git', 'reset', '--hard', original_hash], cwd=repository.root_dir)
-        raise
 
 def sync_branch(repository: Repository, username: str, override: str, feedback_callback: Callable) -> int:
     """"""
