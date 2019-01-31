@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Jan 23 2019 17:43:01 GMT-0500 (Eastern Standard Time)
+# timestamp: Thu Jan 31 2019 15:34:48 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -1063,7 +1063,7 @@ input MergeFromBranchInput {
   owner: String!
   labbookName: String!
   otherBranchName: String!
-  force: Boolean
+  overrideMethod: String
   clientMutationId: String
 }
 

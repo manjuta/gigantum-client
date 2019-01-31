@@ -174,14 +174,14 @@ export default class BranchCard extends Component {
     );
   }
   /**
-    @param {object,Object}
+    @param {Object} params
     merge branch using WorkonExperimentalBranchMutation
   */
-  _merge(evt, params) {
+  _merge(params) {
     const otherBranchName = this.props.name;
     const { owner, labbookName } = this.state;
     const { activeBranchName } = this.props;
-    const { force } = params;
+    const { method } = params;
     const self = this;
     setInfoMessage(`Merging ${otherBranchName} into ${activeBranchName}`);
     this.setState({ showLoader: true, buttonLoaderStateMerge: 'loading' });
@@ -190,7 +190,7 @@ export default class BranchCard extends Component {
       owner,
       labbookName,
       otherBranchName,
-      force,
+      method,
       (response, error) => {
         if (error) {
           setErrorMessage(`There was a problem merging ${activeBranchName} into ${otherBranchName}`, error);
@@ -282,7 +282,6 @@ export default class BranchCard extends Component {
           <ForceMerge
             key="ForceMerge__modal"
             merge={this._merge}
-            params={{ force: true }}
             toggleModal={this._toggleModal}
           />
         }
@@ -310,7 +309,7 @@ export default class BranchCard extends Component {
             <ButtonLoader
               ref="buttonLoaderMerge"
               buttonState={this.state.buttonLoaderStateMerge}
-              params={{ force: false }}
+              params={{ method: null }}
               buttonText="Merge"
               buttonDisabled={showLoader}
               clicked={this._merge}

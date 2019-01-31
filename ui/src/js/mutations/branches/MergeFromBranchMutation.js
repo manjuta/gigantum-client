@@ -20,7 +20,7 @@ export default function MergeFromBranchMutation(
   owner,
   labbookName,
   otherBranchName,
-  force,
+  overrideMethod,
   callback,
 ) {
   const clientMutationId = uuidV4();
@@ -29,7 +29,7 @@ export default function MergeFromBranchMutation(
       owner,
       labbookName,
       otherBranchName,
-      force,
+      overrideMethod,
       clientMutationId,
     },
     first: 2,
