@@ -236,7 +236,7 @@ class TestGitWorkflowsMethods(object):
 
         n = wf.sync(username=username, override=MergeOverride.THEIRS)
         assert h != wf.labbook.git.commit_hash
-        flines = open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile')).read()
+        flines = open(os.path.join(wf.labbook.root_dir, 'input', 'testfile')).read()
         assert 'conflicting-change-other-user' == flines
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
@@ -267,7 +267,7 @@ class TestGitWorkflowsMethods(object):
         with open(fpath, 'w') as f: f.write('conflicting-change-original-user')
         wf.labbook.sweep_uncommitted_changes()
         n = wf.sync(username=username, override=MergeOverride.OURS)
-        flines = open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile')).read()
+        flines = open(os.path.join(wf.labbook.root_dir, 'input', 'testfile')).read()
         assert 'conflicting-change-original-user' == flines
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
