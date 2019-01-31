@@ -520,7 +520,7 @@ class TestWorkflowsBranching(object):
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
                 otherBranchName: "{nb}",
-                force: true
+                overrideMethod: "theirs"
             }}) {{
                 labbook{{
                     name
@@ -555,8 +555,7 @@ class TestWorkflowsBranching(object):
             mergeFromBranch(input: {{
                 owner: "{UT_USERNAME}",
                 labbookName: "{UT_LBNAME}",
-                otherBranchName: "{nb}",
-                force: false
+                otherBranchName: "{nb}"
             }}) {{
                 labbook{{
                     name

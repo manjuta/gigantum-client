@@ -160,19 +160,26 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         other_branch_name = graphene.String(required=True)
-        force = graphene.Boolean()
+        override_method = graphene.String(default="abort")
 
     labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name, force=False,
-                               client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name,
+                               override_method="abort", client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
             bm = BranchManager(lb, username=username)
-            bm.merge_from(other_branch=other_branch_name, force=force)
+            if override_method == 'abort':
+                bm.merge_from(other_branch=other_branch_name)
+            elif override_method == 'ours':
+                bm.merge_use_ours(other_branch=other_branch_name)
+            elif override_method == 'theirs':
+                bm.merge_use_theirs(other_branch=other_branch_name)
+            else:
+                raise ValueError(f"Unknown override method {override}")
 
         return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
