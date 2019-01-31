@@ -167,12 +167,8 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
                 raise MergeConflict('Merge conflict pulling upstream', conflicted_files)
             call_subprocess(f'git checkout --{override} {" ".join(conflicted_files)}'.split(),
                             cwd=repository.root_dir)
-
             call_subprocess('git add .'.split(), cwd=repository.root_dir)
             call_subprocess('git commit -m "Merge"'.split(), cwd=repository.root_dir)
-
-            if override == 'ours':
-                print(open(os.path.join(repository.root_dir, 'input', 'testfile')).read())
             assert repository.is_repo_clean
         else:
             raise

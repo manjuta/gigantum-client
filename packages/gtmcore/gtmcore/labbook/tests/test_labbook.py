@@ -45,7 +45,7 @@ class TestLabBook(object):
         assert parts[0] == "test"
         assert parts[1] == "test"
         assert parts[2] == "labbook1"
-        assert len(parts[5]) == 10
+        assert len(parts[-1]) == 10
 
         # Check repo is clean
         status = lb.git.status()
