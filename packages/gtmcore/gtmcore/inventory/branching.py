@@ -41,7 +41,7 @@ class BranchWorkflowViolation(BranchException):
 
 
 class MergeConflict(BranchException):
-    def __init__(self, message, file_conflicts: List[str]):
+    def __init__(self, message, file_conflicts: List[str]) -> None:
         super().__init__(message)
         # List of file paths (relative to root) that are in conflict
         self.file_conflicts = file_conflicts

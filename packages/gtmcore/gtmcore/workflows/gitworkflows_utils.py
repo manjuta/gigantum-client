@@ -152,7 +152,7 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
         logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time():.2f}s')
 
 
-def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> str:
+def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> None:
     # TODO(billvb) Refactor to BranchManager
     feedback_cb(f"Pulling upstream from {branch_name} with `{override}` strategy")
     cp = repository.git.commit_hash
