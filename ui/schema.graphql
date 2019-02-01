@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Thu Jan 31 2019 15:34:48 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Feb 01 2019 13:57:28 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -1415,7 +1415,7 @@ type SyncDatasetPayload {
 input SyncLabbookInput {
   owner: String!
   labbookName: String!
-  force: Boolean
+  overrideMethod: String
   clientMutationId: String
 }
 

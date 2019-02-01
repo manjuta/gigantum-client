@@ -20,7 +20,7 @@ let tempID = 0;
 export default function SyncDatasetMutation(
   owner,
   datasetName,
-  force,
+  overrideMethod,
   successCall,
   failureCall,
   callback,
@@ -29,7 +29,7 @@ export default function SyncDatasetMutation(
     input: {
       owner,
       datasetName,
-      force,
+      overrideMethod,
       clientMutationId: tempID++,
     },
     first: 2,
