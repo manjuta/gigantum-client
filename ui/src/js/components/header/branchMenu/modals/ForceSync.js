@@ -42,7 +42,7 @@ export default class ForceSync extends Component {
       SyncDatasetMutation(
         owner,
         labbookName,
-        method,
+        true,
         () => {},
         () => {},
         (error) => {
