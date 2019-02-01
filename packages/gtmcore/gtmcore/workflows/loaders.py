@@ -67,8 +67,6 @@ def clone_repo(remote_url: str, username: str, owner: str,
             call_subprocess("git config core.fileMode false".split(),
                             cwd=candidate_repo.root_dir)
 
-        bm = BranchManager(candidate_repo, username=username)
-
         repository = put_repository(candidate_repo.root_dir, username, owner)
 
     return repository
