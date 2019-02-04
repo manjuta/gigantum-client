@@ -128,28 +128,13 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
     feedback_callback("Pushing up regular objects...")
     call_subprocess(['git', 'push', '--set-upstream', 'origin', bm.workspace_branch],
                     cwd=repository.root_dir)
-
-    # if repository.client_config.config["git"]["lfs_enabled"] is True:
-    #     feedback_callback("Pushing up large objects...")
-    #     t0 = time.time()
-    #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', bm.workspace_branch],
-    #                     cwd=repository.root_dir)
-    #     logger.info(f"Ran in {str(repository)} `git lfs push --all` in {t0-time.time():.2f}s")
-    #
-    # feedback_callback(f"Publish complete.")
+    feedback_callback(f"Publish complete.")
 
 
 def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: Callable):
     # TODO(billvb) - Refactor to BranchManager
     set_upstream_tokens = ['git', 'push', '--set-upstream', 'origin', branch_name]
     call_subprocess(set_upstream_tokens, cwd=repository.root_dir)
-
-    # if repository.client_config.config["git"]["lfs_enabled"] is True:
-    #     feedback_cb('Pushing large files')
-    #     t0 = time.time()
-    #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
-    #                     cwd=repository.root_dir)
-    #     logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time():.2f}s')
 
 
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> None:
@@ -160,6 +145,7 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
         call_subprocess(f'git pull'.split(), cwd=repository.root_dir)
     except subprocess.CalledProcessError as cp_error:
         if 'Automatic merge failed' in cp_error.stdout.decode():
+            feedback_cb(f"Detected merge conflict, resolution method = {override}")
             bm = BranchManager(repository, username='')
             conflicted_files = bm._infer_conflicted_files(cp_error.stdout.decode())
             if 'abort' == override:
@@ -169,44 +155,23 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
                             cwd=repository.root_dir)
             call_subprocess('git add .'.split(), cwd=repository.root_dir)
             call_subprocess('git commit -m "Merge"'.split(), cwd=repository.root_dir)
-            assert repository.is_repo_clean
+            feedback_cb("Resolved merge conflict")
         else:
             raise
-    #
-    # if repository.client_config.config["git"]["lfs_enabled"] is True:
-    #     lfs_pull_tokens = ['git', 'lfs', 'pull', 'origin', branch_name]
-    #     if override == 'ours':
-    #         pass
-    #         #lfs_pull_tokens.extend(['-s', 'ours', '-X', 'theirs'])
-    #     elif override == 'theirs':
-    #         lfs_pull_tokens.extend(['-X', 'theirs'])
-    #
-    #     feedback_cb(f"Pulling large files with `{override}` strategy...")
-    #     try:
-    #         call_subprocess(lfs_pull_tokens, cwd=repository.root_dir)
-    #     except subprocess.CalledProcessError as cp_error:
-    #         if 'Automatic merge failed' in cp_error.stdout.decode():
-    #             raise MergeError(f"Merge conflict pulling LFS files in branch {branch_name}")
-    #         else:
-    #             raise
 
-def _sync_pull_push(repository: Repository, username: str, branch_name: str, override: str, feedback_cb: Callable):
+def _sync_pull_push(repository: Repository, username: str, branch_name: str, override: str,
+                    feedback_cb: Callable):
     bm = BranchManager(repository, username=username)
     bm.fetch()
     _pull(repository, branch_name, override, feedback_cb)
-
-    #bm.merge_from(branch_name, force=override=='theirs')
-
-    # Push regular Git objects, then LFS objects
     push_tokens = f'git push origin {branch_name}'.split()
     if branch_name not in bm.branches_remote:
         push_tokens.insert(2, "--set-upstream")
     call_subprocess(push_tokens, cwd=repository.root_dir)
-    # if repository.client_config.config["git"]["lfs_enabled"] is True:
-    #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
-    #                     cwd=repository.root_dir)
 
-def sync_branch(repository: Repository, username: str, override: str, feedback_callback: Callable) -> int:
+
+def sync_branch(repository: Repository, username: str, override: str,
+                feedback_callback: Callable) -> int:
     """"""
     repository.sweep_uncommitted_changes()
     repository.git.fetch()
