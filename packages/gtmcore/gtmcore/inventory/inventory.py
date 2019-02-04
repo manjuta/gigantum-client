@@ -21,6 +21,7 @@ from gtmcore.labbook.labbook import LabBook
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
+from gtmcore.dataset.manifest import Manifest
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
 from gtmcore.dataset import Manifest
@@ -564,6 +565,12 @@ class InventoryManager(object):
         assert os.path.dirname(final_path) != 'datasets', f"shutil.move used incorrectly"
 
         ds = self.load_dataset_from_directory(final_path)
+
+        # link dataset objects
+        ds.namespace = owner
+        m = Manifest(ds, logged_in_username=username)
+        m.link_revision()
+
         return ds
 
     def load_dataset(self, username: str, owner: str, dataset_name: str,
