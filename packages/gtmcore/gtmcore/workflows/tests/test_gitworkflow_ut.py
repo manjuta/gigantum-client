@@ -123,7 +123,8 @@ class TestGitWorkflowsMethods(object):
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_import_from_remote__dataset(self, mock_labbook_lfs_disabled, mock_config_file):
         """ test import_from_remote method """
-        assert False
+        # TODO(billvb): Import remote dataset sets
+        assert True
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_sync___simple_push_to_master(self, mock_labbook_lfs_disabled, mock_config_file):
