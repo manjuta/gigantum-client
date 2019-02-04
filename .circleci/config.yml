@@ -3,7 +3,7 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:38cb81a526-2019-01-29
+      - image: gigantum/circleci-client:2ad8563b28-2019-02-01
 
 jobs:
   mypy-gtmcore:
@@ -118,7 +118,7 @@ jobs:
             npm run relay
             unset CI && npm run build
       - run:
-          name: Run tests
+          name: Run jest tests
           command: |
             cd /home/circleci/repo/ui
             jest shared/fileBrowser activity dashboard -u

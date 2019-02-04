@@ -5,6 +5,7 @@ import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import shallowCompare from 'react-addons-shallow-compare'; // ES6
+import { connect } from 'react-redux';
 // assets
 import './FileBrowser.scss';
 // components
@@ -802,15 +803,31 @@ class FileBrowser extends Component {
                }
             </div>
           }
+          {
+            this.props.isProcessing &&
+            <div className="FileBrowser__veil">
+              <span>Processing...</span>
+            </div>
+          }
       </div>
   </div>)
     );
   }
 }
 
+const mapStateToProps = (state, ownProps) => ({
+  isProcessing: state.dataset.isProcessing,
+});
+
+const mapDispatchToProps = dispatch => ({
+
+});
+
+const FileBrowserContainer = connect(mapStateToProps, mapDispatchToProps)(FileBrowser);
+
 
 export default DropTarget(
     ['card', NativeTypes.FILE],
     Connectors.targetSource,
     Connectors.targetCollect,
-  )(FileBrowser);
+  )(FileBrowserContainer);

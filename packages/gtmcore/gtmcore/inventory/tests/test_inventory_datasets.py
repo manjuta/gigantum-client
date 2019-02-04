@@ -171,7 +171,7 @@ class TestInventoryDatasets(object):
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
-
+        ds.namespace = 'test'
         orig_location = ds.root_dir
         with tempfile.TemporaryDirectory() as tempdir:
             r = shutil.move(ds.root_dir, tempdir)

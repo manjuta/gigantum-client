@@ -127,7 +127,7 @@ const startFileUpload = (files, prefix, fileSizeData, mutationData, dropZoneProp
     } else if (file.name) {
       const isFileAllowed = fileSizeData.fileSizeNotAllowed.filter(largeFile => largeFile.name === file.name).length === 0;
       if (isFileAllowed) {
-        let newKey = prefix;
+        let newKey = prefix === '/' ? '' : prefix;
 
         if ((prefix !== '') && (prefix.substring(prefix.length - 1, prefix.length) !== '/')) {
           newKey += '/';

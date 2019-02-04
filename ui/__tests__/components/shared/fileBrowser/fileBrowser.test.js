@@ -1,9 +1,12 @@
 // vendor
+import { Provider } from 'react-redux';
 import React from 'react';
 import renderer from 'react-test-renderer';
 import FileBrowserDropZone from 'Components/shared/fileBrowser/FileBrowser';
 import { mount, shallow } from 'enzyme';
 import { BrowserRouter as Router } from 'react-router-dom';
+// import { Provider } from 'react-redux';
+import store from 'JS/redux/store';
 // fixtures
 import Auth from 'JS/Auth/Auth';
 import history from 'JS/history';
@@ -63,15 +66,17 @@ const FileBrowser = FileBrowserDropZone.DecoratedComponent;
 
 describe('FileBrowser component', () => {
   it('Test FileBrowser Rendering', () => {
-        const component = renderer.create(<FileBrowserDropZone.DecoratedComponent
+        const component = renderer.create(<Provider store={store}><FileBrowserDropZone.DecoratedComponent
               {...fixtures}
-            />);
+            /></Provider>);
 
         let tree = component.toJSON();
         expect(tree).toMatchSnapshot();
    });
 
-   const component = mount(<FileBrowserDropZone.DecoratedComponent {...fixtures}/>);
+   const wrapper = mount(<Provider store={store} ><FileBrowserDropZone.DecoratedComponent {...fixtures } /></Provider>);
+
+   const component = wrapper.find(FileBrowser).childAt(0);
    let deleteCount = 0;
    const MockFn = jest.fn();
    const mockDeleteMutation = new MockFn();
@@ -79,7 +84,7 @@ describe('FileBrowser component', () => {
 
    it('Sorts by date', () => {
      component.find('.FileBrowser__header--date').simulate('click');
-     expect(component.state('sort')).toEqual('modified');
+     expect(component.state().sort).toEqual('modified');
    });
 
    it('Multiselect selects all', () => {
