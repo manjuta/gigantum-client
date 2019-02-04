@@ -129,14 +129,14 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
     call_subprocess(['git', 'push', '--set-upstream', 'origin', bm.workspace_branch],
                     cwd=repository.root_dir)
 
-    if repository.client_config.config["git"]["lfs_enabled"] is True:
-        feedback_callback("Pushing up large objects...")
-        t0 = time.time()
-        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', bm.workspace_branch],
-                        cwd=repository.root_dir)
-        logger.info(f"Ran in {str(repository)} `git lfs push --all` in {t0-time.time():.2f}s")
-
-    feedback_callback(f"Publish complete.")
+    # if repository.client_config.config["git"]["lfs_enabled"] is True:
+    #     feedback_callback("Pushing up large objects...")
+    #     t0 = time.time()
+    #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', bm.workspace_branch],
+    #                     cwd=repository.root_dir)
+    #     logger.info(f"Ran in {str(repository)} `git lfs push --all` in {t0-time.time():.2f}s")
+    #
+    # feedback_callback(f"Publish complete.")
 
 
 def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: Callable):
@@ -144,12 +144,12 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
     set_upstream_tokens = ['git', 'push', '--set-upstream', 'origin', branch_name]
     call_subprocess(set_upstream_tokens, cwd=repository.root_dir)
 
-    if repository.client_config.config["git"]["lfs_enabled"] is True:
-        feedback_cb('Pushing large files')
-        t0 = time.time()
-        call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
-                        cwd=repository.root_dir)
-        logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time():.2f}s')
+    # if repository.client_config.config["git"]["lfs_enabled"] is True:
+    #     feedback_cb('Pushing large files')
+    #     t0 = time.time()
+    #     call_subprocess(['git', 'lfs', 'push', '--all', 'origin', branch_name],
+    #                     cwd=repository.root_dir)
+    #     logger.info(f'Ran in {str(repository)} `git lfs push all` in {t0-time.time():.2f}s')
 
 
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> None:
