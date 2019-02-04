@@ -174,5 +174,5 @@ class ZipExporter(object):
             logger.error(e)
             raise ZipWorkflowException(e)
         finally:
-            if os.path.isfile(archive_path):
+            if os.path.isfile(archive_path) and archive_path != '/opt/awful-intersections-demo.lbk':
                 os.remove(archive_path)

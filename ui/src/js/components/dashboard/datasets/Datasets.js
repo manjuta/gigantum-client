@@ -5,11 +5,11 @@ import classNames from 'classnames';
 import { connect } from 'react-redux';
 // components
 import WizardModal from 'Components/wizard/WizardModal';
-import Loader from 'Components/shared/Loader';
+import Loader from 'Components/common/Loader';
 import LocalDatasetsContainer, { LocalDatasets } from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
 // import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
-import LoginPrompt from 'Components/header/branchMenu/modals/LoginPrompt';
-import ToolTip from 'Components/shared/ToolTip';
+import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import ToolTip from 'Components/common/ToolTip';
 import DatasetFilterBy from './filters/DatasetFilterBy';
 import DatasetSort from './filters/DatasetSort';
 // utils
@@ -62,6 +62,8 @@ class Datasets extends Component {
     this._changeSearchParam = this._changeSearchParam.bind(this);
     this._hideSearchClear = this._hideSearchClear.bind(this);
     this._setFilterValue = this._setFilterValue.bind(this);
+    this._toggleSortMenu = this._toggleSortMenu.bind(this);
+    this._toggleFilterMenu = this._toggleFilterMenu.bind(this);
   }
 
   /**
@@ -125,7 +127,7 @@ class Datasets extends Component {
   */
 
   _closeSortMenu(evt) {
-    const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('Datasets__sort') > -1);
+    const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('DatasetSort__selector') > -1);
 
     if (!isSortMenu && this.state.sortMenuOpen) {
       this.setState({ sortMenuOpen: false });
@@ -138,7 +140,7 @@ class Datasets extends Component {
     * hides the filter menu dropdown from the view
   */
   _closeFilterMenu(evt) {
-    const isFilterMenu = evt.target.className.indexOf('Datasets__filter') > -1;
+    const isFilterMenu = evt.target.className.indexOf('DatasetFilterBy__selector') > -1;
 
     if (!isFilterMenu && this.state.filterMenuOpen) {
       this.setState({ filterMenuOpen: false });
@@ -214,6 +216,18 @@ class Datasets extends Component {
     this._changeSearchParam({ filter });
   }
   /**
+     sets state for filter menu
+  */
+  _toggleFilterMenu() {
+    this.setState({ filterMenuOpen: !this.state.filterMenuOpen });
+  }
+  /**
+   sets state for sort menu
+  */
+  _toggleSortMenu() {
+    this.setState({ sortMenuOpen: !this.state.sortMenuOpen });
+  }
+  /**
    * @param {string} section
    replaces history and checks session
   */
@@ -235,10 +249,16 @@ class Datasets extends Component {
     return false;
   }
   /**
-   * @param {array, string} localDatasets.edges,filter
+   * @param {Object} datasetList
+   * @param {String} filter
+   * @param {Boolean} isLoading
    * @return {array} filteredDatasets
   */
-  _filterDatasets(datasets, filter) {
+  _filterDatasets(datasetList, filter, isLoading) {
+    if (isLoading) {
+      return [];
+    }
+    const datasets = datasetList.localDatasets.edges;
     const username = localStorage.getItem('username');
     let self = this,
       filteredDatasets = [];
@@ -435,10 +455,12 @@ class Datasets extends Component {
 
             <DatasetFilterBy
               {...this.state}
+              toggleFilterMenu={this._toggleFilterMenu}
               setFilter={this._setFilter}
             />
             <DatasetSort
               {...this.state}
+              toggleSortMenu={this._toggleSortMenu}
               setSortFilter={this._setSortFilter}
             />
           </div>
@@ -447,6 +469,7 @@ class Datasets extends Component {
               <LocalDatasets
                 loading
                 showModal={this._showModal}
+                filterDatasets={this._filterDatasets}
                 section={this.props.section}
               />
             :

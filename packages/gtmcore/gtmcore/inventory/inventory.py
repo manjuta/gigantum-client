@@ -22,9 +22,10 @@ from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
+from gtmcore.dataset.manifest import Manifest
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
-from gtmcore.dataset.manifest import Manifest
+from gtmcore.dataset import Manifest
 
 
 logger = LMLogger.get_logger()
@@ -518,6 +519,10 @@ class InventoryManager(object):
             store = ActivityStore(dataset)
             store.create_activity_record(ar)
 
+            # Initialize file cache and link revision
+            m = Manifest(dataset, username)
+            m.link_revision()
+
             return dataset
 
     def delete_dataset(self, username: str, owner: str, dataset_name: str) -> None:
@@ -535,7 +540,6 @@ class InventoryManager(object):
         ds = self.load_dataset(username, owner, dataset_name)
         shutil.rmtree(ds.root_dir, ignore_errors=True)
 
-
     def put_dataset(self, path: str, username: str, owner: str) -> Dataset:
         try:
             return self._put_dataset(path, username, owner)
@@ -544,8 +548,8 @@ class InventoryManager(object):
             raise InventoryException(e)
 
     def _put_dataset(self, path: str, username: str, owner: str) -> Dataset:
-        # Validate that given path contains labbook
-        temp_ds = self.load_dataset_from_directory(path)
+        # Validate that given path contains a dataset
+        _ = self.load_dataset_from_directory(path)
 
         p = os.path.join(self.inventory_root, username, owner, 'datasets')
         dir_name = os.path.basename(path)
@@ -559,10 +563,15 @@ class InventoryManager(object):
             raise InventoryException(f"Dataset directory {dir_name} already exists")
 
         final_path = shutil.move(path, p)
-        assert os.path.dirname(final_path) != 'datasets', \
-               f"shutil.move used incorrectly"
+        assert os.path.dirname(final_path) != 'datasets', f"shutil.move used incorrectly"
 
         ds = self.load_dataset_from_directory(final_path)
+
+        # link dataset objects
+        ds.namespace = owner
+        m = Manifest(ds, logged_in_username=username)
+        m.link_revision()
+
         return ds
 
     def load_dataset(self, username: str, owner: str, dataset_name: str,

@@ -13,8 +13,8 @@ import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/header/branchMenu/modals/LoginPrompt';
-import Loader from 'Components/shared/Loader';
+import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
 
@@ -177,7 +177,7 @@ export default class RemoteLabbookPanel extends Component {
      'RemoteLabbooks__row RemoteLabbooks__row--text': true,
      blur: this.state.isImporting,
    });
-
+   console.log('RemoteLabbooks__icon', localStorage, localStorage.getItem('username'), edge.node.owner)
    const deleteCSS = classNames({
      RemoteLabbooks__icon: true,
      'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,
@@ -246,6 +246,8 @@ export default class RemoteLabbookPanel extends Component {
          <p
            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
          >
+         {
+          edge.node.description && edge.node.description.length ?
            <Highlighter
              highlightClassName="LocalLabbooks__highlighted"
              searchWords={[store.getState().labbookListing.filterText]}
@@ -253,6 +255,13 @@ export default class RemoteLabbookPanel extends Component {
              caseSensitive={false}
              textToHighlight={edge.node.description}
            />
+           :
+           <span
+           className="RemoteDatasets__description--blank"
+         >
+            No description provided
+         </span>
+         }
          </p>
        </div>
        { !(edge.node.visibility === 'local') &&

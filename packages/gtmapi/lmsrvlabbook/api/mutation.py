@@ -34,6 +34,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteRemoteLabbook,
                                         CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
                                         CreateDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                        DeleteDatasetFiles, MoveDatasetFile, MakeDatasetDirectory,
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
                                         ModifyDatasetLink)
@@ -193,3 +194,12 @@ class LabbookMutations(graphene.ObjectType):
 
     # Link/Unlink a dataset to a project
     modify_dataset_link = ModifyDatasetLink.Field()
+
+    # Delete a file or directory inside of a Dataset
+    delete_dataset_files = DeleteDatasetFiles.Field()
+
+    # Move a file or directory inside of a Dataset
+    move_dataset_file = MoveDatasetFile.Field()
+
+    # Create an empty directory inside of a Dataset
+    make_dataset_directory = MakeDatasetDirectory.Field()

@@ -7,11 +7,11 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-d
 // history
 import history from 'JS/history';
 // components
-import SideBar from 'Components/shared/SideBar';
-import Footer from 'Components/shared/footer/Footer';
-import Prompt from 'Components/shared/Prompt';
+import SideBar from 'Components/common/SideBar';
+import Footer from 'Components/common/footer/Footer';
+import Prompt from 'Components/common/Prompt';
 import Profile from 'Components/profile/Profile';
-import Helper from 'Components/shared/Helper';
+import Helper from 'Components/common/Helper';
 // config
 import config from 'JS/config';
 
@@ -102,12 +102,10 @@ class Routes extends Component {
     if (!this.state.hasError) {
       const headerCSS = classNames({
         Header: true,
-        hidden: !this.props.validSession,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({
         Routes__main: true,
-        'Routes__main-no-auth': !this.props.validSession,
       });
 
       const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";

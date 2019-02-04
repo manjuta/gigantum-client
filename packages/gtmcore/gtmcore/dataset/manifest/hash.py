@@ -166,11 +166,15 @@ class SmartHash(object):
         """
         h = blake2b()
 
-        with open(self.get_abs_path(path), 'rb') as fh:
-            file_buffer = await self.read_block(fh, blocksize)
-            while len(file_buffer) > 0:
-                h.update(file_buffer)
+        abs_path = self.get_abs_path(path)
+        if os.path.isfile(abs_path):
+            with open(abs_path, 'rb') as fh:
                 file_buffer = await self.read_block(fh, blocksize)
+                while len(file_buffer) > 0:
+                    h.update(file_buffer)
+                    file_buffer = await self.read_block(fh, blocksize)
+        else:
+            h.update(abs_path.encode('utf-8'))
 
         return h.hexdigest()
 
@@ -185,7 +189,7 @@ class SmartHash(object):
         """
         loop = get_event_loop()
         tasks = [asyncio.ensure_future(self.async_hash_file(path, self.hashing_block_size)) for path in path_list]
-        loop.run_until_complete(asyncio.ensure_future(asyncio.wait(tasks)))
+        loop.run_until_complete(asyncio.ensure_future(asyncio.gather(*tasks)))
 
         fast_hash_result = self.fast_hash(path_list)
 

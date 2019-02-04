@@ -16,7 +16,7 @@ class TestHostFilesystemCache(object):
         assert hfc.cache_root == os.path.join(ds.client_config.config.get('git')['working_directory'], '.labmanager',
                                               'datasets', 'tester', 'tester', ds.name)
 
-        rev = mock_dataset_with_cache_dir[2]
+        rev = ds.git.repo.head.commit.hexsha
         assert hfc.current_revision_dir == os.path.join(ds.client_config.config.get('git')['working_directory'],
                                                         '.labmanager', 'datasets', 'tester', 'tester', ds.name, rev)
 
