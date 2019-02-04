@@ -144,6 +144,9 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
+        gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
+        gl_mgr.configure_git_credentials(default_remote, username)
+
         wf = DatasetWorkflow.import_from_remote(remote_url, username=username)
         ds = wf.dataset
 
