@@ -111,7 +111,7 @@ class TestDatasetImportZipping(object):
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
         # TODO -- redo hardcoded zip file
-        assert x.active_branch == 'gm.workspace-unittester'
+        assert x.active_branch == 'master'
 
     def test_fail_cannot_import_dataset_to_overwrite_name(self, mock_config_file):
         import_zip = os.path.join(resource_filename('gtmcore','workflows'),

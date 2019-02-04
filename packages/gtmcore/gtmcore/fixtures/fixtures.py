@@ -125,7 +125,7 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     repository.git.repo.heads['master'].checkout()
     repository.git.repo.git.push("origin", "master")
 
-    # Set the head to gm.workspace on the remote
+    # Set the head to master on the remote
     r.git.symbolic_ref('HEAD', 'refs/heads/master')
 
     # Check back out the original user branch

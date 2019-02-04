@@ -115,18 +115,18 @@ class TestLabbookSharing(object):
         nodes = r['data']['labbook']['branches']['edges']
         for n in [x['node'] for x in nodes]:
             # Make sure that the user's local branch was created
-            if n['prefix'] is None and n['refName'] == f'gm.workspace-{new_owner}':
+            if n['prefix'] is None and n['refName'] == f'master':
                 break
         else:
-            assert False, f"Branch gm.workspace-{new_owner} should exist but does not"
+            assert False, f"Branch master should exist but does not"
 
         for n in [x['node'] for x in nodes]:
-            # Make sure that origin/gm.workspace is in list of branches. This means it tracks.
-            if n['refName'] == 'gm.workspace':
+            # Make sure that origin/master is in list of branches. This means it tracks.
+            if n['refName'] == 'master':
                 break
         else:
             pprint.pprint(nodes)
-            assert False, "gm.workspace should be in list of branches"
+            assert False, "master should be in list of branches"
 
         # Make sure the labbook cloned into the correct directory
         assert os.path.exists(os.path.join(fixture_working_dir[1], 'default', new_owner, 'labbooks', 'sample-repo-lb'))
@@ -150,11 +150,7 @@ class TestLabbookSharing(object):
         lb = InventoryManager(conf_file).create_labbook("default", "default", "default-owned-repo-lb",
                                                         description="my first labbook")
         bm = BranchManager(lb, username='default')
-        bm.workon_branch("gm.workspace")
         labbook_dir = lb.root_dir
-
-        bm.workon_branch("gm.workspace")
-
 
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
@@ -206,11 +202,11 @@ class TestLabbookSharing(object):
         assert 'errors' not in r
         for n in [x['node'] for x in nodes]:
             # Make sure that origin/master is in list of branches. This means it tracks.
-            if n['prefix'] == 'origin' and n['refName'] == 'gm.workspace':
+            if n['prefix'] == 'origin' and n['refName'] == 'master':
                 break
         else:
             pprint.pprint(nodes)
-            assert False, "Did not check out gm.workspace branch"
+            assert False, "Did not check out master branch"
 
         # Make sure the labbook cloned into the correct directory
         assert os.path.exists(os.path.join(fixture_working_dir[1], 'default', 'default', 'labbooks',
