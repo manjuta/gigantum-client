@@ -12,7 +12,7 @@ import ImportModule from './import/ImportModule';
 import ContainerLookup from './lookups/ContainerLookup';
 import VisibilityLookup from './lookups/VisibilityLookup';
 // assets
-import './LocalLabBooks.scss';
+import './LocalLabbooks.scss';
 
 
 export class LocalLabbooks extends Component {

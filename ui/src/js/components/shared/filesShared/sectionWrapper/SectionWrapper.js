@@ -10,11 +10,10 @@ const getComponetPaths = ((props) => {
   const sectionType = props.labbook ? 'labbook' : 'dataset',
   sectionPathRoot = `${sectionType}`,
   sectionUpperCase = props.section[0].toUpperCase() + props.section.slice(1),
-  section = (props.section === 'code') ? props.section : `${props.section}Data`,
+  section = ((props.section === 'code') || props.section === 'data') ? props.section : `${props.section}Data`,
   browserPath = `${sectionPathRoot}/${section}/${sectionUpperCase}Browser`,
   favoritePath = props.labbook ? `${sectionPathRoot}/${section}/${sectionUpperCase}Favorites` : '',
   recentPath = props.labbook ? `${sectionPathRoot}/${section}/MostRecent${sectionUpperCase}` : '';
-  console.log(browserPath, favoritePath, recentPath)
   return ({
     browserPath,
     favoritePath,

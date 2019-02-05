@@ -303,7 +303,11 @@ const targetSource = {
               };
 
               if (props.mutations) {
-                props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                if (props.section !== 'data') {
+                  props.mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                } else {
+                  props.mutations.moveDatasetFile(moveLabbookFileData, (response) => {});
+                }
               } else {
                 const {
                   parentId,
@@ -324,7 +328,11 @@ const targetSource = {
 
                 const mutations = new FileBrowserMutations(mutationData);
 
-                mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                if (props.section !== 'data') {
+                  mutations.moveLabbookFile(moveLabbookFileData, (response) => {});
+                } else {
+                  mutations.moveDatasetFile(moveLabbookFileData, (response) => {});
+                }
               }
             }
           }

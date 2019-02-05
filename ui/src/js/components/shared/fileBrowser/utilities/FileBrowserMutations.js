@@ -12,6 +12,7 @@ import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/Comple
 // store
 import store from 'JS/redux/store';
 import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setIsProcessing } from 'JS/redux/reducers/dataset/dataset';
 
 class FileBrowserMutations {
    /**
@@ -80,11 +81,11 @@ class FileBrowserMutations {
             console.error(error);
             setErrorMessage(`ERROR: could not create ${key}`, error);
           }
-
           callback(response, error);
         },
       );
      } else {
+      setIsProcessing(true)
       MakeDatasetDirectoryMutation(
         connection,
         owner,
@@ -96,7 +97,7 @@ class FileBrowserMutations {
             console.error(error);
             setErrorMessage(`ERROR: could not create ${key}`, error);
           }
-
+          setTimeout(() => setIsProcessing(false), 1100);
           callback(response, error);
         },
       );
@@ -127,6 +128,7 @@ class FileBrowserMutations {
 
     const { key } = edge.node;
 
+    setIsProcessing(true);
     MoveDatasetFileMutation(
       connection,
       owner,
@@ -138,6 +140,7 @@ class FileBrowserMutations {
       section,
       removeIds,
       (response, error) => {
+        setTimeout(() => setIsProcessing(false), 1100);
         callback(response, error);
       },
     );
@@ -319,6 +322,8 @@ class FileBrowserMutations {
         },
       );
     } else {
+      setIsProcessing(true);
+
       DeleteDatasetFilesMutation(
         connection,
         owner,
@@ -333,6 +338,7 @@ class FileBrowserMutations {
             let keys = filePaths.join(' ');
             setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
           }
+          setTimeout(() => setIsProcessing(false), 1100);
         },
       );
     }
