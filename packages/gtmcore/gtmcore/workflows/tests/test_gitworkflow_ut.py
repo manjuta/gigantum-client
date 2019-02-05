@@ -118,7 +118,7 @@ class TestGitWorkflowsMethods(object):
         # The actual path on disk will be different, though
         assert wf_other.repository != wf.repository
         # Check imported into namespace of original owner (testuser)
-        assert 'testuser/labbooks/labbook1' in wf_other.repository.root_dir
+        assert f'{other_user}/{username}/labbooks/labbook1' in wf_other.repository.root_dir
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_import_from_remote__dataset(self, mock_labbook_lfs_disabled, mock_config_file):

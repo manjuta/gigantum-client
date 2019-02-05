@@ -139,7 +139,7 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
 
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable) -> None:
     # TODO(billvb) Refactor to BranchManager
-    feedback_cb(f"Pulling upstream from {branch_name} with `{override}` strategy")
+    feedback_cb(f"Pulling from branch \"{branch_name}\" with \"override\" strategy")
     cp = repository.git.commit_hash
     try:
         call_subprocess(f'git pull'.split(), cwd=repository.root_dir)
