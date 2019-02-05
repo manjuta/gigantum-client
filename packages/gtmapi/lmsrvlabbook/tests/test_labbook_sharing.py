@@ -85,8 +85,8 @@ class TestLabbookSharing(object):
         """
         r = fixture_working_dir[2].execute(query, context_value=req)
         pprint.pprint(r)
-        # Note this is testing cloning a PUBLIC labbook so the owner should get changed.
-        assert r['data']['importRemoteLabbook']['newLabbookEdge']['node']['owner'] == 'default'
+        # Note this is testing cloning a PUBLIC - nonetheless the owner stays the same.
+        assert r['data']['importRemoteLabbook']['newLabbookEdge']['node']['owner'] == 'test'
         assert r['data']['importRemoteLabbook']['newLabbookEdge']['node']['name'] == 'sample-repo-lb'
         assert 'errors' not in r
 

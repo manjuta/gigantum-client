@@ -145,7 +145,8 @@ class LabbookWorkflow(GitWorkflow):
                            config_file: str = None) -> 'LabbookWorkflow':
         """Take a URL of a remote Dataset and manifest it locally on this system. """
         inv_manager = InventoryManager(config_file=config_file)
-        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        _, namespace, _, repo_name = remote_url.rsplit('/', 3)
+        print('XXXX',remote_url)
         repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
                                   load_repository=inv_manager.load_labbook_from_directory,
                                   put_repository=inv_manager.put_labbook)
@@ -162,7 +163,7 @@ class DatasetWorkflow(GitWorkflow):
                            config_file: str = None) -> 'DatasetWorkflow':
         """Take a URL of a remote Dataset and manifest it locally on this system. """
         inv_manager = InventoryManager(config_file=config_file)
-        _, namespace, repo_name = remote_url.rsplit('/', 2)
+        _, namespace, _, repo_name = remote_url.rsplit('/', 3)
         repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
                                   load_repository=inv_manager.load_dataset_from_directory,
                                   put_repository=inv_manager.put_dataset)
