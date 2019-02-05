@@ -4,7 +4,6 @@ import flask
 import os
 
 from gtmcore.dataset import Dataset
-from gtmcore.workflows import DatasetWorkflow
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration

@@ -15,10 +15,9 @@ logger = LMLogger.get_logger()
 
 
 def _clone(remote_url: str, working_dir: str) -> str:
-    if Configuration().config['git']['lfs_enabled'] and False:
-        clone_tokens = f"git lfs clone {remote_url}".split()
-    else:
-        clone_tokens = f"git clone {remote_url}".split()
+
+    # Note, --recursive forces clone of all submodules
+    clone_tokens = f"git clone --recursive {remote_url}".split()
 
     # Perform a Git clone
     call_subprocess(clone_tokens, cwd=working_dir)
@@ -33,22 +32,6 @@ def _clone(remote_url: str, working_dir: str) -> str:
         raise GigantumException('Could not find expected path of repo after clone')
 
     return p
-
-
-def _switch_owner(repository: Repository, username: str) -> Repository:
-    #TODO: owner is no longer used and this function should be removed
-    logger.info(f"Cloning public repo; changing owner to {username}")
-    repository._load_gigantum_data()
-    if repository._data:
-        if 'owner' in repository._data.keys():
-            repository._data['owner']['username'] = username
-    else:
-        raise GigantumException("LabBook _data not defined")
-    repository._save_gigantum_data()
-    repository.remove_remote('origin')
-    msg = f"Imported and changed owner to {username}"
-    repository.sweep_uncommitted_changes(extra_msg=msg)
-    return repository
 
 
 def clone_repo(remote_url: str, username: str, owner: str,

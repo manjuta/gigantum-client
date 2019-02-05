@@ -143,6 +143,7 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
     cp = repository.git.commit_hash
     try:
         call_subprocess(f'git pull'.split(), cwd=repository.root_dir)
+        call_subprocess(f'git submodule update --recursive'.split(), cwd=repository.root_dir)
     except subprocess.CalledProcessError as cp_error:
         if 'Automatic merge failed' in cp_error.stdout.decode():
             feedback_cb(f"Detected merge conflict, resolution method = {override}")

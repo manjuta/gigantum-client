@@ -25,7 +25,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
-from gtmcore.workflows import LabbookWorkflow
+from gtmcore.workflows import LabbookWorkflow, MergeOverride
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.labbook import Labbook
@@ -166,17 +166,18 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name,
-                               override_method="abort", client_mutation_id=None):
+                               override_method=MergeOverride.ABORT, client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
+            override = MergeOverride(override_method)
             bm = BranchManager(lb, username=username)
-            if override_method == 'abort':
+            if override == MergeOverride.ABORT:
                 bm.merge_from(other_branch=other_branch_name)
-            elif override_method == 'ours':
+            elif override == MergeOverride.OURS:
                 bm.merge_use_ours(other_branch=other_branch_name)
-            elif override_method == 'theirs':
+            elif override == MergeOverride.THEIRS:
                 bm.merge_use_theirs(other_branch=other_branch_name)
             else:
                 raise ValueError(f"Unknown override method {override}")
