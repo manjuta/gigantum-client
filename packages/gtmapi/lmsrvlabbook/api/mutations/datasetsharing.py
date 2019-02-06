@@ -129,7 +129,6 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         logger.info(f"Importing remote dataset from {remote_url}")
         ds = Dataset(author=get_logged_in_author())
 
-        # TODO(dmk?) Refactor this so we dont need to load a dataset to get config data.
         default_remote = ds.client_config.config['git']['default_remote']
         admin_service = None
         for remote in ds.client_config.config['git']['remotes']:
