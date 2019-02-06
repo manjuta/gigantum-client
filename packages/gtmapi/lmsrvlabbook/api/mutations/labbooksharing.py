@@ -76,14 +76,14 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        override_method = graphene.String(default=MergeOverride.ABORT)
+        override_method = graphene.String(default="abort")
 
     job_key = graphene.String()
 
     @classmethod
     @logged_mutation
     def mutate_and_get_payload(cls, root, info, owner, labbook_name,
-                               override_method=MergeOverride.ABORT, client_mutation_id=None):
+                               override_method="abort", client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
@@ -113,11 +113,7 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
         mgr = GitLabManager(default_remote, admin_service, access_token=token)
         mgr.configure_git_credentials(default_remote, username)
 
-        override = MergeOverride.ABORT
-        if override_method == 'ours':
-            override = MergeOverride.OURS
-        else:
-            override = MergeOverride.THEIRS
+        override = MergeOverride(override_method)
 
         job_metadata = {'method': 'sync_labbook',
                         'labbook': lb.key}

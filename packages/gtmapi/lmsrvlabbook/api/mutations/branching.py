@@ -166,7 +166,7 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name,
-                               override_method=MergeOverride.ABORT, client_mutation_id=None):
+                               override_method="abort", client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
