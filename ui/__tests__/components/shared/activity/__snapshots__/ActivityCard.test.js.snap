@@ -5,13 +5,6 @@ exports[`Activity renders a snapshot 1`] = `
   className="ActivityCard__container column-1-span-10"
 >
   <div
-    className="ActivityCard__start-node ActivityCard__end-node"
-    onClick={[Function]}
-    onMouseOut={[Function]}
-    onMouseOver={[Function]}
-    style={false}
-  />
-  <div
     className="ActivityCard ActivityCard--collapsed card ActivityCard--faded ActivityCard__expanded"
     style={Object {}}
   >

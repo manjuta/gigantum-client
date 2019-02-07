@@ -153,6 +153,7 @@ class ContainerStatus extends Component {
    *
   */
   _closePopupMenus(evt) {
+    // TODO fix this implementation, this is not sustainable.
     const containerMenuClicked = (evt.target.className.indexOf('ContainerStatus__container-state') > -1) ||
       (evt.target.className.indexOf('ContainerStatus__button-menu') > -1) ||
       (evt.target.className.indexOf('PackageDependencies__button') > -1) ||
@@ -171,7 +172,8 @@ class ContainerStatus extends Component {
       (evt.target.className.indexOf('PackageDependencies__remove-button--full') > -1) ||
       (evt.target.className.indexOf('PackageDependencies__remove-button--half') > -1) ||
       (evt.target.className.indexOf('PackageDependencies__update-button') > -1) ||
-      (evt.target.className.indexOf('BranchCard__delete-labbook') > -1);
+      (evt.target.className.indexOf('BranchCard__delete-labbook') > -1) ||
+      (evt.target.className.indexOf('Rollback') > -1);
 
     if (!containerMenuClicked &&
     this.props.containerMenuOpen) {
@@ -253,17 +255,21 @@ class ContainerStatus extends Component {
 
     return status;
   }
+
   /**
     @param {}
     triggers stop container mutation
   */
   _stopContainerMutation() {
-    this.props.setContainerMenuVisibility(false);
+    const { props, state } = this;
+
+    props.setContainerMenuVisibility(false);
+
     const self = this;
 
     StopContainerMutation(
-      this.state.labbookName,
-      this.state.owner,
+      state.labbookName,
+      state.owner,
       'clientMutationId',
       (response, error) => {
         self.setState({
@@ -273,8 +279,7 @@ class ContainerStatus extends Component {
         });
 
         if (error) {
-          console.log(error);
-          this.props.setErrorMessage(`There was a problem stopping ${self.state.labbookName} container`, error);
+          props.setErrorMessage(`There was a problem stopping ${self.state.labbookName} container`, error);
         } else {
           console.log('stopped container');
         }

@@ -8,6 +8,8 @@ import CodeBlock from 'Components/labbook/renderers/CodeBlock';
 import environment from 'JS/createRelayEnvironment';
 // store
 import store from 'JS/redux/store';
+// assets
+import './DetailRecords.scss';
 
 const DetailRecordsQuery = graphql`
 query DetailRecordsQuery($name: String!, $owner: String!, $keys: [String]){
@@ -58,12 +60,38 @@ export default class UserNote extends Component {
     this._setLinks = this._setLinks.bind(this);
   }
 
+  /**
+   * Lifecycle methods start
+   */
+  componentDidMount() {
+    const self = this;
+    setTimeout(() => {
+      self._setLinks();
+    }, 100);
+    window.addEventListener('resize', this._setLinks.bind(this));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._setLinks.bind(this));
+  }
+
+  componentDidUpdate() {
+    const self = this;
+    setTimeout(() => {
+      self._setLinks();
+    }, 100);
+  }
+
+  /**
+   * Lifecycle methods end
+   */
+
   _setLinks() {
     const elements = Array.prototype.slice.call(document.getElementsByClassName('ReactMarkdown'));
     const moreObj = {};
     elements.forEach((elOuter, index) => {
-      if (this.checkOverflow(elOuter) === true) moreObj[index] = true;
-      if (this.checkOverflow(elOuter.childNodes[elOuter.childNodes.length - 1]) === true) moreObj[index] = true;
+      if (this._checkOverflow(elOuter) === true) moreObj[index] = true;
+      if (this._checkOverflow(elOuter.childNodes[elOuter.childNodes.length - 1]) === true) moreObj[index] = true;
     });
     const pElements = Array.prototype.slice.call(document.getElementsByClassName('DetailsRecords__link'));
     for (const key in pElements) {
@@ -83,33 +111,25 @@ export default class UserNote extends Component {
     }
   }
 
-  checkOverflow(el) {
-    if (el) {
-      const curOverflow = el.style.overflow;
-      if (!curOverflow || curOverflow === 'visible') { el.style.overflow = 'hidden'; }
-      const isOverflowing = el.clientHeight + 3 < el.scrollHeight;
+  /**
+    @param {Object} element
+    checks if elements scrollheight is greater than it's client height
+    @return {boolean} isOverflowing
+  */
+  _checkOverflow(element) {
+    if (element) {
+      const curOverflow = element.style.overflow;
+      if (!curOverflow || curOverflow === 'visible') { element.style.overflow = 'hidden'; }
+      const isOverflowing = element.clientHeight + 3 < element.scrollHeight;
       return isOverflowing;
     }
   }
 
-  componentDidMount() {
-    const self = this;
-    setTimeout(() => {
-      self._setLinks();
-    }, 100);
-    window.addEventListener('resize', this._setLinks.bind(this));
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._setLinks.bind(this));
-  }
-  componentDidUpdate() {
-    const self = this;
-    setTimeout(() => {
-      self._setLinks();
-    }, 100);
-  }
-
+  /**
+    @param {Array} item
+    returns tag to render if item matches a case
+    @return {JSX}
+  */
   _renderDetail(item) {
     switch (item[0]) {
       case 'text/plain':
@@ -131,7 +151,13 @@ export default class UserNote extends Component {
     }
   }
 
+  /**
+    @param {Object} target
+    toggles content in a record when it has more to show
+    @return {}
+  */
   _moreClicked(target) {
+    // TODO remove setting classNames in react, using state is preffered
     if (target.className !== 'DetailsRecords__link-clicked') {
       const elements = Array.prototype.slice.call(document.getElementsByClassName('ReactMarkdown'));
       const index = Array.prototype.slice.call(document.getElementsByClassName('DetailsRecords__link')).indexOf(target);
@@ -150,42 +176,40 @@ export default class UserNote extends Component {
   }
 
   render() {
+    const { props, state } = this;
     const variables = {
-      keys: this.props.keys,
-      owner: this.state.owner,
-      name: this.state.labbookName,
+      keys: props.keys,
+      owner: state.owner,
+      name: state.labbookName,
     };
 
-    this.items = {};
-
-    let self = this;
+    const query = props.sectionType === 'labbook' ? DetailRecordsQuery : DetailRecordsDatasetsQuery;
 
     return (
       <QueryRenderer
         environment={environment}
-        query={ this.props.sectionType === 'labbook' ? DetailRecordsQuery : DetailRecordsDatasetsQuery}
+        query={query}
         variables={variables}
-        render={({ props, error }) => {
-            if (props) {
+        render={(response) => {
+            if (response && response.props) {
                 return (
                   <div className="DetailsRecords">
                     <ul className="DetailsRecords__list">
                       {
-                      props[self.props.sectionType].detailRecords.map((detailRecord) => {
+                      response.props[props.sectionType].detailRecords.map((detailRecord) => {
                         const liCSS = detailRecord.type === 'NOTE' ? 'DetailsRecords__item-note' : 'DetailsRecords__item';
                         const containerCSS = detailRecord.type === 'NOTE' ? 'DetailsRecords__container note' : 'DetailsRecords__container';
                         return (
                           <div className={containerCSS} key={detailRecord.id}>
                             {
-                              detailRecord.type !== 'NOTE' &&
-                              <div className={`DetailsRecords__action DetailsRecords__action--${detailRecord.action && detailRecord.action.toLowerCase()}`} />
+                              detailRecord.type !== 'NOTE'
+                              && <div className={`DetailsRecords__action DetailsRecords__action--${detailRecord.action && detailRecord.action.toLowerCase()}`} />
                             }
                             {
                               detailRecord.data.map((item, index) => (
                                 <li
                                   key={`${detailRecord.id}_${index}`}
-                                  className={liCSS}
-                                >
+                                  className={liCSS}>
                                   {this._renderDetail(item)}
                                   <div className="DetailsRecords hidden" />
                                   <p className="DetailsRecords__link hidden" onClick={e => this._moreClicked(e.target)}>More...</p>

@@ -1,3 +1,5 @@
+@import '~Styles/_imports.scss';
+
 .Modal__content{
   @include flex(flex-start, column);
   padding: 0 40px;
@@ -21,28 +23,35 @@
 
 .Modal__content.create .Modal__container{
   .Modal__header{
-    background: url('./../images/icons/create-azure.svg') no-repeat 207px 45px;
+    background: url('~Images/icons/create-azure.svg') no-repeat 207px 45px;
     background-size: 50px;
   }
 }
 
 .Modal__content.user .Modal__container{
   .Modal__header{
-    background: url('./../images/icons/user-azure.svg') no-repeat 160px 34px;
+    background: url('~Images/icons/user-azure.svg') no-repeat 160px 34px;
     background-size: 50px;
   }
 }
 
 .Modal__content.add .Modal__container{
   .Modal__header{
-    background: url('./../images/icons/add.svg') no-repeat 160px 34px;
+    background: url('~Images/icons/add.svg') no-repeat 160px 34px;
+    background-size: 50px;
+  }
+}
+
+.Modal__content.rollback .Modal__container{
+  .Modal__header{
+    background: url('~Images/icons/rollback.svg') no-repeat 160px 34px;
     background-size: 50px;
   }
 }
 
 .Modal__content.project .Modal__container{
   .Modal__header{
-    background: url('./../images/icons/labbooks-blue.svg') no-repeat 274px 40px;
+    background: url('~Images/icons/labbooks-blue.svg') no-repeat 274px 40px;
     background-size: 42px;
   }
 }

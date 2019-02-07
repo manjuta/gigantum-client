@@ -31,7 +31,6 @@
 @import 'components/shared/header';
 @import 'components/shared/helper';
 @import 'components/shared/tooltip';
-@import 'components/shared/modal';
 @import 'components/shared/componentError';
   //footer
 @import 'components/shared/footer/footer';
@@ -42,11 +41,8 @@
 @import 'components/login.scss';
 @import 'components/home.scss';
 //labbook components
-@import 'components/labbook/detail.scss';
-@import 'components/labbook/userNote.scss';
 @import 'components/labbook/dataBrowser.scss';
 @import 'components/labbook/containerStatus.scss';
-@import 'components/labbook/detailPanel.scss';
 //wizard components
 @import 'components/wizard/wizardModal';
 @import 'components/wizard/selectBase';

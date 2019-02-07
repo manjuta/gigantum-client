@@ -1,3 +1,8 @@
+@import '~Styles/_imports.scss';
+
+.DetailsRecords {
+  overflow: visible;
+}
 
 .LargeIcon {
   background-size: 38px;
@@ -9,6 +14,8 @@
 
 .DetailsRecords__list {
   margin: 0;
+  position: relative;
+  height: auto;
 }
 
 .DetailsRecords__item {
@@ -134,22 +141,34 @@ li.DetailsRecords__item-note .ReactMarkdown {
 }
 
 .DetailsRecords__action--create{
-  background: url('../images/icons/action-create.svg') no-repeat center center;
+  background: url('~Images/icons/action-create.svg') no-repeat center center;
 }
 .DetailsRecords__action--edit{
-  background: url('../images/icons/action-edit.svg') no-repeat center center;
+  background: url('~Images/icons/action-edit.svg') no-repeat center center;
 }
 .DetailsRecords__action--delete{
-  background: url('../images/icons/action-delete.svg') no-repeat center center;
+  background: url('~Images/icons/action-delete.svg') no-repeat center center;
 }
 .DetailsRecords__action--execute{
-  background: url('../images/icons/action-run.svg') no-repeat center center;
+  background: url('~Images/icons/action-run.svg') no-repeat center center;
 }
 .DetailsRecords__action--noaction{
-  background: url('../images/icons/action-null.svg') no-repeat center center;
+  background: url('~Images/icons/action-null.svg') no-repeat center center;
 }
 .DetailsRecords__container {
   position: relative;
+
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    z-index: 3;
+    border-right: 1px dashed $grey;
+    height: calc(100% + 0px);
+    width: 1px;
+    top: calc(-50%);
+    left: 25px;
+  }
 }
 
 .DetailsRecords__action:before {
@@ -157,32 +176,47 @@ li.DetailsRecords__item-note .ReactMarkdown {
   display: block;
   position: absolute;
   z-index: index($elements, card);
-  border: 1px dashed $grey;
+  border-bottom: 1px dashed $grey;
   height: 1px;
-  width: 10px;
-  top: 15px;
+  width: 14px;
+  top: 14px;
   left: -8px
 }
 
-.DetailsRecords__container:last-child:not(.note):before {
+
+.DetailsRecords__container:first-child:before {
   content: "";
   display: block;
   position: absolute;
   z-index: 3;
-  border: 1px solid #fefefe;
-  height: calc(50% - 10px);
+  border-right: 1px dashed $grey;
+  height: calc(50% + 10px);
   width: 1px;
-  top: calc(50% + 3px);
+  top: -10px;
   left: 25px;
 }
 
-.DetailsRecords__item:after {
+
+div.DetailsRecords__container:last-child .DetailsRecords__item:after {
   content: "";
-  background: $grey;
+  display: block;
   position: absolute;
-  bottom: 0;
-  left: 25%;
-  height: 1px;
-  width: 50%;
-  opacity: 0.5;
+  z-index: 3;
+  border-right: 1px dashed $grey;
+  height: 100%;
+  width: 1px;
+  top: -50%;
+  left: 25px;
+}
+
+div.DetailsRecords__container:first-child .DetailsRecords__item:after {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 3;
+  border-right: 1px dashed $grey;
+  height: calc(50% + 10px);
+  width: 1px;
+  top: -10px;
+  left: 25px;
 }
