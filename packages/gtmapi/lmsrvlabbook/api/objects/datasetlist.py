@@ -30,6 +30,11 @@ class DatasetList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                                                     order_by=graphene.String(default_value="name"),
                                                     sort=graphene.String(default_value="asc"))
 
+    # Connection to remotely available labbooks
+    remote_datasets = graphene.relay.ConnectionField(RemoteDatasetConnection,
+                                                     order_by=graphene.String(default_value="name"),
+                                                     sort=graphene.String(default_value="asc"))
+
     @classmethod
     def get_node(cls, info, id):
         """Method to resolve the object based on it's Node ID"""
