@@ -29,13 +29,15 @@ export default function SyncLabbookMutation(
     input: {
       owner,
       labbookName,
-      overrideMethod,
       clientMutationId: tempID++,
     },
     first: 2,
     cursor: null,
     hasNext: false,
   };
+  if (overrideMethod) {
+    variables.input.overrideMethod = overrideMethod;
+  }
 
   commitMutation(
     environment,

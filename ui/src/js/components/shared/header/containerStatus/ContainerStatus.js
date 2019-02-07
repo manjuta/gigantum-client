@@ -15,10 +15,11 @@ import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/red
 import { setPackageMenuVisible } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setBuildingState, setMergeMode } from 'JS/redux/reducers/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/reducers/footer';
-//
-import FetchContainerStatus from './fetchContainerStatus';
 // components
 import ToolTip from 'Components/common/ToolTip';
+// fetch
+import FetchContainerStatus from './fetchContainerStatus';
+
 
 function Bounce(w) {
   window.blur();
@@ -28,17 +29,18 @@ function Bounce(w) {
 class ContainerStatus extends Component {
   constructor(props) {
     super(props);
-    const devTools = this.props.base.developmentTools.slice();
+    console.log(props)
+    const devTools = props.base ? props.base.developmentTools.slice() : [];
 
     const selectedDevTool = devTools[0] === 'jupyterlab' ? 'JupyterLab' : devTools[0] === 'notebook' ? 'Notebook' : devTools[0] === 'rstudio' ? 'RStudio' : devTools[0];
     const { owner, labbookName } = store.getState().routes;
 
-    const state = {
+    this.state = {
       status: '',
       secondsElapsed: 0,
       pluginsMenu: false,
-      containerStatus: this.props.containerStatus,
-      imageStatus: this.props.imageStatus,
+      containerStatus: props.containerStatus,
+      imageStatus: props.imageStatus,
       containerMenuOpen: false,
       isMouseOver: false,
       rebuildAttempts: 0,
@@ -48,8 +50,6 @@ class ContainerStatus extends Component {
       showDevList: false,
       showInitialMessage: false,
     };
-
-    this.state = state;
 
     this._checkJupyterStatus = this._checkJupyterStatus.bind(this);
     this._getContainerStatusText = this._getContainerStatusText.bind(this);
@@ -153,6 +153,7 @@ class ContainerStatus extends Component {
    *
   */
   _closePopupMenus(evt) {
+    // TODO fix this implementation, this is not sustainable.
     const containerMenuClicked = (evt.target.className.indexOf('ContainerStatus__container-state') > -1) ||
       (evt.target.className.indexOf('ContainerStatus__button-menu') > -1) ||
       (evt.target.className.indexOf('PackageDependencies__button') > -1) ||
@@ -171,7 +172,8 @@ class ContainerStatus extends Component {
       (evt.target.className.indexOf('PackageDependencies__remove-button--full') > -1) ||
       (evt.target.className.indexOf('PackageDependencies__remove-button--half') > -1) ||
       (evt.target.className.indexOf('PackageDependencies__update-button') > -1) ||
-      (evt.target.className.indexOf('BranchCard__delete-labbook') > -1);
+      (evt.target.className.indexOf('BranchCard__delete-labbook') > -1) ||
+      (evt.target.className.indexOf('Rollback') > -1);
 
     if (!containerMenuClicked &&
     this.props.containerMenuOpen) {
@@ -253,17 +255,21 @@ class ContainerStatus extends Component {
 
     return status;
   }
+
   /**
     @param {}
     triggers stop container mutation
   */
   _stopContainerMutation() {
-    this.props.setContainerMenuVisibility(false);
+    const { props, state } = this;
+
+    props.setContainerMenuVisibility(false);
+
     const self = this;
 
     StopContainerMutation(
-      this.state.labbookName,
-      this.state.owner,
+      state.labbookName,
+      state.owner,
       'clientMutationId',
       (response, error) => {
         self.setState({
@@ -273,8 +279,7 @@ class ContainerStatus extends Component {
         });
 
         if (error) {
-          console.log(error);
-          this.props.setErrorMessage(`There was a problem stopping ${self.state.labbookName} container`, error);
+          props.setErrorMessage(`There was a problem stopping ${self.state.labbookName} container`, error);
         } else {
           console.log('stopped container');
         }
@@ -483,12 +488,14 @@ class ContainerStatus extends Component {
 
 
   _containerStatusJSX(status, key) {
+    const { props } = this;
+    console.log(props)
     const excludeStatuses = ['Stopping', 'Starting', 'Building', 'Publishing', 'Syncing'];
 
     const notExcluded = excludeStatuses.indexOf(this.state.status) === -1;
 
     const textStatus = this._getStatusText(status);
-    const devTools = this.props.base.developmentTools.slice();
+    const devTools = props.base.developmentTools.slice();
     const jupyterIndex = devTools.indexOf('jupyterlab');
     const notebookIndex = devTools.indexOf('notebook');
     const rstudioIndex = devTools.indexOf('rstudio');

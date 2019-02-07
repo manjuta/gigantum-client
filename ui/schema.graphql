@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Fri Feb 01 2019 13:57:28 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Feb 04 2019 10:54:52 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -1320,7 +1320,7 @@ input ResetBranchToRemoteInput {
 """
 Undo all local history and then set current branch tip to match remote.
 
-Very useful when changes are made to master that cannot be pushed. 
+Very useful when changes are made to master that cannot be pushed.
 """
 type ResetBranchToRemotePayload {
   labbook: Labbook

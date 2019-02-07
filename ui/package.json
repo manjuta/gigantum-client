@@ -1,5 +1,5 @@
 {
-  "name": "lab-manager-ui",
+  "name": "gigantum-client-ui",
   "version": "1.12.3",
   "private": true,
   "devDependencies": {
@@ -14,7 +14,6 @@
     "@babel/runtime": "^7.0.0",
     "@gigantum/relay-testing-utils": "^0.1.0",
     "auth0-js": "^9.3.0",
-    "autobind-decorator": "2.1.0",
     "autoprefixer": "^9.4.7",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
@@ -53,12 +52,9 @@
     "promise": "8.0.2",
     "react-dev-utils": "^7.0.1",
     "react-error-overlay": "^5.1.2",
-    "react-relay": "1.6.1",
     "react-test-renderer": "^16.3.2",
     "regenerator-runtime": "^0.13.1",
     "relay": "^0.8.0",
-    "relay-compiler": "1.6.1",
-    "relay-runtime": "1.6.1",
     "sass-loader": "^7.1.0",
     "sinon": "^7.2.3",
     "style-loader": "0.23.1",
@@ -111,7 +107,9 @@
     "react-loadable": "^5.5.0",
     "react-markdown": "^4.0.6",
     "react-redux": "^6.0.0",
+    "react-relay": "2.0.0",
     "react-router-dom": "^4.2.2",
+    "react-show-more": "^2.0.0",
     "react-slick": "^0.23.2",
     "react-syntax-highlighter": "^10.1.2",
     "react-tag-input": "^6.2.0",
@@ -119,6 +117,8 @@
     "react-virtualized": "^9.21.0",
     "react-youtube": "^7.6.0",
     "redux": "^4.0.1",
+    "relay-compiler": "2.0.0",
+    "relay-runtime": "2.0.0",
     "run-options": "0.0.4",
     "simplemde": "^1.11.2",
     "uglifyjs-webpack-plugin": "^2.0.1",
@@ -133,7 +133,7 @@
     "test": "TZ='Europe/London' jest shared/fileBrowser activity dashboard",
     "test-update": "TZ='Europe/London' jest shared/fileBrowser activity dashboard -u",
     "test-proxy": "USE_PROXY=true jest",
-    "relay": "relay-compiler --src ./src --schema ./schema.graphql",
+    "relay": "relay-compiler --watchman false --src ./src --schema ./schema.graphql",
     "relay-test": "relay-compiler --src ./__tests__ --schema ./schema.graphql",
     "update-schema": "graphql get-schema -p labbook",
     "update-json-schema": "babel-node ./scripts/updateSchema.js",
@@ -141,7 +141,8 @@
     "mock": "node __mocks__/react-relay.js",
     "polyfills": "babel-node ./config/polyfills.js",
     "lint-fix": "eslint ./.eslintrc --fix ./src",
-    "rebuild-sass": "npm rebuild node-sass --force"
+    "rebuild-sass": "npm rebuild node-sass --force",
+    "update-globals": "npm install -g @babel/cli@7.2.3 @babel/core@7.2.2 jest@23.6.0 relay-compiler@2.0.0"
   },
   "eslint": {
     "plugins": [

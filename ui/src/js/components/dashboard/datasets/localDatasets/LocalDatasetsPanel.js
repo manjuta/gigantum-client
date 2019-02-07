@@ -3,9 +3,6 @@ import React, { Component } from 'react';
 import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
-// muations
-import StartContainerMutation from 'Mutations/StartContainerMutation';
-import StopContainerMutation from 'Mutations/StopContainerMutation';
 // store
 import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';
@@ -39,8 +36,7 @@ export default class LocalDatasetPanel extends Component {
           }
         }}
         key={`local${edge.node.name}`}
-        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
-      >
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between">
 
         <div className="LocalDatasets__row--icons">
 

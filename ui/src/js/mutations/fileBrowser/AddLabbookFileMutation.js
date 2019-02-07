@@ -82,7 +82,11 @@ export default function AddLabbookFileMutation(
 ) {
   const date = new Date();
   const size = chunk.fileSizeKb * 1000;
-  const modifiedAt = (date.getTime() / 1000)
+  const modifiedAt = (date.getTime() / 1000);
+  const tempString = transactionId + filePath;
+  const tempId = tempString.replace(/\W/g, '');
+  const optimisticId = window.btoa((tempId));
+  const id = uuidv4();
   const optimisticResponse = {
     addLabbookFile: {
       newLabbookFileEdge: {
@@ -93,15 +97,12 @@ export default function AddLabbookFileMutation(
           modifiedAt,
           size,
         },
+        cursor: '',
       },
+      clientMutationId: id,
     },
   };
   const uploadables = [chunk.blob, accessToken];
-
-  const id = uuidv4();
-  const tempString = transactionId + filePath;
-  const tempId = tempString.replace(/\W/g, '');
-  const optimisticId = window.btoa((tempId));
 
   const variables = {
     input: {
@@ -121,10 +122,11 @@ export default function AddLabbookFileMutation(
       clientMutationId: id,
     },
   };
-
-  const recentConnectionKey = section === 'code' ? 'MostRecentCode_allFiles' :
-    section === 'input' ? 'MostRecentInput_allFiles' :
-      'MostRecentOutput_allFiles';
+  // TODO remove this, connections should be passed down from section
+  const recentConnectionKey = section === 'code'
+        ? 'MostRecentCode_allFiles'
+        : section === 'input' ? 'MostRecentInput_allFiles'
+        : 'MostRecentOutput_allFiles';
   commitMutation(
     environment,
     {
@@ -140,45 +142,25 @@ export default function AddLabbookFileMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
-      optimisticUpdater: (store) => {
-
-        if (deleteId && store.get(deleteId)) {
-          let node = store.get(deleteId)
-          node.setValue(modifiedAt, 'modifiedAt');
-          node.setValue(size, 'size');
-        } else {
-          if (store.get(optimisticId)) {
-            deleteEdge(store, sectionId, optimisticId, connectionKey);
-          }
-          let nodeExists = store.get(optimisticId);
-          const node = store.create(optimisticId, 'LabbookFile');
-          node.setValue(optimisticId, 'id');
-          node.setValue(false, 'isDir');
-          node.setValue(filePath, 'key');
-          node.setValue(modifiedAt, 'modifiedAt');
-          node.setValue(size, 'size');
-          sharedUpdater(store, sectionId, connectionKey, node);
-        }
-      },
       updater: (store, response) => {
-
         if (response.addLabbookFile && response.addLabbookFile.newLabbookFileEdge && response.addLabbookFile.newLabbookFileEdge.node) {
+
+          const responseNode = response.addLabbookFile.newLabbookFileEdge.node
           deleteEdge(store, sectionId, optimisticId, connectionKey);
           deleteEdge(store, sectionId, optimisticId, recentConnectionKey);
-          const { id } = response.addLabbookFile.newLabbookFileEdge.node;
+          const { id } = responseNode;
           const nodeExists = store.get(id);
 
           const node = nodeExists ? store.get(id) : store.create(id, 'LabbookFile');
 
-          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.size, 'size');
+          node.setValue(responseNode.size, 'size');
           node.setValue(false, 'isDir');
-          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.id, 'id');
-          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.key, 'key');
-          node.setValue(response.addLabbookFile.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
+          node.setValue(responseNode.id, 'id');
+          node.setValue(responseNode.key, 'key');
+          node.setValue(responseNode.modifiedAt, 'modifiedAt');
 
           sharedUpdater(store, sectionId, connectionKey, node);
           sharedUpdater(store, sectionId, recentConnectionKey, node);
-
         }
       },
     },

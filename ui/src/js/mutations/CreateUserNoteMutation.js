@@ -47,6 +47,16 @@ export default function CreateUserNoteMutation(
   labbookId,
   callback,
 ) {
+
+  console.log(type,
+    name,
+    title,
+    body,
+    owner,
+    objects,
+    tags,
+    labbookId,
+    callback)
   const variables = {
     input: {
       [`${type}Name`]: name,

@@ -10,13 +10,12 @@ export default class ActivityCard extends Component {
   constructor(props) {
     super(props);
 
-    const showDetails = this.props.edge.node.show &&
-
-    this.props.edge.node.detailObjects.filter(details => details.show).length !== 0;
+    const showDetails = props.edge.node.show && props.edge.node.detailObjects.filter(details => details.show).length !== 0;
 
     this.state = {
       showExtraInfo: showDetails,
       show: true,
+      isOver: false,
     };
   }
 
@@ -34,26 +33,28 @@ export default class ActivityCard extends Component {
 
     return `${hour}:${minutes}${ampm}`;
   }
+
   /**
     @param {}
     * determines the appropriate margins for cards when compressing
     @return {object}
   */
   _processCardStyle() {
-    const activityCardStyle = {};
+    const activityCardStyle = {},
+          { props, state } = this;
 
-    if (this.props.isCompressed) {
-      if (!this.props.isExpandedHead && !this.props.isExpandedEnd) {
+    if (props.isCompressed) {
+      if (!props.isExpandedHead && !props.isExpandedEnd) {
         activityCardStyle.marginTop = '-7.5px';
         activityCardStyle.marginBottom = '-7.5px';
-      } else if (this.props.isExpandedHead) {
-        const distance = this.props.attachedCluster.length - 1;
+      } else if (props.isExpandedHead) {
+        const distance = props.attachedCluster.length - 1;
         const calculatedMargin = distance * 7.5;
 
         activityCardStyle.marginTop = `${calculatedMargin}px`;
         activityCardStyle.marginBottom = '-7.5px';
-      } else if (this.props.isExpandedEnd) {
-        const distance = this.props.attachedCluster.length - 1;
+      } else if (props.isExpandedEnd) {
+        const distance = props.attachedCluster.length - 1;
         const calculatedMargin = distance * 7.5;
 
         activityCardStyle.marginTop = '-7.5px';
@@ -65,55 +66,62 @@ export default class ActivityCard extends Component {
   }
 
 
+  _expandCollapseSideBar(isOver) {
+     const { props } = this;
+     props.compressExpanded(props.attachedCluster, !isOver);
+
+     this.setState({ isOver });
+  }
+
+
   render() {
-    const node = this.props.edge.node,
+    const { props, state } = this;
+    const node = props.edge.node,
       type = node.type && node.type.toLowerCase();
 
     const activityCardCSS = classNames({
-        'ActivityCard card': this.state.showExtraInfo,
-        'ActivityCard ActivityCard--collapsed card': !this.state.showExtraInfo,
-        'ActivityCard--faded': this.props.hoveredRollback > this.props.position,
-        ActivityCard__expanded: this.props.isExpandedNode,
-        ActivityCard__compressed: this.props.isCompressed && !this.props.isExpandedEnd,
+        'ActivityCard card': state.showExtraInfo,
+        'ActivityCard ActivityCard--collapsed card': !state.showExtraInfo,
+        'ActivityCard--faded': props.hoveredRollback > props.position,
+        ActivityCard__expanded: props.isExpandedNode,
+        ActivityCard__compressed: props.isCompressed && !props.isExpandedEnd,
       }),
 
       titleCSS = classNames({
         'ActivityCard__title flex flex--row justify--space-between': true,
-        open: this.state.showExtraInfo || (type === 'note' && this.state.show),
-        closed: !this.state.showExtraInfo || (type === 'note' && !this.state.show),
+        open: state.showExtraInfo || (type === 'note' && state.show),
+        closed: !state.showExtraInfo || (type === 'note' && !state.show),
       }),
 
       expandedCSS = classNames({
-        ActivityCard__node: this.props.isExpandedNode && !this.props.isExpandedHead && !this.props.isExpandedEnd,
-        'ActivityCard__start-node': this.props.isExpandedHead,
-        'ActivityCard__end-node': this.props.isExpandedEnd,
+        ActivityCard__node: props.isExpandedNode && !props.isExpandedHead && !props.isExpandedEnd,
+        'ActivityCard__start-node': props.isExpandedHead,
+        'ActivityCard__end-node': props.isExpandedEnd,
       });
-    const expandedHeight = this.props.attachedCluster ? 110 * (this.props.attachedCluster.length - 1) : 0;
-    const expandedStyle = this.props.attachedCluster && {
+
+    let expandedHeight = props.attachedCluster ? 110 * (props.attachedCluster.length - 1) : 0;
+
+    let expandedBarHeight = state.isOver ? expandedHeight - ((props.attachedCluster.length - 1) * 15) : expandedHeight;
+
+    let margin = state.isOver ? ((props.attachedCluster.length - 1) * 7.5) : 0;
+
+    const expandedContainerStyle = props.attachedCluster && {
       height: `${expandedHeight}px`,
     };
 
-    if (this.props.isFirstCard && this.props.attachedCluster) {
-      expandedStyle.top = '32px';
+    const expandedStyle = props.attachedCluster && {
+      height: `${expandedBarHeight}px`,
+      margin: `${margin}px 0 0 0`,
+    };
+
+    if (props.isFirstCard && props.attachedCluster) {
+      expandedStyle.top = '2px';
     }
 
     const activityCardStyle = this._processCardStyle();
-
     return (
       <div className="ActivityCard__container column-1-span-10">
-        {
-          this.props.isExpandedHead &&
 
-          <div
-            className={expandedCSS}
-            ref="expanded"
-            style={expandedStyle}
-            onClick={() => this.props.addCluster(this.props.attachedCluster)}
-            onMouseOver={() => this.props.compressExpanded(this.props.attachedCluster)}
-            onMouseOut={() => this.props.compressExpanded(this.props.attachedCluster, true)}
-          />
-
-        }
         <div className={activityCardCSS} ref="card" style={activityCardStyle}>
 
           <div className={`ActivityCard__badge ActivityCard__badge--${type}`}
@@ -124,32 +132,33 @@ export default class ActivityCard extends Component {
 
             <div
               className={titleCSS}
-              onClick={() => this.setState({ show: !this.state.show, showExtraInfo: !this.state.showExtraInfo })}
-            >
+              onClick={() => this.setState({ show: !state.show, showExtraInfo: !state.showExtraInfo })}>
 
               <div className="ActivityCard__stack">
 
                 <p className="ActivityCard__time">
-                  {this._getTimeOfDay(this.props.edge.node.timestamp)}
+                  {this._getTimeOfDay(props.edge.node.timestamp)}
                 </p>
 
                 <div className="ActivityCard__user" />
               </div>
 
               <h6 className="ActivityCard__commit-message">
-                <b>{`${this.props.edge.node.username} - `}</b>{this.props.edge.node.message}
+                <b>{`${props.edge.node.username} - `}</b>
+                { props.edge.node.message }
               </h6>
 
             </div>
 
-            { this.state.showExtraInfo && (type !== 'note' || this.state.show) &&
-              <ActivityDetails
-                sectionType={this.props.sectionType}
-                edge={this.props.edge}
-                show={this.state.showExtraInfo}
-                key={`${node.id}_activity-details`}
-                node={node}
-              />
+            {
+              (state.showExtraInfo && (type !== 'note' || state.show))
+                && <ActivityDetails
+                    sectionType={props.sectionType}
+                    edge={props.edge}
+                    show={state.showExtraInfo}
+                    key={`${node.id}_activity-details`}
+                    node={node}
+                  />
             }
           </div>
         </div>
