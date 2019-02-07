@@ -104,7 +104,7 @@ export default class RemoteDatasetPanel extends Component {
  importDataset = (owner, datasetName) => {
    const self = this;
    const id = uuidv4();
-   const remote = `https://repo.gigantum.io/${owner}/${datasetName}`;
+   const remote = `https://repo.gtm-dev.cloud/${owner}/${datasetName}`;
 
    UserIdentity.getUserIdentity().then((response) => {
      if (navigator.onLine) {
@@ -125,34 +125,9 @@ export default class RemoteDatasetPanel extends Component {
                } else if (response) {
                  const datasetName = response.importRemoteDataset.newDatasetEdge.node.name;
                  const owner = response.importRemoteDataset.newDatasetEdge.node.owner;
-                 setMultiInfoMessage(id, `Successfully imported remote Project ${datasetName}`, true, false);
+                 setMultiInfoMessage(id, `Successfully imported remote Dataset ${datasetName}`, true, false);
 
-
-                 BuildImageMutation(
-                   datasetName,
-                   owner,
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${datasetName}`, null, true, error);
-                     }
-                   },
-                 );
-
-                 self.props.history.replace(`/projects/${owner}/${datasetName}`);
-               } else {
-                 BuildImageMutation(
-                   datasetName,
-                   localStorage.getItem('username'),
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${datasetName}`, null, true, error);
-                     }
-                   },
-                 );
+                 self.props.history.replace(`/datasets/${owner}/${datasetName}`);
                }
              },
            );
@@ -177,7 +152,7 @@ export default class RemoteDatasetPanel extends Component {
      'RemoteDatasets__row RemoteDatasets__row--text': true,
      blur: this.state.isImporting,
    });
-   console.log('RemoteDatasets__icon', localStorage, localStorage.getItem('username'), edge.node.owner)
+
    const deleteCSS = classNames({
      RemoteDatasets__icon: true,
      'RemoteDatasets__icon--delete': localStorage.getItem('username') === edge.node.owner,

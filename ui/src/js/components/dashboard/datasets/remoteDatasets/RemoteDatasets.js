@@ -113,7 +113,7 @@ class RemoteDatasets extends Component {
 
   render() {
     if (this.props.remoteDatasets && this.props.remoteDatasets.remoteDatasets !== null) {
-      const datasets = this.props.filterDatasets(this.props.remoteDatasets.remoteDatasets.edges, this.props.filterState);
+      const datasets = this.props.filterDatasets(this.props.remoteDatasets, this.props.filterState);
 
       return (
         <div className="Datasets__listing">
