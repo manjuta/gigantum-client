@@ -152,7 +152,7 @@ class DatasetList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         else:
             per_page = 20
 
-        url = f"https://{index_service}/projects?version=2&per_page={per_page}"
+        url = f"https://{index_service}/datasets?per_page={per_page}"
 
         # Add optional arguments
         if kwargs.get("before"):
@@ -169,6 +169,8 @@ class DatasetList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
             if sort not in ['desc', 'asc']:
                 raise ValueError(f"Unsupported sort: {sort}. Use `desc`, `asc`")
             url = f"{url}&sort={sort}"
+
+        print(f'URL FOR QUERYING REMOTE DATASETS: {url}')
 
         # Query SaaS index service for data
         access_token = flask.g.get('access_token', None)
