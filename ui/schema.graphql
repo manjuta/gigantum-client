@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Jan 23 2019 17:43:01 GMT-0500 (Eastern Standard Time)
+# timestamp: Thu Feb 07 2019 11:57:26 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -429,7 +429,7 @@ type DatasetFile implements Node & GitRepository {
   isDir: Boolean
   isFavorite: Boolean
   isLocal: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -460,6 +460,7 @@ type DatasetList implements Node {
   id: ID!
   localById(ids: [String]): [Dataset]
   localDatasets(orderBy: String = "name", sort: String = "asc", before: String, after: String, first: Int, last: Int): DatasetConnection
+  remoteDatasets(orderBy: String = "name", sort: String = "asc", before: String, after: String, first: Int, last: Int): RemoteDatasetConnection
 }
 
 """A type that represents a type of Dataset that can be created"""
@@ -735,7 +736,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of.
+A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -858,7 +859,7 @@ type LabbookFile implements Node & GitRepository {
   key: String!
   isDir: Boolean
   isFavorite: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -1015,7 +1016,7 @@ type LabbookRefEdge {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-
+    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1065,7 +1066,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary.
+Merge from another branch into the current active branch. Force if necessary. 
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -1206,6 +1207,55 @@ input PublishLabbookInput {
 type PublishLabbookPayload {
   jobKey: String
   clientMutationId: String
+}
+
+"""
+A type representing a Dataset stored on a remote server
+
+RemoteDatasets are uniquely identified by both the "owner" and the "name" of the Dataset
+
+NOTE: RemoteDatasets require all fields to be explicitly set as there is no current way to asynchronously retrieve
+      the data
+
+NOTE: Currently all description fields will return empty strings
+"""
+type RemoteDataset implements Node & GitRepository {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  description: String
+  visibility: String
+  creationDateUtc: String
+  modifiedDateUtc: String
+  isLocal: Boolean
+}
+
+"""
+A Connection for paging through remote datasets.
+
+This is a remote call, so should be fetched on its own and only when needed. The user must have a valid
+session for data to be returned.
+
+It is recommended to use large page size (e.g. 50-100). This is due to how the remote server returns all the
+available data at once, so it is more efficient to load a lot of records at a time.
+
+Supported sorting modes:
+    - az: naturally sort
+    - created_on: sort by creation date, newest first
+    - modified_on: sort by modification date, newest first
+"""
+type RemoteDatasetConnection {
+  pageInfo: PageInfo!
+  edges: [RemoteDatasetEdge]!
+}
+
+type RemoteDatasetEdge {
+  """The item at the end of the edge"""
+  node: RemoteDataset
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 """
