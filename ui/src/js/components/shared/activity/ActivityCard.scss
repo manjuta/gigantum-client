@@ -4,7 +4,7 @@
 .ActivityCard {
   transition: all 0.125s;
   margin: 0;
-  padding: 0 10px;
+  padding: 0px 10px;
   color: $romanSilver;
   z-index: index($elements, card);
   position: relative;
@@ -39,36 +39,41 @@
   background-size: 30px 30px;
 }
 
-.ActivityCard__wrapper {
-    position: relative;
 
-    &:before {
-      content: "";
-      display: block;
-      position: absolute;
-      z-index: index($elements, pseudoCard);
-      top: 100%;
-      left: 40px;
-      border: 3px solid $romanSilver;
-      border-width: 0 0 0 4px;
-      width: 1px;
-      height: 30px;
-      transition: height 0.125s;
-    }
+.ActivityCard__cluster-wrapper{
+  position: relative;
+  width: calc(100% - 30px);
+  transition: all 0.25s;
+  margin: 20px 0 20px 30px;
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    z-index: index($elements, pseudoCard);
+    top: 100%;
+    left: 40px;
+    border: 3px solid $romanSilver;
+    border-width: 0 0 0 4px;
+    width: 1px;
+    height: 30px;
+    transition: height 0.25s;
+  }
 }
 
-.Activity__date-tab:before {
- content: "";
- display: block;
- position: absolute;
- z-index: index($elements, pseudoCard);
- top: 100%;
- left: 40px;
- border: 3px solid $romanSilver;
- border-width: 0 0 0 4px;
- width: 1px;
- height: 30px;
- transition: height 0.125s;
+.Activity__date-section--0 {
+  .Activity__date-tab:before {
+     content: "";
+     display: block;
+     position: absolute;
+     z-index: index($elements, pseudoCard);
+     top: 100%;
+     left: 38px;
+     border: 3px solid $romanSilver;
+     border-width: 0 0 0 4px;
+     width: 1px;
+     height: 11px;
+     transition: height 0.125s;
+  }
 }
 
 .ActivityCard__title {
@@ -404,7 +409,7 @@
   width: 60px;
   margin: 15px 20px 0 0;
   text-align: center;
-  align-self: top;
+  align-self: flex-start;
   line-height: 40px;
   color: $jet;
 }
@@ -600,40 +605,18 @@
   margin: 0 !important;
 }
 
-.ActivityCard__start-node{
-  animation: slide-down-fade-in forwards .5s;
-  z-index: index($elements, card);
-  cursor: pointer;
-  position: absolute;
-  height: 100%;
-  width: 20px;
-  left: 6px;
-  top: 62px;
-  height: 100%;
-  border-top: 4px solid $romanSilver;
-  width: 13px;
-  border-left: 4px solid $romanSilver;
-  border-bottom: 4px solid $romanSilver;
-}
+// .ActivityDetail__details:not(.note):before {
+//   content: "";
+//   display: block;
+//   position: absolute;
+//   z-index: 3;
+//   border: 1px dashed #b9babc;
+//   height: calc(100% - 73px);
+//   width: 1px;
+//   top: 41px;
+//   left: 25px;
+// }
 
-.ActivityCard__end-node{
-  height: calc(90%);
-}
-
-.ActivityDetail__details:not(.note):before {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 3;
-  border: 1px dashed #b9babc;
-  height: calc(100% - 73px);
-  width: 1px;
-  top: 41px;
-  left: 25px;
-}
-.ActivityCard__wrapper:last-child:before{
-  height: 80px;
-}
 
 .ActivityDetail__details-title.ActivityDetail__details-title--closed:before {
   position: absolute;

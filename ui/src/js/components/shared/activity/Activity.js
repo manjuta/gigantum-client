@@ -1,23 +1,22 @@
 // vendor
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
-// store
 import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
 import store from 'JS/redux/store';
-// Components
-import ActivityCard from './ActivityCard';
-import Loader from 'Components/common/Loader';
-import UserNote from './UserNote';
-import PaginationLoader from './loaders/PaginationLoader';
-import CreateBranch from 'Components/shared/header/branches/CreateBranch';
-import NewActivity from './NewActivity';
-import ToolTip from 'Components/common/ToolTip';
-import ErrorBoundary from 'Components/common/ErrorBoundary';
 // config
 import config from 'JS/config';
+// Components
+import Loader from 'Components/common/Loader';
+import CreateBranch from 'Components/shared/header/branches/CreateBranch';
+import ErrorBoundary from 'Components/common/ErrorBoundary';
+import PaginationLoader from './loaders/PaginationLoader';
+import ClusterCardWrapper from './wrappers/ClusterCardWrapper';
+import CardWrapper from './wrappers/CardWrapper';
+import UserNoteWrapper from './wrappers/UserNoteWrapper';
+// utils
+import NewActivity from './NewActivity';
 // assets
 import './Activity.scss';
-
 
 // local variables
 let pagination = false;
@@ -27,10 +26,10 @@ let isMounted = false;
 
 export const getGlobals = () => ({ counter, pagination });
 
-export default class Activity extends Component {
+class Activity extends Component {
   constructor(props) {
     super(props);
-    this.sectionType = this.props[this.props.sectionType];
+    const section = props[props.sectionType];
   	this.state = {
       modalVisible: false,
       isPaginating: false,
@@ -44,7 +43,7 @@ export default class Activity extends Component {
       expandedClusterObject: new Map(),
       newActivityForcePaused: false,
       refetchForcePaused: false,
-      activityRecords: this._transformActivity(this.sectionType.activityRecords),
+      activityRecords: section.activityRecords ? [] : this._transformActivity(section.activityRecords),
       stickyDate: false,
       compressedElements: new Set(),
     };
@@ -60,24 +59,34 @@ export default class Activity extends Component {
     this._scrollTo = this._scrollTo.bind(this);
     this._stopRefetch = this._stopRefetch.bind(this);
     this._toggleCreateModal = this._toggleCreateModal.bind(this);
+    this._toggleRollbackMenu = this._toggleRollbackMenu.bind(this);
     this._getNewActivities = this._getNewActivities.bind(this);
     this._changeFullscreenState = this._changeFullscreenState.bind(this);
     this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
     this._transformActivity = this._transformActivity.bind(this);
     this._countUnexpandedRecords = this._countUnexpandedRecords.bind(this);
     this._addCluster = this._addCluster.bind(this);
+    this._expandCluster = this._expandCluster.bind(this);
     this._compressExpanded = this._compressExpanded.bind(this);
     this._setStickyDate = this._setStickyDate.bind(this);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    this.sectionType = nextProps[nextProps.sectionType];
-    const activityRecords = nextProps[nextProps.sectionType].activityRecords;
-    if (activityRecords && JSON.stringify(this._transformActivity(activityRecords)) !== JSON.stringify(this.state.activityRecords)) {
-      const prevCommit = this.sectionType && this.sectionType.activityRecords.edges && this.sectionType.activityRecords.edges[0].node;
-      const newcommit = nextProps[nextProps.sectionType] && nextProps[nextProps.sectionType].activityRecords.edges && nextProps[nextProps.sectionType].activityRecords.edges[0] && nextProps[nextProps.sectionType].activityRecords.edges[0].node;
+    const section = nextProps[nextProps.sectionType],
+          activityRecords = nextProps[nextProps.sectionType].activityRecords,
+          {
+            state,
+            props,
+          } = this,
+          currentActivityRecords = JSON.stringify(this._transformActivity(activityRecords)),
+          previousActivityRecords = JSON.stringify(state.activityRecords);
 
-      if (prevCommit && prevCommit !== newcommit) {
+    if (activityRecords && (currentActivityRecords !== previousActivityRecords)) {
+      const previousSection = props[props.sectionType];
+      const prevCommit = previousSection && previousSection.activityRecords.edges && section.activityRecords.edges[0].node && false;
+      const newcommit = section && section.activityRecords.edges && section.activityRecords.edges[0] && section.activityRecords.edges[0].node;
+
+      if (prevCommit && (prevCommit !== newcommit)) {
         this.setState({ expandedClusterObject: new Map() }, () => this.setState({ activityRecords: this._transformActivity(activityRecords) }));
       } else {
         this.setState({ activityRecords: this._transformActivity(activityRecords) });
@@ -96,8 +105,9 @@ export default class Activity extends Component {
   */
   componentDidMount() {
     isMounted = true;
-
-    const activityRecords = this.sectionType.activityRecords;
+    const { props } = this,
+          section = props[props.sectionType],
+          activityRecords = section.activityRecords;
 
     window.addEventListener('scroll', this._handleScroll);
     window.addEventListener('visibilitychange', this._handleVisibilityChange);
@@ -123,6 +133,7 @@ export default class Activity extends Component {
     window.removeEventListener('visibilitychange', this._handleVisibilityChange);
     window.removeEventListener('scroll', this._handleScroll);
   }
+
   /**
    * @param {}
    * scroll to top of page
@@ -134,11 +145,12 @@ export default class Activity extends Component {
    */
   _scrollTo(evt) {
     if (document.documentElement.scrollTop === 0) {
-      const { relay } = this.props;
+      const { props } = this,
+            { relay } = props,
+            store = relay.environment.getStore(),
+            section = props[props.sectionType];
 
-      const store = relay.environment.getStore();
-
-      this.sectionType.activityRecords.edges.forEach((edge) => {
+      section.activityRecords.edges.forEach((edge) => {
         store._recordSource.delete(edge.node.id);
       });
 
@@ -149,20 +161,23 @@ export default class Activity extends Component {
       window.removeEventListener('scroll', this._scrollTo);
     }
   }
+
   /**
    * @param {}
    * handles refiring new activity query if visibility changes back to visible
    * @return {}
    */
   _handleVisibilityChange() {
-    if (this.state.newActivityForcePaused) {
+    const { state } = this;
+    if (state.newActivityForcePaused) {
       this._stopRefetch();
       this.setState({ newActivityForcePaused: false });
-    } else if (this.state.refetchForcePaused) {
+    } else if (state.refetchForcePaused) {
       this._refetch();
       this.setState({ refetchForcePaused: false });
     }
   }
+
   /**
    * @param {}
    * sets scroll listener
@@ -177,13 +192,15 @@ export default class Activity extends Component {
       behavior: 'smooth',
     });
   }
+
   /**
    * @param {}
    * restarts refetch
    * @return {}
    */
   _startRefetch() {
-    if (this.state.newActivityPolling) {
+    const { state } = this;
+    if (state.newActivityPolling) {
       this.setState({
         refetchEnabled: true,
         newActivityPolling: false,
@@ -193,15 +210,17 @@ export default class Activity extends Component {
       this._refetch();
     }
   }
+
   /**
    * @param {}
    * stops refetch from firing
    * @return {}
    */
   _stopRefetch() {
-    const self = this;
+    const self = this,
+          { state } = this;
 
-    if (!this.state.newActivityPolling) {
+    if (!state.newActivityPolling) {
       this.setState({
         refetchEnabled: false,
         newActivityPolling: true,
@@ -217,9 +236,9 @@ export default class Activity extends Component {
 
           if (firstRecordCommitId === newRecordCommitId) {
             self.newActivityTimeout = setTimeout(() => {
-              if (isMounted && document.visibilityState === 'visible' && !this.state.refetchEnabled) {
+              if (isMounted && (document.visibilityState === 'visible') && !state.refetchEnabled) {
                 getNewActivity();
-              } else if (isMounted && document.visibilityState !== 'visible' && !this.state.refetchEnabled) {
+              } else if (isMounted && (document.visibilityState !== 'visible') && !state.refetchEnabled) {
                 this.setState({ newActivityForcePaused: true, newActivityPolling: false });
               }
             }, 3000);
@@ -239,18 +258,20 @@ export default class Activity extends Component {
   * @return {}
   */
   _refetch() {
-    const self = this;
-    const relay = this.props.relay;
-    const activityRecords = this.sectionType.activityRecords;
+    const self = this,
+          { props } = this,
+          { relay } = props,
+          section = props[props.sectionType],
+          activityRecords = section.activityRecords;
 
     const cursor = activityRecords.edges.node ? activityRecords.edges[activityRecords.edges.length - 1].node.cursor : null;
     relay.refetchConnection(
       counter,
       (response, error) => {
         self.refetchTimeout = setTimeout(() => {
-          if (self.state.refetchEnabled && isMounted && document.visibilityState === 'visible') {
+          if (self.state.refetchEnabled && isMounted && (document.visibilityState === 'visible')) {
             self._refetch();
-          } else if (self.state.refetchEnabled && isMounted && document.visibilityState !== 'visible') {
+          } else if (self.state.refetchEnabled && isMounted && (document.visibilityState !== 'visible')) {
             self.setState({ refetchForcePaused: true });
           }
         }, 5000);
@@ -260,12 +281,16 @@ export default class Activity extends Component {
       },
     );
   }
+
   /**
   *  @param {}
   *  pagination container loads more items
   */
   _loadMore() {
-    const self = this;
+    const self = this,
+          { props } = this,
+          section = props[props.sectionType],
+          activityRecords = section.activityRecords;
 
     pagination = true;
 
@@ -273,14 +298,14 @@ export default class Activity extends Component {
       isPaginating: true,
     });
 
-    this.props.relay.loadMore(
+    props.relay.loadMore(
       5, // Fetch the next 5 feed items
       (error) => {
         if (error) {
           console.error(error);
         }
 
-        if ((this.sectionType.activityRecords.pageInfo.hasNextPage) && (this._countUnexpandedRecords() < 7) && (this._countUnexpandedRecords() > 2)) {
+        if ((activityRecords.pageInfo.hasNextPage) && (this._countUnexpandedRecords() < 7) && (this._countUnexpandedRecords() > 2)) {
           self._loadMore();
         } else {
           this.setState({
@@ -291,7 +316,7 @@ export default class Activity extends Component {
         name: 'labbook',
       },
     );
-    if (this.sectionType.activityRecords.pageInfo.hasNextPage) {
+    if (activityRecords.pageInfo.hasNextPage) {
       counter += 5;
     }
   }
@@ -301,9 +326,11 @@ export default class Activity extends Component {
   *  counts visible non clustered activity records
   */
   _countUnexpandedRecords() {
-    let records = this.sectionType.activityRecords.edges,
-      hiddenCount = 0,
-      recordCount = 0;
+    const { props } = this,
+          section = props[props.sectionType];
+    let records = section.activityRecords.edges,
+        hiddenCount = 0,
+        recordCount = 0;
 
     const visibleRecords = records.filter((record) => {
       if (record) {
@@ -324,6 +351,7 @@ export default class Activity extends Component {
 
     return visibleRecords.length + recordCount;
   }
+
   /**
     *  @param {}
     *   determines value of stickyDate by checking vertical offset and assigning it to the state
@@ -333,7 +361,8 @@ export default class Activity extends Component {
     let isDemo = window.location.hostname === config.demoHostName,
       upperBound = isDemo ? 170 : 120,
       lowerBound = isDemo ? 130 : 80,
-      stickyDate = null;
+      stickyDate = null,
+      { state } = this;
 
     this.offsetDistance = window.pageYOffset;
 
@@ -352,24 +381,26 @@ export default class Activity extends Component {
       }
     });
 
-    if (stickyDate !== this.state.stickyDate) {
+    if (stickyDate !== state.stickyDate) {
       this.setState({ stickyDate });
     }
   }
+
   /**
   *  @param {evt}
   *   handles scolls and passes off loading to pagination container
   *
   */
+
   _handleScroll(evt) {
     this._setStickyDate();
-
-    let { isPaginating } = this.state,
-      activityRecords = this.sectionType.activityRecords,
-      root = document.getElementById('root'),
-      distanceY = window.innerHeight + document.documentElement.scrollTop + 1000,
-      expandOn = root.scrollHeight;
-
+    const { props, state } = this,
+       { isPaginating } = state,
+       section = props[props.sectionType],
+       activityRecords = section.activityRecords,
+       root = document.getElementById('root'),
+       distanceY = window.innerHeight + document.documentElement.scrollTop + 1000,
+       expandOn = root.scrollHeight;
 
     if ((distanceY > expandOn) && !isPaginating && activityRecords.pageInfo.hasNextPage) {
       this._loadMore(evt);
@@ -381,58 +412,92 @@ export default class Activity extends Component {
       this._startRefetch();
     }
   }
+
   /**
   *   @param {array}
   *   loops through activityRecords array and sorts into days
   *   @return {Object}
   */
   _transformActivity(activityRecords) {
+    const { state } = this;
     let activityTime = {},
-      count = 0,
-      previousTimeHash = null;
-
+        count = 0,
+        previousTimeHash = null,
+        clusterIndex = 0;
     activityRecords.edges.forEach((edge, index) => {
       if (edge && edge.node) {
-        const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date();
+         const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date(),
+              year = date.getFullYear(),
+              month = date.getMonth(),
+              day = date.getDate(),
+              timeHash = `${year}_${month}_${day}`;
 
-        const year = date.getFullYear(),
-          month = date.getMonth(),
-          day = date.getDate();
-
-        const timeHash = `${year}_${month}_${day}`;
-        count = edge.node.show || (previousTimeHash && timeHash !== previousTimeHash) ? 0 : count + 1;
+        count = (edge.node.show || (previousTimeHash && (timeHash !== previousTimeHash))) ? 0 : count + 1;
+        if (count === 0) {
+          clusterIndex = 0;
+        }
         previousTimeHash = timeHash;
 
-        const isExpandedHead = this.state && this.state.expandedClusterObject.has(index) && !this.state.expandedClusterObject.has(index - 1);
-        const isExpandedEnd = this.state && this.state.expandedClusterObject.has(index) && !this.state.expandedClusterObject.has(index + 1);
-        const isExpandedNode = this.state && this.state.expandedClusterObject.has(index);
-        const attachedCluster = this.state && this.state.expandedClusterObject.has(index) && this.state.expandedClusterObject.get(index);
-
+        const isExpandedHead = state && state.expandedClusterObject.has(index) && !state.expandedClusterObject.has(index - 1);
+        const isExpandedEnd = state && state.expandedClusterObject.has(index) && !state.expandedClusterObject.has(index + 1);
+        const isExpandedNode = state && state.expandedClusterObject.has(index);
+        const attachedCluster = state && state.expandedClusterObject.has(index) && state.expandedClusterObject.get(index);
         const newActivityObject = {
-          edge, date, collapsed: (count > 2 && ((this.state && !this.state.expandedClusterObject.has(index)) || (!this.state))), flatIndex: index, isExpandedHead, isExpandedEnd, isExpandedNode, attachedCluster,
+          edge,
+          date,
+          collapsed: ((count > 2) && ((this.state && !state.expandedClusterObject.has(index)) || (!state))),
+          flatIndex: index,
+          isExpandedHead,
+          isExpandedEnd,
+          isExpandedNode,
+          attachedCluster,
         };
 
-        if (count > 2 && ((this.state && !this.state.expandedClusterObject.has(index)) || (!this.state))) {
-          activityTime[timeHash][activityTime[timeHash].length - 1].collapsed = true;
-          activityTime[timeHash][activityTime[timeHash].length - 2].collapsed = true;
-        }
+        if (count > 2 && ((this.state && !state.expandedClusterObject.has(index)) || (!state))) {
+          if (count === 3) {
+            let activityOne = activityTime[timeHash][activityTime[timeHash].length - 1];
+            activityTime[timeHash][activityTime[timeHash].length - 1].collapsed = true;
 
-        activityTime[timeHash] ? activityTime[timeHash].push(newActivityObject) : activityTime[timeHash] = [newActivityObject];
+           let activityTwo = activityTime[timeHash][activityTime[timeHash].length - 2];
+            activityTime[timeHash][activityTime[timeHash].length - 2].collapsed = true;
+
+            let clusterObject = {
+              cluster: [activityOne, activityTwo, newActivityObject],
+              attachedCluster,
+              expanded: false,
+              id: activityOne.edge.node.id,
+            };
+
+            activityTime[timeHash].splice(activityTime[timeHash].length - 1, 1);
+            activityTime[timeHash].splice(activityTime[timeHash].length - 2, 1);
+
+            activityTime[timeHash] ? activityTime[timeHash].push(clusterObject) : activityTime[timeHash] = [clusterObject];
+
+            clusterIndex = activityTime[timeHash].length - 1;
+          } else {
+            activityTime[timeHash][clusterIndex].cluster.push(newActivityObject);
+          }
+        } else {
+          clusterIndex = 0;
+          activityTime[timeHash] ? activityTime[timeHash].push(newActivityObject) : activityTime[timeHash] = [newActivityObject];
+        }
       }
     });
-
     return activityTime;
   }
+
   /**
   *   @param {}
   *   toggles activity visibility
   *   @return {}
   */
   _toggleActivity() {
+    const { modalVisible } = this.state;
     this.setState({
-      modalVisible: !this.state.modalVisible,
+      modalVisible: !modalVisible,
     });
   }
+
   /**
   *   @param {}
   *   hides add activity
@@ -443,6 +508,7 @@ export default class Activity extends Component {
       modalVisible: false,
     });
   }
+
   /**
   *   @param {}
   *   hides add activity
@@ -450,9 +516,15 @@ export default class Activity extends Component {
   */
   _toggleRollbackMenu(node) {
     const { status } = store.getState().containerStatus;
+    const { props } = this;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status);
     if (canEditEnvironment) {
-      this.setState({ selectedNode: node, createBranchVisible: true });
+      const selectedNode = {
+         activityNode: node,
+         activeBranch: props.activeBranch,
+         description: props.description,
+      };
+      this.setState({ selectedNode, createBranchVisible: true });
     } else {
       setContainerMenuWarningMessage('Stop Project before editing the environment. \n Be sure to save your changes.');
     }
@@ -463,9 +535,9 @@ export default class Activity extends Component {
   *   toggle create branch modal visibility
   *   @return {}
   */
-
   _toggleCreateModal() {
-    this.setState({ createBranchVisible: !this.state.createBranchVisible });
+    const { createBranchVisible } = this.state;
+    this.setState({ createBranchVisible: !createBranchVisible });
   }
 
   /**
@@ -488,11 +560,13 @@ export default class Activity extends Component {
   *   Changes editorFullscreen in state to true if isFullscreen is true, else it swaps existing state
   *   @return {}
   */
+
   _changeFullscreenState(isFullscreen) {
     if (isFullscreen) {
       this.setState({ editorFullscreen: isFullscreen });
     } else {
-      this.setState({ editorFullscreen: !this.state.editorFullscreen });
+      const { editorFullscreen } = this.state;
+      this.setState({ editorFullscreen: !editorFullscreen });
     }
   }
 
@@ -501,16 +575,12 @@ export default class Activity extends Component {
   *   modifies expandedClusterObject from state
   *   @return {}
   */
-  _deleteCluster(clusterElements) {
-    const newExpandedClusterObject = new Map(this.state.expandedClusterObject);
-    if (newExpandedClusterObject !== {}) {
-      clusterElements.forEach((val) => {
-        newExpandedClusterObject.set(val, clusterElements);
-      });
-    }
-    this.setState({ expandedClusterObject: newExpandedClusterObject }, () => {
-      this.setState({ activityRecords: this._transformActivity(this.sectionType.activityRecords) });
-    });
+  _expandCluster(indexItem) {
+    const { props, state } = this;
+    let activityRecords = state.activityRecords;
+    activityRecords[indexItem.timestamp][indexItem.j].cluster = true;
+
+    this.setState({ activityRecords });
   }
 
   /**
@@ -519,20 +589,32 @@ export default class Activity extends Component {
     *   @return {}
   */
   _addCluster(clusterElements) {
-    const newExpandedClusterObject = new Map(this.state.expandedClusterObject);
+    const { props, state } = this,
+          section = props[props.sectionType],
+          newExpandedClusterObject = new Map(state.expandedClusterObject);
+
     if (newExpandedClusterObject !== {}) {
       clusterElements.forEach((val) => {
         newExpandedClusterObject.delete(val);
       });
     }
+
     this.setState({ expandedClusterObject: newExpandedClusterObject }, () => {
-      this.setState({ activityRecords: this._transformActivity(this.sectionType.activityRecords) });
+      this.setState({ activityRecords: this._transformActivity(section.activityRecords) });
       this._compressExpanded(clusterElements, true);
     });
   }
 
+  /**
+  *   @param {array} clusterElements
+  *   @param {boolean} remove
+  *   adds or removes elements to cluster on expand and collapse
+  *   @return {}
+  */
   _compressExpanded(clusterElements, remove) {
-    const newCompressedElements = new Set(this.state.compressedElements);
+    const { compressedElements } = this.state,
+          newCompressedElements = new Set(compressedElements);
+
     if (remove) {
       clusterElements.forEach((val) => {
         newCompressedElements.delete(val);
@@ -551,8 +633,9 @@ export default class Activity extends Component {
   *   @return {}
   */
   _toggleSubmenu(evt) {
-    const submenu = evt.target.parentElement;
-    const wrapper = submenu && submenu.parentElement;
+    const submenu = evt.target.parentElement,
+          wrapper = submenu && submenu.parentElement;
+
     if (wrapper.previousSibling) {
       wrapper.previousSibling.className.indexOf('ActivityExtended') !== -1 ? wrapper.previousSibling.classList.remove('ActivityExtended') : wrapper.previousSibling.classList.add('ActivityExtended');
     } else {
@@ -561,261 +644,75 @@ export default class Activity extends Component {
     submenu.className.indexOf('open-menu') !== -1 ? submenu.classList.remove('open-menu') : submenu.classList.add('open-menu');
   }
 
-  /**
-  *   @param {object, array, integer, integer, integer} obj, clusterElements, i, j, k
-  *   resets clusterElements
-  *   returns visible activity cards and their submenus
-  *   @return {jsx}
-  */
-
-  _visibleCardRenderer(obj, clusterElements, i, j, k) {
-    const isLastRecordObj = i === Object.keys(this.state.activityRecords).length - 1;
-    const isLastRecordNode = j === this.state.activityRecords[k].length - 1;
-    const isLastPage = !this.sectionType.activityRecords.pageInfo.hasNextPage;
-    const rollbackableDetails = obj.edge.node.detailObjects.filter(detailObjs => detailObjs.type !== 'RESULT' && detailObjs.type !== 'CODE_EXECUTED');
-    const isCompressed = this.state.compressedElements.has(obj.flatIndex);
-    const activtyBarHeight = obj.attachedCluster ? ((obj.attachedCluster.length - 1) * 7.5) + 30 : 0;
-    return (
-      <Fragment key={obj.edge.node.id}>
-        <div className="ActivityCard__wrapper">
-          { ((i !== 0) || (j !== 0)) &&
-            <div className="Activity__submenu-container">
-              {
-              (!(isLastRecordObj && isLastRecordNode && isLastPage) && this.props.isMainWorkspace && !!rollbackableDetails.length) && this.state.compressedElements.size === 0 &&
-              <Fragment>
-                <ToolTip section="activitySubmenu" />
-                {
-                  this.props.sectionType === 'labbook' &&
-                  <div
-                    className="Activity__submenu-circle"
-                    onClick={evt => this._toggleSubmenu(evt)}
-                  />
-                }
-                <div className="Activity__submenu-subcontainer">
-                  <div
-                    className="Activity__rollback"
-                    onMouseOver={() => this.setState({ hoveredRollback: obj.flatIndex })}
-                    onMouseOut={() => this.setState({ hoveredRollback: null })}
-                    onClick={() => this._toggleRollbackMenu(obj.edge.node)}
-                  >
-                    <button
-                      className="Activity__rollback-button"
-                    />
-                    <h5
-                      className="Activity__rollback-text"
-                    >
-                      Rollback
-                    </h5>
-                  </div>
-                </div>
-              </Fragment>
-            }
-            </div>
-          }
-          {j === 0 && isCompressed &&
-            <div className="Activity__submenu--flat">&nbsp;</div>
-          }
-          {
-            obj.isExpandedHead && isCompressed &&
-              <div className="Activity__compressed-bar--top" style={{ height: `${activtyBarHeight}px` }} />
-          }
-          {
-            obj.isExpandedEnd && isCompressed &&
-              <div className="Activity__compressed-bar--bottom" style={{ height: `${activtyBarHeight}px` }} />
-          }
-          <ErrorBoundary type="activityCardError" key={`activityCard${obj.edge.node.id}`}>
-            <ActivityCard
-              sectionType={this.props.sectionType}
-              isFirstCard={j === 0}
-              addCluster={this._addCluster}
-              compressExpanded={this._compressExpanded}
-              isCompressed={isCompressed}
-              isExpandedHead={obj.isExpandedHead}
-              isExpandedEnd={obj.isExpandedEnd}
-              isExpandedNode={obj.isExpandedNode}
-              attachedCluster={obj.attachedCluster}
-              collapsed={obj.collapsed}
-              clusterObject={this.state.clusterObject}
-              position={obj.flatIndex}
-              hoveredRollback={this.state.hoveredRollback}
-              key={`${obj.edge.node.id}_activity-card`}
-              edge={obj.edge}
-            />
-          </ErrorBoundary>
-        </div>
-        {(j === this.state.activityRecords[k].length - 1) && isCompressed &&
-          <div className="Activity__submenu--flat">&nbsp;</div>
-        }
-      </Fragment>
-    );
-  }
-
-  /**
-  *   @param {object, array, integer, integer, integer} obj, clusterElements, i, j, k
-  *   appends to clusterElements
-  *   creates a cluster card that replaces multiple repeating minor activities
-  *   @return {jsx}
-  */
-  _cardClusterRenderer(obj, clusterElements, i, j, k) {
-    const shouldBeFaded = this.state.hoveredRollback > obj.flatIndex;
-    const clusterCSS = classNames({
-      'ActivityCard--cluster': true,
-      'column-1-span-10': true,
-      faded: shouldBeFaded,
-    });
-    clusterElements.push(obj.flatIndex);
-    const clusterRef = clusterElements.slice();
-    if (this.state.activityRecords[k][j + 1] && this.state.activityRecords[k][j + 1].collapsed) {
-      return undefined;
-    }
-    return (
-      <div className="ActivityCard__wrapper" key={obj.flatIndex}>
-        {
-        (clusterElements[0] !== 0) &&
-        <div className="Activity__submenu-container" />
-      }
-        <ToolTip section="activityCluster" />
-        <div className={clusterCSS} ref={`cluster--${obj.flatindex}`} onClick={() => this._deleteCluster(clusterRef, i)}>
-          <div className="ActivityCard__cluster--layer1 box-shadow">
-            {clusterElements.length} Minor Activities
-          </div>
-          <div className="ActivityCard__cluster--layer2 box-shadow" />
-          <div className="ActivityCard__cluster--layer3 box-shadow" />
-        </div>
-      </div>
-    );
-  }
-
-  /**
-  *   @param {} obj
-  *   renders usernote and it's menu
-  *   @return {jsx}
-  */
-
-  _renderUserNote() {
-    const userActivityContainerCSS = classNames({
-      UserActivity__container: true,
-      fullscreen: this.state.editorFullscreen,
-    });
-
-    return (
-      <div className={userActivityContainerCSS}>
-        <div className="Activity__user-note">
-          <ToolTip section="userNote" />
-          <div
-            className="Activity__user-note-menu-icon"
-            onClick={this.state.modalVisible ? (evt) => {
-            this._toggleActivity();
-            this._toggleSubmenu(evt);
-          } : evt => this._toggleSubmenu(evt)}
-          />
-          <div className="Activity__user-note-menu">
-            <div
-              className="Activity__add-note"
-              onClick={() => this._toggleActivity()}
-            >
-              <button
-                className={this.state.modalVisible ? 'Activity__hide-note-button' : 'Activity__add-note-button'}
-              />
-              <h5>Add Note</h5>
-            </div>
-            {
-              this.props.sectionType !== 'dataset' &&
-              <div
-                className="Activity__add-branch"
-                onClick={() => this._createBranch()}
-              >
-                <button
-                  className="Activity__add-branch-button"
-                />
-                <h5>Add Branch</h5>
-              </div>
-            }
-          </div>
-        </div>
-        <div className={this.state.modalVisible ? 'Activity__add ActivityCard' : 'hidden'}>
-          <UserNote
-            key="UserNote"
-            labbookId={this.sectionType.id}
-            hideLabbookModal={this._hideAddActivity}
-            changeFullScreenState={this._changeFullscreenState}
-            {...this.props}
-          />
-        </div>
-      </div>
-    );
-  }
-
   render() {
-    const activityCSS = classNames({
-      Activity: true,
-      fullscreen: this.state.editorFullscreen,
-    });
-    const newActivityCSS = classNames({
-      'Activity__new-record box-shadow': true,
-      'is-demo': window.location.hostname === config.demoHostName,
-    });
-
-    if (this.sectionType) {
-      const recordDates = Object.keys(this.state.activityRecords);
-      const stickyDateCSS = classNames({
-        'Activity__date-tab': true,
-        fixed: this.state.stickyDate,
-        'is-demo': window.location.hostname === config.demoHostName,
-      });
+    const { props, state } = this,
+          section = props[props.sectionType],
+          activityCSS = classNames({
+            Activity: true,
+            fullscreen: state.editorFullscreen,
+          }),
+          newActivityCSS = classNames({
+            'Activity__new-record box-shadow': true,
+            'is-demo': window.location.hostname === config.demoHostName,
+          });
+    if (section) {
+      const recordDates = Object.keys(state.activityRecords),
+            stickyDateCSS = classNames({
+              'Activity__date-tab': true,
+              fixed: state.stickyDate,
+              'is-demo': window.location.hostname === config.demoHostName,
+            });
       return (
-        <div key={this.sectionType} className={activityCSS}>
+        <div
+          key={props.sectionType}
+          className={activityCSS}>
           {
-            (!this.state.refetchEnabled && this.state.newActivityAvailable) &&
-            <div
-              className="Activity__new-record-wrapper column-1-span-10"
-            >
+            (!state.refetchEnabled && state.newActivityAvailable)
+            && <div className="Activity__new-record-wrapper column-1-span-10">
               <div
                 onClick={() => this._getNewActivities()}
-                className={newActivityCSS}
-              >
+                className={newActivityCSS}>
                 New Activity
               </div>
-           §</div>
+           </div>
           }
           {
-            this.state.stickyDate &&
-            <div className={stickyDateCSS}>
-              <div className="Activity__date-day">{this.state.stickyDate.split('_')[2]}</div>
+            state.stickyDate
+            && <div className={stickyDateCSS}>
+              <div className="Activity__date-day">{state.stickyDate.split('_')[2]}</div>
               <div className="Activity__date-sub">
 
                 <div className="Activity__date-month">
                   {
-                    config.months[parseInt(this.state.stickyDate.split('_')[1], 10)]
+                    config.months[parseInt(state.stickyDate.split('_')[1], 10)]
                   }
                 </div>
 
-                <div className="Activity__date-year">{this.state.stickyDate.split('_')[0]}</div>
+                <div className="Activity__date-year">{state.stickyDate.split('_')[0]}</div>
               </div>
             </div>
 
           }
 
           <div
-            key={`${this.sectionType}_labbooks__container`}
-            className="Activity__inner-container flex flex--row flex--wrap justify--flex-start"
-          >
+            key={`${props.sectionType}_labbooks__container`}
+            className="Activity__inner-container flex flex--row flex--wrap justify--flex-start">
             <div
-              key={`${this.sectionType}_labbooks__labook-id-container`}
-              className="Activity__sizer flex-1-0-auto"
-            >
-
-              <CreateBranch
-                ref="createBranch"
-                selected={this.state.selectedNode}
-                activeBranch={this.props.activeBranch}
-                modalVisible={this.state.createBranchVisible}
-                toggleModal={this._toggleCreateModal}
-                setBuildingState={this.props.setBuildingState}
-              />
+              key={`${props.sectionType}_labbooks__labook-id-container`}
+              className="Activity__sizer flex-1-0-auto">
+              { state.createBranchVisible
+                && <CreateBranch
+                  ref="createBranch"
+                  selected={state.selectedNode}
+                  activeBranch={props.activeBranch}
+                  modalVisible={state.createBranchVisible}
+                  toggleModal={this._toggleCreateModal}
+                  setBuildingState={props.setBuildingState}
+                />
+              }
 
               {
-                recordDates.map((k, i) => {
+                recordDates.map((timestamp, i) => {
                   let clusterElements = [];
                   const ActivityDateCSS = classNames({
                     'Activity__date-tab': true,
@@ -826,25 +723,74 @@ export default class Activity extends Component {
                     'Activity__card-container--last': recordDates.length === i + 1,
                   });
                   return (
-                    <div key={k}>
-                      <div ref={evt => this.dates[i] = { e: evt, time: k }} className={ActivityDateCSS}>
-                        <div className="Activity__date-day">{k.split('_')[2]}</div>
+                    <div className={`Activity__date-section Activity__date-section--${i}`} key={timestamp}>
+                      <div
+                        ref={evt => this.dates[i] = { e: evt, time: timestamp }} className={ActivityDateCSS}>
+
+                        <div className="Activity__date-day">
+                          { timestamp.split('_')[2] }
+                        </div>
+
                         <div className="Activity__date-sub">
-                          <div className="Activity__date-month">{ config.months[parseInt(k.split('_')[1], 10)] }</div>
-                          <div className="Activity__date-year">{k.split('_')[0]}</div>
+
+                          <div className="Activity__date-month">
+                            { config.months[parseInt(timestamp.split('_')[1], 10)] }
+                          </div>
+
+                          <div className="Activity__date-year">
+                            {timestamp.split('_')[0]}
+                          </div>
                         </div>
                       </div>
                       {
-                        (i === 0) && this._renderUserNote()
+                        (i === 0)
+                        && <UserNoteWrapper
+                            modalVisible={state.modalVisible}
+                            hideLabbookModal={this._hideAddActivity}
+                            changeFullScreenState={this._changeFullscreenState}
+                            labbookId={section.id}
+                            editorFullscreen={state.editorFullscreen}
+                            {...props}
+                           />
                       }
-                      <div key={`${k}__card`} className={ActivityContainerCSS}>
+                      <div
+                        key={`${timestamp}__card`}
+                        className={ActivityContainerCSS}>
                         {
-                          this.state.activityRecords[k].map((obj, j) => {
-                            if (!obj.collapsed) {
-                              clusterElements = [];
-                              return this._visibleCardRenderer(obj, clusterElements, i, j, k);
+                          state.activityRecords[timestamp].map((record, timestampIndex) => {
+                            if (record.cluster) {
+                              return (
+                                <ClusterCardWrapper
+                                    sectionType={props.sectionType}
+                                    isMainWorkspace={props.isMainWorkspace}
+                                    section={section}
+                                    activityRecords={state.activityRecords}
+                                    key={`ClusterCardWrapper_${timestamp}_${record.id}`}
+                                    record={record}
+                                    hoveredRollback={state.hoveredRollback}
+                                    indexItem={{ i, timestampIndex, timestamp }}
+                                    toggleSubmenu={this._toggleSubmenu}
+                                    toggleRollbackMenu={this._toggleRollbackMenu}
+                                 />);
                             }
-                              return this._cardClusterRenderer(obj, clusterElements, i, j, k);
+
+                            return (<CardWrapper
+                                section={section}
+                                isMainWorkspace={props.isMainWorkspace}
+                                activityRecords={state.activityRecords}
+                                clusterElements={clusterElements}
+                                sectionType={props.sectionType}
+                                record={record}
+                                compressExpanded={this._compressExpanded}
+                                clusterObject={state.clusterObject}
+                                compressedElements={state.compressedElements}
+                                hoveredRollback={state.hoveredRollback}
+                                indexItem={{ i, timestampIndex, timestamp }}
+                                addCluster={this._addCluster}
+                                key={`VisibileCardWrapper_${record.flatIndex}`}
+                                toggleSubmenu={this._toggleSubmenu}
+                                toggleRollbackMenu={this._toggleRollbackMenu}
+                              />);
                           })
                         }
                       </div>
@@ -856,7 +802,7 @@ export default class Activity extends Component {
                   <PaginationLoader
                     key={`Actvity_paginationLoader${index}`}
                     index={index}
-                    isLoadingMore={this.state.isPaginating}
+                    isLoadingMore={state.isPaginating}
                   />
                   ))
               }
@@ -870,3 +816,5 @@ export default class Activity extends Component {
     );
   }
 }
+
+export default Activity;

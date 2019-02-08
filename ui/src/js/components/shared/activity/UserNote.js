@@ -1,19 +1,15 @@
 // vendor
 import React, { Component } from 'react';
 import Loadable from 'react-loadable';
+import { WithContext as ReactTags } from 'react-tag-input';
 // mutations
 import CreateUserNoteMutation from 'Mutations/CreateUserNoteMutation';
 // store
 import store from 'JS/redux/store';
+// assets
+import './UserNote.scss';
 
 let simple;
-
-const Loading = () => <div />;
-
-const ReactTags = Loadable({
-  loader: () => import('react-tag-input').then(({ WithContext }) => WithContext),
-  loading: Loading,
-});
 
 export default class UserNote extends Component {
   constructor(props) {
@@ -30,11 +26,14 @@ export default class UserNote extends Component {
     this._handleAddition = this._handleAddition.bind(this);
     this._handleDrag = this._handleDrag.bind(this);
   }
+
   /**
     @param {}
     after component mounts apply simplemde to the dom element id:markdown
   */
   componentDidMount() {
+    const { props } = this;
+
     import('simplemde').then((comp) => {
       if (document.getElementById('markDown')) {
         const Simple = comp.default;
@@ -43,9 +42,9 @@ export default class UserNote extends Component {
           spellChecker: true,
         });
         const fullscreenButton = document.getElementsByClassName('fa-arrows-alt')[0];
-        fullscreenButton && fullscreenButton.addEventListener('click', () => this.props.changeFullScreenState());
+        fullscreenButton && fullscreenButton.addEventListener('click', () => props.changeFullScreenState());
         const sideBySideButton = document.getElementsByClassName('fa-columns')[0];
-        sideBySideButton && sideBySideButton.addEventListener('click', () => this.props.changeFullScreenState(true));
+        sideBySideButton && sideBySideButton.addEventListener('click', () => props.changeFullScreenState(true));
       }
     });
   }
@@ -55,21 +54,23 @@ export default class UserNote extends Component {
     calls CreateUserNoteMutation adds note to activity feed
   */
   _addNote = () => {
-    const tags = this.state.tags.map(tag => (tag.text));
+    const { props, state } = this;
+    const tags = state.tags.map(tag => (tag.text));
     const { labbookName, owner } = store.getState().routes;
-    const { labbookId } = this.props;
+    const { labbookId } = props;
+
     this.setState({ addNoteDisabled: true });
     CreateUserNoteMutation(
-      this.props.type,
+      props.sectionType,
       labbookName,
-      this.state.userSummaryText,
+      state.userSummaryText,
       simple.value(),
       owner,
       [],
       tags,
-      labbookId || this.props.datasetId,
+      labbookId || props.datasetId,
       (response, error) => {
-        this.props.hideLabbookModal();
+        props.toggleUserNote(false);
         this.setState({
           tags: [],
           userSummaryText: '',
@@ -91,6 +92,7 @@ export default class UserNote extends Component {
       addNoteDisabled: (summaryText.length === 0),
     });
   }
+
   /**
     @param {number} i
     removes tag from list
@@ -102,20 +104,17 @@ export default class UserNote extends Component {
 
      this.setState({ tags });
    }
+
    /**
      @param {number} i
      add tag to list
    */
    _handleAddition = (tag) => {
      const { tags } = this.state;
-
-     tags.push({
-       id: tags.length + 1,
-       text: tag,
-     });
-
-     this.setState({ tags });
+     tags.push(tag);
+     this.setState(tags);
    }
+
    /**
      @param {number} i
      drags tag to new position.
@@ -133,16 +132,15 @@ export default class UserNote extends Component {
 
 
    render() {
-     const { tags } = this.state;
+     const { state } = this;
+     const { tags } = state;
      return (
        <div className="UserNote flex flex--column">
          <input
-           id="UserNoteTitle"
+           type="text"
            placeholder="Add a summary title"
-           onKeyUp={
-            e => this._setUserSummaryText(e)
-          }
-           className="UserNote__summary"
+           onKeyUp={evt => this._setUserSummaryText(evt)}
+           className="UserNote__title"
          />
 
          <textarea
@@ -160,10 +158,11 @@ export default class UserNote extends Component {
          />
 
          <button
+          type="submit"
            className="UserNote__add-note"
-           disabled={this.state.addNoteDisabled}
-           onClick={() => { this._addNote(); }}
-         >Add Note
+           disabled={state.addNoteDisabled}
+           onClick={() => { this._addNote(); }}>
+           Add Note
          </button>
        </div>
      );
