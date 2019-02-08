@@ -170,8 +170,6 @@ class DatasetList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                 raise ValueError(f"Unsupported sort: {sort}. Use `desc`, `asc`")
             url = f"{url}&sort={sort}"
 
-        print(f'URL FOR QUERYING REMOTE DATASETS: {url}')
-
         # Query SaaS index service for data
         access_token = flask.g.get('access_token', None)
         id_token = flask.g.get('id_token', None)
