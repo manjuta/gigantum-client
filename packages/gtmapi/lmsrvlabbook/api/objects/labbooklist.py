@@ -168,17 +168,20 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         if "first" in kwargs:
             per_page = int(kwargs['first'])
         elif "last" in kwargs:
-            per_page = int(kwargs['last'])
+            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
         else:
             per_page = 20
 
+        # use version=2 to page through both projects and datasets returned by gitlab but only return projects.
+        # omitting the version parameter will return projects and datasets together, but avoids breaking functionality
+        # in any gigantum instances not using the latest client code
         url = f"https://{index_service}/projects?version=2&per_page={per_page}"
 
         # Add optional arguments
-        if kwargs.get("before"):
-            url = f"{url}&cursor={kwargs.get('before')}"
-        elif kwargs.get("after"):
+        if kwargs.get("after"):
             url = f"{url}&cursor={kwargs.get('after')}"
+        elif kwargs.get("before"):
+            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
 
         if order_by is not None:
             if order_by not in ['name', 'created_on', 'modified_on']:
