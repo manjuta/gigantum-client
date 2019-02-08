@@ -1,0 +1,167 @@
+@import '~Styles/_imports.scss';
+
+.ClusterCardWrapper{
+    position: relative;
+    box-sizing: content-box;
+
+    &:after{
+      content: "";
+      display: block;
+      position: absolute;
+      top: calc(100% - 10px);
+      left: 40px;
+      border: 3px solid #9b9c9e;
+      border-width: 0 0 0 4px;
+      width: 1px;
+      height: 50px;
+      transition: none;
+    }
+
+    &:before{
+      content: "";
+      display: block;
+      position: absolute;
+      top: -12px;
+      left: 40px;
+      border: 3px solid #9b9c9e;
+      border-width: 0 0 0 4px;
+      width: 1px;
+      height: 80px;
+      transition: none;
+    }
+
+    .CardWrapper:last-child{
+      &:before {
+        display: none;
+      }
+    }
+    .CardWrapper {
+      margin-left: 30px;
+    }
+
+    .CardWrapper.CardWrapper--cluster {
+      margin-left: 0px;
+    }
+
+    .ActivityCard__cluster-wrapper {
+      margin: 20px 0 10px 30px;
+    }
+
+    &--shrink{
+      padding: 20px 0;
+      height: calc(100% - 20px);
+
+      .ClusterCard__sidebar-container {
+        position: absolute;
+        z-index: 4;
+        padding: 30px 0;
+        box-sizing: content-box;
+      }
+
+      .ActivityCard__cluster-wrapper {
+        margin: 18px 0 2px 30px;
+      }
+
+      &:after{
+        content: "";
+        display: block;
+        position: absolute;
+        top: calc(100% - 10px);
+        left: 40px;
+        border: 3px solid #9b9c9e;
+        border-width: 0 0 0 4px;
+        width: 1px;
+        height: 70px;
+        transition: none;
+      }
+
+      &:before{
+        content: "";
+        display: block;
+        position: absolute;
+        top: -12px;
+        left: 40px;
+        border: 3px solid #9b9c9e;
+        border-width: 0 0 0 4px;
+        width: 1px;
+        height: 70px;
+        transition: none;
+      }
+    }
+
+    .ActivityCard__cluster-wrapper:last-child{
+      &:before{
+        display: none;
+      }
+    }
+
+    .column-1-span-10, .activityCardError {
+        width: 995px;
+        margin: 12.5px;
+    }
+}
+
+.ClusterCard__sidebar{
+  position: relative;
+  z-index: index($elements, card);
+  left: 21px;
+  top: 40px;
+  bottom: 40px;
+
+  width: 20px;
+  height: calc(100% - 80px);;
+
+  cursor: pointer;
+
+  border-top: 4px solid $azure;
+  border-bottom: 4px solid $azure;
+  border-left: 4px solid $azure;
+}
+
+.ClusterCard__sidebar-container{
+  position: absolute;
+  z-index: 4;
+  top: 0px;
+  bottom: 0px;
+  left: -12px;
+
+  width: 38px;
+  transition: all 0.125s;
+
+  cursor: pointer;
+
+  &:hover .ClusterCard__sidebar {
+    transition: 0.25s all;
+    border-top: 5px solid $azure;
+    border-bottom: 5px solid $azure;
+    border-left: 5px solid $azure;
+  }
+}
+
+.CardWrapper--cluster{
+    &:after{
+      content: "";
+      display: block;
+      position: absolute;
+      top: calc(100% - 10px);
+      left: 40px;
+      border: 3px solid #9b9c9e;
+      border-width: 0 0 0 4px;
+      width: 1px;
+      height: 50px;
+      transition: none;
+    }
+
+    &:before{
+      content: "";
+      display: block;
+      position: absolute;
+      top: -12px;
+      left: 40px;
+      border: 3px solid #9b9c9e;
+      border-width: 0 0 0 4px;
+      width: 1px;
+      height: 80px;
+      transition: none;
+    }
+}

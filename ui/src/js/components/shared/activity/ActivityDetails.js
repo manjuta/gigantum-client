@@ -16,8 +16,9 @@ export default class ActivityCard extends Component {
   }
 
   /**
-  *   @param {}
+  *  @param {} -
   *  reverse state of showExtraInfo
+  *  @param {}
   */
   _toggleExtraInfo = () => {
     this.setState({ showExtraInfo: !this.state.showExtraInfo });
@@ -37,9 +38,9 @@ export default class ActivityCard extends Component {
     return `${hour}:${minutes}${ampm}`;
   }
   /**
-    @param {string} freeText
-    use SimpleMDE to get html of markdown
-    @return {html}
+    @param {Object} node
+    loobest through detailObjects array to get format an object of details
+    @return {Object} categories
   */
   _catagorizeDetails(node) {
     const categories = {
@@ -60,26 +61,31 @@ export default class ActivityCard extends Component {
     return categories;
   }
 
-
+  /**
+    @param {}
+    sets state to hide ellipsis for shortening
+    @return {}
+  */
   _hideElipsis() {
     this.setState({ showEllispsis: false });
   }
   render() {
-    const categorizedDetails = this._catagorizeDetails(this.props.node);
+    const { props, state } = this,
+          categorizedDetails = this._catagorizeDetails(props.node);
     return (
       <div className="ActivityDetail">
         {
           Object.keys(categorizedDetails.detailObjects).map((key, index) => (
             <ActivityDetailList
-              sectionType={this.props.sectionType}
+              sectionType={props.sectionType}
               hideElipsis={this._hideElipsis}
-              edge={this.props.edge}
+              edge={props.edge}
               categorizedDetails={categorizedDetails}
               itemKey={key}
               key={key + index}
-              siblingCount={this.props.node.detailObjects.length}
-              show={this.props.show}
-              showEllispsis={this.state.showEllispsis}
+              siblingCount={props.node.detailObjects.length}
+              show={props.show}
+              showEllispsis={state.showEllispsis}
             />
             ))
         }

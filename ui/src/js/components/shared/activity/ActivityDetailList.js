@@ -1,7 +1,9 @@
 // vendor
 import React, { Component } from 'react';
-import DetailRecords from './DetailRecords';
 import classNames from 'classnames';
+// components
+import DetailRecords from './DetailRecords';
+
 
 export default class ActivityDefaultList extends Component {
   constructor(props) {
@@ -16,9 +18,9 @@ export default class ActivityDefaultList extends Component {
     });
 
     this.state = {
-      show: props.categorizedDetails.detailObjects[this.props.itemKey][0].show,
+      show: props.categorizedDetails.detailObjects[props.itemKey][0].show,
       showEllipsis: show,
-      showDetails: this.props.show,
+      showDetails: props.show,
     };
     this._toggleDetailsList = this._toggleDetailsList.bind(this);
   }
@@ -31,19 +33,15 @@ export default class ActivityDefaultList extends Component {
     this.setState({ show: !this.state.show });
   }
 
-
-  _toggleDetailsView = () => {
-    this.setState({ showDetails: true, showEllipsis: false });
-    this.props.hideElipsis();
-  }
-
   /**
-  *   @param {}
-  *  reverse state of showExtraInfo
-  */
+   * @param {}
+   * restarts refetch
+   * @return {}
+   */
   _toggleDetailsView = () => {
+    const { props } = this;
     this.setState({ showDetails: true, showEllipsis: false });
-    this.props.hideElipsis();
+    props.hideElipsis();
   }
 
   /**
@@ -74,6 +72,7 @@ export default class ActivityDefaultList extends Component {
   }
 
   render() {
+    const { props, state } = this;
     let keys = this.props.categorizedDetails.detailKeys[this.props.itemKey],
       type = this.props.categorizedDetails.detailObjects[this.props.itemKey][0].type.toLowerCase();
     const activityDetailsCSS = classNames({
@@ -84,16 +83,14 @@ export default class ActivityDefaultList extends Component {
 
       <div className={activityDetailsCSS}>
         {
-            this.state.showDetails && type !== 'note' ?
+            state.showDetails && type !== 'note' ?
               <div
                 onClick={() => { this._toggleDetailsList(); }}
-                className={this.state.show ? 'ActivityDetail__details-title ActivityDetail__details-title--open' : 'ActivityDetail__details-title ActivityDetail__details-title--closed'}
-              >
-
+                className={state.show ? 'ActivityDetail__details-title ActivityDetail__details-title--open' : 'ActivityDetail__details-title ActivityDetail__details-title--closed'}>
                 <div className="ActivityDetail__header">
                   <div className={`ActivityDetail__badge ActivityDetail__badge--${type}`} />
                   <div className="ActivityDetail__content">
-                    <p>{this._formatTitle(this.props.itemKey)}</p>
+                    <p>{this._formatTitle(props.itemKey)}</p>
                   </div>
                 </div>
 
@@ -101,16 +98,16 @@ export default class ActivityDefaultList extends Component {
             :
               <hr />
           }
-        {this.state.show &&
+        {state.show &&
         <div className="ActivtyDetail_list">
           <DetailRecords
             keys={keys}
-            sectionType={this.props.sectionType}
+            sectionType={props.sectionType}
           />
         </div>
           }
 
-        {this.props.showEllipsis &&
+        {props.showEllipsis &&
 
         <div className="ActivityCard__ellipsis ActivityCard__ellipsis-detail" onClick={() => { this._toggleDetailsView(); }} />
 

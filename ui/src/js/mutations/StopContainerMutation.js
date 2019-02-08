@@ -27,6 +27,7 @@ export default function StopContainerMutation(
       clientMutationId: `${tempID++}`,
     },
   };
+  console.log(this, variables, environment)
   commitMutation(
     environment,
     {
@@ -39,9 +40,6 @@ export default function StopContainerMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
-
-      updater: (store) => {
-      },
     },
   );
 }
