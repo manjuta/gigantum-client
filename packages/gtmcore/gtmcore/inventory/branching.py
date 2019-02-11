@@ -64,6 +64,7 @@ class BranchManager(object):
     """
 
     def __init__(self, repository: Repository, username: str) -> None:
+        # TODO - Remove username from here.
         self.repository = repository
         self.username = username
 
