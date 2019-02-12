@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Feb 04 2019 10:54:52 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Feb 11 2019 16:41:34 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -235,6 +235,7 @@ type BaseComponent implements Node {
   dockerImageNamespace: String
   dockerImageRepository: String
   dockerImageTag: String
+  cudaVersion: String
 }
 
 """A Connection for paging through Base components"""
@@ -429,7 +430,7 @@ type DatasetFile implements Node & GitRepository {
   isDir: Boolean
   isFavorite: Boolean
   isLocal: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -858,7 +859,7 @@ type LabbookFile implements Node & GitRepository {
   key: String!
   isDir: Boolean
   isFavorite: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
