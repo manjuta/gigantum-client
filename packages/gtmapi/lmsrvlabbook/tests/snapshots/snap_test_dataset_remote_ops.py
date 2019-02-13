@@ -7,20 +7,20 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 1'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_az 1'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     },
@@ -29,10 +29,10 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 1'] = {
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     }
@@ -45,19 +45,19 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 1'] = {
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 2'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_az 2'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     },
@@ -66,9 +66,9 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 2'] = {
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     }
@@ -81,20 +81,20 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_az 2'] = {
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 1'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_modified 1'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     },
@@ -103,10 +103,10 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 1'] = 
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     }
@@ -119,19 +119,19 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 1'] = 
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 2'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_modified 2'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     },
@@ -140,9 +140,9 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 2'] = 
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     }
@@ -155,20 +155,20 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_modified 2'] = 
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 1'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_created 1'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     },
@@ -177,10 +177,10 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 1'] = {
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     }
@@ -193,19 +193,19 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 1'] = {
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 2'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_created 2'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     },
@@ -214,9 +214,9 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 2'] = {
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     }
@@ -229,20 +229,20 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_created 2'] = {
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 1'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_page 1'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-30T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTE=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTE=',
                             'isLocal': False,
                             'modifiedDateUtc': '2018-08-30T18:01:33.312Z',
-                            'name': 'test-proj-1',
+                            'name': 'test-data-1',
                             'owner': 'tester'
                         }
                     }
@@ -255,19 +255,19 @@ snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 1'] = {
     }
 }
 
-snapshots['TestLabBookRemoteOperations.test_list_remote_labbooks_page 2'] = {
+snapshots['TestDatasetRemoteOperations.test_list_remote_datasets_page 2'] = {
     'data': {
-        'labbookList': {
-            'remoteLabbooks': {
+        'datasetList': {
+            'remoteDatasets': {
                 'edges': [
                     {
                         'cursor': 'eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ==',
                         'node': {
                             'creationDateUtc': '2018-08-29T18:01:33.312Z',
                             'description': 'No Description',
-                            'id': 'UmVtb3RlTGFiYm9vazp0ZXN0ZXImdGVzdC1wcm9qLTI=',
+                            'id': 'UmVtb3RlRGF0YXNldDp0ZXN0ZXImdGVzdC1kYXRhLTI=',
                             'modifiedDateUtc': '2018-09-01T18:01:33.312Z',
-                            'name': 'test-proj-2',
+                            'name': 'test-data-2',
                             'owner': 'tester'
                         }
                     }

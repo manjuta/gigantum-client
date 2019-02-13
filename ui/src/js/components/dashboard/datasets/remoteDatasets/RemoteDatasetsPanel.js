@@ -5,7 +5,7 @@ import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
 import Moment from 'moment';
 // muations
-import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
+import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
 import BuildImageMutation from 'Mutations/BuildImageMutation';
 // store
 import store from 'JS/redux/store';
@@ -16,16 +16,16 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
-import './RemoteLabbookPanel.scss';
+import './RemoteDatasetsPanel.scss';
 // config
 import config from 'JS/config';
 
-export default class RemoteLabbookPanel extends Component {
+export default class RemoteDatasetPanel extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      labbookName: props.edge.node.name,
+      datasetName: props.edge.node.name,
       owner: props.edge.node.owner,
       isImporting: false,
       showLoginPrompt: false,
@@ -38,7 +38,7 @@ export default class RemoteLabbookPanel extends Component {
 
   /**
     * @param {object} edge
-    * validates user's session and then triggers toggleDeleteModal which passes parameters to the DeleteLabbook component
+    * validates user's session and then triggers toggleDeleteModal which passes parameters to the DeleteDataset component
   */
   _handleDelete(edge) {
     if (localStorage.getItem('username') !== edge.node.owner) {
@@ -49,14 +49,14 @@ export default class RemoteLabbookPanel extends Component {
           if (response.data) {
             if (response.data.userIdentity.isSessionValid) {
               this.props.toggleDeleteModal({
-                remoteId: edge.node.id, remoteOwner: edge.node.owner, remoteLabbookName: edge.node.name, existsLocally: this.props.existsLocally,
+                remoteId: edge.node.id, remoteOwner: edge.node.owner, remoteDatasetName: edge.node.name, existsLocally: this.props.existsLocally,
               });
             } else {
               this.props.auth.renewToken(true, () => {
                 this.setState({ showLoginPrompt: true });
               }, () => {
                 this.props.toggleDeleteModal({
-                  remoteId: edge.node.id, remoteOwner: edge.node.owner, remoteLabbookName: edge.node.name, existsLocally: this.props.existsLocally,
+                  remoteId: edge.node.id, remoteOwner: edge.node.owner, remoteDatasetName: edge.node.name, existsLocally: this.props.existsLocally,
                 });
               });
             }
@@ -99,14 +99,52 @@ export default class RemoteLabbookPanel extends Component {
   }
 
   /**
-    *  @param {owner, labbookName}
-    *  imports labbook from remote url, builds the image, and redirects to imported labbook
+    *  @param {}
+    *  changes state of isImporting to true
+  */
+  _importingState = () => {
+    this.setState({
+      isImporting: true,
+    });
+  }
+
+  /**
+    *  @param {String} owner
+    *  @param {String} datasetName
+    *  @param {String} remote
+    *  handles importing dataset mutation
+  */
+  _handleImportDataset = (owner, datasetName, remote) => {
+    ImportRemoteDatasetMutation(
+      owner,
+      datasetName,
+      remote,
+      (response, error) => {
+        this._clearState();
+
+        if (error) {
+          console.error(error);
+          setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
+        } else if (response) {
+          const datasetName = response.importRemoteDataset.newDatasetEdge.node.name;
+          const owner = response.importRemoteDataset.newDatasetEdge.node.owner;
+          setMultiInfoMessage(id, `Successfully imported remote Dataset ${datasetName}`, true, false);
+
+          this.props.history.replace(`/datasets/${owner}/${datasetName}`);
+        }
+      },
+    );
+  }
+
+  /**
+    *  @param {owner, datasetName}
+    *  imports dataset from remote url, builds the image, and redirects to imported dataset
     *  @return {}
   */
- importLabbook = (owner, labbookName) => {
+ importDataset = (owner, datasetName) => {
    const self = this;
    const id = uuidv4();
-   const remote = `https://repo.${config.domain}/${owner}/${labbookName}`;
+   const remote = `https://repo.${config.domain}/${owner}/${datasetName}`;
 
    UserIdentity.getUserIdentity().then((response) => {
      if (navigator.onLine) {
@@ -114,55 +152,12 @@ export default class RemoteLabbookPanel extends Component {
          if (response.data.userIdentity.isSessionValid) {
            this._importingState();
            setMultiInfoMessage(id, 'Importing Project please wait', false, false);
-           ImportRemoteLabbookMutation(
-             owner,
-             labbookName,
-             remote,
-             (response, error) => {
-               this._clearState();
-
-               if (error) {
-                 console.error(error);
-                 setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
-               } else if (response) {
-                 const labbookName = response.importRemoteLabbook.newLabbookEdge.node.name;
-                 const owner = response.importRemoteLabbook.newLabbookEdge.node.owner;
-                 setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
-
-
-                 BuildImageMutation(
-                   labbookName,
-                   owner,
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                     }
-                   },
-                 );
-
-                 self.props.history.replace(`/projects/${owner}/${labbookName}`);
-               } else {
-                 BuildImageMutation(
-                   labbookName,
-                   localStorage.getItem('username'),
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                     }
-                   },
-                 );
-               }
-             },
-           );
+           this._handleImportDataset(owner, datasetName, remote);
          } else {
            this.props.auth.renewToken(true, () => {
              this.setState({ showLoginPrompt: true });
            }, () => {
-             this.importLabbook(owner, labbookName);
+             this.importDataset(owner, datasetName);
            });
          }
        }
@@ -176,14 +171,14 @@ export default class RemoteLabbookPanel extends Component {
    const edge = this.props.edge;
 
    const descriptionCss = classNames({
-     'RemoteLabbooks__row RemoteLabbooks__row--text': true,
+     'RemoteDatasets__row RemoteDatasets__row--text': true,
      blur: this.state.isImporting,
    });
-   console.log('RemoteLabbooks__icon', localStorage, localStorage.getItem('username'), edge.node.owner)
+
    const deleteCSS = classNames({
-     RemoteLabbooks__icon: true,
-     'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,
-     'RemoteLabbooks__icon--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
+     RemoteDatasets__icon: true,
+     'RemoteDatasets__icon--delete': localStorage.getItem('username') === edge.node.owner,
+     'RemoteDatasets__icon--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
    });
 
    return (
@@ -194,11 +189,11 @@ export default class RemoteLabbookPanel extends Component {
        {
 
         }
-       <div className="RemoteLabbooks__row RemoteLabbooks__row--icon">
+       <div className="RemoteDatasets__row RemoteDatasets__row--icon">
          {
           this.props.existsLocally ?
             <button
-              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
+              className="RemoteDatasets__icon RemoteDatasets__icon--cloud"
               data-tooltip="Project exists locally"
               disabled
             >
@@ -207,8 +202,8 @@ export default class RemoteLabbookPanel extends Component {
           :
             <button
               disabled={this.state.isImporting}
-              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud-download"
-              onClick={() => this.importLabbook(edge.node.owner, edge.node.name)}
+              className="RemoteDatasets__icon RemoteDatasets__icon--cloud-download"
+              onClick={() => this.importDataset(edge.node.owner, edge.node.name)}
             >
               Import
             </button>
@@ -226,13 +221,13 @@ export default class RemoteLabbookPanel extends Component {
 
        <div className={descriptionCss}>
 
-         <div className="RemoteLabbooks__row RemoteLabbooks__row--title">
+         <div className="RemoteDatasets__row RemoteDatasets__row--title">
            <h6
-             className="RemoteLabbooks__panel-title"
+             className="RemoteDatasets__panel-title"
            >
              <Highlighter
-               highlightClassName="LocalLabbooks__highlighted"
-               searchWords={[store.getState().labbookListing.filterText]}
+               highlightClassName="LocalDatasets__highlighted"
+               searchWords={[store.getState().datasetListing.filterText]}
                autoEscape={false}
                caseSensitive={false}
                textToHighlight={edge.node.name}
@@ -241,18 +236,18 @@ export default class RemoteLabbookPanel extends Component {
 
          </div>
 
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Modified ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
+         <p className="RemoteDatasets__paragraph RemoteDatasets__paragraph--owner">{edge.node.owner}</p>
+         <p className="RemoteDatasets__paragraph RemoteDatasets__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
+         <p className="RemoteDatasets__paragraph RemoteDatasets__paragraph--owner">{`Modified ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
 
          <p
-           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
+           className="RemoteDatasets__paragraph RemoteDatasets__paragraph--description"
          >
          {
           edge.node.description && edge.node.description.length ?
            <Highlighter
-             highlightClassName="LocalLabbooks__highlighted"
-             searchWords={[store.getState().labbookListing.filterText]}
+             highlightClassName="LocalDatasets__highlighted"
+             searchWords={[store.getState().datasetListing.filterText]}
              autoEscape={false}
              caseSensitive={false}
              textToHighlight={edge.node.description}
@@ -267,11 +262,11 @@ export default class RemoteLabbookPanel extends Component {
          </p>
        </div>
        { !(edge.node.visibility === 'local') &&
-       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}`} />
+       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteDatasets__${edge.node.visibility}`} />
         }
        {
           this.state.isImporting &&
-          <div className="RemoteLabbooks__loader">
+          <div className="RemoteDatasets__loader">
             <Loader />
           </div>
         }

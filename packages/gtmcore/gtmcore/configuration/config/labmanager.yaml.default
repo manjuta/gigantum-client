@@ -54,6 +54,7 @@ git:
       index_service: api.gigantum.com/read
       object_service: api.gigantum.com/object-v1
 
+
 # Embedded Detail Object Database config
 detaildb:
   logfile_limit: 8000000

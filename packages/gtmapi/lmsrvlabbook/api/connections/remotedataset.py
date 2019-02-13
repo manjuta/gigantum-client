@@ -18,11 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import graphene
-from lmsrvlabbook.api.objects.remotelabbook import RemoteLabbook
+from lmsrvlabbook.api.objects.remotedataset import RemoteDataset
 
 
-class RemoteLabbookConnection(graphene.relay.Connection):
-    """A Connection for paging through remote labbooks.
+class RemoteDatasetConnection(graphene.relay.Connection):
+    """A Connection for paging through remote datasets.
 
     This is a remote call, so should be fetched on its own and only when needed. The user must have a valid
     session for data to be returned.
@@ -33,6 +33,6 @@ class RemoteLabbookConnection(graphene.relay.Connection):
         - modified_on: sort by modification date, newest first
     """
     class Meta:
-        node = RemoteLabbook
+        node = RemoteDataset
 
 

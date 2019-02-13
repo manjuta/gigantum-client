@@ -5,24 +5,24 @@ import {
   graphql,
 } from 'react-relay';
 // components
-import RemoteLabbookPanel from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
-import DeleteLabbook from 'Components/shared/header/branchMenu/modals/DeleteLabbook';
-import LabbooksPaginationLoader from '../labbookLoaders/LabbookPaginationLoader';
+import RemoteDatasetPanel from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasetsPanel';
+// import DeleteDataset from 'Components/shared/header/branchMenu/modals/DeleteDataset';
+import DatasetsPaginationLoader from '../datasetsLoaders/datasetsPaginationLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
 import store from 'JS/redux/store';
 // assets
-import './RemoteLabbooks.scss';
+import './RemoteDatasets.scss';
 
-class RemoteLabbooks extends Component {
+class RemoteDatasets extends Component {
   constructor(props) {
     super(props);
     this.state = {
       deleteData: {
         remoteId: null,
         remoteOwner: null,
-        remoteLabbookName: null,
+        remoteDatasetName: null,
         existsLocally: null,
       },
       deleteModalVisible: false,
@@ -32,26 +32,26 @@ class RemoteLabbooks extends Component {
     this._loadMore = this._loadMore.bind(this);
   }
   /*
-    loads more remote labbooks on mount
+    loads more remote datasets on mount
   */
   componentDidMount() {
-    if (this.props.remoteLabbooks.remoteLabbooks && this.props.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
+    if (this.props.remoteDatasets.remoteDatasets && this.props.remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
       this._loadMore();
     }
   }
 
   /*
-    loads more remote labbooks if available
+    loads more remote datasets if available
   */
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.remoteLabbooks.remoteLabbooks && nextProps.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
+    if (nextProps.remoteDatasets.remoteDatasets && nextProps.remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
       this._loadMore();
     }
   }
 
   /**
     *  @param {}
-    *  loads more labbooks using the relay pagination container
+    *  loads more datasets using the relay pagination container
   */
   _loadMore = () => {
     const self = this;
@@ -63,7 +63,7 @@ class RemoteLabbooks extends Component {
               isPaginating: true,
             });
 
-            if (this.props.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
+            if (this.props.remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
               this.props.relay.loadMore(
                 8, // Fetch the next 8 items
                 (ev) => {
@@ -103,7 +103,7 @@ class RemoteLabbooks extends Component {
         deleteData: {
           remoteId: null,
           remoteOwner: null,
-          remoteLabbookName: null,
+          remoteDatasetName: null,
           existsLocally: null,
         },
         deleteModalVisible: false,
@@ -112,20 +112,20 @@ class RemoteLabbooks extends Component {
   }
 
   render() {
-    if (this.props.remoteLabbooks && this.props.remoteLabbooks.remoteLabbooks !== null) {
-      const labbooks = this.props.filterLabbooks(this.props.remoteLabbooks.remoteLabbooks.edges, this.props.filterState);
+    if (this.props.remoteDatasets && this.props.remoteDatasets.remoteDatasets !== null) {
+      const datasets = this.props.filterDatasets(this.props.remoteDatasets, this.props.filterState);
 
       return (
-        <div className="Labbooks__listing">
+        <div className="Datasets__listing">
           <div className="grid">
             {
-            labbooks.length ?
-            labbooks.map(edge => (
-              <RemoteLabbookPanel
+            datasets.length ?
+            datasets.map(edge => (
+              <RemoteDatasetPanel
                 toggleDeleteModal={this._toggleDeleteModal}
-                labbookListId={this.props.remoteLabbooksId}
+                datasetListId={this.props.remoteDatasetsId}
                 key={edge.node.owner + edge.node.name}
-                ref={`RemoteLabbookPanel${edge.node.name}`}
+                ref={`RemoteDatasetPanel${edge.node.name}`}
                 edge={edge}
                 history={this.props.history}
                 existsLocally={edge.node.isLocal}
@@ -134,14 +134,14 @@ class RemoteLabbooks extends Component {
               ))
             :
             !this.state.isPaginating &&
-            store.getState().labbookListing.filterText &&
+            store.getState().datasetListing.filterText &&
 
-            <div className="Labbooks__no-results">
+            <div className="Datasets__no-results">
 
-              <h3 className="Labbooks__h3">No Results Found</h3>
+              <h3 className="Datasets__h3">No Results Found</h3>
 
               <p>Edit your filters above or <span
-                className="Labbooks__span"
+                className="Datasets__span"
                 onClick={() => this.props.setFilterValue({ target: { value: '' } })}
               >clear
                                             </span> to try again.
@@ -151,29 +151,14 @@ class RemoteLabbooks extends Component {
           }
             {
             Array(5).fill(1).map((value, index) => (
-              <LabbooksPaginationLoader
-                key={`RemoteLabbooks_paginationLoader${index}`}
+              <DatasetsPaginationLoader
+                key={`RemoteDatasets_paginationLoader${index}`}
                 index={index}
                 isLoadingMore={this.state.isPaginating}
               />
               ))
           }
           </div>
-          {
-          this.state.deleteModalVisible &&
-          <DeleteLabbook
-            handleClose={() => { this._toggleDeleteModal(); }}
-            labbookListId={this.props.labbookListId}
-            remoteId={this.state.deleteData.remoteId}
-            remoteConnection="RemoteLabbooks_remoteLabbooks"
-            toggleModal={this._toggleDeleteModal}
-            remoteOwner={this.state.deleteData.remoteOwner}
-            remoteLabbookName={this.state.deleteData.remoteLabbookName}
-            existsLocally={this.state.deleteData.existsLocally}
-            remoteDelete
-            history={this.props.history}
-          />
-        }
         </div>
       );
     }
@@ -194,10 +179,10 @@ class RemoteLabbooks extends Component {
 }
 
 export default createPaginationContainer(
-  RemoteLabbooks,
+  RemoteDatasets,
   graphql`
-    fragment RemoteLabbooks_remoteLabbooks on LabbookList{
-      remoteLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteLabbooks_remoteLabbooks", filters: []){
+    fragment RemoteDatasets_remoteDatasets on DatasetList{
+      remoteDatasets(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteDatasets_remoteDatasets", filters: []){
         edges {
           node {
             name
@@ -223,7 +208,7 @@ export default createPaginationContainer(
   {
     direction: 'forward',
     getConnectionFromProps(props, error) {
-      return props.remoteLabbooks.remoteLabbooks;
+      return props.remoteDatasets.remoteDatasets;
     },
     getFragmentVariables(prevVars, first, cursor) {
       return {
@@ -235,7 +220,7 @@ export default createPaginationContainer(
       first, cursor, orderBy, sort,
     }, fragmentVariables) {
       first = 20;
-      cursor = props.remoteLabbooks.remoteLabbooks.pageInfo.endCursor;
+      cursor = props.remoteDatasets.remoteDatasets.pageInfo.endCursor;
       orderBy = fragmentVariables.orderBy;
       sort = fragmentVariables.sort;
       return {
@@ -248,14 +233,14 @@ export default createPaginationContainer(
       };
     },
     query: graphql`
-      query RemoteLabbooksPaginationQuery(
+      query RemoteDatasetsPaginationQuery(
         $first: Int!
         $cursor: String
         $orderBy: String
         $sort: String
       ) {
-        labbookList{
-          ...RemoteLabbooks_remoteLabbooks
+        datasetList{
+          ...RemoteDatasets_remoteDatasets
         }
       }
     `,

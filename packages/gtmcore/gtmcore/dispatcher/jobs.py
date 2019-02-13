@@ -33,8 +33,8 @@ from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory.inventory  import InventoryManager
-from gtmcore.inventory  import Repository
+from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import sync_locally, GitWorkflow, ZipExporter
@@ -70,6 +70,7 @@ def publish_repository(repository: Repository, username: str, access_token: str,
             wf = GitWorkflow(repository)
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta, id_token=id_token)
+
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise
@@ -96,6 +97,7 @@ def sync_repository(repository: Repository, username: str, remote: str = "origin
             wf = GitWorkflow(repository)
             cnt = wf.sync(username=username, remote=remote, force=force,
                           feedback_callback=update_meta, access_token=access_token, id_token=id_token)
+
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:
