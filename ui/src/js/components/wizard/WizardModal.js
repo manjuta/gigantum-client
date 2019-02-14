@@ -11,7 +11,7 @@ import Modal from 'Components/common/Modal';
 // mutations
 import CreateLabbookMutation from 'Mutations/CreateLabbookMutation';
 import CreateDatasetMutation from 'Mutations/CreateDatasetMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 
@@ -286,8 +286,8 @@ export default class WizardModal extends React.Component {
   */
   _buildImage(name, owner) {
     BuildImageMutation(
-      name,
       owner,
+      name,
       false,
       (response, error) => {
         if (error) {

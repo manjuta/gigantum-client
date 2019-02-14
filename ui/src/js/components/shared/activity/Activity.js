@@ -7,7 +7,7 @@ import store from 'JS/redux/store';
 import config from 'JS/config';
 // Components
 import Loader from 'Components/common/Loader';
-import CreateBranch from 'Components/shared/header/branches/CreateBranch';
+import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import PaginationLoader from './loaders/PaginationLoader';
 import ClusterCardWrapper from './wrappers/ClusterCardWrapper';
@@ -123,7 +123,7 @@ class Activity extends Component {
       this._refetch();
     }
 
-
+    this.setState({ activityRecords: this._transformActivity(activityRecords) });
   }
 
   componentWillUnmount() {
@@ -292,7 +292,7 @@ class Activity extends Component {
   */
   _loadMore() {
     const self = this,
-          { props } = this,
+          { props, state } = this,
           section = props[props.sectionType],
           activityRecords = section.activityRecords;
 
@@ -308,7 +308,6 @@ class Activity extends Component {
         if (error) {
           console.error(error);
         }
-
         if ((activityRecords.pageInfo.hasNextPage) && (this._countUnexpandedRecords() < 7) && (this._countUnexpandedRecords() > 2)) {
           self._loadMore();
         } else {
@@ -428,6 +427,7 @@ class Activity extends Component {
         count = 0,
         previousTimeHash = null,
         clusterIndex = 0;
+
     activityRecords.edges.forEach((edge, index) => {
       if (edge && edge.node) {
          const date = (edge.node && edge.node.timestamp) ? new Date(edge.node.timestamp) : new Date(),
@@ -487,6 +487,7 @@ class Activity extends Component {
         }
       }
     });
+
     return activityTime;
   }
 

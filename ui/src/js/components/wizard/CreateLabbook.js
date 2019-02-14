@@ -4,10 +4,10 @@ import uuidv4 from 'uuid/v4';
 // utilities
 import validation from 'JS/utils/Validation';
 // components
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -71,8 +71,8 @@ export default class CreateLabbook extends React.Component {
                     setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
 
                     BuildImageMutation(
-                      labbookName,
                       owner,
+                      labbookName,
                       false,
                       (response, error) => {
                         if (error) {
@@ -84,8 +84,8 @@ export default class CreateLabbook extends React.Component {
                     self.props.history.replace(`/projects/${owner}/${labbookName}`);
                   } else {
                     BuildImageMutation(
-                      labbookName,
                       localStorage.getItem('username'),
+                      labbookName,
                       false,
                       (response, error) => {
                         if (error) {

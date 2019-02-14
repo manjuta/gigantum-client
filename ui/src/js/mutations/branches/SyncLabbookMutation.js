@@ -33,7 +33,7 @@ export default function SyncLabbookMutation(
       pullOnly,
       clientMutationId: tempID++,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

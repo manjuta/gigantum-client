@@ -1,20 +1,20 @@
 // vendor
 import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
-// components
-import Loader from 'Components/common/Loader';
-import Base from './Base';
-import PackageDependencies from './PackageDependencies';
-import CustomDockerfile from './CustomDockerfile';
-import ErrorBoundary from 'Components/common/ErrorBoundary';
-import ToolTip from 'Components/common/ToolTip';
-// mutations
-import BuildImageMutation from 'Mutations/BuildImageMutation';
-import StopContainerMutation from 'Mutations/StopContainerMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 import { setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import store from 'JS/redux/store';
+// mutations
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
+import StopContainerMutation from 'Mutations/container/StopContainerMutation';
+// components
+import ErrorBoundary from 'Components/common/ErrorBoundary';
+import ToolTip from 'Components/common/ToolTip';
+import Loader from 'Components/common/Loader';
+import Base from './Base';
+import PackageDependencies from './PackageDependencies';
+import CustomDockerfile from './CustomDockerfile';
 // assets
 import './Environment.scss';
 
@@ -45,17 +45,16 @@ class Environment extends Component {
     this.props.setBuildingState(true);
     if (store.getState().containerStatus.status === 'Running') {
       StopContainerMutation(
-        labbookName,
         owner,
-        'clientMutationId',
+        labbookName,
         (response, error) => {
           if (error) {
             console.log(error);
             setErrorMessage(`Problem stopping ${labbookName}`, error);
           } else {
             BuildImageMutation(
-              labbookName,
               owner,
+              labbookName,
               false,
               (response, error) => {
                 if (error) {
@@ -74,8 +73,8 @@ class Environment extends Component {
       );
     } else {
       BuildImageMutation(
-        labbookName,
         owner,
+        labbookName,
         false,
         (response, error) => {
           if (error) {

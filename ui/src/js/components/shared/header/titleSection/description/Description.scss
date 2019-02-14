@@ -1,0 +1,175 @@
+@import '~Styles/_imports.scss';
+
+.Description {
+    z-index: index($elements, popup) + 1;
+    p {
+      margin: 0;
+
+      line-height: 24px;
+    }
+
+    button {
+      margin-top: 2px;
+    }
+
+    .empty {
+      opacity: 0.5;
+      color: $romanSilver;
+
+      font-style: oblique;
+    }
+}
+
+.Description__text{
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+.Description__container{
+    position: relative;
+    z-index: index($elements, popup) + 1;
+
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+
+    min-width: 500px;
+    max-width: 500px;
+    max-height: 72px;
+
+
+
+    cursor: pointer;
+    white-space: pre-line;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+
+    color: $jet;
+
+    -webkit-line-clamp: 3;
+    &--hovered {
+      @include boxShadow();
+        border: 1px solid $romanSilver;
+        .Description__text{
+          overflow: auto;
+          white-space: pre-line;
+          word-break: break-word;
+          padding: 2px 5px 2px 5px;
+          margin: 0 30px 0 0;
+          height: 70px;
+          background-color: $background-color;
+        }
+    }
+}
+
+.Description__input{
+    width: 470px;
+    min-height: 70px !important;
+    margin: 0 30px 0 0;
+    padding: 2px 5px;
+    z-index: index($elements, popup) + 1;
+
+    resize: none;
+
+    background: $white;
+
+    line-height: 24px;
+    &:focus {
+      border: 2px solid #26a69a;
+      outline: none;
+      box-shadow: 0 1px 0 0 #26a69a;
+    }
+}
+
+.Description__edit-button,
+.Description__edit-button:focus,
+.Description__edit-button:hover,{
+    position: absolute;
+    right: 0;
+    bottom: 5px;
+    height: 15px;
+    width: 15px;
+    border: 0px;
+    background: $background-color url('~Images/icons/edit.svg') no-repeat center center;
+    background-size: 15px;
+}
+
+.Description__input-buttons{
+    min-height: 70px !important;
+    background: $white;
+    @include flex(space-around, column);
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-top: 1px solid $romanSilver;
+    border-right: 1px solid $romanSilver;
+    border-bottom: 1px solid $romanSilver;
+    padding: 0 4px;
+}
+
+.Description__input-cancel{
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    background: url('~Images/icons/x-close-azure.svg') no-repeat center center;
+    background-size: 26px;
+    border: none;
+    &:hover {
+        background: url('~Images/icons/x-close-turquise.svg') no-repeat center center;
+        background-size: 26px;
+        border: none;
+    }
+}
+.Description__input-save{
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    background: url('~Images/icons/check-selected.svg') no-repeat center center;
+    background-size: 27px;
+    border: none;
+    &:hover {
+        background: url('~Images/icons/check-selected-turquise.svg') no-repeat center center;
+        background-size: 26px;
+        border: none;
+    }
+}
+
+@-moz-document url-prefix() {
+    .Description__container {
+        overflow: hidden;
+        position: relative;
+    }
+    .Description__container:before {
+        background: $background-color;
+        bottom: 4px;
+        position: absolute;
+        right: 0;
+        float: right;
+        content: '\2026';
+        margin-left: -2rem;
+        width: 22px;
+    }
+    .Description__container:after {
+        content: '';
+        background: $background-color;
+        position: absolute;
+        height: 50px;
+        width: 100%;
+        z-index: 1;
+    }
+}
+
+@media screen and (max-width: 1480px) and (min-width: 1140px) {
+    .Description__container{
+        max-width: 400px;
+    }
+}
+@media screen and (max-width: 1140px) and (min-width: 0) {
+    .Description__container{
+        max-width: 300px;
+    }
+}

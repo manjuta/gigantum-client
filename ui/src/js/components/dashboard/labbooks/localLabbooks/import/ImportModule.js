@@ -6,7 +6,7 @@ import uuidv4 from 'uuid/v4';
 import JobStatus from 'JS/utils/JobStatus';
 import ChunkUploader from 'JS/utils/ChunkUploader';
 // components
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import ToolTip from 'Components/common/ToolTip';
 // store
 import store from 'JS/redux/store';
@@ -15,7 +15,7 @@ import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
 import UserIdentity from 'JS/Auth/UserIdentity';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // config
 import config from 'JS/config'
 // assets
@@ -613,11 +613,11 @@ export default class ImportModule extends Component {
 
   /**
   *  @param {String, String, String}
-  *  trigers BuildImageMutation
+  *  trigers §
   *  @return {}
   */
   _buildImage(labbookName, owner, id) {
-    BuildImageMutation(labbookName, owner, false, (response, error) => {
+    BuildImageMutation(owner, labbookName, false, (response, error) => {
       if (error) {
         console.error(error);
 

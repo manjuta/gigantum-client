@@ -4,8 +4,8 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 // muations
-import StartContainerMutation from 'Mutations/StartContainerMutation';
-import StopContainerMutation from 'Mutations/StopContainerMutation';
+import StartContainerMutation from 'Mutations/container/StartContainerMutation';
+import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // store
 import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';
@@ -99,9 +99,8 @@ export default class LocalLabbookPanel extends Component {
     this.setState({ status: 'Starting', textStatus: 'Starting' });
 
     StartContainerMutation(
-      labbookName,
       owner,
-      'clientMutationId',
+      labbookName,
       (response, error) => {
         if (error) {
           setErrorMessage(`There was a problem starting ${this.state.labbookName}, go to Project and try again`, error);
@@ -124,9 +123,8 @@ export default class LocalLabbookPanel extends Component {
     this.setState({ status: 'Stopping', textStatus: 'Stopping' });
 
     StopContainerMutation(
-      labbookName,
       owner,
-      'clientMutationId',
+      labbookName,
       (response, error) => {
         if (error) {
           console.log(error);

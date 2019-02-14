@@ -11,7 +11,7 @@ import Connectors from './../utilities/Connectors';
 import ActionsMenu from './ActionsMenu';
 import DatasetActionsMenu from './dataset/DatasetActionsMenu';
 // mutations
-import StartContainerMutation from 'Mutations/StartContainerMutation';
+import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
 // config
 import config from 'JS/config';
@@ -110,9 +110,8 @@ class File extends Component {
       });
       setMergeMode(false, false);
       StartContainerMutation(
-        labbookName,
         owner,
-        'clientMutationId',
+        labbookName,
         (response, error) => {
           if (error) {
             setErrorMessage(`There was a problem starting ${labbookName} container`, error);

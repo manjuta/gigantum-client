@@ -17,7 +17,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import base64
 import graphene
 import os
 
@@ -31,14 +30,12 @@ from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
-
-from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.identity import parse_token
 
 from lmsrvlabbook.api.objects.jobstatus import JobStatus
-from lmsrvlabbook.api.connections.ref import LabbookRefConnection
 from lmsrvlabbook.api.objects.environment import Environment
+from lmsrvlabbook.api.objects.commit import Branch
 from lmsrvlabbook.api.objects.overview import LabbookOverview
 from lmsrvlabbook.api.objects.ref import LabbookRef
 from lmsrvlabbook.api.objects.labbooksection import LabbookSection
@@ -79,23 +76,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # Primary user branch of repo (known also as "Workspace Branch" or "trunk")
     workspace_branch_name = graphene.String()
 
-    # All available feature/rollback branches (Collectively known as experimental branches)
-    available_branch_names = graphene.List(graphene.String)
-
-    local_branch_names = graphene.List(graphene.String)
-    remote_branch_names = graphene.List(graphene.String)
-
-    # Names of branches that can be merged into the current active branch
-    mergeable_branch_names = graphene.List(graphene.String)
-
-    # The name of the current branch
-    # NOTE: DEPRECATED
-    active_branch = graphene.Field(LabbookRef, deprecation_reason="Can use workspaceBranchName instead")
-
-    # List of branches
-    # NOTE: DEPRECATED
-    branches = graphene.relay.ConnectionField(LabbookRefConnection,
-                                              deprecation_reason="Can use availableBranchNames instead")
+    # List of branch objects
+    branches = graphene.List(Branch)
 
     # Get the URL of the remote origin
     default_remote = graphene.String()
@@ -111,9 +93,6 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     # A boolean indicating if the current user can manage collaborators
     can_manage_collaborators = graphene.Boolean()
-
-    # How many commits the current active_branch is behind remote (0 if up-to-date or local-only).
-    updates_available_count = graphene.Int()
 
     # Whether repo state is clean
     is_repo_clean = graphene.Boolean()
@@ -200,16 +179,6 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         NOTE! This must be a string, as graphene can't quite handle big integers. """
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: str(FileOperations.content_size(labbook)))
-
-    def resolve_updates_available_count(self, info):
-        """Get number of commits the active_branch is behind its remote counterpart.
-        Returns 0 if up-to-date or if local only."""
-        # Note, by default using remote "origin"
-        def _gc(lb):
-            bm = BranchManager(lb, get_logged_in_username())
-            return bm.get_commits_behind_remote()[1]
-        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            _gc)
 
     def resolve_active_branch_name(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
@@ -319,34 +288,9 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             lambda labbook: self.helper_resolve_default_remote(labbook))
 
     def helper_resolve_branches(self, lb, kwargs):
-        # Get all edges and cursors. Here, cursors are just an index into the refs
-        edges = [x for x in lb.git.repo.refs]
-        cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt,
-                                                                                          x in enumerate(edges)]
-
-        # Process slicing and cursor args
-        lbc = ListBasedConnection(edges, cursors, kwargs)
-        lbc.apply()
-
-        # Get LabbookRef instances
-        edge_objs = []
-        for edge, cursor in zip(lbc.edges, lbc.cursors):
-            parts = edge.name.split("/")
-            if len(parts) > 1:
-                prefix = parts[0]
-                branch = parts[1]
-            else:
-                prefix = None
-                branch = parts[0]
-
-            create_data = {"name": lb.name,
-                           "owner": self.owner,
-                           "prefix": prefix,
-                           "ref_name": branch}
-            edge_objs.append(LabbookRefConnection.Edge(node=LabbookRef(**create_data), cursor=cursor))
-
-        return LabbookRefConnection(edges=edge_objs,
-                                    page_info=lbc.page_info)
+        bm = BranchManager(lb)
+        return [Branch(owner=self.owner, name=self.name, branch_name=b)
+                for b in sorted(set(bm.branches_local + bm.branches_remote))]
 
     def resolve_branches(self, info, **kwargs):
         """Method to page through branch Refs
