@@ -26,6 +26,7 @@ from gtmcore.exceptions import GigantumException
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.inventory import InventoryManager, Repository
 from gtmcore.labbook import LabBook
+from gtmcore.activity import ActivityStore
 from gtmcore.dataset import Dataset
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import core
@@ -152,7 +153,13 @@ class ZipExporter(object):
                                    fetch_method=InventoryManager(config_file).load_labbook_from_directory,
                                    put_method=InventoryManager(config_file).put_labbook,
                                    update_meta=update_meta)
-            return cast(LabBook, repo)
+
+            # Index the activity on the labbook.
+            lb = cast(LabBook, repo)
+            ars = ActivityStore(lb) 
+            ars.index_activity()
+
+            return lb
         except Exception as e:
             logger.error(e)
             raise ZipWorkflowException(e)

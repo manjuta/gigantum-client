@@ -1003,3 +1003,27 @@ class Repository(object):
             with open(readme_file, 'rt') as rf:
                 contents = rf.read()
         return contents
+
+    def update_indexes(self) -> None:
+        """Method to incrementally update whoosh indexes for a labbook.
+
+        Args:
+            None
+
+        Returns:
+            None (updates the whoosh index)
+        """
+        ars = ActivityStore(self)
+        ars.index_activity()
+
+    def drop_indexes(self) -> None:
+        """Method to drop whoosh indexes as part of deleting a local labbook.
+
+        Args:
+            None
+
+        Returns:
+            None (removes the whoosh index)
+        """
+        ars = ActivityStore(self)
+        ars.asearch.delete()

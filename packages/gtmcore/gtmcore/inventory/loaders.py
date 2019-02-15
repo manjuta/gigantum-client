@@ -86,6 +86,12 @@ def _from_remote(remote_url: str, username: str, owner: str,
 
         repository = put_repository(candidate_repo.root_dir, username, new_owner)
 
+        # TODO RB BVB F needs to be a launched as a background job 
+        # The labbook is fully populated.  Start a background job to index the activity.
+        logger.info(f"Updating whoosh indexes.")
+        ars = ActivityStore(repository)
+        ars.index_activity()
+
     return repository
 
 
