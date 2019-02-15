@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Tue Feb 12 2019 14:25:24 GMT-0500 (Eastern Standard Time)
+# timestamp: Tue Feb 12 2019 17:34:56 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
