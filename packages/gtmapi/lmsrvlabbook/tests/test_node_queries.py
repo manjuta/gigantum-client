@@ -35,7 +35,7 @@ from ..api import LabbookMutations, LabbookQuery
 
 class TestNodeQueries(object):
 
-    def test_node_labbook_from_object(self, fixture_working_dir, snapshot):
+    def test_node_labbook_from_object(self, fixture_working_dir):
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "cat-lab-book1", description="Test cat labbook from obj")
 
@@ -45,7 +45,7 @@ class TestNodeQueries(object):
                         ... on Labbook {
                             name
                             description
-                            activeBranch {
+                            activeBranchName {
                                 refName
                             }
                         }
@@ -54,7 +54,11 @@ class TestNodeQueries(object):
                 }
                 """
 
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        assert r['data']['node']['description'] == 'Test cat labbook from obj'
+        assert r['data']['node']['id'] == 'TGFiYm9vazpkZWZhdWx0JmNhdC1sYWItYm9vazE='
+        assert r['data']['node']['name'] == 'cat-lab-book1'
+        assert r['data']['node']['activeBranchName'] == 'master'
 
     def test_node_package(self, fixture_working_dir, snapshot):
         im = InventoryManager(fixture_working_dir[0])

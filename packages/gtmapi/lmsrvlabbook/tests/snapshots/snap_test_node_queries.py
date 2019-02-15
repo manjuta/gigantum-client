@@ -7,19 +7,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestNodeQueries.test_node_labbook_from_object 1'] = {
-    'data': {
-        'node': {
-            'activeBranch': {
-                'refName': 'master'
-            },
-            'description': 'Test cat labbook from obj',
-            'id': 'TGFiYm9vazpkZWZhdWx0JmNhdC1sYWItYm9vazE=',
-            'name': 'cat-lab-book1'
-        }
-    }
-}
-
 snapshots['TestNodeQueries.test_node_environment 1'] = {
     'data': {
         'node': {
