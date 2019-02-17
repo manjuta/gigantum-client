@@ -13,7 +13,6 @@ from elasticsearch import Elasticsearch
 
 es_ip = "172.17.0.3"
 
-
 def helper_create_labbook_change(labbook, cnt=0):
     """Helper method to create a change to the labbook"""
     # Make a new file
@@ -125,18 +124,76 @@ class TestElasticSearch:
 
         aidx.destroy()
 
-    def test_destroy(self, mock_config_with_activitystore):
-        """Make sure no indexes are hanging around"""
+    def test_details(self, mock_config_with_activitystore):
+
+        linked_commit = helper_create_labbook_change(mock_config_with_activitystore[1], 1)
+
+        ar = ActivityRecord(ActivityType.NOTE)
+        ar.timestamp = datetime.now()
+        ar.linked_commit = linked_commit.hexsha
+        ar.tags = ['foo','bar', 'mu', 'wa']
+        ar.message = 'hi, my name is'
+
+        ad1 = ActivityDetailRecord(ActivityDetailType.CODE)
+        ad1.show = True
+        ad1.importance = 100
+        ad1.tags = ['foo', 'mu']
+        ad1.add_value("text/plain", "slim shady")
+
+        ad2 = ActivityDetailRecord(ActivityDetailType.CODE)
+        ad2.show = True
+        ad2.importance = 0
+        ad2.tags = ['bar', 'wah']
+        ad2.add_value("text/plain", "please stand up")
+        ad2.add_value("text/markdown", "<code>would the real slim shady</code>")
+
+        ad3 = ActivityDetailRecord(ActivityDetailType.CODE)
+        ad3.show = True
+        ad3.importance = 0
+        ad3.tags = ['wah', 'foo']
+        ad3.add_value("text/plain", "I'm the real shady")
+        ad3.add_value("text/markdown", "##stand up") 
+
+        ar.add_detail_object(ad1)
+        ar.add_detail_object(ad2)
+        ar.add_detail_object(ad3)
+
+        # make an activity record
+        recorda = mock_config_with_activitystore[0].create_activity_record(ar)
 
         # Create an index
-        aidx = ESActivityIndex(mock_config_with_activitystore[1].name, es_ip)
+        aidx = ESActivityIndex(mock_config_with_activitystore[1].name, es_ip, create=True)
 
         # Iterate over activity records and store them.
         for rec in mock_config_with_activitystore[0].get_activity_records():
-            aidx.add(rec)
+            aidx.add(rec, mock_config_with_activitystore[1])
 
-        aidx.destroy()
+        #RBTODO -- index populated, but queries not processing right......
+        # check for tags
+        res = aidx.search_detail("tags","foo")
+        assert(len(res)==2)
 
+        res = aidx.search_detail("tags","bar")
+        assert(len(res)==1)
+
+        # freetext searches
+        res = aidx.search_detail("freetext","stand")
+        assert(len(res)==2)
+
+        res = aidx.search_detail("freetext","shady")
+        assert(len(res)==3)
+
+        # and search for mimetypes
+        res = aidx.searchDetail("mimetypes","text/plain")
+        assert(len(res)==3)
+
+        # and search for mimetypes
+        res = aidx.searchDetail("mimetypes","text/markdown")
+        assert(len(res)==2)
+
+        # importance
+        res = aidx.searchDetail("importance","100")
+        assert(len(res)==1)
 
     def test_destroy(self, mock_config_with_activitystore):
         """Destory any hanging on indexes in case.  Not a test."""

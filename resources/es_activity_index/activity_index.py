@@ -4,6 +4,7 @@ from git import Commit
 from typing import Dict, Union, List, Any, Optional
 
 from gtmcore.labbook import LabBook
+from gtmcore.activity import ActivityStore
 from gtmcore.activity.records import ActivityRecord, ActivityDetailRecord
 from gtmcore.logging import LMLogger
 
@@ -29,16 +30,15 @@ class ESActivityIndex:
 #   The benefit of keeping as one index would be that we could query details and activity in one go.....
 #    and maybe make batch indexing easier.
 
-    # mapping for labnotes
-    # add level as a tag 
+    # mapping for activity records
     activity_mapping = {
         "mappings": {
             "activity_record": { 
                 "properties": { 
-                    "commit":           { "type": "text" },
-                    "linkedcommit":     { "type": "text" },
+                    "commit":           { "type": "keyword" },
+                    "linkedcommit":     { "type": "keyword" },
                     "name":             { "type": "text" },
-                    "email":            { "type": "text" },
+                    "email":            { "type": "keyword" },
                     "commit_message":   { "type": "text" },
                     "linked_commit_message":   { "type": "text" },
                     "record_type":      { "type": "keyword" }, 
@@ -49,14 +49,16 @@ class ESActivityIndex:
         }
     }
 
+    # mapping for detail records
     detail_mapping = { 
         "mappings": {
-            "activity_detail": { 
+            "detail_record": { 
                 "properties": { 
                     "key":              { "type": "keyword" },
-                    "commit":           { "type": "text" },
-                    "linkedcommit":     { "type": "text" },
-                    "record_type":      { "type": "text" },
+                    "commit":           { "type": "keyword" },
+                    "linkedcommit":     { "type": "keyword" },
+                    "record_type":      { "type": "keyword" },
+                    "record_action":    { "type": "keyword" },
                     "tags":             { "type": "keyword" },
                     "mime_types":       { "type": "keyword" },
                     "free_text":        { "type": "text" }, 
@@ -166,10 +168,10 @@ class ESActivityIndex:
 
         # add details with linked_commit
         with record.inspect_detail_objects() as detail_objs:
+            ars = ActivityStore(labbook)
             for i, obj in enumerate(detail_objs):
-                import pdb; pdb.set_trace()
-                assert(0)
-                self._add_detail(es, record.commit, record.linked_commit, linked_commit_record['committed_on'], ob[3])
+                obj_loaded = ars.get_detail_record(obj.key) 
+                self._add_detail(es, record.commit, record.linked_commit, linked_commit_record['committed_on'], obj_loaded)
 
 
     def _add_detail(self, es: Elasticsearch, commit: Optional[str], linked_commit: Optional[str], timestamp: datetime, record: ActivityDetailRecord) -> None:
@@ -182,20 +184,12 @@ class ESActivityIndex:
                 linked_commit: connect detail to activity record
                 time_stamp: so we can search by time
                 recordid(str): commit_hash of activity entry
-                record(dict): with some subset of the fields
-                    "properties": { 
-                        "type":         { "type": "keyword" },
-                        "tags":         { "type": "keyword" }, 
-                        "mimetypes":    { "type": "keyword" }, 
-                        "freetext":     { "type": "text" }
-                    }
+                record(dict): ActivityDetailRecord
             
             Returns:
                 None
         """
-        return
 
-#  do nothing yet
         mimetypes = list()
         freetext = str()
 
@@ -206,14 +200,16 @@ class ESActivityIndex:
             # flatten freetext into uni-str
             freetext = freetext + dataobj + "\n"
 
-#        dwriter.add_document( key=record.key, \
-#                      commit=commit, \
-#                      linked_commit=linked_commit, \
-#                      record_type=record.type.name, \
-#                      tags=record.tags, \
-#                      mimetypes=mimetypes, \
-#                      freetext=freetext, \
-#                      timestamp=timestamp)
+        ad_dict = { "commit": commit, 
+                    "linkedcommit": linked_commit,
+                    "record_type": record.type.name,
+                    "record_action": record.action.name,
+                    "mimetypes": mimetypes,
+                    "freetext": freetext, 
+                    "tags": record.tags,
+                    "timestamp": timestamp }
+
+        es.index(index=f"{self.index_name}_detail", doc_type="detail_record", body=ad_dict)
 
     def search_activity(self, field: str, terms: str) -> List:
         """Simple search for terms in a field.
@@ -229,8 +225,24 @@ class ESActivityIndex:
         es = Elasticsearch(self.servers)
 
         query = {"query": {"match": {field : terms}}}
-
         res = es.search(index=f"{self.index_name}_activity", body=query)
 
         return res['hits']['hits']
     
+    def search_detail(self, field: str, terms: str) -> List:
+        """Simple search for terms in a field.
+            If the field is not given (None), look in all fields.
+
+            Args:
+                field(str): field in which to search
+                terms(str): terms to identify in the field
+            
+            Returns:
+                iterable(dict)
+        """
+        es = Elasticsearch(self.servers)
+
+        query = {"query": {"match": {field : terms}}}
+        res = es.search(index=f"{self.index_name}_detail", body=query)
+
+        return res['hits']['hits']
