@@ -55,8 +55,7 @@ class PresignedS3Upload(object):
             None
         """
         self.s3_headers = {'x-amz-server-side-encryption': 'aws:kms',
-                           'x-amz-server-side-encryption-aws-kms-key-id': encryption_key_id
-                           }
+                           'x-amz-server-side-encryption-aws-kms-key-id': encryption_key_id}
 
     async def get_presigned_s3_url(self, session: aiohttp.ClientSession) -> None:
         """Method to make a request to the object service and pre-sign an S3 PUT
@@ -67,12 +66,6 @@ class PresignedS3Upload(object):
         Returns:
             None
         """
-        # Set the Content-Length of the PUT explicitly since it won't happen automatically due to streaming IO
-        headers = copy.deepcopy(self.s3_headers)
-
-        # Add custom headers
-        _, file_extension = os.path.splitext(self.object_details.dataset_path)
-
         # Get the object id from the object path
         _, obj_id = self.object_details.object_path.rsplit('/', 1)
 
