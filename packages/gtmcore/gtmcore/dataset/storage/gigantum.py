@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import aiofiles
 import copy
+import blosc
 
 from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
@@ -176,6 +177,7 @@ class PresignedS3Download(object):
                         chunk = await response.content.read(self.download_chunk_size)
                         if not chunk:
                             break
+                        decompressed_chunk = blosc.decompress(chunk)
                         await fd.write(chunk)
         except Exception as err:
             logger.exception(err)
