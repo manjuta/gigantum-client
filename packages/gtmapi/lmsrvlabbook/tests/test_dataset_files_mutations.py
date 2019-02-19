@@ -3,6 +3,8 @@ import os
 import uuid
 import flask
 from aioresponses import aioresponses
+import gzip
+import shutil
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
@@ -12,6 +14,13 @@ from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest
 
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file
+
+
+def helper_compress_file(source, destination):
+    with open(source, "rb") as src_file:
+        with gzip.open(destination, mode="wb", compresslevel=6) as compressed_file:
+            shutil.copyfileobj(src_file, compressed_file)
+    os.remove(source)
 
 
 class TestDatasetFilesMutations(object):
@@ -42,8 +51,8 @@ class TestDatasetFilesMutations(object):
 
         assert os.path.exists(obj1_target) is True
         assert os.path.exists(obj2_target) is True
-        os.rename(obj1_target, obj1_source)
-        os.rename(obj2_target, obj2_source)
+        helper_compress_file(obj1_target, obj1_source)
+        helper_compress_file(obj2_target, obj2_source)
         assert os.path.isfile(obj1_target) is False
         assert os.path.isfile(obj2_target) is False
         assert os.path.isfile(obj1_source) is True
@@ -97,7 +106,7 @@ class TestDatasetFilesMutations(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is False
-            with open(obj1_source, 'rt') as dd:
+            with gzip.open(obj1_source, 'rt') as dd:
                 source1 = dd.read()
             with open(obj1_target, 'rt') as dd:
                 assert source1 == dd.read()
@@ -120,11 +129,11 @@ class TestDatasetFilesMutations(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is True
-            with open(obj1_source, 'rt') as dd:
+            with gzip.open(obj1_source, 'rt') as dd:
                 source1 = dd.read()
             with open(obj1_target, 'rt') as dd:
                 assert source1 == dd.read()
-            with open(obj2_source, 'rt') as dd:
+            with gzip.open(obj2_source, 'rt') as dd:
                 source2 = dd.read()
             with open(obj2_target, 'rt') as dd:
                 assert source2 == dd.read()
