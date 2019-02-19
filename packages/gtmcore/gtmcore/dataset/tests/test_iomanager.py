@@ -4,12 +4,20 @@ import glob
 import uuid
 import shutil
 from aioresponses import aioresponses
+import gzip
 
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file,\
     USERNAME
 from gtmcore.dataset.io import PushResult, PushObject
+
+
+def helper_compress_file(source, destination):
+    with open(source, "rb") as src_file:
+        with gzip.open(destination, mode="wb", compresslevel=6) as compressed_file:
+            shutil.copyfileobj(src_file, compressed_file)
+    os.remove(source)
 
 
 class TestIOManager(object):
@@ -299,8 +307,10 @@ class TestIOManager(object):
 
         assert os.path.exists(obj1_target) is True
         assert os.path.exists(obj2_target) is True
-        os.rename(obj1_target, obj1_source)
-        os.rename(obj2_target, obj2_source)
+
+        helper_compress_file(obj1_target, obj1_source)
+        helper_compress_file(obj2_target, obj2_source)
+
         assert os.path.isfile(obj1_target) is False
         assert os.path.isfile(obj2_target) is False
         assert os.path.isfile(obj1_source) is True
@@ -346,10 +356,8 @@ class TestIOManager(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is False
-            with open(obj1_source, 'rt') as dd:
-                source1 = dd.read()
             with open(obj1_target, 'rt') as dd:
-                assert source1 == dd.read()
+                assert "asdfadfsdf" == dd.read()
 
             result = iom.pull_objects(keys=["test2.txt"])
             assert len(glob.glob(f'{iom.push_dir}/*')) == 1
@@ -359,14 +367,10 @@ class TestIOManager(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is True
-            with open(obj1_source, 'rt') as dd:
-                source1 = dd.read()
             with open(obj1_target, 'rt') as dd:
-                assert source1 == dd.read()
-            with open(obj2_source, 'rt') as dd:
-                source2 = dd.read()
+                assert "asdfadfsdf" == dd.read()
             with open(obj2_target, 'rt') as dd:
-                assert source2 == dd.read()
+                assert "fdsfgfd" == dd.read()
 
     def test_pull_objects_all(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
@@ -393,8 +397,10 @@ class TestIOManager(object):
 
         assert os.path.exists(obj1_target) is True
         assert os.path.exists(obj2_target) is True
-        os.rename(obj1_target, obj1_source)
-        os.rename(obj2_target, obj2_source)
+
+        helper_compress_file(obj1_target, obj1_source)
+        helper_compress_file(obj2_target, obj2_source)
+
         assert os.path.isfile(obj1_target) is False
         assert os.path.isfile(obj2_target) is False
         assert os.path.isfile(obj1_source) is True
@@ -448,7 +454,7 @@ class TestIOManager(object):
             assert os.path.isfile(obj2_target) is True
 
             for r in result.success:
-                with open(check_info[r.object_path], 'rt') as dd:
+                with gzip.open(check_info[r.object_path], 'rt') as dd:
                     source1 = dd.read()
                 with open(r.object_path, 'rt') as dd:
                     dest1 = dd.read()
@@ -484,7 +490,7 @@ class TestIOManager(object):
 
         # Completely remove other_dir/test3.txt object
         os.remove(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "other_dir", "test3.txt"))
-        os.rename(obj1_target, obj1_source)
+        helper_compress_file(obj1_target, obj1_source)
 
         # Remove link for test1.txt
         os.remove(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test1.txt"))

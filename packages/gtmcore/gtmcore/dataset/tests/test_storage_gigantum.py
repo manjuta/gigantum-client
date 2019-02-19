@@ -1,6 +1,7 @@
 import pytest
 from aioresponses import aioresponses
 import aiohttp
+import gzip
 
 import os
 import uuid
@@ -12,10 +13,9 @@ from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
 from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 
-
 def helper_write_object(object_id):
     object_file = os.path.join('/tmp', object_id)
-    with open(object_file, 'wt') as temp:
+    with gzip.open(object_file, 'wt') as temp:
         temp.write(f'dummy data: {object_id}')
 
     return object_file
@@ -528,7 +528,7 @@ class TestStorageBackendGigantum(object):
             assert result.success[1].object_path in [obj1_target, obj2_target]
 
             for r in result.success:
-                with open(check_info[r.object_path], 'rt') as dd:
+                with gzip.open(check_info[r.object_path], 'rt') as dd:
                     source1 = dd.read()
                 with open(r.object_path, 'rt') as dd:
                     dest1 = dd.read()
@@ -596,7 +596,7 @@ class TestStorageBackendGigantum(object):
             assert os.path.isfile(result.success[0].object_path) is True
             assert os.path.isfile(result.failure[0].object_path) is False
 
-            with open(check_info[result.success[0].object_path], 'rt') as dd:
+            with gzip.open(check_info[result.success[0].object_path], 'rt') as dd:
                 source1 = dd.read()
             with open(result.success[0].object_path, 'rt') as dd:
                 dest1 = dd.read()
@@ -661,7 +661,7 @@ class TestStorageBackendGigantum(object):
             assert os.path.isfile(result.success[0].object_path) is True
             assert os.path.isfile(result.failure[0].object_path) is False
 
-            with open(check_info[result.success[0].object_path], 'rt') as dd:
+            with gzip.open(check_info[result.success[0].object_path], 'rt') as dd:
                 source1 = dd.read()
             with open(result.success[0].object_path, 'rt') as dd:
                 dest1 = dd.read()
