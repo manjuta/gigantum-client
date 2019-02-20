@@ -52,7 +52,7 @@ const BaseQuery = graphql`query SelectBaseQuery($first: Int!, $cursor: String){
 }`;
 
 const DatasetQuery = graphql`query SelectBase_DatasetQuery{
-  availableDatasets {
+  availableDatasetTypes {
     id
     name
     storageType
@@ -399,8 +399,8 @@ export default class SelectBase extends React.Component {
                     </div>
                   );
                 } else if (props && this.props.datasets) {
-                  const filterCategories = this._createDatasetFilters(props.availableDatasets);
-                  const filteredDatasets = this._filterDatasets(props.availableDatasets);
+                  const filterCategories = this._createDatasetFilters(props.availableDatasetTypes);
+                  const filteredDatasets = this._filterDatasets(props.availableDatasetTypes);
                   return <div className={innerContainer}>
                     <AdvancedSearch
                       tags={this.state.tags}
