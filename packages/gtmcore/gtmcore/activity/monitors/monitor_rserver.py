@@ -20,7 +20,8 @@ from gtmcore.configuration import get_docker_client
 from gtmcore.activity.monitors.devenv import DevEnvMonitor
 from gtmcore.activity.monitors.activity import ActivityMonitor
 
-from gtmcore.activity.processors.core import GenericFileChangeProcessor, ActivityShowBasicProcessor
+from gtmcore.activity.processors.core import GenericFileChangeProcessor, ActivityShowBasicProcessor, \
+    ActivityDetailLimitProcessor
 from gtmcore.activity import ActivityType
 from gtmcore.activity.processors.rserver import (RStudioServerCodeProcessor,
                                                  RStudioServerPlaintextProcessor,
@@ -241,6 +242,7 @@ class RStudioServerMonitor(ActivityMonitor):
         self.add_processor(GenericFileChangeProcessor())
         self.add_processor(RStudioServerPlaintextProcessor())
         self.add_processor(RStudioServerImageExtractorProcessor())
+        self.add_processor(ActivityDetailLimitProcessor())
         self.add_processor(ActivityShowBasicProcessor())
 
     def start(self, metadata: Dict[str, str], database: int = 1) -> None:

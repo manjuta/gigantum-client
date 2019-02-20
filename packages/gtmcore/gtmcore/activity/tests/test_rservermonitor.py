@@ -38,7 +38,7 @@ class TestRStudioServerMonitor(object):
     
         server_monitor = RStudioServerMonitor("test", "test", mock_labbook[2].name,
                                             "52f5a3a9", config_file=mock_labbook[0])
-        assert len(server_monitor.processors) == 5
+        assert len(server_monitor.processors) == 6
 
     def test_code_and_image(self, redis_client, mock_labbook):
         """Test reading a log and storing a record"""
