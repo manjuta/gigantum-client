@@ -92,7 +92,7 @@ class LabbookQuery(graphene.ObjectType):
     available_bases = graphene.relay.ConnectionField(BaseComponentConnection)
 
     # List available types of datasets
-    available_datasets = graphene.List(DatasetType)
+    available_dataset_types = graphene.List(DatasetType)
 
     # Currently not fully supported, but will be added in the future.
     # available_base_image_versions = graphene.relay.ConnectionField(BaseImageConnection, repository=graphene.String(),
@@ -232,7 +232,7 @@ class LabbookQuery(graphene.ObjectType):
         """
         return UserIdentity()
 
-    def resolve_available_datasets(self, info):
+    def resolve_available_dataset_types(self, info):
         """Method to resolve a list of available dataset types
 
         Returns:

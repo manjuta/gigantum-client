@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Feb 18 2019 14:51:16 GMT-0500 (Eastern Standard Time)
+# timestamp: Wed Feb 20 2019 15:00:36 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -1020,7 +1020,7 @@ type LabbookQuery {
   labbookList: LabbookList
   datasetList: DatasetList
   availableBases(before: String, after: String, first: Int, last: Int): BaseComponentConnection
-  availableDatasets: [DatasetType]
+  availableDatasetTypes: [DatasetType]
   package(manager: String, package: String, version: String = ""): PackageComponent
   userIdentity: UserIdentity
 }
