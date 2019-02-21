@@ -214,14 +214,16 @@ class Header extends Component {
                   key="branches">
                   <BranchMenu
                     defaultRemote={labbook.defaultRemote}
-                    branchesOpen={this.props.branchesOpen}
+                    branchesOpen={props.branchesOpen}
                     labbook={labbook}
+                    branches={props.branches}
                     labbookId={labbook.id}
                     activeBranch={labbook.activeBranchName}
                     toggleBranchesView={this.props.toggleBranchesView}
-                    mergeFilter={this.props.mergeFilter}
-                    setBuildingState={this.props.setBuildingState}
+                    mergeFilter={props.mergeFilter}
+                    setBuildingState={props.setBuildingState}
                     isSticky={props.isSticky}
+                    visibility={props.visibility}
                   />
                 </ErrorBoundary>
                 }

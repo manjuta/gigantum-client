@@ -18,9 +18,16 @@ import './BranchMenu.scss';
   @return {Object} activeBranch
 */
 const extraxtActiveBranch = (branches) => {
-   const activeBranch = branches.filter(branch => branch.isActive)[0];
-   const filteredBranches = branches.filter(branch => !branch.isActive);
-   return ({ activeBranch, filteredBranches });
+   const activeBranch = branches.filter(branch => branch.isActive)[0],
+         filteredBranches = branches.filter(branch => !branch.isActive),
+         branchMenuList = (filteredBranches.length > 3) ? filteredBranches.slice(0, 3) : filteredBranches,
+         otherBranchCount = filteredBranches.length - branchMenuList.length;
+   return ({
+     activeBranch,
+     filteredBranches,
+     branchMenuList,
+     otherBranchCount,
+   });
 };
 
 class BranchMenu extends Component {
@@ -34,7 +41,16 @@ class BranchMenu extends Component {
     }),
     switchingBranch: false,
     sidePanelVisible: false,
+    syncMenuVisible: false,
   };
+
+  componentDidMount() {
+    window.addEventListener('click', this._closePopups);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._closePopups);
+  }
 
 
   /**
@@ -80,6 +96,23 @@ class BranchMenu extends Component {
      const { state } = this;
      this.setState({ switchMenuVisible: !state.switchMenuVisible });
   }
+
+  /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _closePopups(evt) {
+     const { state } = this;
+     if (evt.target.className.indexOf('BranchMenu') < 0) {
+       this.setState({
+         switchMenuVisible: false,
+         syncMenuVisible: false,
+       });
+     }
+  }
+
   /**
     @param {} -
     sets state to toggle the switch dropdown
@@ -87,12 +120,74 @@ class BranchMenu extends Component {
   */
   @boundMethod
   _toggleSidePanel(sidePanelVisible) {
-      this.setState({ sidePanelVisible });
+      this.setState({ sidePanelVisible, switchMenuVisible: false });
+  }
+
+  /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _sync() {
+    const { props, state } = this;
+    this.setState({ syncMenuVisible: false });
+    if ((props.visibility !== 'public') || (props.visibility !== 'private')) {
+
+    } else {
+
+    }
+  }
+
+  /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _pull() {
+    const { props, state } = this;
+    this.setState({ syncMenuVisible: false });
+    if ((props.visibility !== 'public') || (props.visibility !== 'private')) {
+
+    } else {
+
+    }
+  }
+
+  /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _publish() {
+    const { props, state } = this;
+    const data = {
+      labbookId: props.labbook.id,
+      setPublic: false,
+      successCall: () => {},
+      failureCall: () => {},
+    };
+    state.branchMutations.publishLabbook(data, (response, error) => {
+      console.log(response, error)
+    });
+  }
+
+  /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _toggleSyncDropdown() {
+    const { state } = this;
+    this.setState({ syncMenuVisible: !state.syncMenuVisible });
   }
 
   render() {
     const { props, state } = this,
-          { branches } = props.labbook,
+          { branches } = props,
           branchMenuCSS = classNames({
             BranchMenu: true,
             hidden: props.isSticky,
@@ -113,7 +208,20 @@ class BranchMenu extends Component {
             'BranchMenu__branch-name': state.switchingBranch,
             hidden: !state.switchingBranch,
           }),
-          { activeBranch, filteredBranches } = extraxtActiveBranch(branches);
+          syncMenuDropdownCSS = classNames({
+            'BranchMenu__dropdown-menu': state.syncMenuVisible,
+            hidden: !state.syncMenuVisible,
+          }),
+          syncMenuDropdownButtonCSS = classNames({
+            'BranchMenu__btn BranchMenu__btn--sync-dropdown': true,
+            'BranchMenu__btn--sync-open': state.syncMenuVisible,
+          }),
+          {
+            activeBranch,
+            filteredBranches,
+            branchMenuList,
+            otherBranchCount,
+          } = extraxtActiveBranch(branches);
     return (
       <div className={branchMenuCSS}>
           <div className="BranchMenu__dropdown">
@@ -123,7 +231,6 @@ class BranchMenu extends Component {
                   <div className={branchNameCSS}>
                     <div className="BranchMenu__dropdown-label">Branch:</div>
                     <div className="BranchMenu__dropdown-text">{activeBranch.branchName}</div>
-                    <span>{`${activeBranch.commitsBehind} / ${activeBranch.commitsAhead}`}</span>
                   </div>
 
                   <div className={branchSwitchingNameCSS}>
@@ -137,36 +244,100 @@ class BranchMenu extends Component {
                   <h5 className="BranchMenu__h5">Quick Switch</h5>
                   <ul className="BranchMenu__ul">
                     {
-                      filteredBranches.map(branch => <li
-                          onClick={ () => this._switchBranch(branch) }
-                          key={branch.branchName}
-                          className="BrancMenu__list-item">
-                            {branch.branchName}
+                      branchMenuList.map((branch) => {
+                        const cloudIconCSS = classNames({
+                            BranchMenu__icon: true,
+                            'BranchMenu__icon--cloud': branch.isRemote,
+                            'BranchMenu__icon--empty': !branch.isRemote,
+                          }),
+                          localIconCSS = classNames({
+                            BranchMenu__icon: true,
+                            'BranchMenu__icon--local': branch.isLocal,
+                            'BranchMenu__icon--empty': !branch.isLocal,
+                          });
 
-                            <span>{`${branch.commitsBehind} / ${branch.commitsAhead}`}</span>
-                        </li>)
+                        return (<li
+                            onClick={ () => this._switchBranch(branch) }
+                            key={branch.branchName}
+                            className="BranchMenu__list-item">
+                            <div className="BranchMenu__text">{branch.branchName}</div>
+                            <div className="BranchMenu__icons">
+                              <div className={cloudIconCSS}></div>
+                              <div className={localIconCSS}></div>
+                            </div>
+                          </li>);
+                      })
+                    }
+
+                    {
+                      (otherBranchCount > 0)
+                      && <div className="BranchMenu__other-text">{`+${otherBranchCount} others` }</div>
+                    }
+
+                    { (filteredBranches.length === 0)
+                      &&
+                      <li className="BranchMenu__list-item">
+                        There is only a master branch associacted with this project, would you like to
+                        <button className="Btn--flat">create a new branch?</button>
+                      </li>
                     }
                   </ul>
+                  <div className="BranchMenu__menu-button">
+                    <button
+                      onClick={() => this._toggleSidePanel(true)}
+                      className="BranchMenu__button Btn--flat">
+                        Manage Branches
+                    </button>
+                  </div>
                 </div>
           </div>
           <div className="BranchMenu__buttons">
             <button
               onClick={() => this._toggleSidePanel(true)}
-              className="BranchMenu__btn BranchMenu__btn--manage Btn--flat"
+              className="BranchMenu__btn BranchMenu__btn--manage"
               type="Submit">
               Manage
             </button>
             <button
-              className="BranchMenu__btn BranchMenu__btn--manage Btn--flat"
+              className="BranchMenu__btn BranchMenu__btn--create"
               type="Submit"
               onClick={() => this._setModalState('createBranchVisible') }>
               Create
             </button>
-            <button
-              className="BranchMenu__btn BranchMenu__btn--manage Btn--flat"
-              type="Submit">
-              Sync
-            </button>
+            <div className="BranchMenu__sync-container">
+              <button
+                className="BranchMenu__btn BranchMenu__btn--sync"
+                onClick={() => { this._sync(); }}
+                type="Submit">
+                <div className="BranchMenu__sync-status">
+                  <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
+                  <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
+                </div>
+                <div className="BranchMenu__btn--text">Sync</div>
+              </button>
+
+              <button
+                className={syncMenuDropdownButtonCSS}
+                onClick={() => { this._toggleSyncDropdown(); }}
+                type="Submit">
+              </button>
+
+              <div className={syncMenuDropdownCSS}>
+                <h5 className="BranchMenu__h5">Sync</h5>
+                <ul className="BranchMenu__ul">
+                  <li
+                     className="BranchMenu__list-item"
+                     onClick={() => this._sync()}>
+                     Push & Pull
+                  </li>
+                  <li
+                     className="BranchMenu__list-item"
+                     onClick={() => this._pull()}>
+                      Pull-only
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <CreateBranch

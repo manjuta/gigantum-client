@@ -3,9 +3,7 @@
 .ContainerStatus {
   align-self: center;
   position: relative;
-  display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
+  @include flex(flex-start, column);
 }
 
 

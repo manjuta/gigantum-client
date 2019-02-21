@@ -1,294 +1,295 @@
 @import '~Styles/_imports.scss';
+.Header {
+  .ActionsMenu {
+    position: relative;
 
-.ActionsMenu {
-  position: relative;
+    overflow: visible;
+    align-self: flex-end;
 
-  overflow: visible;
-  align-self: flex-end;
+    height: 30px;
+    min-height: 30px;
+    margin: 0 0 0 20px;
 
-  height: 30px;
-  min-height: 30px;
-  margin: 0 0 0 20px;
-
-  @include flex(flex-end, row)
-}
-
-.ActionsMenu__btn {
-  width: 60px;
-  height: 24px;
-
-
-  text-align: left;
-
-  color: $romanSilver;
-  border: 3px solid $grey-border;
-  border-radius: 3px;
-  background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat center center !important;
-  background-color: $white !important;
-  background-size: 30px !important;
-
-  font-size: 14px;
-  line-height: 20px;
-
-  &:hover {
-    color: $romanSilver;
-    border: 3px solid $azure;
-    background: $azure url('~Images/icons/ellipsis-white.svg') no-repeat no-repeat center center !important;
-    background-size: 30px 30px !important;
+    @include flex(flex-end, row)
   }
 
-  &:focus{
+  .ActionsMenu__btn {
+    width: 60px;
+    height: 24px;
+
+
+    text-align: left;
+
+    color: $romanSilver;
+    border: 3px solid $grey-border;
+    border-radius: 3px;
     background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat center center !important;
     background-color: $white !important;
     background-size: 30px !important;
-  }
 
-  &--flat {
-    width: 100%;
-    cursor: pointer;
-    margin: 1.5px 0;
-    background-color: $white;
-    border: 0px solid $white;
-    text-align: left;
-    padding: 0px;
-    color: $romanSilver;
-    font-size: 15px;
-  }
-}
-
-.ActionsMenu__button:hover {
-  border: 3px solid $romanSilver;
-  color: $romanSilver;
-  background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat calc(100% - 10px) center !important;
-  background-size: 30px 30px !important;
-
-  background-color: $white;
-}
-
-.ActionsMenu__menu {
-  position: absolute;
-  right: 0px;
-  top: 25px;
-  background: $white;
-  border-radius: 3px;
-  padding: 10px;
-  z-index: index($elements, popup);
-  width: 300px;
-
-  hr {
-    background-color: $background-color;
-    border-color: $background-color;
-    border-width: 1px;
-    opacity: 0.3;
-    width: 85%;
-  }
-
-  &--animation{
-    animation: slide-down-fade-in forwards .25s;
-  }
-}
-
-.ActionsMenu__list{
-
-  margin-top: 0px;
-
-}
-
-.ActionsMenu__item {
-  padding: 5px 0 5px 40px;
-  line-height: 24px;
-  cursor: pointer;
-  color: $jet;
-
-
-  border-bottom: 2px solid $grey;
-
-  a {
-    color: $jet;
-  }
-
-  &:hover button {
-    background-color: $background-color;
-  }
-
-  &--export {
-    background: url('~Images/icons/export.svg') no-repeat 7px center;
-    background-size: 24px;
+    font-size: 14px;
+    line-height: 20px;
 
     &:hover {
-      background: $background-color url('~Images/icons/export.svg') no-repeat 7px center;
-      background-size: 24px;
-    }
-  }
-
-  &--visibility-public {
-    background: url('~Images/icons/earth-grey.svg') no-repeat 10px center;
-    background-size: 17px;
-
-    &:hover {
-      background: $background-color url('~Images/icons/earth-grey.svg') no-repeat 10px center;
-      background-size: 17px;
-    }
-  }
-
-  &--visibility-private {
-    background: url('~Images/icons/lock-grey.svg') no-repeat 13px center;
-    background-size: 13px;
-
-    &:hover {
-      background: $background-color url('~Images/icons/lock-grey.svg') no-repeat 13px center;
-      background-size: 13px;
-    }
-  }
-
-
-  &--delete{
-    background: url('~Images/icons/trash.svg') no-repeat 11px center;
-    background-size: 16px;
-
-    &:hover {
-      background: $background-color url('~Images/icons/trash.svg') no-repeat 11px center;
-      background-size: 16px;
-    }
-  }
-
-  &--copy {
-    padding: 0px;
-  }
-
-  &--label {
-    font-size: 12px;
-    padding: 5px 0 0 0;
-  }
-
-  &:last-child{
-    border-width: 0px;
-  }
-
-}
-
-.ActionsMenu__toggle {
-  z-index: index($elements, popup) + 1;
-  position: absolute;
-  top: 25px;
-  right: 16px;
-
-  animation: slide-down-fade-in forwards .25s;
-
-  @include triangle('up', 14px, $white);
-}
-
-.ActionsMenu__sync,
-.ActionsMenu__publish {
-  position: relative;
-  width: 100%;
-  text-align: center;
-}
-
-.ActionsMenu__btn{
-  &:focus {
-    color: $jet;
-  }
-}
-
-
-.ActionsMenu__btn{
-  &--flat{
-    width: 100%;
-    cursor: pointer;
-    margin: 1.5px 0;
-    background-color: $white;
-    border: 0px solid $white;
-    text-align: left;
-    padding: 0px;
-    color: $jet;
-    font-size: 15px;
-
-    &:focus,
-    &:disabled, {
-      cursor: pointer;
-      background-color: $white;
-      border: 0px solid $white;
-      padding: 0px;
-      color: $jet;
+      color: $romanSilver;
+      border: 3px solid $azure;
+      background: $azure url('~Images/icons/ellipsis-white.svg') no-repeat no-repeat center center !important;
+      background-size: 30px 30px !important;
     }
 
-    &:hover {
-      background-color: $background-color;
+    &:focus{
+      background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat center center !important;
+      background-color: $white !important;
+      background-size: 30px !important;
+    }
+
+    &--flat {
       width: 100%;
       cursor: pointer;
-      color: $jet;
+      margin: 1.5px 0;
+      background-color: $white;
       border: 0px solid $white;
+      text-align: left;
+      padding: 0px;
+      color: $romanSilver;
+      font-size: 15px;
+    }
+  }
+
+  .ActionsMenu__button:hover {
+    border: 3px solid $romanSilver;
+    color: $romanSilver;
+    background: $white url('~Images/icons/ellipsis.svg') no-repeat no-repeat calc(100% - 10px) center !important;
+    background-size: 30px 30px !important;
+
+    background-color: $white;
+  }
+
+  .ActionsMenu__menu {
+    position: absolute;
+    right: 0px;
+    top: 25px;
+    background: $white;
+    border-radius: 3px;
+    padding: 10px;
+    z-index: index($elements, popup);
+    width: 300px;
+
+    hr {
+      background-color: $background-color;
+      border-color: $background-color;
+      border-width: 1px;
+      opacity: 0.3;
+      width: 85%;
     }
 
-    &.disabled,
-     .disabled:hover{
-        width: 100%;
-        margin: 1.5px 0;
+    &--animation{
+      animation: slide-down-fade-in forwards .25s;
+    }
+  }
+
+  .ActionsMenu__list{
+
+    margin-top: 0px;
+
+  }
+
+  .ActionsMenu__item {
+    padding: 5px 0 5px 40px;
+    line-height: 24px;
+    cursor: pointer;
+    color: $jet;
+
+
+    border-bottom: 2px solid $grey;
+
+    a {
+      color: $jet;
+    }
+
+    &:hover button {
+      background-color: $background-color;
+    }
+
+    &--export {
+      background: url('~Images/icons/export.svg') no-repeat 7px center;
+      background-size: 24px;
+
+      &:hover {
+        background: $background-color url('~Images/icons/export.svg') no-repeat 7px center;
+        background-size: 24px;
+      }
+    }
+
+    &--visibility-public {
+      background: url('~Images/icons/earth-grey.svg') no-repeat 10px center;
+      background-size: 17px;
+
+      &:hover {
+        background: $background-color url('~Images/icons/earth-grey.svg') no-repeat 10px center;
+        background-size: 17px;
+      }
+    }
+
+    &--visibility-private {
+      background: url('~Images/icons/lock-grey.svg') no-repeat 13px center;
+      background-size: 13px;
+
+      &:hover {
+        background: $background-color url('~Images/icons/lock-grey.svg') no-repeat 13px center;
+        background-size: 13px;
+      }
+    }
+
+
+    &--delete{
+      background: url('~Images/icons/trash.svg') no-repeat 11px center;
+      background-size: 16px;
+
+      &:hover {
+        background: $background-color url('~Images/icons/trash.svg') no-repeat 11px center;
+        background-size: 16px;
+      }
+    }
+
+    &--copy {
+      padding: 0px;
+    }
+
+    &--label {
+      font-size: 12px;
+      padding: 5px 0 0 0;
+    }
+
+    &:last-child{
+      border-width: 0px;
+    }
+
+  }
+
+  .ActionsMenu__toggle {
+    z-index: index($elements, popup) + 1;
+    position: absolute;
+    top: 25px;
+    right: 16px;
+
+    animation: slide-down-fade-in forwards .25s;
+
+    @include triangle('up', 14px, $white);
+  }
+
+  .ActionsMenu__sync,
+  .ActionsMenu__publish {
+    position: relative;
+    width: 100%;
+    text-align: center;
+  }
+
+  .ActionsMenu__btn{
+    &:focus {
+      color: $jet;
+    }
+  }
+
+
+  .ActionsMenu__btn{
+    &--flat{
+      width: 100%;
+      cursor: pointer;
+      margin: 1.5px 0;
+      background-color: $white;
+      border: 0px solid $white;
+      text-align: left;
+      padding: 0px;
+      color: $jet;
+      font-size: 15px;
+
+      &:focus,
+      &:disabled, {
+        cursor: pointer;
         background-color: $white;
         border: 0px solid $white;
-        opacity: 0.3;
+        padding: 0px;
+        color: $jet;
+      }
+
+      &:hover {
+        background-color: $background-color;
+        width: 100%;
+        cursor: pointer;
+        color: $jet;
+        border: 0px solid $white;
+      }
+
+      &.disabled,
+       .disabled:hover{
+          width: 100%;
+          margin: 1.5px 0;
+          background-color: $white;
+          border: 0px solid $white;
+          opacity: 0.3;
+       }
      }
-   }
 
-   &--copy{
-     height: 32px;
-     width: 40px;
-     padding: 0px;
-     border-radius: 0px 3px 3px 0px !important;
-     text-align: center;
+     &--copy{
+       height: 32px;
+       width: 40px;
+       padding: 0px;
+       border-radius: 0px 3px 3px 0px !important;
+       text-align: center;
 
-     &:hover, &:focus{
-       background-color: $turquise !important;
-       border-color: $turquise !important;
+       &:hover, &:focus{
+         background-color: $turquise !important;
+         border-color: $turquise !important;
+       }
      }
-   }
 
-   &--remote,
-   &--sync {
-     width: 90%;
-     border-radius: 40px;
-   }
-}
+     &--remote,
+     &--sync {
+       width: 90%;
+       border-radius: 40px;
+     }
+  }
 
 
-.ActionsMenu__copyRemote{
-  @include flex(flex-start, row);
-  flex-wrap: nowrap;
-  align-items: center;
-  margin: 0;
-}
+  .ActionsMenu__copyRemote{
+    @include flex(flex-start, row);
+    flex-wrap: nowrap;
+    align-items: center;
+    margin: 0;
+  }
 
-.ActionsMenu__input[type="text"]{
-  width: 100%;
-  padding: 0px 5px !important;
-  border: 1px solid $romanSilver !important;
-  height: 30px !important;
-  margin: 0px !important;
-  font-size: 15px !important;
-}
+  .ActionsMenu__input[type="text"]{
+    width: 100%;
+    padding: 0px 5px !important;
+    border: 1px solid $romanSilver !important;
+    height: 30px !important;
+    margin: 0px !important;
+    font-size: 15px !important;
+  }
 
-.ActionsMenu__pointer{
-  top: 30px;
-  right: 75px;
-  position: absolute;
-  z-index: index($elements, popup) + 1;
-  animation: slide-down-fade-in forwards .25s;
+  .ActionsMenu__pointer{
+    top: 30px;
+    right: 75px;
+    position: absolute;
+    z-index: index($elements, popup) + 1;
+    animation: slide-down-fade-in forwards .25s;
 
-  @include triangle('up', 14px, $white);
-}
+    @include triangle('up', 14px, $white);
+  }
 
-.ActionsMenu__message{
-  white-space: pre-line;
-  font-size: 15px;
-  top: 42px;
-  right: 0px;
-  position: absolute;
-  background: $white;
-  z-index: index($elements, popup);
-  padding: 15px;
-  border-radius: 8px;
-  width: 350px;
-  text-align: center;
-  animation: slide-down-fade-in forwards .25s;
+  .ActionsMenu__message{
+    white-space: pre-line;
+    font-size: 15px;
+    top: 42px;
+    right: 0px;
+    position: absolute;
+    background: $white;
+    z-index: index($elements, popup);
+    padding: 15px;
+    border-radius: 8px;
+    width: 350px;
+    text-align: center;
+    animation: slide-down-fade-in forwards .25s;
+  }
 }

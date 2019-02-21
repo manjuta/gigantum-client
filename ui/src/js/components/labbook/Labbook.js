@@ -30,6 +30,7 @@ import Header from '../shared/header/Header';
 // assets
 import './Labbook.scss';
 
+let count = 0;
 
 const Loading = () => <Loader />;
 
@@ -78,11 +79,22 @@ class Labbook extends Component {
     imageStatus: this.props.labbook.environment.imageStatus,
     isBuilding: false,
     isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING'),
+    collaborators: this.props.labbook.collaborators,
+    canManageCollaborators: this.props.labbook.canManageCollaborators,
+    visibility: this.props.labbook.visibility,
+    defaultRemote: this.props.labbook.defaultRemote,
+    branches: this.props.labbook.branches,
   }
 
-  UNSAFE_componentWillMount() {
-    const { labbookName, owner } = store.getState().routes;
-    document.title = `${owner}/${labbookName}`;
+  static getDerivedStateFromProps(nextProps, state) {
+    return {
+      ...state,
+      collaborators: nextProps.labbook.collaborators,
+      canManageCollaborators: nextProps.labbook.canManageCollaborators,
+      visibility: nextProps.labbook.visibility,
+      defaultRemote: nextProps.labbook.defaultRemote,
+      branches: nextProps.labbook.branches,
+    }
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -95,7 +107,11 @@ class Labbook extends Component {
     set unsubcribe for store
   */
   componentDidMount() {
-    const { props, state } = this;
+    const { props, state } = this,
+          { name, owner } = props.labbook;
+
+    document.title = `${owner}/${name}`;
+
     props.auth.isAuthenticated().then((response) => {
       let isAuthenticated = response;
       if (isAuthenticated === null) {
@@ -106,7 +122,7 @@ class Labbook extends Component {
       }
     });
     this._setStickHeader();
-    this._fetchStatus();
+    this._fetchStatus(false);
 
     window.addEventListener('scroll', this._setStickHeader);
     window.addEventListener('click', this._branchViewClickedOff);
@@ -130,13 +146,13 @@ class Labbook extends Component {
   *  sets state of labbook using redux and containerStatus using setState
   *  @return {}
   */
-  _fetchStatus() {
+  _fetchStatus(isLabbookUpdate) {
     const { props, state } = this,
           { owner, name } = props.labbook,
           self = this,
           { isBuilding } = props;
 
-      FetchContainerStatus.getContainerStatus(owner, name).then((response, error) => {
+      FetchContainerStatus.getContainerStatus(owner, name, isLabbookUpdate).then((response, error) => {
         if (response && response.labbook) {
           const { environment } = response.labbook;
           // reset build flags
@@ -148,18 +164,35 @@ class Labbook extends Component {
             setBuildingState(false);
           }
           // only updates state if container or imageStatus has changed
-          if ((state.containerStatus !== environment.containerStatus) || (state.imageStatus !== environment.imageStatus)) {
+          if ((response.labbook.branches === undefined) && ((state.containerStatus !== environment.containerStatus) || (state.imageStatus !== environment.imageStatus))) {
             const isLocked = (environment.containerStatus !== 'NOT_RUNNING');
             self.setState({
               imageStatus: environment.imageStatus,
               containerStatus: environment.containerStatus,
               isLocked,
             });
+          } else if (response.labbook.branches) {
+            const isLocked = (environment.containerStatus !== 'NOT_RUNNING');
+            const labbook = response.labbook;
+
+            self.setState({
+              containerStatus: labbook.environment.containerStatus,
+              imageStatus: labbook.environment.imageStatus,
+              isBuilding: false,
+              isLocked: (labbook.environment.containerStatus !== 'NOT_RUNNING'),
+              collaborators: labbook.collaborators,
+              canManageCollaborators: labbook.canManageCollaborators,
+              visibility: labbook.visibility,
+              defaultRemote: labbook.defaultRemote,
+              branches: labbook.branches,
+            });
           }
         }
         // refetches status after a 3 second timeout
         setTimeout(() => {
-          self._fetchStatus();
+          let isLabbookUpdate = (count === 20);
+          self._fetchStatus(isLabbookUpdate);
+          count = isLabbookUpdate ? 0 : (count + 1);
         }, 3 * 1000);
       });
   }
@@ -226,18 +259,18 @@ class Labbook extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const isLockedBrowser = {
-      locked: (props.isPublishing || props.isSyncing || props.isExporting),
-      isPublishing: props.isPublishing,
-      isExporting: props.isExporting,
-      isSyncing: props.isSyncing,
-    };
-    const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
+    const { props, state } = this,
+          isLockedBrowser = {
+            locked: (props.isPublishing || props.isSyncing || props.isExporting),
+            isPublishing: props.isPublishing,
+            isExporting: props.isExporting,
+            isSyncing: props.isSyncing,
+          },
+          isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
+
     if (props.labbook) {
       const { labbook, branchesOpen } = props;
-      const branchName = props.labbook.activeBranchName;
-
+      const branchName = '';
       const labbookCSS = classNames({
         Labbook: true,
         'Labbook--detail-mode': props.detailMode,
@@ -255,11 +288,15 @@ class Labbook extends Component {
               description={labbook.description}
               setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
-              branchName={branchName}
               sectionType={'labbook'}
               containerStatus={state.containerStatus}
               imageStatus={state.imageStatus}
               isLocked={isLocked}
+              collaborators={state.collaborators}
+              canManageCollaborators={state.canManageCollaborators}
+              visibility={state.visibility}
+              defaultRemote={state.defaultRemote}
+              branches={state.branches}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -326,7 +363,7 @@ class Labbook extends Component {
                                branchName={branchName}
                                description={labbook.description}
                                activeBranch={labbook.activeBranchName}
-                               isMainWorkspace={branchName === 'workspace'}
+                               isMainWorkspace={branchName === 'master'}
                                setBuildingState={this._setBuildingState}
                                sectionType={'labbook'}
                                isLocked={isLocked}

@@ -251,10 +251,10 @@ button:disabled {
     padding: 0px 20px;
     border: 0px solid $azure;
     border-radius: 0px;
-    color: $font-grey;
+    color: $azure;
     background: none;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
   }
 
   &--flat:hover {

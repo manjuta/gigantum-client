@@ -3,6 +3,7 @@
 .Navigation {
   position: relative;
   transition: 0.5s all;
+  margin: 15px 0 0 0;
 }
 
 .Navigation__ul {
@@ -21,11 +22,12 @@
     display: inline-block;
 
     margin: 0;
-    padding: .75rem 0;
+    padding: .5rem 10px;
 
     text-decoration: none !important;
 
     color: $jet;
+    border-bottom: 2px solid $azure;
   }
 
   a:hover {
@@ -35,47 +37,11 @@
   &--selected a {
     position: relative;
     z-index: index($elements, button);
-    color: $selected-blue;
-  }
-}
+    color: $white;
+    background: $azure;
 
-.Navigation__slider {
-  position: absolute;
-  bottom: 0;
-
-  width: 100px;
-  height: 3px;
-  margin: 0;
-
-  transition: .1s ease-in-out;
-  pointer-events: none;
-
-  border: none;
-  background: $turquise;
-}
-
-@for $i from 0 through 5 {
-
-  .Navigation__list-item--#{$i}:hover ~ hr,
-  .Navigation__slider--#{$i}{
-    @if $i == 0 {
-      margin-left: $i * 14% + 1%;
+    &:hover {
+      color: $white;
     }
-    @if $i == 1 {
-      margin-left: 16%;
-    }
-    @if $i == 2 {
-      margin-left: $i * 14%;
-    }
-    @if $i == 3 {
-      margin-left: $i * 14% + 3%;
-    }
-    @if $i == 4 {
-      margin-left: $i * 14% + 1%;
-    }
-    @if $i == 5 {
-      margin-left: 71% ;
-    }
-    margin-left: 18.5px + ($i * 137px)
   }
 }

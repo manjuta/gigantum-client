@@ -20,7 +20,7 @@ export default {
   },
   'pre[class*="language-"]': {
     color: '#f3f5f7',
-    background: '#272822',
+    background: '#364454',
     textShadow: '0 1px rgba(0, 0, 0, 0.3)',
     fontFamily: "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
     textAlign: 'left',
@@ -42,7 +42,7 @@ export default {
     borderRadius: '0.3em',
   },
   ':not(pre) > code[class*="language-"]': {
-    background: '#272822',
+    background: '#364454',
     padding: '.1em',
     borderRadius: '.3em',
     whiteSpace: 'normal',

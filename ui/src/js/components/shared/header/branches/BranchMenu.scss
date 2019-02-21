@@ -11,6 +11,7 @@ $dropBoxWidth: 240px;
    overflow: visible;
    z-index: index($elements, popup) + 1;
 
+
    &-btn {
      padding: 0 30px 0 10px;
      height: 30px;
@@ -37,6 +38,7 @@ $dropBoxWidth: 240px;
      top: 30px;
      padding: 10px;
      width: $dropBoxWidth + 50px;
+     animation: slide-down-fade-in forwards .25s;
      @include boxShadow();
    }
 
@@ -51,6 +53,144 @@ $dropBoxWidth: 240px;
      font-size: 18px;
    }
 }
+.BranchMenu__buttons {
+  @include flex(space-around, row);
+  align-items: center;
+  flex-wrap: nowrap;
+  margin: 0 0 0 10px;
+}
+.BranchMenu__btn {
+  height: 30px;
+  line-height: 30px;
+  color: $azure;
+  background: transparent;
+  border: 1px solid $azure;
+  margin: 0 2px;
+  border-radius: 3px;
+
+  padding: 0 10px 0 30px;
+
+  &:hover {
+    color: $white;
+    background-color: $azure;
+    border: 1px solid $azure;
+    padding: 0 10px 0 30px;
+  }
+
+  &--create, &--create:focus {
+
+    background: url(~Images/icons/add-azure.svg) no-repeat 5px center;
+    background-size: 20px;
+
+    &:hover {
+      color: $white;
+      background: $azure url(~Images/icons/add-white.svg) no-repeat 5px center;
+      background-size: 20px;
+    }
+  }
+
+  &--manage , &--manage:focus {
+    background: url(~Images/icons/add-azure.svg) no-repeat 5px center;
+    background-size: 20px;
+
+    &:hover {
+      color: $white;
+      background: $azure url(~Images/icons/add-white.svg) no-repeat 5px center;
+      background-size: 20px;
+    }
+  }
+
+  &--sync, &--sync:focus {
+    padding: 0 10px 0 10px;
+    @include flex(space-around, row);
+    align-items: center;
+    background: transparent;
+    color: $azure;
+
+    &:hover {
+      padding: 0 10px 0 10px;
+
+      background: $azure;
+      color: $white;
+
+      .BranchMenu__sync-status {
+        font-weight: 100;
+        font-size: 12px;
+        background: $white;
+        color: $azure;
+
+        .BranchMenu__sync-status--commits-behind {
+          background: url(~Images/icons/down-arrow-azure.svg) no-repeat right center;
+          background-size: 12px;
+        }
+
+        .BranchMenu__sync-status--commits-ahead {
+          background: url(~Images/icons/up-arrow-azure.svg) no-repeat right center;
+          background-size: 12px;
+        }
+      }
+    }
+  }
+
+  &--sync-dropdown, &--sync-dropdown:focus {
+    margin-left: 0px;
+    width: 24px;
+    padding: 2px;
+    background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
+    background-size: 20px;
+
+    &:hover {
+      background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+      background-size: 20px;
+      margin-left: 0px;
+      width: 24px;
+      padding: 2px;
+    }
+  }
+
+  &--sync-open, &--sync-open:focus {
+    background: url(~Images/icons/up-arrow-azure.svg) no-repeat center center;
+    background-size: 20px;
+
+    &:hover {
+      background: $azure url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+      background-size: 20px;
+    }
+  }
+
+
+}
+
+.BranchMenu__sync-container {
+  position: relative;
+  @include flex(flex-start, row);
+}
+
+.BranchMenu__sync-status {
+  @include flex(space-around, row);
+  align-items: center;
+  flex-wrap: nowrap;
+  color: $white;
+  font-weight: 100;
+  font-size: 12px;
+  margin: 0 3px;
+  padding: 2px;
+  background: $azure;
+  border-radius: 10px;
+  height: 20px;
+
+  .BranchMenu__sync-status--commits-behind {
+    padding: 2px 15px 2px 2px;
+    background: url(~Images/icons/down-arrow-white.svg) no-repeat right center;
+    background-size: 12px;
+  }
+
+  .BranchMenu__sync-status--commits-ahead {
+    padding: 2px 15px 2px 2px;
+    background: url(~Images/icons/up-arrow-white.svg) no-repeat right center;
+    background-size: 12px;
+  }
+}
 
 .BranchMenu__h5 {
   margin: 0;
@@ -62,15 +202,75 @@ $dropBoxWidth: 240px;
   margin: 1px 0;
 }
 
-.BrancMenu__list-item {
-  padding: 5px 10px;
+.BranchMenu__list-item {
+  padding: 10px 10px;
   color: $jet;
   cursor: pointer;
+  @include flex(space-between, row);
+  align-items: center;
   &:hover {
     background-color: $azure;
     color: $white;
   }
+
+  border-bottom: 1px solid $grey;
+
+
+  &:last-child {
+    border-bottom: 0px solid $white;
+  }
 }
+
+.BranchMenu__text {
+  flex: 1;
+}
+
+.BranchMenu__icons {
+  @include flex(space-between, row);
+  align-items: center;
+}
+
+.BranchMenu__icon {
+    height: 30px;
+    width: 30px;
+    &--local {
+       background: url(~Images/icons/download-check.svg) no-repeat center center;
+       background-size: 20px;
+
+       &:hover {
+         background: url(~Images/icons/download-check.svg) no-repeat center center;
+         background-size: 20px;
+       }
+    }
+
+    &--remote {
+      background: url(~Images/icons/download-check.svg) no-repeat center center;
+      background-size: 20px;
+
+      &:hover {
+        background: url(~Images/icons/download-check.svg) no-repeat center center;
+        background-size: 20px;
+      }
+    }
+
+    &--empty {
+      background: url('') no-repeat center center;
+      background-size: 20px;
+    }
+}
+
+.BranchMenu__menu-button {
+  width: 100%;
+  text-align: center;
+}
+
+.BranchMenu__other-text{
+  font-size: 12px;
+  padding: 5px 0;
+  color: $jet;
+}
+
+
 .BranchMenu__branch-name{
   @include flex(flex-start, row);
   .BranchMenu__dropdown-label{

@@ -2,6 +2,8 @@
 import { graphql } from 'react-relay';
 // environment
 import { fetchQuery } from 'JS/createRelayEnvironment';
+// queries
+import labbookUpdatesQuery from './fetchLabbookUpdateQuery';
 
 const containerStatusQuery = graphql`
   query fetchContainerStatusQuery($name: String!, $owner: String!){
@@ -11,19 +13,20 @@ const containerStatusQuery = graphql`
       imageStatus
     }
   }
-}
-`;
+}`;
+
 
 const FetchContainerStatus = {
-  getContainerStatus: (owner, labbookName) => {
+  getContainerStatus: (owner, labbookName, isLabbookUpdate) => {
     const variables = {
       owner,
       name: labbookName,
     };
 
+    const query = isLabbookUpdate ? labbookUpdatesQuery() : containerStatusQuery();
     return new Promise((resolve, reject) => {
       const fetchData = function () {
-        fetchQuery(containerStatusQuery(), variables).then((response) => {
+        fetchQuery(query, variables).then((response) => {
           resolve(response.data);
         }).catch((error) => {
           console.log(error);

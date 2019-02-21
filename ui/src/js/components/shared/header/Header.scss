@@ -22,16 +22,17 @@
   z-index: index($elements, labbookHeader);
 
   flex: 1 0 auto;
-
+  height: 180px;
   width: calc(100% - 190px);
   min-width: 700px;
-  height: 100px;
   min-height: 60px;
   padding: 10px 0 0 0;
+  background-color: $background-color;
 
   transition: height 0.25s;
 
   &--sticky{
+
     z-index: index($elements, labbookHeader);
 
     width: calc(100% - 140px);

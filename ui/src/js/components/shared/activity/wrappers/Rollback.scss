@@ -5,7 +5,7 @@
   width: auto;
   max-width: 200px;
   position: relative;
-  z-index: index($elements, popup);
+  z-index: index($elements, card);
 
   &--locked {
     height: 10px;

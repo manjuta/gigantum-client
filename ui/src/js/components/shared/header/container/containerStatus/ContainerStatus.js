@@ -364,7 +364,10 @@ class ContainerStatus extends Component {
           onMouseOver={() => { this._setMouseOverState(true); }}
           onMouseOut={() => { this._setMouseOverState(false); }}>
 
-          {this._getStatusText(textStatus)}
+         <div className="ContainerStatus__text">{ this._getStatusText(textStatus) }</div>
+         <div className="ContainerStatus__toggle">
+            <div className="ContainerStatus__toggle-btn"></div>
+         </div>
 
         </div>
 

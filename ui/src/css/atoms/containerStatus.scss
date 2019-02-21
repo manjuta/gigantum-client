@@ -1,9 +1,8 @@
 .ContainerStatus__container-state {
-  @include boxShadow();
   transition: all 0.125s;
   width: 141px;
   text-align: center;
-  height: 31px;
+  height: 40px;
   font-size: 16px;
   border-radius: 20px;
   color: $romanSilver;
@@ -12,15 +11,40 @@
   border: 2px solid rgba(0,0,0,0);
   z-index: index($elements, button);
   padding-right: 10px;
+  align-items: center;
 
+  @include flex(space-around, row);
   @include boxShadow();
 }
 
+.ContainerStatus__text {
+  width: 80px;
+
+}
+
+.ContainerStatus__toggle {
+  position: relative;
+  height: 24px;
+  width: 40px;
+  border-radius: 15px;
+  background: $romanSilver;
+}
+
+.ContainerStatus__toggle-btn {
+  transition: all 0.125s ease-in-out;
+  position: absolute;
+  border-radius: 10px;
+  background-color: $background-color;
+  top: 2px;
+  left: 2px;
+  right: 18px;
+  bottom: 2px;
+}
+
 .ContainerStatus__container-state--expanded{
-  width: 149px;
-  height: 33px;
+  width: 141px;
+  height: 40px;
   box-shadow: 0 0px 12px 0 rgba(0,0,0,.50) !important;
-  margin: 0 -7px -1px 0;
 }
 
 .ContainerStatus__container-state--menu-open {
@@ -30,68 +54,94 @@
 
 .ContainerStatus__container-state.Running {
   border: 3px solid $turquise;
-  background: $background-color url('~Images/icons/run.svg') no-repeat 90% center;
-  background-size: 20px;
+
+  .ContainerStatus__toggle-btn {
+    top: 2px;
+    left: 18px;
+    right: 2px;
+    bottom: 2px;
+  }
+
+  .ContainerStatus__toggle {
+    background: $turquise;
+  }
 }
 .ContainerStatus__container-state.Running:hover {
-  width: 149px;
-  height: 33px;
+  width: 141px;
+  height: 40px;
   border: 3px solid $romanSilver;
-  background: $background-color url('~Images/icons/stop.svg') no-repeat 90% center;
-  background-size: 20px;
-  margin: 0 -7px -1px 0;
   line-height: 31px;
+
+  .ContainerStatus__toggle {
+    background: $turquise;
+  }
 }
 
 .ContainerStatus__container-state.Building,
 .ContainerStatus__container-state.Syncing,
 .ContainerStatus__container-state.Publishing {
-  background: $background-color url('~Images/loaders/button-starting.svg') no-repeat 90% center;
   border: 3px solid $goldenLemon;
   background-size: 20px;
+
+  .ContainerStatus__toggle-btn {
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+  }
+
+  .ContainerStatus__toggle {
+    background: $romanSilver url(~Images/icons/container-status-spinner.svg) no-repeat center center;
+    background-size: 40px 24px;
+  }
 }
 
 .ContainerStatus__container-state.Stopped {
-  background: $background-color url('~Images/icons/stop.svg') no-repeat 90% center;
   border: 3px solid $romanSilver;
-  background-size: 20px;
   @include boxShadow();
 }
 
 .ContainerStatus__container-state.Stopped:hover {
-  width: 149px;
-  height: 33px;
-  background: $background-color url('~Images/icons/run.svg') no-repeat 90% center;
+  width: 141px;
+  height: 40px;
   border: 3px solid $turquise;
-  background-size: 20px;
-  margin: 0 -7px -1px 0;
   line-height: 31px;
+
+  .ContainerStatus__toggle {
+    background: $turquise;
+  }
 }
 
 .ContainerStatus__container-state.LookingUp {
   width: 141px !important;
-  height: 31px !important;
+  height: 40px !important;
   font-size: 16px !important;
   line-height: 26px !important;
   margin: 0 !important;
   box-shadow: none !important;
-  background: $background-color url('~Images/loaders/button-starting.svg') no-repeat 90% center !important;
   border: 3px solid $goldenLemon !important;
-  background-size: 20px !important;
   cursor: auto;
 }
 
 .ContainerStatus__container-state.Rebuild{
-  background: $background-color url('~Images/icons/button-build.svg') no-repeat 85% center;
   border: 3px solid $goldenLemon;
   cursor: pointer;
   padding: 0 15px 0 0;
-  background-size: 20px;
 }
 .ContainerStatus__container-state.Stopping,
 .ContainerStatus__container-state.Starting {
-  background: $background-color url('~Images/loaders/button-starting.svg') no-repeat 90% center;
-  background-size: 20px;
-  border: 3px solid $goldenLemon;
+  border: 3px solid $turquise;
   color: $grey;
+
+  .ContainerStatus__toggle {
+    background: $romanSilver url(~Images/icons/container-status-spinner.svg) no-repeat center center;
+    background-size: 40px 24px;
+  }
+
+  .ContainerStatus__toggle-btn {
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+  }
 }

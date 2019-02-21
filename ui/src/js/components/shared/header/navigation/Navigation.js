@@ -91,8 +91,6 @@ class Navigation extends Component {
               </li>);
           })
         }
-
-        <hr className={`Navigation__slider Navigation__slider--${selectedIndex}`} />
       </ul>
 
     </div>
