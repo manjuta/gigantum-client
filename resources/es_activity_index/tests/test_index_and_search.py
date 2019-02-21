@@ -11,7 +11,7 @@ from gtmcore.fixtures import mock_config_with_activitystore
 from resources.es_activity_index import ESActivityIndex
 from elasticsearch import Elasticsearch
 
-es_ip = "172.17.0.3"
+es_ip = "172.17.0.2"
 
 def helper_create_labbook_change(labbook, cnt=0):
     """Helper method to create a change to the labbook"""
@@ -102,6 +102,8 @@ class TestElasticSearch:
         for rec in mock_config_with_activitystore[0].get_activity_records():
             aidx.add(rec, mock_config_with_activitystore[1])
 
+        aidx.flush(mock_config_with_activitystore[1])
+
         # 2 records with foo
         res = aidx.search_activity("tags","foo")
         #assert(len(res)==2)
@@ -168,6 +170,8 @@ class TestElasticSearch:
         for rec in mock_config_with_activitystore[0].get_activity_records():
             aidx.add(rec, mock_config_with_activitystore[1])
 
+        aidx.flush(mock_config_with_activitystore[1])
+
         #RBTODO -- index populated, but queries not processing right......
         # check for tags
         res = aidx.search_detail("tags","foo")
@@ -184,15 +188,15 @@ class TestElasticSearch:
         assert(len(res)==3)
 
         # and search for mimetypes
-        res = aidx.searchDetail("mimetypes","text/plain")
+        res = aidx.search_detail("mimetypes","plain")
         assert(len(res)==3)
 
         # and search for mimetypes
-        res = aidx.searchDetail("mimetypes","text/markdown")
+        res = aidx.search_detail("mimetypes","markdown")
         assert(len(res)==2)
 
         # importance
-        res = aidx.searchDetail("importance","100")
+        res = aidx.search_detail("importance","100")
         assert(len(res)==1)
 
     def test_destroy(self, mock_config_with_activitystore):

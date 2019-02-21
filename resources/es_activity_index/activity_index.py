@@ -36,7 +36,7 @@ class ESActivityIndex:
             "activity_record": { 
                 "properties": { 
                     "commit":           { "type": "keyword" },
-                    "linkedcommit":     { "type": "keyword" },
+                    "linked_commit":    { "type": "keyword" },
                     "name":             { "type": "text" },
                     "email":            { "type": "keyword" },
                     "commit_message":   { "type": "text" },
@@ -56,11 +56,12 @@ class ESActivityIndex:
                 "properties": { 
                     "key":              { "type": "keyword" },
                     "commit":           { "type": "keyword" },
-                    "linkedcommit":     { "type": "keyword" },
+                    "linked_commit":     { "type": "keyword" },
                     "record_type":      { "type": "keyword" },
                     "record_action":    { "type": "keyword" },
                     "tags":             { "type": "keyword" },
                     "mime_types":       { "type": "keyword" },
+                    "importance":       { "type": "keyword" },
                     "free_text":        { "type": "text" }, 
                     "timestamp":        { "type": "date", "format": "strict_date_optional_time||epoch_millis" }
                 }
@@ -123,13 +124,29 @@ class ESActivityIndex:
         else:
             raise(ValueError(f"Inconsistent state for index {self.index_name}. Activity index exists == {aexists} and Detail index exists == {dexists}"))
 
+    def flush(self, labbook: LabBook) -> None:
+        """
+            Attempt to flush and sync elasticsearch.    
+            Hopefully this will make data consistent.
+
+            Args:
+                labbook(LabBook) -- used to identify indices.
+
+            Returns:
+                None
+        """
+        es = Elasticsearch(self.servers)
+        es.indices.flush(index=f"{self.index_name}_activity")
+        es.indices.flush(index=f"{self.index_name}_detail")
+
     def add(self, record: ActivityRecord, labbook: LabBook) -> None:
         """
             Add an ActivityRecord to the search index.
             Configure index writers and calls the low-level method _add_record
 
             Args:
-                record(ActivityRecord)
+                record(ActivityRecord) -- record to be added
+                labbook(LabBook) -- needed to lookup commits
 
             Returns:
                 None
@@ -142,7 +159,7 @@ class ESActivityIndex:
     
             commit_record = labbook.git.log_entry(record.commit)
             ar_dict = { "commit": record.commit, 
-                        "linkedcommit": record.linked_commit,
+                        "linked_commit": record.linked_commit,
                         "name": commit_record['author']['name'],
                         "email": commit_record['author']['email'],
                         "commit_message": record.message,
@@ -155,7 +172,7 @@ class ESActivityIndex:
         else:
             linked_commit_record = labbook.git.log_entry(record.linked_commit)
             ar_dict = { "commit": record.commit, 
-                        "linkedcommit": record.linked_commit,
+                        "linked_commit": record.linked_commit,
                         "name": linked_commit_record['author']['name'],
                         "email": linked_commit_record['author']['email'],
                         "commit_message": record.message,
@@ -201,11 +218,12 @@ class ESActivityIndex:
             freetext = freetext + dataobj + "\n"
 
         ad_dict = { "commit": commit, 
-                    "linkedcommit": linked_commit,
+                    "linked_commit": linked_commit,
                     "record_type": record.type.name,
                     "record_action": record.action.name,
                     "mimetypes": mimetypes,
                     "freetext": freetext, 
+                    "importance": record.importance,
                     "tags": record.tags,
                     "timestamp": timestamp }
 
