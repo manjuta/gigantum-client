@@ -25,7 +25,7 @@ from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.activity import ActivityStore
-from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
@@ -35,6 +35,7 @@ from lmsrvcore.auth.identity import parse_token
 
 from lmsrvlabbook.api.objects.jobstatus import JobStatus
 from lmsrvlabbook.api.objects.environment import Environment
+from lmsrvlabbook.api.objects.collaborator import Collaborator
 from lmsrvlabbook.api.objects.commit import Branch
 from lmsrvlabbook.api.objects.overview import LabbookOverview
 from lmsrvlabbook.api.objects.ref import LabbookRef
@@ -86,7 +87,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     modified_on_utc = graphene.types.datetime.DateTime()
 
     # List of collaborators
-    collaborators = graphene.List(graphene.String)
+    collaborators = graphene.List(Collaborator)
 
     # A boolean indicating if the current user can manage collaborators
     can_manage_collaborators = graphene.Boolean()
@@ -426,7 +427,10 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            self._collaborators = mgr.get_collaborators(self.owner, self.name)
+            self._collaborators = [Collaborator(owner=self.owner, name=self.name,
+                                                collaborator_username=c[1],
+                                                permission=ProjectPermissions(c[2]).name)
+                                   for c in mgr.get_collaborators(self.owner, self.name)]
         except ValueError:
             # If ValueError Raised, assume repo doesn't exist yet
             self._collaborators = []
@@ -439,8 +443,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         self._fetch_collaborators(labbook, info)
-
-        return [x[1] for x in self._collaborators]
+        return self._collaborators
 
     def resolve_collaborators(self, info):
         """Method to get the list of collaborators for a labbook
@@ -455,9 +458,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             # If here, put the fetch for collaborators in the promise
             return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
                 lambda labbook: self.helper_resolve_collaborators(labbook, info))
-
-        # If here, you've already fetched the collaborators once and it's already saved in this Labbook object
-        return [x[1] for x in self._collaborators]
+        else:
+            return self._collaborators
 
     def helper_resolve_can_manage_collaborators(self, labbook, info):
         """Helper method to fetch this labbook's collaborators and check if user can manage collaborators
@@ -467,15 +469,13 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         self._fetch_collaborators(labbook, info)
-
-        can_manage = False
         username = get_logged_in_username()
         for c in self._collaborators:
-            if c[1] == username:
-                if c[2] is True:
-                    can_manage = True
+            if c.collaborator_username == username:
+                if c.permission == ProjectPermissions.OWNER.name:
+                    return True
 
-        return can_manage
+        return False
 
     def resolve_can_manage_collaborators(self, info):
         """Method to check if the user is the "owner" of the labbook and can manage collaborators
@@ -491,14 +491,11 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
                 lambda labbook: self.helper_resolve_can_manage_collaborators(labbook, info))
 
-        can_manage = False
         username = get_logged_in_username()
         for c in self._collaborators:
-            if c[1] == username:
-                if c[2] is True:
-                    can_manage = True
-
-        return can_manage
+            if c[1] == username and c[2] == ProjectPermissions.OWNER.name:
+                return True
+        return False
 
     @staticmethod
     def helper_resolve_background_jobs(labbook):

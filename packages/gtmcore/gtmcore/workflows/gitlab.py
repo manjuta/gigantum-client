@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import requests
-from enum import Enum
-from typing import List, Optional, Tuple, Dict, Any
 import subprocess
 import pexpect
 import re
 import os
+from enum import Enum
+from typing import List, Optional, Tuple, Dict, Any
 from urllib.parse import quote_plus
 
 from gtmcore.logging import LMLogger
@@ -78,6 +78,20 @@ class Visibility(Enum):
 
     # Available to any user registered in GitLab
     INTERNAL = "internal"
+
+
+class ProjectPermissions(Enum):
+    """ Represents a GitLab role -- taken from:
+    https://docs.gitlab.com/ee/api/members.html"""
+
+    # Represents a Gitlab "Reporter"
+    READ_ONLY = 20
+
+    # Represents a "Developer" (Basic read/write)
+    READ_WRITE = 30
+
+    # Represents a "Maintainer" (Essentially owner)
+    OWNER = 40
 
 
 class GitLabManager(object):
@@ -361,17 +375,16 @@ class GitLabManager(object):
         else:
             logger.info(f"Deleted remote repository {namespace}/{labbook_name}")
 
-    def get_collaborators(self, namespace: str, repository_name: str) -> Optional[List[Tuple[int, str, bool]]]:
+    def get_collaborators(self, namespace: str, repository_name: str) \
+            -> List[Tuple[int, str, ProjectPermissions]]:
         """Method to get usernames and IDs of collaborators that have access to the repo
-
-        The method returns a list of tuples where the entries in the tuple are (user id, username, is owner)
 
         Args:
             namespace(str): Namespace in gitlab, currently the "owner"
             repository_name(str): LabBook name (i.e. project name in gitlab)
 
         Returns:
-            list
+            list of tuples (user-id, username, permission-type)
         """
         if not self.repository_exists(namespace, repository_name):
             raise ValueError("Cannot get collaborators of a repository that does not exist")
@@ -386,22 +399,22 @@ class GitLabManager(object):
             logger.error(response.json())
             raise ValueError("Failed to get remote repository collaborators")
         else:
-            # Process response
-            return [(x['id'], x['username'], x['access_level'] == 40) for x in response.json()]
+            # Will load one of ProjectPermissions enum fields, else throwing value err
+            return [(x['id'], x['username'], ProjectPermissions(x['access_level']))
+                    for x in response.json()]
 
-    def add_collaborator(self,
-                         namespace: str,
-                         labbook_name: str,
-                         username: str) -> Optional[List[Tuple[int, str, bool]]]:
+    def add_collaborator(self, namespace: str, labbook_name: str, username: str, role: ProjectPermissions) \
+            -> None:
         """Method to add a collaborator to a remote repository by username
 
         Args:
-            namespace(str): Namespace in gitlab, currently the "owner"
-            labbook_name(str): LabBook name (i.e. project name in gitlab)
-            username(str): username to add
+            namespace: Namespace in gitlab, currently the "owner"
+            labbook_name: LabBook name (i.e. project name in gitlab)
+            username: username to add
+            role: One of ProjectPermissions values - ruleset for new collaborator
 
         Returns:
-            list
+            list of all collaborators
         """
         if not self.repository_exists(namespace, labbook_name):
             raise ValueError("Cannot add a collaborator to a repository that does not exist")
@@ -411,7 +424,7 @@ class GitLabManager(object):
 
         # Call API to add a collaborator
         data = {"user_id": user_id,
-                "access_level": 30}
+                "access_level": role.value}
         repo_id = self.get_repository_id(namespace, labbook_name)
         response = requests.post(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
                                  headers={"PRIVATE-TOKEN": self.user_token},
@@ -420,16 +433,12 @@ class GitLabManager(object):
         if response.status_code != 201:
             logger.error("Failed to add collaborator")
             logger.error(response.json())
-            raise ValueError("Failed to add collaborator")
+            raise GitLabException("Failed to add collaborator")
         else:
             # Re-query for collaborators and return
-            logger.info(f"Added {username} as a collaborator to {labbook_name}")
-            return self.get_collaborators(namespace, labbook_name)
+            logger.info(f"Added {username} as a {role} to {labbook_name}")
 
-    def delete_collaborator(self,
-                            namespace: str,
-                            labbook_name: str,
-                            username: str) -> Optional[List[Tuple[int, str, bool]]]:
+    def delete_collaborator(self, namespace: str, labbook_name: str, username: str) -> None:
         """Method to remove a collaborator from a remote repository by user_id
 
         user id is used because it is assumed you've already listed the current collaborators
@@ -440,7 +449,7 @@ class GitLabManager(object):
             username(str): username to remove
 
         Returns:
-
+            None
         """
         if not self.repository_exists(namespace, labbook_name):
             raise ValueError("Cannot remove a collaborator to a repository that does not exist")
@@ -458,9 +467,7 @@ class GitLabManager(object):
             logger.error(response.json())
             raise ValueError("Failed to remove collaborator")
         else:
-            # Re-query for collaborators and return
             logger.info(f"Removed user id `{user_id}` as a collaborator to {labbook_name}")
-            return self.get_collaborators(namespace, labbook_name)
 
     @staticmethod
     def _call_shell(command: str, input_list: Optional[List[str]]=None) -> Tuple[Optional[bytes], Optional[bytes]]:

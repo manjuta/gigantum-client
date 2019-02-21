@@ -28,7 +28,6 @@ import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ToolTip from 'Components/common/ToolTip';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import VisibilityModal from 'Components/shared/modals/VisibilityModal';
-import PublishDatasetsModal from 'Components/shared/modals/PublishDatasetsModal';
 import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
 // assets
 import './ActionsMenu.scss';
@@ -46,19 +45,15 @@ class ActionsMenu extends Component {
       showLoginPrompt: false,
       exporting: false,
       deleteModalVisible: false,
-      forceSyncModalVisible: false,
       remoteUrl: this.props.remoteUrl,
       publishDisabled: false,
       justOpened: true,
       setPublic: false,
       syncWarningVisible: false,
       publishWarningVisible: false,
-      publishModalVisible: false,
-      publishDatasetsModalVisible: false,
       visibilityModalVisible: false,
       owner,
       labbookName,
-      publishDatasetsModalAction: 'Publish',
     };
 
     this._toggleMenu = this._toggleMenu.bind(this);
@@ -68,11 +63,9 @@ class ActionsMenu extends Component {
     this._sync = this._sync.bind(this);
     this._closeLoginPromptModal = this._closeLoginPromptModal.bind(this);
     this._exportLabbook = this._exportLabbook.bind(this);
-    this._toggleSyncModal = this._toggleSyncModal.bind(this);
     this._switchBranch = this._switchBranch.bind(this);
 
     this._handleToggleModal = this._handleToggleModal.bind(this);
-    this._togglePublishModal = this._togglePublishModal.bind(this);
 
     this._resetState = this._resetState.bind(this);
     this._resetPublishState = this._resetPublishState.bind(this);
@@ -166,41 +159,6 @@ class ActionsMenu extends Component {
     this.setState({ menuOpen: false });
 
     this.props.setContainerMenuWarningMessage(dispatchMessage);
-  }
-
-  /**
-  *  @param {Boolean} queryForLocalDatasets
-  *  @param {Boolean} closePublishDatasetsModal
-  *  adds remote url to labbook
-  *  @return {string}
-  */
-  _togglePublishModal(queryForLocalDatasets, closePublishDatasetsModal) {
-    if (this.props.isExporting) {
-      setWarningMessage('Publishing is currently only available on the main workspace branch.');
-      this.setState({ publishWarningVisible: true });
-    } else if (queryForLocalDatasets && typeof queryForLocalDatasets === 'boolean') {
-      LinkedLocalDatasetsQuery.getLocalDatasets({ owner: this.state.owner, name: this.state.labbookName }).then((res) => {
-          const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
-          if (localDatasets.length === 0) {
-            this.setState({ publishModalVisible: !this.state.publishModalVisible });
-          } else {
-            this.setState({ localDatasets, publishDatasetsModalVisible: !this.state.publishDatasetsModalVisible, publishDatasetsModalAction: 'Publish' });
-          }
-      });
-    } else if (closePublishDatasetsModal) {
-      this.setState({ publishDatasetsModalVisible: !this.state.publishDatasetsModalVisible });
-    } else {
-      this.setState({ publishModalVisible: !this.state.publishModalVisible });
-    }
-  }
-
-  /**
-  *  @param {}
-  *  toggles sync modal
-  *  @return {string}
-  */
-  _toggleSyncModal() {
-    this.setState({ forceSyncModalVisible: !this.state.forceSyncModalVisible });
   }
 
   /**
@@ -576,66 +534,6 @@ class ActionsMenu extends Component {
             remoteAdded={this.props.defaultRemote}
             history={this.props.history}
           />
-        }
-
-        {
-          this.state.forceSyncModalVisible &&
-
-          <ForceSync
-            toggleSyncModal={this._toggleSyncModal}
-            sectionType={this.props.sectionType}
-            pullOnly={this.state.pullOnly}
-          />
-        }
-        {
-          this.state.publishModalVisible &&
-
-          <VisibilityModal
-            owner={this.state.owner}
-            labbookName={this.state.labbookName}
-            labbookId={this.props.labbookId}
-            remoteUrl={this.props.remoteUrl}
-            auth={this.props.auth}
-            buttonText="Publish"
-            header="Publish"
-            modalStateValue="visibilityModalVisible"
-            sectionType={this.props.sectionType}
-            setPublishingState={this.props.setPublishingState}
-            checkSessionIsValid={this._checkSessionIsValid}
-            toggleModal={this._togglePublishModal}
-            showContainerMenuMessage={this._showContainerMenuMessage}
-            resetState={this._resetState}
-            resetPublishState={this._resetPublishState}
-            setRemoteSession={this._setRemoteSession}
-          />
-
-        }
-        {
-          this.state.publishDatasetsModalVisible &&
-
-          <PublishDatasetsModal
-            owner={this.state.owner}
-            labbookName={this.state.labbookName}
-            labbookId={this.props.labbookId}
-            remoteUrl={this.props.remoteUrl}
-            auth={this.props.auth}
-            buttonText="Publish All"
-            header={this.state.publishDatasetsModalAction}
-            pullOnly={this.state.pullOnly}
-            modalStateValue="visibilityModalVisible"
-            sectionType={this.props.sectionType}
-            setPublishingState={this.props.setPublishingState}
-            setSyncingState={this.props.setSyncingState}
-            toggleSyncModal={this._toggleSyncModal}
-            checkSessionIsValid={this._checkSessionIsValid}
-            toggleModal={this._togglePublishModal}
-            showContainerMenuMessage={this._showContainerMenuMessage}
-            resetState={this._resetState}
-            resetPublishState={this._resetPublishState}
-            setRemoteSession={this._setRemoteSession}
-            localDatasets={this.state.localDatasets || []}
-          />
-
         }
 
         {

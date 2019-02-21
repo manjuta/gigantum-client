@@ -224,6 +224,9 @@ class Header extends Component {
                     setBuildingState={props.setBuildingState}
                     isSticky={props.isSticky}
                     visibility={props.visibility}
+                    sectionType={props.sectionType}
+                    auth={props.auth}
+                    setPublishingState={this._setPublishingState}
                   />
                 </ErrorBoundary>
                 }

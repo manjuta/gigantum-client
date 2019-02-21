@@ -5,7 +5,14 @@ import classNames from 'classnames';
 // componenets
 import Loader from 'Components/common/Loader';
 import CreateBranch from 'Components/shared/modals/CreateBranch';
+import ForceSync from 'Components/shared/modals/ForceSync';
 import Branches from 'Components/shared/sidePanel/Branches';
+import VisibilityModal from 'Components/shared/modals/VisibilityModal';
+import PublishDatasetsModal from 'Components/shared/modals/PublishDatasetsModal';
+// queries
+import UserIdentity from 'JS/Auth/UserIdentity';
+// store
+import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
 // assets
@@ -41,6 +48,10 @@ class BranchMenu extends Component {
     }),
     switchingBranch: false,
     sidePanelVisible: false,
+    forceSyncModalVisible: false,
+    publishModalVisible: false,
+    publishDatasetsModalVisible: false,
+    publishDatasetsModalAction: 'Publish',
     syncMenuVisible: false,
   };
 
@@ -52,6 +63,15 @@ class BranchMenu extends Component {
     window.removeEventListener('click', this._closePopups);
   }
 
+  /**
+    *  @param {}
+    *  returns UserIdentityQeury promise
+    *  @return {promise}
+    */
+   @boundMethod
+   _checkSessionIsValid() {
+    return (UserIdentity.getUserIdentity());
+  }
 
   /**
     @param {Array} branches
@@ -85,7 +105,71 @@ class BranchMenu extends Component {
         self.setState({ switchingBranch: false });
       });
   }
+  /**
+  *  @param {Boolean} queryForLocalDatasets
+  *  @param {Boolean} closePublishDatasetsModal
+  *  adds remote url to labbook
+  *  @return {string}
+  */
+  @boundMethod
+  _togglePublishModal(queryForLocalDatasets, closePublishDatasetsModal) {
+    if (this.props.isExporting) {
+      setWarningMessage('Publishing is currently only available on the main workspace branch.');
+      this.setState({ publishWarningVisible: true });
+    } else if (queryForLocalDatasets && typeof queryForLocalDatasets === 'boolean') {
+      LinkedLocalDatasetsQuery.getLocalDatasets({ ownowner, name: this.state.labbookName }).then((res) => {
+          const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
+          if (localDatasets.length === 0) {
+            this.setState({ publishModalVisible: !this.state.publishModalVisible });
+          } else {
+            this.setState({ localDatasets, publishDatasetsModalVisible: !this.state.publishDatasetsModalVisible, publishDatasetsModalAction: 'Publish' });
+          }
+      });
+    } else if (closePublishDatasetsModal) {
+      this.setState({ publishDatasetsModalVisible: !this.state.publishDatasetsModalVisible });
+    } else {
+      this.setState({ publishModalVisible: !this.state.publishModalVisible });
+    }
+  }
 
+  /**
+  *  @param {string, boolean} action, containerRunning
+  *  displays container menu message
+  *  @return {}
+  */
+  @boundMethod
+  _showContainerMenuMessage(action, containerRunning) {
+    const dispatchMessage = containerRunning ? `Stop Project before ${action}. \n Be sure to save your changes.` : `Project is ${action}. \n Please do not refresh the page.`;
+
+    this.setState({ menuOpen: false });
+
+    setContainerMenuWarningMessage(dispatchMessage);
+  }
+  /**
+  *  @param {}
+  *  resets state after publish
+  *  @return {}
+  */
+  @boundMethod
+  _resetState() {
+    this.setState({
+      remoteUrl: '',
+      showLoginPrompt: true,
+    });
+  }
+
+  /**
+  *  @param {}
+  *  resets state after publish
+  *  @return {}
+  */
+  @boundMethod
+  _resetPublishState(publishDisabled) {
+    this.setState({
+      menuOpen: false,
+      publishDisabled,
+    });
+  }
   /**
     @param {} -
     sets state to toggle the switch dropdown
@@ -184,6 +268,51 @@ class BranchMenu extends Component {
     const { state } = this;
     this.setState({ syncMenuVisible: !state.syncMenuVisible });
   }
+  /**
+  *  @param {}
+  *  resets state after publish
+  *  @return {}
+  */
+  @boundMethod
+  _setRemoteSession() {
+    this.setState({
+      addedRemoteThisSession: true,
+      remoteUrl: `https://gigantum.com/${this.state.owner}/${this.state.labbookName}`,
+    });
+  }
+  /**
+  *  @param {}
+  *  handles syncing or publishing the project
+  *  @return {}
+  */
+  @boundMethod
+  _handleSyncButton() {
+    if (!this.props.defaultRemote) {
+      this._togglePublishModal();
+    } else {
+      const data = {
+          successCall: () => {
+          },
+          failureCall: () => {
+          },
+        };
+      this.state.branchMutations.syncLabbook(data, (response, error) => {
+        if (error) {
+          console.log(error);
+        }
+      });
+    }
+  }
+
+    /**
+    *  @param {}
+    *  toggles sync modal
+    *  @return {string}
+    */
+   @boundMethod
+    _toggleSyncModal() {
+      this.setState({ forceSyncModalVisible: !this.state.forceSyncModalVisible });
+    }
 
   render() {
     const { props, state } = this,
@@ -353,8 +482,67 @@ class BranchMenu extends Component {
             activeBranch={activeBranch}
             toggleModal={this._setModalState}
             isSticky={props.isSticky}
-            branchMutations={this.state.branchMutations}
+            branchMutations={state.branchMutations}
           />
+          {
+          state.publishModalVisible &&
+
+          <VisibilityModal
+            owner={props.labbook.owner}
+            labbookName={props.labbook.name}
+            labbookId={props.labbookId}
+            remoteUrl={props.defaultRemote}
+            auth={props.auth}
+            buttonText="Publish"
+            header="Publish"
+            modalStateValue="visibilityModalVisible"
+            sectionType={props.sectionType}
+            setPublishingState={props.setPublishingState}
+            checkSessionIsValid={this._checkSessionIsValid}
+            toggleModal={this._togglePublishModal}
+            showContainerMenuMessage={this._showContainerMenuMessage}
+            resetState={this._resetState}
+            resetPublishState={this._resetPublishState}
+            setRemoteSession={this._setRemoteSession}
+          />
+
+        }
+        {
+          state.publishDatasetsModalVisible &&
+
+          <PublishDatasetsModal
+            owner={state.owner}
+            labbookName={state.labbookName}
+            labbookId={this.props.labbookId}
+            remoteUrl={this.props.remoteUrl}
+            auth={this.props.auth}
+            buttonText="Publish All"
+            header={state.publishDatasetsModalAction}
+            pullOnly={state.pullOnly}
+            modalStateValue="visibilityModalVisible"
+            sectionType={this.props.sectionType}
+            setPublishingState={this.props.setPublishingState}
+            setSyncingState={this.props.setSyncingState}
+            toggleSyncModal={this._toggleSyncModal}
+            checkSessionIsValid={this._checkSessionIsValid}
+            toggleModal={this._togglePublishModal}
+            showContainerMenuMessage={this._showContainerMenuMessage}
+            resetState={this._resetState}
+            resetPublishState={this._resetPublishState}
+            setRemoteSession={this._setRemoteSession}
+            localDatasets={state.localDatasets || []}
+          />
+
+        }
+        {
+          state.forceSyncModalVisible &&
+
+          <ForceSync
+            toggleSyncModal={this._toggleSyncModal}
+            sectionType={this.props.sectionType}
+            pullOnly={state.pullOnly}
+          />
+        }
       </div>
     );
   }

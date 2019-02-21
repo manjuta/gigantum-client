@@ -20,7 +20,7 @@
 import pytest
 import responses
 
-from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 
 
 @pytest.fixture()
@@ -153,14 +153,14 @@ class TestGitLabManager(object):
                                     "id": 29,
                                     "name": "Jane Doe",
                                     "username": "janed",
-                                    "access_level": 40,
+                                    "access_level": ProjectPermissions.OWNER.value,
                                     "expires_at": None
                                 },
                                 {
                                     "id": 30,
                                     "name": "John Doeski",
                                     "username": "jd",
-                                    "access_level": 30,
+                                    "access_level": ProjectPermissions.READ_ONLY.value,
                                     "expires_at": None
                                 }
                             ],
@@ -171,8 +171,8 @@ class TestGitLabManager(object):
         collaborators = gitlab_mngr_fixture.get_collaborators("testuser", "test-labbook")
 
         assert len(collaborators) == 2
-        assert collaborators[0] == (29, 'janed', True)
-        assert collaborators[1] == (30, 'jd', False)
+        assert collaborators[0] == (29, 'janed', ProjectPermissions.OWNER.name)
+        assert collaborators[1] == (30, 'jd', ProjectPermissions.READ_ONLY.name)
 
         # Verify it fails on error to gitlab (should get second mock on second call)
         with pytest.raises(ValueError):
@@ -218,11 +218,13 @@ class TestGitLabManager(object):
                             ],
                       status=200)
 
-        collaborators = gitlab_mngr_fixture.add_collaborator("testuser", "test-labbook", "person100")
+        gitlab_mngr_fixture.add_collaborator("testuser", "test-labbook", "person100",
+                                                             ProjectPermissions.READ_WRITE)
 
+        collaborators = None
         assert len(collaborators) == 2
-        assert collaborators[0] == (29, 'janed', True)
-        assert collaborators[1] == (100, 'person100', False)
+        assert collaborators[0] == (29, 'janed', ProjectPermissions.OWNER.name)
+        assert collaborators[1] == (100, 'person100', ProjectPermissions.READ_WRITE)
 
     @responses.activate
     def test_add_collaborator_errors(self, gitlab_mngr_fixture, property_mocks_fixture):

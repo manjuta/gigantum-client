@@ -28,6 +28,7 @@ class Branches extends Component {
     action: null,
     mergeModalVisible: false,
     deleteModalVisible: false,
+    resetModalVisible: false,
     localSelected: false,
     remoteSelected: false,
   }
@@ -48,10 +49,12 @@ class Branches extends Component {
     @return {}
   */
   _toggleModal(modalName, branch) {
-    if (modalName === 'mergeModal' && this.props.activeBranch.branchName !== branch) {
+    if ((modalName === 'mergeModal') && (this.props.activeBranch.branchName !== branch)) {
       this.setState({ mergeModalVisible: branch || !this.state.mergeModalVisible });
-    } else if (modalName === 'deleteModal' && this.props.activeBranch.branchName !== branch) {
+    } else if ((modalName === 'deleteModal') && (this.props.activeBranch.branchName !== branch) && (branch !== 'master')) {
       this.setState({ deleteModalVisible: branch || !this.state.deleteModalVisible, localSelected: false, remoteSelected: false });
+    } else if ((modal === 'resetModal') && (this.props.activeBranch.branchName === branch)) {
+      this.setState({ resetModalVisible: branch || !this.state.resetModalVisible });
     }
   }
     /**
@@ -65,6 +68,8 @@ class Branches extends Component {
       this._mergeBranch(branch);
     } else if (action === 'delete') {
 
+    } else if (action === 'reset') {
+      this._resetBranch(branch);
     }
   }
   /**
@@ -206,6 +211,12 @@ class Branches extends Component {
                 and click 'Confirm' to proceed.
               </Fragment>
             }
+            {
+              action === 'reset' &&
+              <Fragment>
+                You are about to reset this branch. Resetting a branch will get rid of local changes. Click 'Confirm' to proceed.
+              </Fragment>
+            }
           </div>
           {
             action === 'delete' &&
@@ -306,34 +317,45 @@ class Branches extends Component {
     let deleteTooltip = branch.branchName === 'master' ? 'Cannot delete master branch' : branch.isActive ? 'Cannot delete Active branch' : 'Delete';
     return (
       <div className="Branches__actions-section">
-        <button
-          className={switchButtonCSS}
-          data-tooltip="Switch"
-          onClick={() => this._switchBranch(branch) }
-        />
-        <button
-          className={resetButtonCSS}
-          data-tooltip={resetTooltip}
-          onClick={() => this._resetBranch(branch) }
-        />
-        <button
-          className={mergeButtonCSS}
-          data-tooltip={mergeTooltip}
-          onClick={() => this._toggleModal('mergeModal', branch.branchName) }
-        />
+        {
+          branch.isActive ?
+          <Fragment>
+            <button
+              className="Branches__btn Branches__btn--create"
+              onClick={() => this.props.toggleModal('createBranchVisible') }
+            />
+            <button
+              className={resetButtonCSS}
+              data-tooltip={resetTooltip}
+              onClick={() => this._resetBranch(branch) }
+            />
+            <button
+              className={syncButtonCSS}
+              data-tooltip={syncTooltip}
+              onClick={() => this._syncBranch(branch) }
+            />
+          </Fragment>
+          :
+          <Fragment>
+            <button
+              className={switchButtonCSS}
+              data-tooltip="Switch"
+              onClick={() => this._switchBranch(branch) }
+            />
+            <button
+              className={mergeButtonCSS}
+              data-tooltip={mergeTooltip}
+              onClick={() => this._toggleModal('mergeModal', branch.branchName) }
+             />
+            <button
+              className={deleteButtonCSS}
+              data-tooltip={deleteTooltip}
+              onClick={() => this._toggleModal('deleteModal', branch.branchName) }
+              />
+          </Fragment>
+        }
         {mergeModalVisible && this._renderModal(branch, 'merge')}
-        <button
-          className={deleteButtonCSS}
-          data-tooltip={deleteTooltip}
-          onClick={() => this._toggleModal('deleteModal', branch.branchName) }
-        />
         {deleteModalVisible && this._renderModal(branch, 'delete')}
-        <button
-          className={syncButtonCSS}
-          data-tooltip={syncTooltip}
-          onClick={() => this._syncBranch(branch) }
-
-        />
     </div>);
   }
 
@@ -374,15 +396,10 @@ class Branches extends Component {
                 }
                 <div className="Branches__header">
                   <div className="Branches__title">Manage Branches</div>
-                  <button
-                    className="Branches__btn Branches__btn--create"
-                    onClick={() => this.props.toggleModal('createBranchVisible') }
-                  />
                 </div>
-
+              <div className="Branches__label">Current Branch:</div>
               <div className={currentBranchContainerCSS}>
                 <div className="Branches__base-section">
-                  <div className="Branches__label">Current Branch:</div>
                   <div className="Branches__branchname-container">
                     <div className="Branches__branchname">{props.activeBranch.branchName}</div>
                     <div
@@ -408,21 +425,29 @@ class Branches extends Component {
                   this._renderActions(props.activeBranch)
                 }
               </div>
-
+              <div className="Branches__label">Other Branches:</div>
               {
                 filteredBranches.map((branch) => {
+                  const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
+                  const deleteModalVisible = this.state.deleteModalVisible === branch.branchName;
                   const branchStatusText = branch.isLocal ? branch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only',
                   branchContainerCSS = classNames({
                     Branches__branch: true,
                     'Branches__branch--selected': (branch.branchName === state.mergeModalVisible) || (branch.branchName === state.deleteModalVisible),
+                    'Branches__branch--active': ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible),
+                  }),
+                  branchBaseSectionCSS = classNames({
+                    'Branches__base-section': true,
+                    // 'Branches__base-section--inactive': branch.branchName !== state.selectedBranchname,
                   });
                   return (
                     <div
                       key={branch.branchName}
                       className={branchContainerCSS}
-                      onClick={evt => this._selectBranchname(evt, branch.branchName)}
+                      onMouseEnter={evt => this._selectBranchname(evt, branch.branchName)}
+                      onMouseLeave={evt => this._selectBranchname(evt, null)}
                     >
-                      <div className="Branches__base-section">
+                      <div className={branchBaseSectionCSS}>
                         <div className="Branches__branchname-container">
                           <div className="Branches__branchname">{branch.branchName}</div>
                           <div
@@ -446,7 +471,7 @@ class Branches extends Component {
                         </div>
                       </div>
                       {
-                        state.selectedBranchname === branch.branchName &&
+                        ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible) &&
                         this._renderActions(branch)
                       }
                     </div>

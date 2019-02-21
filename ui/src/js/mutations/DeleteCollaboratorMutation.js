@@ -11,7 +11,13 @@ const mutation = graphql`
     deleteCollaborator(input: $input){
       updatedLabbook{
         id
-        collaborators
+        collaborators {
+          id
+          owner
+          name
+          collaboratorUsername
+          permission
+        }
       }
       clientMutationId
     }

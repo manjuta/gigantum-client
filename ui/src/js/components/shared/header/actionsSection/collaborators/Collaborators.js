@@ -15,7 +15,13 @@ import './Collaborators.scss';
 export const CollaboratorsQuery = graphql`
   query CollaboratorsQuery($name: String!, $owner: String!){
     labbook(name: $name, owner: $owner){
-      collaborators
+      collaborators {
+        id
+        owner
+        name
+        collaboratorUsername
+        permission
+      }
       canManageCollaborators
     }
   }`;
@@ -141,16 +147,14 @@ class CollaboratorButton extends Component {
                 this.collaborators = section.collaborators;
 
                 const collaboratorButtonCSS = classNames({
-                    disabled: !section.canManageCollaborators && this.state.sessionValid,
                     'Collaborators__btn Btn--flat Btn--no-underline': true,
                   }),
 
                   collaboratorCSS = classNames({
                     Collaborators: true,
-                    disabled: !section.canManageCollaborators && this.state.sessionValid,
                   }),
 
-                  collaboratorFilteredArr = section.collaborators && section.collaborators.filter(name => name !== owner);
+                  collaboratorFilteredArr = section.collaborators && section.collaborators.filter(({ collaboratorUsername }) => collaboratorUsername !== owner).map(({ collaboratorUsername }) => collaboratorUsername);
 
                 const collaboratorNames = self._getCollaboratorList(section.collaborators, collaboratorFilteredArr);
 
@@ -181,16 +185,14 @@ class CollaboratorButton extends Component {
                 );
               } else if (collaborators !== null) {
                 const collaboratorButtonCSS = classNames({
-                  disabled: !canManageCollaborators && this.state.sessionValid,
                   Collaborators__btn: true,
                 });
 
                 const collaboratorCSS = classNames({
                   Collaborators: true,
-                  disabled: !canManageCollaborators && this.state.sessionValid,
                 });
 
-                const collaboratorFilteredArr = collaborators && collaborators.filter(name => name !== owner);
+                const collaboratorFilteredArr = collaborators && collaborators.filter(({ collaboratorUsername }) => collaboratorUsername !== owner);
 
                 const collaboratorNames = self._getCollaboratorList(collaborators, collaboratorFilteredArr);
 
@@ -211,6 +213,7 @@ class CollaboratorButton extends Component {
                           key="CollaboratorsModal"
                           ref="collaborators"
                           collaborators={collaborators}
+                          canManageCollaborators={canManageCollaborators}
                           owner={owner}
                           labbookName={name}
                           toggleCollaborators={this._toggleCollaborators}

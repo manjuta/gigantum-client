@@ -105,6 +105,7 @@ input AddDatasetCollaboratorInput {
   owner: String!
   datasetName: String!
   username: String!
+  permissions: String!
   clientMutationId: String
 }
 
@@ -136,6 +137,7 @@ input AddLabbookCollaboratorInput {
   owner: String!
   labbookName: String!
   username: String!
+  permissions: String!
   clientMutationId: String
 }
 
@@ -293,6 +295,15 @@ input ChunkUploadInput {
   chunkIndex: Int!
   filename: String!
   uploadId: String!
+}
+
+type Collaborator implements Node & GitRepository {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  collaboratorUsername: String!
+  permission: String!
 }
 
 input CompleteBatchUploadTransactionInput {
@@ -482,7 +493,7 @@ type DatasetList implements Node {
 
 """
 A type representing the overview of a Dataset
-    
+
 """
 type DatasetOverview implements Node & GitRepository {
   """The ID of the object."""
@@ -756,7 +767,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of. 
+A Connection for paging through all background jobs the system is aware of.
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -790,7 +801,7 @@ type Labbook implements Node & GitRepository {
   defaultRemote: String
   creationDateUtc: DateTime
   modifiedOnUtc: DateTime
-  collaborators: [String]
+  collaborators: [Collaborator]
   canManageCollaborators: Boolean
   isRepoClean: Boolean
   environment: Environment
@@ -999,7 +1010,7 @@ type LabbookQuery {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-    
+
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1049,7 +1060,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary. 
+Merge from another branch into the current active branch. Force if necessary.
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -1340,7 +1351,7 @@ input ResetBranchToRemoteInput {
 """
 Undo all local history and then set current branch tip to match remote.
 
-Very useful when changes are made to master that cannot be pushed. 
+Very useful when changes are made to master that cannot be pushed.
 """
 type ResetBranchToRemotePayload {
   labbook: Labbook

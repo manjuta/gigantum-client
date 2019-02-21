@@ -8,7 +8,7 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 from gtmcore.workflows import DatasetWorkflow
 
 from lmsrvcore.api import logged_mutation
@@ -212,11 +212,12 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         dataset_name = graphene.String(required=True)
         username = graphene.String(required=True)
+        permissions = graphene.String(required=True)
 
     updated_dataset = graphene.Field(DatasetObject)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, dataset_name, username,
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, username, permissions,
                                client_mutation_id=None):
         #TODO(billvb/dmk) - Here "username" refers to the intended recipient username.
         # it should probably be renamed here and in the frontend to "collaboratorUsername"
@@ -239,9 +240,27 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
             raise ValueError("Authorization header not provided. "
                              "Must have a valid session to query for collaborators")
 
+        if permissions == 'readonly':
+            perm = ProjectPermissions.READ_ONLY
+        elif permissions == 'readwrite':
+            perm = ProjectPermissions.READ_WRITE
+        elif permissions == 'owner':
+            perm = ProjectPermissions.OWNER
+        else:
+            raise ValueError(f"Unknown permission set: {permissions}")
+
+        if permissions == 'readonly':
+            perm = ProjectPermissions.READ_ONLY
+        elif permissions == 'readwrite':
+            perm = ProjectPermissions.READ_WRITE
+        elif permissions == 'owner':
+            perm = ProjectPermissions.OWNER
+        else:
+            raise ValueError(f"Unknown permission set: {permissions}")
+
         # Add collaborator to remote service
         mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.add_collaborator(owner, dataset_name, username)
+        mgr.add_collaborator(owner, dataset_name, username, perm)
 
         create_data = {"owner": owner,
                        "name": dataset_name}

@@ -5,7 +5,13 @@ const labbookUpdatesQuery = graphql`
       containerStatus
       imageStatus
     }
-    collaborators
+    collaborators{
+      id
+      owner
+      name
+      collaboratorUsername
+      permission
+    }
     canManageCollaborators
     visibility
     defaultRemote

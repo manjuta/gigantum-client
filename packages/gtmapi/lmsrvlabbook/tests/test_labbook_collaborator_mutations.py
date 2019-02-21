@@ -21,7 +21,6 @@ import responses
 
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
-from snapshottest import snapshot
 
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, property_mocks_fixture, docker_socket_fixture
 
@@ -40,7 +39,7 @@ def mock_create_labbooks(fixture_working_dir):
 
 class TestLabBookCollaboratorMutations(object):
     @responses.activate
-    def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot):
+    def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -50,6 +49,7 @@ class TestLabBookCollaboratorMutations(object):
                                     "name": "New Person",
                                     "username": "default",
                                     "state": "active",
+                                    "access_level": 30
                                 }
                             ],
                       status=200)
@@ -109,7 +109,7 @@ class TestLabBookCollaboratorMutations(object):
         snapshot.assert_match(mock_create_labbooks[2].execute(query, context_value=req))
 
     @responses.activate
-    def test_add_collaborator_as_owner(self, mock_create_labbooks, property_mocks_fixture, snapshot):
+    def test_add_collaborator_as_owner(self, mock_create_labbooks, property_mocks_fixture):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -179,8 +179,7 @@ class TestLabBookCollaboratorMutations(object):
         snapshot.assert_match(mock_create_labbooks[2].execute(query, context_value=req))
 
     @responses.activate
-    def test_delete_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot,
-                                 docker_socket_fixture):
+    def test_delete_collaborator(self, mock_create_labbooks, property_mocks_fixture, docker_socket_fixture):
         """Test deleting a collaborator from a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
