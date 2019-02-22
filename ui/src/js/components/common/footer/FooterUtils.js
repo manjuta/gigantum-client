@@ -42,6 +42,7 @@ const FooterUtils = {
           if (response.data &&
             response.data.jobStatus &&
             response.data.jobStatus.jobMetadata) {
+
             let fullMessage = (response.data.jobStatus.jobMetadata.indexOf('feedback') > -1) ? JSON.parse(response.data.jobStatus.jobMetadata).feedback : '';
             fullMessage = fullMessage.lastIndexOf('\n') === (fullMessage.length - 1)
               ? fullMessage.slice(0, fullMessage.length - 1)

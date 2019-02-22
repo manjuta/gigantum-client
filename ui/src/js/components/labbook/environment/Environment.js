@@ -4,6 +4,7 @@ import { createFragmentContainer, graphql } from 'react-relay';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 import { setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
+import { setBuildingState } from 'JS/redux/reducers/labbook/labbook';
 import store from 'JS/redux/store';
 // mutations
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
@@ -17,6 +18,7 @@ import PackageDependencies from './PackageDependencies';
 import CustomDockerfile from './CustomDockerfile';
 // assets
 import './Environment.scss';
+
 
 class Environment extends Component {
   constructor(props) {
@@ -42,7 +44,8 @@ class Environment extends Component {
   */
   _buildCallback = (refetchPending) => {
     const { labbookName, owner } = this.state;
-    this.props.setBuildingState(true);
+
+    setBuildingState(true);
     if (store.getState().containerStatus.status === 'Running') {
       StopContainerMutation(
         owner,

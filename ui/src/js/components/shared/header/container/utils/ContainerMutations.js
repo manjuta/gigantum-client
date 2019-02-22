@@ -3,7 +3,8 @@ import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
-
+// store
+import { setBuildingState } from 'JS/redux/reducers/labbook/labbook';
 
 class ContainerMutations {
    /**
@@ -82,7 +83,7 @@ class ContainerMutations {
      const { noCache } = data,
            { owner, name } = this.state,
            self = this;
-
+     setBuildingState(true);
      BuildImageMutation(
         owner,
         name,

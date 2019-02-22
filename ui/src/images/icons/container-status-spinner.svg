@@ -41,6 +41,6 @@
 
   </style>
   <g class="spinner">
-    <rect class="path" width="40" height="24" rx="12" ry="12" fill="none" stroke-width="3"></rect>
+    <rect class="path" width="40" height="24" rx="12" ry="12" fill="none" stroke-width="6"></rect>
   </g>
 </svg>

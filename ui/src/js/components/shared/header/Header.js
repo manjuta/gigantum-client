@@ -219,7 +219,8 @@ class Header extends Component {
                   type={branchesErrorCSS}
                   key="branches">
                   <BranchMenu
-                    defaultRemote={section.defaultRemote}
+                    {...props}
+                    defaultRemote={labbook.defaultRemote}
                     branchesOpen={props.branchesOpen}
                     section={section}
                     branches={branches}
@@ -227,7 +228,6 @@ class Header extends Component {
                     activeBranch={section.activeBranchName || 'master'}
                     toggleBranchesView={this.props.toggleBranchesView}
                     mergeFilter={props.mergeFilter}
-                    setBuildingState={props.setBuildingState}
                     isSticky={props.isSticky}
                     visibility={props.visibility}
                     sectionType={props.sectionType}

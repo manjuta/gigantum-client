@@ -398,7 +398,7 @@ class PackageDependencies extends Component {
       installDependenciesButtonState: 'loading',
     });
 
-    this.props.setBuildingState(true);
+    setBuildingState(true);
     this.props.setLookingUpPackagesState(true);
 
     PackageLookup.query(labbookName, owner, filteredInput).then((response) => {
@@ -414,7 +414,7 @@ class PackageDependencies extends Component {
         }, 2000);
         this.props.setErrorMessage('Error occured looking up packages', response.errors);
 
-        this.props.setBuildingState(false);
+        setBuildingState(false);
       } else {
         let resPackages = response.data.labbook.packages;
         let invalidCount = 0;
@@ -434,7 +434,7 @@ class PackageDependencies extends Component {
         if (invalidCount) {
           const message = invalidCount === 1 ? `Unable to find package '${lastInvalid.package}'.` : `Unable to find ${invalidCount} packages.`;
           this.props.setErrorMessage('Packages could not be installed', [{ message }]);
-          this.props.setBuildingState(false);
+          setBuildingState(false);
           this.setState({ disableInstall: false, installDependenciesButtonState: '' });
         } else {
           filteredInput = [];
@@ -492,7 +492,7 @@ class PackageDependencies extends Component {
             );
           } else {
             this.props.setWarningMessage('All packages attempted to be installed already exist.');
-            this.props.setBuildingState(false);
+            setBuildingState(false);
             self.setState({
               disableInstall: false,
               packages: [],

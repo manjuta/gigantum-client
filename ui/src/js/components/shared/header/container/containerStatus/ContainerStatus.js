@@ -34,6 +34,7 @@ class ContainerStatus extends Component {
       showDevList: false,
       showInitialMessage: false,
       previousContainerStatus: props.containerStatus,
+      attemptingRebuild: false,
     };
 
     this._getContainerStatusText = this._getContainerStatusText.bind(this);
@@ -76,8 +77,8 @@ class ContainerStatus extends Component {
     });
 
     const status = this._getContainerStatusText({
-      containerStatus: this.props.containerStatus,
-      imageStatus: this.props.imageStatus,
+      containerStatus: props.containerStatus,
+      imageStatus: props.imageStatus,
     });
 
     const hasLabbookId = store.getState().overview.containerStates[this.props.labbookId];
@@ -144,7 +145,6 @@ class ContainerStatus extends Component {
     const { props, state } = this;
     const labbookCreationDate = Date.parse(`${this.props.creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
-
     const timeDifferenceMS = timeNow - labbookCreationDate;
 
     let status = (containerStatus === 'RUNNING') ? 'Running' : containerStatus;
@@ -152,7 +152,7 @@ class ContainerStatus extends Component {
     status = (imageStatus === 'BUILD_IN_PROGRESS') ? 'Building' : status;
     status = (imageStatus === 'BUILD_FAILED') ? 'Rebuild' : status;
     status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
-    status = ((imageStatus === 'DOES_NOT_EXIST') || (imageStatus === 'BUILD_IN_PROGRESS')) && (timeDifferenceMS < 15000) ? 'Building' : status;
+    status = ((imageStatus === 'DOES_NOT_EXIST') || props.isBuilding || (imageStatus === 'BUILD_IN_PROGRESS')) && (timeDifferenceMS < 15000) ? 'Building' : status;
 
     status = ((status === 'Stopped') && (state.status === 'Starting')) ? 'Starting' : status;
     status = ((status === 'Running') && (state.status === 'Stopping')) ? 'Stopping' : status;
@@ -161,12 +161,21 @@ class ContainerStatus extends Component {
       this.props.setContainerStatus(status);
     }
 
+    if ((status === 'Stopped') && state.attemptingRebuild) {
+      this.setState({ attemptingRebuild: false });
+      this._startContainerMutation(false);
+    } else if (status === 'Rebuild') {
+      this.setState({ attemptingRebuild: false });
+    }
+
     if ((status) && (status !== 'Stopped') && (status !== 'Rebuild')) {
       this.props.setCloseEnvironmentMenus();
       setPackageMenuVisible(false);
     }
+    let cssClass = status;
+    let constainerStatus = (status === 'Rebuild') ? 'Stopped' : status;
 
-    return status;
+    return { constainerStatus, cssClass };
   }
 
   /**
@@ -235,7 +244,7 @@ class ContainerStatus extends Component {
     trigger mutatuion to stop or start container depdending on the state
     @return {string} newStatus
    */
-  _containerAction(status, evt) {
+  _containerAction(status, cssStatus, evt) {
     const { props, state } = this;
     if (!store.getState().labbook.isBuilding && !props.isLookingUpPackages) {
       if (status === 'Stop') {
@@ -243,14 +252,14 @@ class ContainerStatus extends Component {
 
         this.setState({ contanerMenuRunning: false });
         this._stopContainerMutation();
-      } else if (status === 'Run') {
+      } else if ((status === 'Run') && (cssStatus !== 'Rebuild')) {
         props.updateStatus('Starting');
 
         this.setState({ contanerMenuRunning: false });
 
         props.setMergeMode(false, false);
         this._startContainerMutation();
-      } else if ((status === 'Rebuild') || (status === 'Rebuild')) {
+      } else if ((status === 'Run') || (status === 'Rebuild')) {
         this.setState({
           status: 'Building',
           contanerMenuRunning: false,
@@ -311,7 +320,7 @@ class ContainerStatus extends Component {
 
     props.setContainerMenuVisibility(false);
 
-    this.setState({ imageStatus: 'BUILD_IN_PROGRESS' });
+    this.setState({ imageStatus: 'BUILD_IN_PROGRESS', attemptingRebuild: true });
 
     props.containerMutations.buildImage(
       data,
@@ -319,56 +328,47 @@ class ContainerStatus extends Component {
         if (error) {
           console.log(error);
         }
-
-        self.setState({ rebuildAttempts: state.rebuildAttempts + 1 });
-
-        if ((state.status === 'Starting') && (state.rebuildAttempts < 1)) {
-          self._startContainerMutation();
-        } else {
-          self.setState({
-            rebuildAttempts: 0,
-            status: '',
-          });
-        }
       },
     );
   }
 
   render() {
-    const { props, state } = this,
-          status = this._getContainerStatusText(props),
-          key = 'setStatus',
+    const { props, state } = this;
+    let { constainerStatus, cssClass } = this._getContainerStatusText(props);
+
+    const key = 'setStatus',
           excludeStatuses = ['Stopping', 'Starting', 'Building', 'Publishing', 'Syncing'],
-          notExcluded = excludeStatuses.indexOf(status) === -1,
-          textStatus = this._getStatusText(status);
+          notExcluded = (excludeStatuses.indexOf(constainerStatus) === -1),
+          status = this._getStatusText(constainerStatus);
 
     const containerStatusCss = classNames({
-      'ContainerStatus__container-state--menu-open': props.containerMenuOpen,
-      'ContainerStatus__container-state': !props.containerMenuOpen,
-      [status]: !props.isBuilding && !props.isSyncing && !props.isPublishing,
-      Building: props.isBuilding || state.imageStatus === 'BUILD_IN_PROGRESS',
-      Syncing: props.isSyncing,
-      Publishing: props.isPublishing,
-      LookingUp: props.isLookingUpPackages,
-      'ContainerStatus__container-state--expanded': state.isMouseOver && notExcluded && !props.isBuilding && !(state.imageStatus === 'BUILD_IN_PROGRESS'),
-      'ContainerStatus__container-remove-pointer': !notExcluded || props.isBuilding || (props.imageStatus === 'BUILD_IN_PROGRESS') || props.isSyncing || props.isPublishing,
+          'ContainerStatus__container-state--menu-open': props.containerMenuOpen,
+          'ContainerStatus__container-state': !props.containerMenuOpen,
+          [cssClass]: !props.isBuilding && !props.isSyncing && !props.isPublishing,
+          'Tooltip-data': (cssClass === 'Rebuild'),
+          Building: props.isBuilding || props.imageStatus === 'BUILD_IN_PROGRESS',
+          Syncing: props.isSyncing,
+          Publishing: props.isPublishing,
+          LookingUp: props.isLookingUpPackages,
+          'ContainerStatus__container-state--expanded': state.isMouseOver && notExcluded && !props.isBuilding && !(state.imageStatus === 'BUILD_IN_PROGRESS'),
+          'ContainerStatus__container-remove-pointer': !notExcluded || props.isBuilding || (props.imageStatus === 'BUILD_IN_PROGRESS') || props.isSyncing || props.isPublishing,
     });
 
     return (
       <div className="ContainerStatus flex flex--row">
 
         <div
-          onClick={evt => this._containerAction(textStatus, key)}
+          data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
+          onClick={evt => this._containerAction(status, cssClass, key)}
           key={key}
           className={containerStatusCss}
           onMouseOver={() => { this._setMouseOverState(true); }}
           onMouseOut={() => { this._setMouseOverState(false); }}>
 
-         <div className="ContainerStatus__text">{ this._getStatusText(textStatus) }</div>
-         <div className="ContainerStatus__toggle">
-            <div className="ContainerStatus__toggle-btn"></div>
-         </div>
-
+           <div className="ContainerStatus__text">{ status }</div>
+           <div className="ContainerStatus__toggle">
+              <div className="ContainerStatus__toggle-btn"></div>
+           </div>
         </div>
 
         { state.showInitialMessage

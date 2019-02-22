@@ -68,7 +68,6 @@ class Labbook extends Component {
   	super(props);
     localStorage.setItem('owner', store.getState().routes.owner);
     // bind functions here
-    this._setBuildingState = this._setBuildingState.bind(this);
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
     this._branchViewClickedOff = this._branchViewClickedOff.bind(this);
     setCallbackRoute(props.location.pathname);
@@ -77,7 +76,6 @@ class Labbook extends Component {
   state = {
     containerStatus: this.props.labbook.environment.containerStatus,
     imageStatus: this.props.labbook.environment.imageStatus,
-    isBuilding: false,
     isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING'),
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
@@ -157,10 +155,6 @@ class Labbook extends Component {
           const { environment } = response.labbook;
           // reset build flags
           if ((environment.imageStatus !== 'BUILD_IN_PROGRESS') && isBuilding) {
-            self.setState({
-              isBuilding: false,
-            });
-
             setBuildingState(false);
           }
           // only updates state if container or imageStatus has changed
@@ -178,7 +172,6 @@ class Labbook extends Component {
             self.setState({
               containerStatus: labbook.environment.containerStatus,
               imageStatus: labbook.environment.imageStatus,
-              isBuilding: false,
               isLocked: (labbook.environment.containerStatus !== 'NOT_RUNNING'),
               collaborators: labbook.collaborators,
               canManageCollaborators: labbook.canManageCollaborators,
@@ -222,20 +215,6 @@ class Labbook extends Component {
 
     if (isSticky) {
       setMergeMode(false, false);
-    }
-  }
-
-  /**
-    @param {boolean} isBuilding
-    updates container status state
-    updates labbook state
-  */
-  _setBuildingState = (isBuilding) => {
-    const { props } = this;
-    this.refs.ContainerStatus && this.refs.ContainerStatus.setState({ isBuilding });
-
-    if (props.isBuilding !== isBuilding) {
-      setBuildingState(isBuilding);
     }
   }
 
@@ -286,7 +265,6 @@ class Labbook extends Component {
             <Header
               {...props}
               description={labbook.description}
-              setBuildingState={this._setBuildingState}
               toggleBranchesView={this._toggleBranchesView}
               sectionType={'labbook'}
               containerStatus={state.containerStatus}
@@ -311,7 +289,6 @@ class Labbook extends Component {
                         key={`${props.labbookName}_overview`}
                         labbook={labbook}
                         labbookId={labbook.id}
-                        setBuildingState={this._setBuildingState}
                         isSyncing={props.isSyncing}
                         isPublishing={props.isPublishing}
                         scrollToTop={this._scrollToTop}
@@ -338,7 +315,6 @@ class Labbook extends Component {
                                labbook={labbook}
                                description={labbook.description}
                                labbookId={labbook.id}
-                               setBuildingState={this._setBuildingState}
                                isSyncing={props.isSyncing}
                                isPublishing={props.isPublishing}
                                scrollToTop={this._scrollToTop}
@@ -364,7 +340,6 @@ class Labbook extends Component {
                                description={labbook.description}
                                activeBranch={labbook.activeBranchName}
                                isMainWorkspace={branchName === 'master'}
-                               setBuildingState={this._setBuildingState}
                                sectionType={'labbook'}
                                isLocked={isLocked}
                                {...props}
@@ -383,7 +358,6 @@ class Labbook extends Component {
                                key={`${props.labbookName}_environment`}
                                labbook={labbook}
                                labbookId={labbook.id}
-                               setBuildingState={this._setBuildingState}
                                containerStatus={this.refs.ContainerStatus}
                                overview={labbook.overview}
                                isLocked={isLocked}
