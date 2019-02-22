@@ -2,7 +2,7 @@
 
 @media screen and (max-width: 50000px) and (min-width: 1480px){
   .SidePanel {
-    top: 207px !important;
+    top: 202px !important;
     &--sticky{
       top: 110px !important;
     }
@@ -17,7 +17,7 @@
   @include spanColumns(3);
   margin: 0;
   right: 0px;
-  top: 196px;
+  top: 191px;
   bottom: 0px;
   @include boxShadow();
 

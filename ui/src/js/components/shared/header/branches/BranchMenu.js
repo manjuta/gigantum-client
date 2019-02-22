@@ -586,8 +586,8 @@ class BranchMenu extends Component {
             labbookId={props.sectionId}
             remoteUrl={props.defaultRemote}
             auth={props.auth}
-            buttonText="Publish"
-            header="Publish"
+            buttonText="Sync"
+            header="Sync"
             modalStateValue="visibilityModalVisible"
             sectionType={props.sectionType}
             setPublishingState={props.setPublishingState}

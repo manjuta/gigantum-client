@@ -8,7 +8,7 @@ $dropBoxWidth: 250px;
 
 .BranchMenu__status{
   position: absolute;
-  top: 2px;
+  top: 10px;
   right: 38px;
   width: 44px;
   @include flex(flex-start, row);
@@ -36,7 +36,7 @@ $dropBoxWidth: 250px;
    &-btn {
      position: relative;
      padding: 0 80px 0 10px;
-     height: 30px;
+     height: 40px;
      width: $dropBoxWidth;
      border: 1px solid $azure;
      cursor: pointer;
@@ -70,7 +70,7 @@ $dropBoxWidth: 250px;
    &-menu {
      position: absolute;
      background: $white;
-     top: 30px;
+     top: 40px;
      padding: 10px;
      width: $dropBoxWidth + 50px;
      animation: slide-down-fade-in forwards .25s;
@@ -79,7 +79,7 @@ $dropBoxWidth: 250px;
 
    &-label {
      color: $jet;
-     font-size: 10px;
+     font-size: 14px;
    }
 
    &-text {
@@ -95,7 +95,7 @@ $dropBoxWidth: 250px;
   margin: 0 0 0 10px;
 }
 .BranchMenu__btn {
-  height: 30px;
+  height: 40px;
   line-height: 30px;
   color: $azure;
   background: transparent;
@@ -395,6 +395,7 @@ $dropBoxWidth: 250px;
 
 
 .BranchMenu__branch-name{
+  padding-top: 10px;
   @include flex(flex-start, row);
   .BranchMenu__dropdown-label{
     align-self: flex-end;
