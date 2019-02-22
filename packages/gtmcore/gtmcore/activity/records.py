@@ -354,6 +354,11 @@ class ActivityRecord(object):
     def num_detail_objects(self):
         return len(self._detail_objects)
 
+    def trim_detail_objects(self, num_objects: int) -> None:
+        if num_objects < 1:
+            raise ValueError("Cannot set `num_objects` less than 1")
+        self._detail_objects = self._detail_objects[0:num_objects]
+
     @contextmanager
     def inspect_detail_objects(self):
         """To modify _detail_objects, use this in a `with` block

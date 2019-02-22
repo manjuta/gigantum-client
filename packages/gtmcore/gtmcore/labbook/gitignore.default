@@ -38,3 +38,6 @@ coverage.xml
 
 # mypy
 .mypy_cache/
+
+# R
+.Rhistory

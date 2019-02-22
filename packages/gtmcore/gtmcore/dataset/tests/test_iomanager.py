@@ -4,11 +4,12 @@ import glob
 import uuid
 import shutil
 from aioresponses import aioresponses
+import snappy
 
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file,\
-    USERNAME
+    USERNAME, helper_compress_file
 from gtmcore.dataset.io import PushResult, PushObject
 
 
@@ -25,13 +26,13 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfasdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "asfdfdfasdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content 2")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test4.txt", "test content 4")
         manifest.sweep_all_changes()
 
         # Modify file to have 2 objects with same key
-        helper_append_file(manifest.cache_mgr.cache_root, iom.manifest.dataset_revision, "test2.txt", "fghdfghdfghdf")
+        helper_append_file(manifest.cache_mgr.cache_root, iom.manifest.dataset_revision, "test2.txt", "test content 22")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -51,10 +52,10 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test3.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content dup")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content dup")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test3.txt", "test content dup")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test4.txt", "test content 4")
         manifest.sweep_all_changes()
 
         # Write a .DS_Store file in the objects dir to make sure it gets skipped
@@ -75,7 +76,7 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
         helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
         manifest.sweep_all_changes()
 
@@ -114,8 +115,8 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content 2")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -170,9 +171,9 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test3.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content dup")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test3.txt", "test content dup")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -230,8 +231,8 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content 2")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -283,8 +284,8 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content 2")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -299,8 +300,10 @@ class TestIOManager(object):
 
         assert os.path.exists(obj1_target) is True
         assert os.path.exists(obj2_target) is True
-        os.rename(obj1_target, obj1_source)
-        os.rename(obj2_target, obj2_source)
+
+        helper_compress_file(obj1_target, obj1_source)
+        helper_compress_file(obj2_target, obj2_source)
+
         assert os.path.isfile(obj1_target) is False
         assert os.path.isfile(obj2_target) is False
         assert os.path.isfile(obj1_source) is True
@@ -346,10 +349,8 @@ class TestIOManager(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is False
-            with open(obj1_source, 'rt') as dd:
-                source1 = dd.read()
             with open(obj1_target, 'rt') as dd:
-                assert source1 == dd.read()
+                assert "test content 1" == dd.read()
 
             result = iom.pull_objects(keys=["test2.txt"])
             assert len(glob.glob(f'{iom.push_dir}/*')) == 1
@@ -359,14 +360,10 @@ class TestIOManager(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is True
-            with open(obj1_source, 'rt') as dd:
-                source1 = dd.read()
             with open(obj1_target, 'rt') as dd:
-                assert source1 == dd.read()
-            with open(obj2_source, 'rt') as dd:
-                source2 = dd.read()
+                assert "test content 1" == dd.read()
             with open(obj2_target, 'rt') as dd:
-                assert source2 == dd.read()
+                assert "test content 2" == dd.read()
 
     def test_pull_objects_all(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
@@ -374,8 +371,8 @@ class TestIOManager(object):
 
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content 2")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -393,8 +390,10 @@ class TestIOManager(object):
 
         assert os.path.exists(obj1_target) is True
         assert os.path.exists(obj2_target) is True
-        os.rename(obj1_target, obj1_source)
-        os.rename(obj2_target, obj2_source)
+
+        helper_compress_file(obj1_target, obj1_source)
+        helper_compress_file(obj2_target, obj2_source)
+
         assert os.path.isfile(obj1_target) is False
         assert os.path.isfile(obj2_target) is False
         assert os.path.isfile(obj1_source) is True
@@ -447,12 +446,14 @@ class TestIOManager(object):
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is True
 
+            decompressor = snappy.StreamDecompressor()
             for r in result.success:
-                with open(check_info[r.object_path], 'rt') as dd:
-                    source1 = dd.read()
+                with open(check_info[r.object_path], 'rb') as dd:
+                    source1 = decompressor.decompress(dd.read())
+                    source1 += decompressor.flush()
                 with open(r.object_path, 'rt') as dd:
                     dest1 = dd.read()
-                assert source1 == dest1
+                assert source1.decode("utf-8") == dest1
 
     def test_pull_objects_all_partial_download(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
@@ -461,8 +462,8 @@ class TestIOManager(object):
         revision = manifest.dataset_revision
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, revision, "other_dir"))
         helper_append_file(manifest.cache_mgr.cache_root, revision, "other_dir/test3.txt", "1")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "fdsfgfd")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test1.txt", "test content 1")
+        helper_append_file(manifest.cache_mgr.cache_root, revision, "test2.txt", "test content 2")
         manifest.sweep_all_changes()
 
         obj_to_push = iom.objects_to_push()
@@ -484,7 +485,7 @@ class TestIOManager(object):
 
         # Completely remove other_dir/test3.txt object
         os.remove(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "other_dir", "test3.txt"))
-        os.rename(obj1_target, obj1_source)
+        helper_compress_file(obj1_target, obj1_source)
 
         # Remove link for test1.txt
         os.remove(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test1.txt"))
@@ -528,12 +529,12 @@ class TestIOManager(object):
             filename = os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,  "test1.txt")
             assert os.path.isfile(filename) is True
             with open(filename, 'rt') as dd:
-                assert dd.read() == "asdfadfsdf"
+                assert dd.read() == "test content 1"
 
             filename = os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,  "test2.txt")
             assert os.path.isfile(filename) is True
             with open(filename, 'rt') as dd:
-                assert dd.read() == "fdsfgfd"
+                assert dd.read() == "test content 2"
 
             # Try pulling all again with nothing to pull
             result = iom.pull_all()

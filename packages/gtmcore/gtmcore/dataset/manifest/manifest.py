@@ -174,7 +174,7 @@ class Manifest(object):
 
             for file in files:
                 # TODO: Check for ignored
-                if file in ['.smarthash', '.DS_STORE']:
+                if file in ['.smarthash', '.DS_STORE', '.DS_Store']:
                     continue
 
                 rel_path = os.path.join(folder, file)

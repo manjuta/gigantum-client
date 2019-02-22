@@ -1,28 +1,40 @@
 import pytest
 from aioresponses import aioresponses
 import aiohttp
+import snappy
+import shutil
 
 import os
 import uuid
 
 from gtmcore.dataset.storage import get_storage_backend
 from gtmcore.dataset.storage.gigantum import GigantumObjectStore, PresignedS3Download, PresignedS3Upload
-from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir
+from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, helper_compress_file
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
 from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 
-
-def helper_write_object(object_id):
-    object_file = os.path.join('/tmp', object_id)
+def helper_write_object(directory, object_id, contents):
+    object_file = os.path.join(directory, object_id)
     with open(object_file, 'wt') as temp:
-        temp.write(f'dummy data: {object_id}')
+        temp.write(f'dummy data: {contents}')
 
     return object_file
 
 
 def updater(msg):
     print(msg)
+
+
+@pytest.fixture()
+def temp_directories():
+    object_dir = f'/tmp/{uuid.uuid4().hex}'
+    compressed_dir = f'/tmp/{uuid.uuid4().hex}'
+    os.makedirs(object_dir)
+    os.makedirs(compressed_dir)
+    yield object_dir, compressed_dir,
+    shutil.rmtree(object_dir)
+    shutil.rmtree(compressed_dir)
 
 
 class TestStorageBackendGigantum(object):
@@ -230,7 +242,7 @@ class TestStorageBackendGigantum(object):
         sb.set_default_configuration("test-user", "abcd", '1234')
         sb.prepare_push(ds, [], updater)
 
-    def test_push_objects(self, mock_dataset_with_cache_dir):
+    def test_push_objects(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
 
@@ -238,40 +250,47 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            objects = [PushObject(object_path=obj1,
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
+
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
+
+            objects = [PushObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PushObject(object_path=obj2,
+                       PushObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/asdf',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": "https://dummyurl.com/asdf?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
                                          "key_id": "hghghg",
-                                         "obj_id": 'asdf',
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
-            mocked_responses.put("https://dummyurl.com/asdf?params=1",
+            mocked_responses.put(f"https://dummyurl.com/{obj1_id}?params=1",
                                  payload={},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/1234',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                            "presigned_url": "https://dummyurl.com/1234?params=1",
+                                            "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
                                             "key_id": "hghghg",
-                                            "obj_id": '1234',
+                                            "obj_id": obj2_id,
                                             "dataset": ds.name
                                  },
                                  status=200)
-            mocked_responses.put("https://dummyurl.com/1234?params=1",
+            mocked_responses.put(f"https://dummyurl.com/{obj2_id}?params=1",
                                  payload={},
                                  status=200)
 
@@ -281,10 +300,10 @@ class TestStorageBackendGigantum(object):
             assert isinstance(result, PushResult) is True
             assert isinstance(result.success[0], PushObject) is True
             assert result.success[0].object_path != result.success[1].object_path
-            assert result.success[0].object_path in [obj1, obj2]
-            assert result.success[1].object_path in [obj1, obj2]
+            assert result.success[0].object_path in [obj1_src_path, obj2_src_path]
+            assert result.success[1].object_path in [obj1_src_path, obj2_src_path]
 
-    def test_push_objects_with_existing(self, mock_dataset_with_cache_dir):
+    def test_push_objects_with_existing(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
 
@@ -292,37 +311,44 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            objects = [PushObject(object_path=obj1,
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
+
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
+
+            objects = [PushObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PushObject(object_path=obj2,
+                       PushObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/asdf',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": "https://dummyurl.com/asdf?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
                                          "key_id": "hghghg",
-                                         "obj_id": 'asdf',
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=403)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/1234',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                            "presigned_url": "https://dummyurl.com/1234?params=1",
+                                            "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
                                             "key_id": "hghghg",
-                                            "obj_id": '1234',
+                                            "obj_id": obj2_id,
                                             "dataset": ds.name
                                  },
                                  status=200)
-            mocked_responses.put("https://dummyurl.com/1234?params=1",
+            mocked_responses.put(f"https://dummyurl.com/{obj2_id}?params=1",
                                  payload={},
                                  status=200)
 
@@ -332,10 +358,10 @@ class TestStorageBackendGigantum(object):
             assert isinstance(result, PushResult) is True
             assert isinstance(result.success[0], PushObject) is True
             assert result.success[0].object_path != result.success[1].object_path
-            assert result.success[0].object_path in [obj1, obj2]
-            assert result.success[1].object_path in [obj1, obj2]
+            assert result.success[0].object_path in [obj1_src_path, obj2_src_path]
+            assert result.success[1].object_path in [obj1_src_path, obj2_src_path]
 
-    def test_push_objects_fail_url(self, mock_dataset_with_cache_dir):
+    def test_push_objects_fail_url(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
 
@@ -343,37 +369,44 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            objects = [PushObject(object_path=obj1,
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
+
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
+
+            objects = [PushObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PushObject(object_path=obj2,
+                       PushObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/asdf',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": "https://dummyurl.com/asdf?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
                                          "key_id": "hghghg",
-                                         "obj_id": 'asdf',
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=400)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/1234',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                            "presigned_url": "https://dummyurl.com/1234?params=1",
+                                            "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
                                             "key_id": "hghghg",
-                                            "obj_id": '1234',
+                                            "obj_id": obj2_id,
                                             "dataset": ds.name
                                  },
                                  status=200)
-            mocked_responses.put("https://dummyurl.com/1234?params=1",
+            mocked_responses.put(f"https://dummyurl.com/{obj2_id}?params=1",
                                  payload={},
                                  status=200)
 
@@ -382,10 +415,10 @@ class TestStorageBackendGigantum(object):
             assert len(result.failure) == 1
             assert isinstance(result, PushResult) is True
             assert isinstance(result.success[0], PushObject) is True
-            assert result.success[0].object_path == obj2
-            assert result.failure[0].object_path == obj1
+            assert result.success[0].object_path == obj2_src_path
+            assert result.failure[0].object_path == obj1_src_path
 
-    def test_push_objects_fail_upload(self, mock_dataset_with_cache_dir):
+    def test_push_objects_fail_upload(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
 
@@ -393,40 +426,47 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            objects = [PushObject(object_path=obj1,
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
+
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
+
+            objects = [PushObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PushObject(object_path=obj2,
+                       PushObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/asdf',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": "https://dummyurl.com/asdf?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
                                          "key_id": "hghghg",
-                                         "obj_id": 'asdf',
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
-            mocked_responses.put("https://dummyurl.com/asdf?params=1",
+            mocked_responses.put(f"https://dummyurl.com/{obj1_id}?params=1",
                                  payload={},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/1234',
+            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                            "presigned_url": "https://dummyurl.com/1234?params=1",
+                                            "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
                                             "key_id": "hghghg",
-                                            "obj_id": '1234',
+                                            "obj_id": obj2_id,
                                             "dataset": ds.name
                                  },
                                  status=200)
-            mocked_responses.put("https://dummyurl.com/1234?params=1",
+            mocked_responses.put(f"https://dummyurl.com/{obj2_id}?params=1",
                                  payload={},
                                  status=500)
 
@@ -435,8 +475,8 @@ class TestStorageBackendGigantum(object):
             assert len(result.failure) == 1
             assert isinstance(result, PushResult) is True
             assert isinstance(result.success[0], PushObject) is True
-            assert result.success[0].object_path == obj1
-            assert result.failure[0].object_path == obj2
+            assert result.success[0].object_path == obj1_src_path
+            assert result.failure[0].object_path == obj2_src_path
 
     def test_finalize_push(self, mock_dataset_with_cache_dir):
         sb = get_storage_backend("gigantum_object_v1")
@@ -465,56 +505,68 @@ class TestStorageBackendGigantum(object):
         sb.configuration['gigantum_id_token'] = "1234"
         sb.prepare_pull(ds, [], updater)
 
-    def test_pull_objects(self, mock_dataset_with_cache_dir):
+    def test_pull_objects(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
             ds = mock_dataset_with_cache_dir[0]
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            obj_id_1 = uuid.uuid4().hex
-            obj_id_2 = uuid.uuid4().hex
-            obj1_target = f'/tmp/{obj_id_1}'
-            obj2_target = f'/tmp/{obj_id_2}'
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
 
-            check_info = {obj1_target: obj1,
-                          obj2_target: obj2}
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
 
-            objects = [PullObject(object_path=obj1_target,
+            obj1_compressed_path = os.path.join(compressed_dir, obj1_id)
+            obj2_compressed_path = os.path.join(compressed_dir, obj2_id)
+            helper_compress_file(obj1_src_path, obj1_compressed_path)
+            helper_compress_file(obj2_src_path, obj2_compressed_path)
+
+            assert os.path.isfile(obj1_src_path) is False
+            assert os.path.isfile(obj2_src_path) is False
+            assert os.path.isfile(obj1_compressed_path) is True
+            assert os.path.isfile(obj2_compressed_path) is True
+
+            check_info = {obj1_src_path: obj1_compressed_path,
+                          obj2_src_path: obj2_compressed_path}
+
+            objects = [PullObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PullObject(object_path=obj2_target,
+                       PullObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
+            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
-                                         "obj_id": obj_id_1,
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
 
-            with open(obj1, 'rb') as data1:
-                mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1",
+            with open(obj1_compressed_path, 'rb') as data1:
+                mocked_responses.get(f"https://dummyurl.com/{obj1_id}?params=1",
                                      body=data1.read(), status=200,
                                      content_type='application/octet-stream')
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
+            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                          "namespace": ds.namespace,
-                                         "obj_id": obj_id_2,
+                                         "obj_id": obj2_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
 
-            with open(obj2, 'rb') as data2:
-                mocked_responses.get(f"https://dummyurl.com/{obj_id_2}?params=1",
+            with open(obj2_compressed_path, 'rb') as data2:
+                mocked_responses.get(f"https://dummyurl.com/{obj2_id}?params=1",
                                      body=data2.read(), status=200,
                                      content_type='application/octet-stream')
 
@@ -524,64 +576,81 @@ class TestStorageBackendGigantum(object):
             assert isinstance(result, PullResult) is True
             assert isinstance(result.success[0], PullObject) is True
             assert result.success[0].object_path != result.success[1].object_path
-            assert result.success[0].object_path in [obj1_target, obj2_target]
-            assert result.success[1].object_path in [obj1_target, obj2_target]
+            assert result.success[0].object_path in [obj1_src_path, obj2_src_path]
+            assert result.success[1].object_path in [obj1_src_path, obj2_src_path]
 
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
+
+            decompressor = snappy.StreamDecompressor()
             for r in result.success:
-                with open(check_info[r.object_path], 'rt') as dd:
-                    source1 = dd.read()
+                with open(check_info[r.object_path], 'rb') as dd:
+                    source1 = decompressor.decompress(dd.read())
+                    source1 += decompressor.flush()
                 with open(r.object_path, 'rt') as dd:
                     dest1 = dd.read()
-                assert source1 == dest1
+                assert source1.decode("utf-8") == dest1
 
-    def test_pull_objects_fail_download(self, mock_dataset_with_cache_dir):
+    def test_pull_objects_fail_download(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
             ds = mock_dataset_with_cache_dir[0]
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            obj_id_1 = uuid.uuid4().hex
-            obj_id_2 = uuid.uuid4().hex
-            obj1_target = f'/tmp/{obj_id_1}'
-            obj2_target = f'/tmp/{obj_id_2}'
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
 
-            check_info = {obj1_target: obj1,
-                          obj2_target: obj2}
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
 
-            objects = [PullObject(object_path=obj1_target,
+            obj1_compressed_path = os.path.join(compressed_dir, obj1_id)
+            obj2_compressed_path = os.path.join(compressed_dir, obj2_id)
+            helper_compress_file(obj1_src_path, obj1_compressed_path)
+            helper_compress_file(obj2_src_path, obj2_compressed_path)
+
+            assert os.path.isfile(obj1_src_path) is False
+            assert os.path.isfile(obj2_src_path) is False
+            assert os.path.isfile(obj1_compressed_path) is True
+            assert os.path.isfile(obj2_compressed_path) is True
+
+            check_info = {obj1_src_path: obj1_compressed_path,
+                          obj2_src_path: obj2_compressed_path}
+
+            objects = [PullObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PullObject(object_path=obj2_target,
+                       PullObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
+            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
-                                         "obj_id": obj_id_1,
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
 
-            mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1", status=500,
+            mocked_responses.get(f"https://dummyurl.com/{obj1_id}?params=1", status=500,
                                  content_type='application/octet-stream')
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
+            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                          "namespace": ds.namespace,
-                                         "obj_id": obj_id_2,
+                                         "obj_id": obj2_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
 
-            with open(obj2, 'rb') as data2:
-                mocked_responses.get(f"https://dummyurl.com/{obj_id_2}?params=1",
+            with open(obj2_compressed_path, 'rb') as data2:
+                mocked_responses.get(f"https://dummyurl.com/{obj2_id}?params=1",
                                      body=data2.read(), status=200,
                                      content_type='application/octet-stream')
 
@@ -590,63 +659,77 @@ class TestStorageBackendGigantum(object):
             assert len(result.failure) == 1
             assert isinstance(result, PullResult) is True
             assert isinstance(result.success[0], PullObject) is True
-            assert result.success[0].object_path == obj2_target
-            assert result.failure[0].object_path == obj1_target
+            assert result.success[0].object_path == obj2_src_path
+            assert result.failure[0].object_path == obj1_src_path
 
             assert os.path.isfile(result.success[0].object_path) is True
             assert os.path.isfile(result.failure[0].object_path) is False
 
-            with open(check_info[result.success[0].object_path], 'rt') as dd:
-                source1 = dd.read()
+            decompressor = snappy.StreamDecompressor()
+            with open(check_info[result.success[0].object_path], 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
             with open(result.success[0].object_path, 'rt') as dd:
                 dest1 = dd.read()
-            assert source1 == dest1
+            assert source1.decode("utf-8") == dest1
 
-    def test_pull_objects_fail_signing(self, mock_dataset_with_cache_dir):
+    def test_pull_objects_fail_signing(self, mock_dataset_with_cache_dir, temp_directories):
         with aioresponses() as mocked_responses:
             sb = get_storage_backend("gigantum_object_v1")
             ds = mock_dataset_with_cache_dir[0]
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
-            obj1 = helper_write_object('asdf')
-            obj2 = helper_write_object('1234')
+            object_dir, compressed_dir = temp_directories
 
-            obj_id_1 = uuid.uuid4().hex
-            obj_id_2 = uuid.uuid4().hex
-            obj1_target = f'/tmp/{obj_id_1}'
-            obj2_target = f'/tmp/{obj_id_2}'
+            obj1_id = uuid.uuid4().hex
+            obj2_id = uuid.uuid4().hex
 
-            check_info = {obj1_target: obj1,
-                          obj2_target: obj2}
+            obj1_src_path = helper_write_object(object_dir, obj1_id, 'abcd')
+            obj2_src_path = helper_write_object(object_dir, obj2_id, '1234')
+            assert os.path.isfile(obj1_src_path) is True
+            assert os.path.isfile(obj2_src_path) is True
 
-            objects = [PullObject(object_path=obj1_target,
+            obj1_compressed_path = os.path.join(compressed_dir, obj1_id)
+            obj2_compressed_path = os.path.join(compressed_dir, obj2_id)
+            helper_compress_file(obj1_src_path, obj1_compressed_path)
+            helper_compress_file(obj2_src_path, obj2_compressed_path)
+
+            assert os.path.isfile(obj1_src_path) is False
+            assert os.path.isfile(obj2_src_path) is False
+            assert os.path.isfile(obj1_compressed_path) is True
+            assert os.path.isfile(obj2_compressed_path) is True
+
+            check_info = {obj1_src_path: obj1_compressed_path,
+                          obj2_src_path: obj2_compressed_path}
+
+            objects = [PullObject(object_path=obj1_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile1.txt'),
-                       PullObject(object_path=obj2_target,
+                       PullObject(object_path=obj2_src_path,
                                   revision=ds.git.repo.head.commit.hexsha,
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
+            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
                                  payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
-                                         "obj_id": obj_id_1,
+                                         "obj_id": obj1_id,
                                          "dataset": ds.name
                                  },
                                  status=400)
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
+            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
                                  payload={
-                                         "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
+                                         "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                          "namespace": ds.namespace,
-                                         "obj_id": obj_id_2,
+                                         "obj_id": obj2_id,
                                          "dataset": ds.name
                                  },
                                  status=200)
 
-            with open(obj2, 'rb') as data2:
-                mocked_responses.get(f"https://dummyurl.com/{obj_id_2}?params=1",
+            with open(obj2_compressed_path, 'rb') as data2:
+                mocked_responses.get(f"https://dummyurl.com/{obj2_id}?params=1",
                                      body=data2.read(), status=200,
                                      content_type='application/octet-stream')
 
@@ -655,17 +738,19 @@ class TestStorageBackendGigantum(object):
             assert len(result.failure) == 1
             assert isinstance(result, PullResult) is True
             assert isinstance(result.success[0], PullObject) is True
-            assert result.success[0].object_path == obj2_target
-            assert result.failure[0].object_path == obj1_target
+            assert result.success[0].object_path == obj2_src_path
+            assert result.failure[0].object_path == obj1_src_path
 
             assert os.path.isfile(result.success[0].object_path) is True
             assert os.path.isfile(result.failure[0].object_path) is False
 
-            with open(check_info[result.success[0].object_path], 'rt') as dd:
-                source1 = dd.read()
+            decompressor = snappy.StreamDecompressor()
+            with open(check_info[result.success[0].object_path], 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
             with open(result.success[0].object_path, 'rt') as dd:
                 dest1 = dd.read()
-            assert source1 == dest1
+            assert source1.decode("utf-8") == dest1
 
     def test_finalize_pull(self, mock_dataset_with_cache_dir):
         sb = get_storage_backend("gigantum_object_v1")

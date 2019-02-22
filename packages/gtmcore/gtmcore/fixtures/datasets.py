@@ -2,6 +2,7 @@ import pytest
 import os
 import shutil
 from mock import patch
+import snappy
 
 from gtmcore.configuration import Configuration
 from gtmcore.fixtures.fixtures import _create_temp_work_dir
@@ -40,3 +41,10 @@ def helper_append_file(cache_dir, revision, rel_path, content):
         os.makedirs(os.path.join(cache_dir, revision))
     with open(os.path.join(cache_dir, revision, rel_path), 'at') as fh:
         fh.write(content)
+
+
+def helper_compress_file(source, destination):
+    with open(source, "rb") as src_file:
+        with open(destination, mode="wb") as compressed_file:
+            snappy.stream_compress(src_file, compressed_file)
+    os.remove(source)

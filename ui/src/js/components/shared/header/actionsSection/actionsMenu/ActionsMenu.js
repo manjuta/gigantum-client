@@ -29,6 +29,7 @@ import ToolTip from 'Components/common/ToolTip';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import VisibilityModal from 'Components/shared/modals/VisibilityModal';
 import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
+import DeleteDataset from 'Components/shared/modals/DeleteDataset';
 // assets
 import './ActionsMenu.scss';
 
@@ -528,12 +529,18 @@ class ActionsMenu extends Component {
 
         {
           this.state.deleteModalVisible &&
-
+          (this.props.sectionType === 'labbook' ?
           <DeleteLabbook
             handleClose={() => this._toggleDeleteModal()}
             remoteAdded={this.props.defaultRemote}
             history={this.props.history}
           />
+          :
+          <DeleteDataset
+            handleClose={() => this._toggleDeleteModal()}
+            remoteAdded={this.props.defaultRemote}
+            history={this.props.history}
+          />)
         }
 
         {

@@ -2,6 +2,11 @@ import asyncio
 import aiohttp
 import aiofiles
 import copy
+import shutil
+import zlib
+import snappy
+import tempfile
+import requests
 
 from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
@@ -100,15 +105,34 @@ class PresignedS3Upload(object):
         """
         # Set the Content-Length of the PUT explicitly since it won't happen automatically due to streaming IO
         headers = copy.deepcopy(self.s3_headers)
-        headers['Content-Length'] = str(os.path.getsize(self.object_details.object_path))
 
-        async with session.put(self.presigned_s3_url, headers=headers,
-                               data=self._file_loader(filename=self.object_details.object_path)) as response:
-            if response.status != 200:
-                # An error occurred
-                body = await response.text()
-                raise IOError(f"Failed to push {self.object_details.dataset_path} to storage backend."
-                              f" Status: {response.status}. Response: {body}")
+        # Detect file type if possible
+        _, object_id = self.object_details.object_path.rsplit("/", 1)
+        temp_compressed_path = os.path.join(tempfile.gettempdir(), object_id)
+
+        # gzip object before upload
+        try:
+            with open(self.object_details.object_path, "rb") as src_file:
+                with open(temp_compressed_path, "wb") as compressed_file:
+                    snappy.stream_compress(src_file, compressed_file)
+
+            headers['Content-Length'] = str(os.path.getsize(temp_compressed_path))
+
+            # Stream the file up to S3
+            async with session.put(self.presigned_s3_url, headers=headers,
+                                   data=self._file_loader(filename=temp_compressed_path)) as response:
+                if response.status != 200:
+                    # An error occurred
+                    body = await response.text()
+                    raise IOError(f"Failed to push {self.object_details.dataset_path} to storage backend."
+                                  f" Status: {response.status}. Response: {body}")
+
+        finally:
+            try:
+                os.remove(temp_compressed_path)
+            except FileNotFoundError:
+                # Temp file never got created
+                pass
 
 
 class PresignedS3Download(object):
@@ -164,6 +188,7 @@ class PresignedS3Download(object):
             None
         """
         try:
+            decompressor = snappy.StreamDecompressor()
             async with session.get(self.presigned_s3_url) as response:
                 if response.status != 200:
                     # An error occurred
@@ -175,8 +200,9 @@ class PresignedS3Download(object):
                     while True:
                         chunk = await response.content.read(self.download_chunk_size)
                         if not chunk:
+                            fd.write(decompressor.flush())
                             break
-                        await fd.write(chunk)
+                        await fd.write(decompressor.decompress(chunk))
         except Exception as err:
             logger.exception(err)
             raise IOError(f"Failed to get {self.object_details.dataset_path} to storage backend. {err}")
@@ -202,14 +228,14 @@ class GigantumObjectStore(StorageBackend):
         """
         return {"storage_type": "gigantum_object_v1",
                 "name": "Gigantum Cloud",
-                "description": "Scalable Dataset storage provided by your Gigantum account",
+                "description": "Dataset storage provided by your Gigantum account supporting files up to 5GB in size",
                 "tags": ["gigantum"],
                 "icon": "gigantum_object_storage.png",
                 "url": "https://docs.gigantum.com",
                 "is_managed": True,
                 "client_should_dedup_on_push": True,
                 "readme": """Gigantum Cloud Datasets are backed by a scalable object storage service that is linked to
-your Gigantum account and credentials. It provides efficient storage at the file level and works seamlessly with the 
+your Gigantum account and credentials. It provides efficient storage at the file level and works seamlessly with the
 Client.
 
 This dataset type is fully managed. That means as you modify data, each version will be tracked independently. Syncing
@@ -607,3 +633,22 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 
         return PullResult(success=successes, failure=failures, message=message)
 
+    def delete_contents(self, dataset) -> None:
+        """Method to remove the contents of a dataset from the storage backend, should only work if managed
+
+        Args:
+            dataset: Dataset object
+
+        Returns:
+            None
+        """
+        url = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        response = requests.delete(url, headers=self._object_service_headers(), timeout=10)
+
+        if response.status_code != 200:
+            logger.error(f"Failed to remove {dataset.namespace}/{dataset.name} from cloud index. "
+                         f"Status Code: {response.status_code}")
+            logger.error(response.json())
+            raise IOError("Failed to invoke dataset delete in the dataset backend service.")
+        else:
+            logger.info(f"Deleted remote repository {dataset.namespace}/{dataset.name} from cloud index")
