@@ -4,7 +4,6 @@
 
     cursor: pointer;
 
-    font-weight: bolder;
     &:hover::before{
       position: absolute;
       top: calc(100% - 0px);

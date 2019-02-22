@@ -43,6 +43,30 @@ class Branches extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
+
+  componentDidMount() {
+    window.addEventListener('click', this._closePopups);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._closePopups);
+  }
+
+    /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _closePopups(evt) {
+      const { state } = this;
+      if (evt.target.className.indexOf('Branches__btn--sync-dropdown') < 0) {
+        this.setState({
+          syncMenuVisible: false,
+        });
+      }
+  }
+
   /**
     @param {String} modalName
     reverts state of passed in modalname
@@ -53,8 +77,11 @@ class Branches extends Component {
       this.setState({ mergeModalVisible: branch || !this.state.mergeModalVisible });
     } else if ((modalName === 'deleteModal') && (this.props.activeBranch.branchName !== branch) && (branch !== 'master')) {
       this.setState({ deleteModalVisible: branch || !this.state.deleteModalVisible, localSelected: false, remoteSelected: false });
-    } else if ((modal === 'resetModal') && (this.props.activeBranch.branchName === branch)) {
+    } else if ((modalName === 'resetModal') && (!branch || (this.props.activeBranch.branchName === branch))) {
+      const upToDate = (this.props.activeBranch.commitsAhead === 0) && (this.props.activeBranch.commitsBehind === 0);
+      if (this.props.activeBranch.isRemote && !upToDate) {
       this.setState({ resetModalVisible: branch || !this.state.resetModalVisible });
+      }
     }
   }
     /**
@@ -82,6 +109,16 @@ class Branches extends Component {
       if (this.state.selectedBranchname !== selectedBranchname) {
         this.setState({ selectedBranchname });
       }
+  }
+  /**
+    @param {} -
+    sets state to toggle the switch dropdown
+    @return {}
+  */
+  @boundMethod
+  _toggleSyncDropdown() {
+      const { state } = this;
+      this.setState({ syncMenuVisible: !state.syncMenuVisible });
   }
   /**
       @param {Object} branches
@@ -129,48 +166,17 @@ class Branches extends Component {
     filters array branhces and return the active branch node
   */
   @boundMethod
-  _syncBranch(branch) {
-    if (branch.isActive) {
-      const { props } = this,
-          self = this,
-          data = {
-            successCall: () => {
-              self.setState({ action: null, mergeModalVisible: null });
-            },
-            failureCall: () => {
-              self.setState({ action: null, mergeModalVisible: null });
-            },
-          };
-      this.setState({
-        action: 'Syncing Branch',
-      });
-      props.branchMutations.syncLabbook(data, (response, error) => {
-        if (error) {
-          console.log(error)
-        }
-      });
-    }
-  }
-  /**
-    @param {Object} branches
-    filters array branhces and return the active branch node
-  */
-  @boundMethod
   _resetBranch(branch) {
-    const upToDate = (branch.commitsAhead === 0) && (branch.commitsBehind === 0);
-
-    if (!branch.isRemote || upToDate) {
-      const self = this;
-      this.setState({
-        action: 'Syncing Branch',
-      });
-      props.branchMutations.resetBranch((response, error) => {
-        if (error) {
-          console.log(error)
-        }
-        self.setState({ action: null, mergeModalVisible: null });
-      });
-    }
+    const self = this;
+    this.setState({
+      action: 'Resetting Branch',
+    });
+    this.props.branchMutations.resetBranch((response, error) => {
+      if (error) {
+        console.log(error)
+      }
+      self.setState({ action: null, resetModalVisible: null });
+    });
   }
   /**
     @param {Object} branch
@@ -179,7 +185,7 @@ class Branches extends Component {
     @return {JSX}
   */
   _renderModal(branch, action) {
-    const headerText = action === 'merge' ? 'Merge Branches' : action === 'delete' ? 'Delete Branch' : '';
+    const headerText = action === 'merge' ? 'Merge Branches' : action === 'delete' ? 'Delete Branch' : action === 'reset' ? 'Reset Branch' : '';
     return (
       <Fragment>
         <div className={`Branches__Modal Branches__Modal--${action}`}>
@@ -271,8 +277,10 @@ class Branches extends Component {
     @return {JSX}
   */
   _renderActions(branch) {
+    const { props, state} = this;
     const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
     const deleteModalVisible = this.state.deleteModalVisible === branch.branchName;
+    const resetModalVisible = this.state.resetModalVisible === branch.branchName;
     const upToDate = (branch.commitsAhead === 0) && (branch.commitsBehind === 0);
     const mergeButtonCSS = classNames({
       Branches__btn: true,
@@ -310,6 +318,14 @@ class Branches extends Component {
      ' Tooltip-data--small': true,
       'Branches__btn--sync': true,
       'Branches__btn--sync--disabled': !branch.isActive,
+    }),
+    syncMenuDropdownButtonCSS = classNames({
+      'Branches__btn Branches__btn--sync-dropdown': true,
+      'Branches__btn--sync-open': state.syncMenuVisible,
+    }),
+    syncMenuDropdownCSS = classNames({
+      'Branches__dropdown-menu': state.syncMenuVisible,
+      hidden: !state.syncMenuVisible,
     });
     let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset' : 'Branch must be remote';
     let syncTooltip = branch.isActive ? 'Sync' : 'Syncing limited to active branch';
@@ -322,18 +338,37 @@ class Branches extends Component {
           <Fragment>
             <button
               className="Branches__btn Branches__btn--create"
-              onClick={() => this.props.toggleModal('createBranchVisible') }
+              onClick={() => props.toggleModal('createBranchVisible') }
             />
             <button
               className={resetButtonCSS}
               data-tooltip={resetTooltip}
-              onClick={() => this._resetBranch(branch) }
+              onClick={() => this._toggleModal('resetModal', branch.branchName) }
             />
             <button
               className={syncButtonCSS}
               data-tooltip={syncTooltip}
-              onClick={() => this._syncBranch(branch) }
+              onClick={() => props.handleSyncButton(true, props.allowSync) }
             />
+            <button
+              className={syncMenuDropdownButtonCSS}
+              onClick={() => { this._toggleSyncDropdown(); }}
+            />
+            <div className={syncMenuDropdownCSS}>
+              <h5 className="Branches__h5">Sync</h5>
+              <ul className="Branches__ul">
+                <li
+                    className="Branches__list-item"
+                    onClick={() => props.handleSyncButton(false, props.allowSync)}>
+                    Push & Pull
+                </li>
+                <li
+                    className="Branches__list-item"
+                    onClick={() => props.handleSyncButton(true, props.allowSync)}>
+                    Pull-only
+                </li>
+              </ul>
+            </div>
           </Fragment>
           :
           <Fragment>
@@ -356,6 +391,7 @@ class Branches extends Component {
         }
         {mergeModalVisible && this._renderModal(branch, 'merge')}
         {deleteModalVisible && this._renderModal(branch, 'delete')}
+        {resetModalVisible && this._renderModal(branch, 'reset')}
     </div>);
   }
 
@@ -368,7 +404,7 @@ class Branches extends Component {
           }),
           currentBranchContainerCSS = classNames({
             'Branches__branch--current': true,
-            'Branches__branch--current--selected': state.mergeModalVisible,
+            'Branches__branch--current--selected': state.mergeModalVisible || state.resetModalVisible,
           }),
           modalCoverCSS = classNames({
             'Branches__Modal-cover': true,
@@ -384,7 +420,7 @@ class Branches extends Component {
             isSticky={props.isSticky}
             renderContent={() => <div className="Branches">
                 {
-                  (state.mergeModalVisible || state.deleteModalVisible || state.action) &&
+                  (state.mergeModalVisible || state.deleteModalVisible || state.resetModalVisible || state.action) &&
                   <div className={modalCoverCSS}>
                     {
                       state.action &&
@@ -438,7 +474,6 @@ class Branches extends Component {
                   }),
                   branchBaseSectionCSS = classNames({
                     'Branches__base-section': true,
-                    // 'Branches__base-section--inactive': branch.branchName !== state.selectedBranchname,
                   });
                   return (
                     <div

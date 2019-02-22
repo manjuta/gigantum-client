@@ -181,6 +181,7 @@ class Header extends Component {
             defaultRemote,
             id,
           } = labbook || dataset,
+          section = labbook || dataset,
           selectedIndex = this._getSelectedIndex(),
           isLabbookSection = props.sectionType === 'labbook',
           headerCSS = classNames({
@@ -194,7 +195,13 @@ class Header extends Component {
           }),
           hiddenStickCSS = classNames({
             hidden: props.isStick,
-          });
+          }),
+          branches = props.branches || [{
+            branchName: 'master',
+            isActive: true,
+            commitsBehind: 0,
+            commitsAhead: 0,
+          }];
 
     return (
 
@@ -208,17 +215,16 @@ class Header extends Component {
                   self={this}
                   {...props}
                 />
-                { isLabbookSection
-                 && <ErrorBoundary
+                <ErrorBoundary
                   type={branchesErrorCSS}
                   key="branches">
                   <BranchMenu
-                    defaultRemote={labbook.defaultRemote}
+                    defaultRemote={section.defaultRemote}
                     branchesOpen={props.branchesOpen}
-                    labbook={labbook}
-                    branches={props.branches}
-                    labbookId={labbook.id}
-                    activeBranch={labbook.activeBranchName}
+                    section={section}
+                    branches={branches}
+                    sectionId={section.id}
+                    activeBranch={section.activeBranchName || 'master'}
                     toggleBranchesView={this.props.toggleBranchesView}
                     mergeFilter={props.mergeFilter}
                     setBuildingState={props.setBuildingState}
@@ -226,10 +232,12 @@ class Header extends Component {
                     visibility={props.visibility}
                     sectionType={props.sectionType}
                     auth={props.auth}
+                    setSyncingState={this._setSyncingState}
                     setPublishingState={this._setPublishingState}
+                    setExportingState={this._setExportingState}
+                    isLocked={props.isLocked}
                   />
                 </ErrorBoundary>
-                }
 
               </div>
 

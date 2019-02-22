@@ -1,9 +1,30 @@
 @import '~Styles/_imports.scss';
 
-$dropBoxWidth: 240px;
+$dropBoxWidth: 250px;
 .BranchMenu {
   @include flex(flex-start, row);
   z-index: index($elements, popup) - 1;
+}
+
+.BranchMenu__status{
+  position: absolute;
+  top: 2px;
+  right: 38px;
+  width: 44px;
+  @include flex(flex-start, row);
+
+  &--local {
+      width: 22px;
+      height: 22px;
+      background: url('~Images/icons/branches/local.png') no-repeat center center;
+      background-size: 22px;
+  }
+  &--remote {
+      width: 22px;
+      height: 22px;
+      background: url('~Images/icons/branches/remote.png') no-repeat center center;
+      background-size: 22px;
+  }
 }
 
 .BranchMenu__dropdown {
@@ -13,7 +34,8 @@ $dropBoxWidth: 240px;
 
 
    &-btn {
-     padding: 0 30px 0 10px;
+     position: relative;
+     padding: 0 80px 0 10px;
      height: 30px;
      width: $dropBoxWidth;
      border: 1px solid $azure;
@@ -25,6 +47,19 @@ $dropBoxWidth: 240px;
 
      background: url('~Images/icons/down-arrow-azure.svg') no-repeat calc(100% - 10px) center;
      background-size: 20px;
+
+     &--disabled,
+     &--disabled:hover,
+     &--disabled:focus {
+       background: $background-color url(~Images/icons/down-arrow-silver.svg) no-repeat calc(100% - 10px) center !important;
+       background-size: 20px !important;
+       border: 1px solid $romanSilver;
+       color: $romanSilver !important;
+       cursor: auto;
+       * {
+         color: $romanSilver !important;
+       }
+     }
    }
 
    &-btn--open {
@@ -77,36 +112,73 @@ $dropBoxWidth: 240px;
     padding: 0 10px 0 30px;
   }
 
-  &--create, &--create:focus {
+  &--create {
 
-    background: url(~Images/icons/add-azure.svg) no-repeat 5px center;
-    background-size: 20px;
+    background: url(~Images/icons/branches/create.svg) no-repeat 5px center;
+    background-size: 25px;
 
-    &:hover {
+    &:hover, &:focus {
       color: $white;
-      background: $azure url(~Images/icons/add-white.svg) no-repeat 5px center;
-      background-size: 20px;
+      background: $azure url(~Images/icons/branches/create-hover.svg) no-repeat 5px center;
+      background-size: 25px;
+    }
+    &--disabled,
+    &--disabled:hover,
+    &--disabled:focus {
+      background: $background-color url(~Images/icons/branches/create-disabled.svg) no-repeat 5px center !important;
+      background-size: 25px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      cursor: auto;
     }
   }
 
-  &--manage , &--manage:focus {
-    background: url(~Images/icons/add-azure.svg) no-repeat 5px center;
-    background-size: 20px;
+  &--manage {
+    background: url(~Images/icons/branches/manage.svg) no-repeat 5px center;
+    background-size: 25px;
 
-    &:hover {
+    &:hover, &:focus {
       color: $white;
-      background: $azure url(~Images/icons/add-white.svg) no-repeat 5px center;
-      background-size: 20px;
+      background: $azure url(~Images/icons/branches/manage-hover.svg) no-repeat 5px center;
+      background-size: 25px;
+    }
+    &--disabled,
+    &--disabled:hover,
+    &--disabled:focus {
+      background: $background-color url(~Images/icons/branches/manage-disabled.svg) no-repeat 5px center;
+      background-size: 25px;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      cursor: auto;
     }
   }
 
-  &--sync, &--sync:focus {
+  &--reset {
+    background: url(~Images/icons/branches/reset.svg) no-repeat 5px center;
+    background-size: 25px;
+
+    &:hover, &:focus {
+      color: $white;
+      background: $azure url(~Images/icons/branches/reset-hover.svg) no-repeat 5px center;
+      background-size: 25px;
+    }
+    &--disabled,
+    &--disabled:hover,
+    &--disabled:focus {
+      background: $background-color url(~Images/icons/branches/reset-disabled.svg) no-repeat 5px center;
+      background-size: 25px;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      cursor: auto;
+    }
+  }
+
+  &--sync {
     padding: 0 10px 0 10px;
     @include flex(space-around, row);
     align-items: center;
     background: transparent;
     color: $azure;
-
     &:hover {
       padding: 0 10px 0 10px;
 
@@ -130,35 +202,74 @@ $dropBoxWidth: 240px;
         }
       }
     }
+    &--upToDate{
+      background: url('~Images/icons/branches/sync.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      padding: 0 10px 0 30px !important;
+      &:hover, &:focus{
+        background: $azure url('~Images/icons/branches/sync-hover.svg') no-repeat left 5px center !important;
+        background-size: 25px !important;
+        color: $white;
+      }
+    }
+    &--disabled,
+    &--disabled:hover,
+    &--disabled:focus {
+      background: $background-color url(~Images/icons/branches/sync-disabled.svg) no-repeat 5px center !important;
+      background-size: 25px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      padding: 0 10px 0 30px !important;
+      cursor: auto;
+    }
   }
 
-  &--sync-dropdown, &--sync-dropdown:focus {
+  &--sync-dropdown {
     margin-left: 0px;
     width: 24px;
     padding: 2px;
     background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
     background-size: 20px;
 
-    &:hover {
+    &:hover, &:focus {
       background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
       background-size: 20px;
       margin-left: 0px;
       width: 24px;
       padding: 2px;
     }
+
+    &--disabled,
+    &--disabled:hover,
+    &--disabled:focus {
+      background: $background-color url(~Images/icons/down-arrow-silver.svg) no-repeat center center;
+      background-size: 20px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      cursor: auto;
+    }
   }
 
-  &--sync-open, &--sync-open:focus {
+  &--sync-open {
     background: url(~Images/icons/up-arrow-azure.svg) no-repeat center center;
     background-size: 20px;
 
-    &:hover {
+    &:hover, &:focus {
       background: $azure url(~Images/icons/up-arrow-white.svg) no-repeat center center;
       background-size: 20px;
     }
   }
 
 
+}
+
+@media screen and (max-width: 1180px) and (min-width: 0px) {
+  .BranchMenu__buttons{
+    font-size: 0 !important;
+  }
+  .BranchMenu__btn {
+    padding-right: 5px !important;
+  }
 }
 
 .BranchMenu__sync-container {
@@ -208,6 +319,8 @@ $dropBoxWidth: 240px;
   cursor: pointer;
   @include flex(space-between, row);
   align-items: center;
+  font-size: 16px !important;
+
   &:hover {
     background-color: $azure;
     color: $white;

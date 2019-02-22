@@ -10,7 +10,6 @@ import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 import Modal from 'Components/common/Modal';
 // store
 import { setErrorMessage, setInfoMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
-import { setContainerMenuVisibility } from 'JS/redux/reducers/labbook/environment/environment';
 import store from 'JS/redux/store';
 // assets
 import './VisibilityModal.scss';
@@ -131,17 +130,13 @@ export default class PublishModal extends Component {
               if (!self.props.remoteUrl) {
                 self.props.setPublishingState(true);
 
-                self.props.showContainerMenuMessage('publishing');
-
                 const failureCall = () => {
                   self.props.setPublishingState(false);
-                  setContainerMenuVisibility(false);
                   self.props.resetPublishState(false);
                 };
 
                 const successCall = () => {
                   self.props.setPublishingState(false);
-                  setContainerMenuVisibility(false);
                   self.props.resetPublishState(false);
                   // self.props.remountCollab();
 
@@ -179,8 +174,6 @@ export default class PublishModal extends Component {
                   );
                 }
               }
-            } else {
-              self.props.showContainerMenuMessage('publishing', true);
             }
           } else {
             self.props.auth.renewToken(true, () => {

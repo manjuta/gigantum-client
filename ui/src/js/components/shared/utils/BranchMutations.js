@@ -8,6 +8,7 @@ import ResetBranchToRemoteMutation from 'Mutations/branches/ResetBranchToRemoteM
 import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
 import WorkonExperimentalBranchMutation from 'Mutations/branches/WorkonExperimentalBranchMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 
 // store
 import store from 'JS/redux/store';
@@ -140,7 +141,7 @@ class BranchesMutations {
    *  @param {function} callback
    *  resets branch to remote HEAD
    */
-   resetBranch(data, callback) {
+   resetBranch(callback) {
     const { owner, name } = this.state;
 
     ResetBranchToRemoteMutation(
@@ -196,13 +197,34 @@ class BranchesMutations {
     SyncLabbookMutation(
       owner,
       name,
-      overrideMethod,
+      overrideMethod || null,
       pullOnly,
       successCall,
       failureCall,
       callback,
     );
    }
+
+    /**
+     *  @param {Object} data
+     *         {boolean} data.overrideMethod
+     *         {function} data.successCall
+     *         {function} data.failureCall
+     *  @param {function} callback
+     *  pulls and pushes branch
+     */
+    buildImage(callback) {
+    const { owner, name } = this.state;
+
+      BuildImageMutation(
+        owner,
+        name,
+        false,
+        (response, error) => {
+          callback();
+        },
+      );
+    }
 
    /**
    *  @param {Object} data

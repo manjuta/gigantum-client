@@ -51,8 +51,6 @@ class Dataset extends Component {
     this.state = {};
     // bind functions here
     this._setBuildingState = this._setBuildingState.bind(this);
-    this._toggleBranchesView = this._toggleBranchesView.bind(this);
-    this._branchViewClickedOff = this._branchViewClickedOff.bind(this);
     setCallbackRoute(props.location.pathname);
     const { labbookName, owner } = store.getState().routes;
     document.title = `${owner}/${labbookName}`;
@@ -84,7 +82,6 @@ class Dataset extends Component {
     this._setStickHeader();
 
     window.addEventListener('scroll', this._setStickHeader);
-    window.addEventListener('click', this._branchViewClickedOff);
   }
 
   /**
@@ -93,19 +90,6 @@ class Dataset extends Component {
   */
   componentWillUnmount() {
     window.removeEventListener('scroll', this._setStickHeader);
-
-    window.removeEventListener('click', this._branchViewClickedOff);
-  }
-
-  /**
-    @param {event}
-    updates state of dataset when prompted ot by the store
-    updates history prop
-  */
-  _branchViewClickedOff(evt) {
-    if (evt.target.className.indexOf('Dataset__veil') > -1) {
-      this._toggleBranchesView(false, false);
-    }
   }
 
   /**
@@ -135,17 +119,6 @@ class Dataset extends Component {
     }
   }
 
-  /**
-    @param {boolean, boolean}
-    updates branchOpen state
-  */
-  _toggleBranchesView(branchesOpen, mergeFilter) {
-    if (store.getState().containerStatus.status !== 'Running') {
-      setMergeMode(branchesOpen, mergeFilter);
-    } else {
-      setContainerMenuWarningMessage('Stop Project before switching branches. \n Be sure to save your changes.');
-    }
-  }
   /**
     scrolls to top of window
   */

@@ -9,10 +9,10 @@ import ForceSync from 'Components/shared/modals/ForceSync';
 import Branches from 'Components/shared/sidePanel/Branches';
 import VisibilityModal from 'Components/shared/modals/VisibilityModal';
 import PublishDatasetsModal from 'Components/shared/modals/PublishDatasetsModal';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
-// store
-import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
+import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
 // assets
@@ -29,6 +29,7 @@ const extraxtActiveBranch = (branches) => {
          filteredBranches = branches.filter(branch => !branch.isActive),
          branchMenuList = (filteredBranches.length > 3) ? filteredBranches.slice(0, 3) : filteredBranches,
          otherBranchCount = filteredBranches.length - branchMenuList.length;
+         console.log(activeBranch)
    return ({
      activeBranch,
      filteredBranches,
@@ -42,9 +43,9 @@ class BranchMenu extends Component {
     switchMenuVisible: false,
     createBranchVisible: false,
     branchMutations: new BranchMutations({
-      parentId: this.props.labbook.id,
-      name: this.props.labbook.name,
-      owner: this.props.labbook.owner,
+      parentId: this.props.sectionId,
+      name: this.props.section.name,
+      owner: this.props.section.owner,
     }),
     switchingBranch: false,
     sidePanelVisible: false,
@@ -53,6 +54,8 @@ class BranchMenu extends Component {
     publishDatasetsModalVisible: false,
     publishDatasetsModalAction: 'Publish',
     syncMenuVisible: false,
+    showLoginPrompt: false,
+    isDataset: this.props.sectionType !== 'labbook',
   };
 
   componentDidMount() {
@@ -82,7 +85,9 @@ class BranchMenu extends Component {
   _setModalState(key) {
      const { state } = this;
      const value = !state[key];
-     this.setState({ [key]: value });
+     if (!this.props.isLocked && !this.state.isDataset) {
+      this.setState({ [key]: value });
+     }
   }
 
   /**
@@ -133,19 +138,6 @@ class BranchMenu extends Component {
   }
 
   /**
-  *  @param {string, boolean} action, containerRunning
-  *  displays container menu message
-  *  @return {}
-  */
-  @boundMethod
-  _showContainerMenuMessage(action, containerRunning) {
-    const dispatchMessage = containerRunning ? `Stop Project before ${action}. \n Be sure to save your changes.` : `Project is ${action}. \n Please do not refresh the page.`;
-
-    this.setState({ menuOpen: false });
-
-    setContainerMenuWarningMessage(dispatchMessage);
-  }
-  /**
   *  @param {}
   *  resets state after publish
   *  @return {}
@@ -177,8 +169,10 @@ class BranchMenu extends Component {
   */
   @boundMethod
   _toggleBranchSwitch() {
-     const { state } = this;
-     this.setState({ switchMenuVisible: !state.switchMenuVisible });
+    if (!this.props.isLocked && !this.state.isDataset) {
+      const { state } = this;
+      this.setState({ switchMenuVisible: !state.switchMenuVisible });
+    }
   }
 
   /**
@@ -204,69 +198,31 @@ class BranchMenu extends Component {
   */
   @boundMethod
   _toggleSidePanel(sidePanelVisible) {
-      this.setState({ sidePanelVisible, switchMenuVisible: false });
+      if (!this.props.isLocked && !this.state.isDataset) {
+        this.setState({ sidePanelVisible, switchMenuVisible: false });
+      }
   }
 
   /**
-    @param {} -
+  *  @param {}
+  *  closes login prompt modal
+  *  @return {}
+  */
+  @boundMethod
+  _closeLoginPromptModal() {
+    this.setState({ showLoginPrompt: false });
+  }
+  /**
+    @param {Boolean} - allowSync
     sets state to toggle the switch dropdown
     @return {}
   */
   @boundMethod
-  _sync() {
-    const { props, state } = this;
-    this.setState({ syncMenuVisible: false });
-    if ((props.visibility !== 'public') || (props.visibility !== 'private')) {
-
-    } else {
-
+  _toggleSyncDropdown(allowSync) {
+    if (allowSync && !this.state.isDataset) {
+      const { state } = this;
+      this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
-  }
-
-  /**
-    @param {} -
-    sets state to toggle the switch dropdown
-    @return {}
-  */
-  @boundMethod
-  _pull() {
-    const { props, state } = this;
-    this.setState({ syncMenuVisible: false });
-    if ((props.visibility !== 'public') || (props.visibility !== 'private')) {
-
-    } else {
-
-    }
-  }
-
-  /**
-    @param {} -
-    sets state to toggle the switch dropdown
-    @return {}
-  */
-  @boundMethod
-  _publish() {
-    const { props, state } = this;
-    const data = {
-      labbookId: props.labbook.id,
-      setPublic: false,
-      successCall: () => {},
-      failureCall: () => {},
-    };
-    state.branchMutations.publishLabbook(data, (response, error) => {
-      console.log(response, error)
-    });
-  }
-
-  /**
-    @param {} -
-    sets state to toggle the switch dropdown
-    @return {}
-  */
-  @boundMethod
-  _toggleSyncDropdown() {
-    const { state } = this;
-    this.setState({ syncMenuVisible: !state.syncMenuVisible });
   }
   /**
   *  @param {}
@@ -281,26 +237,75 @@ class BranchMenu extends Component {
     });
   }
   /**
-  *  @param {}
+  *  @param {Boolean} - pullOnly
+  *  @param {Boolean} - allowSync
   *  handles syncing or publishing the project
   *  @return {}
   */
   @boundMethod
-  _handleSyncButton() {
-    if (!this.props.defaultRemote) {
-      this._togglePublishModal();
-    } else {
-      const data = {
-          successCall: () => {
-          },
-          failureCall: () => {
-          },
-        };
-      this.state.branchMutations.syncLabbook(data, (response, error) => {
-        if (error) {
-          console.log(error);
-        }
-      });
+  _handleSyncButton(pullOnly, allowSync) {
+    this.setState({ syncMenuVisible: false });
+    if (allowSync) {
+      if (!this.props.defaultRemote) {
+        this._togglePublishModal();
+      } else {
+        const self = this;
+        const data = {
+            successCall: () => {
+              this.props.setSyncingState(false);
+              if (this.props.sectionType === 'labbook') {
+                this.state.branchMutations.buildImage((response, error) => {
+                  if (error) {
+                    console.error(error);
+
+                    setMultiInfoMessage(id, `ERROR: Failed to build ${this.props.section.name}`, null, true, error);
+                  }
+                });
+              }
+            },
+            failureCall: () => {
+              this.props.setSyncingState(false);
+              if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
+                self._toggleSyncModal();
+              }
+            },
+            force: false,
+            pullOnly: pullOnly || false,
+          };
+
+        this._checkSessionIsValid().then((response) => {
+          if (!navigator.onLine) {
+            self.setState({ showLoginPrompt: true });
+          } else if (!(response.data && response.data.userIdentity && response.data.userIdentity.isSessionValid)) {
+            this.props.auth.renewToken(true, () => {
+              self.setState({ showLoginPrompt: true });
+            }, () => {
+              self._sync(pullOnly);
+            });
+          } else if (this.props.sectionType !== 'labbook') {
+            this.state.branchMutations.syncDataset(data, (response, error) => {
+              if (error) {
+                data.failureCall(error);
+              }
+            });
+          } else {
+            LinkedLocalDatasetsQuery.getLocalDatasets({ owner: this.props.section.owner, name: this.props.section.name }).then((res) => {
+              const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
+              if (localDatasets.length === 0) {
+                this.props.setSyncingState(true);
+
+                this.state.branchMutations.syncLabbook(data, (response, error) => {
+                  if (error) {
+                    data.failureCall(error);
+                  }
+                });
+              } else {
+                this.setState({ localDatasets, publishDatasetsModalVisible: !this.state.publishDatasetsModalVisible, publishDatasetsModalAction: 'Sync' });
+              }
+          });
+          }
+        });
+      }
     }
   }
 
@@ -321,13 +326,32 @@ class BranchMenu extends Component {
             BranchMenu: true,
             hidden: props.isSticky,
           }),
+          {
+            activeBranch,
+            filteredBranches,
+            branchMenuList,
+            otherBranchCount,
+          } = extraxtActiveBranch(branches),
+          upToDate = activeBranch.commitsAhead === 0 && activeBranch.commitsBehind === 0,
+          defaultDatasetMessage = 'Datasets does not currently support branching features',
+          allowSync = !(activeBranch.branchName !== 'master' && !this.props.defaultRemote) && !props.isLocked,
+          allowReset = !props.isLocked && !upToDate && activeBranch.isRemote,
+          syncTooltip = props.isLocked ? 'Cannot Sync while Project is in use' : (activeBranch.branchName !== 'master' && !this.props.defaultRemote) ? 'Must sync Master branch first' : 'Sync',
+          manageTooltip = props.isLocked ? 'Cannot Manage Branches while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Manage',
+          createTooltip = props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create',
+          resetTooltip = state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : upToDate ? 'Branch up to date' : 'Reset',
+          switchTooltip = props.isLocked ? 'Cannot switch branches while Project is in use' : state.isDataset ? defaultDatasetMessage : '',
+          smallWidth = window.innerWidth <= 1180,
+          statusText = activeBranch.isRemote ? 'Local & Remote' : 'Local only',
           switchDropdownCSS = classNames({
             'BranchMenu__dropdown-menu': true,
             hidden: !state.switchMenuVisible,
           }),
           drodownButtonCSS = classNames({
             'BranchMenu__dropdown-btn': true,
+            'BranchMenu__dropdown-btn--disabled': props.isLocked || state.isDataset,
             'BranchMenu__dropdown-btn--open': state.switchMenuVisible,
+            'Tooltip-data Tooltip-data': props.isLocked || state.isDataset,
           }),
           branchNameCSS = classNames({
             'BranchMenu__branch-name': !state.switchingBranch,
@@ -338,28 +362,62 @@ class BranchMenu extends Component {
             hidden: !state.switchingBranch,
           }),
           syncMenuDropdownCSS = classNames({
-            'BranchMenu__dropdown-menu': state.syncMenuVisible,
+            'BranchMenu__dropdown-menu': state.syncMenuVisible && !props.isLocked,
             hidden: !state.syncMenuVisible,
           }),
           syncMenuDropdownButtonCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--sync-dropdown': true,
+            'BranchMenu__btn--sync-dropdown--disabled': !allowSync || state.isDataset,
             'BranchMenu__btn--sync-open': state.syncMenuVisible,
           }),
-          {
-            activeBranch,
-            filteredBranches,
-            branchMenuList,
-            otherBranchCount,
-          } = extraxtActiveBranch(branches);
+          syncCSS = classNames({
+            'BranchMenu__btn BranchMenu__btn--sync': true,
+            'BranchMenu__btn--sync--upToDate': upToDate,
+            'BranchMenu__btn--sync--disabled': !allowSync,
+            'Tooltip-data Tooltip-data': !allowSync || smallWidth || state.isDataset,
+          }),
+          manageCSS = classNames({
+            'BranchMenu__btn BranchMenu__btn--manage': true,
+            'BranchMenu__btn--manage--disabled': props.isLocked || state.isDataset,
+            'Tooltip-data Tooltip-data': props.isLocked || smallWidth || state.isDataset,
+          }),
+          resetCSS = classNames({
+            'BranchMenu__btn BranchMenu__btn--reset': true,
+            'BranchMenu__btn--reset--disabled': !allowReset || state.isDataset,
+            'Tooltip-data Tooltip-data': !allowReset || smallWidth || state.isDataset,
+          }),
+          createCSS = classNames({
+            'BranchMenu__btn BranchMenu__btn--create': true,
+            'BranchMenu__btn--create--disabled': props.isLocked || state.isDataset,
+            'Tooltip-data Tooltip-data': props.isLocked || smallWidth || state.isDataset,
+          });
     return (
       <div className={branchMenuCSS}>
           <div className="BranchMenu__dropdown">
                 <div
                 onClick={() => this._toggleBranchSwitch() }
+                data-tooltip={switchTooltip}
                 className={drodownButtonCSS}>
                   <div className={branchNameCSS}>
                     <div className="BranchMenu__dropdown-label">Branch:</div>
                     <div className="BranchMenu__dropdown-text">{activeBranch.branchName}</div>
+                  </div>
+                  <div
+                    className="BranchMenu__status Tooltip-data Tooltip-data--small"
+                    data-tooltip={statusText}
+                  >
+                    {
+                      activeBranch.isLocal ?
+                      <div className="BranchMenu__status--local"></div>
+                      :
+                      <div></div>
+                    }
+                    {
+                      activeBranch.isRemote ?
+                      <div className="BranchMenu__status--remote"></div>
+                      :
+                      <div></div>
+                    }
                   </div>
 
                   <div className={branchSwitchingNameCSS}>
@@ -423,31 +481,55 @@ class BranchMenu extends Component {
           <div className="BranchMenu__buttons">
             <button
               onClick={() => this._toggleSidePanel(true)}
-              className="BranchMenu__btn BranchMenu__btn--manage"
+              className={manageCSS}
+              data-tooltip={manageTooltip}
               type="Submit">
               Manage
             </button>
             <button
-              className="BranchMenu__btn BranchMenu__btn--create"
+              className={createCSS}
               type="Submit"
+              data-tooltip={createTooltip}
               onClick={() => this._setModalState('createBranchVisible') }>
               Create
             </button>
+            <button
+              className={resetCSS}
+              type="Submit"
+              data-tooltip={resetTooltip}
+              // onClick={() => this._setModalState('createBranchVisible') }
+              >
+              Reset
+            </button>
             <div className="BranchMenu__sync-container">
               <button
-                className="BranchMenu__btn BranchMenu__btn--sync"
-                onClick={() => { this._sync(); }}
+                className={syncCSS}
+                onClick={() => { this._handleSyncButton(false, allowSync); }}
+                data-tooltip={syncTooltip}
                 type="Submit">
-                <div className="BranchMenu__sync-status">
-                  <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
-                  <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
+                {
+                  !upToDate && allowSync &&
+                  <div className="BranchMenu__sync-status">
+                    {
+                      activeBranch.commitsBehind !== 0 &&
+                      <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
+                    }
+                    {
+                      activeBranch.commitsAhead !== 0 &&
+                      <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
+                    }
+                  </div>
+                }
+                <div
+                  className="BranchMenu__btn--text"
+                >
+                  Sync
                 </div>
-                <div className="BranchMenu__btn--text">Sync</div>
               </button>
 
               <button
                 className={syncMenuDropdownButtonCSS}
-                onClick={() => { this._toggleSyncDropdown(); }}
+                onClick={() => { this._toggleSyncDropdown(allowSync); }}
                 type="Submit">
               </button>
 
@@ -456,12 +538,12 @@ class BranchMenu extends Component {
                 <ul className="BranchMenu__ul">
                   <li
                      className="BranchMenu__list-item"
-                     onClick={() => this._sync()}>
+                     onClick={() => this._handleSyncButton(false, allowSync)}>
                      Push & Pull
                   </li>
                   <li
                      className="BranchMenu__list-item"
-                     onClick={() => this._pull()}>
+                     onClick={() => this._handleSyncButton(true, allowSync)}>
                       Pull-only
                   </li>
                 </ul>
@@ -471,26 +553,29 @@ class BranchMenu extends Component {
 
           <CreateBranch
             modalVisible={state.createBranchVisible}
-            description={props.labbook.description}
+            description={props.section.description}
             toggleModal={this._setModalState}
           />
 
           <Branches
             sidePanelVisible={state.sidePanelVisible}
             toggleSidePanel={this._toggleSidePanel}
-            branches={props.labbook.branches}
+            branches={props.branches}
             activeBranch={activeBranch}
             toggleModal={this._setModalState}
             isSticky={props.isSticky}
             branchMutations={state.branchMutations}
+            isLocked={props.isLocked}
+            handleSyncButton={this._handleSyncButton}
+            allowSync={allowSync}
           />
           {
           state.publishModalVisible &&
 
           <VisibilityModal
-            owner={props.labbook.owner}
-            labbookName={props.labbook.name}
-            labbookId={props.labbookId}
+            owner={props.section.owner}
+            labbookName={props.section.name}
+            labbookId={props.sectionId}
             remoteUrl={props.defaultRemote}
             auth={props.auth}
             buttonText="Publish"
@@ -500,7 +585,6 @@ class BranchMenu extends Component {
             setPublishingState={props.setPublishingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
-            showContainerMenuMessage={this._showContainerMenuMessage}
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
             setRemoteSession={this._setRemoteSession}
@@ -511,9 +595,9 @@ class BranchMenu extends Component {
           state.publishDatasetsModalVisible &&
 
           <PublishDatasetsModal
-            owner={state.owner}
-            labbookName={state.labbookName}
-            labbookId={this.props.labbookId}
+            owner={this.props.section.owner}
+            labbookName={this.props.section.name}
+            labbookId={this.props.sectionId}
             remoteUrl={this.props.remoteUrl}
             auth={this.props.auth}
             buttonText="Publish All"
@@ -526,7 +610,6 @@ class BranchMenu extends Component {
             toggleSyncModal={this._toggleSyncModal}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
-            showContainerMenuMessage={this._showContainerMenuMessage}
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
             setRemoteSession={this._setRemoteSession}
@@ -542,6 +625,11 @@ class BranchMenu extends Component {
             sectionType={this.props.sectionType}
             pullOnly={state.pullOnly}
           />
+        }
+        {
+          state.showLoginPrompt &&
+
+          <LoginPrompt closeModal={this._closeLoginPromptModal} />
         }
       </div>
     );

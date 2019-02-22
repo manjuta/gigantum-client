@@ -12,7 +12,6 @@ import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 import Modal from 'Components/common/Modal';
 // store
 import { setErrorMessage, setInfoMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
-import { setContainerMenuVisibility } from 'JS/redux/reducers/labbook/environment/environment';
 import store from 'JS/redux/store';
 // assets
 import './PublishDatasetsModal.scss';
@@ -94,12 +93,8 @@ export default class PublishDatasetsModal extends Component {
 
               if (isPublishing) {
                 self.props.setPublishingState(true);
-
-                self.props.showContainerMenuMessage('publishing');
               } else {
                 self.props.setSyncingState(true);
-
-                self.props.showContainerMenuMessage('syncing');
               }
 
               const failureCall = (errorMessage) => {
@@ -113,7 +108,6 @@ export default class PublishDatasetsModal extends Component {
                     self.props.toggleSyncModal();
                   }
                 }
-                setContainerMenuVisibility(false);
               };
 
               const successCall = () => {
@@ -121,7 +115,6 @@ export default class PublishDatasetsModal extends Component {
                 successProgress.project = { step: 3 };
                 this.setState({ progress: successProgress });
                 setTimeout(() => this.props.toggleModal(false, true), 2000);
-                setContainerMenuVisibility(false);
                 if (isPublishing) {
                   self.props.setPublishingState(false);
                   self.props.resetPublishState(false);
@@ -248,10 +241,8 @@ export default class PublishDatasetsModal extends Component {
                       },
                     );
                   }
-                })
+                });
               });
-            } else {
-              self.props.showContainerMenuMessage('publishing', true);
             }
           } else {
             self.props.auth.renewToken(true, () => {

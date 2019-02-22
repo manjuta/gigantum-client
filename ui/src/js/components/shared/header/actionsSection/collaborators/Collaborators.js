@@ -178,6 +178,7 @@ class CollaboratorButton extends Component {
                           owner={owner}
                           labbookName={name}
                           toggleCollaborators={this._toggleCollaborators}
+                          canManageCollaborators={section.canManageCollaborators}
                         />
 
                     }

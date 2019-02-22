@@ -15,6 +15,12 @@
     font-size: 14px;
     height: 70px;
     @include flex(center, column);
+    .Branches__branchname {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        word-break: break-all;
+        overflow: hidden;
+    }
     &--active {
         animation: overflow-change forwards 0.5s;
     }
@@ -25,6 +31,10 @@
         margin: 0;
 
         .Branches__branchname {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            overflow: hidden;
             font-size: 20px;
         }
         &--selected{
@@ -78,6 +88,32 @@
     height: 22px;
     padding: 0;
     position: relative;
+
+    &--sync-dropdown {
+        margin-left: -4px;
+        width: 15px;
+        background: url(~Images/icons/branches/chevron.svg) no-repeat center center;
+        background-size: 20px;
+
+        &:hover, &:focus {
+          background: $azure url(~Images/icons/branches/chevron-hover.svg) no-repeat center center;
+          background-size: 20px;
+          border: 1px solid $azure;
+          margin-left: -4px;
+        }
+
+        &--disabled,
+        &--disabled:hover,
+        &--disabled:focus {
+          background: $background-color url(~Images/icons/branches/chevron-disabled.svg) no-repeat center center;
+          background-size: 20px !important;
+          border: 1px solid $romanSilver;
+          color: $romanSilver;
+          cursor: auto;
+        }
+    }
+
+
     &--create {
         background: $white url('~Images/icons/branches/create.svg') no-repeat center center;
         background-size: 22px;
@@ -97,7 +133,7 @@
         }
     }
     &--reset {
-        background: $azure url('~Images/icons/branches/reset.svg') no-repeat center center;
+        background: $white url('~Images/icons/branches/reset.svg') no-repeat center center;
         background-size: 22px;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/reset-hover.svg') no-repeat center center;
@@ -241,6 +277,7 @@
     }
 }
 .Branches__Modal{
+    word-break: break-word;
     animation: slide-down-fade-in 0.25s;
     &--merge {
         &:before {
@@ -303,4 +340,50 @@
 
 .Branches__Modal-confirm {
     padding: 0 30px;
+}
+
+.Branches__dropdown {
+    position: relative;
+    overflow: visible;
+    z-index: index($elements, popup) + 2;
+    &-menu {
+        position: absolute;
+        background: $white;
+        top: 30px;
+        padding: 10px;
+        width: 150px;
+        animation: slide-down-fade-in forwards .25s;
+        @include boxShadow();
+      }
+}
+
+.Branches__h5 {
+    margin: 0;
+    font-size: 14px;
+    border-bottom: 2px solid $romanSilver;
+}
+
+.Branches__ul{
+    margin: 1px 0;
+}
+
+.Branches__list-item {
+    padding: 10px 10px;
+    color: $jet;
+    cursor: pointer;
+    @include flex(space-between, row);
+    align-items: center;
+    font-size: 14px !important;
+
+    &:hover {
+        background-color: $azure;
+        color: $white;
+    }
+
+    border-bottom: 1px solid $grey;
+
+
+    &:last-child {
+        border-bottom: 0px solid $white;
+    }
 }
