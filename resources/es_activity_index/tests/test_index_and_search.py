@@ -29,17 +29,19 @@ class TestElasticSearch:
 
     def test_create_destroy(self, mock_config_with_activitystore):
 
+        index_name = "".join(random.choice('0123456789abcdef') for i in range(20))
+
         # should be no index
-        with pytest.raises(ValueError):
-            aidx = ESActivityIndex(mock_config_with_activitystore[1].name, es_ip)
+        aidx = ESActivityIndex(index_name, es_ip)
+        assert(aidx.exists()==False)
         
         # create on same name
-        aidx = ESActivityIndex(mock_config_with_activitystore[1].name, es_ip, create=True)
+        aidx = ESActivityIndex(index_name, es_ip, create=True)
         assert(aidx.exists()==True)
 
         # delete one of the indexes and make sure exists raises an error
         es = Elasticsearch([es_ip])
-        es.indices.delete(index=f"{mock_config_with_activitystore[1].name}_detail")
+        es.indices.delete(index=f"{index_name}_detail")
         with pytest.raises(ValueError):
             aidx.exists()
 
@@ -96,13 +98,14 @@ class TestElasticSearch:
         recordd = mock_config_with_activitystore[0].create_activity_record(d)
 
         # Create an index
-        aidx = ESActivityIndex(mock_config_with_activitystore[1].name, es_ip, create=True)
+        index_name = "".join(random.choice('0123456789abcdef') for i in range(20))
+        aidx = ESActivityIndex(index_name, es_ip, create=True)
 
         # Iterate over activity records and store them.
         for rec in mock_config_with_activitystore[0].get_activity_records():
-            aidx.add(rec, mock_config_with_activitystore[1])
+            aidx.add(rec, mock_config_with_activitystore[1].name, mock_config_with_activitystore[1])
 
-        aidx.flush(mock_config_with_activitystore[1])
+        aidx.flush()
 
         # 2 records with foo
         res = aidx.search_activity("tags","foo")
@@ -164,13 +167,14 @@ class TestElasticSearch:
         recorda = mock_config_with_activitystore[0].create_activity_record(ar)
 
         # Create an index
-        aidx = ESActivityIndex(mock_config_with_activitystore[1].name, es_ip, create=True)
+        index_name = "".join(random.choice('0123456789abcdef') for i in range(20))
+        aidx = ESActivityIndex(index_name, es_ip, create=True)
 
         # Iterate over activity records and store them.
         for rec in mock_config_with_activitystore[0].get_activity_records():
-            aidx.add(rec, mock_config_with_activitystore[1])
+            aidx.add(rec, index_name, mock_config_with_activitystore[1])
 
-        aidx.flush(mock_config_with_activitystore[1])
+        aidx.flush()
 
         #RBTODO -- index populated, but queries not processing right......
         # check for tags

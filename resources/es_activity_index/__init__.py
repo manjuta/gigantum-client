@@ -1,1 +1,2 @@
 from resources.es_activity_index.activity_index import ESActivityIndex
+from resources.es_activity_index.labbook_indexer import LabbookIndexer

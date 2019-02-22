@@ -1,0 +1,57 @@
+
+## `activity_index.py`
+
+Manipulate an index of activity and detail records given a target server and a index name.
+For `index_name` the routine creates two indices:
+* `f"{index_name}_activity"`
+* `f"{index_name}_detail"`
+that are queried independently. Separate indices prevent the details from polluting the
+activity index.
+
+### schema notes
+
+The activity mapping contains all activity metadata and:
+  * a argument-defined project name -- that should be used to connect records to a project
+The detail mapping contains all detail metadata and additional fields that all search results
+from the detail index alone useful in looking up projects and activity records.
+  * project name
+  * timestamp -- to search by time
+  * commit and linked commit -- to connect to activity records
+
+### other notes
+
+plaintex indexing does not work well with punctuation seperated field, e.g.
+`text/markdown`.  To search for this search for the term `markdown`.
+
+Searching for `text/markdown` will return matches to `text` and `markdown`.
+
+## `labbook_index.py`
+
+Simple routines that take a labbook and indexes the checked out branch.
+Note that insertion routines are not deduplicating. If you `add` a record twice, 
+you get two hits in the index.
+
+So, we should probably always use the update 
+
+## ./scripts
+
+Shows how one might use `labbook_indexer`  and `activity_search` to manipulate
+an index called `global_index`.
+
+## Timing
+
+_Conclusion_: insert costs much more than query.  So, `add_if_doesnt_exist()`
+is efficient enough for one at a time interfaces.  There are also bulk interfaces
+for insert that we should consider for initial indexing?
+
+On my macbook
+  add = 33 seconds for 750 records
+  add = 33s for 750 more on 750 
+  update = 4.5s 750 redundant records 
+  update = 34s for 750 new
+
+## Usage notes
+
+RB runs this on the dev environment -- gtm dev start
+You must manually
+`pip3 install elasticsearch`  

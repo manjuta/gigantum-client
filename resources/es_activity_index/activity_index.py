@@ -37,6 +37,7 @@ class ESActivityIndex:
                 "properties": { 
                     "commit":           { "type": "keyword" },
                     "linked_commit":    { "type": "keyword" },
+                    "project":          { "type": "keyword" },   # nee labbook
                     "name":             { "type": "text" },
                     "email":            { "type": "keyword" },
                     "commit_message":   { "type": "text" },
@@ -56,7 +57,8 @@ class ESActivityIndex:
                 "properties": { 
                     "key":              { "type": "keyword" },
                     "commit":           { "type": "keyword" },
-                    "linked_commit":     { "type": "keyword" },
+                    "project":          { "type": "keyword" },   # nee labbook
+                    "linked_commit":    { "type": "keyword" },
                     "record_type":      { "type": "keyword" },
                     "record_action":    { "type": "keyword" },
                     "tags":             { "type": "keyword" },
@@ -79,16 +81,11 @@ class ESActivityIndex:
         if create:
             if (not self.exists()):
                 # create if requested
-                self._create() 
+                self.create() 
             else:
                 raise(ValueError(f"Indices already exists for server {self.servers} index name {self.index_name}"))
 
-        else:
-            # verify that index exists and is accessible
-            if not self.exists():
-                raise ValueError(f"No existing indices found for {self.index_name}")
-
-    def _create(self) -> None:
+    def create(self) -> None:
         """Define index and instantiate on ES server.  Including mappings.
             Call through the consructor.
         """
@@ -124,7 +121,7 @@ class ESActivityIndex:
         else:
             raise(ValueError(f"Inconsistent state for index {self.index_name}. Activity index exists == {aexists} and Detail index exists == {dexists}"))
 
-    def flush(self, labbook: LabBook) -> None:
+    def flush(self) -> None:
         """
             Attempt to flush and sync elasticsearch.    
             Hopefully this will make data consistent.
@@ -139,13 +136,14 @@ class ESActivityIndex:
         es.indices.flush(index=f"{self.index_name}_activity")
         es.indices.flush(index=f"{self.index_name}_detail")
 
-    def add(self, record: ActivityRecord, labbook: LabBook) -> None:
+    def add(self, record: ActivityRecord, project: str, labbook: LabBook) -> None:
         """
             Add an ActivityRecord to the search index.
             Configure index writers and calls the low-level method _add_record
 
             Args:
                 record(ActivityRecord) -- record to be added
+                project(str) -- unique name to refer to gigantum project
                 labbook(LabBook) -- needed to lookup commits
 
             Returns:
@@ -160,6 +158,7 @@ class ESActivityIndex:
             commit_record = labbook.git.log_entry(record.commit)
             ar_dict = { "commit": record.commit, 
                         "linked_commit": record.linked_commit,
+                        "project": project,
                         "name": commit_record['author']['name'],
                         "email": commit_record['author']['email'],
                         "commit_message": record.message,
@@ -173,6 +172,7 @@ class ESActivityIndex:
             linked_commit_record = labbook.git.log_entry(record.linked_commit)
             ar_dict = { "commit": record.commit, 
                         "linked_commit": record.linked_commit,
+                        "project": project,
                         "name": linked_commit_record['author']['name'],
                         "email": linked_commit_record['author']['email'],
                         "commit_message": record.message,
@@ -188,20 +188,19 @@ class ESActivityIndex:
             ars = ActivityStore(labbook)
             for i, obj in enumerate(detail_objs):
                 obj_loaded = ars.get_detail_record(obj.key) 
-                self._add_detail(es, record.commit, record.linked_commit, linked_commit_record['committed_on'], obj_loaded)
+                self._add_detail(es, obj_loaded, project, record.commit, record.linked_commit, ar_dict["timestamp"])
 
-
-    def _add_detail(self, es: Elasticsearch, commit: Optional[str], linked_commit: Optional[str], timestamp: datetime, record: ActivityDetailRecord) -> None:
+    def _add_detail(self, es: Elasticsearch, record: ActivityDetailRecord, project: str, commit: Optional[str], linked_commit: Optional[str], timestamp: datetime) -> None:
         """
             Add a detail record to the index.
 
             Args:
                 es -- an open Elasticsearch service
+                record(dict): ActivityDetailRecord
+                project(str) -- unique name to refer to gigantum project
                 commit: connect detail to original activity
                 linked_commit: connect detail to activity record
                 time_stamp: so we can search by time
-                recordid(str): commit_hash of activity entry
-                record(dict): ActivityDetailRecord
             
             Returns:
                 None
@@ -219,6 +218,7 @@ class ESActivityIndex:
 
         ad_dict = { "commit": commit, 
                     "linked_commit": linked_commit,
+                    "project": project,
                     "record_type": record.type.name,
                     "record_action": record.action.name,
                     "mimetypes": mimetypes,
@@ -264,3 +264,24 @@ class ESActivityIndex:
         res = es.search(index=f"{self.index_name}_detail", body=query)
 
         return res['hits']['hits']
+
+    def add_if_doesnt_exist(self, record: ActivityRecord, project: str, labbook: LabBook) -> None:
+        """
+            This adds a record if it's not already stored.  Given that records
+            are write once and immutable, there is no udpate to the index. 
+            When we switch branches, we have no idea what's indexed and what's not.
+
+            Args:
+                record(ActivityRecord) -- record to be added
+                project(str) -- unique name to refer to gigantum project
+                labbook(LabBook) -- needed to lookup commits
+
+            Returns:
+                None
+        """
+        es = Elasticsearch(self.servers)
+
+        # see if record.commit is in the database.
+        # if not, add record
+        if not self.search_activity("commit",record.commit):
+            self.add(record, project, labbook)
