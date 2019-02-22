@@ -463,9 +463,16 @@ class BranchMenu extends Component {
 
                     { (filteredBranches.length === 0)
                       &&
-                      <li className="BranchMenu__list-item">
-                        There is only a master branch associacted with this project, would you like to
-                        <button className="Btn--flat">create a new branch?</button>
+                      <li
+                        className="BranchMenu__list-item BranchMenu__list-item--create"
+                        onClick={() => this._setModalState('createBranchVisible') }
+                      >
+                        No other branches.
+                        <button
+                          className="Btn--flat"
+                        >
+                          Create a new branch?
+                        </button>
                       </li>
                     }
                   </ul>
@@ -568,6 +575,7 @@ class BranchMenu extends Component {
             isLocked={props.isLocked}
             handleSyncButton={this._handleSyncButton}
             allowSync={allowSync}
+            syncTooltip={syncTooltip}
           />
           {
           state.publishModalVisible &&

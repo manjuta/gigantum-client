@@ -31,6 +31,7 @@ class Branches extends Component {
     resetModalVisible: false,
     localSelected: false,
     remoteSelected: false,
+    branchPage: 0,
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -117,8 +118,10 @@ class Branches extends Component {
   */
   @boundMethod
   _toggleSyncDropdown() {
+    if (this.props.allowSync) {
       const { state } = this;
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
+    }
   }
   /**
       @param {Object} branches
@@ -277,7 +280,7 @@ class Branches extends Component {
     @return {JSX}
   */
   _renderActions(branch) {
-    const { props, state} = this;
+    const { props, state } = this;
     const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
     const deleteModalVisible = this.state.deleteModalVisible === branch.branchName;
     const resetModalVisible = this.state.resetModalVisible === branch.branchName;
@@ -317,10 +320,11 @@ class Branches extends Component {
       'Tooltip-data': true,
      ' Tooltip-data--small': true,
       'Branches__btn--sync': true,
-      'Branches__btn--sync--disabled': !branch.isActive,
+      'Branches__btn--sync--disabled': !props.allowSync,
     }),
     syncMenuDropdownButtonCSS = classNames({
       'Branches__btn Branches__btn--sync-dropdown': true,
+      'Branches__btn--sync-dropdown--disabled': !props.allowSync,
       'Branches__btn--sync-open': state.syncMenuVisible,
     }),
     syncMenuDropdownCSS = classNames({
@@ -328,7 +332,7 @@ class Branches extends Component {
       hidden: !state.syncMenuVisible,
     });
     let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset' : 'Branch must be remote';
-    let syncTooltip = branch.isActive ? 'Sync' : 'Syncing limited to active branch';
+    let syncTooltip = props.syncTooltip;
     let mergeTooltip = branch.isActive ? 'Cannot merge active branch with itself' : 'Merge';
     let deleteTooltip = branch.branchName === 'master' ? 'Cannot delete master branch' : branch.isActive ? 'Cannot delete Active branch' : 'Delete';
     return (
@@ -461,7 +465,10 @@ class Branches extends Component {
                   this._renderActions(props.activeBranch)
                 }
               </div>
-              <div className="Branches__label">Other Branches:</div>
+              {
+                filteredBranches.length !== 0 &&
+                <div className="Branches__label">Other Branches:</div>
+              }
               {
                 filteredBranches.map((branch) => {
                   const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
