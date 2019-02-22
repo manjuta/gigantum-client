@@ -20,7 +20,7 @@ from the detail index alone useful in looking up projects and activity records.
 
 ### other notes
 
-plaintex indexing does not work well with punctuation seperated field, e.g.
+plaintex indexing does not work well with punctuation seperated fields, e.g.
 `text/markdown`.  To search for this search for the term `markdown`.
 
 Searching for `text/markdown` will return matches to `text` and `markdown`.
@@ -31,7 +31,7 @@ Simple routines that take a labbook and indexes the checked out branch.
 Note that insertion routines are not deduplicating. If you `add` a record twice, 
 you get two hits in the index.
 
-So, we should probably always use the update 
+So, we should probably always use the update routine.
 
 ## ./scripts
 
@@ -50,8 +50,25 @@ On my macbook
   update = 4.5s 750 redundant records 
   update = 34s for 750 new
 
+The way to do this efficiently as needed is probably to:
+  (1) query for existence one by one
+  (2) build a batch of objects that don't exist.
+I can prototype this.
+
 ## Usage notes
 
-RB runs this on the dev environment -- gtm dev start
-You must manually
+To run tests and experiment,
+
+Run elasticsearch in another container.
+docker run -p 9200:9200 -p 9300:9300 --name="elasticsearch" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+
+Run a gigantum environment
+`gtm dev start`
+Log into the environment as root -- with docker exec
+Install elasticsearch in the container
 `pip3 install elasticsearch`  
+
+Then you can run tests or play with scripts using the IP of the elasticsearch container.
+
+
+
