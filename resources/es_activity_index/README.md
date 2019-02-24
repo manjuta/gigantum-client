@@ -60,7 +60,10 @@ I can prototype this.
 To run tests and experiment,
 
 Run elasticsearch in another container.
-docker run -p 9200:9200 -p 9300:9300 --name="elasticsearch" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+`docker run -p 9200:9200 -p 9300:9300 --name="elasticsearch" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.6.0`
+
+You will need to grab the IP address, something like 172.17.0.2
+`docker inspect ...`
 
 Run a gigantum environment
 `gtm dev start`
@@ -68,7 +71,9 @@ Log into the environment as root -- with docker exec
 Install elasticsearch in the container
 `pip3 install elasticsearch`  
 
+Then, I go to the gigantum user `/opt/setup.sh`
+in `./resources/es_activity_index/tests`
+you need to hardwire the IP address.
+
 Then you can run tests or play with scripts using the IP of the elasticsearch container.
-
-
 
