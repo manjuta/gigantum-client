@@ -77,3 +77,9 @@ you need to hardwire the IP address.
 
 Then you can run tests or play with scripts using the IP of the elasticsearch container.
 
+### Interacting with ElasticSearch
+
+You can query the search interface in many ways to see what's in the indices.  Through CURL and directly.  Some of the queries that I used are:
+* Show all records in an index: `http://localhost:9200/global_index_activity/_search?pretty=true` 
+* Show all records a commit message string: `http://localhost:9200/global_index_activity/_search?q=commit_message:nolinkedcommit`
+
