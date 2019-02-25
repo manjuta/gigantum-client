@@ -1,7 +1,7 @@
 from typing import (Any, Dict, List)
 
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
-from gtmcore.activity import ActivityRecord, ActivityDetailRecord, ActivityAction
+from gtmcore.activity import ActivityRecord, ActivityDetailRecord, ActivityAction, ActivityDetailType
 from gtmcore.labbook import LabBook
 
 
@@ -93,3 +93,38 @@ class GenericFileChangeProcessor(ActivityProcessor):
         return result_obj
 
 
+class ActivityDetailLimitProcessor(ActivityProcessor):
+    """Class to limit the number of captured detail records to 255 records + a truncation notification
+
+    Since the "importance" value used to order detail records is 1 byte and a max value of 255, we'll truncate to
+    255 records and insert a record indicating the truncation occurred
+    """
+
+    def process(self, result_obj: ActivityRecord, data: List[ExecutionData],
+                status: Dict[str, Any], metadata: Dict[str, Any]) -> ActivityRecord:
+        """Method to update a result object based on code and result data
+
+        Args:
+            result_obj(ActivityNote): An object containing the note
+            data(list): A list of ExecutionData instances containing the data for this record
+            status(dict): A dict containing the result of git status from gitlib
+            metadata(str): A dictionary containing Dev Env specific or other developer defined data
+
+        Returns:
+            ActivityNote
+        """
+        with result_obj.inspect_detail_objects() as detail_objs:
+            orig_num = result_obj.num_detail_objects
+            if result_obj.num_detail_objects > 255:
+                result_obj.trim_detail_objects(255)
+
+                adr = ActivityDetailRecord(ActivityDetailType.NOTE, show=True, importance=0,
+                                           action=ActivityAction.NOACTION)
+                adr.add_value('text/markdown', f"This activity produced {orig_num} detail records, "
+                                               f"but was truncated to the top 255 items. Inspect your code to make "
+                                               f"sure that this was not accidental. In Jupyter for example, you can"
+                                               f" use a `;` at the end of a line to suppress output from functions"
+                                               f" that print excessively.")
+                result_obj.add_detail_object(adr)
+
+        return result_obj

@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Fri Feb 22 2019 15:32:01 GMT-0500 (Eastern Standard Time)
+# timestamp: Mon Feb 25 2019 10:26:09 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -552,6 +552,21 @@ type DeleteDatasetFilesPayload {
   clientMutationId: String
 }
 
+input DeleteDatasetInput {
+  owner: String!
+  datasetName: String!
+  local: Boolean
+  remote: Boolean
+  clientMutationId: String
+}
+
+"""Delete a dataset."""
+type DeleteDatasetPayload {
+  localDeleted: Boolean
+  remoteDeleted: Boolean
+  clientMutationId: String
+}
+
 input DeleteExperimentalBranchInput {
   owner: String!
   labbookName: String!
@@ -955,6 +970,7 @@ type LabbookMutations {
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
   fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
+  deleteDataset(input: DeleteDatasetInput!): DeleteDatasetPayload
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
   fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
@@ -1003,7 +1019,7 @@ type LabbookQuery {
   labbookList: LabbookList
   datasetList: DatasetList
   availableBases(before: String, after: String, first: Int, last: Int): BaseComponentConnection
-  availableDatasets: [DatasetType]
+  availableDatasetTypes: [DatasetType]
   package(manager: String, package: String, version: String = ""): PackageComponent
   userIdentity: UserIdentity
 }

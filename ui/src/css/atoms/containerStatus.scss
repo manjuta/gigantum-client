@@ -1,18 +1,20 @@
 .ContainerStatus__container-state {
   transition: all 0.125s;
+  font-weight: 100;
   width: 141px;
   text-align: center;
   height: 40px;
   font-size: 16px;
-  border-radius: 20px;
-  color: $romanSilver;
+  border-radius: 3px;
+  color: $jet;
   line-height: 26px;
+  background-color: white;
   cursor: pointer;
-  border: 2px solid rgba(0,0,0,0);
+  border: 1px solid rgba(0,0,0,0);
   z-index: index($elements, button);
   padding-right: 10px;
   align-items: center;
-
+  position: relative;
   @include flex(space-around, row);
   @include boxShadow();
 }
@@ -34,11 +36,11 @@
   transition: all 0.125s ease-in-out;
   position: absolute;
   border-radius: 10px;
-  background-color: $background-color;
-  top: 2px;
-  left: 2px;
-  right: 18px;
-  bottom: 2px;
+  background-color: $white;
+  top: 3px;
+  left: 3px;
+  right: 19px;
+  bottom: 3px;
 }
 
 .ContainerStatus__container-state--expanded{
@@ -53,23 +55,27 @@
 }
 
 .ContainerStatus__container-state.Running {
-  border: 3px solid $turquise;
+  border: 1px solid $turquise;
 
   .ContainerStatus__toggle-btn {
-    top: 2px;
-    left: 18px;
-    right: 2px;
-    bottom: 2px;
+    top: 3px;
+    left: 19px;
+    right: 3px;
+    bottom: 3px;
   }
 
   .ContainerStatus__toggle {
     background: $turquise;
   }
 }
+.ContainerStatus__container-state.loading{
+  background: $romanSilver;
+  opacity: 0.5;
+}
 .ContainerStatus__container-state.Running:hover {
   width: 141px;
   height: 40px;
-  border: 3px solid $romanSilver;
+  border: 1px solid $romanSilver;
   line-height: 31px;
 
   .ContainerStatus__toggle {
@@ -80,31 +86,31 @@
 .ContainerStatus__container-state.Building,
 .ContainerStatus__container-state.Syncing,
 .ContainerStatus__container-state.Publishing {
-  border: 3px solid $goldenLemon;
+  border: 1px solid $orange;
   background-size: 20px;
 
   .ContainerStatus__toggle-btn {
-    top: 2px;
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
   }
 
   .ContainerStatus__toggle {
-    background: $romanSilver url(~Images/icons/container-status-spinner.svg) no-repeat center center;
+    background: $romanSilver url(~Images/icons/container-status-spinner-building.svg) no-repeat center center;
     background-size: 40px 24px;
   }
 }
 
 .ContainerStatus__container-state.Stopped {
-  border: 3px solid $romanSilver;
+  border: 1px solid $romanSilver;
   @include boxShadow();
 }
 
 .ContainerStatus__container-state.Stopped:hover {
   width: 141px;
   height: 40px;
-  border: 3px solid $turquise;
+  border: 1px solid $turquise;
   line-height: 31px;
 
   .ContainerStatus__toggle {
@@ -119,18 +125,23 @@
   line-height: 26px !important;
   margin: 0 !important;
   box-shadow: none !important;
-  border: 3px solid $goldenLemon !important;
+  border: 1px solid $orange !important;
   cursor: auto;
 }
 
 .ContainerStatus__container-state.Rebuild{
-  border: 3px solid $goldenLemon;
+  border: 1px solid $romanSilver;
   cursor: pointer;
   padding: 0 15px 0 0;
+
+  .ContainerStatus__toggle {
+    background: $orange url(~Images/icons/warning.svg) no-repeat 20px center;
+    background-size: 18px 18px;
+  }
 }
 .ContainerStatus__container-state.Stopping,
 .ContainerStatus__container-state.Starting {
-  border: 3px solid $turquise;
+  border: 1px solid $turquise;
   color: $grey;
 
   .ContainerStatus__toggle {
@@ -139,9 +150,9 @@
   }
 
   .ContainerStatus__toggle-btn {
-    top: 2px;
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
   }
 }

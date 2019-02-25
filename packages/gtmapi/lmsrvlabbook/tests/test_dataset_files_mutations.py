@@ -3,6 +3,7 @@ import os
 import uuid
 import flask
 from aioresponses import aioresponses
+import snappy
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
@@ -11,7 +12,8 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest
 
-from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file
+from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file, \
+    helper_compress_file
 
 
 class TestDatasetFilesMutations(object):
@@ -42,8 +44,8 @@ class TestDatasetFilesMutations(object):
 
         assert os.path.exists(obj1_target) is True
         assert os.path.exists(obj2_target) is True
-        os.rename(obj1_target, obj1_source)
-        os.rename(obj2_target, obj2_source)
+        helper_compress_file(obj1_target, obj1_source)
+        helper_compress_file(obj2_target, obj2_source)
         assert os.path.isfile(obj1_target) is False
         assert os.path.isfile(obj2_target) is False
         assert os.path.isfile(obj1_source) is True
@@ -97,10 +99,14 @@ class TestDatasetFilesMutations(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is False
-            with open(obj1_source, 'rt') as dd:
-                source1 = dd.read()
+
+            decompressor = snappy.StreamDecompressor()
+            with open(obj1_source, 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
             with open(obj1_target, 'rt') as dd:
-                assert source1 == dd.read()
+                dest1 = dd.read()
+            assert source1.decode("utf-8") == dest1
 
             query = """
                        mutation myMutation {
@@ -120,14 +126,20 @@ class TestDatasetFilesMutations(object):
 
             assert os.path.isfile(obj1_target) is True
             assert os.path.isfile(obj2_target) is True
-            with open(obj1_source, 'rt') as dd:
-                source1 = dd.read()
+
+            with open(obj1_source, 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
             with open(obj1_target, 'rt') as dd:
-                assert source1 == dd.read()
-            with open(obj2_source, 'rt') as dd:
-                source2 = dd.read()
+                dest1 = dd.read()
+            assert source1.decode("utf-8") == dest1
+
+            with open(obj2_source, 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
             with open(obj2_target, 'rt') as dd:
-                assert source2 == dd.read()
+                dest1 = dd.read()
+            assert source1.decode("utf-8") == dest1
 
     def test_delete_dataset_files(self, fixture_working_dir, snapshot):
         im = InventoryManager(fixture_working_dir[0])

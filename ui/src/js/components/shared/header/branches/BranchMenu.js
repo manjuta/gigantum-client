@@ -29,7 +29,6 @@ const extraxtActiveBranch = (branches) => {
          filteredBranches = branches.filter(branch => !branch.isActive),
          branchMenuList = (filteredBranches.length > 3) ? filteredBranches.slice(0, 3) : filteredBranches,
          otherBranchCount = filteredBranches.length - branchMenuList.length;
-         console.log(activeBranch)
    return ({
      activeBranch,
      filteredBranches,

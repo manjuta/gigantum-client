@@ -122,8 +122,6 @@ class Activity extends Component {
       this.setState({ refetchEnabled: true });
       this._refetch();
     }
-
-    this.setState({ activityRecords: this._transformActivity(activityRecords) });
   }
 
   componentWillUnmount() {
@@ -466,15 +464,14 @@ class Activity extends Component {
             activityTime[timeHash][activityTime[timeHash].length - 2].collapsed = true;
 
             let clusterObject = {
-              cluster: [activityOne, activityTwo, newActivityObject],
+              cluster: [activityTwo, activityOne, newActivityObject],
               attachedCluster,
               expanded: false,
               id: activityOne.edge.node.id,
             };
 
-            activityTime[timeHash].splice(activityTime[timeHash].length - 1, 1);
-            activityTime[timeHash].splice(activityTime[timeHash].length - 2, 1);
-
+            activityTime[timeHash].pop();
+            activityTime[timeHash].pop();
             activityTime[timeHash] ? activityTime[timeHash].push(clusterObject) : activityTime[timeHash] = [clusterObject];
 
             clusterIndex = activityTime[timeHash].length - 1;

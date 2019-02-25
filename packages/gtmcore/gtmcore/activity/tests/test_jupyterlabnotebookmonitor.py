@@ -25,7 +25,8 @@ import os
 
 from gtmcore.activity.monitors.monitor_jupyterlab import JupyterLabNotebookMonitor, JupyterLabCodeProcessor, \
     JupyterLabPlaintextProcessor, JupyterLabImageExtractorProcessor
-from gtmcore.activity.processors.core import ActivityShowBasicProcessor, GenericFileChangeProcessor
+from gtmcore.activity.processors.core import ActivityShowBasicProcessor, GenericFileChangeProcessor, \
+    ActivityDetailLimitProcessor
 from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType
 
 
@@ -47,13 +48,14 @@ class TestJupyterLabNotebookMonitor(object):
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
                                             monitor_key, config_file=mock_labbook[0])
 
-        assert len(monitor.processors) == 6
+        assert len(monitor.processors) == 7
         assert type(monitor.processors[0]) == JupyterLabCodeProcessor
         assert type(monitor.processors[1]) == GenericFileChangeProcessor
         assert type(monitor.processors[2]) == JupyterLabPlaintextProcessor
         assert type(monitor.processors[3]) == JupyterLabImageExtractorProcessor
         assert type(monitor.processors[4]) == JupyterLabCellVisibilityProcessor
-        assert type(monitor.processors[5]) == ActivityShowBasicProcessor
+        assert type(monitor.processors[5]) == ActivityDetailLimitProcessor
+        assert type(monitor.processors[6]) == ActivityShowBasicProcessor
 
     def test_start(self, redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity"""
@@ -474,28 +476,32 @@ class TestJupyterLabNotebookMonitor(object):
         assert record.importance == 0
         assert not record.tags
         assert record.message == 'Executed cell in notebook code/Test.ipynb'
-        assert len(record._detail_objects) == 262
+        assert len(record._detail_objects) == 256
+        assert record.num_detail_objects == 256
         assert record._detail_objects[0][0] is True
-        assert record._detail_objects[0][1] == ActivityDetailType.RESULT.value
-        assert record._detail_objects[0][2] == 155
-        assert record._detail_objects[1][0] is False
-        assert record._detail_objects[1][1] == ActivityDetailType.CODE_EXECUTED.value
-        assert record._detail_objects[1][2] == 255
+        assert record._detail_objects[0][1] == ActivityDetailType.NOTE.value
+        assert record._detail_objects[0][2] == 0
+        assert record._detail_objects[1][0] is True
+        assert record._detail_objects[1][1] == ActivityDetailType.RESULT.value
+        assert record._detail_objects[1][2] == 155
         assert record._detail_objects[2][0] is False
-        assert record._detail_objects[2][1] == ActivityDetailType.OUTPUT_DATA.value
+        assert record._detail_objects[2][1] == ActivityDetailType.CODE_EXECUTED.value
         assert record._detail_objects[2][2] == 255
         assert record._detail_objects[3][0] is False
         assert record._detail_objects[3][1] == ActivityDetailType.OUTPUT_DATA.value
-        assert record._detail_objects[3][2] == 254
-        assert record._detail_objects[47][0] is False
-        assert record._detail_objects[47][1] == ActivityDetailType.OUTPUT_DATA.value
-        assert record._detail_objects[47][2] == 210
-        assert record._detail_objects[260][0] is False
-        assert record._detail_objects[260][1] == ActivityDetailType.OUTPUT_DATA.value
-        assert record._detail_objects[260][2] == 0
-        assert record._detail_objects[261][0] is False
-        assert record._detail_objects[261][1] == ActivityDetailType.OUTPUT_DATA.value
-        assert record._detail_objects[261][2] == 0
+        assert record._detail_objects[3][2] == 255
+        assert record._detail_objects[4][0] is False
+        assert record._detail_objects[4][1] == ActivityDetailType.OUTPUT_DATA.value
+        assert record._detail_objects[4][2] == 254
+        assert record._detail_objects[48][0] is False
+        assert record._detail_objects[48][1] == ActivityDetailType.OUTPUT_DATA.value
+        assert record._detail_objects[48][2] == 210
+        assert record._detail_objects[254][0] is False
+        assert record._detail_objects[254][1] == ActivityDetailType.OUTPUT_DATA.value
+        assert record._detail_objects[254][2] == 4
+        assert record._detail_objects[255][0] is False
+        assert record._detail_objects[255][1] == ActivityDetailType.OUTPUT_DATA.value
+        assert record._detail_objects[255][2] == 3
 
     def test_no_record_on_error(self, redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity that didn't execute successfully"""

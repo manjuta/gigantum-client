@@ -150,7 +150,7 @@ class DevTools extends Component {
 
   render() {
     const { props, state } = this,
-          devTools = props.labbook.environment.base.developmentTools,
+          devTools = props.labbook.environment.base ? props.labbook.environment.base.developmentTools : [],
           jupyterButtonCss = classNames({
             'DevTools-button': true,
             'ContainerStatus__button--bottom': state.isMouseOver,

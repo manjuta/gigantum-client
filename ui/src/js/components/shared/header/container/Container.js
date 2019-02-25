@@ -39,7 +39,6 @@ class Container extends Component {
   render() {
     const { props, state } = this,
           { labbook } = props;
-
     return (
         <div className="Container">
 
@@ -58,7 +57,6 @@ class Container extends Component {
               updateStatus={this._updateStatus}
               containerMutations={state.containerMutations}
               base={labbook.environment.base}
-              isBuilding={state.isBuilding}
             />
 
         </div>

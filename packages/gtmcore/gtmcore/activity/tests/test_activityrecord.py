@@ -250,3 +250,45 @@ _GTM_ACTIVITY_END_"""
         assert len(ar._detail_objects) == 2
         assert ar._detail_objects[0][3].data['text/plain'] == 'second'
         assert ar._detail_objects[1][3].data['text/plain'] == 'first'
+
+    def test_trim_detail_objects(self):
+        """"""
+        ar = ActivityRecord(ActivityType.CODE,
+                            show=True,
+                            message="added some code",
+                            importance=50,
+                            linked_commit='aaaaaaaa')
+
+        adr1 = ActivityDetailRecord(ActivityDetailType.CODE)
+        adr1.show = True
+        adr1.importance = 100
+        adr1.add_value("text/plain", "first")
+        ar.add_detail_object(adr1)
+
+        adr2 = ActivityDetailRecord(ActivityDetailType.CODE)
+        adr2.show = True
+        adr2.importance = 0
+        adr2.add_value("text/plain", "second")
+        ar.add_detail_object(adr2)
+
+        adr3 = ActivityDetailRecord(ActivityDetailType.CODE)
+        adr3.show = True
+        adr3.importance = 0
+        adr3.add_value("text/plain", "third")
+        ar.add_detail_object(adr3)
+
+        assert len(ar._detail_objects) == 3
+        assert ar._detail_objects[0][3].data['text/plain'] == 'first'
+        assert ar._detail_objects[1][3].data['text/plain'] == 'second'
+        assert ar._detail_objects[2][3].data['text/plain'] == 'third'
+
+        with ar.inspect_detail_objects():
+            ar.trim_detail_objects(2)
+
+        assert len(ar._detail_objects) == 2
+        assert ar._detail_objects[0][3].data['text/plain'] == 'first'
+        assert ar._detail_objects[1][3].data['text/plain'] == 'second'
+
+        with pytest.raises(ValueError):
+            with ar.inspect_detail_objects():
+                ar.trim_detail_objects(0)

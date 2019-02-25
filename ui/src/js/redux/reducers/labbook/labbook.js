@@ -78,6 +78,8 @@ export default (
       imageStatus: action.payload.imageStatus,
     };
   } else if (action.type === IS_BUILDING) {
+
+    console.log(IS_BUILDING, action.payload.isBuilding)
     return {
       ...state,
       isBuilding: action.payload.isBuilding,

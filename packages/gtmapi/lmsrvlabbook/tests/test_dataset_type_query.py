@@ -22,10 +22,10 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir
 
 
 class TestDatasetTypesQueries(object):
-    def test_get_available_base_images(self, fixture_working_dir, snapshot):
+    def test_get_available_dataset_types(self, fixture_working_dir, snapshot):
         query = """
                 {
-                  availableDatasets{
+                  availableDatasetTypes{
                         id
                         name
                         description
