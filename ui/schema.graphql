@@ -1,9 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-<<<<<<< HEAD
-# timestamp: Thu Feb 21 2019 13:26:43 GMT-0500 (Eastern Standard Time)
-=======
-# timestamp: Wed Feb 20 2019 15:00:36 GMT-0500 (Eastern Standard Time)
->>>>>>> integration
+# timestamp: Mon Feb 25 2019 10:23:01 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -109,7 +105,6 @@ input AddDatasetCollaboratorInput {
   owner: String!
   datasetName: String!
   username: String!
-  permissions: String!
   clientMutationId: String
 }
 
@@ -141,7 +136,6 @@ input AddLabbookCollaboratorInput {
   owner: String!
   labbookName: String!
   username: String!
-  permissions: String!
   clientMutationId: String
 }
 
@@ -258,21 +252,6 @@ type BaseComponentEdge {
   cursor: String!
 }
 
-"""Represents a branch in the repo """
-type Branch implements Node & GitRepository {
-  """The ID of the object."""
-  id: ID!
-  owner: String!
-  name: String!
-  branchName: String!
-  isActive: Boolean
-  isLocal: Boolean
-  isRemote: Boolean
-  isMergeable: Boolean
-  commitsBehind: Int
-  commitsAhead: Int
-}
-
 input BuildImageInput {
   owner: String!
   labbookName: String!
@@ -299,15 +278,6 @@ input ChunkUploadInput {
   chunkIndex: Int!
   filename: String!
   uploadId: String!
-}
-
-type Collaborator implements Node & GitRepository {
-  """The ID of the object."""
-  id: ID!
-  owner: String!
-  name: String!
-  collaboratorUsername: String!
-  permission: String!
 }
 
 input CompleteBatchUploadTransactionInput {
@@ -646,8 +616,7 @@ input DownloadDatasetFilesInput {
 }
 
 type DownloadDatasetFilesPayload {
-  updatedFileEdges: [DatasetFileEdge]
-  statusMessage: String
+  backgroundJobKey: String
   clientMutationId: String
 }
 
@@ -706,6 +675,19 @@ input FetchLabbookEdgeInput {
 type FetchLabbookEdgePayload {
   newLabbookEdge: LabbookEdge
   clientMutationId: String
+}
+
+"""An interface for any object that is represented by a git commit"""
+interface GitCommit {
+  hash: String!
+  shortHash: String
+  committedOn: String
+}
+
+"""An interface for any git reference"""
+interface GitRef {
+  refName: String!
+  prefix: String
 }
 
 """
@@ -816,12 +798,16 @@ type Labbook implements Node & GitRepository {
   sizeBytes: String
   activeBranchName: String
   workspaceBranchName: String
-  branches: [Branch]
+  availableBranchNames: [String]
+  mergeableBranchNames: [String]
+  activeBranch: LabbookRef @deprecated(reason: "Can use workspaceBranchName instead")
+  branches(before: String, after: String, first: Int, last: Int): LabbookRefConnection @deprecated(reason: "Can use availableBranchNames instead")
   defaultRemote: String
   creationDateUtc: DateTime
   modifiedOnUtc: DateTime
-  collaborators: [Collaborator]
+  collaborators: [String]
   canManageCollaborators: Boolean
+  updatesAvailableCount: Int
   isRepoClean: Boolean
   environment: Environment
   overview: LabbookOverview
@@ -835,6 +821,17 @@ type Labbook implements Node & GitRepository {
   packages(packageInput: [PackageComponentInput]): [PackageComponent]
   visibility: String
   linkedDatasets: [Dataset]
+}
+
+"""An object representing a commit to a LabBook"""
+type LabbookCommit implements Node & GitRepository & GitCommit {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  hash: String!
+  shortHash: String
+  committedOn: String
 }
 
 """A Connection for paging through labbooks that exist locally. """
@@ -943,7 +940,6 @@ type LabbookMutations {
   publishDataset(input: PublishDatasetInput!): PublishDatasetPayload
   syncLabbook(input: SyncLabbookInput!): SyncLabbookPayload
   addLabbookRemote(input: AddLabbookRemoteInput!): AddLabbookRemotePayload
-  resetBranchToRemote(input: ResetBranchToRemoteInput!): ResetBranchToRemotePayload
   buildImage(input: BuildImageInput!): BuildImagePayload
   startContainer(input: StartContainerInput!): StartContainerPayload
   stopContainer(input: StopContainerInput!): StopContainerPayload
@@ -1013,6 +1009,7 @@ type LabbookOverview implements Node & GitRepository {
 type LabbookQuery {
   """The ID of the object"""
   node(id: ID!): Node
+  nodes(ids: [String]): [Node]
   buildInfo: String
   cudaAvailable: Boolean
   labbook(owner: String, name: String): Labbook
@@ -1026,6 +1023,31 @@ type LabbookQuery {
   availableDatasetTypes: [DatasetType]
   package(manager: String, package: String, version: String = ""): PackageComponent
   userIdentity: UserIdentity
+}
+
+"""An object representing a git reference in a LabBook repository"""
+type LabbookRef implements Node & GitRepository & GitRef {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  refName: String!
+  prefix: String
+  commit: LabbookCommit
+}
+
+"""A Connection for paging through labbook git refs (branches)"""
+type LabbookRefConnection {
+  pageInfo: PageInfo!
+  edges: [LabbookRefEdge]!
+}
+
+type LabbookRefEdge {
+  """The item at the end of the edge"""
+  node: LabbookRef
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 """
@@ -1075,7 +1097,7 @@ input MergeFromBranchInput {
   owner: String!
   labbookName: String!
   otherBranchName: String!
-  overrideMethod: String
+  force: Boolean
   clientMutationId: String
 }
 
@@ -1362,22 +1384,6 @@ type RemoveUserIdentityPayload {
   clientMutationId: String
 }
 
-input ResetBranchToRemoteInput {
-  owner: String!
-  labbookName: String!
-  clientMutationId: String
-}
-
-"""
-Undo all local history and then set current branch tip to match remote.
-
-Very useful when changes are made to master that cannot be pushed. 
-"""
-type ResetBranchToRemotePayload {
-  labbook: Labbook
-  clientMutationId: String
-}
-
 input SetDatasetDescriptionInput {
   owner: String!
   datasetName: String!
@@ -1478,8 +1484,7 @@ type SyncDatasetPayload {
 input SyncLabbookInput {
   owner: String!
   labbookName: String!
-  pullOnly: Boolean
-  overrideMethod: String
+  force: Boolean
   clientMutationId: String
 }
 
