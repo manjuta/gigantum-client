@@ -11,7 +11,7 @@ import Loader from 'Components/common/Loader';
 import { setUpdateAll } from 'JS/redux/reducers/routes';
 // labbook query with notes fragment
 export const LabbookQuery = graphql`
-  query LabbookQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $hasNext: Boolean!){
+  query LabbookQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $hasNext: Boolean!, $includeInitial: Boolean!){
     labbook(name: $name, owner: $owner){
       id
       description
@@ -35,6 +35,7 @@ class LabbookQueryContainer extends Component {
             owner: parentProps.owner,
             first: 10,
             hasNext: false,
+            includeInitial: false,
           }
         }
       render={({ error, props }) => {

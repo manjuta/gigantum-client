@@ -6,7 +6,7 @@ import uuidV4 from 'uuid/v4';
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
-  mutation CreateExperimentalBranchMutation($input: CreateExperimentalBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
+  mutation CreateExperimentalBranchMutation($input: CreateExperimentalBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!, $includeInitial: Boolean){
     createExperimentalBranch(input: $input){
       labbook{
         ...Labbook_labbook
@@ -37,6 +37,7 @@ export default function CreateExperimentalBranchMutation(
     first: 10,
     cursor: null,
     hasNext: false,
+    includeInitial: true,
   };
   commitMutation(
     environment,

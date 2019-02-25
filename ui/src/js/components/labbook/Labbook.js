@@ -1,6 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import shallowCompare from 'react-addons-shallow-compare';
 import {
   createFragmentContainer,
   graphql,
@@ -27,6 +28,9 @@ import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import Header from '../shared/header/Header';
 // import Activity from './activity/LabbookActivityContainer';
+// mutations
+import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMutation';
+import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
 // assets
 import './Labbook.scss';
 
@@ -85,18 +89,11 @@ class Labbook extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
+    console.log(nextProps)
+    setCallbackRoute(nextProps.location.pathname);
     return {
       ...state,
-      collaborators: nextProps.labbook.collaborators,
-      canManageCollaborators: nextProps.labbook.canManageCollaborators,
-      visibility: nextProps.labbook.visibility,
-      defaultRemote: nextProps.labbook.defaultRemote,
-      branches: nextProps.labbook.branches,
-    }
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    setCallbackRoute(nextProps.location.pathname);
+    };
   }
 
   /**
@@ -109,7 +106,7 @@ class Labbook extends Component {
           { name, owner } = props.labbook;
 
     document.title = `${owner}/${name}`;
-
+    console.log(this.props.relay)
     props.auth.isAuthenticated().then((response) => {
       let isAuthenticated = response;
       if (isAuthenticated === null) {
@@ -125,6 +122,10 @@ class Labbook extends Component {
     window.addEventListener('scroll', this._setStickHeader);
     window.addEventListener('click', this._branchViewClickedOff);
   }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return shallowCompare(this, nextProps, nextState);
+  // }
 
   /**
     @param {}
@@ -150,44 +151,30 @@ class Labbook extends Component {
           self = this,
           { isBuilding } = props;
 
-      FetchContainerStatus.getContainerStatus(owner, name, isLabbookUpdate).then((response, error) => {
-        if (response && response.labbook) {
-          const { environment } = response.labbook;
-          // reset build flags
+    if (isLabbookUpdate) {
+      LabbookContainerStatusMutation(owner, name, (error, response) => {
+        if (response && response.fetchLabbookEdge && response.fetchLabbookEdge.newLabbookEdge) {
+          const { environment } = response.fetchLabbookEdge.newLabbookEdge.node;
           if ((environment.imageStatus !== 'BUILD_IN_PROGRESS') && isBuilding) {
             setBuildingState(false);
           }
-          // only updates state if container or imageStatus has changed
-          if ((response.labbook.branches === undefined) && ((state.containerStatus !== environment.containerStatus) || (state.imageStatus !== environment.imageStatus))) {
-            const isLocked = (environment.containerStatus !== 'NOT_RUNNING');
-            self.setState({
-              imageStatus: environment.imageStatus,
-              containerStatus: environment.containerStatus,
-              isLocked,
-            });
-          } else if (response.labbook.branches) {
-            const isLocked = (environment.containerStatus !== 'NOT_RUNNING');
-            const labbook = response.labbook;
-
-            self.setState({
-              containerStatus: labbook.environment.containerStatus,
-              imageStatus: labbook.environment.imageStatus,
-              isLocked: (labbook.environment.containerStatus !== 'NOT_RUNNING'),
-              collaborators: labbook.collaborators,
-              canManageCollaborators: labbook.canManageCollaborators,
-              visibility: labbook.visibility,
-              defaultRemote: labbook.defaultRemote,
-              branches: labbook.branches,
-            });
-          }
         }
-        // refetches status after a 3 second timeout
         setTimeout(() => {
           let isLabbookUpdate = (count === 20);
           self._fetchStatus(isLabbookUpdate);
           count = isLabbookUpdate ? 0 : (count + 1);
         }, 3 * 1000);
       });
+    } else {
+      LabbookLookupMutation(owner, name, (error, response) => {
+        console.log('IN MUTATION')
+        setTimeout(() => {
+          let isLabbookUpdate = (count === 20);
+          self._fetchStatus(isLabbookUpdate);
+          count = isLabbookUpdate ? 0 : (count + 1);
+        }, 3 * 1000);
+      });
+    }
   }
 
   /**
@@ -248,6 +235,7 @@ class Labbook extends Component {
           isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
 
     if (props.labbook) {
+      console.log(props.labbook)
       const { labbook, branchesOpen } = props;
       const branchName = '';
       const labbookCSS = classNames({
@@ -267,14 +255,14 @@ class Labbook extends Component {
               description={labbook.description}
               toggleBranchesView={this._toggleBranchesView}
               sectionType={'labbook'}
-              containerStatus={state.containerStatus}
-              imageStatus={state.imageStatus}
+              containerStatus={props.labbook.environment.containerStatus}
+              imageStatus={props.labbook.environment.imageStatus}
               isLocked={isLocked}
-              collaborators={state.collaborators}
-              canManageCollaborators={state.canManageCollaborators}
-              visibility={state.visibility}
-              defaultRemote={state.defaultRemote}
-              branches={state.branches}
+              collaborators={props.labbook.collaborators}
+              canManageCollaborators={props.labbook.canManageCollaborators}
+              visibility={props.labbook.visibility}
+              defaultRemote={props.labbook.defaultRemote}
+              branches={props.labbook.branches}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -447,7 +435,7 @@ const LabbookFragmentContainer = createFragmentContainer(
   LabbookContainer,
   {
     labbook: graphql`
-      fragment Labbook_labbook on Labbook{
+      fragment Labbook_labbook on Labbook {
           id
           description
           defaultRemote
@@ -477,11 +465,11 @@ const LabbookFragmentContainer = createFragmentContainer(
            name
            branchName
            isActive
-           isLocal
-           isRemote
-           isMergeable
-           commitsBehind
-           commitsAhead
+           isLocal  @include(if: $includeInitial)
+           isRemote  @include(if: $includeInitial)
+           isMergeable  @include(if: $includeInitial)
+           commitsBehind  @include(if: $includeInitial)
+           commitsAhead  @include(if: $includeInitial)
          }
 
           ...Environment_labbook
@@ -493,7 +481,6 @@ const LabbookFragmentContainer = createFragmentContainer(
 
       }`,
   },
-
 );
 
 /** *
