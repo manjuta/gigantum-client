@@ -7,6 +7,7 @@ import environment from 'JS/createRelayEnvironment';
 // store
 import store from 'JS/redux/store';
 import { setCollaborators, setCanManageCollaborators } from 'JS/redux/reducers/labbook/branchMenu/collaborators/collaborators';
+import { setInfoMessage } from 'JS/redux/reducers/footer';
 // components
 import CollaboratorsModal from './CollaboratorsModal';
 // assets
@@ -187,6 +188,7 @@ class CollaboratorButton extends Component {
               } else if (collaborators !== null) {
                 const collaboratorButtonCSS = classNames({
                   Collaborators__btn: true,
+                  'Btn--flat': true,
                 });
 
                 const collaboratorCSS = classNames({

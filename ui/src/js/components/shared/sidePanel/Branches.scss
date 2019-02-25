@@ -13,7 +13,7 @@
     border: 1px solid $romanSilver;
     padding: 0 10px;
     font-size: 14px;
-    height: 70px;
+    height: 75px;
     @include flex(center, column);
     .Branches__branchname {
         white-space: nowrap;
@@ -230,7 +230,8 @@
 }
 
 .Branches__branchname-container{
-    @include flex(space-between, row)
+    @include flex(space-between, row);
+    align-items: center;
 }
 
 .Branches__status{
@@ -284,8 +285,8 @@
             content: '';
             @include triangle('up', 9px, $white);
             position: absolute;
-            top: -9px;
-            left: 65px;
+            top: -6px;
+            left: 50px;
           }
     }
     &--delete {
@@ -293,8 +294,8 @@
             content: '';
             @include triangle('up', 9px, $white);
             position: absolute;
-            top: -9px;
-            left: 90px;
+            top: -6px;
+            left: 77px;
           }
     }
     font-size: 14px;
@@ -385,5 +386,69 @@
 
     &:last-child {
         border-bottom: 0px solid $white;
+    }
+}
+
+.Branches__commits {
+    @include flex(space-around, row);
+    align-items: center;
+    flex-wrap: nowrap;
+    color: $white;
+    font-weight: 100;
+    font-size: 12px;
+    margin: 0 3px;
+    padding: 2px;
+    background: $azure;
+    border-radius: 10px;
+    height: 20px;
+
+    &--commits-behind {
+        padding: 2px 15px 2px 2px;
+        background: url(~Images/icons/branches/commit-behind.svg) no-repeat right center;
+        background-size: 20px;
+    }
+
+    &--commits-ahead {
+        padding: 2px 15px 2px 2px;
+        background: url(~Images/icons/branches/commit-ahead.svg) no-repeat right center;
+        background-size: 20px;
+    }
+  }
+
+.Branches__scroll{
+    height: 25px;
+    cursor: pointer;
+    &--hidden {
+        display: none;
+    }
+    &--down{
+        border: 1px solid $romanSilver;
+        background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
+        background-size: 20px;
+        &:hover {
+            border: 1px solid $azure;
+            background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+            background-size: 20px;
+        }
+    }
+    &--up{
+        border: 1px solid $romanSilver;
+        background: url(~Images/icons/up-arrow-azure.svg) no-repeat center center;
+        background-size: 20px;
+        &:hover {
+            border: 1px solid $azure;
+            background: $azure url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+            background-size: 20px;
+        }
+    }
+    &--disabled.Branches__scroll--down {
+        pointer-events: none;
+        background: $romanSilver url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+        background-size: 20px;
+    }
+    &--disabled.Branches__scroll--up {
+        pointer-events: none;
+        background: $romanSilver url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+        background-size: 20px;
     }
 }

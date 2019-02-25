@@ -55,7 +55,21 @@ class BranchMenu extends Component {
     syncMenuVisible: false,
     showLoginPrompt: false,
     isDataset: this.props.sectionType !== 'labbook',
+    action: null,
   };
+
+
+  /**
+    @param {object} nextProps
+    @param {object} nextState
+    closes sidepanel if isLocked is passed
+  */
+  static getDerivedStateFromProps(nextProps, nextState) {
+    return {
+      ...nextState,
+      sidePanelVisible: nextProps.isLocked ? false : nextState.sidePanelVisible,
+    };
+  }
 
   componentDidMount() {
     window.addEventListener('click', this._closePopups);
@@ -74,7 +88,22 @@ class BranchMenu extends Component {
    _checkSessionIsValid() {
     return (UserIdentity.getUserIdentity());
   }
-
+  /**
+    @param {}
+    calls reset branch on activebranch
+  */
+  @boundMethod
+  _resetBranch() {
+    const self = this;
+    this._toggleCover('Resetting Branch');
+    this.state.branchMutations.resetBranch((response, error) => {
+      if (error) {
+        console.log(error)
+      }
+      this._toggleCover(null);
+    });
+    this.setState({ popupVisible: false });
+  }
   /**
     @param {Array} branches
     filters array branhces and return the active branch node
@@ -88,7 +117,25 @@ class BranchMenu extends Component {
       this.setState({ [key]: value });
      }
   }
-
+  /**
+    @param {String} action
+    handles labbook cover toggle
+    @return {}
+  */
+  @boundMethod
+  _toggleCover(action) {
+    if (action) {
+      this.setState({ action });
+      if (document.getElementById('labbook__cover')) {
+        document.getElementById('labbook__cover').classList.remove('hidden');
+      }
+    } else {
+      this.setState({ action: false });
+      if (document.getElementById('labbook__cover')) {
+        document.getElementById('labbook__cover').classList.add('hidden');
+      }
+    }
+  }
   /**
     @param {Array} branches
     filters array branhces and return the active branch node
@@ -105,8 +152,10 @@ class BranchMenu extends Component {
         switchingBranch: branch.branchName,
         switchMenuVisible: false,
       });
+      this._toggleCover('Switching Branches');
       state.branchMutations.switchBranch(data, (response, error) => {
         self.setState({ switchingBranch: false });
+        this._toggleCover(null);
       });
   }
   /**
@@ -210,6 +259,17 @@ class BranchMenu extends Component {
   @boundMethod
   _closeLoginPromptModal() {
     this.setState({ showLoginPrompt: false });
+  }
+  /**
+  *  @param {Boolean} blockReset
+  *  toggles reset popup
+  *  @return {}
+  */
+  @boundMethod
+  _toggleResetPopup(blockReset) {
+    if (!blockReset) {
+      this.setState({ popupVisible: !this.state.popupVisible });
+    }
   }
   /**
     @param {Boolean} - allowSync
@@ -389,6 +449,10 @@ class BranchMenu extends Component {
             'BranchMenu__btn BranchMenu__btn--create': true,
             'BranchMenu__btn--create--disabled': props.isLocked || state.isDataset,
             'Tooltip-data Tooltip-data': props.isLocked || smallWidth || state.isDataset,
+          }),
+          popupCSS = classNames({
+            BranchMenu__popup: true,
+            hidden: !this.state.popupVisible,
           });
     return (
       <div className={branchMenuCSS}>
@@ -484,6 +548,8 @@ class BranchMenu extends Component {
                   </div>
                 </div>
           </div>
+          {
+          !this.state.action ?
           <div className="BranchMenu__buttons">
             <button
               onClick={() => this._toggleSidePanel(true)}
@@ -499,14 +565,33 @@ class BranchMenu extends Component {
               onClick={() => this._setModalState('createBranchVisible') }>
               Create
             </button>
-            <button
-              className={resetCSS}
-              type="Submit"
-              data-tooltip={resetTooltip}
-              // onClick={() => this._setModalState('createBranchVisible') }
-              >
-              Reset
-            </button>
+            <div className="BranchMenu__reset-container">
+              <button
+                className={resetCSS}
+                type="Submit"
+                data-tooltip={resetTooltip}
+                onClick={() => this._toggleResetPopup(!allowReset || state.isDataset)}
+                >
+                Reset
+              </button>
+              <div className={popupCSS}>
+                <p>You are about to reset this branch. Resetting a branch will get rid of local changes. Click 'Confirm' to proceed.</p>
+                <div className="flex justify--space-around">
+                  <button
+                    className="Btn--flat"
+                    onClick={(evt) => { this._toggleResetPopup() }}
+                    >
+                      Cancel
+                    </button>
+                  <button
+                    className="BranchMenu__reset-confirm"
+                    onClick={() => this._resetBranch()}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
             <div className="BranchMenu__sync-container">
               <button
                 className={syncCSS}
@@ -543,19 +628,23 @@ class BranchMenu extends Component {
                 <h5 className="BranchMenu__h5">Sync</h5>
                 <ul className="BranchMenu__ul">
                   <li
-                     className="BranchMenu__list-item"
-                     onClick={() => this._handleSyncButton(false, allowSync)}>
-                     Push & Pull
+                    className="BranchMenu__list-item"
+                    onClick={() => this._handleSyncButton(false, allowSync)}>
+                    Push & Pull
                   </li>
                   <li
-                     className="BranchMenu__list-item"
-                     onClick={() => this._handleSyncButton(true, allowSync)}>
+                    className="BranchMenu__list-item"
+                    onClick={() => this._handleSyncButton(true, allowSync)}>
                       Pull-only
                   </li>
                 </ul>
               </div>
+
             </div>
           </div>
+          :
+          <div className="BranchMenu__action">{state.action}</div>
+          }
 
           <CreateBranch
             modalVisible={state.createBranchVisible}
@@ -575,6 +664,8 @@ class BranchMenu extends Component {
             handleSyncButton={this._handleSyncButton}
             allowSync={allowSync}
             syncTooltip={syncTooltip}
+            switchBranch={this._switchBranch}
+            toggleCover={this._toggleCover}
           />
           {
           state.publishModalVisible &&
@@ -589,7 +680,7 @@ class BranchMenu extends Component {
             header="Sync"
             modalStateValue="visibilityModalVisible"
             sectionType={props.sectionType}
-            setPublishingState={props.setPublishingState}
+            setSyncingState={props.setSyncingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
             resetState={this._resetState}
@@ -602,18 +693,17 @@ class BranchMenu extends Component {
           state.publishDatasetsModalVisible &&
 
           <PublishDatasetsModal
-            owner={this.props.section.owner}
-            labbookName={this.props.section.name}
-            labbookId={this.props.sectionId}
-            remoteUrl={this.props.remoteUrl}
-            auth={this.props.auth}
+            owner={props.section.owner}
+            labbookName={props.section.name}
+            labbookId={props.sectionId}
+            remoteUrl={props.remoteUrl}
+            auth={props.auth}
             buttonText="Publish All"
             header={state.publishDatasetsModalAction}
             pullOnly={state.pullOnly}
             modalStateValue="visibilityModalVisible"
-            sectionType={this.props.sectionType}
-            setPublishingState={this.props.setPublishingState}
-            setSyncingState={this.props.setSyncingState}
+            sectionType={props.sectionType}
+            setSyncingState={props.setSyncingState}
             toggleSyncModal={this._toggleSyncModal}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
@@ -629,7 +719,7 @@ class BranchMenu extends Component {
 
           <ForceSync
             toggleSyncModal={this._toggleSyncModal}
-            sectionType={this.props.sectionType}
+            sectionType={props.sectionType}
             pullOnly={state.pullOnly}
           />
         }

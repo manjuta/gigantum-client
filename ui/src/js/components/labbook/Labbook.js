@@ -259,7 +259,7 @@ class Labbook extends Component {
 
       return (
         <div className={labbookCSS}>
-
+        <div id="labbook__cover" className="Labbook__cover hidden"></div>
           <div className="Labbook__spacer flex flex--column">
 
             <Header

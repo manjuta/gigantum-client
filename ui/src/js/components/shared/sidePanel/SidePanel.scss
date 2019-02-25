@@ -11,7 +11,7 @@
 
 .SidePanel {
   position: fixed;
-  z-index: index($elements, modal) - 1;
+  z-index: index($elements, labbookHeader) - 1;
   background-color: $white;
   animation: slide-left-fade-in .25s;
   @include spanColumns(3);

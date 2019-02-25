@@ -192,13 +192,13 @@ $dropBoxWidth: 250px;
         color: $azure;
 
         .BranchMenu__sync-status--commits-behind {
-          background: url(~Images/icons/down-arrow-azure.svg) no-repeat right center;
-          background-size: 12px;
+          background: url(~Images/icons/branches/commit-behind-azure.svg) no-repeat right center;
+          background-size: 20px;
         }
 
         .BranchMenu__sync-status--commits-ahead {
-          background: url(~Images/icons/up-arrow-azure.svg) no-repeat right center;
-          background-size: 12px;
+          background: url(~Images/icons/branches/commit-ahead-azure.svg) no-repeat right center;
+          background-size: 20px;
         }
       }
     }
@@ -292,14 +292,14 @@ $dropBoxWidth: 250px;
 
   .BranchMenu__sync-status--commits-behind {
     padding: 2px 15px 2px 2px;
-    background: url(~Images/icons/down-arrow-white.svg) no-repeat right center;
-    background-size: 12px;
+    background: url(~Images/icons/branches/commit-behind.svg) no-repeat right center;
+    background-size: 20px;
   }
 
   .BranchMenu__sync-status--commits-ahead {
     padding: 2px 15px 2px 2px;
-    background: url(~Images/icons/up-arrow-white.svg) no-repeat right center;
-    background-size: 12px;
+    background: url(~Images/icons/branches/commit-ahead.svg) no-repeat right center;
+    background-size: 20px;
   }
 }
 
@@ -405,5 +405,57 @@ $dropBoxWidth: 250px;
     text-overflow: ellipsis;
     word-break: break-all;
     overflow: hidden;
+  }
+}
+
+.BranchMenu__reset-container {
+  position: relative;
+}
+
+.BranchMenu__popup {
+  &:before {
+    content: '';
+    @include triangle('up', 9px, $white);
+    position: absolute;
+    top: -9px;
+    left: 33px;
+  }
+  background: $white;
+  padding: 10px;
+  font-size: 14px !important;
+  width: 200px;
+  position: absolute;
+  top: 50px;
+  left: -20px;
+  text-align: center;
+  z-index: index($elements, popup);
+}
+
+.Branches__cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: $slateBlue;
+  z-index: 10000;
+}
+
+.BranchMenu__action{
+  margin: 10px;
+  &:after{
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+    -webkit-animation: ellipsis steps(4,end) 900ms infinite;
+    animation: ellipsis steps(4,end) 900ms infinite;
+    content: "\2026";
+    width: 0px;
+  }
+}
+
+@keyframes ellipsis {
+  to {
+    width: 1.25em;
   }
 }
