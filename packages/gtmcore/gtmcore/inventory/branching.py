@@ -158,6 +158,20 @@ class BranchManager(object):
         if target_branch in self.branches_local:
             raise BranchWorkflowViolation(f'Removal of branch `{target_branch}` in {str(self.repository)} failed.')
 
+    def remove_remote_branch(self, target_branch) -> None:
+        # If no remote, do nothing.
+        if not self.repository.has_remote:
+            return
+
+        if target_branch not in self.branches_remote:
+            raise InvalidBranchName(f'Cannot delete `{target_branch}`; does not exist')
+
+        if target_branch == self.active_branch:
+            raise BranchWorkflowViolation(f'Cannot delete current active branch `{target_branch}`')
+
+        logger.info(f'Removing remote branch {target_branch} from {str(self.repository)}')
+        call_subprocess(f'git push origin --delete {target_branch}'.split(), cwd=self.repository.root_dir)
+
     def _workon_branch(self, branch_name: str) -> None:
         """Checkouts a branch as the working revision. """
 
