@@ -93,7 +93,7 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
         delete_local = graphene.Boolean(required=False, default=False)
         delete_remote = graphene.Boolean(required=False, default=False)
 
-    success = graphene.Boolean()
+    labbook = graphene.Field(Labbook)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, delete_local=False,
@@ -107,7 +107,8 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
                 bm.remove_branch(target_branch=branch_name)
             if delete_remote:
                 bm.remove_remote_branch(target_branch=branch_name)
-        return DeleteExperimentalBranch(success=True)
+        return DeleteExperimentalBranch(Labbook(id="{}&{}".format(owner, labbook_name),
+                                                name=labbook_name, owner=owner))
 
 
 class WorkonBranch(graphene.relay.ClientIDMutation):

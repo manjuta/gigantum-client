@@ -28,6 +28,6 @@ if __name__ == '__main__':
     endpoint = endpt_post
     print(owner, lbname)
 
-    resp = run_query(endpoint, 'Migrate Labbook', migrate_query, variables={'owner': owner, 'labbookName': lbname})
+    resp = run_query(endpoint, 'Basic Query Labbook', migrate_query, variables={'owner': owner, 'labbookName': lbname})
     pprint.pprint(resp)
 

@@ -101,7 +101,12 @@ def handle_auth_error(ex):
 @cross_origin(headers=["Content-Type", "Authorization"], max_age=7200)
 def ping():
     """Unauthorized endpoint for validating the API is up"""
-    return jsonify(config.config['build_info'])
+    app_name, built_on, revision = config.config['build_info'].split(' :: ')
+    return jsonify({
+        "application": app_name ,
+        "built_on": built_on,
+        "revision": revision
+    })
 
 
 @app.route(f"{api_prefix}/version/")
@@ -112,7 +117,12 @@ def version():
     Note: /api/version endpoint added due to popup blockers starting to block /api/ping/
 
     """
-    return jsonify(config.config['build_info'])
+    app_name, built_on, revision = config.config['build_info'].split(' :: ')
+    return jsonify({
+        "application": app_name ,
+        "built_on": built_on,
+        "revision": revision
+    })
 
 
 @app.route(f'{api_prefix}/savehook/<username>/<owner>/<labbook_name>')

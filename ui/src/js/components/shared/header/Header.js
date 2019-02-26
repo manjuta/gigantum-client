@@ -220,7 +220,7 @@ class Header extends Component {
                   key="branches">
                   <BranchMenu
                     {...props}
-                    defaultRemote={labbook.defaultRemote}
+                    defaultRemote={section.defaultRemote}
                     branchesOpen={props.branchesOpen}
                     section={section}
                     branches={branches}
