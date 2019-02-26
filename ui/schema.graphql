@@ -642,8 +642,7 @@ input DownloadDatasetFilesInput {
 }
 
 type DownloadDatasetFilesPayload {
-  updatedFileEdges: [DatasetFileEdge]
-  statusMessage: String
+  backgroundJobKey: String
   clientMutationId: String
 }
 
@@ -1009,6 +1008,7 @@ type LabbookOverview implements Node & GitRepository {
 type LabbookQuery {
   """The ID of the object"""
   node(id: ID!): Node
+  nodes(ids: [String]): [Node]
   buildInfo: String
   cudaAvailable: Boolean
   labbook(owner: String, name: String): Labbook
