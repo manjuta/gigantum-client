@@ -145,13 +145,18 @@ class LabbookWorkflow(GitWorkflow):
     @classmethod
     def import_from_remote(cls, remote_url: str, username: str,
                            config_file: str = None) -> 'LabbookWorkflow':
-        """Take a URL of a remote Dataset and manifest it locally on this system. """
-        inv_manager = InventoryManager(config_file=config_file)
-        _, namespace, repo_name = remote_url.rsplit('/', 2)
-        repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
-                                  load_repository=inv_manager.load_labbook_from_directory,
-                                  put_repository=inv_manager.put_labbook)
-        return cls(repo)
+        """Take a URL of a remote Labbook and manifest it locally on this system. """
+
+        try:
+            inv_manager = InventoryManager(config_file=config_file)
+            _, namespace, repo_name = remote_url.rsplit('/', 2)
+            repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
+                                      load_repository=inv_manager.load_labbook_from_directory,
+                                      put_repository=inv_manager.put_labbook)
+            return cls(repo)
+        except Exception as e:
+            logger.error(e)
+            raise
 
     def migrate(self) -> bool:
         """ Migrate the given LabBook to the most recent schema AND branch version.
@@ -164,8 +169,8 @@ class LabbookWorkflow(GitWorkflow):
             logger.info(f"{str(self.labbook)} already migrated.")
             return False
 
-        if not 'gm.workspace-' in BranchManager(self.labbook).active_branch:
-            raise GitWorkflowException('Must be on gm.workspace-<username> branch to migrate')
+        if 'gm.workspace' not in BranchManager(self.labbook).active_branch:
+            raise GitWorkflowException('Must be on a gm.workspace branch to migrate')
 
         im = InventoryManager(self.labbook.client_config.config_file)
         gitworkflows_utils.migrate_labbook_branches(self.labbook)

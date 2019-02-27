@@ -117,8 +117,6 @@ def translate_schema(lb_dict: Dict, root_dir: str) -> Dict:
     else:
         created_on = '1970-01-01T00:00:00.000'
         build_info = 'Gigantum Client Alpha Build (Unknown Date)'
-        logger.warning(f'No buildinfo file for schema 1 project'
-                       f'at {root_dir}')
 
     return {
         'schema': schema_version,

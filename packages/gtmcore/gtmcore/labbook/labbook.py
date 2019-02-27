@@ -165,7 +165,12 @@ class LabBook(Repository):
             # "Virtualize" old schemas into new schemas to support back-compatability
             self._data = translate_schema(d, self.root_dir)
         else:
-            raise GigantumException('Cannot find configuration yaml file')
+            if 'gm.workspace' in self.get_branches()['local']:
+                logger.warning("Master branch empty, attempting to load gm.workspace")
+                self.checkout_branch('gm.workspace')
+                self._load_gigantum_data()
+            else:
+                raise GigantumException('Cannot find configuration yaml file')
 
     def _validate_gigantum_data(self) -> None:
         """Method to validate the LabBook data file contents

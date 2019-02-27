@@ -181,12 +181,16 @@ def sync_branch(repository: Repository, username: str, override: str,
     else:
         pulled_updates_count = bm.get_commits_behind()
         _pull(repository, branch_name, override, feedback_callback)
-        if not pull_only:
+        should_push = not pull_only
+        if should_push:
             # Skip pushing back up if set to pull_only
             push_tokens = f'git push origin {branch_name}'.split()
             if branch_name not in bm.branches_remote:
                 push_tokens.insert(2, "--set-upstream")
             call_subprocess(push_tokens, cwd=repository.root_dir)
+            feedback_callback("Sync complete")
+        else:
+            feedback_callback("Pull complete")
         return pulled_updates_count
 
 

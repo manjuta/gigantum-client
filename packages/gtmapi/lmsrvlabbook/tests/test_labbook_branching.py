@@ -334,7 +334,11 @@ class TestWorkflowsBranching(object):
                 branchName: "{b1}",
                 deleteLocal: true
             }}) {{
-                success
+                labbook {{
+                    branches {{
+                        branchName
+                    }}
+                }}
             }}
         }}
         """
@@ -344,6 +348,7 @@ class TestWorkflowsBranching(object):
         assert 'errors' not in r
         assert bm.active_branch == bm.workspace_branch
         assert lb.is_repo_clean
+        assert b1 not in bm.branches_local
 
     def test_workon_feature_branch_bad_name_fail(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
