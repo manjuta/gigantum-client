@@ -466,6 +466,7 @@ class Labbooks extends Component {
                   loading
                   showModal={this._showModal}
                   section={this.props.section}
+                  history={this.props.history}
                 />
               :
               this.state.selectedSection === 'local' ?

@@ -349,11 +349,12 @@ class Activity extends Component {
   */
   @boundMethod
   _setStickyDate() {
-    let isDemo = window.location.hostname === config.demoHostName,
-      upperBound = isDemo ? 170 : 120,
-      lowerBound = isDemo ? 130 : 80,
-      stickyDate = null,
-      { state } = this;
+    let offsetAmount = window.location.hostname === config.demoHostName ? 50 : 0;
+      offsetAmount = this.props.isDeprecated ? offsetAmount + 70 : offsetAmount;
+    let upperBound = offsetAmount + 120,
+    lowerBound = offsetAmount + 80,
+    stickyDate = null,
+    { state } = this;
 
     this.offsetDistance = window.pageYOffset;
 
@@ -655,6 +656,8 @@ class Activity extends Component {
           newActivityCSS = classNames({
             'Activity__new-record box-shadow': true,
             'is-demo': window.location.hostname === config.demoHostName,
+            'is-deprecated': this.props.isDeprecated,
+            'is-demo-deprecated': window.location.hostname === config.demoHostName && this.props.isDeprecated,
           });
     if (section) {
       const recordDates = Object.keys(state.activityRecords),
@@ -662,6 +665,8 @@ class Activity extends Component {
               'Activity__date-tab': true,
               fixed: state.stickyDate,
               'is-demo': window.location.hostname === config.demoHostName,
+              'is-deprecated': this.props.isDeprecated,
+              'is-demo-deprecated': window.location.hostname === config.demoHostName && this.props.isDeprecated,
             });
 
       return (

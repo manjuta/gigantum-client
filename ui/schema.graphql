@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Feb 25 2019 10:24:00 GMT-0500 (Eastern Standard Time)
+# timestamp: Tue Feb 26 2019 15:53:52 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -493,7 +493,7 @@ type DatasetList implements Node {
 
 """
 A type representing the overview of a Dataset
-
+    
 """
 type DatasetOverview implements Node & GitRepository {
   """The ID of the object."""
@@ -571,12 +571,14 @@ input DeleteExperimentalBranchInput {
   owner: String!
   labbookName: String!
   branchName: String!
+  deleteLocal: Boolean
+  deleteRemote: Boolean
   clientMutationId: String
 }
 
 """Delete a feature/rollback branch. Fails for any other attempt."""
 type DeleteExperimentalBranchPayload {
-  success: Boolean
+  labbook: Labbook
   clientMutationId: String
 }
 
@@ -781,7 +783,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of.
+A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -808,6 +810,7 @@ type Labbook implements Node & GitRepository {
   name: String!
   description: String
   schemaVersion: Int
+  isDeprecated: Boolean
   sizeBytes: String
   activeBranchName: String
   workspaceBranchName: String
@@ -924,6 +927,11 @@ type LabbookList implements Node {
 
 """Entry point for all graphql mutations"""
 type LabbookMutations {
+  migrateLabbookSchema(input: MigrateLabbookSchemaInput!): MigrateLabbookSchemaPayload
+  createExperimentalBranch(input: CreateExperimentalBranchInput!): CreateExperimentalBranchPayload
+  deleteExperimentalBranch(input: DeleteExperimentalBranchInput!): DeleteExperimentalBranchPayload
+  mergeFromBranch(input: MergeFromBranchInput!): MergeFromBranchPayload
+  workonExperimentalBranch(input: WorkonBranchInput!): WorkonBranchPayload
   importLabbook(input: ImportLabbookInput!): ImportLabbookPayload
   importRemoteLabbook(input: ImportRemoteLabbookInput!): ImportRemoteLabbookPayload
   importRemoteDataset(input: ImportRemoteDatasetInput!): ImportRemoteDatasetPayload
@@ -962,10 +970,6 @@ type LabbookMutations {
   addDatasetCollaborator(input: AddDatasetCollaboratorInput!): AddDatasetCollaboratorPayload
   deleteDatasetCollaborator(input: DeleteDatasetCollaboratorInput!): DeleteDatasetCollaboratorPayload
   writeLabbookReadme(input: WriteLabbookReadmeInput!): WriteLabbookReadmePayload
-  createExperimentalBranch(input: CreateExperimentalBranchInput!): CreateExperimentalBranchPayload
-  deleteExperimentalBranch(input: DeleteExperimentalBranchInput!): DeleteExperimentalBranchPayload
-  mergeFromBranch(input: MergeFromBranchInput!): MergeFromBranchPayload
-  workonExperimentalBranch(input: WorkonBranchInput!): WorkonBranchPayload
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
   fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
@@ -1026,7 +1030,7 @@ type LabbookQuery {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-
+    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1076,9 +1080,20 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary.
+Merge from another branch into the current active branch. Force if necessary. 
 """
 type MergeFromBranchPayload {
+  labbook: Labbook
+  clientMutationId: String
+}
+
+input MigrateLabbookSchemaInput {
+  owner: String!
+  labbookName: String!
+  clientMutationId: String
+}
+
+type MigrateLabbookSchemaPayload {
   labbook: Labbook
   clientMutationId: String
 }
@@ -1367,7 +1382,7 @@ input ResetBranchToRemoteInput {
 """
 Undo all local history and then set current branch tip to match remote.
 
-Very useful when changes are made to master that cannot be pushed.
+Very useful when changes are made to master that cannot be pushed. 
 """
 type ResetBranchToRemotePayload {
   labbook: Labbook

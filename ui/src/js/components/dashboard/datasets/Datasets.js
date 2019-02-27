@@ -471,6 +471,7 @@ class Datasets extends Component {
                 showModal={this._showModal}
                 filterDatasets={this._filterDatasets}
                 section={this.props.section}
+                history={this.props.history}
               />
             :
             this.state.selectedSection === 'local' ?

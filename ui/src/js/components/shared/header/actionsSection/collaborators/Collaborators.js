@@ -7,6 +7,7 @@ import environment from 'JS/createRelayEnvironment';
 // store
 import store from 'JS/redux/store';
 import { setCollaborators, setCanManageCollaborators } from 'JS/redux/reducers/labbook/branchMenu/collaborators/collaborators';
+import { setInfoMessage } from 'JS/redux/reducers/footer';
 // components
 import CollaboratorsModal from './CollaboratorsModal';
 // assets
@@ -63,11 +64,6 @@ class CollaboratorButton extends Component {
       });
     }
     return nextState;
-  }
-
-  componentDidMount() {
-    this.props.setCollaborators({ [this.props.labbookName]: this.collaborators });
-    this.props.setCanManageCollaborators({ [this.props.labbookName]: this.canManageCollaborators });
   }
 
   _toggleCollaborators() {
@@ -145,7 +141,8 @@ class CollaboratorButton extends Component {
                 section = sectionType === 'dataset' ? props.dataset : props.labbook;
                 this.canManageCollaborators = section.canManageCollaborators;
                 this.collaborators = section.collaborators;
-
+                this.props.setCollaborators({ [this.props.labbookName]: this.collaborators });
+                this.props.setCanManageCollaborators({ [this.props.labbookName]: this.canManageCollaborators });
                 const collaboratorButtonCSS = classNames({
                     'Collaborators__btn Btn--flat Btn--no-underline': true,
                   }),
@@ -187,13 +184,14 @@ class CollaboratorButton extends Component {
               } else if (collaborators !== null) {
                 const collaboratorButtonCSS = classNames({
                   Collaborators__btn: true,
+                  'Btn--flat': true,
                 });
 
                 const collaboratorCSS = classNames({
                   Collaborators: true,
                 });
 
-                const collaboratorFilteredArr = collaborators && collaborators.filter(({ collaboratorUsername }) => collaboratorUsername !== owner);
+                const collaboratorFilteredArr = collaborators && collaborators.filter(({ collaboratorUsername }) => collaboratorUsername !== owner).map(({ collaboratorUsername }) => collaboratorUsername);
 
                 const collaboratorNames = self._getCollaboratorList(collaborators, collaboratorFilteredArr);
 

@@ -80,10 +80,6 @@ class ActionsMenu extends Component {
   */
   componentDidMount() {
     window.addEventListener('click', this._closeMenu);
-    const username = localStorage.getItem('username');
-    if ((this.props.owner === username) && this.props.defaultRemote && !this.state.canManageCollaborators) {
-      setInfoMessage(`${username} needs to log out and then log back in to validate for remote operations`);
-    }
   }
   /**
    * detach window listener evetns here

@@ -35,6 +35,12 @@
   &--demo-mode{
     margin-top: 70px;
   }
+  &--deprecated{
+    margin-top: 70px;
+  }
+  &--demo-deprecated{
+    margin-top: 120px;
+  }
 }
 
 .Labbook__spacer {
@@ -70,4 +76,66 @@
   .Labbook__spacer{
     margin: 20px 35px;
   }
+}
+
+.Labbook__cover{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  margin-top: -10px;
+  background: $slateBlueOpaque;
+  z-index: index($elements, modalCover);
+}
+
+.Labbook__deprecated{
+  position: fixed;
+  color: $white;
+  height: 50px;
+  width: 100%;
+  padding: 13px 0 13px 40px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 100;
+  background: $orange no-repeat center center;
+  white-space: nowrap;
+  top: 10px;
+  left: 140px;
+  text-align: left;
+  background-size: cover;
+  z-index: index($elements, loader);
+  border-top: 1px solid $white;
+  a,
+  a:visited{
+    margin-left: 10px;
+    text-decoration: underline;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+  }
+  &--demo {
+    top: 60px;
+  }
+}
+
+.Labbook__deprecated-action{
+  background: transparent;
+  border: 2px solid $white;
+  margin-left: 25px;
+  &:hover, &:focus {
+    background: $white;
+    color: $orange;
+    border: 2px solid $orange;
+  }
+}
+
+.Labbook__migration-modal{
+  margin-top: 40px;
+  a {
+    margin-left: 5px;
+  }
+}
+
+.Labbook__migration-buttons {
+  align-self: center;
+  margin-top: 100px;
 }

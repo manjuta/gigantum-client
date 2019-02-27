@@ -42,6 +42,12 @@
   &.is-demo{
     top: 200px;
   }
+  &.is-deprecated{
+    top: 200px;
+  }
+  &.is-demo-deprecated{
+    top: 260px;
+  }
 
   &:hover{
     color: $turquise;
@@ -108,11 +114,24 @@
   }
 
   &.is-demo{
-    top: 100px;
+    top: 138px;
+  }
+  &.is-deprecated{
+    top: 157px;
+  }
+
+  &.is-demo-deprecated{
+    top: 207px;
   }
 
   &.is-expanded.is-demo{
     top: 140px;
+  }
+  &.is-expanded.is-deprecated{
+    top: 140px;
+  }
+  &.is-expanded.is-demo-deprecated{
+    top: 190px;
   }
 
 }

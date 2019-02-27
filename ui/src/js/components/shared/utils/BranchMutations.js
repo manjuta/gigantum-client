@@ -278,6 +278,8 @@ class BranchesMutations {
         const {
           branchName,
           labbookId,
+          deleteLocal,
+          deleteRemote,
         } = data;
       const { owner, name } = this.state;
 
@@ -286,6 +288,8 @@ class BranchesMutations {
         name,
         branchName,
         labbookId,
+        deleteLocal,
+        deleteRemote,
         callback,
       );
       }

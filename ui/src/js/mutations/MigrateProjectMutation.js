@@ -2,12 +2,13 @@ import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import uuidV4 from 'uuid/v4';
 import environment from 'JS/createRelayEnvironment';
+// store
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 
 const mutation = graphql`
-  mutation DeleteExperimentalBranchMutation($input: DeleteExperimentalBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
-    deleteExperimentalBranch(input: $input){
+  mutation MigrateProjectMutation($input: MigrateLabbookSchemaInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
+    migrateLabbookSchema(input: $input){
       labbook{
         ...Labbook_labbook
       }
@@ -16,24 +17,18 @@ const mutation = graphql`
   }
 `;
 
-export default function DeleteExperimentalBranchMutation(
+let tempID = 0;
+
+export default function MigrateProjectMutation(
   owner,
   labbookName,
-  branchName,
-  labbookId,
-  deleteLocal,
-  deleteRemote,
   callback,
 ) {
-  const clientMutationId = uuidV4();
   const variables = {
     input: {
       owner,
       labbookName,
-      branchName,
-      clientMutationId,
-      deleteLocal,
-      deleteRemote,
+      clientMutationId: tempID++,
     },
     first: 10,
     cursor: null,
@@ -47,15 +42,11 @@ export default function DeleteExperimentalBranchMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
+          setErrorMessage('ERROR: Could not migrate project', error);
         }
-
         callback(response, error);
       },
-      onError: (err) => { console.error(err); },
-      optimisticUpdater(store) {
-      },
-      updater: (store, response) => {
-      },
+      onError: err => console.error(err),
     },
   );
 }

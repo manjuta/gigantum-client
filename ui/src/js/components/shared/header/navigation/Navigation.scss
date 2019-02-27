@@ -31,7 +31,8 @@
   }
 
   a:hover {
-    color: $selected-blue;
+    background: $azure;
+    color: $white;
   }
 
   &--selected a {

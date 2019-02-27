@@ -233,9 +233,9 @@ class Header extends Component {
                     sectionType={props.sectionType}
                     auth={props.auth}
                     setSyncingState={this._setSyncingState}
-                    setPublishingState={this._setPublishingState}
                     setExportingState={this._setExportingState}
                     isLocked={props.isLocked}
+                    setBranchUptodate={props.setBranchUptodate}
                   />
                 </ErrorBoundary>
 
@@ -250,7 +250,6 @@ class Header extends Component {
                   labbookId={id}
                   remoteUrl={defaultRemote}
                   setSyncingState={this._setSyncingState}
-                  setPublishingState={this._setPublishingState}
                   setExportingState={this._setExportingState}
                   branchName={branchName}
                   isSticky={props.isSticky}

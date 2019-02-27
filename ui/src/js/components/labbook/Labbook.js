@@ -1,6 +1,7 @@
 // vendor
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import shallowCompare from 'react-addons-shallow-compare';
 import {
   createFragmentContainer,
   graphql,
@@ -10,15 +11,16 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import Loadable from 'react-loadable';
+import { boundMethod } from 'autobind-decorator';
 // store
 import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
 import { setMergeMode, setBuildingState, setStickyDate } from 'JS/redux/reducers/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
 import { setLatestPackages } from 'JS/redux/reducers/labbook/environment/packageDependencies';
+import { setInfoMessage } from 'JS/redux/reducers/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
-import FetchContainerStatus from './fetchContainerStatus';
 // config
 import Config from 'JS/config';
 // components
@@ -26,7 +28,12 @@ import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import Header from '../shared/header/Header';
+import Modal from 'Components/common/Modal';
 // import Activity from './activity/LabbookActivityContainer';
+// mutations
+import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMutation';
+import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
+import MigrateProjectMutation from 'Mutations/MigrateProjectMutation';
 // assets
 import './Labbook.scss';
 
@@ -82,21 +89,44 @@ class Labbook extends Component {
     visibility: this.props.labbook.visibility,
     defaultRemote: this.props.labbook.defaultRemote,
     branches: this.props.labbook.branches,
+    deletedBranches: [],
+    migrationInProgress: false,
+    migrateCompleteModalVisible: false,
   }
 
   static getDerivedStateFromProps(nextProps, state) {
+    setCallbackRoute(nextProps.location.pathname);
+    const propBranches = nextProps.labbook.branches;
+    const stateBranches = state.branches;
+    const branchMap = new Map();
+    const mergedBranches = [];
+    const newDeletedBranches = state.deletedBranches.slice();
+
+    propBranches.forEach((branch) => {
+      if (newDeletedBranches.indexOf(branch.id) === -1) {
+        branchMap.set(branch.id, branch);
+      }
+    });
+    stateBranches.forEach((branch) => {
+      if (branchMap.has(branch.id)) {
+        const itemReference = branchMap.get(branch.id);
+        const newItem = Object.assign({}, branch, itemReference);
+        branchMap.set(branch.id, newItem);
+      } else {
+        newDeletedBranches.push(branch.id);
+      }
+    });
+    branchMap.forEach((branch) => {
+      mergedBranches.push(branch);
+    });
+
     return {
       ...state,
-      collaborators: nextProps.labbook.collaborators,
+      deletedBranches: newDeletedBranches,
+      branches: mergedBranches,
       canManageCollaborators: nextProps.labbook.canManageCollaborators,
-      visibility: nextProps.labbook.visibility,
-      defaultRemote: nextProps.labbook.defaultRemote,
-      branches: nextProps.labbook.branches,
-    }
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    setCallbackRoute(nextProps.location.pathname);
+      collaborators: nextProps.labbook.collaborators,
+    };
   }
 
   /**
@@ -107,24 +137,27 @@ class Labbook extends Component {
   componentDidMount() {
     const { props, state } = this,
           { name, owner } = props.labbook;
-
+    this.mounted = true;
     document.title = `${owner}/${name}`;
-
     props.auth.isAuthenticated().then((response) => {
       let isAuthenticated = response;
       if (isAuthenticated === null) {
         isAuthenticated = false;
       }
-      if (isAuthenticated !== state.authenticated) {
+      if ((isAuthenticated !== state.authenticated) && this.mounted) {
         this.setState({ authenticated: isAuthenticated });
       }
     });
     this._setStickHeader();
-    this._fetchStatus(false);
+    this._fetchStatus(true);
 
     window.addEventListener('scroll', this._setStickHeader);
     window.addEventListener('click', this._branchViewClickedOff);
   }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return shallowCompare(this, nextProps, nextState);
+  // }
 
   /**
     @param {}
@@ -132,7 +165,7 @@ class Labbook extends Component {
   */
   componentWillUnmount() {
     setLatestPackages({});
-
+    this.mounted = false;
     window.removeEventListener('scroll', this._setStickHeader);
 
     window.removeEventListener('click', this._branchViewClickedOff);
@@ -149,45 +182,39 @@ class Labbook extends Component {
           { owner, name } = props.labbook,
           self = this,
           { isBuilding } = props;
-
-      FetchContainerStatus.getContainerStatus(owner, name, isLabbookUpdate).then((response, error) => {
-        if (response && response.labbook) {
-          const { environment } = response.labbook;
-          // reset build flags
-          if ((environment.imageStatus !== 'BUILD_IN_PROGRESS') && isBuilding) {
-            setBuildingState(false);
+    if (this.mounted) {
+      if (!isLabbookUpdate) {
+        LabbookContainerStatusMutation(owner, name, (error, response) => {
+          if (response && response.fetchLabbookEdge && response.fetchLabbookEdge.newLabbookEdge) {
+            const { environment } = response.fetchLabbookEdge.newLabbookEdge.node;
+            if ((environment.imageStatus !== 'BUILD_IN_PROGRESS') && isBuilding) {
+              setBuildingState(false);
+            }
           }
-          // only updates state if container or imageStatus has changed
-          if ((response.labbook.branches === undefined) && ((state.containerStatus !== environment.containerStatus) || (state.imageStatus !== environment.imageStatus))) {
-            const isLocked = (environment.containerStatus !== 'NOT_RUNNING');
+          setTimeout(() => {
+            let isLabbookUpdate = (count === 20);
+            self._fetchStatus(isLabbookUpdate);
+            count = isLabbookUpdate ? 0 : (count + 1);
+          }, 3 * 1000);
+        });
+      } else {
+        LabbookLookupMutation(owner, name, (error, response) => {
+          if (response && response.fetchLabbookEdge && response.fetchLabbookEdge.newLabbookEdge) {
+            const { branches, collaborators, canManageCollaborators } = response.fetchLabbookEdge.newLabbookEdge.node;
             self.setState({
-              imageStatus: environment.imageStatus,
-              containerStatus: environment.containerStatus,
-              isLocked,
-            });
-          } else if (response.labbook.branches) {
-            const isLocked = (environment.containerStatus !== 'NOT_RUNNING');
-            const labbook = response.labbook;
-
-            self.setState({
-              containerStatus: labbook.environment.containerStatus,
-              imageStatus: labbook.environment.imageStatus,
-              isLocked: (labbook.environment.containerStatus !== 'NOT_RUNNING'),
-              collaborators: labbook.collaborators,
-              canManageCollaborators: labbook.canManageCollaborators,
-              visibility: labbook.visibility,
-              defaultRemote: labbook.defaultRemote,
-              branches: labbook.branches,
+              branches,
+              collaborators,
+              canManageCollaborators,
             });
           }
-        }
-        // refetches status after a 3 second timeout
-        setTimeout(() => {
-          let isLabbookUpdate = (count === 20);
-          self._fetchStatus(isLabbookUpdate);
-          count = isLabbookUpdate ? 0 : (count + 1);
-        }, 3 * 1000);
-      });
+          setTimeout(() => {
+            let isLabbookUpdate = (count === 20);
+            self._fetchStatus(isLabbookUpdate);
+            count = isLabbookUpdate ? 0 : (count + 1);
+          }, 3 * 1000);
+        });
+      }
+    }
   }
 
   /**
@@ -199,6 +226,43 @@ class Labbook extends Component {
     if (evt.target.className.indexOf('Labbook__veil') > -1) {
       this._toggleBranchesView(false, false);
     }
+  }
+
+  /**
+    sets branch uptodate in state
+  */
+  @boundMethod
+  _setBranchUptodate() {
+    const { branches } = this.state;
+    const activePosition = branches.map(branch => branch.isActive).indexOf(true);
+    const branchesClone = branches.slice();
+    branchesClone[activePosition].commitsBehind = 0;
+    branchesClone[activePosition].commitsAhead = 0;
+    this.setState({ branches: branchesClone });
+  }
+
+  /**
+    migrates project
+  */
+  @boundMethod
+  _migrateProject() {
+    const { owner, name } = this.props.labbook;
+    this.setState({ migrationInProgress: true });
+    if (document.getElementById('labbook__cover')) {
+      document.getElementById('labbook__cover').classList.remove('hidden');
+    }
+    MigrateProjectMutation(owner, name, (response, error) => {
+      this.setState({ migrationInProgress: false });
+      if (document.getElementById('labbook__cover')) {
+        document.getElementById('labbook__cover').classList.add('hidden');
+      }
+      if (error) {
+        console.log(error)
+      } else {
+        this._toggleMigrationModal();
+        setInfoMessage('Project migrated successfully');
+      }
+    });
   }
 
   /**
@@ -222,12 +286,21 @@ class Labbook extends Component {
     @param {boolean, boolean}
     updates branchOpen state
   */
+  @boundMethod
   _toggleBranchesView(branchesOpen, mergeFilter) {
     if (store.getState().containerStatus.status !== 'Running') {
       setMergeMode(branchesOpen, mergeFilter);
     } else {
       setContainerMenuWarningMessage('Stop Project before switching branches. \n Be sure to save your changes.');
     }
+  }
+
+  /**
+    @param {}
+    updates branchOpen state
+  */
+  _toggleMigrationModal() {
+    this.setState({ migrateCompleteModalVisible: !this.state.migrateCompleteModalVisible });
   }
 
   /**
@@ -248,33 +321,114 @@ class Labbook extends Component {
           isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
 
     if (props.labbook) {
+
       const { labbook, branchesOpen } = props;
       const branchName = '';
+      const isDemo = window.location.hostname === Config.demoHostName;
       const labbookCSS = classNames({
         Labbook: true,
         'Labbook--detail-mode': props.detailMode,
         'Labbook--branch-mode': branchesOpen,
-        'Labbook--demo-mode': window.location.hostname === Config.demoHostName,
+        'Labbook--demo-mode': isDemo,
+        'Labbook--deprecated': labbook.isDeprecated,
+        'Labbook--demo-deprecated': labbook.isDeprecated && isDemo,
       });
+      const deprecatedCSS = classNames({
+        Labbook__deprecated: true,
+        'Labbook__deprecated--demo': isDemo,
+      });
+      const isOwner = localStorage.getItem('username') === labbook.owner;
+      const deprecatedText = `This Project needs to be migrated to the latest Project format. ${isOwner ? '' : 'The project owner must migrate and sync this project to update. '}`;
 
       return (
         <div className={labbookCSS}>
-
+        <div id="labbook__cover" className="Labbook__cover hidden"></div>
           <div className="Labbook__spacer flex flex--column">
+            {
+              labbook.isDeprecated &&
+              <div
+                className={deprecatedCSS}
+              >
+                {deprecatedText}
+                <a
+                  target="_blank"
+                  href="https://docs.gigantum.com/"
+                  rel="noopener noreferrer"
+                >
+                  Learn More.
+                </a>
+                {
+                  isOwner &&
+                  <button
+                    className="Labbook__deprecated-action"
+                    onClick={() => this._migrateProject()}
+                    disabled={state.migrationInProgress}
+                  >
+                    Migrate
+                  </button>
+                }
+              </div>
+            }
+            {
+              this.state.migrateCompleteModalVisible
+              &&
+              <Modal
+                header="Migration Complete"
+                handleClose={() => this._toggleMigrationModal()}
+                size="medium"
+                renderContent={() => <Fragment>
+                <div className="Labbook__migration-modal">
+                  {labbook.defaultRemote ?
+                  <Fragment>
+                    You should now click
+                    <b>{' sync '}</b>
+                    to push the new
+                    <b>{' master '}</b>
+                    branch to the cloud. This is the new primary branch to work from.
+                  </Fragment>
+                  :
+                  <Fragment>
+                    Your work has been migrated to the
+                    <b>{' master '}</b>
+                    branch. This is the new primary branch to work from.
+                  </Fragment>
+                  }
+                  <a
+                    target="_blank"
+                    href="https://docs.gigantum.com/"
+                    rel="noopener noreferrer"
+                  >
+                    Learn More here.
+                  </a>
+                </div>
+                <div className="Labbook__migration-buttons">
+                  <button
+                    onClick={() => this._toggleMigrationModal()}
+                  >
+                    Dismiss
+                  </button>
+                </div>
+                </Fragment>
+                }
+              >
 
+              </Modal>
+            }
             <Header
               {...props}
               description={labbook.description}
               toggleBranchesView={this._toggleBranchesView}
               sectionType={'labbook'}
-              containerStatus={state.containerStatus}
-              imageStatus={state.imageStatus}
+              containerStatus={labbook.environment.containerStatus}
+              imageStatus={labbook.environment.imageStatus}
               isLocked={isLocked}
               collaborators={state.collaborators}
               canManageCollaborators={state.canManageCollaborators}
-              visibility={state.visibility}
-              defaultRemote={state.defaultRemote}
+              visibility={labbook.visibility}
+              defaultRemote={labbook.defaultRemote}
               branches={state.branches}
+              setBranchUptodate={this._setBranchUptodate}
+              isDeprecated={labbook.isDeprecated}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -342,6 +496,7 @@ class Labbook extends Component {
                                isMainWorkspace={branchName === 'master'}
                                sectionType={'labbook'}
                                isLocked={isLocked}
+                               isDeprecated={labbook.isDeprecated}
                                {...props}
                              />
                         </ErrorBoundary>
@@ -447,7 +602,7 @@ const LabbookFragmentContainer = createFragmentContainer(
   LabbookContainer,
   {
     labbook: graphql`
-      fragment Labbook_labbook on Labbook{
+      fragment Labbook_labbook on Labbook {
           id
           description
           defaultRemote
@@ -455,6 +610,7 @@ const LabbookFragmentContainer = createFragmentContainer(
           name
           creationDateUtc
           visibility
+          isDeprecated
 
           environment{
             containerStatus
@@ -473,15 +629,13 @@ const LabbookFragmentContainer = createFragmentContainer(
           }
 
          branches {
+           id
            owner
            name
            branchName
            isActive
            isLocal
            isRemote
-           isMergeable
-           commitsBehind
-           commitsAhead
          }
 
           ...Environment_labbook
@@ -493,7 +647,6 @@ const LabbookFragmentContainer = createFragmentContainer(
 
       }`,
   },
-
 );
 
 /** *

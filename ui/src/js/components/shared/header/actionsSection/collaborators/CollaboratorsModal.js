@@ -67,17 +67,16 @@ export default class CollaboratorsModal extends Component {
 
   /**
     *  @param {String} permission
+    *  @param {String} CollaboratorName
     *  gets permissions value and displays it to the UI more clearly
   */
-  _getPermissions(permission) {
+  _getPermissions(permission, collaboratorName) {
     if ((permission === 'readonly') || (permission === 'READ_ONLY')) {
       return 'Read';
     } else if ((permission === 'readwrite') || (permission === 'READ_WRITE')) {
       return 'Write';
     } else if ((permission === 'owner') || (permission === 'OWNER')) {
-      return 'Owner';
-    } else if ((permission === 'admin') || (permission === 'ADMIN')) {
-      return 'Admin';
+      return collaboratorName === this.state.owner ? 'Owner' : 'Admin';
     }
     return 'Select';
   }
@@ -131,13 +130,14 @@ export default class CollaboratorsModal extends Component {
   *  @return {}
   */
   _togglePermissionsMenu(userExpanded) {
-    if (userExpanded) {
-      if (userExpanded !== localStorage.getItem('username')) {
-      this.setState({ userExpanded: this.state.userExpanded === userExpanded ? null : userExpanded });
-
+    if (this.props.canManageCollaborators) {
+      if (userExpanded) {
+        if (userExpanded !== localStorage.getItem('username')) {
+        this.setState({ userExpanded: this.state.userExpanded === userExpanded ? null : userExpanded });
+        }
+      } else {
+        this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen });
       }
-    } else {
-      this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen });
     }
   }
 
@@ -446,25 +446,18 @@ export default class CollaboratorsModal extends Component {
                   {this._getPermissions(this.state.newPermissions)}
                 </span>
                 <ul className={permissionsMenuCSS}>
-                  <li
-                    onClick={() => this._setPermission('readonly')}
-                  >
+                  <li onClick={() => this._setPermission('readonly')}>
                     <div className="CollaboratorsModal__permissions-header">Read</div>
                     <div className="CollaboratorsModal__permissions-subtext">Assigns read only permissions</div>
                   </li>
-                  <li
-                    onClick={() => this._setPermission('readwrite')}
-                  >
+                  <li onClick={() => this._setPermission('readwrite')}>
                     <div className="CollaboratorsModal__permissions-header">Write</div>
                     <div className="CollaboratorsModal__permissions-subtext">Assigns read and write permissions</div>
                   </li>
-                  {/* Admin disabled currently */}
-                  {/* <li
-                    onClick={() => this._setPermission('admin')}
-                  >
+                  <li onClick={() => this._setPermission('owner')}>
                     <div className="CollaboratorsModal__permissions-header">Admin</div>
                     <div className="CollaboratorsModal__permissions-subtext">Assigns elevated permissions to user</div>
-                  </li> */}
+                  </li>
                 </ul>
               </div>
               <ButtonLoader
@@ -515,7 +508,7 @@ export default class CollaboratorsModal extends Component {
                           CollaboratorModal__PermissionsSelector: true,
                           'CollaboratorModal__PermissionsSelector--individual': true,
                           'CollaboratorModal__PermissionsSelector--open': this.state.userExpanded === collaboratorName,
-                          'CollaboratorModal__PermissionsSelector--disabled': collaboratorName === localStorage.getItem('username'),
+                          'CollaboratorModal__PermissionsSelector--disabled': collaboratorName === localStorage.getItem('username') || !this.props.canManageCollaborators,
                           'CollaboratorModal__PermissionsSelector--collapsed': this.state.userExpanded !== collaboratorName,
                         }),
                         individualPermissionsMenuCSS = classNames({
@@ -531,34 +524,27 @@ export default class CollaboratorsModal extends Component {
                           className={collaboratorItemCSS}
                         >
 
-                          <div>{collaboratorName}</div>
+                          <div className="CollaboratorsModal__collaboratorName">{collaboratorName}</div>
                           <div className="CollaboratorsModal__permissions CollaboratorsModal__permissions--individual">
                             <span
                               className={individualPermissionsSelectorCSS}
                               onClick={() => this._togglePermissionsMenu(collaboratorName)}
                             >
-                              {this._getPermissions(collaborator.permission)}
+                              {this._getPermissions(collaborator.permission, collaboratorName)}
                             </span>
                             <ul className={individualPermissionsMenuCSS}>
-                              <li
-                                onClick={() => this._addCollaborator('readonly', collaboratorName)}
-                              >
+                              <li onClick={() => this._addCollaborator('readonly', collaboratorName)}>
                                 <div className="CollaboratorsModal__permissions-header">Read</div>
                                 <div className="CollaboratorsModal__permissions-subtext">Assigns read only permissions</div>
                               </li>
-                              <li
-                                onClick={() => this._addCollaborator('readwrite', collaboratorName)}
-                              >
+                              <li onClick={() => this._addCollaborator('readwrite', collaboratorName)}>
                                 <div className="CollaboratorsModal__permissions-header">Write</div>
                                 <div className="CollaboratorsModal__permissions-subtext">Assigns read and write permissions</div>
                               </li>
-                              {/* Admin disabled currently */}
-                              {/* <li
-                                onClick={() => this._addCollaborator('owner', collaboratorName)}
-                              >
+                              <li onClick={() => this._addCollaborator('owner', collaboratorName)}>
                                 <div className="CollaboratorsModal__permissions-header">Admin</div>
                                 <div className="CollaboratorsModal__permissions-subtext">Assigns elevated permissions to user</div>
-                              </li> */}
+                              </li>
                             </ul>
                           </div>
 
@@ -568,7 +554,7 @@ export default class CollaboratorsModal extends Component {
                             buttonText=""
                             className="CollaboratorsModal__btn"
                             params={{ collaborator: collaboratorName, button: this }}
-                            buttonDisabled={collaboratorName === localStorage.getItem('username')}
+                            buttonDisabled={collaboratorName === localStorage.getItem('username') || !this.props.canManageCollaborators}
                             clicked={this._removeCollaborator}
                           />
 

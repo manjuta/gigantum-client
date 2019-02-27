@@ -1,14 +1,23 @@
 @import '~Styles/_imports.scss';
 
+@media screen and (max-width: 50000px) and (min-width: 1480px){
+  .SidePanel {
+    top: 202px !important;
+    &--sticky{
+      top: 110px !important;
+    }
+  }
+}
+
 .SidePanel {
   position: fixed;
-  z-index: index($elements, modal) - 1;
+  z-index: index($elements, labbookHeader) - 1;
   background-color: $white;
   animation: slide-left-fade-in .25s;
   @include spanColumns(3);
   margin: 0;
   right: 0px;
-  top: 187px;
+  top: 191px;
   bottom: 0px;
   @include boxShadow();
 
@@ -17,6 +26,8 @@
     top: 110px;
   }
 }
+
+
 
 .SidePanel__btn {
   &--close {

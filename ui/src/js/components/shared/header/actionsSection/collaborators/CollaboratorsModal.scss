@@ -293,3 +293,10 @@
   font-size: 14px;
   text-align: center;
 }
+
+.CollaboratorsModal__collaboratorName{
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  overflow: hidden;
+}

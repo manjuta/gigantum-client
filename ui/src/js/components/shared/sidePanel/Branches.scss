@@ -13,7 +13,7 @@
     border: 1px solid $romanSilver;
     padding: 0 10px;
     font-size: 14px;
-    height: 70px;
+    height: 75px;
     @include flex(center, column);
     .Branches__branchname {
         white-space: nowrap;
@@ -84,8 +84,8 @@
     margin-right: 5px;
     background: $background-color;
     border-radius: 4px;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     position: relative;
 
@@ -101,152 +101,152 @@
           border: 1px solid $azure;
           margin-left: -4px;
         }
-
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-          background: $background-color url(~Images/icons/branches/chevron-disabled.svg) no-repeat center center;
-          background-size: 20px !important;
-          border: 1px solid $romanSilver;
-          color: $romanSilver;
-          cursor: auto;
-        }
     }
 
 
     &--create {
         background: $white url('~Images/icons/branches/create.svg') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
         border: 1px solid $azure;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/create-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
-        }
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-            background: $background-color url('~Images/icons/branches/create-disabled.svg') no-repeat center center !important;
-            background-size: 22px !important;
-            border: 1px solid $romanSilver !important;
-            cursor: auto !important;
         }
     }
     &--reset {
         background: $white url('~Images/icons/branches/reset.svg') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/reset-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
-        }
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-            background: $background-color url('~Images/icons/branches/reset-disabled.svg') no-repeat center center !important;
-            background-size: 22px !important;
-            border: 1px solid $romanSilver !important;
-            cursor: auto !important;
         }
     }
     &--switch {
         background: $white url('~Images/icons/branches/switch.svg') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/switch-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
-        }
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-            background: $background-color url('~Images/icons/branches/switch-disabled.svg') no-repeat center center !important;
-            background-size: 22x !important;
-            border: 1px solid $romanSilver !important;
-            cursor: auto !important;
         }
     }
     &--merge {
         background: $white url('~Images/icons/branches/merge.svg') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
         }
         &--selected {
             background: $azure url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
-        }
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-            background: $background-color url('~Images/icons/branches/merge-disabled.svg') no-repeat center center !important;
-            background-size: 22px !important;
-            border: 1px solid $romanSilver !important;
-            cursor: auto !important;
         }
     }
     &--delete {
         background: $white url('~Images/icons/branches/delete.svg') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
         }
         &--selected {
             background: $azure url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
-        }
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-            background: $background-color url('~Images/icons/branches/delete-disabled.svg') no-repeat center center !important;
-            background-size: 22px !important;
-            border: 1px solid $romanSilver !important;
-            cursor: auto !important;
         }
     }
     &--sync {
         background: $white url('~Images/icons/branches/sync.svg') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
         &:hover, &:focus {
             background: $azure url('~Images/icons/branches/sync-hover.svg') no-repeat center center;
-            background-size: 22px;
+            background-size: cover;
             border: 1px solid $azure;
         }
-        &--disabled,
-        &--disabled:hover,
-        &--disabled:focus {
-            background: $background-color url('~Images/icons/branches/sync-disabled.svg') no-repeat center center !important;
-            background-size: 22px !important;
-            border: 1px solid $romanSilver !important;
-            cursor: auto !important;
-        }
+    }
+    &--sync-drowndown--disabled,
+    &--sync-drowndown--disabled:hover,
+    &--sync-drowndown--disabled:focus {
+        background: $background-color url(~Images/icons/branches/chevron-disabled.svg) no-repeat center center;
+        background-size: 20px !important;
+        border: 1px solid $romanSilver;
+        color: $romanSilver;
+        cursor: auto;
+    }
+    &--create--disabled,
+    &--create--disabled:hover,
+    &--create--disabled:focus {
+        background: $background-color url('~Images/icons/branches/create-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--reset--disabled,
+    &--reset--disabled:hover,
+    &--reset--disabled:focus {
+        background: $background-color url('~Images/icons/branches/reset-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--switch--disabled,
+    &--switch--disabled:hover,
+    &--switch--disabled:focus {
+        background: $background-color url('~Images/icons/branches/switch-disabled.svg') no-repeat center center !important;
+        background-size: 22x !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--merge--disabled,
+    &--merge--disabled:hover,
+    &--merge--disabled:focus {
+        background: $background-color url('~Images/icons/branches/merge-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--delete--disabled,
+    &--delete--disabled:hover,
+    &--delete--disabled:focus {
+        background: $background-color url('~Images/icons/branches/delete-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--sync--disabled,
+    &--sync--disabled:hover,
+    &--sync--disabled:focus {
+        background: $background-color url('~Images/icons/branches/sync-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
     }
 }
 
 .Branches__branchname-container{
-    @include flex(space-between, row)
+    @include flex(space-between, row);
+    align-items: center;
 }
 
 .Branches__status{
     @include flex(flex-start, row);
     cursor: auto;
     &--local {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         background: url('~Images/icons/branches/local.png') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
     }
     &--remote {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         background: url('~Images/icons/branches/remote.png') no-repeat center center;
-        background-size: 22px;
+        background-size: cover;
     }
 }
 
@@ -284,8 +284,8 @@
             content: '';
             @include triangle('up', 9px, $white);
             position: absolute;
-            top: -9px;
-            left: 65px;
+            top: -6px;
+            left: 50px;
           }
     }
     &--delete {
@@ -293,8 +293,8 @@
             content: '';
             @include triangle('up', 9px, $white);
             position: absolute;
-            top: -9px;
-            left: 90px;
+            top: -6px;
+            left: 77px;
           }
     }
     font-size: 14px;
@@ -315,7 +315,7 @@
     label {
         margin: 0 5px;
         input {
-            margin: 0 5px;
+            margin: 0 20px 0 0;
         }
     }
 
@@ -385,5 +385,87 @@
 
     &:last-child {
         border-bottom: 0px solid $white;
+    }
+}
+
+.Branches__commits {
+    @include flex(space-around, row);
+    align-items: center;
+    flex-wrap: nowrap;
+    color: $white;
+    font-weight: 100;
+    font-size: 12px;
+    margin: 0 3px;
+    padding: 2px;
+    background: $azure;
+    border-radius: 10px;
+    height: 20px;
+
+    &--commits-behind {
+        padding: 2px 15px 2px 2px;
+        background: url(~Images/icons/branches/commit-behind.svg) no-repeat right -6px bottom;
+        background-size: 25px;
+    }
+
+    &--commits-ahead {
+        padding: 2px 15px 2px 2px;
+        background: url(~Images/icons/branches/commit-ahead.svg) no-repeat right -4px bottom;
+        background-size: 25px;
+    }
+  }
+
+.Branches__scroll{
+    height: 25px;
+    cursor: pointer;
+    &--hidden {
+        display: none;
+    }
+    &--down{
+        border: 1px solid $romanSilver;
+        background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
+        background-size: 20px;
+        &:hover {
+            border: 1px solid $azure;
+            background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+            background-size: 20px;
+        }
+    }
+    &--up{
+        border: 1px solid $romanSilver;
+        background: url(~Images/icons/up-arrow-azure.svg) no-repeat center center;
+        background-size: 20px;
+        &:hover {
+            border: 1px solid $azure;
+            background: $azure url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+            background-size: 20px;
+        }
+    }
+    &--disabled.Branches__scroll--down {
+        pointer-events: none;
+        background: $romanSilver url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+        background-size: 20px;
+    }
+    &--disabled.Branches__scroll--up {
+        pointer-events: none;
+        background: $romanSilver url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+        background-size: 20px;
+    }
+}
+
+.Branches__label{
+    padding-left: 13px;
+    &--local{
+        background: url('~Images/icons/branches/local.png') no-repeat left 25px center;
+        background-size: cover;
+        background-size: 20px;
+    }
+    &--remote{
+        background: url('~Images/icons/branches/remote.png') no-repeat left 25px center;
+        background-size: cover;
+        background-size: 20px;
+    }
+    &--disabled{
+        color: $romanSilver;
+        cursor: auto;
     }
 }
