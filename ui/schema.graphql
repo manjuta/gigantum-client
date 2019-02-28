@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Mon Feb 04 2019 10:54:52 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Feb 22 2019 15:57:01 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -235,6 +235,7 @@ type BaseComponent implements Node {
   dockerImageNamespace: String
   dockerImageRepository: String
   dockerImageTag: String
+  cudaVersion: String
 }
 
 """A Connection for paging through Base components"""
@@ -401,6 +402,7 @@ type Dataset implements Node & GitRepository {
   detailRecords(keys: [String]): [ActivityDetailObject]
   visibility: String
   defaultRemote: String
+  overview: DatasetOverview
 }
 
 """A Connection for paging through datasets that exist locally. """
@@ -429,7 +431,7 @@ type DatasetFile implements Node & GitRepository {
   isDir: Boolean
   isFavorite: Boolean
   isLocal: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -460,6 +462,23 @@ type DatasetList implements Node {
   id: ID!
   localById(ids: [String]): [Dataset]
   localDatasets(orderBy: String = "name", sort: String = "asc", before: String, after: String, first: Int, last: Int): DatasetConnection
+  remoteDatasets(orderBy: String = "name", sort: String = "asc", before: String, after: String, first: Int, last: Int): RemoteDatasetConnection
+}
+
+"""
+A type representing the overview of a Dataset
+
+"""
+type DatasetOverview implements Node & GitRepository {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  numFiles: Int
+  totalBytes: String
+  localBytes: String
+  fileTypeDistribution: [String]
+  readme: String
 }
 
 """A type that represents a type of Dataset that can be created"""
@@ -504,6 +523,21 @@ input DeleteDatasetFilesInput {
 
 type DeleteDatasetFilesPayload {
   success: Boolean
+  clientMutationId: String
+}
+
+input DeleteDatasetInput {
+  owner: String!
+  datasetName: String!
+  local: Boolean
+  remote: Boolean
+  clientMutationId: String
+}
+
+"""Delete a dataset."""
+type DeleteDatasetPayload {
+  localDeleted: Boolean
+  remoteDeleted: Boolean
   clientMutationId: String
 }
 
@@ -582,8 +616,7 @@ input DownloadDatasetFilesInput {
 }
 
 type DownloadDatasetFilesPayload {
-  updatedFileEdges: [DatasetFileEdge]
-  statusMessage: String
+  backgroundJobKey: String
   clientMutationId: String
 }
 
@@ -735,7 +768,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of. 
+A Connection for paging through all background jobs the system is aware of.
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -761,7 +794,6 @@ type Labbook implements Node & GitRepository {
   owner: String!
   name: String!
   description: String
-  readme: String
   schemaVersion: Int
   sizeBytes: String
   activeBranchName: String
@@ -858,7 +890,7 @@ type LabbookFile implements Node & GitRepository {
   key: String!
   isDir: Boolean
   isFavorite: Boolean
-  modifiedAt: Int
+  modifiedAt: Float
   size: String
 }
 
@@ -930,7 +962,7 @@ type LabbookMutations {
   deleteCollaborator(input: DeleteLabbookCollaboratorInput!): DeleteLabbookCollaboratorPayload
   addDatasetCollaborator(input: AddDatasetCollaboratorInput!): AddDatasetCollaboratorPayload
   deleteDatasetCollaborator(input: DeleteDatasetCollaboratorInput!): DeleteDatasetCollaboratorPayload
-  writeReadme(input: WriteReadmeInput!): WriteReadmePayload
+  writeLabbookReadme(input: WriteLabbookReadmeInput!): WriteLabbookReadmePayload
   createExperimentalBranch(input: CreateExperimentalBranchInput!): CreateExperimentalBranchPayload
   deleteExperimentalBranch(input: DeleteExperimentalBranchInput!): DeleteExperimentalBranchPayload
   mergeFromBranch(input: MergeFromBranchInput!): MergeFromBranchPayload
@@ -938,6 +970,7 @@ type LabbookMutations {
   setVisibility(input: SetVisibilityInput!): SetVisibilityPayload
   fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
+  deleteDataset(input: DeleteDatasetInput!): DeleteDatasetPayload
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
   fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
@@ -948,6 +981,8 @@ type LabbookMutations {
   deleteDatasetFiles(input: DeleteDatasetFilesInput!): DeleteDatasetFilesPayload
   moveDatasetFile(input: MoveDatasetFileInput!): MoveDatasetFilePayload
   makeDatasetDirectory(input: MakeDatasetDirectoryInput!): MakeDatasetDirectoryPayload
+  writeDatasetReadme(input: WriteDatasetReadmeInput!): WriteDatasetReadmePayload
+  setDatasetDescription(input: SetDatasetDescriptionInput!): SetDatasetDescriptionPayload
 }
 
 """
@@ -967,12 +1002,14 @@ type LabbookOverview implements Node & GitRepository {
   numCustomDependencies: Int
   recentActivity: [ActivityRecordObject]
   remoteUrl: String
+  readme: String
 }
 
 """Entry point for all LabBook queryable fields"""
 type LabbookQuery {
   """The ID of the object"""
   node(id: ID!): Node
+  nodes(ids: [String]): [Node]
   buildInfo: String
   cudaAvailable: Boolean
   labbook(owner: String, name: String): Labbook
@@ -983,7 +1020,7 @@ type LabbookQuery {
   labbookList: LabbookList
   datasetList: DatasetList
   availableBases(before: String, after: String, first: Int, last: Int): BaseComponentConnection
-  availableDatasets: [DatasetType]
+  availableDatasetTypes: [DatasetType]
   package(manager: String, package: String, version: String = ""): PackageComponent
   userIdentity: UserIdentity
 }
@@ -1015,7 +1052,7 @@ type LabbookRefEdge {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-    
+
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1065,7 +1102,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary. 
+Merge from another branch into the current active branch. Force if necessary.
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -1209,14 +1246,56 @@ type PublishLabbookPayload {
 }
 
 """
+A type representing a Dataset stored on a remote server
+
+RemoteDatasets are uniquely identified by both the "owner" and the "name" of the Dataset
+
+NOTE: RemoteDatasets require all fields to be explicitly set as there is no current way to asynchronously retrieve
+      the data
+"""
+type RemoteDataset implements Node & GitRepository {
+  """The ID of the object."""
+  id: ID!
+  owner: String!
+  name: String!
+  description: String
+  visibility: String
+  creationDateUtc: String
+  modifiedDateUtc: String
+  isLocal: Boolean
+}
+
+"""
+A Connection for paging through remote datasets.
+
+This is a remote call, so should be fetched on its own and only when needed. The user must have a valid
+session for data to be returned.
+
+Supported sorting modes:
+    - az: naturally sort
+    - created_on: sort by creation date, newest first
+    - modified_on: sort by modification date, newest first
+"""
+type RemoteDatasetConnection {
+  pageInfo: PageInfo!
+  edges: [RemoteDatasetEdge]!
+}
+
+type RemoteDatasetEdge {
+  """The item at the end of the edge"""
+  node: RemoteDataset
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""
 A type representing a LabBook stored on a remote server
 
 RemoteLabbooks are uniquely identified by both the "owner" and the "name" of the LabBook
 
 NOTE: RemoteLabbooks require all fields to be explicitly set as there is no current way to asynchronously retrieve
       the data
-
-NOTE: Currently all description fields will return empty strings
 """
 type RemoteLabbook implements Node & GitRepository {
   """The ID of the object."""
@@ -1235,9 +1314,6 @@ A Connection for paging through remote labbooks.
 
 This is a remote call, so should be fetched on its own and only when needed. The user must have a valid
 session for data to be returned.
-
-It is recommended to use large page size (e.g. 50-100). This is due to how the remote server returns all the
-available data at once, so it is more efficient to load a lot of records at a time.
 
 Supported sorting modes:
     - az: naturally sort
@@ -1305,6 +1381,18 @@ Mutation to remove a locally stored user identity (no-op if not running in local
 """
 type RemoveUserIdentityPayload {
   userIdentityEdge: UserIdentity
+  clientMutationId: String
+}
+
+input SetDatasetDescriptionInput {
+  owner: String!
+  datasetName: String!
+  description: String!
+  clientMutationId: String
+}
+
+type SetDatasetDescriptionPayload {
+  updatedDataset: Dataset
   clientMutationId: String
 }
 
@@ -1453,14 +1541,26 @@ type WorkonBranchPayload {
   clientMutationId: String
 }
 
-input WriteReadmeInput {
+input WriteDatasetReadmeInput {
+  owner: String!
+  datasetName: String!
+  content: String!
+  clientMutationId: String
+}
+
+type WriteDatasetReadmePayload {
+  updatedDataset: Dataset
+  clientMutationId: String
+}
+
+input WriteLabbookReadmeInput {
   owner: String!
   labbookName: String!
   content: String!
   clientMutationId: String
 }
 
-type WriteReadmePayload {
+type WriteLabbookReadmePayload {
   updatedLabbook: Labbook
   clientMutationId: String
 }

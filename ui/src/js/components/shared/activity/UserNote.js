@@ -1,9 +1,9 @@
 // vendor
 import React, { Component } from 'react';
-import Loadable from 'react-loadable';
 import { WithContext as ReactTags } from 'react-tag-input';
 // mutations
 import CreateUserNoteMutation from 'Mutations/CreateUserNoteMutation';
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 // store
 import store from 'JS/redux/store';
 // assets
@@ -55,11 +55,13 @@ export default class UserNote extends Component {
   */
   _addNote = () => {
     const { props, state } = this;
+    const self = this;
     const tags = state.tags.map(tag => (tag.text));
     const { labbookName, owner } = store.getState().routes;
     const { labbookId } = props;
 
     this.setState({ addNoteDisabled: true });
+
     CreateUserNoteMutation(
       props.sectionType,
       labbookName,
@@ -71,11 +73,14 @@ export default class UserNote extends Component {
       labbookId || props.datasetId,
       (response, error) => {
         props.toggleUserNote(false);
-        this.setState({
+        self.setState({
           tags: [],
           userSummaryText: '',
           addNoteDisabled: false,
         });
+        if (error) {
+          setErrorMessage('Unable to unlink dataset', error);
+        }
       },
     );
   }
@@ -136,6 +141,11 @@ export default class UserNote extends Component {
      const { tags } = state;
      return (
        <div className="UserNote flex flex--column">
+
+         <div
+          className="UserNote__close close"
+          onClick={() => this.props.toggleUserNote(false) }></div>
+
          <input
            type="text"
            placeholder="Add a summary title"

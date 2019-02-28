@@ -155,11 +155,11 @@ class ZipExporter(object):
                                    update_meta=update_meta)
 
             # Index the activity on the labbook.
-            lb = cast(LabBook, repo)
-            ars = ActivityStore(lb) 
+            ars = ActivityStore(repo) 
             ars.index_activity()
 
-            return lb
+            return cast(LabBook, repo)
+
         except Exception as e:
             logger.error(e)
             raise ZipWorkflowException(e)

@@ -51,7 +51,7 @@ class TestDatasetQueries(object):
                 """
         r = fixture_working_dir_dataset_populated_scoped[2].execute(query)
         assert r['data']['dataset']['description'] == 'Cats 8'
-        assert r['data']['dataset']['datasetType']['description'] == 'Scalable Dataset storage provided by your Gigantum account'
+        assert r['data']['dataset']['datasetType']['description'] == "Dataset storage provided by your Gigantum account supporting files up to 5GB in size"
         assert r['data']['dataset']['datasetType']['name'] == 'Gigantum Cloud'
         assert r['data']['dataset']['name'] == 'dataset8'
         assert r['data']['dataset']['schemaVersion'] == 1

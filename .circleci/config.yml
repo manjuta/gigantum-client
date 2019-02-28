@@ -3,7 +3,7 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:a3c768ad58-2019-02-06
+      - image: gigantum/circleci-client:f99fad5716-2019-02-20
 
 jobs:
   mypy-gtmcore:

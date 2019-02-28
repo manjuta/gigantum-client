@@ -7,6 +7,7 @@ import os
 
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
+from gtmcore.activity import ActivityStore
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.inventory.branching import BranchManager
@@ -88,7 +89,6 @@ def _from_remote(remote_url: str, username: str, owner: str,
 
         # TODO RB BVB F needs to be a launched as a background job 
         # The labbook is fully populated.  Start a background job to index the activity.
-        logger.info(f"Updating whoosh indexes.")
         ars = ActivityStore(repository)
         ars.index_activity()
 

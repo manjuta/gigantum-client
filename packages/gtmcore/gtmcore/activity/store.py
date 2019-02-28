@@ -56,7 +56,7 @@ class ActivityStore(object):
                                          logfile_limit=repository.client_config.config['detaildb']['logfile_limit'])
 
         # connect to an activity search index
-        self.asearch = ActivitySearch(labbook.root_dir, labbook)
+        self.asearch = ActivitySearch(self, repository.root_dir, repository)
 
         # Note record commit messages follow a special structure
         self.note_regex = re.compile(r"(?s)_GTM_ACTIVITY_START_.*?_GTM_ACTIVITY_END_")
@@ -346,7 +346,7 @@ class ActivityStore(object):
     def _index_generator(self) -> Iterator[ActivityRecord]:
         """Generator to get all commits with messages"""
         # get each commit 
-        for entry in self.labbook.git.log():
+        for entry in self.repository.git.log():
             m = self.note_regex.match(entry["message"])
             if m:
                 yield ActivityRecord.from_log_str(m.group(0), 
@@ -356,7 +356,7 @@ class ActivityStore(object):
                                                   email=entry['author']['email'])
 
     def index_activity(self) -> None:
-        """Iterate over labbook and index all activity records with whoosh 
+        """Iterate over repository and index all activity records with whoosh 
 
             Args:
                 None

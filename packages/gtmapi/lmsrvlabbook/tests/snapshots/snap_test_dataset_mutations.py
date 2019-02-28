@@ -12,7 +12,7 @@ snapshots['TestDatasetMutations.test_create_dataset 1'] = {
         'createDataset': {
             'dataset': {
                 'datasetType': {
-                    'description': 'Scalable Dataset storage provided by your Gigantum account',
+                    'description': 'Dataset storage provided by your Gigantum account supporting files up to 5GB in size',
                     'id': 'RGF0YXNldFR5cGU6Z2lnYW50dW1fb2JqZWN0X3Yx',
                     'name': 'Gigantum Cloud'
                 },
@@ -29,7 +29,7 @@ snapshots['TestDatasetMutations.test_create_dataset 2'] = {
     'data': {
         'dataset': {
             'datasetType': {
-                'description': 'Scalable Dataset storage provided by your Gigantum account',
+                'description': 'Dataset storage provided by your Gigantum account supporting files up to 5GB in size',
                 'id': 'RGF0YXNldFR5cGU6Z2lnYW50dW1fb2JqZWN0X3Yx',
                 'name': 'Gigantum Cloud'
             },

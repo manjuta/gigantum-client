@@ -25,7 +25,7 @@ from typing import Optional, List, Tuple
 
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
-# from gtmcore.repository import LabBook
+from gtmcore.activity import ActivityStore
 from gtmcore.inventory import Repository
 from gtmcore.configuration.utils import call_subprocess
 
@@ -157,7 +157,6 @@ class BranchManager(object):
 
         # TODO RB BVB F needs to be a launched as a background job 
         # The labbook is fully populated.  Start a background job to index the activity.
-        logger.info(f"Updating whoosh indexes.")
         ars = ActivityStore(self.repository)
         ars.index_activity()
 

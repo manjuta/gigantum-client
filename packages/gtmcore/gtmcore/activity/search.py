@@ -9,8 +9,8 @@ from datetime import datetime
 from git import Commit
 from typing import Dict, Union, List, Any, Optional
 
-from lmcommon.activity.records import ActivityRecord, ActivityDetailRecord
-from lmcommon.logging import LMLogger
+from gtmcore.activity.records import ActivityRecord, ActivityDetailRecord
+from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
 
@@ -22,7 +22,8 @@ class ActivitySearch:
 
     # TODO RB we should probably version this whoosh schema along with activity records.
     # mapping for activity records (schema for search)
-    # only store the commit and linked commit
+    #   only store the commit and linked commit, we will use these to lookup the records.  
+    #   the rest of the stuff is just indexed for search, but not retrieval
     ar_schema = Schema( \
                         commit=KEYWORD(stored=True), \
                         linked_commit=KEYWORD(stored=True), \
@@ -40,34 +41,36 @@ class ActivitySearch:
                         commit=KEYWORD(stored=True), \
                         linked_commit=KEYWORD(stored=True), \
                         record_type=KEYWORD, \
+                        record_action=KEYWORD, \
                         tags=KEYWORD, \
                         mimetypes=KEYWORD, \
                         freetext=TEXT, \
                         timestamp=DATETIME )
 
-    def __init__(self, root_dir:str, labbook) -> None:
+    def __init__(self, activity_store, root_dir:str, repository) -> None:
         """Create a Activity Search object.
             This will load an existing index if it exists on the server.
             Otherwise, it will create an index, initializing the schema,
-            for subsequent use in this labbook.
+            for subsequent use in this repository.
 
             Args:
                 unique_name(str) -- name of the index 
-
+repository
                     We expect that the unique_name will be something like
-                        user_owner_labbookname
+                        user_owner_repositoryname
                     if you give a path (i.e. with /\:) we will replace 
                     those symbols with _.  One should give the same name
                     for every invocation to connect to the same index.
         
             Returns:  None
         """
-        self.labbook = labbook
+        self.activity_store = activity_store
+        self.repository = repository
 
         # remove special characters and delimiters from path name
         self.idx_name = re.sub('[\\\/\:]', '_', re.sub('^/', '', root_dir))
-        self.index_dir = os.path.join(self.labbook.labmanager_config.config["git"]["working_directory"], \
-                                      self.labbook.labmanager_config.config["whoosh"]["index_dir"])
+        self.index_dir = os.path.join(self.repository.client_config.config["git"]["working_directory"], \
+                                      self.repository.client_config.config["whoosh"]["index_dir"])
         self.idxpath = os.path.join(self.index_dir, self.idx_name)
 
         # Open an existing index
@@ -132,7 +135,6 @@ class ActivitySearch:
                                    'commit': result['linked_commit'] } )
 
             return ret_list
-
 
     def searchDetail(self, field: str, terms: str):
         """Simple search for terms in a field.
@@ -230,7 +232,7 @@ class ActivitySearch:
         # populate the record with metadata from git log
         # if there's no linked commit, get metadata from current commit.
         if record.linked_commit == 'no-linked-commit':
-            commit_record = self.labbook.git.log_entry(record.commit)
+            commit_record = self.repository.git.log_entry(record.commit)
             awriter.add_document( commit=record.commit, \
                                   linked_commit=record.linked_commit, \
                                   name=commit_record['author']['name'], \
@@ -242,12 +244,14 @@ class ActivitySearch:
                                   timestamp=commit_record['committed_on'])
 
             # add details with no linked_commit
-            for ob in record.detail_objects:
-                self.addDetail(dwriter, record.commit, record.linked_commit, commit_record['committed_on'], ob[3])
+            with record.inspect_detail_objects() as detail_objs:
+                for i, obj in enumerate(detail_objs):
+                    obj_loaded = self.activity_store.get_detail_record(obj.key)
+                    self.addDetail(dwriter, record.commit, record.linked_commit, commit_record['committed_on'], obj_loaded)
 
         # otherwise used linked-commit and add linked-commit message also
         else:
-            linked_commit_record = self.labbook.git.log_entry(record.linked_commit)
+            linked_commit_record = self.repository.git.log_entry(record.linked_commit)
             awriter.add_document( commit=record.commit, \
                           linked_commit=record.linked_commit, \
                           name=linked_commit_record['author']['name'], \
@@ -258,9 +262,11 @@ class ActivitySearch:
                           tags=record.tags, \
                           timestamp=linked_commit_record['committed_on'])
 
-            # add details with linked_commit
-            for ob in record.detail_objects:
-                self.addDetail(dwriter, record.commit, record.linked_commit, linked_commit_record['committed_on'], ob[3])
+            # add details with no linked_commit
+            with record.inspect_detail_objects() as detail_objs:
+                for i, obj in enumerate(detail_objs):
+                    obj_loaded = self.activity_store.get_detail_record(obj.key)
+                    self.addDetail(dwriter, record.commit, record.linked_commit, linked_commit_record['committed_on'], obj_loaded)
 
     def addDetail(self, dwriter, commit: Optional[str], linked_commit: Optional[str], timestamp: datetime, record: ActivityDetailRecord) -> None:
         """
