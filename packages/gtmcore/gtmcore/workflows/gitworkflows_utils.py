@@ -244,9 +244,9 @@ def migrate_labbook_untracked_space(labbook: LabBook) -> None:
 
 def migrate_labbook_branches(labbook: LabBook) -> None:
     bm = BranchManager(labbook)
-    if 'gm.workspace-' not in bm.active_branch:
-        raise ValueError('Can only migrate branches if active branch is '
-                         'gm.workspace-username')
+    if 'gm.workspace' not in bm.active_branch:
+        raise ValueError('Can only migrate branches if active branch contains'
+                         '"gm.workspace"')
 
     master_branch = 'master'
     if master_branch in bm.branches_remote:
