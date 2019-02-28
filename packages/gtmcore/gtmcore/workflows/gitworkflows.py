@@ -184,6 +184,7 @@ class LabbookWorkflow(GitWorkflow):
 
         return True
 
+
 class DatasetWorkflow(GitWorkflow):
     @property
     def dataset(self):
@@ -214,7 +215,6 @@ class DatasetWorkflow(GitWorkflow):
         super().publish(username, access_token, remote, public, feedback_callback, id_token)
         self._push_dataset_objects(self.dataset, username, feedback_callback,
                                    access_token, id_token)
-
 
     def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
              feedback_callback: Callable = lambda _ : None, pull_only: bool = False,

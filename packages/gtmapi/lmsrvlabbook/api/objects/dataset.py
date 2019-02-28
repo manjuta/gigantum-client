@@ -11,6 +11,7 @@ from lmsrvcore.api.connections import ListBasedConnection
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory.branching import BranchManager
 
 from lmsrvlabbook.api.objects.datasettype import DatasetType
 from lmsrvlabbook.api.connections.activity import ActivityConnection
@@ -67,6 +68,9 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     # Overview Information
     overview = graphene.Field(DatasetOverview)
+
+    # Temporary commits behind field before full branching is supported to indicate if a dataset is out of date
+    commits_behind = graphene.Int()
 
     @classmethod
     def get_node(cls, info, id):
@@ -419,3 +423,26 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_default_remote(dataset))
+
+    @staticmethod
+    def helper_resolve_commits_behind(dataset):
+        """Temporary Helper to get the commits behind for a dataset. Used for linked datasets to see if
+        they are out of date"""
+        bm = BranchManager(dataset)
+        bm.fetch()
+        return bm.get_commits_behind(branch_name='master')
+
+    def resolve_commits_behind(self, info):
+        """Method to get the commits behind for a dataset. Used for linked datasets to see if
+        they are out of date
+
+        Args:
+            args:
+            context:
+            info:
+
+        Returns:
+
+        """
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_commits_behind(dataset))
