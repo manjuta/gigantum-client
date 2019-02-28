@@ -325,6 +325,7 @@ class TestGitWorkflowsMethods(object):
             lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(temp_lb_path)
             wf = LabbookWorkflow(lb)
 
+            wf.labbook.remove_remote()
             wf.migrate()
 
             # Test that current branch is as appropriate

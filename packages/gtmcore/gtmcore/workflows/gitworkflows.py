@@ -184,10 +184,8 @@ class LabbookWorkflow(GitWorkflow):
         self.repository = im.load_labbook_from_directory(self.labbook.root_dir)
 
         # Pushes up the new master branch
-        self.sync(username='')
-        # The following makes "master" the default remote branch
-        # See the following: https://stackoverflow.com/questions/8839958/how-does-origin-head-get-set
-        call_subprocess('git remote set-head origin master'.split(), cwd=self.labbook.root_dir)
+        if self.repository.has_remote:
+            self.sync(username='')
 
         return True
 

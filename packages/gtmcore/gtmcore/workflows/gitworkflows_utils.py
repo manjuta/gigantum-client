@@ -168,6 +168,9 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
 def sync_branch(repository: Repository, username: Optional[str], override: str,
                 pull_only: bool, feedback_callback: Callable) -> int:
     """"""
+    if not repository.has_remote:
+        return 0
+
     repository.sweep_uncommitted_changes()
     repository.git.fetch()
 
