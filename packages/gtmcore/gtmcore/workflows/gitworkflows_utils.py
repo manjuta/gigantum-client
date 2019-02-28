@@ -165,13 +165,13 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
         else:
             raise
 
-def sync_branch(repository: Repository, username: str, override: str,
+def sync_branch(repository: Repository, username: Optional[str], override: str,
                 pull_only: bool, feedback_callback: Callable) -> int:
     """"""
     repository.sweep_uncommitted_changes()
     repository.git.fetch()
 
-    bm = BranchManager(repository, username=username)
+    bm = BranchManager(repository)
     branch_name = bm.active_branch
 
     if pull_only and branch_name not in bm.branches_remote:

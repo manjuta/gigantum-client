@@ -16,10 +16,7 @@ logger = LMLogger.get_logger()
 
 def _clone(remote_url: str, working_dir: str) -> str:
 
-    # Note, --recursive forces clone of all submodules
     clone_tokens = f"git clone {remote_url}".split()
-
-    # Perform a Git clone
     call_subprocess(clone_tokens, cwd=working_dir)
 
     # Affirm there is only one directory created
@@ -30,6 +27,15 @@ def _clone(remote_url: str, working_dir: str) -> str:
     p = os.path.join(working_dir, dirs[0])
     if not os.path.exists(p):
         raise GigantumException('Could not find expected path of repo after clone')
+
+    try:
+        # This is for backward compatability -- old projects will clone to
+        # branch "gm.workspace" by default -- even if it has already been migrated.
+        # This will therefore set the user to the proper branch if the project has been
+        # migrated, and will have no affect if it hasn't
+        r = call_subprocess("git checkout master".split(), cwd=p)
+    except Exception as e:
+        logger.error(e)
 
     # Initialize all submodule references, allowing updates to fail (for permission reasons)
     call_subprocess(['git', 'submodule', 'update', '--rescursive'], cwd=p, check=False)

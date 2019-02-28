@@ -90,7 +90,9 @@ class BranchManager(object):
     @property
     def branches_remote(self) -> List[str]:
         if self.repository.has_remote:
-            return sorted([b.replace('origin/', '') for b in self.repository.get_branches()['remote']])
+            return sorted([b.replace('origin/', '')
+                           for b in self.repository.get_branches()['remote']
+                           if b != 'HEAD' and b != 'origin/HEAD'])
         else:
             return []
 

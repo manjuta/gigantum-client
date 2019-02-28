@@ -153,6 +153,7 @@ class LabbookWorkflow(GitWorkflow):
             repo = loaders.clone_repo(remote_url=remote_url, username=username, owner=namespace,
                                       load_repository=inv_manager.load_labbook_from_directory,
                                       put_repository=inv_manager.put_labbook)
+            logger.info(f"Imported remote Project {str(repo)} on branch {repo.active_branch}")
             return cls(repo)
         except Exception as e:
             logger.error(e)
@@ -181,6 +182,12 @@ class LabbookWorkflow(GitWorkflow):
 
         gitworkflows_utils.migrate_labbook_untracked_space(self.labbook)
         self.repository = im.load_labbook_from_directory(self.labbook.root_dir)
+
+        # Pushes up the new master branch
+        self.sync(username='')
+        # The following makes "master" the default remote branch
+        # See the following: https://stackoverflow.com/questions/8839958/how-does-origin-head-get-set
+        call_subprocess('git remote set-head origin master'.split(), cwd=self.labbook.root_dir)
 
         return True
 
