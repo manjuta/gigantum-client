@@ -172,6 +172,10 @@ class LabBook(Repository):
             else:
                 raise GigantumException('Cannot find configuration yaml file')
 
+        if self.schema == 2:
+            # Make sure untracked directory exists (it and its contents are ignored)
+            os.makedirs(os.path.join(self.root_dir, 'output', 'untracked'), exist_ok=True)
+
     def _validate_gigantum_data(self) -> None:
         """Method to validate the LabBook data file contents
 
