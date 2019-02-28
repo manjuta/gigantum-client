@@ -17,7 +17,7 @@ logger = LMLogger.get_logger()
 def _clone(remote_url: str, working_dir: str) -> str:
 
     # Note, --recursive forces clone of all submodules
-    clone_tokens = f"git clone --recursive {remote_url}".split()
+    clone_tokens = f"git clone {remote_url}".split()
 
     # Perform a Git clone
     call_subprocess(clone_tokens, cwd=working_dir)
@@ -30,6 +30,9 @@ def _clone(remote_url: str, working_dir: str) -> str:
     p = os.path.join(working_dir, dirs[0])
     if not os.path.exists(p):
         raise GigantumException('Could not find expected path of repo after clone')
+
+    # Initialize all submodule references, allowing updates to fail (for permission reasons)
+    call_subprocess(['git', 'submodule', 'update', '--rescursive'], cwd=p, check=False)
 
     return p
 

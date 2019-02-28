@@ -240,7 +240,6 @@ class BranchManager(object):
                             cwd=self.repository.root_dir)
         self.repository.sweep_uncommitted_changes(extra_msg=f"Merged {other_branch} using theirs.")
 
-
     def get_commits_ahead(self, branch_name: Optional[str] = None, remote_name: str = "origin") -> int:
         """Return to number of local commits not present in remote branch.
 

@@ -219,8 +219,8 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, dataset_name, username, permissions,
                                client_mutation_id=None):
-        #TODO(billvb/dmk) - Here "username" refers to the intended recipient username.
-        # it should probably be renamed here and in the frontend to "collaboratorUsername"
+        # Here "username" refers to the intended recipient username.
+        # Todo: it should probably be renamed here and in the frontend to "collaboratorUsername"
         logged_in_username = get_logged_in_username()
         lb = InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
                                              author=get_logged_in_author())
@@ -239,15 +239,6 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. "
                              "Must have a valid session to query for collaborators")
-
-        if permissions == 'readonly':
-            perm = ProjectPermissions.READ_ONLY
-        elif permissions == 'readwrite':
-            perm = ProjectPermissions.READ_WRITE
-        elif permissions == 'owner':
-            perm = ProjectPermissions.OWNER
-        else:
-            raise ValueError(f"Unknown permission set: {permissions}")
 
         if permissions == 'readonly':
             perm = ProjectPermissions.READ_ONLY
