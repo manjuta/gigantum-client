@@ -174,6 +174,11 @@ def sync_branch(repository: Repository, username: str, override: str,
     bm = BranchManager(repository, username=username)
     branch_name = bm.active_branch
 
+    if pull_only and branch_name not in bm.branches_remote:
+        # Cannot pull when remote branch doesn't exist.
+        feedback_callback("Pull complete - nothing to pull")
+        return 0
+
     if branch_name not in bm.branches_remote:
         # Branch does not exist, so push it to remote.
         _set_upstream_branch(repository, bm.active_branch, feedback_callback)
