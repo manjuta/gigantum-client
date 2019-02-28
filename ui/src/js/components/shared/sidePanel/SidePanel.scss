@@ -3,8 +3,14 @@
 @media screen and (max-width: 50000px) and (min-width: 1480px){
   .SidePanel {
     top: 202px !important;
+    &--is-deprecated{
+      top: 251px !important;
+    }
     &--sticky{
       top: 110px !important;
+    }
+    &--is-deprecated-sticky{
+      top: 160px !important;
     }
   }
 }
@@ -20,7 +26,12 @@
   top: 191px;
   bottom: 0px;
   @include boxShadow();
-
+  &--is-deprecated{
+    top: 251px;
+  }
+  &--is-deprecated-sticky{
+    top: 170px;
+  }
 
   &--sticky{
     top: 110px;

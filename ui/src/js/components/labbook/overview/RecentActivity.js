@@ -148,7 +148,7 @@ export default class RecentActivity extends Component {
       const { owner, labbookName } = store.getState().routes;
       const { props, state } = this;
       const edge = props.recentActivity[0];
-      const isImage = edge.detailObjects && edge.detailObjects[0].data[0] && edge.detailObjects[0].data[0][0] === 'image/png';
+      const isImage = edge && edge.detailObjects && edge.detailObjects[0].data[0] && edge.detailObjects[0].data[0][0] === 'image/png';
       const imageMetadata = isImage && edge.detailObjects[0].data[0][1];
 
       return (<div className="RecentActivity">

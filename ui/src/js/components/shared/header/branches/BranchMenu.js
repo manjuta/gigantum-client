@@ -4,7 +4,6 @@ import { boundMethod } from 'autobind-decorator';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // componenets
-import Loader from 'Components/common/Loader';
 import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ForceSync from 'Components/shared/modals/ForceSync';
 import Branches from 'Components/shared/sidePanel/Branches';
@@ -14,8 +13,6 @@ import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
-// store
-import store from 'JS/redux/store';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
 // assets
@@ -700,6 +697,7 @@ class BranchMenu extends Component {
             syncTooltip={syncTooltip}
             switchBranch={this._switchBranch}
             toggleCover={this._toggleCover}
+            isDeprecated={props.isDeprecated}
             setBranchUptodate={this.props.setBranchUptodate}
           />
           {

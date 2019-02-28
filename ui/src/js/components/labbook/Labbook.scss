@@ -129,7 +129,6 @@
 }
 
 .Labbook__migration-modal{
-  margin-top: 40px;
   a {
     margin-left: 5px;
   }
@@ -137,5 +136,22 @@
 
 .Labbook__migration-buttons {
   align-self: center;
-  margin-top: 100px;
+}
+
+.Labbook__migration-content{
+  height: 280px;
+  margin-bottom: 10px;
+  overflow: auto;
+}
+
+.Labbook__migration-container{
+  @include flex(flex-start, column);
+}
+
+.Labbook__migration-content{
+  li {
+    display:list-item;
+    margin: auto;
+    margin-left: 50px;
+  }
 }

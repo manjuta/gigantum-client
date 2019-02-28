@@ -277,7 +277,6 @@ class BranchesMutations {
       deleteBranch(data, callback) {
         const {
           branchName,
-          labbookId,
           deleteLocal,
           deleteRemote,
         } = data;
@@ -287,7 +286,6 @@ class BranchesMutations {
         owner,
         name,
         branchName,
-        labbookId,
         deleteLocal,
         deleteRemote,
         callback,

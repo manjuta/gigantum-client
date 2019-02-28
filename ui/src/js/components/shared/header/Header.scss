@@ -180,6 +180,9 @@
     width: 316px;
   }
 }
+.Header--sticky.Header--is-deprecated {
+  margin: -10px 0 0 -20px;
+}
 
 
 
@@ -254,6 +257,6 @@
 @media screen and (max-width: 50000px) and (min-width: 1480px) {
 
   .Header--sticky{
-    margin: -10px 0 0 -35px;
+    margin: -10px 0 0 -35px !important;
   }
 }

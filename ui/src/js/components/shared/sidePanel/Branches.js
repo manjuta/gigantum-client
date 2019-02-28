@@ -186,7 +186,6 @@ class Branches extends Component {
       branchName: branch.branchName,
       deleteLocal: this.state.localSelected,
       deleteRemote: this.state.remoteSelected,
-      labbookId: this.props.sectionId,
     };
     this.props.branchMutations.deleteBranch(data, (response, error) => {
       if (error) {
@@ -469,6 +468,7 @@ class Branches extends Component {
         && <SidePanel
             toggleSidePanel={props.toggleSidePanel}
             isSticky={props.isSticky}
+            isDeprecated={props.isDeprecated}
             renderContent={() => <div className="Branches">
                 {
                   (state.mergeModalVisible || state.deleteModalVisible || state.resetModalVisible || state.action) &&

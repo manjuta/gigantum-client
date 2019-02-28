@@ -187,6 +187,7 @@ class Header extends Component {
           headerCSS = classNames({
             Header: true,
             'Header--sticky': props.isSticky,
+            'Header--is-deprecated': props.isDeprecated,
             'Header--branchesOpen': props.branchesOpen,
           }),
           branchesErrorCSS = classNames({

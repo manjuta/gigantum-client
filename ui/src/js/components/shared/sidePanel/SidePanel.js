@@ -39,8 +39,10 @@ class SidePanel extends Component {
     const { props, state } = this,
            sidePanelCSS = classNames({
              SidePanel: true,
-             'SidePanel--sticky': props.isSticky,
-           })
+             'SidePanel--sticky': props.isSticky && !props.isDeprecated,
+             'SidePanel--is-deprecated': props.isDeprecated && !props.isSticky,
+             'SidePanel--is-deprecated-sticky': props.isDeprecated && props.isSticky,
+           });
     return (
       ReactDom.createPortal(
         <div className={sidePanelCSS}>

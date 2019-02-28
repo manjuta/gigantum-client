@@ -20,7 +20,6 @@ export default function DeleteExperimentalBranchMutation(
   owner,
   labbookName,
   branchName,
-  labbookId,
   deleteLocal,
   deleteRemote,
   callback,

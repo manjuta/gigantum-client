@@ -51,7 +51,7 @@ export default class CreateBranchModal extends Component {
       const formattedTimestamp = Moment(Date.parse(nextProps.selected.timestamp)).format('YYYYMMDD-HHmmss');
       const branchName = `rollback-to-${formattedTimestamp}`;
       this.setState({ branchName });
-    } else {
+    } else if (state.branchName.indexOf('rollback') > -1) {
       this.setState({ branchName: '' });
     }
   }
