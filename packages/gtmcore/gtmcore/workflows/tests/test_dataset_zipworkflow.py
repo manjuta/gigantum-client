@@ -97,8 +97,7 @@ class TestDatasetImportZipping(object):
             ZipExporter.export_dataset('/var', '.')
 
     def test_success_import_valid_dataset_from_macos(self, mock_config_file):
-        import_zip = os.path.join(resource_filename('gtmcore','workflows/tests'),
-                                  'test_dataset.zip')
+        import_zip = os.path.join(resource_filename('gtmcore', 'workflows/tests'), 'test_dataset.zip')
         assert os.path.exists(import_zip)
         dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset.zip')
 
@@ -110,7 +109,6 @@ class TestDatasetImportZipping(object):
         x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
-        # TODO -- redo hardcoded zip file
         assert x.active_branch == 'master'
 
     def test_fail_cannot_import_dataset_to_overwrite_name(self, mock_config_file):
