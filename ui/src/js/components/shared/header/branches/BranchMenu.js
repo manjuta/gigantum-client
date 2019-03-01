@@ -468,7 +468,7 @@ class BranchMenu extends Component {
             hidden: state.switchingBranch,
           }),
           branchSwitchingNameCSS = classNames({
-            'BranchMenu__branch-name': state.switchingBranch,
+            'BranchMenu__branch-name BranchMenu__branch-name--switching': state.switchingBranch,
             hidden: !state.switchingBranch,
           }),
           syncMenuDropdownCSS = classNames({
@@ -517,10 +517,16 @@ class BranchMenu extends Component {
                     <div className="BranchMenu__dropdown-label">Branch:</div>
                     <div className="BranchMenu__dropdown-text">{activeBranch.branchName}</div>
                   </div>
+
+                  <div className={branchSwitchingNameCSS}>
+                    <span className="BranchMenu__dropdown-label">Branch:</span>
+                    <span className="BranchMenu__dropdown-text ">
+                      {`switching to ${state.switchingBranch}...`}
+                    </span>
+                  </div>
                   <div
                     className="BranchMenu__status Tooltip-data Tooltip-data--small"
-                    data-tooltip={statusText}
-                  >
+                    data-tooltip={statusText}>
                     {
                       activeBranch.isLocal ?
                       <div className="BranchMenu__status--local"></div>
@@ -533,13 +539,6 @@ class BranchMenu extends Component {
                       :
                       <div></div>
                     }
-                  </div>
-
-                  <div className={branchSwitchingNameCSS}>
-                    <span className="BranchMenu__dropdown-label">Branch:</span>
-                    <span className="BranchMenu__dropdown-text ">
-                      {`switching to ${state.switchingBranch}...`}
-                    </span>
                   </div>
                 </div>
                 <div className={switchDropdownCSS}>

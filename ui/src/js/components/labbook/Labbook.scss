@@ -128,6 +128,11 @@
   }
 }
 
+.Labbook__migration-p{
+  text-align: center;
+  font-size: 18px;
+}
+
 .Labbook__migration-modal{
   a {
     margin-left: 5px;
@@ -139,7 +144,7 @@
 }
 
 .Labbook__migration-content{
-  height: 280px;
+  height: 480px;
   margin-bottom: 10px;
   overflow: auto;
 }
@@ -147,6 +152,22 @@
 .Labbook__migration-container{
   @include flex(flex-start, column);
 }
+
+.Labbook__migration-center {
+  @include flex(space-around, column);
+  align-items: center;
+  margin: 0 auto;
+  text-align: center;
+  width: 540px;
+  margin-top: 50px;
+  height: 200px;
+  margin-bottom: 40px;
+}
+.Labbook__migration-buttons,
+.Labbook__migration--dismiss {
+  text-align: center
+}
+
 
 .Labbook__migration-content{
   li {

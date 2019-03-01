@@ -88,7 +88,7 @@
   white-space: nowrap;
 
   .PackageCount__dependencies {
-    width: 50%;
+    width: 100%;
   }
 }
 
@@ -407,4 +407,7 @@
 }
 .Overview__environment{
   position: relative;
+  .Btn--redirect {
+    top: -8px;
+  }
 }

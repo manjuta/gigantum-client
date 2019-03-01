@@ -50,7 +50,8 @@
   padding: 0px !important;
   color: $jet;
   font-size: 15px;
-
+  border: 0px solid $white !important;
+  
   &:focus,
   &:disabled, {
     cursor: pointer;
@@ -70,7 +71,7 @@
   &.disabled:hover{
       width: 100%;
       margin: 1.5px 0;
-      border: 0px solid $white;
+      border: 0px solid $white !important;
       opacity: 0.3;
    }
 

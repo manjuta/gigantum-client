@@ -675,8 +675,8 @@ class PackageDependencies extends Component {
       const disableInstall = state.disableInstall || ((state.packages.length === 0) || (packagesProcessing.length > 0));
 
       return (
-        <div className="PackageDependencies">
-          <div className="PackageDependencies__card Card Card--auto Card--no-hover">
+        <div className="PackageDependencies grid">
+          <div className="PackageDependencies__card Card Card--auto Card--no-hover column-1-span-12">
             <div className="PackageDependencies__tabs">
               <ul className="tabs-list">
                 {

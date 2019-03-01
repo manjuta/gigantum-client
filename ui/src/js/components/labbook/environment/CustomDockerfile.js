@@ -156,70 +156,68 @@ export default class CustomDockerfile extends Component {
           </div>
 
         </div>
+        <div className="grid">
+          <div className="CustomDockerfile__content Card Card--auto Card--no-hover column-1-span-12">
+            <button
+              className={editDockerfileButtonCSS}
+              onClick={() => this._editDockerfile()}>
+              <span>Edit Dockerfile</span>
+            </button>
+            {
+              this.state.editingDockerfile ?
 
-        <div className="CustomDockerfile__content Card Card--auto Card--no-hover column-1-span-12">
-          <button
-            className={editDockerfileButtonCSS}
-            onClick={() => this._editDockerfile()}
-          >
-            <span>Edit Dockerfile</span>
-          </button>
-          {
-            this.state.editingDockerfile ?
+                <Fragment>
 
-              <Fragment>
+                  <textarea
+                    className="CustomDockerfile__textarea"
+                    type="text"
+                    onChange={(evt) => { this.setState({ dockerfileContent: evt.target.value }); }}
+                    placeholder="Enter dockerfile commands here"
+                    defaultValue={state.dockerfileContent ? state.dockerfileContent : ''}
+                  />
 
-                <textarea
-                  className="CustomDockerfile__textarea"
-                  type="text"
-                  onChange={(evt) => { this.setState({ dockerfileContent: evt.target.value }); }}
-                  placeholder="Enter dockerfile commands here"
-                  defaultValue={state.dockerfileContent ? state.dockerfileContent : ''}
-                />
+                  <div className="CustomDockerfile__buttonContainer">
 
-                <div className="CustomDockerfile__buttonContainer">
+                    <div className="column-1-span-2">
 
-                  <div className="column-1-span-2">
+                      <button
+                        onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
+                        className="CustomDockerfile__content-cancel-button button--flat">
+                      Cancel
+                      </button>
 
-                    <button
-                      onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
-                      className="CustomDockerfile__content-cancel-button button--flat"
-                    >
-                    Cancel
-                    </button>
+                      <button
+                        disabled={state.savingDockerfile}
+                        onClick={() => this._saveDockerfile()}
+                        className="CustomDockerfile__content-save-button">
+                      Save
+                      </button>
 
-                    <button
-                      disabled={state.savingDockerfile}
-                      onClick={() => this._saveDockerfile()}
-                      className="CustomDockerfile__content-save-button">
-                    Save
-                    </button>
+                    </div>
 
                   </div>
 
-                </div>
+                </Fragment>
 
-              </Fragment>
+              :
 
-            :
+                <Fragment>
 
-              <Fragment>
+                  <div className={dockerfileCSS}>
 
-                <div className={dockerfileCSS}>
+                    <ReactMarkdown
+                      renderers={{ code: props => <CodeBlock {...props} language="dockerfile" /> }}
+                      className="ReactMarkdown"
+                      source={renderedContent}
+                    />
 
-                  <ReactMarkdown
-                    renderers={{ code: props => <CodeBlock {...props} language="dockerfile" /> }}
-                    className="ReactMarkdown"
-                    source={renderedContent}
-                  />
+                  </div>
 
-                </div>
+                </Fragment>
+            }
 
-              </Fragment>
-          }
-
+          </div>
         </div>
-
       </div>
     );
   }

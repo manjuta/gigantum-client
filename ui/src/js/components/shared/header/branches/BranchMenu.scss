@@ -7,11 +7,10 @@ $dropBoxWidth: 250px;
 }
 
 .BranchMenu__status{
-  position: absolute;
-  top: 10px;
-  right: 38px;
-  width: 44px;
-  @include flex(flex-start, row);
+  width: auto;
+  @include flex(flex-start, row-reverse);
+  align-items: flex-end;
+  margin: 0 35px 0 10px;
 
   &--local {
       width: 22px;
@@ -33,13 +32,18 @@ $dropBoxWidth: 250px;
    z-index: index($elements, popup) + 1;
 
 
+
    &-btn {
      position: relative;
-     padding: 0 80px 0 10px;
+     padding: 0 0 0 10px;
      height: 40px;
-     width: $dropBoxWidth;
+     width: auto;
+     max-width: $dropBoxWidth + 100px;
      border: 1px solid $azure;
      cursor: pointer;
+     @include flex(space-around, row);
+     flex-wrap: nowrap;
+     align-items: center;
 
      &:hover {
        border-color: $turquise;
@@ -263,15 +267,6 @@ $dropBoxWidth: 250px;
 
 }
 
-@media screen and (max-width: 1180px) and (min-width: 0px) {
-  .BranchMenu__buttons{
-    font-size: 0 !important;
-  }
-  .BranchMenu__btn {
-    padding-right: 5px !important;
-  }
-}
-
 .BranchMenu__sync-container {
   position: relative;
   @include flex(flex-start, row);
@@ -395,18 +390,21 @@ $dropBoxWidth: 250px;
 
 
 .BranchMenu__branch-name{
-  padding-top: 10px;
   @include flex(flex-start, row);
+  line-height: 19px;
+  text-align: end;
+
+  &--switching {
+    max-width: calc(100% - 80px);
+  }
   .BranchMenu__dropdown-label{
     align-self: flex-end;
-    line-height: 17px;
   }
   .BranchMenu__dropdown-text{
     white-space: nowrap;
     text-overflow: ellipsis;
     word-break: break-all;
     overflow: hidden;
-    line-height: 20px;
   }
 }
 
@@ -459,5 +457,34 @@ $dropBoxWidth: 250px;
 @keyframes ellipsis {
   to {
     width: 1.25em;
+  }
+}
+
+@media screen and (max-width: 1060px) and (min-width: 0px) {
+  .BranchMenu__dropdown-btn{
+    max-width: 260px;
+  }
+
+  .BranchMenu__dropdown-text{
+    width: 110px;
+  }
+}
+
+@media screen and (max-width: 980px) and (min-width: 0px) {
+  .BranchMenu__dropdown-btn{
+    max-width: 230px;
+  }
+
+  .BranchMenu__dropdown-text{
+    width: 80px;
+  }
+}
+
+@media screen and (max-width: 1280px) and (min-width: 0px) {
+  .BranchMenu__buttons{
+    font-size: 0 !important;
+  }
+  .BranchMenu__btn {
+    padding-right: 5px !important;
   }
 }
