@@ -511,9 +511,18 @@ class Labbooks extends Component {
           setErrorMessage('Failed to fetch Projects.', [{ message: 'There was an error while fetching Projects. This likely means you have a corrupted Project directory.' }]);
           return (
             <div className="Labbooks__fetch-error">
-                There was an error attempting to fetch Projects. <br />
-                Try restarting Gigantum and refresh the page.<br />
-                If the problem persists <a target="_blank" href="https://docs.gigantum.com/discuss" rel="noopener noreferrer">request assistance here.</a>
+                There was an error attempting to fetch Projects.
+                <br />
+                Try restarting Gigantum and refresh the page.
+                <br />
+                If the problem persists
+                <a
+                  target="_blank"
+                  href="https://spectrum.chat/gigantum"
+                rel="noopener noreferrer"
+                >
+                request assistance here.
+                </a>
             </div>
           );
         }

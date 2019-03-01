@@ -485,7 +485,7 @@ export default class CollaboratorsModal extends Component {
               <b>
                 {' Owner '}
               </b>
-              or Project
+              or a Project
               <b>
                 {' Administrator '}
               </b>
@@ -493,7 +493,9 @@ export default class CollaboratorsModal extends Component {
             </div>
             :
             <div className="CollaboratorsModal__message">
-              This project needs to be synced before collaborators can be added.
+              <b>
+                This project needs to be synced before collaborators can be added.
+              </b>
             </div>
             }
 

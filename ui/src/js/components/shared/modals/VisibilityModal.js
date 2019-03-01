@@ -128,15 +128,15 @@ export default class PublishModal extends Component {
               self.props.resetPublishState(true);
 
               if (!self.props.remoteUrl) {
-                self.props.setSyncingState(true);
+                self.props.setPublishingState(true);
 
                 const failureCall = () => {
-                  self.props.setSyncingState(false);
+                  self.props.setPublishingState(false);
                   self.props.resetPublishState(false);
                 };
 
                 const successCall = () => {
-                  self.props.setSyncingState(false);
+                  self.props.setPublishingState(false);
                   self.props.resetPublishState(false);
                   // self.props.remountCollab();
 
@@ -190,7 +190,7 @@ export default class PublishModal extends Component {
   }
 
   _modifyVisibility() {
-    if (this.props.header === 'Sync') {
+    if (this.props.header === 'Publish') {
       this._publishLabbook();
     } else {
       this._changeVisibility();

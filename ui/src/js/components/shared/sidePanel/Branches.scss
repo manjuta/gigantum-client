@@ -169,9 +169,27 @@
             border: 1px solid $azure;
         }
     }
-    &--sync-drowndown--disabled,
-    &--sync-drowndown--disabled:hover,
-    &--sync-drowndown--disabled:focus {
+    &--push {
+        background: $white url('~Images/icons/branches/push.svg') no-repeat center center;
+        background-size: cover;
+        &:hover, &:focus {
+            background: $azure url('~Images/icons/branches/push-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $azure;
+        }
+    }
+    &--pull {
+        background: $white url('~Images/icons/branches/pull.svg') no-repeat center center;
+        background-size: cover;
+        &:hover, &:focus {
+            background: $azure url('~Images/icons/branches/pull-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $azure;
+        }
+    }
+    &--sync-dropdown--disabled,
+    &--sync-dropdown--disabled:hover,
+    &--sync-dropdown--disabled:focus {
         background: $background-color url(~Images/icons/branches/chevron-disabled.svg) no-repeat center center;
         background-size: 20px !important;
         border: 1px solid $romanSilver;
@@ -222,6 +240,22 @@
     &--sync--disabled:hover,
     &--sync--disabled:focus {
         background: $background-color url('~Images/icons/branches/sync-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--pull--disabled,
+    &--pull--disabled:hover,
+    &--pull--disabled:focus {
+        background: $background-color url('~Images/icons/branches/pull-disabled.svg') no-repeat center center !important;
+        background-size: cover !important;
+        border: 1px solid $romanSilver !important;
+        cursor: auto !important;
+    }
+    &--push--disabled,
+    &--push--disabled:hover,
+    &--push--disabled:focus {
+        background: $background-color url('~Images/icons/branches/push-disabled.svg') no-repeat center center !important;
         background-size: cover !important;
         border: 1px solid $romanSilver !important;
         cursor: auto !important;

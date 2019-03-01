@@ -721,7 +721,7 @@ const ImportMain = ({ self }) => {
         renderContent={() =>
           (<Fragment>
             <div className="ImportModal">
-              <p>In order to import a labbook by either pasting a URL or drag & dropping below</p>
+              <p>Import a Project by either pasting a URL or drag & dropping below</p>
               <input
                 className="Import__input"
                 type="text"
@@ -740,7 +740,7 @@ const ImportMain = ({ self }) => {
                 {
                   self.state.readyLabbook && self.state.files[0] ?
                   <div className="Import__ReadyLabbook">
-                    <div>Select Import to import the following labbook</div>
+                    <div>Select Import to import the following Project</div>
                     <hr/>
                     <div>Project Owner: {self.state.readyLabbook.owner}</div>
                     <div>Project Name: {self.state.readyLabbook.labbookName}</div>

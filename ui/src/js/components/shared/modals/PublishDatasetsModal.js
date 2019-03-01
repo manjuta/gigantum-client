@@ -92,7 +92,7 @@ export default class PublishDatasetsModal extends Component {
               self.props.resetPublishState(true);
 
               if (isPublishing) {
-                self.props.setSyncingState(true);
+                self.props.setPublishingState(true);
               } else {
                 self.props.setSyncingState(true);
               }
@@ -100,7 +100,7 @@ export default class PublishDatasetsModal extends Component {
               const failureCall = (errorMessage) => {
                 setTimeout(() => this.props.toggleModal(false, true), 2000);
                 if (isPublishing) {
-                  self.props.setSyncingState(false);
+                  self.props.setPublishingState(false);
                   self.props.resetPublishState(false);
                 } else {
                   self.props.setSyncingState(false);
@@ -116,7 +116,7 @@ export default class PublishDatasetsModal extends Component {
                 this.setState({ progress: successProgress });
                 setTimeout(() => this.props.toggleModal(false, true), 2000);
                 if (isPublishing) {
-                  self.props.setSyncingState(false);
+                  self.props.setPublishingState(false);
                   self.props.resetPublishState(false);
                   self.props.remountCollab();
 

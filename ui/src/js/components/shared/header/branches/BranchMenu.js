@@ -171,7 +171,7 @@ class BranchMenu extends Component {
       setWarningMessage('Publishing is currently only available on the main workspace branch.');
       this.setState({ publishWarningVisible: true });
     } else if (queryForLocalDatasets && typeof queryForLocalDatasets === 'boolean') {
-      LinkedLocalDatasetsQuery.getLocalDatasets({ ownowner, name: this.state.labbookName }).then((res) => {
+      LinkedLocalDatasetsQuery.getLocalDatasets({ owner: this.props.section.owner, name: this.props.section.name }).then((res) => {
           const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
           if (localDatasets.length === 0) {
             this.setState({ publishModalVisible: !this.state.publishModalVisible });
@@ -273,13 +273,13 @@ class BranchMenu extends Component {
     }
   }
   /**
-    @param {Boolean} - allowSyncPull
+    @param {Boolean} - disableDropdown
     sets state to toggle the switch dropdown
     @return {}
   */
   @boundMethod
-  _toggleSyncDropdown(allowSyncPull) {
-    if (allowSyncPull) {
+  _toggleSyncDropdown(disableDropdown) {
+    if (!disableDropdown) {
       const { state } = this;
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
@@ -332,7 +332,7 @@ class BranchMenu extends Component {
     this.setState({ syncMenuVisible: false });
     if (allowSync || (pullOnly && allowSyncPull)) {
       if (!this.props.defaultRemote) {
-        this._togglePublishModal();
+        this._togglePublishModal(!this.state.isDataset, false);
       } else {
         const self = this;
         const data = {
@@ -407,8 +407,10 @@ class BranchMenu extends Component {
       const { collaborators } = props;
       const sectionCollabs = collaborators && collaborators[props.section.name] || null;
       const defaultDatasetMessage = 'Datasets does not currently support branching features';
+      const isPullOnly = props.defaultRemote && !hasWriteAccess && sectionCollabs;
+      const syncOrPublish = props.defaultRemote ? isPullOnly ? 'Pull' : 'Sync' : 'Publish';
       return {
-        syncTooltip: props.isLocked ? 'Cannot Sync while Project is in use' : (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must sync Master branch first' : props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : !hasWriteAccess ? 'You do not have the correct permissions to Sync' : 'Sync',
+        syncTooltip: props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : !props.defaultRemote ? 'Publish' : props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : !hasWriteAccess ? 'Pull' : 'Sync',
         manageTooltip: props.isLocked ? 'Cannot Manage Branches while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Manage',
         createTooltip: props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create',
         resetTooltip: state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : activeBranch.commitsAhead === undefined ? 'Please wait while branch data is being fetched' : upToDate ? 'Branch up to date' : 'Reset',
@@ -439,13 +441,18 @@ class BranchMenu extends Component {
             branchMenuList,
             otherBranchCount,
           } = extraxtActiveBranch(branches),
+          { collaborators } = props,
+          sectionCollabs = collaborators && collaborators[props.section.name] || null,
+          waitingOnCollabs = !sectionCollabs,
           hasWriteAccess = this.props.defaultRemote ? this._hasWriteAccess() : true,
           upToDate = activeBranch.commitsAhead === 0 && activeBranch.commitsBehind === 0,
           allowSync = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && hasWriteAccess,
-          allowSyncPull = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked,
+          allowSyncPull = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && props.defaultRemote,
           allowReset = !props.isLocked && !upToDate && activeBranch.isRemote && (activeBranch.commitsAhead !== undefined),
           smallWidth = window.innerWidth <= 1180,
           statusText = activeBranch.isRemote ? 'Local & Remote' : 'Local only',
+          showPullOnly = props.defaultRemote && !hasWriteAccess && !waitingOnCollabs,
+          disableDropdown = !allowSyncPull || state.isDataset || !props.defaultRemote || showPullOnly,
           {
             syncTooltip,
             manageTooltip,
@@ -453,6 +460,7 @@ class BranchMenu extends Component {
             resetTooltip,
             switchTooltip,
           } = this._getTooltipText(activeBranch, hasWriteAccess, upToDate),
+          syncButtonText = props.defaultRemote ? showPullOnly ? 'Pull' : 'Sync' : 'Publish',
           switchDropdownCSS = classNames({
             'BranchMenu__dropdown-menu': true,
             hidden: !state.switchMenuVisible,
@@ -472,18 +480,22 @@ class BranchMenu extends Component {
             hidden: !state.switchingBranch,
           }),
           syncMenuDropdownCSS = classNames({
-            'BranchMenu__dropdown-menu': state.syncMenuVisible && !props.isLocked,
+            'BranchMenu__dropdown-menu': state.syncMenuVisible && !disableDropdown,
             hidden: !state.syncMenuVisible,
           }),
           syncMenuDropdownButtonCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--sync-dropdown': true,
-            'BranchMenu__btn--sync-dropdown--disabled': !allowSyncPull,
+            'BranchMenu__btn--sync-dropdown--disabled': disableDropdown,
             'BranchMenu__btn--sync-open': state.syncMenuVisible,
           }),
           syncCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--sync': true,
-            'BranchMenu__btn--sync--upToDate': upToDate || activeBranch.commitsAhead === undefined,
-            'BranchMenu__btn--sync--disabled': !allowSync,
+            'BranchMenu__btn--sync--publish': !props.defaultRemote,
+            'BranchMenu__btn--sync--pull': showPullOnly,
+            'BranchMenu__btn--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined)) && !showPullOnly,
+            'BranchMenu__btn--sync--pull--disabled': showPullOnly && !allowSyncPull,
+            'BranchMenu__btn--sync--publish--disabled': !props.defaultRemote && !allowSync,
+            'BranchMenu__btn--sync--upToDate--disabled': props.defaultRemote && !allowSync && !showPullOnly,
             'Tooltip-data Tooltip-data': !allowSync || smallWidth,
           }),
           manageCSS = classNames({
@@ -646,7 +658,7 @@ class BranchMenu extends Component {
             <div className="BranchMenu__sync-container">
               <button
                 className={syncCSS}
-                onClick={() => { this._handleSyncButton(false, allowSync, allowSyncPull); }}
+                onClick={() => { this._handleSyncButton(showPullOnly, allowSync, allowSyncPull); }}
                 data-tooltip={syncTooltip}
                 type="Submit">
                 {
@@ -665,31 +677,31 @@ class BranchMenu extends Component {
                 <div
                   className="BranchMenu__btn--text"
                 >
-                  Sync
+                  {syncButtonText}
                 </div>
               </button>
 
               <button
                 className={syncMenuDropdownButtonCSS}
-                onClick={() => { this._toggleSyncDropdown(allowSyncPull); }}
+                onClick={() => { this._toggleSyncDropdown(disableDropdown); }}
                 type="Submit">
               </button>
 
               <div className={syncMenuDropdownCSS}>
-                <h5 className="BranchMenu__h5">Sync</h5>
+                <h5 className="BranchMenu__h5">Remote Action</h5>
                 <ul className="BranchMenu__ul">
                   {
                     allowSync &&
                     <li
                       className="BranchMenu__list-item"
                       onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull)}>
-                      Push & Pull
+                      Sync (Pull then Push)
                     </li>
                   }
                   <li
                     className="BranchMenu__list-item"
                     onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}>
-                      Pull-only
+                      Pull (Pull-only)
                   </li>
                 </ul>
               </div>
@@ -709,13 +721,16 @@ class BranchMenu extends Component {
           <Branches
             sidePanelVisible={state.sidePanelVisible}
             toggleSidePanel={this._toggleSidePanel}
+            defaultRemote={props.defaultRemote}
             branches={props.branches}
+            disableDropdown={disableDropdown}
             activeBranch={activeBranch}
             toggleModal={this._setModalState}
             isSticky={props.isSticky}
             branchMutations={state.branchMutations}
             isLocked={props.isLocked}
             handleSyncButton={this._handleSyncButton}
+            waitingOnCollabs={waitingOnCollabs}
             allowSync={allowSync}
             allowSyncPull={allowSyncPull}
             sectionId={props.sectionId}
@@ -724,6 +739,7 @@ class BranchMenu extends Component {
             toggleCover={this._toggleCover}
             isDeprecated={props.isDeprecated}
             setBranchUptodate={this.props.setBranchUptodate}
+            showPullOnly={showPullOnly}
           />
           {
           state.publishModalVisible &&
@@ -734,11 +750,11 @@ class BranchMenu extends Component {
             labbookId={props.sectionId}
             remoteUrl={props.defaultRemote}
             auth={props.auth}
-            buttonText="Sync"
-            header="Sync"
+            buttonText="Publish"
+            header="Publish"
             modalStateValue="visibilityModalVisible"
             sectionType={props.sectionType}
-            setSyncingState={props.setSyncingState}
+            setPublishingState={props.setPublishingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
             resetState={this._resetState}
@@ -762,6 +778,7 @@ class BranchMenu extends Component {
             modalStateValue="visibilityModalVisible"
             sectionType={props.sectionType}
             setSyncingState={props.setSyncingState}
+            setPublishingState={props.setPublishingState}
             toggleSyncModal={this._toggleSyncModal}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}

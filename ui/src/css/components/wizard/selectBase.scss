@@ -252,6 +252,20 @@
 }
 .BaseSlide__wrapper{
   margin: 0 7px;
+  position: relative;
+  &--popular {
+    &:before{
+      content: 'POPULAR';
+      font-size: 12px;
+      padding: 2px 10px;
+      background: $azure;
+      color: $white;
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 1;
+    }
+  }
 }
 
 .BaseSlide__wrapper--recent{
@@ -261,6 +275,17 @@
   position: relative;
   .SelectBase__image {
     margin: 7px 0;
+  }
+}
+
+.BaseSlide__coming-soon {
+  margin: 30px 0 0 0;
+  color: $mineShaft;
+  a {
+    cursor: pointer;
+  }
+  p {
+    text-align: center;
   }
 }
 
@@ -278,3 +303,4 @@
 .SelectBase__readme{
   @include flex(flex-end, column)
 }
+

@@ -94,7 +94,16 @@ export default class Prompt extends Component {
                 :
                   <div>
                     <p>Please ensure you have a valid internet connection.</p>
-                    <p>If the problem continues to persist, please report it <a href="https://docs.gigantum.com/discuss" rel="noopener noreferrer" target="_blank">here</a>.</p>
+                    <p>If the problem continues to persist, please report it&nbsp;
+                      <a
+                        href="https://spectrum.chat/gigantum"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        here
+                      </a>
+                      .
+                      </p>
                   </div>
               }
             </div>

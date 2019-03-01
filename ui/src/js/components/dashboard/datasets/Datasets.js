@@ -515,9 +515,18 @@ class Datasets extends Component {
           setErrorMessage('Failed to fetch Datasets.', [{ message: 'There was an error while fetching Datasets. This likely means you have a corrupted Dataset directory.' }]);
           return (
             <div className="Datasets__fetch-error">
-                There was an error attempting to fetch Datasets. <br />
-                Try restarting Gigantum and refresh the page.<br />
-                If the problem persists <a target="_blank" href="https://docs.gigantum.com/discuss" rel="noopener noreferrer">request assistance here.</a>
+                There was an error attempting to fetch Datasets.
+                <br />
+                Try restarting Gigantum and refresh the page.
+                <br />
+                If the problem persists
+                <a
+                  target="_blank"
+                  href="https://spectrum.chat/gigantum"
+                  rel="noopener noreferrer"
+                >
+                {' request assistance here.'}
+                </a>
             </div>
           );
         }

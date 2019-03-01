@@ -234,6 +234,7 @@ class Header extends Component {
                     sectionType={props.sectionType}
                     auth={props.auth}
                     setSyncingState={this._setSyncingState}
+                    setPublishingState={this._setPublishingState}
                     setExportingState={this._setExportingState}
                     isLocked={props.isLocked}
                     setBranchUptodate={props.setBranchUptodate}

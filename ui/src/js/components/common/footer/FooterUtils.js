@@ -18,7 +18,7 @@ const FooterUtils = {
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
-  getJobStatus: (result, type, key, successCall, failureCall) => {
+  getJobStatus: (result, type, key, successCall, failureCall, id) => {
     /**
       *  @param {}
       *  refetches job status
@@ -78,11 +78,11 @@ const FooterUtils = {
 
             if (response.data.jobStatus.status === 'started') {
               if (html.length) {
-                setMultiInfoMessage(response.data.jobStatus.id, message, false, false, [{ message: html }]);
+                setMultiInfoMessage(id || response.data.jobStatus.id, message, false, false, [{ message: html }]);
               }
               refetch();
             } else if (response.data.jobStatus.status === 'finished') {
-              setMultiInfoMessage(response.data.jobStatus.id, message, true, null, [{ message: html }]);
+              setMultiInfoMessage(id || response.data.jobStatus.id, message, true, null, [{ message: html }]);
               if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'publishDataset') || (type === 'syncDataset')) {
                 successCall();
                 const section = type.indexOf('Dataset') > -1 ? 'dataset' : 'labbook';
@@ -177,7 +177,7 @@ const FooterUtils = {
                 failureKeys.forEach(failedKey => reportedFailureMessage = `${reportedFailureMessage}\n${failedKey}`);
               }
               html += `\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
-              setMultiInfoMessage(response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
+              setMultiInfoMessage(id || response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
             } else {
               // refetch status data not ready
               refetch();

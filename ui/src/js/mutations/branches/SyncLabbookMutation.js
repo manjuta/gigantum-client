@@ -3,7 +3,8 @@ import {
   graphql,
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
-
+import uuidv4 from 'uuid/v4';
+import { setMultiInfoMessage } from 'JS/redux/reducers/footer';
 import FooterUtils from 'Components/common/footer/FooterUtils';
 
 const mutation = graphql`
@@ -40,7 +41,9 @@ export default function SyncLabbookMutation(
   if (overrideMethod) {
     variables.input.overrideMethod = overrideMethod;
   }
-
+  const id = uuidv4();
+  const startMessage = `Preparing to ${pullOnly ? 'pull' : 'sync'} Project...`;
+  setMultiInfoMessage(id, startMessage, false, false, [{ message: startMessage }]);
   commitMutation(
     environment,
     {
@@ -56,7 +59,7 @@ export default function SyncLabbookMutation(
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
         if (response) {
-          FooterUtils.getJobStatus(response, 'syncLabbook', 'jobKey', successCall, failureCall);
+          FooterUtils.getJobStatus(response, 'syncLabbook', 'jobKey', successCall, failureCall, id);
         }
       },
     },

@@ -133,7 +133,7 @@ class Branches extends Component {
   */
   @boundMethod
   _toggleSyncDropdown() {
-    if (this.props.allowSyncPull) {
+    if (!this.props.disableDropdown) {
       const { state } = this;
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
@@ -352,16 +352,21 @@ class Branches extends Component {
       Branches__btn: true,
       'Tooltip-data': true,
       'Tooltip-data--small': true,
-      'Branches__btn--sync': true,
-      'Branches__btn--sync--disabled': !props.allowSync,
+      'Branches__btn--sync': props.defaultRemote,
+      'Branches__btn--push': !props.defaultRemote,
+      'Branches__btn--pull': props.showPullOnly,
+      'Branches__btn--push--disabled': !props.defaultRemote && !props.allowSync,
+      'Branches__btn--sync--disabled': !props.allowSync && !props.showPullOnly,
+      'Branches__btn--pull--disabled': props.showPullOnly && !props.allowSyncPull,
     }),
     syncMenuDropdownButtonCSS = classNames({
       'Branches__btn Branches__btn--sync-dropdown': true,
-      'Branches__btn--sync-dropdown--disabled': !props.allowSyncPull,
+      'Branches__btn--sync-dropdown--disabled': props.disableDropdown,
       'Branches__btn--sync-open': state.syncMenuVisible,
+      'Tooltip-data': props.disableDropdown && props.showPullOnly,
     }),
     syncMenuDropdownCSS = classNames({
-      'Branches__dropdown-menu': state.syncMenuVisible,
+      'Branches__dropdown-menu': state.syncMenuVisible && !props.disableDropdown,
       hidden: !state.syncMenuVisible,
     });
     let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset' : 'Branch must be remote';
@@ -385,27 +390,28 @@ class Branches extends Component {
             <button
               className={syncButtonCSS}
               data-tooltip={syncTooltip}
-              onClick={() => props.handleSyncButton(true, props.allowSync, props.allowSyncPull) }
+              onClick={() => props.handleSyncButton(props.showPullOnly, props.allowSync, props.allowSyncPull) }
             />
             <button
               className={syncMenuDropdownButtonCSS}
+              data-tooltip="You do not have the appropriate permissions to sync"
               onClick={() => { this._toggleSyncDropdown(); }}
             />
             <div className={syncMenuDropdownCSS}>
-              <h5 className="Branches__h5">Sync</h5>
+              <h5 className="Branches__h5">Remote Action</h5>
               <ul className="Branches__ul">
                 {
                   props.allowSync &&
                   <li
                       className="Branches__list-item"
                       onClick={() => props.handleSyncButton(false, props.allowSync, props.allowSyncPull)}>
-                      Push & Pull
+                      Sync (Pull then Push)
                   </li>
                 }
                 <li
                     className="Branches__list-item"
                     onClick={() => props.handleSyncButton(true, props.allowSync, props.allowSyncPull)}>
-                    Pull-only
+                    Pull (Pull-only)
                 </li>
               </ul>
             </div>

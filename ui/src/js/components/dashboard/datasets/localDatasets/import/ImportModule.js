@@ -596,7 +596,7 @@ const ImportMain = ({ self }) => {
         renderContent={() =>
           (<Fragment>
             <div className="ImportModal">
-              <p>In order to import a dataset by either pasting a URL or drag & dropping below</p>
+              <p>Import a dataset by either pasting a URL or drag & dropping below</p>
               <input
                 className="Import__input"
                 type="text"

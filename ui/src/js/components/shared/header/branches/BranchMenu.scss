@@ -216,9 +216,49 @@ $dropBoxWidth: 250px;
         color: $white;
       }
     }
-    &--disabled,
-    &--disabled:hover,
-    &--disabled:focus {
+    &--publish{
+      background: url('~Images/icons/branches/push.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      padding: 0 10px 0 30px !important;
+      &:hover, &:focus{
+        background: $azure url('~Images/icons/branches/push-hover.svg') no-repeat left 5px center !important;
+        background-size: 25px !important;
+        color: $white;
+      }
+    }
+    &--pull{
+      background: url('~Images/icons/branches/pull.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      padding: 0 10px 0 30px !important;
+      &:hover, &:focus{
+        background: $azure url('~Images/icons/branches/pull-hover.svg') no-repeat left 5px center !important;
+        background-size: 25px !important;
+        color: $white;
+      }
+    }
+    &--pull--disabled,
+    &--pull--disabled:hover,
+    &--pull--disabled:focus {
+      background: $background-color url(~Images/icons/branches/pull-disabled.svg) no-repeat 5px center !important;
+      background-size: 25px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      padding: 0 10px 0 30px !important;
+      cursor: auto;
+    }
+    &--publish--disabled,
+    &--publish--disabled:hover,
+    &--publish--disabled:focus {
+      background: $background-color url(~Images/icons/branches/push-disabled.svg) no-repeat 5px center !important;
+      background-size: 25px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      padding: 0 10px 0 30px !important;
+      cursor: auto;
+    }
+    &--upToDate--disabled,
+    &--upToDate--disabled:hover,
+    &--upToDate--disabled:focus {
       background: $background-color url(~Images/icons/branches/sync-disabled.svg) no-repeat 5px center !important;
       background-size: 25px !important;
       border: 1px solid $romanSilver;
