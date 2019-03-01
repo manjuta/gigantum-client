@@ -45,7 +45,11 @@ export default class LocalLabbookPanel extends Component {
       status = (imageStatus === 'BUILD_FAILED') ? 'Rebuild' : status;
       status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
 
-      const textStatus = status === 'Rebuild' ? 'Stopped' : status;
+      status = ((state.status === 'Starting') && (containerStatus !== 'RUNNING')) || (state.status === 'Stopping' && (containerStatus !== 'NOT_RUNNING')) ? state.status : status;
+
+      let textStatus = (status === 'Rebuild') ? 'Stopped' : status;
+      textStatus = (state.textStatus === 'Run') ? 'Run' : textStatus;
+      textStatus = (state.textStatus === 'Stop') ? 'Stop' : textStatus;
 
       state.status = status;
       state.textStatus = textStatus;
@@ -65,7 +69,7 @@ export default class LocalLabbookPanel extends Component {
     status = (imageStatus === 'BUILD_FAILED') ? 'Rebuild' : status;
     status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
 
-    const textStatus = newStatus === 'Rebuild' ? 'Stopped' : textStatus;
+    const textStatus = (newStatus === 'Rebuild') ? 'Stopped' : textStatus;
 
     return { status: textStatus, cssClass: newStatus };
   }
@@ -91,7 +95,7 @@ export default class LocalLabbookPanel extends Component {
     }
   }
 
-  _rebuildContainer(){
+  _rebuildContainer() {
 
   }
   /** *
@@ -111,7 +115,6 @@ export default class LocalLabbookPanel extends Component {
       (response, error) => {
         if (error) {
           setErrorMessage(`There was a problem starting ${this.state.labbookName}, go to Project and try again`, error);
-          self.setState({ textStatus: 'Stopped', status: 'Stopped' });
         } else {
           self.props.history.replace(`../../projects/${owner}/${labbookName}`);
         }
@@ -138,7 +141,7 @@ export default class LocalLabbookPanel extends Component {
           setErrorMessage(`There was a problem stopping ${this.state.labbookName} container`, error);
           self.setState({ textStatus: 'Running', status: 'Running' });
         } else {
-          this.setState({ status: 'Stopped', textStatus: 'Stopped' });
+          // this.setState({ status: 'Stopped', textStatus: 'Stopped' });
         }
       },
     );
@@ -147,13 +150,16 @@ export default class LocalLabbookPanel extends Component {
   * @param {object,string} evt,status
   * stops labbbok conatainer
   ** */
-  _updateTextStatusOver(evt, status) {
+  _updateTextStatusOver(evt, isOver, status) {
     let newStatus = status;
-
-    if (status !== 'loading') {
-      newStatus = (status === 'Running') ? 'Stop' : newStatus;
-      newStatus = (status === 'Stopped') ? 'Run' : newStatus;
-      this.setState({ textStatus: newStatus });
+    if (isOver) {
+      if (status === 'Running') {
+        this.setState({ textStatus: 'Stop' });
+      } else if (status === 'Stopped') {
+        this.setState({ textStatus: 'Run' });
+      }
+    } else {
+      this.setState({ textStatus: status });
     }
   }
   /** *
@@ -193,8 +199,8 @@ export default class LocalLabbookPanel extends Component {
             <div
               data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
               onClick={evt => this._stopStartContainer(evt, cssClass)}
-              onMouseOver={evt => this._updateTextStatusOver(evt, status)}
-              onMouseOut={evt => this._updateTextStatusOut(evt, status)}
+              onMouseOver={evt => this._updateTextStatusOver(evt, true, status)}
+              onMouseOut={evt => this._updateTextStatusOut(evt, false, status)}
               className={containerCSS}>
              <div className="ContainerStatus__text">{ textStatus }</div>
              <div className="ContainerStatus__toggle">

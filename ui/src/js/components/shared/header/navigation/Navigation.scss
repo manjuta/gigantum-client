@@ -9,7 +9,7 @@
 .Navigation__ul {
   white-space: nowrap;
   max-width: 1235px;
-  min-width: 820px;
+  min-width: 760px;
   border-bottom: 1px solid $grey;
 }
 
@@ -44,5 +44,14 @@
     &:hover {
       color: $white;
     }
+  }
+}
+
+@media screen and (max-width: 1000px) and (min-width: 0px) {
+  .Navigation__ul {
+    width: calc(100% - 20px);
+  }
+  .Navigation__list-item {
+    width: 120px;
   }
 }

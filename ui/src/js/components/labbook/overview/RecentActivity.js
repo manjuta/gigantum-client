@@ -161,7 +161,7 @@ export default class RecentActivity extends Component {
         </div>
 
         <div className="RecentActivity__list grid">
-          <div key={edge.id} className="RecentActivity__card Card Card--auto Card--no-hover column-3-span-4">
+          <div key={edge.id} className="RecentActivity__card Card Card--auto Card--no-hover column-1-span-12">
             <button
               className="Btn--redirect"
               onClick={() => this._handleRedirect('activity')}

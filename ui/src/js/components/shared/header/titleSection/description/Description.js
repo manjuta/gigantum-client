@@ -149,7 +149,7 @@ export default class Description extends Component {
                 this.state.editingDescription ?
                   <Fragment>
                     <textarea
-                        maxLength="260"
+                        maxLength="80"
                         className="Description__input"
                         type="text"
                         onChange={(evt) => { this.setState({ descriptionText: evt.target.value.replace(/\n/g, ' ') }); }}

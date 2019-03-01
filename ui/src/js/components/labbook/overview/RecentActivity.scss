@@ -14,7 +14,6 @@
 
 .RecentActivity__card {
   @include flex(flex-start, row);
-  width: 100%;
   border-bottom: 10px solid $azure;
   min-height: 80x;
   max-height: 150px;

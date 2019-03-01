@@ -5,7 +5,7 @@
   width: auto;
   max-width: 200px;
   position: relative;
-  z-index: index($elements, card);
+  z-index: index($elements, card + 1);
 
   &--locked {
     height: 10px;
@@ -36,6 +36,7 @@
 
   &:hover{
     top: -5px;
+    left: 25px;
     color: $white;
     background: $azure url('~Images/icons/menu-rollback.svg') no-repeat 2px center !important;
     padding: 0px 2px 2px 30px;

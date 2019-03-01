@@ -10,7 +10,6 @@ mutation LabbookLookupMutation($input: FetchLabbookEdgeInput!){
     fetchLabbookEdge(input: $input) {
         newLabbookEdge{
             node{
-              id
               environment{
                 containerStatus
                 imageStatus

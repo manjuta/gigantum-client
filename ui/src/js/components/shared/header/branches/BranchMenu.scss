@@ -399,12 +399,14 @@ $dropBoxWidth: 250px;
   @include flex(flex-start, row);
   .BranchMenu__dropdown-label{
     align-self: flex-end;
+    line-height: 17px;
   }
   .BranchMenu__dropdown-text{
     white-space: nowrap;
     text-overflow: ellipsis;
     word-break: break-all;
     overflow: hidden;
+    line-height: 20px;
   }
 }
 

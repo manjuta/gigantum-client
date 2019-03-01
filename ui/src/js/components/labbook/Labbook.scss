@@ -1,7 +1,7 @@
 @import '~Styles/_imports.scss';
 
 .Labbook {
-  width: calc(100% - 40px);
+  width: calc(100% - 30px);
   min-width: 820px;
   max-width: 1285px;
   height: auto;
@@ -44,7 +44,7 @@
 }
 
 .Labbook__spacer {
-  width: calc(100% - 50px);
+  width: calc(100% - 20px);
   height: auto;
   min-height: 100%;
   margin: 10px 5px 20px 20px;

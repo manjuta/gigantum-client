@@ -20,18 +20,23 @@ import './CreateBranch.scss';
 export default class CreateBranchModal extends Component {
   constructor(props) {
     super(props);
-    const formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A');
-    const formatedTimestamp = props.selected ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('M/DD/YY h:mm:ss A') : '';
+    let branchDescription = props.selected ? `${props.selected.description}. ${props.selected.activeBranch} at ${formatedTimestamp}.` : props.description ? props.description : '';
+          branchDescription = branchDescription.substr(0, 80);
+    const textLength = 80 - branchDescription.length,
+          formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A'),
+          formatedTimestamp = props.selected ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('M/DD/YY h:mm:ss A') : '',
+          textWarning = textLength > 20 ? 'CreateBranch__warning--green' : 'CreateBranch__warning--orange';
+
     this.state = {
       modalVisible: props.modalVisible,
       showLoginPrompt: false,
-      textWarning: 'hidden',
-      textLength: 0,
       showError: false,
       branchName: '',
-      branchDescription: props.selected ? `${props.selected.description}. ${props.selected.activeBranch} at ${formatedTimestamp}.` : props.description ? props.description : '',
       createButtonClicked: false,
       buttonLoaderCreateBranch: '',
+      textWarning,
+      branchDescription,
+      textLength,
     };
 
     this._showModal = this._showModal.bind(this);
@@ -51,7 +56,7 @@ export default class CreateBranchModal extends Component {
       const formattedTimestamp = Moment(Date.parse(nextProps.selected.timestamp)).format('YYYYMMDD-HHmmss');
       const branchName = `rollback-to-${formattedTimestamp}`;
       this.setState({ branchName });
-    } else if (state.branchName.indexOf('rollback') > -1) {
+    } else if (state.branchName && (typeof state.branchName === 'string') && (state.branchName.indexOf('rollback') > -1)) {
       this.setState({ branchName: '' });
     }
   }
@@ -73,7 +78,10 @@ export default class CreateBranchModal extends Component {
   _hideModal(inputsDisabled) {
     const { props } = this;
     if (!inputsDisabled) {
-      this.setState({ modalVisible: false });
+      this.setState({
+        branchName: '',
+        modalVisible: false,
+      });
 
       if (props.toggleModal) {
         props.toggleModal('createBranchVisible');
@@ -111,23 +119,21 @@ export default class CreateBranchModal extends Component {
         this.setState({
           showError: ((isMatch === false) && (evt.target.value.length > 0)),
           errorType: '',
+          branchName: (evt.target.value === '') ? '' : state.branchName,
         });
       }
     } else {
       state[key] = evt.target.value;
     }
-
-    const textLength = 240 - evt.target.value.length;
-    if (textLength >= 100) {
-      state.textWarning = 'CreateBranch__warning--hidden';
-    } else if ((textLength <= 100) && (textLength > 50)) {
-      state.textWarning = 'CreateBranch__warning--green';
-    } else if ((textLength <= 50) && (textLength > 20)) {
-      state.textWarning = 'CreateBranch__warning--yellow';
-    } else {
-      state.textWarning = 'CreateBranch__warning--red';
+    if (key === 'branchDescription') {
+      const textLength = 80 - evt.target.value.length;
+      if ((textLength <= 80) && (textLength > 20)) {
+        state.textWarning = 'CreateBranch__warning--green';
+      } else if (textLength < 20) {
+        state.textWarning = 'CreateBranch__warning--orange';
+      }
+      state.textLength = textLength;
     }
-    state.textLength = textLength;
 
     this.setState(state);
   }
@@ -208,7 +214,7 @@ export default class CreateBranchModal extends Component {
           formatedTimestamp = props.selected ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('M/DD/YY h:mm:ss A') : '',
           branchNameTimestamp = props.selected ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('MMDDYY-HHmmss').toLowerCase() : '',
           branchDefault = props.selected ? `${props.selected.activeBranch}-at-${branchNameTimestamp}` : '',
-          textAreaDefault = props.selected ? `${props.selected.description} (from ${props.selected.activeBranch} at ${formatedTimestamp})` : props.description ? props.description : '',
+          textAreaDefault = state.branchDescription,
           inputCSS = classNames({
             'CreateBranch__input--invalid': state.showError,
           }),
@@ -219,7 +225,6 @@ export default class CreateBranchModal extends Component {
           branchModalTitle = props.selected ? 'Create Rollback Branch' : 'Create Branch',
           icon = props.selected ? 'rollback' : 'create';
 
-
     return (
       <div>
         { state.modalVisible
@@ -229,9 +234,10 @@ export default class CreateBranchModal extends Component {
           header={branchModalTitle}
           icon={icon}
           renderContent={() => (<div className="CreateBranch">
-            <div>
-              <label>Name</label>
+            <div className="CreateBranch__name">
+              <label htmlFor="CreateBranchName">Name</label>
               <input
+                id="CreateBranchName"
                 type="text"
                 maxLength="80"
                 className={inputCSS}
@@ -244,14 +250,15 @@ export default class CreateBranchModal extends Component {
               <span className={errorCSS}>{this._getErrorText()}</span>
             </div>
 
-            <div>
-              <label>Description</label>
+            <div className="CreateBranch__description">
+              <label htmlFor="CreateBranchDescription">Description</label>
               <textarea
+                id="CreateBranchDescription"
                 className="CreateBranch__input--description"
                 disabled={inputsDisabled}
                 onChange={evt => this._updateTextState(evt, 'branchDescription')}
                 onKeyUp={evt => this._updateTextState(evt, 'branchDescription')}
-                maxLength="240"
+                maxLength="80"
                 placeholder="Briefly describe this branch, its purpose and any other key details. "
                 defaultValue={textAreaDefault}
               />

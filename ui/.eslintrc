@@ -99,7 +99,13 @@
     "react/no-access-state-in-setstate": 0,
     "operator-linebreak": 0,
     "no-else-return": 0,
-    "react/button-has-type": 0
+    "react/button-has-type": 0,
+    "jsx-a11y/label-has-associated-control": [ 2, {
+        "labelComponents": ["CustomInputLabel"],
+        "labelAttributes": ["label"],
+        "controlComponents": ["CustomInput"],
+        "depth": 3,
+     }],
   },
   "settings": {
     "import/resolver": {

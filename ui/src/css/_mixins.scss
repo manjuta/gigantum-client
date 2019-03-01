@@ -118,14 +118,17 @@
 }
 
 @mixin removeColumns($width, $span, $columnsToRemove){
-  $columnWidth: 130px;
+  $columnWidth: 105px;
   $columnSpan: ((80px * $span) + (25px * ($span - 1)));
 
-  $maxScreenWidth: ($width + 180px) - (($columnsToRemove - 1) * 130px) + 25px;
 
-  $minScreenWidth: $maxScreenWidth - ($columnsToRemove * $columnWidth);
+
+  $maxScreenWidth: $width - (($columnsToRemove - 1) * $columnWidth) + 205px;
+
+  $minScreenWidth: $maxScreenWidth - $columnWidth;
   @media screen and (max-width: $maxScreenWidth) and (min-width: $minScreenWidth) {
     width: (($span - $columnsToRemove) * 80px) + (($span - ($columnsToRemove + 1)) * 25px) !important;
+    max-width: $width;
   }
 }
 
@@ -144,4 +147,18 @@
   *************************************/
   @include removeColumns($width, $span, 2);
 
+  /************************************
+    remove 3 columns
+  *************************************/
+  @include removeColumns($width, $span, 3);
+
+  /************************************
+    remove 4 columns
+  *************************************/
+  @include removeColumns($width, $span, 4);
+
+  /************************************
+    remove 5 columns
+  *************************************/
+  @include removeColumns($width, $span, 5);
 }

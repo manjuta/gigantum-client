@@ -85,7 +85,7 @@ class Labbook extends Component {
   state = {
     containerStatus: this.props.labbook.environment.containerStatus,
     imageStatus: this.props.labbook.environment.imageStatus,
-    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING'),
+    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     visibility: this.props.labbook.visibility,
@@ -127,13 +127,14 @@ class Labbook extends Component {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-
+    const isLocked = (nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
     return {
       ...state,
       deletedBranches: newDeletedBranches,
       branches: mergedBranches,
       canManageCollaborators: nextProps.labbook.canManageCollaborators,
       collaborators: nextProps.labbook.collaborators,
+      isLocked,
     };
   }
 
@@ -349,24 +350,25 @@ class Labbook extends Component {
           isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
 
     if (props.labbook) {
-      const { labbook, branchesOpen } = props;
-      const branchName = '';
-      const isDemo = window.location.hostname === Config.demoHostName;
-      const labbookCSS = classNames({
-        Labbook: true,
-        'Labbook--detail-mode': props.detailMode,
-        'Labbook--branch-mode': branchesOpen,
-        'Labbook--demo-mode': isDemo,
-        'Labbook--deprecated': labbook.isDeprecated,
-        'Labbook--demo-deprecated': labbook.isDeprecated && isDemo,
-      });
-      const deprecatedCSS = classNames({
-        Labbook__deprecated: true,
-        'Labbook__deprecated--demo': isDemo,
-      });
-      const isOwner = localStorage.getItem('username') === labbook.owner;
-      const deprecatedText = `This Project needs to be migrated to the latest Project format. ${isOwner ? '' : 'The project owner must migrate and sync this project to update. '}`;
-      const oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName));
+      const { labbook, branchesOpen } = props,
+            branchName = '',
+            isDemo = window.location.hostname === Config.demoHostName,
+            labbookCSS = classNames({
+            Labbook: true,
+            'Labbook--detail-mode': props.detailMode,
+            'Labbook--branch-mode': branchesOpen,
+            'Labbook--demo-mode': isDemo,
+            'Labbook--deprecated': labbook.isDeprecated,
+            'Labbook--demo-deprecated': labbook.isDeprecated && isDemo,
+          }),
+          deprecatedCSS = classNames({
+            Labbook__deprecated: true,
+            'Labbook__deprecated--demo': isDemo,
+          }),
+          isOwner = localStorage.getItem('username') === labbook.owner,
+          ownerText = isOwner ? '' : 'The project owner must migrate and sync this project to update.',
+          deprecatedText = `This Project needs to be migrated to the latest Project format. ${ownerText}`,
+          oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName));
 
       return (
         <div className={labbookCSS}>
@@ -376,15 +378,12 @@ class Labbook extends Component {
           <div className="Labbook__spacer flex flex--column">
             {
               labbook.isDeprecated &&
-              <div
-                className={deprecatedCSS}
-              >
+              <div className={deprecatedCSS}>
                 {deprecatedText}
                 <a
                   target="_blank"
                   href="https://docs.gigantum.com/"
-                  rel="noopener noreferrer"
-                >
+                  rel="noopener noreferrer">
                   Learn More.
                 </a>
                 {
@@ -392,15 +391,14 @@ class Labbook extends Component {
                   <button
                     className="Labbook__deprecated-action"
                     onClick={() => this._toggleMigrationModal()}
-                    disabled={state.migrationInProgress}
-                  >
+                    disabled={state.migrationInProgress}>
                     Migrate
                   </button>
                 }
               </div>
             }
             {
-              this.state.migrationModalVisible
+              state.migrationModalVisible
               &&
               <Modal
                 header="Project Migration"
@@ -408,7 +406,7 @@ class Labbook extends Component {
                 size="large"
                 renderContent={() => <div className="Labbook__migration-modal">
                   {
-                    !this.state.migrateComplete ?
+                    !state.migrateComplete ?
                     <div className="Labbook__migration-container">
                       <div className="Labbook__migration-content">
                       <p>

@@ -29,10 +29,11 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   const headers = {
     accept: '*/*',
   };
+
+
   if (process.env.NODE_ENV === 'development') {
     headers['Access-Control-Allow-Origin'] = '*';
   }
-
   if (uploadables && uploadables[0]) {
     if (uploadables[1]) {
       const idToken = localStorage.getItem('id_token');
