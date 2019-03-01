@@ -7,21 +7,21 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import Loadable from 'react-loadable';
-// components
-import DatasetHeader from '../shared/header/Header';
-import Login from 'Components/login/Login';
-import Loader from 'Components/common/Loader';
-import ErrorBoundary from 'Components/common/ErrorBoundary';
 // store
 import store from 'JS/redux/store';
 import { setStickyState } from 'JS/redux/reducers/dataset/dataset';
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
+// config
+import Config from 'JS/config';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
+// components
+import Login from 'Components/login/Login';
+import Loader from 'Components/common/Loader';
+import ErrorBoundary from 'Components/common/ErrorBoundary';
+import DatasetHeader from '../shared/header/Header';
 // assets
 import './Dataset.scss';
-
-import Config from 'JS/config';
 
 const Loading = () => <Loader />;
 
@@ -51,8 +51,6 @@ class Dataset extends Component {
     this.state = {};
     // bind functions here
     this._setBuildingState = this._setBuildingState.bind(this);
-    this._toggleBranchesView = this._toggleBranchesView.bind(this);
-    this._branchViewClickedOff = this._branchViewClickedOff.bind(this);
     setCallbackRoute(props.location.pathname);
     const { labbookName, owner } = store.getState().routes;
     document.title = `${owner}/${labbookName}`;
@@ -84,7 +82,6 @@ class Dataset extends Component {
     this._setStickHeader();
 
     window.addEventListener('scroll', this._setStickHeader);
-    window.addEventListener('click', this._branchViewClickedOff);
   }
 
   /**
@@ -93,35 +90,6 @@ class Dataset extends Component {
   */
   componentWillUnmount() {
     window.removeEventListener('scroll', this._setStickHeader);
-
-    window.removeEventListener('click', this._branchViewClickedOff);
-  }
-
-  /**
-    @param {event}
-    updates state of dataset when prompted ot by the store
-    updates history prop
-  */
-  _branchViewClickedOff(evt) {
-    if (evt.target.className.indexOf('Dataset__veil') > -1) {
-      this._toggleBranchesView(false, false);
-    }
-  }
-
-  /**
-    @param {string}
-    makes branch name pretty
-    @return {string}
-  */
-  _sanitizeBranchName(branchName) {
-    const username = localStorage.getItem('username');
-    const workspace = `gm.workspace-${username}`;
-
-    if (branchName) {
-      const prettyBranchName = (branchName === workspace) ? 'workspace' : branchName.replace(`${workspace}.`, '');
-
-      return prettyBranchName;
-    }
   }
 
   /**
@@ -151,17 +119,6 @@ class Dataset extends Component {
     }
   }
 
-  /**
-    @param {boolean, boolean}
-    updates branchOpen state
-  */
-  _toggleBranchesView(branchesOpen, mergeFilter) {
-    if (store.getState().containerStatus.status !== 'Running') {
-      setMergeMode(branchesOpen, mergeFilter);
-    } else {
-      setContainerMenuWarningMessage('Stop Project before switching branches. \n Be sure to save your changes.');
-    }
-  }
   /**
     scrolls to top of window
   */
@@ -316,6 +273,7 @@ const DatasetFragmentContainer = createFragmentContainer(
           id
           description
           owner
+          name
           #createdOnUtc
           modifiedOnUtc
           defaultRemote

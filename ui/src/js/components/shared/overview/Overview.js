@@ -222,12 +222,12 @@ export default class Overview extends Component {
       }),
 
       overviewReadmeEditingCSS = classNames({
-        'Overview__readme--editing': state.editingReadme,
+        'Overview__readme--editing column-1-span-12': state.editingReadme,
         hidden: !state.editingReadme,
       }),
 
       overviewReadmeCSS = classNames({
-        'Overview__readme Card Card--auto Card--no-hover': !state.editingReadme,
+        'Overview__readme Card Card--auto Card--no-hover column-1-span-12': !state.editingReadme,
         hidden: state.editingReadme,
       }),
 
@@ -280,114 +280,115 @@ export default class Overview extends Component {
 
             {
             state.editingReadme &&
+            <div className="grid">
+              <div className={overviewReadmeEditingCSS}>
 
-            <div className={overviewReadmeEditingCSS}>
+                <textarea
+                  ref="markdown"
+                  className="Overview__readme-editor"
+                  id="markDown"
+                />
 
-              <textarea
-                ref="markdown"
-                className="Overview__readme-editor"
-                id="markDown"
-              />
+                <div className="Overview__readme--editing-buttons">
 
-              <div className="Overview__readme--editing-buttons">
+                  <button
+                    className="Overview__readme-save"
+                    disabled={false}
+                    onClick={() => { this._saveReadme(); }}
+                  >
+                    Save
+                  </button>
 
-                <button
-                  className="Overview__readme-save"
-                  disabled={false}
-                  onClick={() => { this._saveReadme(); }}
-                >
-                  Save
-                </button>
+                  {
+                    state.readMeWarning &&
 
-                {
-                  state.readMeWarning &&
+                    <Fragment>
 
-                  <Fragment>
+                      <div className="BranchMenu__menu-pointer" />
 
-                    <div className="BranchMenu__menu-pointer" />
-
-                    <div className="BranchMenu__button-menu">
-                      Readme cannot be edited while project is
-                      {state.readMeWarning}
-                      .
-                    </div>
-                  </Fragment>
-                }
-                <button
-                  className="Overview__readme-cancel"
-                  onClick={() => { this._closeReadme(); }}
-                >
-                  Cancel
-                </button>
+                      <div className="BranchMenu__button-menu">
+                        Readme cannot be edited while project is
+                        {state.readMeWarning}
+                        .
+                      </div>
+                    </Fragment>
+                  }
+                  <button
+                    className="Overview__readme-cancel"
+                    onClick={() => { this._closeReadme(); }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
+             </div>
             }
             {
             sectionProps.overview.readme ?
-              <div
-                className={overviewReadmeCSS}
-              >
-                <button
-                  className={overviewReadmeButtonCSS}
-                  onClick={() => this._setEditingReadme(true)}
-                >
-                  <span>Edit Readme</span>
-                </button>
-                <ReactMarkdown
-                  className={readmeCSS}
-                  source={sectionProps.overview.readme}
-                  renderers={{ code: props => <CodeBlock {...props} /> }}
-                />
+              <div className="grid">
+                <div className={overviewReadmeCSS}>
+                  <button
+                    className={overviewReadmeButtonCSS}
+                    onClick={() => this._setEditingReadme(true)}>
+                    <span>Edit Readme</span>
+                  </button>
+                  <ReactMarkdown
+                    className={readmeCSS}
+                    source={sectionProps.overview.readme}
+                    renderers={{ code: props => <CodeBlock {...props} /> }}
+                  />
 
-                {
-                  state.overflowExists && !state.readmeExpanded &&
-
-                  <div className="Overview__readme-fadeout" />
-                }
-
-                <div className="Overview__readme-buttons">
                   {
-                    state.overflowExists && (state.readmeExpanded ?
-                      <div className="Overview__readme-bar-less">
-                        <button
-                          className="Overview__readme-less"
-                          onClick={() => this._shrinkReadme()}
-                        >
-                          Collapse
-                        </button>
-                      </div>
-                      :
-                      <div className="Overview__readme-bar-more">
-                        <button
-                          className="Overview__readme-more"
-                          onClick={() => this._expandReadme()}
-                        >
-                          Expand
-                        </button>
-                      </div>)
-                  }
-                </div>
+                    state.overflowExists && !state.readmeExpanded &&
 
+                    <div className="Overview__readme-fadeout" />
+                  }
+
+                  <div className="Overview__readme-buttons">
+                    {
+                      state.overflowExists && (state.readmeExpanded ?
+                        <div className="Overview__readme-bar-less">
+                          <button
+                            className="Overview__readme-less"
+                            onClick={() => this._shrinkReadme()}>
+                            Collapse
+                          </button>
+                        </div>
+                        :
+                        <div className="Overview__readme-bar-more">
+                          <button
+                            className="Overview__readme-more"
+                            onClick={() => this._expandReadme()}
+                          >
+                            Expand
+                          </button>
+                        </div>)
+                    }
+                  </div>
+
+                </div>
               </div>
               :
               !state.editingReadme &&
-                <div className="Overview__empty">
-                  <button
-                    className={overviewReadmeButtonCSS}
-                    onClick={() => this._setEditingReadme(true)}
-                  >
-                    <span>Edit Readme</span>
-                  </button>
-                  <div className="Overview__empty-content">
-                    <p>This Project Has No Readme</p>
-                    <p
-                      className="Overview__empty-action"
+                <div className="grid">
+                  <div className="Overview__empty column-1-span-12">
+                    <button
+                      className={overviewReadmeButtonCSS}
                       onClick={() => this._setEditingReadme(true)}
                     >
-                      Create a Readme
-                    </p>
+                      <span>Edit Readme</span>
+                    </button>
+                    <div className="Overview__empty-content">
+                      <p>This Project Has No Readme</p>
+                      <p
+                        className="Overview__empty-action"
+                        onClick={() => this._setEditingReadme(true)}
+                      >
+                        Create a Readme
+                      </p>
+                    </div>
                   </div>
-                </div>
+                 </div>
             }
               <div className="Overview__container">
 
@@ -399,20 +400,22 @@ export default class Overview extends Component {
             </div>
             {
               props.sectionType === 'labbook' ?
-              <div className="Overview__environment">
-                <button
-                  className="Btn--redirect"
-                  onClick={() => this._handleRedirect('environment')}
-                >
-                  <span>View Environment Details</span>
-                </button>
-                <Base
-                  ref="base"
-                  environment={sectionProps.environment}
-                  blockClass="Overview"
-                  overview={sectionProps.overview}
-                />
+              <div className="grid">
+                <div className="Overview__environment column-1-span-12">
+                  <button
+                    className="Btn--redirect"
+                    onClick={() => this._handleRedirect('environment')}
+                  >
+                    <span>View Environment Details</span>
+                  </button>
+                  <Base
+                    ref="base"
+                    environment={sectionProps.environment}
+                    blockClass="Overview"
+                    overview={sectionProps.overview}
+                  />
 
+                </div>
               </div>
               :
               <div className="Overview__environment">

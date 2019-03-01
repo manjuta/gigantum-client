@@ -14,6 +14,14 @@ mutation FetchDatasetEdgeMutation($input: FetchDatasetEdgeInput!){
                 name
                 visibility
                 defaultRemote
+                collaborators {
+                  id
+                  owner
+                  name
+                  collaboratorUsername
+                  permission
+                }
+                canManageCollaborators
             }
         }
         clientMutationId

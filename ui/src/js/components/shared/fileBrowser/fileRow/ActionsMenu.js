@@ -1,5 +1,5 @@
 // vendor
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // assets
 import './ActionsMenu.scss';
@@ -120,7 +120,7 @@ export default class ActionsMenu extends Component {
 
   render() {
     const favoriteCSS = classNames({
-            ActionsMenu__item: true,
+            'ActionsMenu__item Tooltip-data Tooltip-data--small': true,
             'ActionsMenu__item--favorite-on': this.props.edge.node.isFavorite,
             'ActionsMenu__item--favorite-off': !this.props.edge.node.isFavorite,
           }),
@@ -132,14 +132,15 @@ export default class ActionsMenu extends Component {
 
           deleteCSS = classNames({
             'ActionsMenu__item ActionsMenu__item--delete': true,
+            'Tooltip-data Tooltip-data--small': !this.state.popupVisible,
             'ActionsMenu__popup-visible': this.state.popupVisible,
           }),
           folderCSS = classNames({
-            ActionsMenu__item: true,
+            'ActionsMenu__item Tooltip-data Tooltip-data--small': true,
             'ActionsMenu__item--AddSubfolder': true,
             'visibility-hidden': !this.props.folder,
           });
-
+    const isUntrackedDirectory = (this.props.edge.node.key === 'untracked/') && this.props.folder && (this.props.section === 'output');
     return (
         <div
           className="ActionsMenu"
@@ -148,39 +149,44 @@ export default class ActionsMenu extends Component {
           <div
             onClick={() => { this.props.folder && this.props.addFolderVisible(true); }}
             className={folderCSS}
-            name="Add Subfolder">
-          </div>
-          <div
-            className={deleteCSS}
-            name="Delete"
-            onClick={(evt) => { this._togglePopup(evt, true); }} >
-
-            <div className={popupCSS}>
-              <div className="ToolTip__pointer"></div>
-              <p>Are you sure?</p>
-              <div className="flex justify--space-around">
-                <button
-                  className="File__btn--round File__btn--cancel"
-                  onClick={(evt) => { this._togglePopup(evt, false); }} />
-                <button
-                  className="File__btn--round File__btn--add"
-                  onClick={(evt) => { this._triggerDeleteMutation(evt); }}
-                />
-              </div>
-            </div>
-          </div>
-          <div
-            onClick={() => { this.props.renameEditMode(true); }}
-            className="ActionsMenu__item ActionsMenu__item--rename"
-            name="Rename">
+            data-tooltip="Add Subfolder">
           </div>
           {
-            this.props.section !== 'data' &&
-            <div
-              onClick={ () => { this._triggerFavoriteMutation(); }}
-              className={favoriteCSS}
-              name="Favorite">
-            </div>
+            !isUntrackedDirectory &&
+            <Fragment>
+              <div
+                className={deleteCSS}
+                data-tooltip="Delete"
+                onClick={(evt) => { this._togglePopup(evt, true); }} >
+
+                <div className={popupCSS}>
+                  <div className="ToolTip__pointer"></div>
+                  <p>Are you sure?</p>
+                  <div className="flex justify--space-around">
+                    <button
+                      className="File__btn--round File__btn--cancel"
+                      onClick={(evt) => { this._togglePopup(evt, false); }} />
+                    <button
+                      className="File__btn--round File__btn--add"
+                      onClick={(evt) => { this._triggerDeleteMutation(evt); }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div
+                onClick={() => { this.props.renameEditMode(true); }}
+                className="ActionsMenu__item ActionsMenu__item--rename Tooltip-data Tooltip-data--small"
+                data-tooltip="Rename">
+              </div>
+              {
+                this.props.section !== 'data' &&
+                <div
+                  onClick={ () => { this._triggerFavoriteMutation(); }}
+                  className={favoriteCSS}
+                  data-tooltip="Favorite">
+                </div>
+              }
+            </Fragment>
           }
         </div>
     );

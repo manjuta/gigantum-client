@@ -3,7 +3,12 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'; // keep browser router, reloads page with Router in labbook view
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from 'react-router-dom'; // keep browser router, reloads page with Router in labbook view
 // history
 import history from 'JS/history';
 // components
@@ -101,7 +106,7 @@ class Routes extends Component {
   render() {
     if (!this.state.hasError) {
       const headerCSS = classNames({
-        Header: true,
+        HeaderBar: true,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({
@@ -125,22 +130,19 @@ class Routes extends Component {
                     (this.state.showDefaultMessage ?
                       <div
                         id="demo-header"
-                        className="demo-header"
-                      >
+                        className="demo-header">
                         {demoText}
                         <a
                           href="http://gigantum.com/download"
                           rel="noopener noreferrer"
-                          target="_blank"
-                        >
+                          target="_blank">
                         download the Gigantum client.
                         </a>
                       </div>
                     :
                       <div
                         id="demo-header"
-                        className="demo-header"
-                      >
+                        className="demo-header">
                       Curious what can Gigantum do for you? &nbsp;
                         <a onClick={() => this.setState({ showYT: true })}>
                          Watch this overview video.
@@ -152,8 +154,7 @@ class Routes extends Component {
                       <div
                         id="yt-lightbox"
                         className="yt-lightbox"
-                        onClick={() => this.setState({ showYT: false })}
-                      >
+                        onClick={() => this.setState({ showYT: false })}>
                         <YouTube
                           opts={{ height: '576', width: '1024' }}
                           className="yt-frame"
@@ -171,8 +172,7 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/"
-                      render={props =>
-                      (<Home
+                      render={props => (<Home
                         loadingRenew={this.state.loadingRenew}
                         history={history}
                         auth={this.props.auth}
@@ -195,27 +195,20 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/:id"
-                      render={props =>
-                        <Redirect to="/projects/local" />
-                    }
+                      render={props => <Redirect to="/projects/local" /> }
                     />
 
                     <Route
                       exact
                       path="/labbooks/:section"
-                      render={props =>
-                        <Redirect to="/projects/local" />
-                    }
+                      render={props => <Redirect to="/projects/local" /> }
                     />
 
 
                     <Route
                       exact
                       path="/datasets/:labbookSection"
-                      render={props =>
-
-
-                      (<Home
+                      render={props => (<Home
                         loadingRenew={this.state.loadingRenew}
                         history={history}
                         auth={this.props.auth}
@@ -228,10 +221,7 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/projects/:labbookSection"
-                      render={props =>
-
-
-                      (<Home
+                      render={props => (<Home
                         loadingRenew={this.state.loadingRenew}
                         history={history}
                         auth={this.props.auth}
@@ -303,6 +293,7 @@ class Routes extends Component {
                       ref="footer"
                       history={history}
                     />
+
                   </div>
                 </div>
               )}

@@ -11,7 +11,7 @@ import Modal from 'Components/common/Modal';
 // mutations
 import CreateLabbookMutation from 'Mutations/CreateLabbookMutation';
 import CreateDatasetMutation from 'Mutations/CreateDatasetMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 
@@ -286,8 +286,8 @@ export default class WizardModal extends React.Component {
   */
   _buildImage(name, owner) {
     BuildImageMutation(
-      name,
       owner,
+      name,
       false,
       (response, error) => {
         if (error) {
@@ -303,12 +303,13 @@ export default class WizardModal extends React.Component {
       hidden: !this.state.modalBlur,
     });
     const currentComponent = this._currentComponent();
+    const modalSize = (currentComponent.header === 'Select A Base') ? 'large-long' : 'large';
     return (
       <div>
         {
           this.state.modal_visible &&
           <Modal
-            size="large"
+            size={modalSize}
             icon="add"
             handleClose={() => this._hideModal()}
             header={currentComponent.header}

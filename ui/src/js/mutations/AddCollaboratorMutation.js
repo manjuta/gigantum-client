@@ -11,7 +11,13 @@ const mutation = graphql`
     addCollaborator(input: $input){
       updatedLabbook{
         id
-        collaborators
+        collaborators {
+          id
+          owner
+          name
+          collaboratorUsername
+          permission
+        }
       }
       clientMutationId
     }
@@ -24,6 +30,7 @@ export default function AddCollaboratorMutation(
   labbookName,
   owner,
   username,
+  permissions,
   callback,
 ) {
   const variables = {
@@ -31,6 +38,7 @@ export default function AddCollaboratorMutation(
       labbookName,
       owner,
       username,
+      permissions,
       clientMutationId: tempID++,
     },
   };

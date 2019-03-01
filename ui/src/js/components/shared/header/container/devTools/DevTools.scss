@@ -1,0 +1,130 @@
+@import '~Styles/_imports.scss';
+
+.DevTools {
+  position: relative;
+  overflow: visible;
+  margin: 0 20px 0 0;
+
+}
+
+.DevTools__flex {
+  @include flex(flex-end, row);
+}
+
+.DevTools__btn {
+  height: 40px;
+  border-radius: 3px;
+
+  &--launch {
+    padding: 6px 30px 6px 20px;
+    text-align: left;
+    align-items: flex-start;
+    margin: 0 4px 0 0;
+
+  }
+
+  &--dropdown {
+    height: 40px;
+    padding: 5px;
+    width: 20px;
+    background: $azure url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+    background-size: 20px;
+
+    &:hover, &:focus:hover{
+      background: $turquise url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+      background-size: 20px;
+    }
+
+    &:focus{
+      background: $azure url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+      background-size: 20px;
+    }
+  }
+
+  &--open {
+    background: $azure url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+    background-size: 20px;
+
+    &:hover, &:focus:hover{
+      background: $turquise url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+      background-size: 20px;
+    }
+
+    &:focus{
+      background: $azure url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+      background-size: 20px;
+    }
+  }
+}
+
+.DevTools__dropdown-menu {
+  position: absolute;
+  padding: 0 15px 10px;
+  
+  background: $white;
+  top: calc(100% + 1px);
+  left: 0px;
+  width: 316px;
+  z-index: index($elements, popup);
+  animation: slide-down-fade-in forwards .25s;
+  @include boxShadow();
+}
+
+
+
+.DevTool__menu-title{
+  border-bottom: 2px solid $romanSilver;
+  color: $jet;
+  padding: 5px 0 5px 25px;
+  background: url('~Images/icons/offsite-grey.svg') no-repeat left center;
+  background-size: 16px;
+  font-size: 14px;
+}
+
+.DevTool__list {
+  @include flex(flex-start, row);
+  flex-wrap: wrap;
+  padding: 5px 0 0 0;
+}
+
+.DevTools__item {
+  height: 80px;
+  width: 80px;
+  text-align: center;
+  vertical-align: baseline;
+  align-items: center;
+  color: $jet;
+
+  @include flex(space-around, column);
+
+  cursor: pointer;
+
+  &--selected {
+    border: 1px solid $azure;
+  }
+
+  &:hover {
+    background: $azure;
+    color: $white;
+  }
+}
+
+.DevTools__icon {
+  height: 40px;
+  width: 40px;
+  font-size:30px;
+  text-align: center;
+  line-height: 50px;
+
+  &:before {
+    font-size:30px;
+    line-height: 50px;
+  }
+
+
+}
+
+.DevTools__text{
+  font-size: 12px;
+  text-align: center;
+}

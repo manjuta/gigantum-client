@@ -603,20 +603,8 @@
 
 .ActivityCard__container{
   margin: 0 !important;
+  max-width: 100%;
 }
-
-// .ActivityDetail__details:not(.note):before {
-//   content: "";
-//   display: block;
-//   position: absolute;
-//   z-index: 3;
-//   border: 1px dashed #b9babc;
-//   height: calc(100% - 73px);
-//   width: 1px;
-//   top: 41px;
-//   left: 25px;
-// }
-
 
 .ActivityDetail__details-title.ActivityDetail__details-title--closed:before {
   position: absolute;

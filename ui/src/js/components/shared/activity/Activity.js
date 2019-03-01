@@ -9,7 +9,7 @@ import store from 'JS/redux/store';
 import config from 'JS/config';
 // Components
 import Loader from 'Components/common/Loader';
-import CreateBranch from 'Components/shared/header/branches/CreateBranch';
+import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import PaginationLoader from './loaders/PaginationLoader';
 import ClusterCardWrapper from './wrappers/ClusterCardWrapper';
@@ -278,7 +278,7 @@ class Activity extends Component {
   @boundMethod
   _loadMore() {
     const self = this,
-          { props } = this,
+          { props, state } = this,
           section = props[props.sectionType],
           activityRecords = section.activityRecords;
 
@@ -294,7 +294,6 @@ class Activity extends Component {
         if (error) {
           console.error(error);
         }
-
         if ((activityRecords.pageInfo.hasNextPage) && (this._countUnexpandedRecords() < 7) && (this._countUnexpandedRecords() > 2)) {
           self._loadMore();
         } else {
@@ -350,11 +349,12 @@ class Activity extends Component {
   */
   @boundMethod
   _setStickyDate() {
-    let isDemo = window.location.hostname === config.demoHostName,
-      upperBound = isDemo ? 170 : 120,
-      lowerBound = isDemo ? 130 : 80,
-      stickyDate = null,
-      { state } = this;
+    let offsetAmount = window.location.hostname === config.demoHostName ? 50 : 0;
+      offsetAmount = this.props.isDeprecated ? offsetAmount + 70 : offsetAmount;
+    let upperBound = offsetAmount + 120,
+    lowerBound = offsetAmount + 80,
+    stickyDate = null,
+    { state } = this;
 
     this.offsetDistance = window.pageYOffset;
 
@@ -475,6 +475,7 @@ class Activity extends Component {
         }
       }
     });
+
     return activityTime;
   }
 
@@ -655,6 +656,8 @@ class Activity extends Component {
           newActivityCSS = classNames({
             'Activity__new-record box-shadow': true,
             'is-demo': window.location.hostname === config.demoHostName,
+            'is-deprecated': this.props.isDeprecated,
+            'is-demo-deprecated': window.location.hostname === config.demoHostName && this.props.isDeprecated,
           });
     if (section) {
       const recordDates = Object.keys(state.activityRecords),
@@ -662,6 +665,8 @@ class Activity extends Component {
               'Activity__date-tab': true,
               fixed: state.stickyDate,
               'is-demo': window.location.hostname === config.demoHostName,
+              'is-deprecated': this.props.isDeprecated,
+              'is-demo-deprecated': window.location.hostname === config.demoHostName && this.props.isDeprecated,
             });
 
       return (
@@ -702,17 +707,14 @@ class Activity extends Component {
             <div
               key={`${props.sectionType}_labbooks__labook-id-container`}
               className="Activity__sizer flex-1-0-auto">
-              { state.createBranchVisible
-                && <CreateBranch
+              <CreateBranch
                   ref="createBranch"
                   selected={state.selectedNode}
                   activeBranch={props.activeBranch}
                   modalVisible={state.createBranchVisible}
                   toggleModal={this._toggleCreateModal}
                   setBuildingState={props.setBuildingState}
-                />
-              }
-
+              />
               {
                 recordDates.map((timestamp, i) => {
                   let clusterElements = [];
@@ -773,6 +775,7 @@ class Activity extends Component {
                                     indexItem={{ i, timestampIndex, timestamp }}
                                     toggleSubmenu={this._toggleSubmenu}
                                     toggleRollbackMenu={this._toggleRollbackMenu}
+                                    isLocked={props.isLocked}
                                  />);
                             }
 
@@ -792,6 +795,7 @@ class Activity extends Component {
                                 key={`VisibileCardWrapper_${record.flatIndex}`}
                                 toggleSubmenu={this._toggleSubmenu}
                                 toggleRollbackMenu={this._toggleRollbackMenu}
+                                isLocked={props.isLocked}
                               />);
                           })
                         }

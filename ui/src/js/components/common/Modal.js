@@ -1,6 +1,8 @@
 // vendor
 import React, { Component, Fragment } from 'react';
+import ReactDom from 'react-dom';
 import classNames from 'classnames';
+import { boundMethod } from 'autobind-decorator';
 // assets
 import './Modal.scss';
 
@@ -17,6 +19,7 @@ export default class Modal extends Component {
     }
   }
 
+
   render() {
     const { props } = this;
     const modalContentCSS = classNames({
@@ -29,8 +32,9 @@ export default class Modal extends Component {
       'Modal__sub-container--nopadding': props.noPadding,
     });
     return (
-      <div className="Modal">
-
+      ReactDom
+      .createPortal(
+        <div className="Modal">
         <div
           className="Modal__cover"
           onClick={props.handleClose}
@@ -60,7 +64,9 @@ export default class Modal extends Component {
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>,
+    document.getElementById('modal'),
+  )
+  );
   }
 }

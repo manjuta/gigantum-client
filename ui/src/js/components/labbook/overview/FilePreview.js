@@ -110,7 +110,7 @@ export default class FilePreview extends Component {
                   {
                     queryProps.labbook.code.favorites && queryProps.labbook.code.favorites.edges.length ?
                     queryProps.labbook.code.favorites.edges.map(edge => <FileCard key={edge.node.id} edge={edge} />) :
-                      <div className="FilePreview__empty">
+                      <div className="FilePreview__empty column-1-span-12">
                         <button
                           className="Btn--redirect"
                           onClick={() => this._handleRedirect('code')}
@@ -141,7 +141,7 @@ export default class FilePreview extends Component {
                   {
                     queryProps.labbook.input.favorites &&
                     queryProps.labbook.input.favorites.edges.length ? queryProps.labbook.input.favorites.edges.map(edge => <FileCard key={edge.node.id} edge={edge} />) :
-                    <div className="FilePreview__empty">
+                    <div className="FilePreview__empty column-1-span-12">
                     <button
                       className="Btn--redirect"
                       onClick={() => this._handleRedirect('inputData')}
@@ -172,7 +172,7 @@ export default class FilePreview extends Component {
                   {
                     queryProps.labbook.output.favorites &&
                     queryProps.labbook.output.favorites.edges.length ? queryProps.labbook.output.favorites.edges.map(edge => <FileCard key={edge.node.id} edge={edge} />) :
-                    <div className="FilePreview__empty">
+                    <div className="FilePreview__empty column-1-span-12">
                     <button
                       className="Btn--redirect"
                       onClick={() => this._handleRedirect('outputData')}

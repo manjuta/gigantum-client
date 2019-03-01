@@ -16,11 +16,13 @@
 @import 'atoms/button.scss';
 @import 'atoms/loader.scss';
 @import 'atoms/download.scss';
+@import 'atoms/tooltip.scss';
 @import 'atoms/_input-text.scss';
 @import 'atoms/textarea.scss';
 @import 'atoms/table.scss';
 @import 'atoms/_radio-button.scss';
 @import 'atoms/card.scss';
+@import 'atoms/containerStatus.scss';
 
 //shared components
 @import 'components/shared/sideBar';
@@ -42,11 +44,9 @@
 @import 'components/home.scss';
 //labbook components
 @import 'components/labbook/dataBrowser.scss';
-@import 'components/labbook/containerStatus.scss';
 //wizard components
 @import 'components/wizard/wizardModal';
 @import 'components/wizard/selectBase';
-@import 'components/wizard/createLabbook';
 @import 'components/wizard/baseDetails';
 @import 'components/wizard/trackingToggle';
 
@@ -64,7 +64,7 @@ body .fa {
   bottom: 0px;
   right: 0px;
   left: 0px;
-  background-color: $white;
+  background-color: $slateBlueOpaque;
   animation: fade-in-modal forwards .25s;
   opacity: 0.5;
   z-index: index($elements, modalCover);
@@ -138,63 +138,4 @@ code {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.Tooltip{
-  position: relative;
-  font-weight: bolder;
-  cursor: pointer;
-  &:hover::before{
-    content: "";
-    border: solid transparent;
-    border-bottom-color: $white;
-    border-width: 10px;
-    position: absolute;
-    right: 5px;
-    bottom: 0;
-  }
-
-  &:hover::after{
-    content: attr(data-tooltip);
-    @extend .box-shadow;
-    position: absolute;
-    min-width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    margin: 0;
-    background: $azure;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
-    right: 40px;
-    bottom: 10px;
-    z-index: 1;
-    font-size: .7em;
-  }
-}
-
-.Tooltip-Listing{
-  position: relative;
-  font-weight: bolder;
-  cursor: pointer;
-
-  &:hover::after{
-    content: attr(data-tooltip);
-    @extend .box-shadow;
-    position: absolute;
-    min-width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    margin: 0;
-    background: $azure;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
-    right: 40px;
-    bottom: 10px;
-    z-index: 1;
-    font-size: .7em;
-  }
 }

@@ -18,7 +18,6 @@ from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.labbook.labbook import LabBook
-from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
 from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
@@ -244,7 +243,6 @@ class InventoryManager(object):
                                  name=labbook_name, description=description,
                                  author=author, bypass_lfs=True)
         lb = self.load_labbook_from_directory(path, author=author)
-        assert lb.active_branch == f'gm.workspace-{username}'
         return lb
 
     def create_labbook(self, username: str, owner: str, labbook_name: str,
@@ -297,15 +295,16 @@ class InventoryManager(object):
         labbook = LabBook(config_file=self.config_file, author=author)
 
         # Build data file contents
+        buildinfo = Configuration(self.config_file).config['build_info']
         labbook._data = {
-            "labbook": {"id": uuid.uuid4().hex,
-                        "name": name,
-                        "description": description or ''},
-            "owner": owner,
-            "schema": LABBOOK_CURRENT_SCHEMA
+            "schema": LABBOOK_CURRENT_SCHEMA,
+            "id": uuid.uuid4().hex,
+            "name": name,
+            "description": description or '',
+            "build_info": buildinfo,
+            "created_on": str(datetime.datetime.utcnow().isoformat())
         }
 
-        # Validate data
         labbook._validate_gigantum_data()
 
         logger.info("Creating new labbook on disk for {}/{}/{} ...".format(username, owner, name))
@@ -354,7 +353,7 @@ class InventoryManager(object):
 
             # Create Directory Structure
             dirs = [
-                'code', 'input', 'output', '.gigantum',
+                'code', 'input', 'output', 'output/untracked', '.gigantum',
                 os.path.join('.gigantum', 'env'),
                 os.path.join('.gigantum', 'env', 'base'),
                 os.path.join('.gigantum', 'env', 'custom'),
@@ -372,41 +371,17 @@ class InventoryManager(object):
                     gk.write("This file is necessary to keep this directory tracked by Git"
                              " and archivable by compression tools. Do not delete or modify!")
 
-            # Create labbook.yaml file
             labbook._save_gigantum_data()
-
-            # Save build info
-            try:
-                buildinfo = Configuration(self.config_file).config['build_info']
-            except KeyError:
-                logger.warning("Could not obtain build_info from config")
-                buildinfo = None
-            buildinfo = {
-                'creation_utc': datetime.datetime.utcnow().isoformat(),
-                'build_info': buildinfo
-            }
-
-            buildinfo_path = os.path.join(labbook.root_dir, '.gigantum', 'buildinfo')
-            with open(buildinfo_path, 'w') as f:
-                json.dump(buildinfo, f)
-
             # Create .gitignore default file
             shutil.copyfile(os.path.join(resource_filename('gtmcore', 'labbook'), 'gitignore.default'),
                             os.path.join(labbook.root_dir, ".gitignore"))
 
-            # Commit
             labbook.git.add_all()
-            labbook.git.create_branch(name="gm.workspace")
-            bm = BranchManager(labbook, username=username)
+
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             labbook.git.commit(f"Creating new empty LabBook: {name}")
-            user_workspace_branch = f"gm.workspace-{username}"
-            bm.create_branch(user_workspace_branch)
-
-            if labbook.active_branch != user_workspace_branch:
-                raise ValueError(f"active_branch should be '{user_workspace_branch}'")
 
             return labbook.root_dir
 
@@ -496,7 +471,6 @@ class InventoryManager(object):
                     gk.write("This file is necessary to keep this directory tracked by Git"
                              " and archivable by compression tools. Do not delete or modify!")
 
-            # Create labbook.yaml file
             dataset._save_gigantum_data()
 
             # Create an empty storage.json file
@@ -508,15 +482,11 @@ class InventoryManager(object):
 
             # Commit
             dataset.git.add_all()
-            dataset.git.create_branch(name="gm.workspace")
-            bm = BranchManager(dataset, username=username)
 
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
             # TODO: Improve method for detecting the first activity record
             dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
-            user_workspace_branch = f"gm.workspace-{username}"
-            bm.create_branch(user_workspace_branch)
 
             # Create Activity Record
             adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0)

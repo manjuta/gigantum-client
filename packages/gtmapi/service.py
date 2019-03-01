@@ -59,6 +59,7 @@ if os.path.exists(user_conf_path):
 else:
     logger.info("No custom user configuration found")
 
+
 random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration()
@@ -100,7 +101,12 @@ def handle_auth_error(ex):
 @cross_origin(headers=["Content-Type", "Authorization"], max_age=7200)
 def ping():
     """Unauthorized endpoint for validating the API is up"""
-    return jsonify(config.config['build_info'])
+    app_name, built_on, revision = config.config['build_info'].split(' :: ')
+    return jsonify({
+        "application": app_name ,
+        "built_on": built_on,
+        "revision": revision
+    })
 
 
 @app.route(f"{api_prefix}/version/")
@@ -111,7 +117,12 @@ def version():
     Note: /api/version endpoint added due to popup blockers starting to block /api/ping/
 
     """
-    return jsonify(config.config['build_info'])
+    app_name, built_on, revision = config.config['build_info'].split(' :: ')
+    return jsonify({
+        "application": app_name ,
+        "built_on": built_on,
+        "revision": revision
+    })
 
 
 @app.route(f'{api_prefix}/savehook/<username>/<owner>/<labbook_name>')

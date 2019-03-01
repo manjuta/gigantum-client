@@ -12,7 +12,22 @@ mutation FetchLabbookEdgeMutation($input: FetchLabbookEdgeInput!){
             node{
                 owner
                 name
-                collaborators,
+                branches {
+                  id
+                  owner
+                  name
+                  branchName
+                  isActive
+                  isLocal
+                  isRemote
+                }
+                collaborators {
+                  id
+                  owner
+                  name
+                  collaboratorUsername
+                  permission
+                }
                 canManageCollaborators,
                 visibility,
                 defaultRemote

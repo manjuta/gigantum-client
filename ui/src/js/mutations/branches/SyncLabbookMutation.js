@@ -20,7 +20,8 @@ let tempID = 0;
 export default function SyncLabbookMutation(
   owner,
   labbookName,
-  force,
+  overrideMethod,
+  pullOnly,
   successCall,
   failureCall,
   callback,
@@ -29,13 +30,16 @@ export default function SyncLabbookMutation(
     input: {
       owner,
       labbookName,
-      force,
+      pullOnly,
       clientMutationId: tempID++,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };
+  if (overrideMethod) {
+    variables.input.overrideMethod = overrideMethod;
+  }
 
   commitMutation(
     environment,

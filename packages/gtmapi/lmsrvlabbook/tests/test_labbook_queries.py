@@ -17,8 +17,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import pytest
-
 import os
 import time
 from snapshottest import snapshot
@@ -29,7 +27,6 @@ from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TE
 import datetime
 import pprint
 import aniso8601
-import graphene
 
 import gtmcore
 
@@ -401,7 +398,7 @@ class TestLabBookServiceQueries(object):
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert r['data']['currentLabbookSchemaVersion'] == 1
+        assert r['data']['currentLabbookSchemaVersion'] == 2
 
     def test_get_labbook(self, fixture_working_dir):
         """Test listing labbooks"""
@@ -413,25 +410,23 @@ class TestLabBookServiceQueries(object):
         query = """
         {
           labbook(name: "labbook1", owner: "default") {
+            isDeprecated
             schemaVersion
             name
             sizeBytes
             description
             creationDateUtc
-            activeBranch {
-                refName
-                prefix
-            }
+            activeBranchName
           }
         }
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert r['data']['labbook']['schemaVersion'] == 1
+        assert r['data']['labbook']['schemaVersion'] == 2
+        assert r['data']['labbook']['isDeprecated'] == False
         assert int(r['data']['labbook']['sizeBytes']) > 10000
         assert int(r['data']['labbook']['sizeBytes']) < 40000
-        assert r['data']['labbook']['activeBranch']['refName'] == 'gm.workspace-default'
-        assert r['data']['labbook']['activeBranch']['prefix'] is None
+        assert r['data']['labbook']['activeBranchName'] == 'master'
         assert r['data']['labbook']['name'] == 'labbook1'
         d = r['data']['labbook']['creationDateUtc']
         n = aniso8601.parse_datetime(d)
@@ -719,7 +714,8 @@ class TestLabBookServiceQueries(object):
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        snapshot.assert_match(r)
 
         # Just get the files in the sub-directory "js"
         query = """
@@ -765,21 +761,8 @@ class TestLabBookServiceQueries(object):
                   }
                 }
                 """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
-
-    def test_check_updates_available_from_remote(self, remote_labbook_repo, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
-        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
-
-        query = f"""
-        {{
-            labbook(name: "labbook1", owner: "default") {{
-                updatesAvailableCount
-            }}
-        }}
-        """
         r = fixture_working_dir[2].execute(query)
-        assert r['data']['labbook']['updatesAvailableCount'] == 0
+        snapshot.assert_match(r)
 
     def test_list_favorites(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
@@ -1149,7 +1132,8 @@ class TestLabBookServiceQueries(object):
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        snapshot.assert_match(r)
 
     def test_get_activity_records_next_page(self, fixture_working_dir_env_repo_scoped, snapshot, fixture_test_file):
         """Test next page logic, which requires a labbook to be created properly with an activity"""
@@ -1413,7 +1397,6 @@ class TestLabBookServiceQueries(object):
         """
         # Uses an invalid string
         r = fixture_working_dir[2].execute(query)
-        pprint.pprint(r)
         assert 'errors' in r
         snapshot.assert_match(r)
 
@@ -1707,7 +1690,6 @@ class TestLabBookServiceQueries(object):
         # wait, add another commit, and remove the buildinfo file to test the fallback method for getting create date
         time.sleep(4)
         lb.write_readme("##Summary\nThis is my readme!!")
-        os.remove(os.path.join(lb.root_dir, '.gigantum', 'buildinfo'))
 
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r

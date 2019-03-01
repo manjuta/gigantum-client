@@ -493,7 +493,8 @@ class Folder extends Component {
         let fileKeys = children && Object.keys(children).filter(child => children[child].edge && !children[child].edge.node.isDir) || [];
         fileKeys = this._childSort(fileKeys, this.props.sort, this.props.reverse, children, 'files');
         let childrenKeys = folderKeys.concat(fileKeys);
-        let folder = // this.props.connectDragPreview(
+        const isUntrackedDirectory = (node.key === 'untracked/') && (this.props.section === 'output');
+        let folder =
           <div
           onMouseOver={(evt) => { this._setHoverState(evt, true); }}
           onMouseOut={(evt) => { this._setHoverState(evt, false); }}
@@ -515,6 +516,13 @@ class Folder extends Component {
                       <div className="Folder__name">
                           {folderName}
                       </div>
+                      {
+                        isUntrackedDirectory &&
+                        <div
+                          className="Folder__info Tooltip-data"
+                          data-tooltip="Files in this folder will not be versioned or synced."
+                        />
+                      }
                     </div>
                     <div className={renameCSS}>
 

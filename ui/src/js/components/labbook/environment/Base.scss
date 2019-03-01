@@ -6,13 +6,13 @@
 }
 
 .Base__header{
-  color: $romanSilver;
+  color: $mineShaft;
 }
 
 .Base__card{
   padding: 30px;
 
-  color: $romanSilver;
+  color: $mineShaft;
 
   @include flex(space-between, row);
 }

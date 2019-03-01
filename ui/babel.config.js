@@ -12,12 +12,11 @@ module.exports = {
  ],
  "plugins": [
    "relay",
-   ["@babel/plugin-proposal-decorators", {
-    "legacy": true
-   }],
-   ["@babel/plugin-proposal-class-properties", { "loose": true }],
    "@babel/plugin-syntax-dynamic-import",
-
+   ["@babel/plugin-proposal-decorators", {
+       "legacy": true,
+   }],
+   ["@babel/plugin-proposal-class-properties", { "loose" : true }],
    ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }],
    [
      "module-resolver",
@@ -47,10 +46,12 @@ module.exports = {
       '@babel/preset-react',
     ],
     "plugins": [
-      ["@babel/plugin-proposal-decorators", { "legacy": true }],
-      ["@babel/plugin-proposal-class-properties", { "loose": true }],
       '@babel/plugin-transform-modules-commonjs',
       'babel-plugin-dynamic-import-node-babel-7',
+      ["@babel/plugin-proposal-decorators", {
+        "legacy": true,
+      }],
+      ["@babel/plugin-proposal-class-properties", { "loose" : true }],
     ],
   },
 },

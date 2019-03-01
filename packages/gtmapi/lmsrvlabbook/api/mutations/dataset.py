@@ -26,7 +26,8 @@ import requests
 from gtmcore.configuration import Configuration
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.dataset.io.manager import IOManager
 from gtmcore.exceptions import GigantumException
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author

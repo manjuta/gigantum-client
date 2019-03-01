@@ -11,7 +11,13 @@ const mutation = graphql`
     addDatasetCollaborator(input: $input){
       updatedDataset{
         id
-        collaborators
+        collaborators {
+          id
+          owner
+          name
+          collaboratorUsername
+          permission
+        }
       }
       clientMutationId
     }

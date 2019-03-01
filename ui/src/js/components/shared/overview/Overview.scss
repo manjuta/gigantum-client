@@ -93,7 +93,7 @@
 }
 
 .PackageCount__item {
-  color: $romanSilver;
+  color: $mineShaft;
   padding: 5px 0px;
   margin: 0 10px 0 0;
 }
@@ -106,7 +106,7 @@
 .Overview__readme--editing {
   text-align: left;
   padding: 10px;
-  color: $romanSilver;
+  color: $mineShaft;
   z-index: index($elements, card);
   position: relative;
   background: white;
@@ -139,7 +139,7 @@
 .Overview__readme {
 
   padding: 10px 50px;
-  color: $romanSilver;
+  color: $mineShaft;
   z-index: index($elements, card);
   position: relative;
   background: white;
@@ -396,7 +396,7 @@
   }
   p:first-child {
     font-weight: 900;
-    color: $darkGrey;
+    color: $mineShaft;
   }
   .Overview__empty-action{
     color: $azure;

@@ -29,7 +29,8 @@ $tintBlue: #007fa4;
 $backgroundGrey: rgb(196, 199, 201);
 $lightblue: #74a4bc;
 $selected-blue: #53667C;
-$darkGrey: #4A4A4A;
+$mineShaft: #4A4A4A;
+$orange: rgb(236, 128, 11);
 
 
 /***********************
@@ -57,7 +58,7 @@ $white: #fefefe;
 * z-index: index($elements, labbookHeader)
 *
 ***********************/
-$elements: basic, psuedoCard, card, fixedDate, date, button, sideBar, headerStrip, veil, popup, head, modalCoverNested, labbookHeader, footer, loader, helper, modalCover, modal, login, prompt;
+$elements: basic, psuedoCard, card, fixedDate, date, button,labbookHeader, sideBar, headerStrip, veil, popup, head, modalCoverNested, loader, helper, modalCover, modal, footer, login, prompt;
 
 /*********************
 *

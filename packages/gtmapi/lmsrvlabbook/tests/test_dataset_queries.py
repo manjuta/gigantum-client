@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import pytest
 import os
 import aniso8601
@@ -24,7 +5,7 @@ import time
 import datetime
 
 from snapshottest import snapshot
-from lmsrvlabbook.tests.fixtures import fixture_working_dir_dataset_populated_scoped
+from lmsrvlabbook.tests.fixtures import fixture_working_dir_dataset_populated_scoped, fixture_working_dir
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
@@ -54,7 +35,7 @@ class TestDatasetQueries(object):
         assert r['data']['dataset']['datasetType']['description'] == "Dataset storage provided by your Gigantum account supporting files up to 5GB in size"
         assert r['data']['dataset']['datasetType']['name'] == 'Gigantum Cloud'
         assert r['data']['dataset']['name'] == 'dataset8'
-        assert r['data']['dataset']['schemaVersion'] == 1
+        assert r['data']['dataset']['schemaVersion'] == 2
         assert r['data']['dataset']['visibility'] == "local"
         assert r['data']['dataset']['defaultRemote'] is None
 
@@ -390,3 +371,37 @@ class TestDatasetQueries(object):
         assert (datetime.datetime.now(datetime.timezone.utc) - modified_on_2).total_seconds() < 10
         assert modified_on_2 > modified_on_1
 
+    def test_get_commits_behind(self, fixture_working_dir):
+        """Test temporar field commitsBehind on dataset objects"""
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset("default", "default", "test-ds", "gigantum_object_v1",
+                               description="my first dataset",
+                               author=GitAuthor(name="default", email="test@test.com"))
+
+        lb = im.create_labbook("default", "default", "test-lb")
+
+        im.link_dataset_to_labbook(f"{ds.root_dir}/.git", 'default', 'test-ds', lb)
+
+        query = """
+                {
+                  labbook(owner: "default", name:"test-lb")
+                  {
+                    linkedDatasets{
+                      name
+                      commitsBehind
+                      
+                    }
+                  }
+                }
+                """
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['labbook']['linkedDatasets'][0]['name'] == 'test-ds'
+        assert r['data']['labbook']['linkedDatasets'][0]['commitsBehind'] == 0
+
+        ds.write_readme("test contents to make a commit")
+        
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['labbook']['linkedDatasets'][0]['name'] == 'test-ds'
+        assert r['data']['labbook']['linkedDatasets'][0]['commitsBehind'] == 2

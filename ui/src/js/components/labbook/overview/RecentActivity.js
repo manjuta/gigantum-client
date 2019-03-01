@@ -148,7 +148,7 @@ export default class RecentActivity extends Component {
       const { owner, labbookName } = store.getState().routes;
       const { props, state } = this;
       const edge = props.recentActivity[0];
-      const isImage = edge.detailObjects && edge.detailObjects[0].data[0] && edge.detailObjects[0].data[0][0] === 'image/png';
+      const isImage = edge && edge.detailObjects && edge.detailObjects[0].data[0] && edge.detailObjects[0].data[0][0] === 'image/png';
       const imageMetadata = isImage && edge.detailObjects[0].data[0][1];
 
       return (<div className="RecentActivity">
@@ -161,7 +161,7 @@ export default class RecentActivity extends Component {
         </div>
 
         <div className="RecentActivity__list grid">
-          <div key={edge.id} className="RecentActivity__card Card Card--auto Card--no-hover column-3-span-4">
+          <div key={edge.id} className="RecentActivity__card Card Card--auto Card--no-hover column-1-span-12">
             <button
               className="Btn--redirect"
               onClick={() => this._handleRedirect('activity')}

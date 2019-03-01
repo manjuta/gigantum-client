@@ -18,10 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import responses
+import pprint
 
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
-from snapshottest import snapshot
 
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, property_mocks_fixture, docker_socket_fixture
 
@@ -40,7 +40,7 @@ def mock_create_labbooks(fixture_working_dir):
 
 class TestLabBookCollaboratorMutations(object):
     @responses.activate
-    def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot):
+    def test_add_collaborator(self, mock_create_labbooks, property_mocks_fixture):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -50,6 +50,7 @@ class TestLabBookCollaboratorMutations(object):
                                     "name": "New Person",
                                     "username": "default",
                                     "state": "active",
+                                    "access_level": 30
                                 }
                             ],
                       status=200)
@@ -98,18 +99,25 @@ class TestLabBookCollaboratorMutations(object):
               owner: "default",
               labbookName: "labbook1",
               username: "default"
+              permissions: "readwrite"
             }) {
               updatedLabbook {
-                collaborators
+                collaborators {
+                    collaboratorUsername
+                }
                 canManageCollaborators
               }
             }
         }
         """
-        snapshot.assert_match(mock_create_labbooks[2].execute(query, context_value=req))
+        r = mock_create_labbooks[2].execute(query, context_value=req)
+        assert 'errors' not in r
+        assert r['data']['addCollaborator']['updatedLabbook']['collaborators'][0]['collaboratorUsername'] == 'janed'
+        assert r['data']['addCollaborator']['updatedLabbook']['collaborators'][1]['collaboratorUsername'] == 'person100'
+        assert r['data']['addCollaborator']['updatedLabbook']['canManageCollaborators'] is False
 
     @responses.activate
-    def test_add_collaborator_as_owner(self, mock_create_labbooks, property_mocks_fixture, snapshot):
+    def test_add_collaborator_as_owner(self, mock_create_labbooks, property_mocks_fixture):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -130,7 +138,8 @@ class TestLabBookCollaboratorMutations(object):
                                 "state": "active",
                             },
                       status=201)
-
+        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members/100',
+                      status=204)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1',
                       json=[{
                               "id": 27,
@@ -168,19 +177,25 @@ class TestLabBookCollaboratorMutations(object):
               owner: "default",
               labbookName: "labbook1",
               username: "default"
+              permissions: "owner"
             }) {
               updatedLabbook {
-                collaborators
+                collaborators {
+                    collaboratorUsername
+                }
                 canManageCollaborators
               }
             }
         }
         """
-        snapshot.assert_match(mock_create_labbooks[2].execute(query, context_value=req))
+        r = mock_create_labbooks[2].execute(query, context_value=req)
+        assert 'errors' not in r
+        assert r['data']['addCollaborator']['updatedLabbook']['canManageCollaborators'] is True
+        assert r['data']['addCollaborator']['updatedLabbook']['collaborators'][0]['collaboratorUsername'] == 'default'
+        assert r['data']['addCollaborator']['updatedLabbook']['collaborators'][1]['collaboratorUsername'] == 'person100'
 
     @responses.activate
-    def test_delete_collaborator(self, mock_create_labbooks, property_mocks_fixture, snapshot,
-                                 docker_socket_fixture):
+    def test_delete_collaborator(self, mock_create_labbooks, property_mocks_fixture, docker_socket_fixture):
         """Test deleting a collaborator from a LabBook"""
         # Setup REST mocks
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
@@ -227,10 +242,13 @@ class TestLabBookCollaboratorMutations(object):
               username: "default"
             }) {
               updatedLabbook {
-                collaborators
+                collaborators {
+                    collaboratorUsername
+                }
               }
             }
         }
         """
-        snapshot.assert_match(mock_create_labbooks[2].execute(query, context_value=req))
-
+        r = mock_create_labbooks[2].execute(query, context_value=req)
+        assert 'errors' not in r
+        assert r['data']['deleteCollaborator']['updatedLabbook']['collaborators'][0]['collaboratorUsername'] == 'janed'

@@ -7,11 +7,12 @@ from lmsrvlabbook.api.mutations.labbook import (CreateLabbook, DeleteLabbook, De
                                                 AddLabbookCollaborator, DeleteLabbookCollaborator,
                                                 WriteLabbookReadme, CompleteBatchUploadTransaction, FetchLabbookEdge)
 
+from lmsrvlabbook.api.mutations.migrations import MigrateLabbookSchema
 from lmsrvlabbook.api.mutations.environment import (BuildImage, StartContainer, StopContainer)
 from lmsrvlabbook.api.mutations.container import StartDevTool
 from lmsrvlabbook.api.mutations.note import CreateUserNote
 from lmsrvlabbook.api.mutations.branching import (CreateExperimentalBranch, DeleteExperimentalBranch,
-                                                  MergeFromBranch, WorkonBranch)
+                                                  MergeFromBranch, WorkonBranch, ResetBranchToRemote)
 from lmsrvlabbook.api.mutations.environmentcomponent import (AddPackageComponents,
                                                              RemovePackageComponents,
                                                              AddCustomDocker, RemoveCustomDocker)

@@ -30,17 +30,16 @@ from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.files import FileOperations
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.environment import ComponentManager
 
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
-from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
 
@@ -50,7 +49,6 @@ from lmsrvlabbook.api.connections.labbook import LabbookConnection
 from lmsrvlabbook.api.objects.labbook import Labbook
 from lmsrvlabbook.api.objects.labbookfile import LabbookFavorite, LabbookFile
 from lmsrvlabbook.dataloader.labbook import LabBookLoader
-
 
 logger = LMLogger.get_logger()
 
@@ -312,26 +310,14 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.configure_git_credentials(default_remote, username)
-        try:
-            collaborators = [collab[1] for collab in mgr.get_collaborators(owner, labbook_name) or []]
-            is_collab = any([username == c for c in collaborators])
-        except:
-            is_collab = username == owner
+        gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
+        gl_mgr.configure_git_credentials(default_remote, username)
 
-        # IF user is collaborator, then clone in order to support collaboration
-        # ELSE, this means we are cloning a public repo and can't push back
-        #       so we change to owner to the given user so they can (re)publish
-        #       and do whatever with it.
-        make_owner = not is_collab
-        logger.info(f"Getting from remote, make_owner = {make_owner}")
-        lb = loaders.labbook_from_remote(remote_url, username, owner, labbook=lb,
-                                         make_owner=make_owner)
-        import_owner = InventoryManager().query_owner(lb)
+        wf = LabbookWorkflow.import_from_remote(remote_url, username=username)
+        import_owner = InventoryManager().query_owner(wf.labbook)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=labbook_name),
+        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=wf.labbook.name),
                                         cursor=cursor)
         return ImportRemoteLabbook(new_labbook_edge=lbedge)
 
@@ -373,7 +359,7 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         lb.description = description_content
         with lb.lock():
-            lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
+            lb.git.add(os.path.join(lb.config_path))
             commit = lb.git.commit('Updating description')
 
             adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
@@ -689,11 +675,12 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         username = graphene.String(required=True)
+        permissions = graphene.String(required=True)
 
     updated_labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, username,
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, username, permissions,
                                client_mutation_id=None):
         #TODO(billvb/dmk) - Here "username" refers to the intended recipient username.
         # it should probably be renamed here and in the frontend to "collaboratorUsername"
@@ -716,9 +703,28 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
             raise ValueError("Authorization header not provided. "
                              "Must have a valid session to query for collaborators")
 
-        # Add collaborator to remote service
+        if permissions == 'readonly':
+            perm = ProjectPermissions.READ_ONLY
+        elif permissions == 'readwrite':
+            perm = ProjectPermissions.READ_WRITE
+        elif permissions == 'owner':
+            perm = ProjectPermissions.OWNER
+        else:
+            raise ValueError(f"Unknown permission set: {permissions}")
+
         mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.add_collaborator(owner, labbook_name, username)
+
+        existing_collabs = mgr.get_collaborators(owner, labbook_name)
+
+        if username not in [n[1] for n in existing_collabs]:
+            logger.info(f"Adding user {username} to {owner}/{labbook_name}"
+                        f"with permission {perm}")
+            mgr.add_collaborator(owner, labbook_name, username, perm)
+        else:
+            logger.warning(f"Changing permission of {username} on"
+                           f"{owner}/{labbook_name} to {perm}")
+            mgr.delete_collaborator(owner, labbook_name, username)
+            mgr.add_collaborator(owner, labbook_name, username, perm)
 
         # Prime dataloader with labbook you just created
         dataloader = LabBookLoader()

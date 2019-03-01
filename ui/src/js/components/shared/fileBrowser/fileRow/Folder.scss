@@ -60,7 +60,7 @@
 .Folder__cell{
 
   @include flex(flex-start, row);
-
+  position: relative;
   &--name{
       margin: 0 0 0 12px;
       flex: 1;
@@ -163,9 +163,16 @@
       background-size: 20px;
       line-height: 24px;
     }
+}
 
-    // .File__row,
-    // .Folder__row {
-    //   padding-left: 30px;
-    // }
+
+.Folder__info {
+    width: 15px;
+    height: 15px;
+    background: url('~Images/icons/info-icon.svg') no-repeat center center;
+    background-size: 15px;
+    position: absolute;
+    left: 120px;
+    top: 6px;
+    cursor: pointer;
 }

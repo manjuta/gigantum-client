@@ -1,0 +1,47 @@
+@import '~Styles/_imports.scss';
+
+@media screen and (max-width: 50000px) and (min-width: 1480px){
+  .SidePanel {
+    top: 202px !important;
+    &--is-deprecated{
+      top: 251px !important;
+    }
+    &--sticky{
+      top: 110px !important;
+    }
+    &--is-deprecated-sticky{
+      top: 160px !important;
+    }
+  }
+}
+
+.SidePanel {
+  position: fixed;
+  z-index: index($elements, labbookHeader) - 1;
+  background-color: $white;
+  animation: slide-left-fade-in .25s;
+  @include spanColumns(3);
+  margin: 0;
+  right: 0px;
+  top: 191px;
+  bottom: 0px;
+  @include boxShadow();
+  &--is-deprecated{
+    top: 251px;
+  }
+  &--is-deprecated-sticky{
+    top: 170px;
+  }
+
+  &--sticky{
+    top: 110px;
+  }
+}
+
+
+
+.SidePanel__btn {
+  &--close {
+    @include close();
+  }
+}

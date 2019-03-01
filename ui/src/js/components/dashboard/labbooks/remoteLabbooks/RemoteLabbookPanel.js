@@ -6,14 +6,14 @@ import classNames from 'classnames';
 import Moment from 'moment';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import store from 'JS/redux/store';
 import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
@@ -131,8 +131,8 @@ export default class RemoteLabbookPanel extends Component {
 
 
                  BuildImageMutation(
-                   labbookName,
                    owner,
+                   labbookName,
                    false,
                    (response, error) => {
                      if (error) {
@@ -145,8 +145,8 @@ export default class RemoteLabbookPanel extends Component {
                  self.props.history.replace(`/projects/${owner}/${labbookName}`);
                } else {
                  BuildImageMutation(
-                   labbookName,
                    localStorage.getItem('username'),
+                   labbookName,
                    false,
                    (response, error) => {
                      if (error) {

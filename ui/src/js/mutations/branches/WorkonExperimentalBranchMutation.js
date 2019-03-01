@@ -20,7 +20,6 @@ export default function WorkonExperimentalBranchMutation(
   owner,
   labbookName,
   branchName,
-  revision,
   callback,
 ) {
   const clientMutationId = uuidV4();
@@ -31,7 +30,7 @@ export default function WorkonExperimentalBranchMutation(
       branchName,
       clientMutationId,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };
