@@ -64,7 +64,7 @@ body .fa {
   bottom: 0px;
   right: 0px;
   left: 0px;
-  background-color: $white;
+  background-color: $slateBlueOpaque;
   animation: fade-in-modal forwards .25s;
   opacity: 0.5;
   z-index: index($elements, modalCover);

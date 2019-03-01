@@ -100,7 +100,7 @@ const FooterUtils = {
                     },
                   )
                   :
-                  FetchLabbookDatasetFilesMutation(
+                  FetchDatasetEdgeMutation(
                     owner,
                     labbookName,
                     (error) => {

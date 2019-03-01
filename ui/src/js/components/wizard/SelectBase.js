@@ -364,11 +364,11 @@ export default class SelectBase extends React.Component {
                         <div className={selecBaseImage}>
                           {
                             filteredProjects.map(({ node }) => {
+                              const isMostRecent = mostRecent === node.componentId;
                               const BaseWrapper = classNames({
                                 BaseSlide__wrapper: true,
                                 'BaseSlide__wrapper--recent': mostRecent === node.componentId,
                               });
-                              const isMostRecent = mostRecent === node.componentId;
                               return (
                               <div
                                 key={node.id}

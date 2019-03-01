@@ -49,6 +49,19 @@ export default class SideBar extends Component {
       SideBar__icon: true,
       'SideBar__icon--labbooks-selected': isLabbooks,
       'SideBar__icon SideBar__icon--labbooks': !isLabbooks,
+    }),
+    datasetCSS = classNames({
+      SideBar__icon: true,
+      'SideBar__icon SideBar__icon--datasets': isLabbooks,
+      'SideBar__icon SideBar__icon--datasets-selected': !isLabbooks,
+    }),
+    labbookSideBarItemCSS = classNames({
+      'SideBar__nav-item SideBar__nav-item--labbooks': true,
+      'SideBar__nav-item--selected': isLabbooks,
+    }),
+    datasetSideBarItemCSS = classNames({
+      'SideBar__nav-item SideBar__nav-item--datasets': true,
+      'SideBar__nav-item--selected': !isLabbooks,
     });
     return (
       <div className={sidebarCSS}>
@@ -56,12 +69,12 @@ export default class SideBar extends Component {
           <div className="SideBar__logo" />
           <ul className="SideBar__nav">
             <li
-              className={isLabbooks ? 'SideBar__list-item--selected' : 'SideBar__list-item'}
-              data-tooltip="Redirects to Project listing page"
+              className="SideBar__list-item Tooltip-data Tooltip-data--right"
+              data-tooltip="View Project listing page"
             >
               <Link
                 onClick={() => setCallbackRoute('/projects/local')}
-                className={isLabbooks ? 'SideBar__nav-item SideBar__nav-item--labbooks SideBar__nav-item--selected' : 'SideBar__nav-item SideBar__nav-item--labbooks'}
+                className={labbookSideBarItemCSS}
                 to={{ pathname: '/projects/local' }}
               >
                 <div
@@ -71,15 +84,15 @@ export default class SideBar extends Component {
               </Link>
               <ToolTip section="labbookListing" />
             </li>
-            <li className={!isLabbooks ? 'SideBar__list-item--selected' : 'SideBar__list-item'}
-                data-tooltip="Redirects to the Dataset listing page"
+            <li className="SideBar__list-item Tooltip-data Tooltip-data--right"
+                data-tooltip="View Dataset listing page"
             >
               <Link
                 onClick={() => setCallbackRoute('/datasets/local')}
-                className={!isLabbooks ? 'SideBar__nav-item SideBar__nav-item--datasets SideBar__nav-item--selected' : 'SideBar__nav-item SideBar__nav-item--datasets'}
+                className={datasetSideBarItemCSS}
                 to={{ pathname: '/datasets/local' }}
               >
-                <div className={!isLabbooks ? 'SideBar__icon SideBar__icon--datasets-selected' : 'SideBar__icon SideBar__icon--datasets'}
+                <div className={datasetCSS}
                 />
                 Datasets
               </Link>

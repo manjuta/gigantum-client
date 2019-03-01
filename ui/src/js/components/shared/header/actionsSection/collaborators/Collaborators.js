@@ -30,7 +30,13 @@ export const CollaboratorsQuery = graphql`
 export const CollaboratorsDatasetQuery = graphql`
 query CollaboratorsDatasetQuery($name: String!, $owner: String!){
   dataset(name: $name, owner: $owner){
-    collaborators
+    collaborators {
+      id
+      owner
+      name
+      collaboratorUsername
+      permission
+    }
     canManageCollaborators
   }
 }`;
@@ -109,8 +115,8 @@ class CollaboratorButton extends Component {
 
   _getCollabororInfo(name) {
     let { collaborators, canManageCollaborators } = store.getState().collaborators;
-    collaborators = collaborators && collaborators[name];
-    canManageCollaborators = canManageCollaborators && canManageCollaborators[name];
+    collaborators = collaborators && collaborators[name] || null;
+    canManageCollaborators = canManageCollaborators && canManageCollaborators[name] || null;
     return { collaborators, canManageCollaborators };
   }
 
@@ -141,8 +147,8 @@ class CollaboratorButton extends Component {
                 section = sectionType === 'dataset' ? props.dataset : props.labbook;
                 this.canManageCollaborators = section.canManageCollaborators;
                 this.collaborators = section.collaborators;
-                this.props.setCollaborators({ [this.props.labbookName]: this.collaborators });
-                this.props.setCanManageCollaborators({ [this.props.labbookName]: this.canManageCollaborators });
+                this.props.setCollaborators({ [name]: this.collaborators });
+                this.props.setCanManageCollaborators({ [name]: this.canManageCollaborators });
                 const collaboratorButtonCSS = classNames({
                     'Collaborators__btn Btn--flat Btn--no-underline': true,
                   }),
@@ -207,8 +213,7 @@ class CollaboratorButton extends Component {
 
                     {
                       this.state.collaboratorModalVisible &&
-
-                        [<CollaboratorsModal
+                        <CollaboratorsModal
                           key="CollaboratorsModal"
                           ref="collaborators"
                           collaborators={collaborators}
@@ -216,13 +221,7 @@ class CollaboratorButton extends Component {
                           owner={owner}
                           labbookName={name}
                           toggleCollaborators={this._toggleCollaborators}
-                        />,
-                          <div
-                            key="CollaboratorsModal__cover"
-                            className="modal__cover--nested"
-                          />,
-                        ]
-
+                        />
                     }
                   </div>
                 );

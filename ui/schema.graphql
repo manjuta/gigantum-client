@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Tue Feb 26 2019 15:53:52 GMT-0500 (Eastern Standard Time)
+# timestamp: Thu Feb 28 2019 16:12:11 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -419,7 +419,7 @@ type Dataset implements Node & GitRepository {
   datasetType: DatasetType
   schemaVersion: Int
   createdOnUtc: DateTime
-  collaborators: [String]
+  collaborators: [Collaborator]
   canManageCollaborators: Boolean
   modifiedOnUtc: DateTime
   activityRecords(before: String, after: String, first: Int, last: Int): ActivityConnection
@@ -429,6 +429,7 @@ type Dataset implements Node & GitRepository {
   visibility: String
   defaultRemote: String
   overview: DatasetOverview
+  commitsBehind: Int
 }
 
 """A Connection for paging through datasets that exist locally. """

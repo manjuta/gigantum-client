@@ -423,23 +423,25 @@ class FileBrowser extends Component {
   */
  _childSort(array, type, reverse, children, section) {
     array.sort((a, b) => {
+      const isAUntracked = (a === 'untracked') && (section === 'folder') && (this.props.section === 'output');
+      const isBUntracked = (b === 'untracked') && (section === 'folder') && (this.props.section === 'output');
       let lowerA,
       lowerB;
-      if (type === 'az' || type === 'size' && section === 'folder') {
+      if ((type === 'az') || ((type === 'size') && (section === 'folder'))) {
         lowerA = a.toLowerCase();
         lowerB = b.toLowerCase();
         if (type === 'size' || !reverse) {
-          return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
+          return isAUntracked ? -1 : isBUntracked ? 1 : (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
         }
-        return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
+        return isAUntracked ? -1 : isBUntracked ? 1 : (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
       } else if (type === 'modified') {
         lowerA = children[a].edge.node.modifiedAt;
         lowerB = children[b].edge.node.modifiedAt;
-        return reverse ? lowerB - lowerA : lowerA - lowerB;
+        return isAUntracked ? -1 : isBUntracked ? 1 : reverse ? lowerB - lowerA : lowerA - lowerB;
       } else if (type === 'size') {
         lowerA = children[a].edge.node.size;
         lowerB = children[b].edge.node.size;
-        return reverse ? lowerB - lowerA : lowerA - lowerB;
+        return isAUntracked ? -1 : isBUntracked ? 1 : reverse ? lowerB - lowerA : lowerA - lowerB;
       }
       return 0;
     });

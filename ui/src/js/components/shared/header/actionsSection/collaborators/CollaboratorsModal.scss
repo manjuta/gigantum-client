@@ -170,7 +170,7 @@
   position: relative;
   @include flex(space-between, row);
 
-  width: calc(33% - 33px);
+  width: calc(50% - 33px);
   margin: 18px 25px 13px 0;
   padding: 0 40px 0 10px;
 
@@ -248,8 +248,8 @@
   background: $white;
 
   li {
-    height: 60px;
-    padding: 10px 5px !important;
+    height: 70px;
+    padding: 5px !important;
     padding-top: 2px;
 
     user-select: none;

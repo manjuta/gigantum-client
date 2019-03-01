@@ -2,6 +2,7 @@
 import React, { Component, Fragment } from 'react';
 import ReactDom from 'react-dom';
 import classNames from 'classnames';
+import { boundMethod } from 'autobind-decorator';
 // assets
 import './Modal.scss';
 
@@ -10,21 +11,14 @@ export default class Modal extends Component {
     if (document.getElementById('root')) {
       document.getElementById('root').classList.add('no-overflow');
     }
-
-    if (document.getElementById('modal__cover')) {
-       document.getElementById('modal__cover').classList.remove('hidden');
-    }
   }
 
   componentWillUnmount() {
     if (document.getElementById('root')) {
       document.getElementById('root').classList.remove('no-overflow');
     }
-
-    if (document.getElementById('modal__cover')) {
-       document.getElementById('modal__cover').classList.add('hidden');
-    }
   }
+
 
   render() {
     const { props } = this;

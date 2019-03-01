@@ -133,7 +133,7 @@ class Branches extends Component {
   */
   @boundMethod
   _toggleSyncDropdown() {
-    if (this.props.allowSync) {
+    if (this.props.allowSyncPull) {
       const { state } = this;
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
@@ -357,7 +357,7 @@ class Branches extends Component {
     }),
     syncMenuDropdownButtonCSS = classNames({
       'Branches__btn Branches__btn--sync-dropdown': true,
-      'Branches__btn--sync-dropdown--disabled': !props.allowSync,
+      'Branches__btn--sync-dropdown--disabled': !props.allowSyncPull,
       'Branches__btn--sync-open': state.syncMenuVisible,
     }),
     syncMenuDropdownCSS = classNames({
@@ -385,7 +385,7 @@ class Branches extends Component {
             <button
               className={syncButtonCSS}
               data-tooltip={syncTooltip}
-              onClick={() => props.handleSyncButton(true, props.allowSync) }
+              onClick={() => props.handleSyncButton(true, props.allowSync, props.allowSyncPull) }
             />
             <button
               className={syncMenuDropdownButtonCSS}
@@ -394,14 +394,17 @@ class Branches extends Component {
             <div className={syncMenuDropdownCSS}>
               <h5 className="Branches__h5">Sync</h5>
               <ul className="Branches__ul">
+                {
+                  props.allowSync &&
+                  <li
+                      className="Branches__list-item"
+                      onClick={() => props.handleSyncButton(false, props.allowSync, props.allowSyncPull)}>
+                      Push & Pull
+                  </li>
+                }
                 <li
                     className="Branches__list-item"
-                    onClick={() => props.handleSyncButton(false, props.allowSync)}>
-                    Push & Pull
-                </li>
-                <li
-                    className="Branches__list-item"
-                    onClick={() => props.handleSyncButton(true, props.allowSync)}>
+                    onClick={() => props.handleSyncButton(true, props.allowSync, props.allowSyncPull)}>
                     Pull-only
                 </li>
               </ul>

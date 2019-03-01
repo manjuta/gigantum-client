@@ -303,12 +303,13 @@ export default class WizardModal extends React.Component {
       hidden: !this.state.modalBlur,
     });
     const currentComponent = this._currentComponent();
+    const modalSize = (currentComponent.header === 'Select A Base') ? 'large-long' : 'large';
     return (
       <div>
         {
           this.state.modal_visible &&
           <Modal
-            size="large"
+            size={modalSize}
             icon="add"
             handleClose={() => this._hideModal()}
             header={currentComponent.header}

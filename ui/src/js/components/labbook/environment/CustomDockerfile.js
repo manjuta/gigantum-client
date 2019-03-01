@@ -126,6 +126,10 @@ export default class CustomDockerfile extends Component {
             CustomDockerfile__header: true,
             'Tooltip-data Tooltip-data--right': props.isLocked,
           }),
+          editDockerfileButtonCSS = classNames({
+            'CustomDockerfile__edit-button': true,
+            hidden: state.editingDockerfile,
+          }),
           renderedContent = state.dockerfileContent ? `\`\`\`\n${state.dockerfileContent}\n\`\`\`` : 'No commands provided.';
 
     return (
@@ -138,13 +142,6 @@ export default class CustomDockerfile extends Component {
             data-tooltip="Container must be turned off to edit docker snippets">
             Custom Docker Instructions
             <ToolTip section="dockerInstructionsEnvironment" />
-            {
-              !state.editingDockerfile &&
-              <button
-                onClick={() => this._editDockerfile()}
-                className="CustomDockerfile__btn--edit"
-              />
-            }
           </h5>
 
         </div>
@@ -161,6 +158,12 @@ export default class CustomDockerfile extends Component {
         </div>
 
         <div className="CustomDockerfile__content Card Card--auto Card--no-hover column-1-span-12">
+          <button
+            className={editDockerfileButtonCSS}
+            onClick={() => this._editDockerfile()}
+          >
+            <span>Edit Dockerfile</span>
+          </button>
           {
             this.state.editingDockerfile ?
 

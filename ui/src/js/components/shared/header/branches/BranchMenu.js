@@ -273,13 +273,13 @@ class BranchMenu extends Component {
     }
   }
   /**
-    @param {Boolean} - allowSync
+    @param {Boolean} - allowSyncPull
     sets state to toggle the switch dropdown
     @return {}
   */
   @boundMethod
-  _toggleSyncDropdown(allowSync) {
-    if (allowSync && !this.state.isDataset) {
+  _toggleSyncDropdown(allowSyncPull) {
+    if (allowSyncPull && !this.state.isDataset) {
       const { state } = this;
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
@@ -323,13 +323,14 @@ class BranchMenu extends Component {
   /**
   *  @param {Boolean} - pullOnly
   *  @param {Boolean} - allowSync
+  *  @param {Boolean} - allowSyncPull
   *  handles syncing or publishing the project
   *  @return {}
   */
   @boundMethod
-  _handleSyncButton(pullOnly, allowSync) {
+  _handleSyncButton(pullOnly, allowSync, allowSyncPull) {
     this.setState({ syncMenuVisible: false });
-    if (allowSync) {
+    if (allowSync || (pullOnly && allowSyncPull)) {
       if (!this.props.defaultRemote) {
         this._togglePublishModal();
       } else {
@@ -394,6 +395,28 @@ class BranchMenu extends Component {
     }
   }
 
+      /**
+    *  @param {Object} activeBranch
+    *  @param {Boolean} hasWriteAccess
+    *  @param {Boolean} upToDate
+    *  returns tooltip info
+    *  @return {string}
+    */
+    @boundMethod
+    _getTooltipText(activeBranch, hasWriteAccess, upToDate) {
+      const { props, state } = this;
+      const { collaborators } = props;
+      const sectionCollabs = collaborators && collaborators[props.section.name] || null;
+      const defaultDatasetMessage = 'Datasets does not currently support branching features';
+      return {
+        syncTooltip: props.isLocked ? 'Cannot Sync while Project is in use' : (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must sync Master branch first' : props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : !hasWriteAccess ? 'You do not have the correct permissions to Sync' : 'Sync',
+        manageTooltip: props.isLocked ? 'Cannot Manage Branches while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Manage',
+        createTooltip: props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create',
+        resetTooltip: state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : activeBranch.commitsAhead === undefined ? 'Please wait while branch data is being fetched' : upToDate ? 'Branch up to date' : 'Reset',
+        switchTooltip: props.isLocked ? 'Cannot switch branches while Project is in use' : state.isDataset ? defaultDatasetMessage : '',
+      };
+    }
+
     /**
     *  @param {}
     *  toggles sync modal
@@ -417,20 +440,20 @@ class BranchMenu extends Component {
             branchMenuList,
             otherBranchCount,
           } = extraxtActiveBranch(branches),
-          { collaborators } = props,
-          sectionCollabs = collaborators && collaborators[props.section.name] || null,
           hasWriteAccess = this.props.defaultRemote ? this._hasWriteAccess() : true,
           upToDate = activeBranch.commitsAhead === 0 && activeBranch.commitsBehind === 0,
-          defaultDatasetMessage = 'Datasets does not currently support branching features',
-          allowSync = !(activeBranch.branchName !== 'master' && !this.props.defaultRemote) && !props.isLocked && hasWriteAccess,
+          allowSync = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && hasWriteAccess,
+          allowSyncPull = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked,
           allowReset = !props.isLocked && !upToDate && activeBranch.isRemote && (activeBranch.commitsAhead !== undefined),
-          syncTooltip = props.isLocked ? 'Cannot Sync while Project is in use' : (activeBranch.branchName !== 'master' && !this.props.defaultRemote) ? 'Must sync Master branch first' : !sectionCollabs ? 'Please wait while Project data is being fetched' : !hasWriteAccess ? 'You do not have the correct permissions to Sync' : 'Sync',
-          manageTooltip = props.isLocked ? 'Cannot Manage Branches while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Manage',
-          createTooltip = props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create',
-          resetTooltip = state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : activeBranch.commitsAhead === undefined ? 'Please wait while branch data is being fetched' : upToDate ? 'Branch up to date' : 'Reset',
-          switchTooltip = props.isLocked ? 'Cannot switch branches while Project is in use' : state.isDataset ? defaultDatasetMessage : '',
           smallWidth = window.innerWidth <= 1180,
           statusText = activeBranch.isRemote ? 'Local & Remote' : 'Local only',
+          {
+            syncTooltip,
+            manageTooltip,
+            createTooltip,
+            resetTooltip,
+            switchTooltip,
+          } = this._getTooltipText(activeBranch, hasWriteAccess, upToDate),
           switchDropdownCSS = classNames({
             'BranchMenu__dropdown-menu': true,
             hidden: !state.switchMenuVisible,
@@ -455,7 +478,7 @@ class BranchMenu extends Component {
           }),
           syncMenuDropdownButtonCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--sync-dropdown': true,
-            'BranchMenu__btn--sync-dropdown--disabled': !allowSync || state.isDataset,
+            'BranchMenu__btn--sync-dropdown--disabled': !allowSyncPull || state.isDataset,
             'BranchMenu__btn--sync-open': state.syncMenuVisible,
           }),
           syncCSS = classNames({
@@ -625,7 +648,7 @@ class BranchMenu extends Component {
             <div className="BranchMenu__sync-container">
               <button
                 className={syncCSS}
-                onClick={() => { this._handleSyncButton(false, allowSync); }}
+                onClick={() => { this._handleSyncButton(false, allowSync, allowSyncPull); }}
                 data-tooltip={syncTooltip}
                 type="Submit">
                 {
@@ -650,21 +673,24 @@ class BranchMenu extends Component {
 
               <button
                 className={syncMenuDropdownButtonCSS}
-                onClick={() => { this._toggleSyncDropdown(allowSync); }}
+                onClick={() => { this._toggleSyncDropdown(allowSyncPull); }}
                 type="Submit">
               </button>
 
               <div className={syncMenuDropdownCSS}>
                 <h5 className="BranchMenu__h5">Sync</h5>
                 <ul className="BranchMenu__ul">
+                  {
+                    allowSync &&
+                    <li
+                      className="BranchMenu__list-item"
+                      onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull)}>
+                      Push & Pull
+                    </li>
+                  }
                   <li
                     className="BranchMenu__list-item"
-                    onClick={() => this._handleSyncButton(false, allowSync)}>
-                    Push & Pull
-                  </li>
-                  <li
-                    className="BranchMenu__list-item"
-                    onClick={() => this._handleSyncButton(true, allowSync)}>
+                    onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}>
                       Pull-only
                   </li>
                 </ul>
@@ -693,6 +719,7 @@ class BranchMenu extends Component {
             isLocked={props.isLocked}
             handleSyncButton={this._handleSyncButton}
             allowSync={allowSync}
+            allowSyncPull={allowSyncPull}
             sectionId={props.sectionId}
             syncTooltip={syncTooltip}
             switchBranch={this._switchBranch}
