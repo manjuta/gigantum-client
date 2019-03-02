@@ -367,7 +367,8 @@ class Labbook extends Component {
           }),
           isOwner = localStorage.getItem('username') === labbook.owner,
           ownerText = isOwner ? '' : 'The project owner must migrate and sync this project to update.',
-          deprecatedText = `This Project needs to be migrated to the latest Project format. ${ownerText}`,
+          hasMaster = labbook.branches.filter(branch => (branch.branchName === 'master')).length > 0,
+          deprecatedText = hasMaster ? 'This project has been migrated. Master is the new primary branch. Old branches should be removed.' : `This Project needs to be migrated to the latest Project format. ${ownerText}`,
           oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName)),
           migrationModalType = state.migrateComplete ? 'large' : 'large-long';
 
@@ -383,12 +384,12 @@ class Labbook extends Component {
                 {deprecatedText}
                 <a
                   target="_blank"
-                  href="https://docs.gigantum.com/"
+                  href="https://docs.gigantum.com/docs/project-migration"
                   rel="noopener noreferrer">
                   Learn More.
                 </a>
                 {
-                  isOwner &&
+                  isOwner && !hasMaster &&
                   <button
                     className="Labbook__deprecated-action"
                     onClick={() => this._toggleMigrationModal()}

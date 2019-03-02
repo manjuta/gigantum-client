@@ -65,4 +65,43 @@
       top: calc(50% - 10px);
       left: calc(100% + 16px);
     }
+
+    &--left:hover::before {
+      top: calc(50% - 7px);
+      right: calc(100% + 2px);
+
+      @include triangle('right', 7px, $slateBlue);
+    }
+
+
+    &--left:hover::after {
+      top: calc(50% - 10px);
+      right: calc(100% + 16px);
+    }
+
+    &--top-offset:hover::before {
+      top: calc(100% + 7px);
+      left: calc(50% - 70px);
+
+      @include triangle('top', 7px, $slateBlue);
+    }
+
+
+    &--top-offset:hover::after {
+      top: calc(100% + 7px);
+      left: calc(50% - 110px);
+    }
+
+
+
+    &--info {
+        width: 15px;
+        height: 15px;
+        background: url('~Images/icons/info-icon.svg') no-repeat center center;
+        background-size: 15px;
+        position: absolute;
+        right: 10px;
+        top: calc(50% - 7px);
+        cursor: pointer;
+    }
   }

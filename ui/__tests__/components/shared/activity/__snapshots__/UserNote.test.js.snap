@@ -4,6 +4,10 @@ exports[`UserNote Renders a snapshot 1`] = `
 <div
   className="UserNote flex flex--column"
 >
+  <div
+    className="UserNote__close close"
+    onClick={[Function]}
+  />
   <input
     className="UserNote__title"
     onKeyUp={[Function]}

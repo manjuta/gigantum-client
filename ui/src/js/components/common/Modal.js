@@ -31,6 +31,7 @@ export default class Modal extends Component {
       'Modal__sub-container': true,
       'Modal__sub-container--nopadding': props.noPadding,
     });
+    const overflow = (this.props.overlfow === 'visible') ? 'visible' : 'hidden';
     return (
       ReactDom
       .createPortal(
@@ -40,7 +41,7 @@ export default class Modal extends Component {
           onClick={props.handleClose}
         />
 
-        <div className={modalContentCSS}>
+        <div className={modalContentCSS} style={{ overflow }}>
           { props.handleClose
             && <div
               className="Modal__close"

@@ -573,13 +573,17 @@ class ActionsMenu extends Component {
           <ul className="ActionsMenu__list">
 
             <li className="ActionsMenu__item ActionsMenu__item--export">
-
               <button
                 onClick={evt => this._exportLabbook(evt)}
                 disabled={this.state.exporting}
                 className="ActionsMenu__btn--flat">
-                Export
+                Export to Zip
               </button>
+
+              <div
+                className="Tooltip-data Tooltip-data--top-offset Tooltip-data--info"
+                data-tooltip="Exports project zip file to your gignatum directory"
+              />
 
             </li>
 

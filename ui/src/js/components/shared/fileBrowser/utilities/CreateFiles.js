@@ -41,7 +41,7 @@ const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) =
       return (filteredFileNames.indexOf(filename) > -1);
     });
 
-    if (mutationData.section === 'code') {
+    if (mutationData.section !== 'dataset') {
       startFileUpload(filteredFiles, prefix, fileSizeData, mutationData, dropZoneProps);
     } else {
       const fileSizeData = checkFileSize(files, true);
@@ -231,8 +231,10 @@ const createFilesFooterMessage = (totalFiles, hasDirectoryUpload, fileSizeData, 
     const fileSizeNotAllowedString = fileSizeNotAllowedNames.join(', ');
 
     if (fileSizeNotAllowedString.length > 0) {
-      const size = mutationData.section === 'code' ? '100 MB' : '1.8 GB';
-      const message = `Cannot upload files over ${size} to the ${mutationData.section} directory. The following files have not been added ${fileSizeNotAllowedString}`;
+      let size = (mutationData.section === 'code') ? '100 MB' : (mutationData.section === 'data') ? '4 GB' : '500 MB';
+
+      const inputOutputDatasetMessage = (mutationData.section === 'input') || (mutationData.section === 'output') ? 'Please use datasets for large files.' : '';
+      const message = `Cannot upload files over ${size} to the ${mutationData.section} directory. The following files have not been added ${fileSizeNotAllowedString}. ${inputOutputDatasetMessage}`;
 
       setWarningMessage(message);
     }

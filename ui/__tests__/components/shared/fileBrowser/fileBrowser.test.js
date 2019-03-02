@@ -74,9 +74,8 @@ describe('FileBrowser component', () => {
         expect(tree).toMatchSnapshot();
    });
 
-   const wrapper = mount(<Provider store={store} ><FileBrowserDropZone.DecoratedComponent {...fixtures } /></Provider>);
+   const component = mount(<FileBrowserDropZone.DecoratedComponent {...fixtures } />);
 
-   const component = wrapper.find(FileBrowser).childAt(0);
    let deleteCount = 0;
    const MockFn = jest.fn();
    const mockDeleteMutation = new MockFn();

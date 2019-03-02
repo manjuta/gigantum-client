@@ -78,7 +78,7 @@ export default class CollaboratorsModal extends Component {
     } else if ((permission === 'owner') || (permission === 'OWNER')) {
       return collaboratorName === this.state.owner ? 'Owner' : 'Admin';
     }
-    return 'Select';
+    return 'Read';
   }
   /**
   *  @param {number}
@@ -133,10 +133,10 @@ export default class CollaboratorsModal extends Component {
     if (this.props.canManageCollaborators) {
       if (userExpanded) {
         if (userExpanded !== localStorage.getItem('username')) {
-        this.setState({ userExpanded: this.state.userExpanded === userExpanded ? null : userExpanded });
+          this.setState({ userExpanded: this.state.userExpanded === userExpanded ? null : userExpanded});
         }
       } else {
-        this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen });
+        this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen});
       }
     }
   }
@@ -376,6 +376,7 @@ export default class CollaboratorsModal extends Component {
   }
 
   render() {
+    const { state } = this;
     const autoCompleteMenu = classNames({
       'CollaboratorsModal__auto-compelte-menu box-shadow': true,
       'CollaboratorsModal__auto-compelte-menu--visible': this.state.colloboratorSearchList.length > 0,
@@ -389,13 +390,18 @@ export default class CollaboratorsModal extends Component {
       permissionsMenuCSS = classNames({
         'CollaboratorModal__PermissionsMenu box-shadow': true,
         hidden: !this.state.permissionMenuOpen,
+      }),
+      collaboratorList = classNames({
+        CollaboratorsModal__list: true,
+        'CollaboratorsModal__list--overflow': (state.userExpanded !== null),
       });
-    const disableAddButton = this.state.addCollaboratorButtonDisabled || !this.state.newCollaborator.length || !this.state.newPermissions;
+    const disableAddButton = this.state.addCollaboratorButtonDisabled || !this.state.newCollaborator.length;
     return (
       <Modal
         header="Manage Collaborators"
         icon="user"
         size="large"
+        overflow="visible"
         handleClose={() => { this.props.toggleCollaborators(); }}
         renderContent={() =>
           (<div>
@@ -507,7 +513,7 @@ export default class CollaboratorsModal extends Component {
 
                 {this.props.collaborators &&
 
-                <ul className="CollaboratorsModal__list">
+                <ul className={ collaboratorList }>
                   {
                     this.props.collaborators.map((collaborator) => {
                       const collaboratorName = collaborator.collaboratorUsername;
@@ -532,15 +538,13 @@ export default class CollaboratorsModal extends Component {
                         <li
                           key={collaboratorName}
                           ref={collaboratorName}
-                          className={collaboratorItemCSS}
-                        >
+                          className={collaboratorItemCSS}>
 
                           <div className="CollaboratorsModal__collaboratorName">{collaboratorName}</div>
                           <div className="CollaboratorsModal__permissions CollaboratorsModal__permissions--individual">
                             <span
                               className={individualPermissionsSelectorCSS}
-                              onClick={() => this._togglePermissionsMenu(collaboratorName)}
-                            >
+                              onClick={() => this._togglePermissionsMenu(collaboratorName)}>
                               {this._getPermissions(collaborator.permission, collaboratorName)}
                             </span>
                             <ul className={individualPermissionsMenuCSS}>

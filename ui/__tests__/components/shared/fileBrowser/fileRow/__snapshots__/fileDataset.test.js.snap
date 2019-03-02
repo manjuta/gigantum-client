@@ -77,13 +77,13 @@ exports[`Dataset File component File Snapshot 1`] = `
         className="ActionsMenu"
       >
         <div
-          className="ActionsMenu__item ActionsMenu__item--AddSubfolder visibility-hidden"
-          name="Add Subfolder"
+          className="ActionsMenu__item Tooltip-data Tooltip-data--small ActionsMenu__item--AddSubfolder visibility-hidden"
+          data-tooltip="Add Subfolder"
           onClick={[Function]}
         />
         <div
-          className="ActionsMenu__item ActionsMenu__item--delete"
-          name="Delete"
+          className="ActionsMenu__item ActionsMenu__item--delete Tooltip-data Tooltip-data--small"
+          data-tooltip="Delete"
           onClick={[Function]}
         >
           <div
@@ -110,8 +110,8 @@ exports[`Dataset File component File Snapshot 1`] = `
           </div>
         </div>
         <div
-          className="ActionsMenu__item ActionsMenu__item--rename"
-          name="Rename"
+          className="ActionsMenu__item ActionsMenu__item--rename Tooltip-data Tooltip-data--small"
+          data-tooltip="Rename"
           onClick={[Function]}
         />
       </div>
@@ -119,29 +119,8 @@ exports[`Dataset File component File Snapshot 1`] = `
         className="DatasetActionsMenu"
       >
         <div
-          className="DatasetActionsMenu__database-actions"
-        >
-          <div
-            className="DatasetActionsMenu__item DatasetActionsMenu__item--details"
-            name="Details"
-            onClick={[Function]}
-          >
-            Details
-          </div>
-          <div
-            className="DatasetActionsMenu__item DatasetActionsMenu__item--remove"
-            name="Remove"
-            onClick={[Function]}
-          />
-          <div
-            className="DatasetActionsMenu__item DatasetActionsMenu__item--manage"
-            name="Manage"
-            onClick={[Function]}
-          />
-        </div>
-        <div
-          className="DatasetActionsMenu__item DatasetActionsMenu__item--download-grey"
-          name="Download"
+          className="DatasetActionsMenu__item Tooltip-data Tooltip-data--small DatasetActionsMenu__item--download-grey"
+          data-tooltip="Download"
           onClick={[Function]}
         />
       </div>

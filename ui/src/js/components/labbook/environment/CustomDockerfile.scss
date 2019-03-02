@@ -46,6 +46,13 @@
   flex-wrap: nowrap;
   flex-direction: column;
 
+  .ReactMarkdown {
+    .CodeBlock--docker {
+      display: flex !important;
+      width: calc(100% - 60px);
+    }
+  }
+
   p {
     margin: 0
   }

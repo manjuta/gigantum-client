@@ -36,7 +36,7 @@ class Activity extends Component {
       isPaginating: false,
       selectedNode: null,
       createBranchVisible: false,
-      refetchEnabled: false,
+      refetchEnabled: true,
       newActivityAvailable: false,
       newActivityPolling: false,
       editorFullscreen: false,
@@ -98,7 +98,7 @@ class Activity extends Component {
       this._loadMore();
     }
 
-    if (activityRecords.edges && activityRecords.edges.length) {
+    if (activityRecords.edges) {
       this.setState({ refetchEnabled: true });
       this._refetch();
     }
@@ -153,10 +153,11 @@ class Activity extends Component {
   @boundMethod
   _handleVisibilityChange() {
     const { state } = this;
+
     if (state.newActivityForcePaused) {
       this._stopRefetch();
       this.setState({ newActivityForcePaused: false });
-    } else if (state.refetchForcePaused) {
+    } else if (!state.refetchForcePaused) {
       this._refetch();
       this.setState({ refetchForcePaused: false });
     }

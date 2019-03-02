@@ -198,7 +198,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
+            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud Tooltip-data Tooltip-data--small"
             data-tooltip="Project exists locally"
             disabled={true}
           >
@@ -259,7 +259,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip-Listing RemoteLabbooks__private"
+          className="Tooltip-Listing RemoteLabbooks__private   Tooltip-data Tooltip-data--small"
           data-tooltip="private"
         />
       </div>

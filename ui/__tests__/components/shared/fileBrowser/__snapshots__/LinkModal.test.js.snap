@@ -10,6 +10,11 @@ exports[`Test LinkModal 1`] = `
   />
   <div
     className="Modal__content large"
+    style={
+      Object {
+        "overflow": "hidden",
+      }
+    }
   >
     <div
       className="Modal__close"

@@ -80,6 +80,7 @@
     "classnames": "^2.2.6",
     "create-object-url": "^1.0.2",
     "dateformat": "^3.0.3",
+    "detect-browser": "^4.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.11.1",

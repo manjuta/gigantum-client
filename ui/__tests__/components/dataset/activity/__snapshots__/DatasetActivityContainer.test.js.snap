@@ -10,6 +10,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
     <div
       className="Activity__sizer flex-1-0-auto"
     >
+      <div />
       <div
         className="Activity__date-section Activity__date-section--0"
       >
@@ -83,54 +84,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="UserNote__add UserNote__card column-1-span-10 hidden"
-          >
-            <div
-              className="UserNote flex flex--column"
-            >
-              <input
-                className="UserNote__title"
-                onKeyUp={[Function]}
-                placeholder="Add a summary title"
-                type="text"
-              />
-              <textarea
-                className="UserNote__summary"
-                id="markDown"
-              />
-              <div
-                className="ReactTags__tags react-tags-wrapper"
-              >
-                <div
-                  className="ReactTags__selected"
-                >
-                  <div
-                    className="ReactTags__tagInput"
-                  >
-                    <input
-                      aria-label="Add new tag"
-                      className="ReactTags__tagInputField"
-                      id="TagsInput"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onPaste={[Function]}
-                      placeholder="Add new tag"
-                      type="text"
-                    />
-                  </div>
-                </div>
-              </div>
-              <button
-                className="UserNote__add-note"
-                disabled={true}
-                onClick={[Function]}
-                type="submit"
-              >
-                Add Note
-              </button>
-            </div>
-          </div>
+          />
         </div>
         <div
           className="Activity__card-container Activity__card-container--last"

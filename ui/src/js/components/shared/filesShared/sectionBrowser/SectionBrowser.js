@@ -1,15 +1,19 @@
 // vendor
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 // mutations
 import FileBrowser from 'Components/shared/fileBrowser/FileBrowser';
 
-export default class SectionBrowser extends Component {
+class SectionBrowser extends Component {
   constructor(props) {
   	super(props);
 
     this.state = {
       rootFolder: '',
       moreLoading: false,
+      dataset: {
+        isProcessing: false,
+      },
     };
 
     this._setRootFolder = this._setRootFolder.bind(this);
@@ -84,12 +88,14 @@ export default class SectionBrowser extends Component {
       }
       return (
         <FileBrowser
-          ref={`${this.props.section}Browser`}
+          ref={inst => inst }
+          // ref={`${this.props.section}Browser`}
           section={this.props.section}
           selectedFiles={this.props.selectedFiles}
           clearSelectedFiles={this.props.clearSelectedFiles}
           setRootFolder={this._setRootFolder}
           files={files}
+          isProcessing={this.props.isProcessing}
           parentId={this.props.sectionId}
           connection={`${capitalSection}Browser_allFiles`}
           favoriteConnection={`${capitalSection}Favorites_favorites`}
@@ -102,3 +108,15 @@ export default class SectionBrowser extends Component {
     return (<div>No Files Found</div>);
   }
 }
+
+
+const mapStateToProps = (state, ownProps) => ({
+  isProcessing: state.dataset.isProcessing,
+});
+
+const mapDispatchToProps = dispatch => ({
+
+});
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(SectionBrowser);
