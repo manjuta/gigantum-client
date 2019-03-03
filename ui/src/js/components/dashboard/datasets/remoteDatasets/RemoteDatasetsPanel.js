@@ -41,7 +41,7 @@ export default class RemoteDatasetPanel extends Component {
   */
   _handleDelete(edge) {
     if (localStorage.getItem('username') !== edge.node.owner) {
-      setWarningMessage('You can only delete remote Projects that you have created.');
+      setWarningMessage('You can only delete remote Datasets that you have created.');
     } else {
       UserIdentity.getUserIdentity().then((response) => {
         if (navigator.onLine) {
@@ -83,6 +83,9 @@ export default class RemoteDatasetPanel extends Component {
     *  changes state of isImporting to false
   */
   _clearState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.add('hidden');
+    }
     this.setState({
       isImporting: false,
     });
@@ -92,16 +95,9 @@ export default class RemoteDatasetPanel extends Component {
     *  changes state of isImporting to true
   */
   _importingState = () => {
-    this.setState({
-      isImporting: true,
-    });
-  }
-
-  /**
-    *  @param {}
-    *  changes state of isImporting to true
-  */
-  _importingState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.remove('hidden');
+    }
     this.setState({
       isImporting: true,
     });
@@ -114,6 +110,7 @@ export default class RemoteDatasetPanel extends Component {
     *  handles importing dataset mutation
   */
   _handleImportDataset = (owner, datasetName, remote) => {
+    const id = uuidv4();
     ImportRemoteDatasetMutation(
       owner,
       datasetName,
@@ -123,7 +120,7 @@ export default class RemoteDatasetPanel extends Component {
 
         if (error) {
           console.error(error);
-          setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
+          setMultiInfoMessage(id, 'ERROR: Could not import remote Dataset', null, true, error);
         } else if (response) {
           const datasetName = response.importRemoteDataset.newDatasetEdge.node.name;
           const owner = response.importRemoteDataset.newDatasetEdge.node.owner;
@@ -150,7 +147,7 @@ export default class RemoteDatasetPanel extends Component {
        if (response.data) {
          if (response.data.userIdentity.isSessionValid) {
            this._importingState();
-           setMultiInfoMessage(id, 'Importing Project please wait', false, false);
+           setMultiInfoMessage(id, 'Importing Dataset please wait', false, false);
            this._handleImportDataset(owner, datasetName, remote);
          } else {
            this.props.auth.renewToken(true, () => {
@@ -193,7 +190,7 @@ export default class RemoteDatasetPanel extends Component {
           this.props.existsLocally ?
             <button
               className="RemoteDatasets__icon RemoteDatasets__icon--cloud"
-              data-tooltip="Project exists locally"
+              data-tooltip="Dataset exists locally"
               disabled
             >
               Imported
@@ -209,7 +206,7 @@ export default class RemoteDatasetPanel extends Component {
         }
          <button
            className={deleteCSS}
-           data-tooltip={localStorage.getItem('username') !== edge.node.owner ? 'Can only delete remote projects created by you' : ''}
+           data-tooltip={localStorage.getItem('username') !== edge.node.owner ? 'Can only delete remote datasets created by you' : ''}
            disabled={this.state.isImporting || localStorage.getItem('username') !== edge.node.owner}
            onClick={() => this._handleDelete(edge)}
          >

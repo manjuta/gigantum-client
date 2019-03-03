@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Fri Mar 01 2019 15:16:26 GMT-0500 (Eastern Standard Time)
+# timestamp: Fri Mar 01 2019 17:58:45 GMT-0500 (Eastern Standard Time)
 
 schema {
   query: LabbookQuery
@@ -1478,7 +1478,8 @@ type StopContainerPayload {
 input SyncDatasetInput {
   owner: String!
   datasetName: String!
-  force: Boolean
+  pullOnly: Boolean
+  overrideMethod: String
   clientMutationId: String
 }
 

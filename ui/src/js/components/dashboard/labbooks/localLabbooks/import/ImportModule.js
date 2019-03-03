@@ -466,15 +466,6 @@ export default class ImportModule extends Component {
 
   /**
   *  @param {}
-  *  sets state of app for importing
-  *  @return {}
-  */
-  _importingState = () => {
-    this.setState({ isImporting: true });
-  }
-
-  /**
-  *  @param {}
   *  clears state of file and sets css back to import
   *  @return {}
   */

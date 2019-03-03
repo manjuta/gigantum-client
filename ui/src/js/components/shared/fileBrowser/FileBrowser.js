@@ -816,8 +816,8 @@ class FileBrowser extends Component {
               const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
               const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
               const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
-
                 if (isDataset) {
+                  const commitsBehind = this.props.linkedDatasets.filter(dataset => dataset.name === file)[0].commitsBehind;
                   return (
                     <Dataset
                       ref={file}
@@ -834,6 +834,7 @@ class FileBrowser extends Component {
                       childrenState={this.state.childrenState}
                       updateChildState={this._updateChildState}
                       codeDirUpload={this._codeDirUpload}
+                      commitsBehind={commitsBehind}
                     />
                   );
                 } else if (isDir) {

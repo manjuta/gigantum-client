@@ -84,6 +84,9 @@ export default class RemoteLabbookPanel extends Component {
     *  changes state of isImporting to false
   */
   _clearState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.add('hidden');
+    }
     this.setState({
       isImporting: false,
     });
@@ -93,6 +96,9 @@ export default class RemoteLabbookPanel extends Component {
     *  changes state of isImporting to true
   */
   _importingState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.remove('hidden');
+    }
     this.setState({
       isImporting: true,
     });

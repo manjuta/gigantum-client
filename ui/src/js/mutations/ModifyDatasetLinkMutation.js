@@ -15,6 +15,7 @@ import {
                 linkedDatasets {
                   name
                   owner
+                  commitsBehind
                   allFiles{
                     edges{
                       node{
