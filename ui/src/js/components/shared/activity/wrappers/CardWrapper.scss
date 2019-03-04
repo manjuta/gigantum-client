@@ -40,6 +40,19 @@
        &:after {
          display: none;
        }
+       &:before {
+         content: "";
+         display: block;
+         position: absolute;
+         z-index: index($elements, pseudoCard);
+         top: -10px;
+         left: 40px;
+         border: 3px solid $romanSilver;
+         border-width: 0 0 0 4px;
+         width: 1px;
+         height: 70px;
+         transition: height 0.25s
+       }
     }
 
     &:first-child{
@@ -58,6 +71,8 @@
        }
     }
 
+
+
     &--cluster {
       &:before {
         height: 60px !important;
@@ -68,4 +83,14 @@
 
 .CardWapper:last-child:before{
   height: 80px;
+  display: block;
+  position: absolute;
+  z-index: index($elements, pseudoCard);
+  top: -10px;
+  left: 40px;
+  border: 3px solid $romanSilver;
+  border-width: 0 0 0 4px;
+  width: 1px;
+  height: 70px;
+  transition: height 0.25s
 }

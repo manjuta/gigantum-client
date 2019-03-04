@@ -37,6 +37,7 @@ class Activity extends Component {
       selectedNode: null,
       createBranchVisible: false,
       refetchEnabled: true,
+      activityCardCount: 0,
       newActivityAvailable: false,
       newActivityPolling: false,
       editorFullscreen: false,
@@ -73,8 +74,20 @@ class Activity extends Component {
       }
     }
 
-    if (activityRecords.pageInfo.hasNextPage && (activityRecords.edges.length < 3)) {
-      this._loadMore();
+    if (activityRecords.pageInfo.hasNextPage) {
+      const stateActivityRecords = state.activityRecords;
+
+      let keys = Object.keys(stateActivityRecords);
+      let activityCardCount = 0;
+      keys.forEach((key) => {
+        activityCardCount += stateActivityRecords[key].length;
+      });
+
+      this.setState({ activityCardCount });
+
+      if (activityCardCount < 10) {
+        this._loadMore();
+      }
     }
   }
 
@@ -809,7 +822,7 @@ class Activity extends Component {
                   <PaginationLoader
                     key={`Actvity_paginationLoader${index}`}
                     index={index}
-                    isLoadingMore={state.isPaginating}
+                    isLoadingMore={state.isPaginating || (state.activityCardCount < 10)}
                   />
                   ))
               }

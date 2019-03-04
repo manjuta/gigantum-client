@@ -326,31 +326,50 @@
   opacity: 1;
   height: auto !important;
   min-height: 50px;
+  animation-duration: 0.8s;
+  animation-name: opacityPulse;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
 }
 
 .ActivityCard.ActivityCard__loader--1 {
-  transition: opacity 0.8s;
+
+  animation-duration: 0.8s;
+  animation-name: opacityPulse;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-delay: 0.8s;
 }
 
 .ActivityCard.ActivityCard__loader--2 {
-  transition: opacity 1.2s;
+   animation-delay: 1.2s;
 }
 
 .ActivityCard.ActivityCard__loader--3 {
-  transition: opacity 2s;
+   animation-delay: 2s;
 }
 
 .ActivityCard.ActivityCard__loader--4 {
-  transition: opacity 2.8s;
+   animation-delay: 2.8s;
 }
 
 .ActivityCard.ActivityCard__loader--5 {
-  transition: opacity 3.6s;
+   animation-delay: 3.6s;
 }
 
 .ActivityDetail__details {
   position: relative;
   margin: -1px 0px;
+}
+
+@keyframes opacityPulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.7;
+  }
 }
 
 .ActivityDetail__details-title {
