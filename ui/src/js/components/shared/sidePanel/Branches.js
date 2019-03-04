@@ -18,6 +18,7 @@ import {
 // components
 import ToolTip from 'Components/common/ToolTip';
 import SidePanel from './SidePanel';
+import ForceMerge from 'Components/shared/modals/ForceMerge';
 // assets
 import './Branches.scss';
 
@@ -32,6 +33,7 @@ class Branches extends Component {
     localSelected: false,
     remoteSelected: false,
     currentIndex: 0,
+    forceMergeModalVisible: false,
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -93,7 +95,7 @@ class Branches extends Component {
   */
   _handleConfirm(branch, action) {
     if (action === 'merge') {
-      this._mergeBranch(branch);
+      this._mergeBranch(branch.branchName);
     } else if (action === 'delete') {
       this._deleteBranch(branch);
     } else if (action === 'reset') {
@@ -139,25 +141,40 @@ class Branches extends Component {
     }
   }
   /**
-    @param {Object} branches
+    @param {Object} branchName
+    @param {String} overrideMethod
     filters array branhces and return the active branch node
   */
   @boundMethod
-  _mergeBranch(branch) {
+  _mergeBranch(branchName, overrideMethod) {
     const { props } = this,
           self = this,
           data = {
-            branchName: branch.branchName,
+            branchName,
+            overrideMethod,
           };
       props.toggleCover('Merging Branches');
       props.branchMutations.mergeBranch(data, (response, error) => {
         if (error) {
-          console.log(error)
+          const errorMessage = error[0].message;
+          if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
+            self._toggleMergeModal();
+          }
+        } else {
+          self.setState({ action: null, mergeModalVisible: null });
         }
-        self.setState({ action: null, mergeModalVisible: null });
         props.toggleCover(null);
       });
   }
+    /**
+    *  @param {}
+    *  toggles merge modal
+    *  @return {string}
+    */
+   @boundMethod
+    _toggleMergeModal() {
+      this.setState({ forceMergeModalVisible: !this.state.forceMergeModalVisible });
+    }
   /**
     calls reset branch mutation
   */
@@ -369,17 +386,18 @@ class Branches extends Component {
       'Branches__dropdown-menu': state.syncMenuVisible && !props.disableDropdown,
       hidden: !state.syncMenuVisible,
     });
-    let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset' : 'Branch must be remote';
+    let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset Branch to Remote' : 'Branch must be remote';
     let syncTooltip = props.syncTooltip;
-    let mergeTooltip = branch.isActive ? 'Cannot merge active branch with itself' : 'Merge';
-    let deleteTooltip = branch.branchName === 'master' ? 'Cannot delete master branch' : branch.isActive ? 'Cannot delete Active branch' : 'Delete';
+    let mergeTooltip = branch.isActive ? 'Cannot merge active branch with itself' : 'Merge into active branch';
+    let deleteTooltip = branch.branchName === 'master' ? 'Cannot delete master branch' : branch.isActive ? 'Cannot delete Active branch' : 'Delete Branch';
     return (
       <div className="Branches__actions-section">
         {
           branch.isActive ?
           <Fragment>
             <button
-              className="Branches__btn Branches__btn--create"
+              className="Branches__btn Branches__btn--create Tooltip-data Tooltip-data--small"
+              data-tooltip="Create Branch"
               onClick={() => props.toggleModal('createBranchVisible') }
             />
             <button
@@ -420,7 +438,7 @@ class Branches extends Component {
           <Fragment>
             <button
               className={switchButtonCSS}
-              data-tooltip="Switch"
+              data-tooltip="Switch to Branch"
               onClick={() => this.props.switchBranch(branch) }
             />
             <button
@@ -473,6 +491,16 @@ class Branches extends Component {
     const statusText = props.activeBranch.isLocal ? props.activeBranch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only';
     return (
       <div>
+        {
+          state.forceMergeModalVisible &&
+
+          <ForceMerge
+            toggleModal={this._toggleMergeModal}
+            sectionType={props.sectionType}
+            merge={this._mergeBranch}
+            branchName={state.mergeModalVisible}
+          />
+      }
       { props.sidePanelVisible
         && <SidePanel
             toggleSidePanel={props.toggleSidePanel}
@@ -500,7 +528,7 @@ class Branches extends Component {
                     <div className="Branches__branchname">{props.activeBranch.branchName}</div>
                     <div className="Branches__details">
                       {
-                         !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) &&
+                         !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) && (props.activeBranch.commitsAhead !== null) &&
                         <div className="Branches__commits">
                           {
                            (props.activeBranch.commitsBehind !== 0) &&
@@ -570,7 +598,7 @@ class Branches extends Component {
                           <div className="Branches__branchname">{branch.branchName}</div>
                           <div className="Branches__details">
                             {
-                              !branchUpToDate && (branch.commitsAhead !== undefined) &&
+                              !branchUpToDate && (branch.commitsAhead !== undefined) && (branch.commitsAhead !== null) &&
                               <div className="Branches__commits">
                                 {
                                   (branch.commitsBehind !== 0) &&

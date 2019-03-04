@@ -92,7 +92,7 @@ export default class Summary extends Component {
                                 {tooltipText}
                                 <a
                                     target="_blank"
-                                    href="https://docs.gigantum.com/"
+                                    href="https://docs.gigantum.com/docs/datasets-overview#section-dataset-overview"
                                     rel="noopener noreferrer"
                                 >
                                 Learn more.

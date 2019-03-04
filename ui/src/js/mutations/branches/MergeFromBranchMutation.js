@@ -36,7 +36,7 @@ export default function MergeFromBranchMutation(
     hasNext: false,
   };
   if (overrideMethod) {
-    input.overrideMethod = overrideMethod;
+    variables.input.overrideMethod = overrideMethod;
   }
 
   commitMutation(

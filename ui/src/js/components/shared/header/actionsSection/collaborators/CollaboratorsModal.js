@@ -515,7 +515,7 @@ export default class CollaboratorsModal extends Component {
             :
             <div className="CollaboratorsModal__message">
               <b>
-                This project needs to be synced before collaborators can be added.
+                This project needs to be published before collaborators can be added.
               </b>
             </div>
             }

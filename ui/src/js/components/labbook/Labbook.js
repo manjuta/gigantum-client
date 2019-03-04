@@ -104,7 +104,7 @@ class Labbook extends Component {
 
   static getDerivedStateFromProps(nextProps, state) {
     setCallbackRoute(nextProps.location.pathname);
-    const propBranches = nextProps.labbook.branches;
+    const propBranches = nextProps.labbook ? nextProps.labbook.branches : [];
     const stateBranches = state.branches;
     const branchMap = new Map();
     const mergedBranches = [];
@@ -127,13 +127,13 @@ class Labbook extends Component {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-    const isLocked = (nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
+    const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
     return {
       ...state,
       deletedBranches: newDeletedBranches,
       branches: mergedBranches,
-      canManageCollaborators: nextProps.labbook.canManageCollaborators,
-      collaborators: nextProps.labbook.collaborators,
+      canManageCollaborators: nextProps.labbook ? nextProps.labbook.canManageCollaborators : false,
+      collaborators: nextProps.labbook ? nextProps.labbook.collaborators : [],
       isLocked,
     };
   }

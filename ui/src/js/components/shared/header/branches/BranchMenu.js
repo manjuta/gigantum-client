@@ -298,12 +298,12 @@ class BranchMenu extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Object} - activeBranch
   *  determines whether or not user has write access
   *  @return {}
   */
   @boundMethod
-  _hasWriteAccess() {
+  _hasWriteAccess(activeBranch) {
     const { props } = this;
     const username = localStorage.getItem('username');
 
@@ -313,7 +313,7 @@ class BranchMenu extends Component {
       const filteredArr = props.collaborators[props.section.name].filter(collaborator => collaborator.collaboratorUsername === username);
       if (filteredArr.length === 0) {
         return false;
-      } else if (filteredArr[0].permission === 'READ_ONLY') {
+      } else if ((filteredArr[0].permission === 'READ_ONLY') || ((filteredArr[0].permission === 'READ_WRITE') && (activeBranch.branchName === 'master'))) {
         return false;
       } else {
         return true;
@@ -353,6 +353,7 @@ class BranchMenu extends Component {
               this.props.setSyncingState(false);
               if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
                 self._toggleSyncModal();
+                this.setState({ pullOnly });
               }
             },
             pullOnly: pullOnly || false,
@@ -365,7 +366,7 @@ class BranchMenu extends Component {
             this.props.auth.renewToken(true, () => {
               self.setState({ showLoginPrompt: true });
             }, () => {
-              self._sync(pullOnly, allowSync);
+              self.handleSyncButton(pullOnly, allowSync, allowSyncPull);
             });
           } else if (this.props.sectionType !== 'labbook') {
             this.state.branchMutations.syncDataset(data, (response, error) => {
@@ -376,7 +377,7 @@ class BranchMenu extends Component {
           } else {
             LinkedLocalDatasetsQuery.getLocalDatasets({ owner: this.props.section.owner, name: this.props.section.name }).then((res) => {
               const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
-              if (localDatasets.length === 0) {
+              if ((localDatasets.length === 0) || pullOnly) {
                 this.props.setSyncingState(true);
 
                 this.state.branchMutations.syncLabbook(data, (response, error) => {
@@ -411,9 +412,9 @@ class BranchMenu extends Component {
       const syncOrPublish = props.defaultRemote ? isPullOnly ? 'Pull' : 'Sync' : 'Publish';
       return {
         syncTooltip: props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : !props.defaultRemote ? 'Publish' : props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : !hasWriteAccess ? 'Pull' : 'Sync',
-        manageTooltip: props.isLocked ? 'Cannot Manage Branches while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Manage',
-        createTooltip: props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create',
-        resetTooltip: state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : activeBranch.commitsAhead === undefined ? 'Please wait while branch data is being fetched' : upToDate ? 'Branch up to date' : 'Reset',
+        manageTooltip: props.isLocked ? 'Cannot Manage Branches while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Manage Branches',
+        createTooltip: props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create Branch',
+        resetTooltip: state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : activeBranch.commitsAhead === undefined ? 'Please wait while branch data is being fetched' : upToDate ? 'Branch up to date' : 'Reset Branch to Remote',
         switchTooltip: props.isLocked ? 'Cannot switch branches while Project is in use' : state.isDataset ? defaultDatasetMessage : '',
       };
     }
@@ -425,7 +426,7 @@ class BranchMenu extends Component {
     */
    @boundMethod
     _toggleSyncModal() {
-      this.setState({ forceSyncModalVisible: !this.state.forceSyncModalVisible });
+      this.setState({ forceSyncModalVisible: !this.state.forceSyncModalVisible, publishDatasetsModalVisible: false });
     }
 
   render() {
@@ -444,7 +445,7 @@ class BranchMenu extends Component {
           { collaborators } = props,
           sectionCollabs = collaborators && collaborators[props.section.name] || null,
           waitingOnCollabs = !sectionCollabs,
-          hasWriteAccess = this.props.defaultRemote ? this._hasWriteAccess() : true,
+          hasWriteAccess = this.props.defaultRemote ? this._hasWriteAccess(activeBranch) : true,
           upToDate = activeBranch.commitsAhead === 0 && activeBranch.commitsBehind === 0,
           allowSync = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && hasWriteAccess,
           allowSyncPull = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && props.defaultRemote,
@@ -496,22 +497,22 @@ class BranchMenu extends Component {
             'BranchMenu__btn--sync--pull--disabled': showPullOnly && !allowSyncPull,
             'BranchMenu__btn--sync--publish--disabled': !props.defaultRemote && !allowSync,
             'BranchMenu__btn--sync--upToDate--disabled': props.defaultRemote && !allowSync && !showPullOnly,
-            'Tooltip-data Tooltip-data': !allowSync || smallWidth,
+            'Tooltip-data': true,
           }),
           manageCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--manage': true,
             'BranchMenu__btn--manage--disabled': props.isLocked || state.isDataset,
-            'Tooltip-data Tooltip-data': props.isLocked || smallWidth || state.isDataset,
+            'Tooltip-data': true,
           }),
           resetCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--reset': true,
             'BranchMenu__btn--reset--disabled': !allowReset || state.isDataset,
-            'Tooltip-data Tooltip-data': !allowReset || smallWidth || state.isDataset,
+            'Tooltip-data': true,
           }),
           createCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--create': true,
             'BranchMenu__btn--create--disabled': props.isLocked || state.isDataset,
-            'Tooltip-data Tooltip-data': props.isLocked || smallWidth || state.isDataset,
+            'Tooltip-data': true,
           }),
           popupCSS = classNames({
             BranchMenu__popup: true,
@@ -619,14 +620,12 @@ class BranchMenu extends Component {
               className={manageCSS}
               data-tooltip={manageTooltip}
               type="Submit">
-              Manage
             </button>
             <button
               className={createCSS}
               type="Submit"
               data-tooltip={createTooltip}
               onClick={() => this._setModalState('createBranchVisible') }>
-              Create
             </button>
             <div className="BranchMenu__reset-container">
               <button
@@ -635,7 +634,6 @@ class BranchMenu extends Component {
                 data-tooltip={resetTooltip}
                 onClick={() => this._toggleResetPopup(!allowReset || state.isDataset)}
                 >
-                Reset
               </button>
               <div className={popupCSS}>
                 <p>You are about to reset this branch. Resetting a branch will get rid of local changes. Click 'Confirm' to proceed.</p>
@@ -785,6 +783,7 @@ class BranchMenu extends Component {
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
             setRemoteSession={this._setRemoteSession}
+            handleSync={this._handleSyncButton}
             localDatasets={state.localDatasets || []}
           />
 
@@ -810,7 +809,7 @@ class BranchMenu extends Component {
 
 
 const mapStateToProps = (state, ownProps) => ({
-  collaborators: state.collaborators.collaborators
+  collaborators: state.collaborators.collaborators,
 });
 
 const mapDispatchToProps = dispatch => ({

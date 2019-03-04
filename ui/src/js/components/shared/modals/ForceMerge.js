@@ -13,15 +13,15 @@ export default class ForceMerge extends Component {
   *  @return {}
   */
   _forceMerge(method) {
-    this.props.merge({ method });
-    this.props.toggleModal('forceMergeVisible');
+    this.props.merge(this.props.branchName, method);
+    this.props.toggleModal();
   }
 
   render() {
     return (
 
       <Modal
-        handleClose={() => this.props.toggleModal('forceMergeVisible')}
+        handleClose={() => this.props.toggleModal()}
         header="Merge Conflict"
         size="medium"
         renderContent={() =>

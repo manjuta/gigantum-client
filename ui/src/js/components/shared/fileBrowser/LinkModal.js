@@ -146,11 +146,6 @@ export default class LinkModal extends Component {
 
         tags.forEach(({ text, className }) => {
             if (className === 'Dataset Type') {
-                const isManaged = text === 'Managed';
-                if (isManaged !== node.datasetType.isManaged) {
-                    isReturned = false;
-                }
-            } else if (className === 'Base Type') {
                 if (node.datasetType.name !== text) {
                     isReturned = false;
                 }

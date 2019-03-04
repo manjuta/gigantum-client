@@ -29,9 +29,6 @@ mutation LabbookLookupMutation($input: FetchLabbookEdgeInput!){
                 owner
                 name
                 branchName
-                isActive
-                isLocal
-                isRemote
                 isMergeable
                 commitsBehind
                 commitsAhead

@@ -612,7 +612,7 @@ class ActionsMenu extends Component {
               </li>
             }
             {
-              this.state.remoteUrl &&
+              (this.state.remoteUrl || this.props.defaultRemote) &&
               <li className="ActionsMenu__item ActionsMenu__item--copy">
                 <div className="ActionsMenu__item--label">Get Share URL</div>
                 <div className="ActionsMenu__copyRemote">

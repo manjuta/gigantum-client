@@ -118,7 +118,6 @@ export default class PublishDatasetsModal extends Component {
                 if (isPublishing) {
                   self.props.setPublishingState(false);
                   self.props.resetPublishState(false);
-                  self.props.remountCollab();
 
                   setMultiInfoMessage(id, `Added remote https://gigantum.com/${self.props.owner}/${self.props.labbookName}`, true, false);
 
@@ -201,19 +200,7 @@ export default class PublishDatasetsModal extends Component {
                                           },
                                         );
                                       } else {
-                                        SyncLabbookMutation(
-                                          this.props.owner,
-                                          this.props.labbookName,
-                                          null,
-                                          this.props.pullOnly,
-                                          successCall,
-                                          failureCall,
-                                          (error) => {
-                                            if (error) {
-                                              failureCall();
-                                            }
-                                          },
-                                        );
+                                        this.props.handleSync(false, true, true);
                                       }
                                     }
                                   }

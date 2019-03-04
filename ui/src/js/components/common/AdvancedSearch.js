@@ -122,7 +122,9 @@ export default class Modal extends Component {
                   <div className="InfoTooltip">
                     CUDA enabled bases will automatically use the NVIDIA Container Runtime when NVIDIA drivers on the host are compatible with the CUDA version installed in the Base.&nbsp;&nbsp;
                     <a
-                      target="_blank" href="https://docs.gigantum.com/" rel="noopener noreferrer"
+                      target="_blank"
+                      href="https://docs.gigantum.com/docs/using-cuda-with-nvidia-gpus"
+                      rel="noopener noreferrer"
                     >
                       Learn more.
                     </a>
