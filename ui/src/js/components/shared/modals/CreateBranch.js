@@ -53,8 +53,8 @@ export default class CreateBranchModal extends Component {
     }
 
     if (nextProps.selected) {
-      const formattedTimestamp = Moment(Date.parse(nextProps.selected.timestamp)).format('YYYYMMDD-HHmmss');
-      const branchName = `rollback-to-${formattedTimestamp}`;
+      const formattedTimestamp = Moment(Date.parse(nextProps.selected.activityNode.timestamp)).format('MMDDYY-HHmmss').toLowerCase()
+      const branchName = `${nextProps.selected.activeBranch}-at-${formattedTimestamp}`;
       this.setState({ branchName });
     } else if (state.branchName && (typeof state.branchName === 'string') && (state.branchName.indexOf('rollback') > -1)) {
       this.setState({ branchName: '' });

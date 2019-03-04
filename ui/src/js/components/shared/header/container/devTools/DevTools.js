@@ -95,7 +95,7 @@ class DevTools extends Component {
         if (response.startDevTool) {
           const tabName = `${developmentTool}-${owner}-${name}`;
           let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-          if (developmentTool === 'Notebook') {
+          if (developmentTool === 'notebook') {
             if (path.includes('/lab/tree')) {
               path = path.replace('/lab/tree', '/tree');
             } else {
@@ -118,7 +118,7 @@ class DevTools extends Component {
           if (response.startDevTool) {
             const tabName = `${developmentTool}-${owner}-${name}`;
             let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-            if (developmentTool === 'Notebook') {
+            if (developmentTool === 'notebook') {
               if (path.includes('/lab/tree')) {
                 path = path.replace('/lab/tree', '/tree');
               } else {

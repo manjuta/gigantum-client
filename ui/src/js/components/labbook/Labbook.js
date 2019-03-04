@@ -690,6 +690,7 @@ class Labbook extends Component {
 const mapStateToProps = (state, ownProps) => state.labbook;
 
 const mapDispatchToProps = dispatch => ({
+  setBuildingState,
 });
 
 const LabbookContainer = connect(mapStateToProps, mapDispatchToProps)(Labbook);

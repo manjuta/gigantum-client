@@ -33,6 +33,7 @@ export const LinkModalQuery = graphql`
                 datasetType {
                     name
                     isManaged
+                    icon
                 }
               }
               cursor
@@ -72,17 +73,16 @@ export default class LinkModal extends Component {
     */
     _createFilters(datasets) {
         const filters = {
-        'Dataset Type': ['Managed', 'Unmanaged'],
-        'Base Type': [],
+        'Dataset Type': [],
         };
 
-        const baseTypes = new Set();
+        const datasetTypes = new Set();
         datasets.forEach(({ node }) => {
-            if (!baseTypes.has(node.datasetType.name) && node.datasetType.name) {
-                baseTypes.add(node.datasetType.name);
+            if (!datasetTypes.has(node.datasetType.name) && node.datasetType.name) {
+                datasetTypes.add(node.datasetType.name);
               }
         });
-        filters['Base Type'] = Array.from(baseTypes);
+        filters['Dataset Type'] = Array.from(datasetTypes);
         return filters;
     }
   /**
@@ -219,6 +219,12 @@ export default class LinkModal extends Component {
                                                             className="LinkModal__wrapper"
                                                         >
                                                             <div className={LinkModalCard}>
+                                                                    <img
+                                                                        alt=""
+                                                                        src={`data:image/jpeg;base64,${node.datasetType.icon}`}
+                                                                        height="50"
+                                                                        width="50"
+                                                                    />
                                                                     <div className="LinkModal__details">
                                                                         <h6 className="LinkModal__name">{node.name}</h6>
                                                                         <h6 className="LinkModal__type">{node.isManaged ? 'Managed' : 'Unmanaged'}</h6>

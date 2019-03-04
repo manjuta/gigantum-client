@@ -64,7 +64,6 @@
 
 .LinkModal__details{
   padding: 20px 10px;
-  padding-left: 100px;
   color: $slateBlue;
   @include flex(space-around, column);
   h6 {
@@ -109,4 +108,9 @@
   left: 600px;
   top: 75px;
   cursor: pointer;
+}
+
+.LinkModal__dataset img {
+  align-self: center;
+  margin: 0 20px;
 }

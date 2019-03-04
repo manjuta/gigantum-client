@@ -31,7 +31,7 @@ export default class CollaboratorsModal extends Component {
       owner,
       addCollaboratorButtonDisabled: false,
       newCollaborator: '',
-      newPermissions: null,
+      newPermissions: 'readonly',
       permissionMenuOpen: false,
       userExpanded: null,
       buttonLoaderRemoveCollaborator: {},
@@ -227,25 +227,41 @@ export default class CollaboratorsModal extends Component {
         collaboratorName || newCollaborator,
         permissionOverride || newPermissions,
         (response, error) => {
-          const { buttonLoaderRemoveCollaborator } = this.state;
+          const completeState = this.state.buttonLoaderRemoveCollaborator;
 
-          buttonLoaderRemoveCollaborator[newCollaborator] = '';
+          if (permissionOverride && completeState[collaboratorName]) {
+            if (error) {
+              completeState[collaboratorName] = 'error';
+            } else {
+              completeState[collaboratorName] = 'finished';
+            }
+            this.setState({ buttonLoaderRemoveCollaborator: completeState });
 
-          this.setState({ newCollaborator: '', addCollaboratorButtonDisabled: false, buttonLoaderRemoveCollaborator });
+            setTimeout(() => {
+              const postCompleteState = this.state.buttonLoaderRemoveCollaborator;
+              postCompleteState[collaboratorName] = '';
+              this.setState({ buttonLoaderAddCollaborator: postCompleteState });
+            }, 2000);
 
-          this.collaboratorSearch.value = '';
-
-          if (error) {
-            setErrorMessage('Could not add collaborator', error);
-
-            this.setState({ buttonLoaderAddCollaborator: 'error' });
           } else {
-            this.setState({ buttonLoaderAddCollaborator: 'finished' });
-          }
+            completeState[newCollaborator] = '';
 
-          setTimeout(() => {
-            this.setState({ buttonLoaderAddCollaborator: '' });
-          }, 2000);
+            this.setState({ newCollaborator: '', addCollaboratorButtonDisabled: false, buttonLoaderRemoveCollaborator: completeState });
+
+            this.collaboratorSearch.value = '';
+
+            if (error) {
+              setErrorMessage('Could not add collaborator', error);
+
+              this.setState({ buttonLoaderAddCollaborator: 'error' });
+            } else {
+              this.setState({ buttonLoaderAddCollaborator: 'finished' });
+            }
+
+            setTimeout(() => {
+              this.setState({ buttonLoaderAddCollaborator: '' });
+            }, 2000);
+          }
         },
 
       )

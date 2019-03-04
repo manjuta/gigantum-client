@@ -10,6 +10,7 @@ const LinkedLocalDatasetsQuery = graphql`
             owner
             name
             defaultRemote
+            commitsBehind
         }
     }
   }

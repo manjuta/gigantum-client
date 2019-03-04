@@ -817,7 +817,8 @@ class FileBrowser extends Component {
               const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
               const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
                 if (isDataset) {
-                  const commitsBehind = this.props.linkedDatasets.filter(dataset => dataset.name === file)[0].commitsBehind;
+                  const currentDataset = this.props.linkedDatasets.filter(dataset => dataset.name === file)[0];
+                  const commitsBehind = currentDataset && currentDataset.commitsBehind;
                   return (
                     <Dataset
                       ref={file}
