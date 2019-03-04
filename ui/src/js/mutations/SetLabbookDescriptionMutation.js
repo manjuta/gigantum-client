@@ -20,14 +20,15 @@ let tempID = 0;
 export default function SetLabbookDescriptionMutation(
   owner,
   labbookName,
-  descriptionContent,
+  description,
+  sectionId,
   callback,
 ) {
   const variables = {
     input: {
       owner,
       labbookName,
-      descriptionContent,
+      descriptionContent: description,
       clientMutationId: `${tempID++}`,
     },
   };
@@ -43,6 +44,20 @@ export default function SetLabbookDescriptionMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
+      optimisticUpdater: (store) => {
+         const node = store.get(sectionId);
+         if (node) {
+           node.setValue(description, 'description');
+         }
+      },
+      updater: (store, response) => {
+          if (response.setLabbookDescription.success) {
+            const node = store.get(sectionId);
+            if (node) {
+              node.setValue(description, 'description');
+            }
+          }
+      },
     },
   );
 }

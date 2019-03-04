@@ -16,6 +16,7 @@ export default class Description extends Component {
     super(props);
     this.state = {
       editingDescription: false,
+      descriptionEdited: false,
       descriptionText: props.description ? props.description.replace(/\n/g, ' ') : '',
       lastSavedDescription: props.description ? props.description.replace(/\n/g, ' ') : '',
       savingDescription: false,
@@ -31,8 +32,8 @@ export default class Description extends Component {
   static getDerivedStateFromProps(nextProps, state) {
       return {
         ...state,
-        descriptionText: nextProps.description,
-      }
+        descriptionText: state.descriptionEdited ? state.descriptionText : nextProps.description,
+      };
   }
   /*
     adds event listeners
@@ -62,17 +63,24 @@ export default class Description extends Component {
    calls mutation to save labbook description
    */
   _saveLabbookDescription(owner, labbookName) {
-    const { state } = this;
+    const { props, state } = this;
+    const sectionId = props[props.sectionType].id;
     SetLabbookDescriptionMutation(
       owner,
       labbookName,
-      state.descriptionText.replace(/\n/g, ' '),
+      state.descriptionText,
+      sectionId,
       (res, error) => {
         if (error) {
           console.log(error);
           setErrorMessage('Description was not set: ', error);
         } else {
-          this.setState({ editingDescription: false, savingDescription: false, lastSavedDescription: state.descriptionText.replace(/\n/g, ' ') });
+          this.setState({
+            descriptionEdited: false,
+            editingDescription: false,
+            savingDescription: false,
+            lastSavedDescription: state.descriptionText.replace(/\n/g, ' '),
+          });
         }
       },
     );
@@ -84,17 +92,24 @@ export default class Description extends Component {
    calls mutation to save dataset description
    */
   _saveDatasetDescription(owner, labbookName) {
-    const { state } = this;
+    const { props, state } = this;
+    const sectionId = props[props.sectionType].id;
     SetDatasetDescriptionMutation(
       owner,
       labbookName,
-      state.descriptionText.replace(/\n/g, ' '),
+      state.descriptionText,
+      sectionId,
       (res, error) => {
         if (error) {
           console.log(error);
           setErrorMessage('Description was not set: ', error);
         } else {
-          this.setState({ editingDescription: false, savingDescription: false, lastSavedDescription: state.descriptionText.replace(/\n/g, ' ') });
+          this.setState({
+            descriptionEdited: false,
+            editingDescription: false,
+            savingDescription: false,
+            lastSavedDescription: state.descriptionText.replace(/\n/g, ' '),
+          });
         }
       },
     );
@@ -120,7 +135,11 @@ export default class Description extends Component {
   */
   _cancelDescription() {
     const { state } = this;
-    this.setState({ editingDescription: false, descriptionText: state.lastSavedDescription });
+    this.setState({
+      descriptionEdited: false,
+      editingDescription: false,
+      descriptionText: state.lastSavedDescription,
+    });
   }
   /**
     *  @param {}
@@ -134,6 +153,16 @@ export default class Description extends Component {
       let height = element.offsetHeight - 4;
       this.setState({ editingDescription: true, textareaWidth: `${width}px`, textareaHeight: `${height}px` });
     }
+  }
+  /**
+    *  @param {}
+    *  handles enabling description editing and sets textareaCSS
+  */
+  _updateDescrtipionText(evt) {
+    this.setState({
+      descriptionText: evt.target.value.replace(/\n/g, ' '),
+      descriptionEdited: true,
+    });
   }
 
   render() {
@@ -165,7 +194,7 @@ export default class Description extends Component {
                         maxLength="80"
                         className="Description__input"
                         type="text"
-                        onChange={(evt) => { this.setState({ descriptionText: evt.target.value.replace(/\n/g, ' ') }); }}
+                        onChange={(evt) => { this._updateDescrtipionText(evt); }}
                         onKeyDown={(evt) => {
                             if (evt.key === 'Enter') {
                                 this.setState({ editingDescription: false });

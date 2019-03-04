@@ -717,7 +717,7 @@ class FileBrowser extends Component {
 
             <div className="FileBrowser__search flex-1">
               <input
-                className="FileBrowser__input full--border"
+                className="FileBrowser__input search"
                 type="text"
                 placeholder="Search Files Here"
                 onChange={(evt) => { this._updateSearchState(evt); } }

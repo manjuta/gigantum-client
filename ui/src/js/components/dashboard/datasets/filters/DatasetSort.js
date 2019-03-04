@@ -30,25 +30,24 @@ class DatasetSort extends Component {
     const { props, state } = this;
 
     const datasetSortSeclectorCSS = classNames({
-      DatasetSort__selector: true,
-      'DatasetSort__selector--open': props.sortMenuOpen,
-      'DatasetSort__selector--collapsed': !props.sortMenuOpen,
+      'DatasetSort__selector Dropdown': true,
+      'Dropdown--open': props.sortMenuOpen,
+      'Dropdown--collapsed': !props.sortMenuOpen,
     });
 
     const datasetSortMenuCSS = classNames({
-      'DatasetSort__menu box-shadow': true,
+      'Dropdown__menu DatasetSort__menu box-shadow': true,
       hidden: !props.sortMenuOpen,
     });
 
     return (
 
-      <div className="DatasetSort">
+      <div className="DatasetSort column-4-span-3 padding--0">
         Sort by:
 
         <span
           className={datasetSortSeclectorCSS}
-          onClick={props.toggleSortMenu}
-        >
+          onClick={props.toggleSortMenu}>
           {this._getSelectedSort()}
         </span>
 
@@ -56,44 +55,38 @@ class DatasetSort extends Component {
 
           <li
             className="DatasetSort__list-item"
-            onClick={() => props.setSortFilter('modified_on', 'desc')}
-          >
-            Modified Date (Newest) {props.orderBy === 'modified_on' && props.sort !== 'asc' ? '✓ ' : ''}
+            onClick={() => props.setSortFilter('modified_on', 'desc')}>
+            Modified Date (Newest) { (props.orderBy === 'modified_on') && (props.sort !== 'asc') ? '✓ ' : ''}
           </li>
 
           <li
             className="DatasetSort__list-item"
-            onClick={() => props.setSortFilter('modified_on', 'asc')}
-          >
-            Modified Date (Oldest) {props.orderBy === 'modified_on' && props.sort === 'asc' ? '✓ ' : ''}
+            onClick={() => props.setSortFilter('modified_on', 'asc')}>
+            Modified Date (Oldest) { (props.orderBy === 'modified_on') && (props.sort === 'asc') ? '✓ ' : '' }
           </li>
 
           <li
             className="DatasetSort__list-item"
-            onClick={() => props.setSortFilter('created_on', 'desc')}
-          >
-            Creation Date (Newest) {props.orderBy === 'created_on' && props.sort !== 'asc' ? '✓ ' : ''}
+            onClick={() => props.setSortFilter('created_on', 'desc')}>
+            Creation Date (Newest) { (props.orderBy === 'created_on') && (props.sort !== 'asc') ? '✓ ' : '' }
           </li>
 
           <li
             className="DatasetSort__list-item"
-            onClick={() => props.setSortFilter('created_on', 'asc')}
-          >
-            Creation Date (Oldest) {props.orderBy === 'created_on' && props.sort === 'asc' ? '✓ ' : ''}
+            onClick={() => props.setSortFilter('created_on', 'asc')}>
+            Creation Date (Oldest) { (props.orderBy === 'created_on') && (props.sort === 'asc') ? '✓ ' : '' }
           </li>
 
           <li
             className="DatasetSort__list-item"
-            onClick={() => props.setSortFilter('name', 'asc')}
-          >
-            A-Z {props.orderBy === 'name' && props.sort === 'asc' ? '✓ ' : ''}
+            onClick={() => props.setSortFilter('name', 'asc')}>
+            A-Z { (props.orderBy === 'name') && (props.sort === 'asc') ? '✓ ' : '' }
           </li>
 
           <li
             className="DatasetSort__list-item"
-            onClick={() => props.setSortFilter('name', 'desc')}
-          >
-            Z-A {this.props.orderBy === 'name' && this.props.sort !== 'asc' ? '✓ ' : ''}
+            onClick={() => props.setSortFilter('name', 'desc')}>
+            Z-A { (props.orderBy === 'name') && (props.sort !== 'asc') ? '✓ ' : '' }
           </li>
 
         </ul>

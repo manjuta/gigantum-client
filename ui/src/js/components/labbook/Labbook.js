@@ -367,7 +367,13 @@ class Labbook extends Component {
           }),
           isOwner = localStorage.getItem('username') === labbook.owner,
           ownerText = isOwner ? '' : 'The project owner must migrate and sync this project to update.',
-          hasMaster = labbook.branches.filter(branch => (branch.branchName === 'master')).length > 0,
+          hasMaster = labbook.branches.filter((branch) => {
+            let isRemoteMaster = false;
+            if (branch.branchName === 'master') {
+              isRemoteMaster = branch.isRemote;
+            }
+            return { isRemoteMaster };
+          }).length > 0,
           deprecatedText = hasMaster ? 'This project has been migrated. Master is the new primary branch. Old branches should be removed.' : `This Project needs to be migrated to the latest Project format. ${ownerText}`,
           oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName)),
           migrationModalType = state.migrateComplete ? 'large' : 'large-long';

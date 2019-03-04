@@ -429,8 +429,8 @@ class Datasets extends Component {
             </ul>
 
           </div>
-          <div className="Datasets__subheader">
-            <div className="Datasets__search-container">
+          <div className="Datasets__subheader grid">
+            <div className="Datasets__search-container column-2-span-6 padding--0">
               {
                   this.state.showSearchCancel &&
                   (this.props.filterText.length !== 0) &&
@@ -445,7 +445,7 @@ class Datasets extends Component {
               <input
                 type="text"
                 ref="datasetSearch"
-                className="Datasets__search no--margin"
+                className="Datasets__search margin--0"
                 placeholder="Filter Datasets by name or description"
                 defaultValue={this.props.filterText}
                 onKeyUp={evt => this._setFilterValue(evt)}

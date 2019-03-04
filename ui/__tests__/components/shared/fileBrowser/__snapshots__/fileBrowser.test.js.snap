@@ -16,7 +16,7 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
       className="FileBrowser__search flex-1"
     >
       <input
-        className="FileBrowser__input full--border"
+        className="FileBrowser__input search"
         onChange={[Function]}
         onKeyUp={[Function]}
         placeholder="Search Files Here"

@@ -29,24 +29,23 @@ class LabbookFilterBy extends Component {
     const { props } = this;
 
     const labbookFilterSeclectorCSS = classNames({
-      LabbookFilterBy__selector: true,
-      'LabbookFilterBy__selector--open': props.filterMenuOpen,
-      'LabbookFilterBy__selector--collapsed': !props.filterMenuOpen,
+      'LabbookFilterBy__selector Dropdown': true,
+      'Dropdown--open': props.filterMenuOpen,
+      'Dropdown--collapsed': !props.filterMenuOpen,
     });
 
     const labbookFilterMenuCSS = classNames({
-      'LabbookFilterBy__menu box-shadow': true,
+      'LabbookFilterBy__menu Dropdown__menu box-shadow': true,
       hidden: !props.filterMenuOpen,
     });
 
     return (
 
-      <div className="LabbookFilterBy">
+      <div className="LabbookFilterBy column-4-span-3 padding--0">
         Filter by:
         <span
           className={labbookFilterSeclectorCSS}
-          onClick={props.toggleFilterMenu}
-        >
+          onClick={props.toggleFilterMenu}>
           {this._getFilter()}
         </span>
 

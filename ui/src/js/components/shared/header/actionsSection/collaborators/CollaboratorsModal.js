@@ -382,13 +382,13 @@ export default class CollaboratorsModal extends Component {
       'CollaboratorsModal__auto-compelte-menu--visible': this.state.colloboratorSearchList.length > 0,
     }),
       permissionsSelectorCSS = classNames({
-        CollaboratorModal__PermissionsSelector: true,
-        'CollaboratorModal__PermissionsSelector--open': this.state.permissionMenuOpen,
+        'CollaboratorModal__PermissionsSelector Dropdown': true,
+        'Dropdown--open': this.state.permissionMenuOpen,
         'CollaboratorModal__PermissionsSelector--add': true,
-        'CollaboratorModal__PermissionsSelector--collapsed': !this.state.permissionMenuOpen,
+        'Dropdown--collapsed': !this.state.permissionMenuOpen,
       }),
       permissionsMenuCSS = classNames({
-        'CollaboratorModal__PermissionsMenu box-shadow': true,
+        'CollaboratorModal__PermissionsMenu Dropdown__menu box-shadow': true,
         hidden: !this.state.permissionMenuOpen,
       }),
       collaboratorList = classNames({
@@ -448,8 +448,7 @@ export default class CollaboratorsModal extends Component {
               <div className="CollaboratorsModal__permissions">
                 <span
                   className={permissionsSelectorCSS}
-                  onClick={() => this._togglePermissionsMenu()}
-                >
+                  onClick={() => this._togglePermissionsMenu()}>
                   {this._getPermissions(this.state.newPermissions)}
                 </span>
                 <ul className={permissionsMenuCSS}>

@@ -28,46 +28,40 @@ class DatasetFilterBy extends Component {
     const { props } = this;
 
     const datasetFilterSeclectorCSS = classNames({
-      DatasetFilterBy__selector: true,
-      'DatasetFilterBy__selector--open': props.filterMenuOpen,
-      'DatasetFilterBy__selector--collapsed': !props.filterMenuOpen,
+      'Dropdown DatasetFilterBy__selector': true,
+      'Dropdown--open': props.filterMenuOpen,
+      'Dropdown--collapsed': !props.filterMenuOpen,
     });
 
     const datasetFilterMenuCSS = classNames({
-      'DatasetFilterBy__menu box-shadow': true,
+      'Dropdown__menu DatasetFilterBy__menu box-shadow': true,
       hidden: !props.filterMenuOpen,
     });
 
     return (
 
-      <div className="DatasetFilterBy">
+      <div className="DatasetFilterBy column-4-span-3 padding--0">
         Filter by:
         <span
           className={datasetFilterSeclectorCSS}
-          onClick={props.toggleFilterMenu}
-        >
+          onClick={props.toggleFilterMenu}>
           {this._getFilter()}
         </span>
-        <ul
-          className={datasetFilterMenuCSS}
-        >
+        <ul className={datasetFilterMenuCSS}>
           <li
             className="DatasetFilterBy__list-item"
-            onClick={() => props.setFilter('all')}
-          >
-            All {props.filter === 'all' ? '✓ ' : ''}
+            onClick={() => props.setFilter('all')}>
+            All { (props.filter === 'all') ? '✓ ' : ''}
           </li>
           <li
             className="DatasetFilterBy__list-item"
-            onClick={() => props.setFilter('owner')}
-          >
-           My Datasets {props.filter === 'owner' ? '✓ ' : ''}
+            onClick={() => props.setFilter('owner')}>
+            My Datasets { (props.filter === 'owner') ? '✓ ' : ''}
           </li>
           <li
             className="DatasetFilterBy__list-item"
-            onClick={() => props.setFilter('others')}
-          >
-            Shared with me {props.filter === 'others' ? '✓ ' : ''}
+            onClick={() => props.setFilter('others')}>
+            Shared with me { (props.filter === 'others') ? '✓ ' : ''}
           </li>
         </ul>
       </div>);

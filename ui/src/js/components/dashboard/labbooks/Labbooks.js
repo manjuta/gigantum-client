@@ -424,8 +424,8 @@ class Labbooks extends Component {
             </ul>
 
           </div>
-          <div className="Labbooks__subheader">
-            <div className="Labbooks__search-container">
+          <div className="Labbooks__subheader grid">
+            <div className="Labbooks__search-container column-2-span-6 padding--0">
               {
                   this.state.showSearchCancel &&
                   (this.props.filterText.length !== 0) &&

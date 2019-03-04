@@ -114,7 +114,7 @@ describe('FileBrowser component', () => {
          value: 'png',
        },
      };
-     component.find('.FileBrowser__input.full--border').simulate('change', evt);
+     component.find('.FileBrowser__input').simulate('change', evt);
      expect(component.state('search')).toEqual('png');
    });
 

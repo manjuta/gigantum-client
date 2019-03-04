@@ -12,17 +12,9 @@
 }
 .UserNote{
   .UserNote__title[type="text"] {
-    border: 1px solid $romanSilver;
     color: $jet;
-    border-radius: 4px;
     margin: 10px 0 20px;
     width: 100% !important;
-    height: 30px;
-
-    &:focus {
-      border: 1px solid $romanSilver !important;
-      box-shadow: none !important;
-    }
   }
 }
 

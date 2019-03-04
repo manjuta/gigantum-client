@@ -135,18 +135,10 @@ Labbook__nav end
 
 .Labbooks__subheader {
   position: relative;
-
-  display: flex;
-  justify-content: flex-start;
-  height: 28px;
-  margin: 10px;
-  margin: 60px 0 10px 0;
+  margin-top: 20px;
 }
 
 .Labbooks__search-container{
-  flex-grow: 1;
-  margin-right: 20px;
-  align-self: flex-end;
   position: relative;
 }
 

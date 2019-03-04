@@ -135,24 +135,15 @@ Dataset__nav end
 
 .Datasets__subheader {
   position: relative;
-
-  display: flex;
-  justify-content: flex-start;
-  height: 28px;
-  margin: 10px;
-  margin: 60px 0 10px 0;
+  margin-top: 20px;
 }
 
 .Datasets__search-container{
-  flex-grow: 1;
-  margin-right: 20px;
   align-self: flex-end;
   position: relative;
 }
 
 .Datasets__search {
-  height: 28px !important;
-  margin: 0px !important;
   color: $azure !important;
 }
 
