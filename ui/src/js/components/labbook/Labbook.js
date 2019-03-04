@@ -28,14 +28,15 @@ import Config from 'JS/config';
 import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import Header from '../shared/header/Header';
+import Header from 'Components/shared/header/Header';
 import ButtonLoader from 'Components/common/ButtonLoader';
 import Modal from 'Components/common/Modal';
-// import Activity from './activity/LabbookActivityContainer';
 // mutations
 import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMutation';
 import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
 import MigrateProjectMutation from 'Mutations/MigrateProjectMutation';
+// query
+import fetchMigrationInfoQuery from './fetchMigrationInfoQuery'
 // assets
 import './Labbook.scss';
 
@@ -99,6 +100,8 @@ class Labbook extends Component {
       name: this.props.labbook.name,
       owner: this.props.labbook.owner,
     }),
+    isDeprecated: null,
+    shouldMigrate: null,
     buttonState: '',
   }
 
@@ -157,6 +160,9 @@ class Labbook extends Component {
         this.setState({ authenticated: isAuthenticated });
       }
     });
+
+    this._fetchMigrationInfo();
+
     this._setStickHeader();
     this._fetchStatus(true);
 
@@ -164,9 +170,27 @@ class Labbook extends Component {
     window.addEventListener('click', this._branchViewClickedOff);
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return shallowCompare(this, nextProps, nextState);
-  // }
+  /**
+   * @param {}
+   * checks if project is deprecated and should migrate and sets state
+  */
+  _fetchMigrationInfo() {
+    const { props } = this,
+          { owner, name } = props.labbook;
+    let self = this;
+    fetchMigrationInfoQuery.getLabook(owner, name).then((response) => {
+      if (response.labbook) {
+        const {
+          isDeprecated,
+          shouldMigrate,
+        } = response.labbook;
+        self.setState({
+          isDeprecated,
+          shouldMigrate,
+        });
+      }
+    });
+  }
 
   /**
     @param {}
@@ -265,6 +289,10 @@ class Labbook extends Component {
             this.setState({ buttonState: '' });
         }, 2000);
       } else {
+        this.setState({
+          isDeprecated: false,
+          shouldMigrate: false,
+        });
         const oldBranches = this.props.labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace')));
         oldBranches.forEach(({ branchName }, index) => {
           const data = {
@@ -281,7 +309,9 @@ class Labbook extends Component {
               }, 2000);
             }
             if (index === oldBranches.length - 1) {
-              this.setState({ migrateComplete: true });
+              this.setState({
+                migrateComplete: true,
+              });
               setInfoMessage('Project migrated successfully');
               this.setState({ buttonState: 'finished' });
               setTimeout(() => {
@@ -339,6 +369,34 @@ class Labbook extends Component {
     window.scrollTo(0, 0);
   }
 
+  /**
+    scrolls to top of window
+    @return {boolean, string}
+  */
+  _getMigrationInfo() {
+    const { props, state } = this,
+          isOwner = (localStorage.getItem('username') === props.labbook.owner),
+          {
+            isDeprecated,
+            shouldMigrate,
+          } = state,
+          isPublished = typeof props.labbook.defaultRemote === 'string';
+
+    let migrationText = '';
+    let showMigrationButton = false;
+
+    if ((isOwner && isDeprecated && shouldMigrate && isPublished) || (isDeprecated && !isPublished && shouldMigrate)) {
+      migrationText = 'This Project needs to be migrated to the latest Project format';
+      showMigrationButton = true;
+    } else if (!isOwner && isDeprecated && shouldMigrate && isPublished) {
+      migrationText = 'This Project needs to be migrated to the latest Project format. The project owner must migrate and sync this project to update.';
+    } else if ((isDeprecated && !isPublished && !shouldMigrate) || (isDeprecated && isPublished && !shouldMigrate)) {
+      migrationText = 'This project has been migrated. Master is the new primary branch. Old branches should be removed.';
+    }
+
+    return { showMigrationButton, migrationText };
+  }
+
   render() {
     const { props, state } = this,
           isLockedBrowser = {
@@ -358,23 +416,14 @@ class Labbook extends Component {
             'Labbook--detail-mode': props.detailMode,
             'Labbook--branch-mode': branchesOpen,
             'Labbook--demo-mode': isDemo,
-            'Labbook--deprecated': labbook.isDeprecated,
-            'Labbook--demo-deprecated': labbook.isDeprecated && isDemo,
+            'Labbook--deprecated': state.isDeprecated,
+            'Labbook--demo-deprecated': state.isDeprecated && isDemo,
           }),
           deprecatedCSS = classNames({
             Labbook__deprecated: true,
             'Labbook__deprecated--demo': isDemo,
           }),
-          isOwner = localStorage.getItem('username') === labbook.owner,
-          ownerText = isOwner ? '' : 'The project owner must migrate and sync this project to update.',
-          hasMaster = labbook.branches.filter((branch) => {
-            let isRemoteMaster = false;
-            if (branch.branchName === 'master') {
-              isRemoteMaster = branch.isRemote;
-            }
-            return { isRemoteMaster };
-          }).length > 0,
-          deprecatedText = hasMaster ? 'This project has been migrated. Master is the new primary branch. Old branches should be removed.' : `This Project needs to be migrated to the latest Project format. ${ownerText}`,
+          { migrationText, showMigrationButton } = this._getMigrationInfo(),
           oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName)),
           migrationModalType = state.migrateComplete ? 'large' : 'large-long';
 
@@ -385,9 +434,9 @@ class Labbook extends Component {
         </div>
           <div className="Labbook__spacer flex flex--column">
             {
-              labbook.isDeprecated &&
+              state.isDeprecated &&
               <div className={deprecatedCSS}>
-                {deprecatedText}
+                {migrationText}
                 <a
                   target="_blank"
                   href="https://docs.gigantum.com/docs/project-migration"
@@ -395,7 +444,7 @@ class Labbook extends Component {
                   Learn More.
                 </a>
                 {
-                  isOwner && !hasMaster &&
+                  showMigrationButton &&
                   <button
                     className="Labbook__deprecated-action"
                     onClick={() => this._toggleMigrationModal()}
@@ -525,7 +574,7 @@ class Labbook extends Component {
               defaultRemote={labbook.defaultRemote}
               branches={state.branches}
               setBranchUptodate={this._setBranchUptodate}
-              isDeprecated={labbook.isDeprecated}
+              isDeprecated={state.isDeprecated}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -593,7 +642,7 @@ class Labbook extends Component {
                                isMainWorkspace={branchName === 'master'}
                                sectionType={'labbook'}
                                isLocked={isLocked}
-                               isDeprecated={labbook.isDeprecated}
+                               isDeprecated={state.isDeprecated}
                                {...props}
                              />
                         </ErrorBoundary>
@@ -708,7 +757,6 @@ const LabbookFragmentContainer = createFragmentContainer(
           name
           creationDateUtc
           visibility
-          isDeprecated
           activeBranchName
 
           environment{

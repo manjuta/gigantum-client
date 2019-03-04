@@ -19,6 +19,9 @@
 import pytest
 import mock
 import tempfile
+import shutil
+import subprocess
+import subprocess
 import os
 from pkg_resources import resource_filename
 
@@ -353,4 +356,26 @@ class TestGitWorkflowsMethods(object):
 
         # No change of git status after no-op migration
         assert h1 == wf.labbook.git.commit_hash
+
+    def test_should_migrate_on_old_project(self, mock_config_file):
+        p = resource_filename('gtmcore', 'workflows')
+        p2 = os.path.join(p, 'tests', 'lb-to-migrate-197b6a.zip')
+        with tempfile.TemporaryDirectory() as tempdir:
+            lbp = shutil.copyfile(p2, os.path.join(tempdir, 'lb-to-migrate.zip'))
+            subprocess.run(f'unzip lb-to-migrate.zip'.split(),
+                           check=True, cwd=tempdir)
+
+            im = InventoryManager(mock_config_file[0])
+            lb = im.load_labbook_from_directory(os.path.join(tempdir, 'lb-to-migrate'))
+            wf = LabbookWorkflow(lb)
+
+            assert wf.should_migrate() is True
+
+            wf.migrate()
+
+            assert wf.labbook.active_branch == 'master'
+            assert wf.should_migrate() is False
+
+            wf.labbook.git.checkout('gm.workspace')
+            assert wf.should_migrate() is False
 

@@ -27,6 +27,7 @@ from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from gtmcore.activity import ActivityStore
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
@@ -67,6 +68,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     # Indicates whether the current schema is behind.
     is_deprecated = graphene.Boolean()
+    should_migrate = graphene.Boolean()
 
     # Size on disk of LabBook in bytes
     # NOTE: This is a string since graphene can't represent ints bigger than 2**32
@@ -172,6 +174,13 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """ Returns True if the project schema lags the current schema and should be migrated """
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: labbook.schema != CURRENT_SCHEMA)
+
+    def resolve_should_migrate(self, info):
+        def _should_migrate(lb):
+            wf = LabbookWorkflow(lb)
+            return wf.should_migrate()
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: _should_migrate(labbook))
 
     def resolve_size_bytes(self, info):
         """Return the size of the labbook on disk (in bytes).

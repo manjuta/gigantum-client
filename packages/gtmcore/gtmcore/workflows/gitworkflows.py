@@ -159,6 +159,26 @@ class LabbookWorkflow(GitWorkflow):
             logger.error(e)
             raise
 
+    def should_migrate(self) -> bool:
+        """
+        Indicate whether a migration should be performed
+
+        Only looks at LOCAL details.
+        """
+        bm = BranchManager(self.labbook)
+        if 'gm.workspace' not in bm.active_branch:
+            return False
+
+        if 'master' not in bm.branches_local:
+            return True
+
+        logmsgs = call_subprocess('git log master --oneline --pretty=format:"%s"'.split(),
+                                  cwd=self.labbook.root_dir).split('\n')
+        if '"Migrate schema to 2"' in logmsgs:
+            return False
+
+        return True
+
     def migrate(self) -> bool:
         """ Migrate the given LabBook to the most recent schema AND branch version.
 

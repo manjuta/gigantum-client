@@ -26,6 +26,7 @@ from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
                              ActivityDetailType, ActivityDetailRecord, \
                              ActivityAction
+from gtmcore.exceptions import GigantumException
 from gtmcore.labbook import LabBook
 from gtmcore.labbook.schemas import migrate_schema_to_current, \
                                     CURRENT_SCHEMA as CURRENT_LABBOOK_SCHEMA
@@ -252,9 +253,6 @@ def migrate_labbook_branches(labbook: LabBook) -> None:
                          '"gm.workspace"')
 
     master_branch = 'master'
-    if master_branch in bm.branches_remote:
-        raise ValueError('Cannot migrate when remote master branch already exists')
-
     if master_branch in bm.branches_local:
         bm.remove_branch(master_branch)
 

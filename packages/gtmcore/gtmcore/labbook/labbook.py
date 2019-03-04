@@ -149,7 +149,8 @@ class LabBook(Repository):
             None
         """
         if not self.root_dir:
-            raise ValueError("No root directory assigned to lab book. Failed to get root directory.")
+            raise GigantumException("No root directory assigned to lab book. "
+                                    "Failed to get root directory.")
 
         schema_path = os.path.join(self.root_dir, '.gigantum', 'project.yaml')
         old_schema_path = os.path.join(self.root_dir, ".gigantum", "labbook.yaml")

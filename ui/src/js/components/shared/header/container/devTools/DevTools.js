@@ -77,7 +77,7 @@ class DevTools extends Component {
     status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
     status = ((imageStatus === 'DOES_NOT_EXIST') || (imageStatus === 'BUILD_IN_PROGRESS')) && (timeDifferenceMS < 15000) ? 'Building' : status;
 
-    if ((status !== 'Stopped') && (status !== 'Running')) {
+    if (((status !== 'Stopped') && (status !== 'Running')) || (props.isExporting || props.isPublishing || props.isSyncing || props.isBuilding)) {
       setWarningMessage('Could not launch development environment as the project is not ready.');
     } else if (status === 'Stopped') {
       setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
