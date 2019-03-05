@@ -157,7 +157,7 @@ export default class CreateBranchModal extends Component {
           { state, props } = this,
           { owner, labbookName } = store.getState().routes,
           { branchName } = this.state,
-          revision = props.selected ? props.selected.commit : null;
+          revision = props.selected ? props.selected.activityNode.commit : null;
 
 
     this.setState({ buttonLoaderCreateBranch: 'loading' });

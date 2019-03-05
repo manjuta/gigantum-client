@@ -202,7 +202,6 @@ class Activity extends Component {
     const { state } = this;
 
     if (state.newActivityPolling) {
-
       this.setState({
         refetchEnabled: true,
         newActivityPolling: false,
@@ -682,7 +681,6 @@ class Activity extends Component {
               'is-deprecated': this.props.isDeprecated,
               'is-demo-deprecated': window.location.hostname === config.demoHostName && this.props.isDeprecated,
             });
-
       return (
         <div
           key={props.sectionType}

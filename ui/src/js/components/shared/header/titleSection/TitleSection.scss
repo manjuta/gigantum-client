@@ -35,11 +35,6 @@
 
   background: url(~Images/icons/lock-grey.svg) no-repeat center center;
   background-size: 16px;
-
-  &--sticky{
-    top: 40px;
-    left: 120px
-  }
 }
 
 .TitleSection__public {
@@ -52,9 +47,4 @@
 
   background: url(~Images/icons/earth-grey.svg) no-repeat center center;
   background-size: 20px;
-
-  &--sticky {
-    top: 43px;
-    left: 120px;
-  }
 }

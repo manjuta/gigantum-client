@@ -139,8 +139,8 @@ export default class LinkModal extends Component {
         const lowercaseDescription = node.description.toLowerCase();
         const lowercaseName = node.name.toLowerCase();
         let isReturned = true;
-        if (tags.indexOf('Managed') > -1 && !node.isManaged ||
-            tags.indexOf('Unmanaged') > -1 && node.isManaged) {
+        if (((tags.indexOf('Managed') > -1) && !node.isManaged) ||
+            ((tags.indexOf('Unmanaged') > -1) && node.isManaged)) {
             isReturned = false;
         }
 
@@ -166,13 +166,10 @@ export default class LinkModal extends Component {
         handleClose={() => props.closeLinkModal()}
         size="large-long"
         noPadding
-        renderContent={() =>
-
-          (<div className="LinkModal">
+        renderContent={() =>(<div className="LinkModal">
             <div
                 className="LinkModal__info Tooltip-data"
-                data-tooltip="Linking a dataset will allow you to reference its files within the Project"
-            >
+                data-tooltip="Linking a dataset will allow you to reference its files within the Project">
             </div>
             <QueryRenderer
                 environment={environment}
@@ -202,17 +199,19 @@ export default class LinkModal extends Component {
                                     <div className="LinkModal__dataset-container">
                                         {
                                             localDatasetEdges.map((edge) => {
+                                                    // TODO make this a component
                                                     const node = edge.node;
                                                     const LinkModalCard = classNames({
-                                                    'LinkModal__dataset--selected': this.state.selectedDataset && this.state.selectedDataset.owner === node.owner && this.state.selectedDataset.name === node.name,
-                                                    LinkModal__dataset: true,
-                                                    Card: true,
+                                                      'LinkModal__dataset--selected': this.state.selectedDataset && this.state.selectedDataset.owner === node.owner
+                                                      && this.state.selectedDataset.name === node.name,
+                                                      LinkModal__dataset: true,
+                                                      Card: true,
                                                     });
+
                                                     return (<div
                                                             key={node.id}
                                                             onClick={() => { this._updateSelected(edge); }}
-                                                            className="LinkModal__wrapper"
-                                                        >
+                                                            className="LinkModal__wrapper">
                                                             <div className={LinkModalCard}>
                                                                     <img
                                                                         alt=""
@@ -222,7 +221,7 @@ export default class LinkModal extends Component {
                                                                     />
                                                                     <div className="LinkModal__details">
                                                                         <h6 className="LinkModal__name">{node.name}</h6>
-                                                                        <h6 className="LinkModal__type">{node.isManaged ? 'Managed' : 'Unmanaged'}</h6>
+                                                                        <h6 className="LinkModal__type">{node.datasetType.isManaged ? 'Managed' : 'Unmanaged'}</h6>
                                                                         <h6>{`Created on ${Moment(edge.node.createdOnUtc).format('MM/DD/YY')}`}</h6>
                                                                         <h6>{`Modified ${Moment(edge.node.modifiedOnUtc).fromNow()}`}</h6>
                                                                     </div>
@@ -240,8 +239,7 @@ export default class LinkModal extends Component {
                                 <div className="Link__buttonContainer">
                                     <button
                                         className="Btn--flat"
-                                        onClick={() => this.props.closeLinkModal()}
-                                    >
+                                        onClick={() => this.props.closeLinkModal()}>
                                     Cancel
                                     </button>
                                     <ButtonLoader
