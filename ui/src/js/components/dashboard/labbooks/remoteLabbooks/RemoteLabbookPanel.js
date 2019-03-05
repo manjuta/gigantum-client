@@ -6,17 +6,19 @@ import classNames from 'classnames';
 import Moment from 'moment';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import store from 'JS/redux/store';
 import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
-import Loader from 'Components/shared/Loader';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
+import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
+// config
+import config from 'JS/config';
 
 export default class RemoteLabbookPanel extends Component {
   constructor(props) {
@@ -82,6 +84,9 @@ export default class RemoteLabbookPanel extends Component {
     *  changes state of isImporting to false
   */
   _clearState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.add('hidden');
+    }
     this.setState({
       isImporting: false,
     });
@@ -91,6 +96,9 @@ export default class RemoteLabbookPanel extends Component {
     *  changes state of isImporting to true
   */
   _importingState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.remove('hidden');
+    }
     this.setState({
       isImporting: true,
     });
@@ -104,7 +112,7 @@ export default class RemoteLabbookPanel extends Component {
  importLabbook = (owner, labbookName) => {
    const self = this;
    const id = uuidv4();
-   const remote = `https://repo.gigantum.io/${owner}/${labbookName}`;
+   const remote = `https://repo.${config.domain}/${owner}/${labbookName}`;
 
    UserIdentity.getUserIdentity().then((response) => {
      if (navigator.onLine) {
@@ -129,8 +137,8 @@ export default class RemoteLabbookPanel extends Component {
 
 
                  BuildImageMutation(
-                   labbookName,
                    owner,
+                   labbookName,
                    false,
                    (response, error) => {
                      if (error) {
@@ -143,8 +151,8 @@ export default class RemoteLabbookPanel extends Component {
                  self.props.history.replace(`/projects/${owner}/${labbookName}`);
                } else {
                  BuildImageMutation(
-                   labbookName,
                    localStorage.getItem('username'),
+                   labbookName,
                    false,
                    (response, error) => {
                      if (error) {
@@ -177,9 +185,9 @@ export default class RemoteLabbookPanel extends Component {
      'RemoteLabbooks__row RemoteLabbooks__row--text': true,
      blur: this.state.isImporting,
    });
-
    const deleteCSS = classNames({
      RemoteLabbooks__icon: true,
+     'Tooltip-data Tooltip-data--small': localStorage.getItem('username') !== edge.node.owner,
      'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,
      'RemoteLabbooks__icon--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
    });
@@ -196,7 +204,7 @@ export default class RemoteLabbookPanel extends Component {
          {
           this.props.existsLocally ?
             <button
-              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
+              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud Tooltip-data Tooltip-data--small"
               data-tooltip="Project exists locally"
               disabled
             >
@@ -246,6 +254,8 @@ export default class RemoteLabbookPanel extends Component {
          <p
            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
          >
+         {
+          edge.node.description && edge.node.description.length ?
            <Highlighter
              highlightClassName="LocalLabbooks__highlighted"
              searchWords={[store.getState().labbookListing.filterText]}
@@ -253,10 +263,17 @@ export default class RemoteLabbookPanel extends Component {
              caseSensitive={false}
              textToHighlight={edge.node.description}
            />
+           :
+           <span
+           className="RemoteDatasets__description--blank"
+         >
+            No description provided
+         </span>
+         }
          </p>
        </div>
        { !(edge.node.visibility === 'local') &&
-       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}`} />
+       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}   Tooltip-data Tooltip-data--small`} />
         }
        {
           this.state.isImporting &&

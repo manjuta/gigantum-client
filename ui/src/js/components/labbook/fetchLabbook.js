@@ -3,7 +3,7 @@ import { graphql } from 'react-relay';
 // environment
 import { fetchQuery } from 'JS/createRelayEnvironment';
 
-const containerStatusQuery = graphql`
+const fetchLabbookQuery = graphql`
   query fetchLabbookQuery($name: String!, $owner: String!, $first: Int!, $hasNext: Boolean!, $cursor: String){
   labbook(name: $name, owner: $owner){
     id
@@ -25,7 +25,7 @@ const FetchLabbook = {
 
     return new Promise((resolve, reject) => {
       const fetchData = function () {
-        fetchQuery(containerStatusQuery(), variables).then((response) => {
+        fetchQuery(fetchLabbookQuery(), variables).then((response) => {
           resolve(response.data);
         }).catch((error) => {
           console.log(error);

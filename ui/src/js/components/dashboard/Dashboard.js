@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import { graphql, QueryRenderer } from 'react-relay';
 import queryString from 'querystring';
 // components
-import DatasetSets from './datasets/DatasetSets';
 import LocalLabbooksContainer from './labbooks/localLabbooks/LocalLabbooksContainer';
+import LocalDatasetsContainer from './datasets/localDatasets/LocalDatasetsContainer';
+import RemoteDatasetsContainer from './datasets/remoteDatasets/RemoteDatasetsContainer';
 import RemoteLabbooksContainer from './labbooks/remoteLabbooks/RemoteLabbooksContainer';
 import environment from 'JS/createRelayEnvironment';
+import Loader from 'Components/common/Loader';
 // assets
 import './Dashboard.scss';
 // redux
@@ -16,6 +18,13 @@ const LocalListingQuery = graphql`query DashboardLocalQuery($first: Int!, $curso
   ...LocalLabbooksContainer_labbookList
 }`;
 
+const LocalDatasetListingQuery = graphql`query DashboardDatasetLocalQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
+  ...LocalDatasetsContainer_datasetList
+}`;
+const RemoteDatasetListingQuery = graphql`query DashboardDatasetRemoteQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
+  ...RemoteDatasetsContainer_datasetList
+}`;
+
 const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
   ...RemoteLabbooksContainer_labbookList
 }`;
@@ -23,9 +32,11 @@ const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cur
 export default class DashboardContainer extends Component {
   constructor(props) {
     super(props);
+
     const { orderBy, sort } = queryString.parse(this.props.history.location.search.slice(1));
+
     this.state = {
-      selectedComponent: props.match.params.id,
+      selectedComponent: props.match.path,
       orderBy: orderBy || 'modified_on',
       sort: sort || 'desc',
     };
@@ -38,7 +49,7 @@ export default class DashboardContainer extends Component {
   */
   UNSAFE_componentWillReceiveProps(nextProps) {
     this.setState({
-      selectedComponent: nextProps.match.params.id,
+      selectedComponent: nextProps.match.path,
     });
     setCallbackRoute(nextProps.history.location.pathname);
   }
@@ -60,9 +71,9 @@ export default class DashboardContainer extends Component {
   *  @return {jsx}
   */
   _displaySelectedComponent() {
-    if (this.state.selectedComponent === 'datasets') {
-      return (<DatasetSets />);
-    }
+    // if (this.state.selectedComponent === '/datasets/:labbookSection') {
+    //   return (<DatasetSets />);
+    // }
 
     const paths = this.props.history.location.pathname.split('/');
     const sectionRoute = paths.length > 2 ? paths[2] : 'local';
@@ -71,12 +82,22 @@ export default class DashboardContainer extends Component {
       this.props.history.replace('../../../../projects/local');
     }
 
+
+    let query;
+    if (this.state.selectedComponent === '/datasets/:labbookSection') {
+      query = sectionRoute === 'cloud' ? RemoteDatasetListingQuery : LocalDatasetListingQuery;
+    } else if (sectionRoute === 'cloud') {
+      query = RemoteListingQuery;
+    } else {
+      query = LocalListingQuery;
+    }
+
     return (
       <QueryRenderer
         environment={environment}
-        query={sectionRoute === 'cloud' ? RemoteListingQuery : LocalListingQuery}
+        query={query}
         variables={{
-            first: sectionRoute === 'cloud' ? 20 : 100,
+            first: sectionRoute === 'cloud' ? 8 : 100,
             cursor: null,
             orderBy: this.state.orderBy,
             sort: this.state.sort,
@@ -85,6 +106,28 @@ export default class DashboardContainer extends Component {
             if (error) {
               console.log(error);
             } else if (props) {
+              if (this.state.selectedComponent === '/datasets/:labbookSection') {
+                if (sectionRoute === 'cloud') {
+                  return (
+                    <RemoteDatasetsContainer
+                      auth={this.props.auth}
+                      datasetList={props}
+                      history={this.props.history}
+                      section={sectionRoute}
+                      refetchSort={this._refetchSort}
+                    />
+                  );
+                }
+                  return (
+                    <LocalDatasetsContainer
+                      auth={this.props.auth}
+                      datasetList={props}
+                      history={this.props.history}
+                      section={sectionRoute}
+                      refetchSort={this._refetchSort}
+                    />
+                  );
+              }
               if (sectionRoute === 'cloud') {
                 return (
                   <RemoteLabbooksContainer
@@ -96,15 +139,28 @@ export default class DashboardContainer extends Component {
                 );
               }
 
+              return (
+                <LocalLabbooksContainer
+                  auth={this.props.auth}
+                  labbookList={props}
+                  history={this.props.history}
+                  refetchSort={this._refetchSort}
+                />
+              );
+            } else {
+              if (this.state.selectedComponent === '/datasets/:labbookSection') {
                 return (
-                  <LocalLabbooksContainer
+                  <LocalDatasetsContainer
                     auth={this.props.auth}
-                    labbookList={props}
+                    datasetList={props}
                     history={this.props.history}
+                    section={sectionRoute}
                     refetchSort={this._refetchSort}
+                    loading
                   />
                 );
-            } else {
+              }
+
               return (
                 <LocalLabbooksContainer
                   auth={this.props.auth}
@@ -125,6 +181,9 @@ export default class DashboardContainer extends Component {
       <div className="Dashboard flex flex-column">
 
         <div className="Dashboard__view flex-1-0-auto">
+          <div id="dashboard__cover" className="Dashboard__cover hidden">
+            <Loader/>
+          </div>
           {
             this._displaySelectedComponent()
           }

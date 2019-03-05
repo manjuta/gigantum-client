@@ -1,48 +1,13 @@
 @import '~Styles/_imports.scss';
 
 .LabbookFilterBy {
-  margin-right: 20px;
   color: $font-grey;
-  align-self: flex-end;
+  position: relative;
 }
 
-.LabbookFilterBy__selector{
-    display: inline-block;
-
-    width: 200px;
-    margin-left: 20px;
-
-    cursor: pointer;
-    user-select: none;
-
-    border-bottom: 1px solid $font-grey;
-
-    &--open{
-      background: url('~Images/icons/up-arrow-silver.svg') no-repeat right;
-      background-size: 15px;
-    }
-
-    &--collapsed{
-      background: url('~Images/icons/down-arrow-silver.svg') no-repeat right;
-      background-size: 15px;
-    }
+.LabbookFilterBy__selector {
+   width: 208px;
 }
-
-.LabbookFilterBy__menu{
-    animation: slide-down-fade-in forwards .25s;
-    padding: 3px;
-    position: absolute;
-    z-index: index($elements, popup);
-    right: 296px;
-
-    width: 200px;
-
-    cursor: pointer;
-    text-align: left;
-
-    border: 1px solid $grey;
-    background: $white;
- }
 
 .LabbookFilterBy__list-item{
 

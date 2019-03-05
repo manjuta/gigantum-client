@@ -21,7 +21,7 @@ import json
 import os
 import shutil
 import tempfile
-import uuid
+import requests
 import collections
 import git
 from pkg_resources import resource_filename
@@ -29,14 +29,14 @@ import pytest
 import uuid
 
 from gtmcore.configuration import Configuration
-from gtmcore.environment import RepositoryManager, ComponentManager
+from gtmcore.environment import RepositoryManager
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.activity.detaildb import ActivityDetailDB
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.files import FileOperations
 from gtmcore.inventory.branching import BranchManager
-import requests
+
 
 
 ENV_UNIT_TEST_REPO = 'gigantum_base-images-testing'
@@ -101,7 +101,7 @@ def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
     return config_file, unit_test_working_dir
 
 
-def _MOCK_create_remote_repo2(labbook, username: str, visibility, access_token = None) -> None:
+def _MOCK_create_remote_repo2(repository, username: str, visibility, access_token = None) -> None:
     """ Used to mock out creating a Labbook remote Gitlab repo. This is not a fixture per se,
 
     Usage:
@@ -113,11 +113,23 @@ def _MOCK_create_remote_repo2(labbook, username: str, visibility, access_token =
     ```
     """
     rand = str(uuid.uuid4())[:6]
-    working_dir = os.path.join(tempfile.gettempdir(), rand, labbook.name)
+    working_dir = os.path.join(tempfile.gettempdir(), rand, 'testuser', repository.name)
     os.makedirs(working_dir, exist_ok=True)
     r = git.Repo.init(path=working_dir, bare=True)
     assert r.bare is True
-    labbook.add_remote(remote_name="origin", url=working_dir)
+    repository.add_remote(remote_name="origin", url=working_dir)
+
+    # Push branches
+    # TODO: @billvb - need to refactor this once new branch model is in effect.
+    original_branch = repository.git.repo.head.ref.name
+    repository.git.repo.heads['master'].checkout()
+    repository.git.repo.git.push("origin", "master")
+
+    # Set the head to master on the remote
+    r.git.symbolic_ref('HEAD', 'refs/heads/master')
+
+    # Check back out the original user branch
+    repository.git.repo.heads[original_branch].checkout()
 
 
 @pytest.fixture()
@@ -366,7 +378,7 @@ def remote_labbook_repo():
     im = InventoryManager(conf_file)
     lb = im.create_labbook('test', 'test', 'sample-repo-lb', description="my first labbook")
     bm = BranchManager(lb, username='test')
-    bm.create_branch('gm.workspace-test.testing-branch')
+    bm.create_branch('testing-branch')
 
 
     #with tempfile.TemporaryDirectory() as tmpdirname:
@@ -376,7 +388,7 @@ def remote_labbook_repo():
     FileOperations.insert_file(lb, "code", "/tmp/codefile.c")
 
     assert lb.is_repo_clean
-    bm.workon_branch('gm.workspace')
+    bm.workon_branch('master')
 
     # Location of the repo to push/pull from
     yield lb.root_dir

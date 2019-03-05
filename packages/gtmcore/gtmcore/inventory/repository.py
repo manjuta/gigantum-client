@@ -18,7 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
-import re
 import uuid
 import yaml
 import json
@@ -95,6 +94,9 @@ class Repository(object):
 
         # Persisted Favorites data for more efficient file listing operations
         self._favorite_keys: Optional[Dict[str, Any]] = None
+
+    def __eq__(self, other):
+        return type(other) == type(self) and other.root_dir == self.root_dir
 
     def _validate_git(method_ref):  #type: ignore
         """Definition of decorator that validates git operations.
@@ -207,10 +209,7 @@ class Repository(object):
 
     @property
     def schema(self) -> int:
-        if self._data:
-            return self._data["schema"]
-        else:
-            raise ValueError("No schema stored in repository data.")
+        return self._data["schema"]
 
     @property
     def id(self) -> str:
@@ -325,10 +324,10 @@ class Repository(object):
 
     @property
     def modified_on(self) -> datetime.datetime:
-        return self.git.log(max_count=1)[0]['committed_on']
+        return self.git.log(max_count=1)[0]['committed_on'].replace(tzinfo=datetime.timezone.utc)
 
     @property
-    def build_details(self) -> Optional[Dict[str, str]]:
+    def build_details(self) -> str:
         """Return the build info for the application that created the repository"""
         raise NotImplemented
 

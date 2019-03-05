@@ -7,7 +7,7 @@ RUN apt-get -y update && apt-get -y install git curl gosu nodejs npm
 RUN npm install yarn -g
 
 # Install babel-node
-RUN npm install -g @babel/cli@7.1.5 @babel/core@7.1.5  jest@23.6.0 relay-compiler@1.6.0
+RUN npm install -g @babel/cli@7.2.3 @babel/core@7.2.2 jest@24.0.0 relay-compiler@1.6.1
 
 # Make build location dir
 RUN mkdir /opt/ui
@@ -34,7 +34,7 @@ ENV SHELL=/bin/bash
 # Super instruction to install all dependencies
 RUN apt-get -y update && \
     apt-get -y --no-install-recommends install git nginx supervisor wget openssl python3 python3-pip python3-distutils \
-    gcc g++ gosu redis-server libjpeg-dev git-lfs python3-setuptools python3-dev libdpkg-perl zip unzip && \
+    gcc g++ gosu redis-server libjpeg-dev git-lfs python3-setuptools python3-dev libdpkg-perl zip unzip libsnappy-dev && \
     git lfs install && \
     apt-get -y install curl gnupg gnupg1 gnupg2 && \
     curl -sL https://deb.nodesource.com/setup_8.x | bash && \
@@ -55,6 +55,7 @@ ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
 ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
 ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
 ARG ENTRYPOINT_FILE=resources/client/entrypoint.sh
+ARG REDIS_CONFIG=resources/client/redis.conf
 
 # Copy Libraries
 # TODO: Make pip installs once refactor is completed
@@ -85,7 +86,7 @@ COPY $NGINX_API_CONFIG /etc/nginx/sites-enabled/
 RUN rm /etc/nginx/sites-enabled/default
 
 # Setup Redis
-COPY resources/client/redis.conf /opt/redis/redis.conf
+COPY $REDIS_CONFIG /opt/redis/redis.conf
 
 # Setup Supervisord to launch both uwsgi and nginx
 RUN mkdir -p /opt/log/supervisor && mkdir -p /opt/log/nginx && mkdir -p /opt/run && \
@@ -97,7 +98,7 @@ COPY $ENTRYPOINT_FILE /usr/local/bin/entrypoint.sh
 RUN chmod u+x /usr/local/bin/entrypoint.sh
 
 # Setup demo labbook
-COPY resources/awful-intersections-demo.lbk /opt/awful-intersections-demo.lbk
+COPY resources/my-first-project.zip /opt/my-first-project.zip
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

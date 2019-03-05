@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import RemoteLabbookPanel from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
-import DeleteLabbook from 'Components/labbook/labbookHeader/branchMenu/modals/DeleteLabbook';
+import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
 import LabbooksPaginationLoader from '../labbookLoaders/LabbookPaginationLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -65,7 +65,7 @@ class RemoteLabbooks extends Component {
 
             if (this.props.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
               this.props.relay.loadMore(
-                20, // Fetch the next 20 items
+                8, // Fetch the next 8 items
                 (ev) => {
                   this.setState({
                     isPaginating: false,

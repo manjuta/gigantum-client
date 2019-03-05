@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserNote Renders a snapshot 1`] = `
+<div
+  className="UserNote flex flex--column"
+>
+  <div
+    className="UserNote__close close"
+    onClick={[Function]}
+  />
+  <input
+    className="UserNote__title"
+    onKeyUp={[Function]}
+    placeholder="Add a summary title"
+    type="text"
+  />
+  <textarea
+    className="UserNote__summary"
+    id="markDown"
+  />
+  <div
+    className="ReactTags__tags react-tags-wrapper"
+  >
+    <div
+      className="ReactTags__selected"
+    >
+      <div
+        className="ReactTags__tagInput"
+      >
+        <input
+          aria-label="Add new tag"
+          className="ReactTags__tagInputField"
+          id="TagsInput"
+          onBlur={[Function]}
+          onChange={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onPaste={[Function]}
+          placeholder="Add new tag"
+          type="text"
+        />
+      </div>
+    </div>
+  </div>
+  <button
+    className="UserNote__add-note"
+    disabled={true}
+    onClick={[Function]}
+    type="submit"
+  >
+    Add Note
+  </button>
+</div>
+`;

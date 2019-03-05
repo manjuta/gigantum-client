@@ -6,13 +6,13 @@
 }
 
 .Base__header{
-  color: $romanSilver;
+  color: $mineShaft;
 }
 
 .Base__card{
   padding: 30px;
 
-  color: $romanSilver;
+  color: $mineShaft;
 
   @include flex(space-between, row);
 }
@@ -33,6 +33,7 @@
 .Base__paragraph{
    font-size: 14px;
    font-weight: 400;
+   word-break: normal;
  }
 
 .Base__name{
@@ -56,9 +57,13 @@
 .Base__categories{
   @include flex(flex-start, row);
 
-  h6{
+  h6 {
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 800;
+  }
+  li {
+    font-size: 14px;
+    font-weight: 100;
   }
 }
 

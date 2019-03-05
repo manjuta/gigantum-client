@@ -1,0 +1,5 @@
+@import '~Styles/_imports.scss';
+
+.ActionsSection{
+  @include flex(space-between, row);
+}

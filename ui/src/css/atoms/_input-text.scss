@@ -1,24 +1,33 @@
+/**********
+* a) Default simple search box—31px tall; variable width; 1px outline in #9B9C9E; text style "Search prompt"
+*************/
 input[type="text"] {
-//  height: 20px !important;
+  height: 31px;
   line-height: 20px;
   margin: 5px;
   border: 0;
   outline: none;
   width: 100%;
-  border-bottom: 1px solid $romanSilver !important;
-  padding: 0 20px !important;
-  width: calc(100% - 40px) !important;
+  border: 1px solid $romanSilver;
+  padding: 0 20px;
+  width: 100%;
   background: transparent;
 }
+
 input[type="text"]:focus {
-  border-bottom: 1px solid $turquise !important;
-  box-shadow: 0 1px 0 0 $turquise !important;
   padding: 0 20px;
+  background: $white;
+  border: 0;
+  @include boxShadowDark();
+
+}
+
+input[type="text"].search {
+
 }
 
 
 input[type="text"].full--border {
-//  height: 20px !important;
   line-height: 20px;
   margin: 5px;
   border: 1px solid $romanSilver !important;
@@ -30,4 +39,11 @@ input[type="text"].full--border:focus {
   border: 1px solid $turquise !important;
   box-shadow: 0 1px 0 0 $turquise !important;
   border-radius: 8px;
+}
+
+textarea {
+  width: 100%;
+  resize: none;
+  padding: 10px 20px;
+  line-height: 28px;
 }

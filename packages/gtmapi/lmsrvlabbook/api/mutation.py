@@ -20,22 +20,46 @@
 import graphene
 from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContainer,
                                         AddPackageComponents, CreateUserNote, StopContainer,
-                                        ImportLabbook, DeleteLabbook,
+                                        ImportLabbook, DeleteLabbook, ImportRemoteDataset,
                                         ImportRemoteLabbook, AddLabbookRemote,
                                         ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
                                         AddLabbookCollaborator,
-                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook,
+                                        DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
                                         RemovePackageComponents,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
-                                        DeleteExperimentalBranch,
-                                        MergeFromBranch, WorkonBranch, WriteReadme, AddCustomDocker, RemoveCustomDocker,
-                                        DeleteRemoteLabbook,
-                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge)
+                                        DeleteExperimentalBranch, MigrateLabbookSchema,
+                                        MergeFromBranch, WorkonBranch, WriteLabbookReadme, AddCustomDocker, 
+                                        RemoveCustomDocker, DeleteRemoteLabbook,
+                                        CompleteBatchUploadTransaction, SetVisibility, FetchLabbookEdge,
+                                        CreateDataset, DeleteDataset, AddDatasetFile, CompleteDatasetUploadTransaction,
+                                        DeleteDatasetFiles, MoveDatasetFile, MakeDatasetDirectory,
+                                        FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
+                                        AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
+                                        ModifyDatasetLink, WriteDatasetReadme, SetDatasetDescription, ResetBranchToRemote)
+
+from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
 
-class LabbookMutations(graphene.ObjectType):
+class BranchMutations(object):
+
+    migrate_labbook_schema = MigrateLabbookSchema.Field()
+
+    # Create a Rollback or Feature branch
+    create_experimental_branch = CreateExperimentalBranch.Field()
+
+    # Delete a Rollback or Feature branch
+    delete_experimental_branch = DeleteExperimentalBranch.Field()
+
+    # Merge from a given branch into the current checked-out branch
+    merge_from_branch = MergeFromBranch.Field()
+
+    # Work on a given feature branch (perform a git checkout).
+    workon_experimental_branch = WorkonBranch.Field()
+
+
+class LabbookMutations(BranchMutations, graphene.ObjectType):
     """Entry point for all graphql mutations"""
 
     # Import a labbook from an uploaded file (Archive as zip).
@@ -43,6 +67,13 @@ class LabbookMutations(graphene.ObjectType):
 
     # Import a labbook from a remote Git repository.
     import_remote_labbook = ImportRemoteLabbook.Field()
+
+    # Import a Dataset from the Gitlab repository
+    import_remote_dataset = ImportRemoteDataset.Field()
+
+    # Import/Export datasets as zip files
+    import_dataset = ImportDataset.Field()
+    export_dataset = ExportDataset.Field()
 
     # Export a labbook and return URL to its zipped archive.
     export_labbook = ExportLabbook.Field()
@@ -62,11 +93,17 @@ class LabbookMutations(graphene.ObjectType):
     # Publish a labbook to a remote (for the first time
     publish_labbook = PublishLabbook.Field()
 
+    # Publish a dataset to a remote (for the first time
+    publish_dataset = PublishDataset.Field()
+
     # Sync a Labbook with remote (for collaboration)
     sync_labbook = SyncLabbook.Field()
 
     # Add a remote to the labbook
     add_labbook_remote = AddLabbookRemote.Field()
+
+    # Perform a git reset to remote on current branch
+    reset_branch_to_remote = ResetBranchToRemote.Field()
 
     # Build a docker image for a given Labbook.
     build_image = BuildImage.Field()
@@ -129,23 +166,57 @@ class LabbookMutations(graphene.ObjectType):
     # Delete a collaborator from a LabBook
     delete_collaborator = DeleteLabbookCollaborator.Field()
 
+    # Adds a dataset collaborator
+    add_dataset_collaborator = AddDatasetCollaborator.Field()
+    delete_dataset_collaborator = DeleteDatasetCollaborator.Field()
+
     # Write a readme to a LabBook
-    write_readme = WriteReadme.Field()
+    write_labbook_readme = WriteLabbookReadme.Field()
 
-    # Create a Rollback or Feature branch
-    create_experimental_branch = CreateExperimentalBranch.Field()
-
-    # Delete a Rollback or Feature branch
-    delete_experimental_branch = DeleteExperimentalBranch.Field()
-
-    # Merge from a given branch into the current checked-out branch
-    merge_from_branch = MergeFromBranch.Field()
-
-    # Work on a given feature branch (perform a git checkout).
-    workon_experimental_branch = WorkonBranch.Field()
-
-    # Set a remote project visibiltiy
+    # Set a remote project visibility
     set_visibility = SetVisibility.Field()
 
     # Kludge-query to return a labbook edge when querying for job status
     fetch_labbook_edge = FetchLabbookEdge.Field()
+
+    # Create a new dataset on the file system.
+    create_dataset = CreateDataset.Field()
+
+    # Delete a dataset
+    delete_dataset = DeleteDataset.Field()
+
+    # Add a file to a dataset
+    add_dataset_file = AddDatasetFile.Field()
+
+    # Close an upload transaction to a dataset
+    complete_dataset_upload_transaction = CompleteDatasetUploadTransaction.Field()
+
+    # Kludge-query to return a dataset edge when querying for job status
+    fetch_dataset_edge = FetchDatasetEdge.Field()
+
+    # Set a remote dataset visibility
+    set_dataset_visibility = SetDatasetVisibility.Field()
+
+    # Sync a Dataset with remote (for collaboration)
+    sync_dataset = SyncDataset.Field()
+
+    # Download dataset files locally
+    download_dataset_files = DownloadDatasetFiles.Field()
+
+    # Link/Unlink a dataset to a project
+    modify_dataset_link = ModifyDatasetLink.Field()
+
+    # Delete a file or directory inside of a Dataset
+    delete_dataset_files = DeleteDatasetFiles.Field()
+
+    # Move a file or directory inside of a Dataset
+    move_dataset_file = MoveDatasetFile.Field()
+
+    # Create an empty directory inside of a Dataset
+    make_dataset_directory = MakeDatasetDirectory.Field()
+
+    # Write a readme to a Dataset
+    write_dataset_readme = WriteDatasetReadme.Field()
+
+    # Write a description to a Dataset
+    set_dataset_description = SetDatasetDescription.Field()

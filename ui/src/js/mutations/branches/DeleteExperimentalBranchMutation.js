@@ -6,9 +6,11 @@ import uuidV4 from 'uuid/v4';
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
-  mutation DeleteExperimentalBranchMutation($input: DeleteExperimentalBranchInput!){
+  mutation DeleteExperimentalBranchMutation($input: DeleteExperimentalBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
     deleteExperimentalBranch(input: $input){
-      success
+      labbook{
+        ...Labbook_labbook
+      }
       clientMutationId
     }
   }
@@ -18,7 +20,8 @@ export default function DeleteExperimentalBranchMutation(
   owner,
   labbookName,
   branchName,
-  labbookId,
+  deleteLocal,
+  deleteRemote,
   callback,
 ) {
   const clientMutationId = uuidV4();
@@ -28,7 +31,12 @@ export default function DeleteExperimentalBranchMutation(
       labbookName,
       branchName,
       clientMutationId,
+      deleteLocal,
+      deleteRemote,
     },
+    first: 10,
+    cursor: null,
+    hasNext: false,
   };
   commitMutation(
     environment,
@@ -44,30 +52,8 @@ export default function DeleteExperimentalBranchMutation(
       },
       onError: (err) => { console.error(err); },
       optimisticUpdater(store) {
-        const labbook = store.get(labbookId);
-        const availableBranchNames = labbook.getValue('availableBranchNames');
-
-        const newAvailableBranchNames = availableBranchNames.filter(listBranchName => listBranchName !== branchName);
-
-        labbook.setValue(newAvailableBranchNames, 'availableBranchNames');
-
-        const mergeableBranchNames = labbook.getValue('mergeableBranchNames');
-        const newMergeableBranchNames = mergeableBranchNames.filter(listBranchName => listBranchName !== branchName);
-
-        labbook.setValue(newMergeableBranchNames, 'mergeableBranchNames');
       },
       updater: (store, response) => {
-        const labbook = store.get(labbookId);
-        const availableBranchNames = labbook.getValue('availableBranchNames');
-
-        const newAvailableBranchNames = availableBranchNames.filter(listBranchName => listBranchName !== branchName);
-
-        labbook.setValue(newAvailableBranchNames, 'availableBranchNames');
-
-        const mergeableBranchNames = labbook.getValue('mergeableBranchNames');
-        const newMergeableBranchNames = mergeableBranchNames.filter(listBranchName => listBranchName !== branchName);
-
-        labbook.setValue(newMergeableBranchNames, 'mergeableBranchNames');
       },
     },
   );

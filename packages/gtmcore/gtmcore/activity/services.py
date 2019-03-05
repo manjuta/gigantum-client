@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 from gtmcore.labbook import LabBook
 from typing import Optional
 import time
@@ -93,7 +74,7 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
 
     if dev_env_mgr.is_available(dev_tool):
         # Add record to redis for Dev Env Monitor
-        owner = InventoryManager().query_labbook_owner(labbook)
+        owner = InventoryManager().query_owner(labbook)
         dev_env_monitor_key = "dev_env_monitor:{}:{}:{}:{}".format(username,
                                                                    owner,
                                                                    labbook.name,
@@ -105,7 +86,7 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
                   'key': dev_env_monitor_key}
         job_key = d.schedule_task(run_dev_env_monitor, kwargs=kwargs, repeat=None, interval=3)
 
-        owner = InventoryManager().query_labbook_owner(labbook)
+        owner = InventoryManager().query_owner(labbook)
         redis_conn.hset(dev_env_monitor_key, "container_name", infer_docker_image_name(labbook.name,
                                                                                        owner,
                                                                                        username))
@@ -135,6 +116,7 @@ def stop_dev_env_monitors(dev_env_key: str, redis_conn: redis.Redis, labbook_nam
 
     """
     # Unschedule dev env monitor
+    logger.info(f"Stopping dev env monitor {dev_env_key}")
     d = Dispatcher()
     process_id = redis_conn.hget(dev_env_key, "process_id")
     if process_id:
@@ -155,6 +137,7 @@ def stop_dev_env_monitors(dev_env_key: str, redis_conn: redis.Redis, labbook_nam
     # Get all related activity monitor keys
     activity_monitor_keys = redis_conn.keys("{}:activity_monitor*".format(dev_env_key))
 
+    logger.info(f"Signaling {activity_monitor_keys} for shutdown.")
     # Signal all activity monitors to exit
     for am in activity_monitor_keys:
         # Set run flag in redis
@@ -174,6 +157,7 @@ def stop_labbook_monitor(labbook: LabBook, username: str, database: int = 1) -> 
         None
 
     """
+    logger.info(f"Stopping labbook monitors for {labbook.name}")
     # Connect to redis
     redis_conn = redis.Redis(db=database)
 
@@ -182,7 +166,7 @@ def stop_labbook_monitor(labbook: LabBook, username: str, database: int = 1) -> 
     base_data = cm.base_fields
 
     for dt in base_data['development_tools']:
-        owner = InventoryManager().query_labbook_owner(labbook)
+        owner = InventoryManager().query_owner(labbook)
         dev_env_monitor_key = "dev_env_monitor:{}:{}:{}:{}".format(username,
                                                                    owner,
                                                                    labbook.name,

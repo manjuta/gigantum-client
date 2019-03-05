@@ -37,27 +37,6 @@
 .SideBar__list-item {
   width: 100%;
   position: relative;
-
-  &:hover:after{
-    animation: 1s ease 0s normal forwards 1 delayed-fade-in;
-    text-align: center;
-    content: attr(data-tooltip);
-    width: 100px;
-    position: absolute;
-    min-width: 100px;
-    font-weight: 100;
-    line-height: 1.3em;
-    font-size: 16px;
-    margin: 0;
-    background: $azure;
-    color: $white;
-    padding: 5px;
-    border-radius: 5px;
-    left: 21px;
-    bottom: -38px;
-    z-index: 1;
-    font-size: .7em;
-  }
 }
 
 .SideBar__list-item--selected {
@@ -71,6 +50,9 @@
   align-items: center;
   height: 50%;
   @include flex(flex-start, column);
+  .Tooltip-data:after {
+    top: calc(50% - 24px);
+  }
 }
 
 .SideBar__nav-item {
@@ -96,11 +78,20 @@
 
 .SideBar__nav-item--datasets {
   align-items: center;
-  opacity: 0.3;
+  text-decoration: none !important;
+  &:hover .SideBar__icon--datasets {
+    background: url('../images/icons/datasets-selected.svg') no-repeat center center;
+    background-size: 40px;
+  }
 }
 
 .SideBar__nav-item--labbooks {
   align-items: center;
+  text-decoration: none !important;
+  &:hover .SideBar__icon--labbooks {
+    background: url('../images/icons/labbooks-selected.svg') no-repeat center center;
+    background-size: 40px;
+  }
 }
 
 .SideBar__icon {
@@ -116,8 +107,20 @@
   background-size: 40px;
 }
 
+.SideBar__icon--datasets-selected:before,
+.SideBar__icon--labbooks-selected:before,{
+    content: "";
+    position: absolute;
+    background: $turquise;
+    width: 5px;
+    height: 55px;
+    right: -40px;
+    margin-top: 7px;
+}
 
-.SideBar__icon--datasets-selected {
+
+.SideBar__icon--datasets-selected,
+.SideBar__icon--datasets:hover,{
   background: url('../images/icons/datasets-selected.svg') no-repeat center center;
   background-size: 40px;
 }
@@ -127,8 +130,8 @@
   background-size: 40px;
 }
 
-.SideBar__icon--labbooks-selected {
-
+.SideBar__icon--labbooks-selected,
+.SideBar__icon--labbooks:hover {
   background: url('../images/icons/labbooks-selected.svg') no-repeat center center;
   background-size: 40px;
 }

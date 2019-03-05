@@ -3,15 +3,20 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'; // keep browser router, reloads page with Router in labbook view
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from 'react-router-dom'; // keep browser router, reloads page with Router in labbook view
 // history
 import history from 'JS/history';
 // components
-import SideBar from 'Components/shared/SideBar';
-import Footer from 'Components/shared/footer/Footer';
-import Prompt from 'Components/shared/Prompt';
+import SideBar from 'Components/common/SideBar';
+import Footer from 'Components/common/footer/Footer';
+import Prompt from 'Components/common/Prompt';
 import Profile from 'Components/profile/Profile';
-import Helper from 'Components/shared/Helper';
+import Helper from 'Components/common/Helper';
 // config
 import config from 'JS/config';
 
@@ -24,6 +29,11 @@ const Home = Loadable({
 
 const LabbookQueryContainer = Loadable({
   loader: () => import('Components/labbook/LabbookQueryContainer'),
+  loading: Loading,
+});
+
+const DatasetQueryContainer = Loadable({
+  loader: () => import('Components/dataset/DatasetQueryContainer'),
   loading: Loading,
 });
 
@@ -96,13 +106,11 @@ class Routes extends Component {
   render() {
     if (!this.state.hasError) {
       const headerCSS = classNames({
-        Header: true,
-        hidden: !this.props.validSession,
+        HeaderBar: true,
         'is-demo': window.location.hostname === config.demoHostName,
       });
       const routesCSS = classNames({
         Routes__main: true,
-        'Routes__main-no-auth': !this.props.validSession,
       });
 
       const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
@@ -122,22 +130,19 @@ class Routes extends Component {
                     (this.state.showDefaultMessage ?
                       <div
                         id="demo-header"
-                        className="demo-header"
-                      >
+                        className="demo-header">
                         {demoText}
                         <a
                           href="http://gigantum.com/download"
                           rel="noopener noreferrer"
-                          target="_blank"
-                        >
+                          target="_blank">
                         download the Gigantum client.
                         </a>
                       </div>
                     :
                       <div
                         id="demo-header"
-                        className="demo-header"
-                      >
+                        className="demo-header">
                       Curious what can Gigantum do for you? &nbsp;
                         <a onClick={() => this.setState({ showYT: true })}>
                          Watch this overview video.
@@ -149,8 +154,7 @@ class Routes extends Component {
                       <div
                         id="yt-lightbox"
                         className="yt-lightbox"
-                        onClick={() => this.setState({ showYT: false })}
-                      >
+                        onClick={() => this.setState({ showYT: false })}>
                         <YouTube
                           opts={{ height: '576', width: '1024' }}
                           className="yt-frame"
@@ -168,8 +172,7 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/"
-                      render={props =>
-                      (<Home
+                      render={props => (<Home
                         loadingRenew={this.state.loadingRenew}
                         history={history}
                         auth={this.props.auth}
@@ -192,31 +195,60 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/:id"
-                      render={props =>
-                        <Redirect to="/projects/local" />
-                    }
+                      render={props => <Redirect to="/projects/local" /> }
                     />
 
                     <Route
                       exact
                       path="/labbooks/:section"
-                      render={props =>
-                        <Redirect to="/projects/local" />
-                    }
+                      render={props => <Redirect to="/projects/local" /> }
                     />
+
 
                     <Route
                       exact
-                      path="/projects/:labbookSection"
-                      render={props =>
-
-
-                      (<Home
+                      path="/datasets/:labbookSection"
+                      render={props => (<Home
                         loadingRenew={this.state.loadingRenew}
                         history={history}
                         auth={this.props.auth}
                         {...props}
                       />)
+                      }
+                    />
+
+
+                    <Route
+                      exact
+                      path="/projects/:labbookSection"
+                      render={props => (<Home
+                        loadingRenew={this.state.loadingRenew}
+                        history={history}
+                        auth={this.props.auth}
+                        {...props}
+                      />)
+                      }
+                    />
+
+                    <Route
+                      path="/datasets/:owner/:datasetName"
+                      auth={this.props.auth}
+                      render={(parentProps) => {
+                          if (this.state.forceLoginScreen) {
+                            return <Redirect to="/login" />;
+                          }
+
+                          return (
+                            <DatasetQueryContainer
+                              datasetName={parentProps.match.params.datasetName}
+                              owner={parentProps.match.params.owner}
+                              auth={this.props.auth}
+                              history={history}
+                              {...this.props}
+                              {...parentProps}
+                            />);
+                      }
+
                       }
                     />
 
@@ -261,6 +293,7 @@ class Routes extends Component {
                       ref="footer"
                       history={history}
                     />
+
                   </div>
                 </div>
               )}

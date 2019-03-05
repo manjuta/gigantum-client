@@ -3,8 +3,9 @@ import {
   graphql,
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
-
-import FooterUtils from 'Components/shared/footer/FooterUtils';
+import uuidv4 from 'uuid/v4';
+import FooterUtils from 'Components/common/footer/FooterUtils';
+import { setMultiInfoMessage } from 'JS/redux/reducers/footer';
 
 const mutation = graphql`
   mutation PublishLabbookMutation($input: PublishLabbookInput!){
@@ -34,7 +35,9 @@ export default function PublishLabbookMutation(
       clientMutationId: tempID++,
     },
   };
-
+  const id = uuidv4();
+  const startMessage = 'Preparing to publish Project...';
+  setMultiInfoMessage(id, startMessage, false, false, [{ message: startMessage }]);
   commitMutation(
     environment,
     {
@@ -50,7 +53,7 @@ export default function PublishLabbookMutation(
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
         if (response) {
-          FooterUtils.getJobStatus(response, 'publishLabbook', 'jobKey', successCall, failureCall);
+          FooterUtils.getJobStatus(response, 'publishLabbook', 'jobKey', successCall, failureCall, id);
         }
       },
     },

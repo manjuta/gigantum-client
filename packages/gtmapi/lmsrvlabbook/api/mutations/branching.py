@@ -25,6 +25,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
+from gtmcore.workflows import LabbookWorkflow, MergeOverride
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.labbook import Labbook
@@ -48,7 +49,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
     def _update_branch_description(cls, lb: Labbook, description: str):
         # Update the description on branch creation
         lb.description = description
-        lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
+        lb.git.add(lb.config_path)
         commit = lb.git.commit('Updating description')
 
         adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
@@ -69,8 +70,8 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
-            bm = BranchManager(labbook=lb, username=username)
-            full_branch_title = bm.create_branch(title=f'gm.workspace-{username}.{branch_name}',
+            bm = BranchManager(lb, username=username)
+            full_branch_title = bm.create_branch(title=branch_name,
                                                  revision=revision)
             logger.info(f"In {str(lb)} created new experimental feature branch: "
                         f"{full_branch_title}")
@@ -78,7 +79,7 @@ class CreateExperimentalBranch(graphene.relay.ClientIDMutation):
             if description:
                 cls._update_branch_description(lb, description)
 
-        return CreateExperimentalBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
+        return CreateExperimentalBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                         name=labbook_name, owner=owner))
 
 
@@ -89,19 +90,25 @@ class DeleteExperimentalBranch(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         branch_name = graphene.String(required=True)
+        delete_local = graphene.Boolean(required=False, default=False)
+        delete_remote = graphene.Boolean(required=False, default=False)
 
-    success = graphene.Boolean()
+    labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, branch_name, delete_local=False,
+                               delete_remote=False, client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
-            bm = BranchManager(labbook=lb, username=username)
-            bm.remove_branch(target_branch=branch_name)
-        logger.info(f'Removed experimental branch {branch_name} from {str(lb)}')
-        return DeleteExperimentalBranch(success=True)
+            bm = BranchManager(lb, username=username)
+            if delete_local:
+                bm.remove_branch(target_branch=branch_name)
+            if delete_remote:
+                bm.remove_remote_branch(target_branch=branch_name)
+        return DeleteExperimentalBranch(Labbook(id="{}&{}".format(owner, labbook_name),
+                                                name=labbook_name, owner=owner))
 
 
 class WorkonBranch(graphene.relay.ClientIDMutation):
@@ -122,10 +129,34 @@ class WorkonBranch(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         # TODO - fail fast if already locked.
         with lb.lock():
-            bm = BranchManager(labbook=lb, username=username)
+            bm = BranchManager(lb, username=username)
             bm.workon_branch(branch_name=branch_name)
-        return WorkonBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
+        return WorkonBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                             name=labbook_name, owner=owner))
+
+
+class ResetBranchToRemote(graphene.relay.ClientIDMutation):
+    """ Undo all local history and then set current branch tip to match remote.
+
+    Very useful when changes are made to master that cannot be pushed. """
+
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+
+    labbook = graphene.Field(Labbook)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            wf = LabbookWorkflow(lb)
+            wf.reset(username)
+
+        return ResetBranchToRemote(Labbook(id="{}&{}".format(owner, labbook_name),
+                                           name=labbook_name, owner=owner))
 
 
 class MergeFromBranch(graphene.relay.ClientIDMutation):
@@ -135,19 +166,28 @@ class MergeFromBranch(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         other_branch_name = graphene.String(required=True)
-        force = graphene.Boolean()
+        override_method = graphene.String(default="abort")
 
     labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name, force=False,
-                               client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, other_branch_name,
+                               override_method="abort", client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
-            bm = BranchManager(labbook=lb, username=username)
-            bm.merge_from(other_branch=other_branch_name, force=force)
+            override = MergeOverride(override_method)
+            bm = BranchManager(lb, username=username)
+            if override == MergeOverride.ABORT:
+                bm.merge_from(other_branch=other_branch_name)
+            elif override == MergeOverride.OURS:
+                bm.merge_use_ours(other_branch=other_branch_name)
+            elif override == MergeOverride.THEIRS:
+                bm.merge_use_theirs(other_branch=other_branch_name)
+            else:
+                raise ValueError(f"Unknown override method {override}")
 
-        return MergeFromBranch(labbook=Labbook(id="{}&{}".format(owner, labbook_name),
+        return MergeFromBranch(Labbook(id="{}&{}".format(owner, labbook_name),
                                                name=labbook_name, owner=owner))
+

@@ -20,14 +20,15 @@
 import os
 import re
 import yaml
-import json
 import datetime
+import glob
 
 from typing import (Dict, Optional)
 
+from gtmcore.exceptions import GigantumException
 from gtmcore.gitlib import GitAuthor
 from gtmcore.logging import LMLogger
-from gtmcore.labbook.schemas import validate_labbook_schema
+from gtmcore.labbook.schemas import validate_labbook_schema, translate_schema, CURRENT_SCHEMA
 from gtmcore.activity import ActivityType, ActivityDetailType
 
 from gtmcore.inventory.repository import Repository
@@ -58,96 +59,72 @@ class LabBook(Repository):
 
     @property
     def id(self) -> str:
-        if self._data:
-            return self._data["labbook"]["id"]
-        else:
-            raise ValueError("No ID assigned to Lab Book.")
+            return self._data["id"]
 
     @property
     def name(self) -> str:
-        if self._data:
-            return self._data["labbook"]["name"]
-        else:
-            raise ValueError("No name assigned to Lab Book.")
+            return self._data["name"]
 
     @name.setter
     def name(self, value: str) -> None:
-        if not value:
-            raise ValueError("value cannot be None or empty")
-
-        if not self._data:
-            self._data = {'labbook': {'name': value}}
-        else:
-            self._data["labbook"]["name"] = value
-        self._validate_gigantum_data()
-
-        # Update data file
-        self._save_gigantum_data()
-
-        # Rename directory
-        if self._root_dir:
-            base_dir, _ = self._root_dir.rsplit(os.path.sep, 1)
-            os.rename(self._root_dir, os.path.join(base_dir, value))
-        else:
-            raise ValueError("Lab Book root dir not specified. Failed to configure git.")
-
-        # Update the root directory to the new directory name
-        self._set_root_dir(os.path.join(base_dir, value))
+        raise ValueError("Cannot set name")
 
     @property
     def creation_date(self) -> Optional[datetime.datetime]:
-        path = os.path.join(self.root_dir, '.gigantum', 'buildinfo')
-        if os.path.isfile(path):
-            with open(path) as p:
-                info = json.load(p)
-                date_str = info.get('creation_utc')
-                d = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
-                return d
-        else:
-            first_commit = self.git.repo.git.rev_list('HEAD', max_parents=0)
-            create_date = self.git.log_entry(first_commit)['committed_on'].replace(tzinfo=None)
-            return create_date
+        """ Return the timestamp of creation of this project """
+        date_str = self._data.get('creation_utc') or self._data['created_on']
+        try:
+            d = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
+        except ValueError:
+            d = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S%z')
+
+        # Make tz aware so rendering in API is consistent
+        d = d.replace(tzinfo=datetime.timezone.utc)
+        # Make all times consistent
+        d = d.replace(microsecond=0)
+        return d
 
     @property
-    def build_details(self) -> Optional[Dict[str, str]]:
-        path = os.path.join(self.root_dir, '.gigantum', 'buildinfo')
-        if os.path.isfile(path):
-            with open(path) as p:
-                info = json.load(p)
-                return info.get('build_info')
-        else:
-            return None
+    def build_details(self) -> str:
+        """ Return details of the Gigantum client application that build this """
+        return self._data['build_info']
 
     @property
     def description(self) -> str:
-        if self._data:
-            return self._data["labbook"]["description"]
-        else:
-            raise ValueError("No description assigned to Lab Book.")
+        return self._data["description"]
 
     @description.setter
     def description(self, value) -> None:
-        if not self._data:
-            self._data = {'labbook': {'description': value}}
-        else:
-            self._data["labbook"]["description"] = value
-
+        self._data["description"] = value
         self._save_gigantum_data()
 
     @property
     def cuda_version(self) -> Optional[str]:
-        if self._data and self._data.get("cuda_version"):
-            return self._data.get("cuda_version")
-        else:
+        """Get the cuda version of the LabBook from the base configuration. If no cuda_version is present, return None
+
+        Returns:
+
+        """
+        base_yaml_file = glob.glob(os.path.join(self.root_dir, '.gigantum', 'env', 'base', '*.yaml'))
+
+        if len(base_yaml_file) > 1:
+            raise ValueError(f"Project misconfigured. Found {len(base_yaml_file)} base configurations.")
+        elif len(base_yaml_file) == 0:
             return None
 
-    @cuda_version.setter
-    def cuda_version(self, cuda_version: Optional[str] = None) -> None:
-        if self._data:
-            self._data['cuda_version'] = cuda_version
-            self._save_gigantum_data()
+        # If you got 1 base, load from disk
+        with open(base_yaml_file[0], 'rt') as bf:
+            base_data = yaml.safe_load(bf)
+
+        return base_data.get('cuda_version')
+
+    @property
+    def config_path(self) -> str:
+        if self._data['schema'] == 2:
+            return os.path.join(self.root_dir, '.gigantum', 'project.yaml')
         else:
-            raise ValueError("LabBook _data cannot be None")
+            # Backward compatibility loading old projects
+            return os.path.join(self.root_dir, '.gigantum', 'labbook.yaml')
 
     def _save_gigantum_data(self) -> None:
         """Method to save changes to the LabBook
@@ -158,7 +135,10 @@ class LabBook(Repository):
         if not self.root_dir:
             raise ValueError("No root directory assigned to lab book. Failed to get root directory.")
 
-        with open(os.path.join(self.root_dir, ".gigantum", "labbook.yaml"), 'wt') as lbfile:
+        if self.schema != CURRENT_SCHEMA:
+            raise ValueError('Cannot save data to Project with old schema')
+
+        with open(self.config_path, 'wt') as lbfile:
             lbfile.write(yaml.safe_dump(self._data, default_flow_style=False))
             lbfile.flush()
 
@@ -169,10 +149,33 @@ class LabBook(Repository):
             None
         """
         if not self.root_dir:
-            raise ValueError("No root directory assigned to lab book. Failed to get root directory.")
+            raise GigantumException("No root directory assigned to lab book. "
+                                    "Failed to get root directory.")
 
-        with open(os.path.join(self.root_dir, ".gigantum", "labbook.yaml"), 'rt') as lbfile:
-            self._data = yaml.safe_load(lbfile)
+        schema_path = os.path.join(self.root_dir, '.gigantum', 'project.yaml')
+        old_schema_path = os.path.join(self.root_dir, ".gigantum", "labbook.yaml")
+
+        if os.path.exists(schema_path):
+            with open(schema_path, 'rt') as lbfile:
+                d = yaml.safe_load(lbfile)
+            self._data = d
+        elif os.path.exists(old_schema_path):
+            # For backward compatibility
+            with open(old_schema_path, 'rt') as lbfile:
+                d = yaml.safe_load(lbfile)
+            # "Virtualize" old schemas into new schemas to support back-compatability
+            self._data = translate_schema(d, self.root_dir)
+        else:
+            if 'gm.workspace' in self.get_branches()['local']:
+                logger.warning("Master branch empty, attempting to load gm.workspace")
+                self.checkout_branch('gm.workspace')
+                self._load_gigantum_data()
+            else:
+                raise GigantumException('Cannot find configuration yaml file')
+
+        if self.schema == 2:
+            # Make sure untracked directory exists (it and its contents are ignored)
+            os.makedirs(os.path.join(self.root_dir, 'output', 'untracked'), exist_ok=True)
 
     def _validate_gigantum_data(self) -> None:
         """Method to validate the LabBook data file contents

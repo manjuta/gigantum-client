@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalDatasets Renders a snapshot 1`] = `
+<div
+  className="Datasets__listing"
+>
+  <div
+    className="grid"
+  >
+    <div
+      className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
+    >
+      <div
+        className="Import__dataset-main"
+      >
+        <div
+          className="Import__dataset-header"
+        >
+          <div
+            className="Import__dataset-icon"
+          >
+            <div
+              className="Import__dataset-add-icon"
+            />
+          </div>
+          <div
+            className="Import__dataset-title"
+          >
+            <h4>
+              Add Dataset
+            </h4>
+          </div>
+        </div>
+        <div
+          className="btn--import"
+          onClick={[Function]}
+        >
+          Create New
+        </div>
+        <div
+          className="btn--import"
+          onClick={[Function]}
+        >
+          Import Existing
+        </div>
+        <div
+          className="hidden createLabbook"
+        >
+          <div
+            className="ToolTip__toggle createLabbook"
+            onClick={[Function]}
+          >
+            <div
+              className="ToolTip__glow-container"
+            >
+              <div
+                className="ToolTip__glow-ring-outer"
+              >
+                <div
+                  className="ToolTip__glow-ring-inner"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            className="hidden createLabbook"
+          />
+          <div
+            className="hidden createLabbook"
+          >
+            Clicking on the 'Create New' button will open the new Project window, letting you name and select a Base for the new Project.
+          </div>
+        </div>
+      </div>
+      <div
+        className="hidden"
+      />
+    </div>
+    <div
+      className="DatasetPaginationLoader--hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="DatasetPaginationLoader--hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="DatasetPaginationLoader--hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="DatasetPaginationLoader--hidden"
+    >
+      <div />
+    </div>
+    <div
+      className="DatasetPaginationLoader--hidden"
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;

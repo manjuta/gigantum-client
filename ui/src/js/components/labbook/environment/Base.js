@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
 // components
 import PackageCount from 'Components/labbook/overview/PackageCount';
-import Loader from 'Components/shared/Loader';
+import Loader from 'Components/common/Loader';
 // assets
 import './Base.scss';
 
@@ -52,8 +52,8 @@ class Base extends Component {
     if (base) {
       return (
         <div className="Base">
-          <div className="Base__info">
-            <div className="Base__card Card--auto Card--no-hover">
+          <div className="Base__info grid">
+            <div className="Base__card Card--auto Card--no-hover column-1-span-12">
 
               <div className="Base__imageContainer">
                 <img

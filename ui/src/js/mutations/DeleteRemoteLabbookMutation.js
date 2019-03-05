@@ -63,7 +63,9 @@ export default function DeleteRemoteLabbookMutation(
         callback(response, error);
       },
       updater: (store, response) => {
-        sharedUpdater(store, parentID, nodeID, connection);
+        if (parentID) {
+          sharedUpdater(store, parentID, nodeID, connection);
+        }
       },
     },
   );

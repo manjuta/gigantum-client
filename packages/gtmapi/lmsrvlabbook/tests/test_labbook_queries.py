@@ -17,9 +17,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import pytest
-
 import os
+import time
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, fixture_working_dir_populated_scoped, fixture_test_file
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
@@ -27,8 +26,7 @@ from gtmcore.files import FileOperations
 from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 import datetime
 import pprint
-
-import graphene
+import aniso8601
 
 import gtmcore
 
@@ -400,7 +398,7 @@ class TestLabBookServiceQueries(object):
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert r['data']['currentLabbookSchemaVersion'] == 1
+        assert r['data']['currentLabbookSchemaVersion'] == 2
 
     def test_get_labbook(self, fixture_working_dir):
         """Test listing labbooks"""
@@ -412,29 +410,29 @@ class TestLabBookServiceQueries(object):
         query = """
         {
           labbook(name: "labbook1", owner: "default") {
+            isDeprecated
             schemaVersion
             name
             sizeBytes
             description
             creationDateUtc
-            activeBranch {
-                refName
-                prefix
-            }
+            activeBranchName
           }
         }
         """
         r = fixture_working_dir[2].execute(query)
         assert 'errors' not in r
-        assert r['data']['labbook']['schemaVersion'] == 1
+        assert r['data']['labbook']['schemaVersion'] == 2
+        assert r['data']['labbook']['isDeprecated'] == False
         assert int(r['data']['labbook']['sizeBytes']) > 10000
         assert int(r['data']['labbook']['sizeBytes']) < 40000
-        assert r['data']['labbook']['activeBranch']['refName'] == 'gm.workspace-default'
-        assert r['data']['labbook']['activeBranch']['prefix'] is None
+        assert r['data']['labbook']['activeBranchName'] == 'master'
         assert r['data']['labbook']['name'] == 'labbook1'
         d = r['data']['labbook']['creationDateUtc']
-        n = datetime.datetime.strptime(d, '%Y-%m-%dT%H:%M:%S.%f')
-        assert (datetime.datetime.utcnow() - n).total_seconds() < 30
+        n = aniso8601.parse_datetime(d)
+        assert (datetime.datetime.now(datetime.timezone.utc) - n).total_seconds() < 5
+        assert n.microsecond == 0
+        assert n.tzname() == "+00:00"
 
     def test_get_labbook_size_rediculously_huge(self, monkeypatch, fixture_working_dir):
         """Test listing labbooks"""
@@ -716,7 +714,8 @@ class TestLabBookServiceQueries(object):
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        snapshot.assert_match(r)
 
         # Just get the files in the sub-directory "js"
         query = """
@@ -762,21 +761,8 @@ class TestLabBookServiceQueries(object):
                   }
                 }
                 """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
-
-    def test_check_updates_available_from_remote(self, remote_labbook_repo, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
-        lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
-
-        query = f"""
-        {{
-            labbook(name: "labbook1", owner: "default") {{
-                updatesAvailableCount
-            }}
-        }}
-        """
         r = fixture_working_dir[2].execute(query)
-        assert r['data']['labbook']['updatesAvailableCount'] == 0
+        snapshot.assert_match(r)
 
     def test_list_favorites(self, fixture_working_dir, snapshot):
         """Test listing labbook favorites"""
@@ -1146,7 +1132,8 @@ class TestLabBookServiceQueries(object):
                       }
                     }
                     """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        snapshot.assert_match(r)
 
     def test_get_activity_records_next_page(self, fixture_working_dir_env_repo_scoped, snapshot, fixture_test_file):
         """Test next page logic, which requires a labbook to be created properly with an activity"""
@@ -1410,7 +1397,6 @@ class TestLabBookServiceQueries(object):
         """
         # Uses an invalid string
         r = fixture_working_dir[2].execute(query)
-        pprint.pprint(r)
         assert 'errors' in r
         snapshot.assert_match(r)
 
@@ -1680,8 +1666,8 @@ class TestLabBookServiceQueries(object):
         """.format(",".join(f'"{k}"' for k in keys))
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
-    def test_get_labbook_readme(self, fixture_working_dir, snapshot):
-        """Test getting a labbook's readme document"""
+    def test_get_labbook_create_date(self, fixture_working_dir, snapshot):
+        """Test getting a labbook's create date"""
         # Create labbooks
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
@@ -1689,14 +1675,63 @@ class TestLabBookServiceQueries(object):
         query = """
         {
           labbook(name: "labbook1", owner: "default") {
-            name
-            description
-            readme
+            creationDateUtc
           }
         }
         """
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        d = r['data']['labbook']['creationDateUtc']
+        # using aniso8601 to parse because built-in datetime doesn't parse the UTC offset properly (configured for js)
+        create_on = aniso8601.parse_datetime(d)
+        assert create_on.microsecond == 0
+        assert create_on.tzname() == "+00:00"
 
+        # wait, add another commit, and remove the buildinfo file to test the fallback method for getting create date
+        time.sleep(4)
         lb.write_readme("##Summary\nThis is my readme!!")
 
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        d = r['data']['labbook']['creationDateUtc']
+        create_on_fallback = aniso8601.parse_datetime(d)
+        assert create_on_fallback.microsecond == 0
+        assert create_on_fallback.tzname() == "+00:00"
+
+        # Because there can be 1 second of drift between normal and fallback methods, be safe and check they are not 2
+        # seconds apart.
+        assert abs((create_on - create_on_fallback).seconds) < 2
+
+    def test_get_labbook_modified_on(self, fixture_working_dir, snapshot):
+        """Test getting a labbook's modifed date"""
+        # Create labbooks
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
+
+        modified_query = """
+        {
+          labbook(name: "labbook1", owner: "default") {
+            modifiedOnUtc
+          }
+        }
+        """
+        r = fixture_working_dir[2].execute(modified_query)
+        assert 'errors' not in r
+        d = r['data']['labbook']['modifiedOnUtc']
+        # using aniso8601 to parse because built-in datetime doesn't parse the UTC offset properly (configured for js)
+        modified_on_1 = aniso8601.parse_datetime(d)
+        assert modified_on_1.microsecond == 0
+        assert modified_on_1.tzname() == "+00:00"
+
+        time.sleep(2)
+        lb.write_readme("##Summary\nThis is my readme!!")
+
+        r = fixture_working_dir[2].execute(modified_query)
+        assert 'errors' not in r
+        d = r['data']['labbook']['modifiedOnUtc']
+        modified_on_2 = aniso8601.parse_datetime(d)
+
+        assert (datetime.datetime.now(datetime.timezone.utc) - modified_on_1).total_seconds() < 30
+        assert (datetime.datetime.now(datetime.timezone.utc) - modified_on_2).total_seconds() < 30
+        assert modified_on_2 > modified_on_1
+

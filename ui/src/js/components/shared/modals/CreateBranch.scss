@@ -1,0 +1,64 @@
+@import '~Styles/_imports.scss';
+
+.CreateBranch {
+  height: 100%;
+  @include flex(space-between, column);
+}
+
+.CreateBranch__nav {
+  @include flex(space-between, row);
+}
+
+.CreateBranch__navGroup {
+  @include flex(flex-end, row);
+}
+
+.CreateBranch_navItem{
+  width: 100px;
+  align-content: center;
+  text-align: center;
+}
+
+.CreateBranch__name {
+  height: 80px;
+}
+
+
+.CreateBranch__btn--progress {
+  margin: 0 10px;
+}
+
+.CreateBranch__error {
+  color: $orange;
+}
+
+
+.CreateBranch__input--invalid[type=text]{
+  &:focus,
+  &:hover {
+    color: $orange;
+    border-color: $orange;
+  }
+}
+
+
+.CreateBranch__warning {
+  text-align: right;
+  margin: 0px;
+
+  &--green {
+    color: $turquise;
+  }
+
+  &--orange {
+    color: $orange;
+  }
+
+}
+
+.CreateBranch__input--description {
+  height: 50px;
+  &:focus {
+    outline: none;
+  }
+}

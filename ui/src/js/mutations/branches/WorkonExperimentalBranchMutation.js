@@ -9,6 +9,9 @@ const mutation = graphql`
   mutation WorkonExperimentalBranchMutation($input: WorkonBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
     workonExperimentalBranch(input: $input){
       labbook{
+        id
+        isDeprecated
+        shouldMigrate
         ...Labbook_labbook
       }
       clientMutationId
@@ -20,7 +23,6 @@ export default function WorkonExperimentalBranchMutation(
   owner,
   labbookName,
   branchName,
-  revision,
   callback,
 ) {
   const clientMutationId = uuidV4();
@@ -31,7 +33,7 @@ export default function WorkonExperimentalBranchMutation(
       branchName,
       clientMutationId,
     },
-    first: 2,
+    first: 10,
     cursor: null,
     hasNext: false,
   };

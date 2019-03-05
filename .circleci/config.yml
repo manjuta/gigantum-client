@@ -1,8 +1,13 @@
-version: 2
+version: 2.1
+
+executors:
+  gig_client:
+    docker:
+      - image: gigantum/circleci-client:0df6fba6a5-2019-02-25
+
 jobs:
   mypy-gtmcore:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
@@ -12,8 +17,7 @@ jobs:
             python3 -m mypy packages/gtmcore --ignore-missing-imports --strict-optional
 
   mypy-gtmapi:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
@@ -23,8 +27,7 @@ jobs:
             python3 -m mypy packages/gtmapi --ignore-missing-imports --strict-optional
 
   test-confhttpproxy:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
@@ -40,8 +43,7 @@ jobs:
             cd ~/repo
 
   test-gtmcore:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
@@ -59,8 +61,7 @@ jobs:
             codecov -F core
 
   test-gtmapi:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
@@ -83,8 +84,7 @@ jobs:
             codecov -F api
 
   test-long-running-env:
-    docker:
-      - image: gigantum/circleci-client:d1f2e268a3-2018-12-05
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
@@ -104,16 +104,11 @@ jobs:
             codecov -F core
 
   test-ui-components:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Initialize submodules
-          command: |
-            git submodule update --init --recursive
       - run:
           name: Build frontend production code
           command: |
@@ -123,21 +118,16 @@ jobs:
             npm run relay
             unset CI && npm run build
       - run:
-          name: Run dashboard tests
+          name: Run jest tests
           command: |
             cd /home/circleci/repo/ui
-            jest dashboard -u --ci
+            jest shared/fileBrowser activity dashboard -u
 
   fossa:
-    docker:
-      - image: gigantum/circleci-client:f652c96aba-2018-12-07
+    executor: gig_client
     working_directory: ~/repo
     steps:
       - checkout
-      - run:
-          name: Initialize submodules
-          command: |
-            git submodule update --init --recursive
       - run:
           name: Build frontend production code
           command: |
@@ -179,8 +169,3 @@ workflows:
       - fossa:
           requires:
             - test-confhttpproxy
-        #filters:
-        #  branches:
-        #    only:
-        #      - master
-        #      - integration

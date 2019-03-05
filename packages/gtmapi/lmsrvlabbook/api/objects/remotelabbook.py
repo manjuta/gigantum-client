@@ -20,7 +20,7 @@
 import graphene
 
 from gtmcore.configuration import Configuration
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 
 from lmsrvcore.api.interfaces import GitRepository
@@ -35,8 +35,6 @@ class RemoteLabbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
 
     NOTE: RemoteLabbooks require all fields to be explicitly set as there is no current way to asynchronously retrieve
           the data
-
-    NOTE: Currently all description fields will return empty strings
 
     """
     # A short description of the LabBook limited to 140 UTF-8 characters
@@ -88,7 +86,7 @@ class RemoteLabbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            d = mgr.repo_details(namespace=self.owner, labbook_name=self.name)
+            d = mgr.repo_details(namespace=self.owner, repository_name=self.name)
             return d.get('visibility')
         except ValueError:
             return "unknown"

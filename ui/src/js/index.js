@@ -5,8 +5,11 @@ import './../css/critical.scss';
 import UserIdentity from 'JS/Auth/UserIdentity';
 import Auth from 'JS/Auth/Auth';
 import { Provider } from 'react-redux';
+import { detect } from 'detect-browser';
+
 // components
-import Routes from './components/Routes';
+import Routes from 'Components/Routes';
+import BrowserSupport from 'Components/browserSupport/BrowserSupport';
 // store
 import store from 'JS/redux/store';
 
@@ -17,7 +20,6 @@ UserIdentity.getUserIdentity().then((response) => {
   const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
   let forceLoginScreen = true;
   let loadingRenew = false;
-  let validSession = false;
 
   if (response.data) {
     if (response.data.userIdentity && ((response.data.userIdentity.isSessionValid && navigator.onLine) || !navigator.onLine)) {
@@ -26,7 +28,6 @@ UserIdentity.getUserIdentity().then((response) => {
       localStorage.setItem('email', response.data.userIdentity.email);
       localStorage.setItem('username', response.data.userIdentity.username);
       localStorage.setItem('expires_at', expiresAt);
-      validSession = true;
       forceLoginScreen = false;
     } else if (response.data.userIdentity && localStorage.getItem('access_token')) {
       loadingRenew = true;
@@ -34,7 +35,6 @@ UserIdentity.getUserIdentity().then((response) => {
         setTimeout(() => {
           routes.setState({ loadingRenew: false });
         }, 2000);
-        validSession = true;
       }, true, () => {
         routes.setState({ forceLoginScreen: true, loadingRenew: false });
       });
@@ -48,23 +48,26 @@ UserIdentity.getUserIdentity().then((response) => {
       localStorage.removeItem('id_token');
       forceLoginScreen = true;
     }
-  } else {
-
   }
-
-  render(
-    <Provider store={store}>
-      <Routes
-        ref={el => routes = el}
-        auth={auth}
-        forceLoginScreen={forceLoginScreen}
-        loadingRenew={loadingRenew}
-        validSession={validSession}
-      />
-    </Provider>
-    , document.getElementById('root') || document.createElement('div'),
-
-  );
+  const browser = detect();
+  if ((browser.name === 'chrome') || (browser.name === 'firefox')) {
+    render(
+      <Provider store={store}>
+        <Routes
+          ref={el => routes = el}
+          auth={auth}
+          forceLoginScreen={forceLoginScreen}
+          loadingRenew={loadingRenew}
+        />
+      </Provider>,
+      document.getElementById('root') || document.createElement('div'),
+    );
+  } else {
+    render(
+     <BrowserSupport />,
+     document.getElementById('root') || document.createElement('div'),
+    );
+  }
 });
 
 unregister();

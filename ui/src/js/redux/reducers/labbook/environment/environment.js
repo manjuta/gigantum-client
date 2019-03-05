@@ -35,17 +35,21 @@ export default (
       packageMenuVisible: false,
       viewContainerVisible: false,
     };
-  } else if (action.type === RESET_DETAIL_STORE) {
+  }
+  if (action.type === RESET_DETAIL_STORE) {
     return {
       ...state,
       detailMode: false,
     };
-  } else if (action.type === CONTAINER_MENU_WARNING) {
+  }
+  if (action.type === CONTAINER_MENU_WARNING) {
     return {
       ...state,
       containerMenuWarning: action.payload.message,
     };
-  } else if (action.type === UPDATE_CONTAINER_MENU_VISIBILITY) {
+  }
+  if (action.type === UPDATE_CONTAINER_MENU_VISIBILITY) {
+
     return {
       ...state,
       containerMenuOpen: action.payload.containerMenuOpen,

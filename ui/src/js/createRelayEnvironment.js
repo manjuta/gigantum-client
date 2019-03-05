@@ -1,7 +1,7 @@
 import reduxStore from 'JS/redux/store';
 
 const {
-  Environment, Network, RecordSource, Store,
+  Environment, Network, RecordSource, Store, ConnectionHandler, ViewerHandler,
 } = require('relay-runtime');
 
 const parseParams = (str) => {
@@ -24,16 +24,16 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   if (reduxStore.getState().login.logut && (operation.text.indexOf('RemoveUserIdentityMutation') === -1)) {
     return;
   }
-
-  const queryString = operation.text.replace(/(\r\n|\n|\r)/gm, '');
+  const queryString = operation.params ? operation.params.text.replace(/(\r\n|\n|\r)/gm, '') : operation.text.replace(/(\r\n|\n|\r)/gm, '');
   let body;
   const headers = {
     accept: '*/*',
   };
+
+
   if (process.env.NODE_ENV === 'development') {
     headers['Access-Control-Allow-Origin'] = '*';
   }
-
   if (uploadables && uploadables[0]) {
     if (uploadables[1]) {
       const idToken = localStorage.getItem('id_token');
@@ -81,7 +81,17 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
 }
 
 const network = Network.create(fetchQuery);
-const handlerProvider = null;
+
+const handlerProvider = function handlerProvider(handle) {
+  switch (handle) {
+    // Augment (or remove from) this list:
+    case 'connection': return ConnectionHandler;
+    case 'viewer': return ViewerHandler;
+  }
+  throw new Error(
+    `handlerProvider: No handler provided for ${handle}`
+  );
+}
 
 const source = new RecordSource();
 const store = new Store(source);

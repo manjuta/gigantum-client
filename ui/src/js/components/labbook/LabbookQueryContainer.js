@@ -6,7 +6,7 @@ import environment from 'JS/createRelayEnvironment';
 
 // components
 import Labbook from './Labbook';
-import Loader from 'Components/shared/Loader';
+import Loader from 'Components/common/Loader';
 // store
 import { setUpdateAll } from 'JS/redux/reducers/routes';
 // labbook query with notes fragment
@@ -33,7 +33,7 @@ class LabbookQueryContainer extends Component {
           {
             name: parentProps.labbookName,
             owner: parentProps.owner,
-            first: 2,
+            first: 10,
             hasNext: false,
           }
         }
@@ -46,7 +46,6 @@ class LabbookQueryContainer extends Component {
             if (props.errors) {
               return (<div>{props.errors[0].message}</div>);
             }
-
 
               return (
                 <Labbook
@@ -61,7 +60,7 @@ class LabbookQueryContainer extends Component {
                 />);
           }
 
-            return (<Loader />);
+          return (<Loader />);
         }
       }
     />);

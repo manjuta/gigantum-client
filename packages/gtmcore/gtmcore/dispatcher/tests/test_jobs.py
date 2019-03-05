@@ -17,23 +17,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import getpass
 import os
 import pprint
 import pytest
 import shutil
 import tempfile
-import uuid
-
-import docker
 
 from gtmcore.configuration import get_docker_client
 from gtmcore.dispatcher import jobs
 import gtmcore.fixtures
+from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file
+
 from gtmcore.fixtures import mock_config_file, mock_config_with_repo
-from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.labbook import LabBook
-from gtmcore.inventory.inventory  import InventoryManager
+from gtmcore.environment import ComponentManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.imagebuilder import ImageBuilder
 
 
@@ -84,11 +81,6 @@ class TestJobs(object):
             ib.assemble_dockerfile(write=True)
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
-            assert import_lb.data['owner']['username'] == 'unittester2'
-
-            # After importing, the new user (in this case "cat") should be the current, active workspace.
-            # And be created, if necessary.
-            assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
             # Repeat the above, except with the original user (e.g., re-importing their own labbook)
@@ -99,10 +91,8 @@ class TestJobs(object):
             # New path should reflect username of new owner and user.
             assert user_import_lb
             import_lb2 = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(user_import_lb)
-            assert import_lb2.data['owner']['username'] == 'unittester'
             # After importing, the new user (in this case "cat") should be the current, active workspace.
             # And be created, if necessary.
-            assert import_lb2.active_branch == "gm.workspace-unittester"
             assert not import_lb2.has_remote
 
             build_kwargs = {
@@ -167,11 +157,6 @@ class TestJobs(object):
             ib.assemble_dockerfile(write=True)
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
-            assert import_lb.data['owner']['username'] == 'unittester2'
-
-            # After importing, the new user (in this case "cat") should be the current, active workspace.
-            # And be created, if necessary.
-            assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
     def test_fail_import_export_zip(self, mock_config_with_repo):

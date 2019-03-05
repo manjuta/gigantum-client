@@ -1,0 +1,156 @@
+.ContainerStatus__container-state {
+  transition: all 0.125s;
+  font-weight: 100;
+  width: 141px;
+  text-align: center;
+  height: 40px;
+  font-size: 16px;
+  border-radius: 3px;
+  color: $jet;
+  line-height: 26px;
+  background-color: white;
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0);
+  z-index: index($elements, button);
+  padding-right: 10px;
+  align-items: center;
+  position: relative;
+  @include flex(space-around, row);
+  @include boxShadow();
+}
+
+.ContainerStatus__text {
+  width: 80px;
+
+}
+
+.ContainerStatus__toggle {
+  position: relative;
+  height: 24px;
+  width: 40px;
+  border-radius: 15px;
+  background: $romanSilver;
+}
+
+.ContainerStatus__toggle-btn {
+  transition: all 0.125s ease-in-out;
+  position: absolute;
+  border-radius: 10px;
+  background-color: $white;
+  top: 3px;
+  left: 3px;
+  right: 19px;
+  bottom: 3px;
+}
+
+.ContainerStatus__container-state--expanded{
+  width: 141px;
+  height: 40px;
+  box-shadow: 0 0px 12px 0 rgba(0,0,0,.50) !important;
+}
+
+.ContainerStatus__container-state--menu-open {
+  @extend .ContainerStatus__container-state;
+  background: $background-color url('~Images/icons/up-arrow-silver.svg') no-repeat 90% center;
+}
+
+.ContainerStatus__container-state.Running {
+  border: 1px solid $turquise;
+
+  .ContainerStatus__toggle-btn {
+    top: 3px;
+    left: 19px;
+    right: 3px;
+    bottom: 3px;
+  }
+
+  .ContainerStatus__toggle {
+    background: $turquise;
+  }
+}
+.ContainerStatus__container-state.loading{
+  background: $romanSilver;
+  opacity: 0.5;
+}
+.ContainerStatus__container-state.Running:hover {
+  width: 141px;
+  height: 40px;
+  border: 1px solid $romanSilver;
+
+  .ContainerStatus__toggle {
+    background: $turquise;
+  }
+}
+
+.ContainerStatus__container-state.Building,
+.ContainerStatus__container-state.Syncing,
+.ContainerStatus__container-state.Publishing {
+  border: 1px solid $orange;
+  background-size: 20px;
+
+  .ContainerStatus__toggle-btn {
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+  }
+
+  .ContainerStatus__toggle {
+    background: $romanSilver url(~Images/icons/container-status-spinner-building.svg) no-repeat center center;
+    background-size: 40px 24px;
+  }
+}
+
+.ContainerStatus__container-state.Stopped {
+  border: 1px solid $romanSilver;
+  @include boxShadow();
+}
+
+.ContainerStatus__container-state.Stopped:hover {
+  width: 141px;
+  height: 40px;
+  border: 1px solid $turquise;
+
+  .ContainerStatus__toggle {
+    background: $turquise;
+  }
+}
+
+.ContainerStatus__container-state.LookingUp {
+  width: 141px !important;
+  height: 40px !important;
+  font-size: 16px !important;
+  line-height: 26px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid $orange !important;
+  cursor: auto;
+}
+
+.ContainerStatus__container-state.Rebuild{
+  border: 1px solid $romanSilver;
+  cursor: pointer;
+  padding: 0 15px 0 0;
+
+  .ContainerStatus__toggle {
+    background: $orange url(~Images/icons/warning.svg) no-repeat 20px center;
+    background-size: 18px 18px;
+  }
+}
+.ContainerStatus__container-state.Stopping,
+.ContainerStatus__container-state.Starting {
+  border: 1px solid $turquise;
+  color: $grey;
+
+  .ContainerStatus__toggle {
+    background: $romanSilver url(~Images/icons/container-status-spinner.svg) no-repeat center center;
+    background-size: 40px 24px;
+  }
+
+  .ContainerStatus__toggle-btn {
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+  }
+}

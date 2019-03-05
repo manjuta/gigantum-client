@@ -47,7 +47,7 @@
     margin: 20px;
     padding: 20px;
 
-    color: $romanSilver;
+    color: $mineShaft;
     border-radius: 8px;
     background: $white;
 }
@@ -77,7 +77,7 @@
   align-content: center;
   align-self: center;
   font-size: 14px;
-  color: $backgroundGrey;
+  color: $white;
 }
 
 .Footer__message-expand{
@@ -120,7 +120,7 @@
 .Footer__message-list {
     overflow-y: auto;
     overflow-x: hidden;
-    
+
     height: auto;
     min-height: 80px;
     padding: 0 20px;

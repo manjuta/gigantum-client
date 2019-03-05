@@ -1,0 +1,413 @@
+@import '~Styles/_imports.scss';
+
+.Overview {
+  height: auto;
+  color: $romanSilver;
+  font-weight: 100;
+  width: 100%;
+
+  &--fullscreen {
+    z-index: index($elements, modal);
+  }
+
+  .Base__header-container {
+    display: none;
+  }
+
+  .Base__categories {
+    justify-content: space-between;
+
+    .Base__categories-languages {
+      width: 25%;
+    }
+
+    .Base__categories-tools {
+      width: 25%;
+    }
+  }
+}
+
+.Overview__container {
+  align-items: center;
+
+  a {
+    color: $azure;
+    text-decoration: none;
+    margin-left: 20px;
+    margin-top: 40px;
+  }
+
+  @include flex(flex-start, row);
+}
+
+.Overview__title {
+  padding: 0px;
+  position: relative;
+  color: $jet;
+}
+
+.Overview__header {
+  font-weight: light;
+}
+
+.Overview__image-container {
+  padding: 0 10px;
+  @include flex(center, column);
+
+  img {
+    align-content: center;
+  }
+
+}
+
+.Overview__package-dependencies {
+  margin: 10px;
+}
+
+.Overview__name {
+  font-size: 8px;
+}
+
+.Overview__human-name {
+  color: $jet;
+  font-size: 12px;
+}
+
+.Overview__open-jupyter-container {
+  align-self: center;
+  width: 200px;
+}
+
+.Overview__development-environment-item {
+  margin: 0;
+}
+
+.PackageCount {
+  width: 50%;
+  @include flex(flex-start, row);
+  white-space: nowrap;
+
+  .PackageCount__dependencies {
+    width: 100%;
+  }
+}
+
+.PackageCount__item {
+  color: $mineShaft;
+  padding: 5px 0px;
+  margin: 0 10px 0 0;
+}
+
+.PackageCount__dependencies {
+  margin: 0px;
+}
+
+
+.Overview__readme--editing {
+  text-align: left;
+  padding: 10px;
+  color: $mineShaft;
+  z-index: index($elements, card);
+  position: relative;
+  background: white;
+  min-height: 200px;
+  @include flex(center, column);
+
+  .fa {
+    font-family: FontAwesome !important;
+  }
+
+  .Overview__readme--editing-buttons {
+    position: relative;
+    @include flex(center, row);
+
+    button {
+      margin: 0 10px;
+    }
+
+    .BranchMenu__menu-pointer{
+      right: auto;
+      margin-left: -55px;
+    }
+
+    .BranchMenu__button-menu{
+      right: auto;
+    }
+  }
+}
+
+.Overview__readme {
+
+  padding: 10px 50px;
+  color: $mineShaft;
+  z-index: index($elements, card);
+  position: relative;
+  background: white;
+  min-height: 200px;
+  text-align: left;
+  h1 {
+    padding: 10px 0;
+    font-size: 2em;
+    color: $jet;
+    border-bottom: 1px solid $grey-light;
+    font-weight: 400;
+  }
+  h2 {
+    padding: 10px 0;
+    font-size: 1.5em;
+    color: $jet;
+    border-bottom: 1px solid $grey-light;
+    font-weight: 400;
+
+  }
+  h3 {
+    font-size: 1.17em;
+    color: $jet;
+    font-weight: 400;
+
+  }
+  h4 {
+    font-size: 1.12em;
+    color: $jet;
+    font-weight: 400;
+
+  }
+  h5 {
+    font-size: .83em;
+    font-weight: 400;
+    color: $jet;
+  }
+  h6 {
+    font-weight: 400;
+    font-size: .75em;
+    color: $jet;
+  }
+}
+
+.ReadmeMarkdown {
+  max-height: 200px;
+  overflow: hidden;
+  blockquote {
+    border-left: 5px solid $lightblue;
+  }
+  a {
+    color: $azure;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  ul {
+    padding-left: 40px;
+    list-style-type: disc;
+    li {
+      list-style-type: disc;
+    }
+  }
+}
+
+.editor-preview,
+.editor-preview-side {
+  h1 {
+    padding: 10px 0;
+    font-size: 2em;
+    color: $jet;
+    border-bottom: 1px solid $grey-light;
+    font-weight: 400;
+  }
+  h2 {
+    padding: 10px 0;
+    font-size: 1.5em;
+    color: $jet;
+    border-bottom: 1px solid $grey-light;
+    font-weight: 400;
+
+  }
+  h3 {
+    font-size: 1.17em;
+    color: $jet;
+    font-weight: 400;
+
+  }
+  h4 {
+    font-size: 1.12em;
+    color: $jet;
+    font-weight: 400;
+
+  }
+  h5 {
+    font-size: .83em;
+    font-weight: 400;
+    color: $jet;
+  }
+  h6 {
+    font-weight: 400;
+    font-size: .75em;
+    color: $jet;
+  }
+}
+
+.editor-preview,
+.editor-preview-side,
+.ReadmeMarkdown--expanded {
+  blockquote {
+    border-left: 5px solid $lightblue;
+  }
+  a {
+    color: $azure;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  ul {
+    padding-left: 40px;
+    list-style-type: disc;
+    li {
+      list-style-type: disc;
+    }
+  }
+}
+
+.ReadmeMarkdown *,
+.ReadmeMarkdown--expanded *,{
+  word-break: break-word;
+}
+
+.Overview__readme-buttons {
+  @include flex(center, row);
+}
+
+.Overview__readme-fadeout {
+  position: relative;
+  bottom: 2em;
+  height: 2em;
+  background: -webkit-linear-gradient(
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 1) 100%
+  );
+}
+
+.Overview__readme-bar-less{
+  margin: 30px 0 15px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.Overview__readme-bar-more{
+  @extend .Overview__readme-bar-less;
+  margin-top: 0;
+}
+
+.Overview__readme-edit-button {
+  transition: all 0.125s ease, background-position 1ms;
+  font-weight: light;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  top: -20px;
+  right: 15px;
+  padding: 5px;
+  border: 0px;
+  background: $azure url('~Images/icons/edit-azure.svg') no-repeat center center;
+  background-size: 18px;
+  position: absolute;
+  span {
+    display: none;
+  }
+
+  &:hover,
+  &:focus {
+    border: none;
+    width: auto;
+    padding: 0 40px 0 15px;
+    background: $azure url('~Images/icons/edit-azure.svg') no-repeat right 7px center;
+    background-size: 18px;
+
+    span {
+      display: block;
+    }
+  }
+}
+
+.Overview__readme-more,
+.Overview__readme-less{
+  position: absolute;
+  top: -26px;
+}
+
+.Overview__readme-more,
+.Overview__readme-more:focus {
+  color: $azure;
+  border: 0px;
+  background: url('~Images/icons/down-arrow-azure.svg') no-repeat 80px;
+  background-size: 15px;
+  padding-right: 40px;
+}
+
+.Overview__readme-more:hover {
+  color: $turquise;
+  border: 0px;
+  background: url('~Images/icons/down-arrow-turquise.svg') no-repeat 80px;
+  background-size: 15px;
+  padding-right: 40px;
+}
+
+.Overview__readme-less,
+.Overview__readme-less:focus {
+  color: $azure;
+  border: 0px;
+  background: url('~Images/icons/up-arrow-azure.svg') no-repeat 87px;
+  background-size: 15px;
+  padding-right: 40px;
+}
+
+.Overview__readme-less:hover {
+  color: $turquise;
+  border: 0px;
+  background: url('~Images/icons/up-arrow-turquise.svg') no-repeat 87px;
+  background-size: 15px;
+  padding-right: 40px;
+}
+
+
+.CodeMirror-lines * {
+  word-break: break-word;
+}
+
+.CodeMirror-wrap {
+  height: 270px;
+  box-sizing: border-box;
+}
+
+.Overview__empty{
+  height: 100px;
+  background: $grey-border;
+  @include flex(center, row);
+  text-align: center;
+  padding: 30px;
+  position: relative;
+}
+
+.Overview__empty-content{
+  @include flex(center, column);
+  p {
+    margin: 0;
+  }
+  p:first-child {
+    font-weight: 900;
+    color: $mineShaft;
+  }
+  .Overview__empty-action{
+    color: $azure;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+}
+.Overview__environment{
+  position: relative;
+  .Btn--redirect {
+    top: -8px;
+  }
+}

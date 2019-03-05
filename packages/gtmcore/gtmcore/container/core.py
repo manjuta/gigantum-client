@@ -1,22 +1,3 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import os
 import docker
 import docker.errors
@@ -27,9 +8,11 @@ from typing import Callable, Optional
 
 from gtmcore.configuration import get_docker_client, Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.inventory.inventory  import InventoryManager
-from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.inventory.inventory  import InventoryManager, InventoryException
+from gtmcore.container.utils import infer_docker_image_name, ps_search
 from gtmcore.container.exceptions import ContainerBuildException
+from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.container.cuda import should_launch_with_cuda_support
 
 logger = LMLogger.get_logger()
 
@@ -150,7 +133,7 @@ def build_docker_image(root_dir: str, override_image_tag: Optional[str],
     lb = InventoryManager().load_labbook_from_directory(root_dir)
 
     # Build image
-    owner = InventoryManager().query_labbook_owner(lb)
+    owner = InventoryManager().query_owner(lb)
     image_name = override_image_tag or infer_docker_image_name(labbook_name=lb.name,
                                                                owner=owner,
                                                                username=username)
@@ -215,7 +198,7 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     lb = InventoryManager(config_file=config_path).load_labbook_from_directory(labbook_root)
     if not override_image_id:
-        owner = InventoryManager().query_labbook_owner(lb)
+        owner = InventoryManager().query_owner(lb)
         tag = infer_docker_image_name(lb.name, owner, username)
     else:
         tag = override_image_id
@@ -225,6 +208,22 @@ def start_labbook_container(labbook_root: str, config_path: str,
         mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
         'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
     }
+
+    # Set up additional bind mounts for datasets if needed.
+    submodules = lb.git.list_submodules()
+    for submodule in submodules:
+        try:
+            namespace, dataset_name = submodule['name'].split("&")
+            submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', namespace, dataset_name)
+            ds = InventoryManager().load_dataset_from_directory(submodule_dir)
+            ds.namespace = namespace
+
+            cm_class = get_cache_manager_class(ds.client_config)
+            cm = cm_class(ds, username)
+            ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+            volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+        except InventoryException:
+            continue
 
     # If re-mapping permissions, be sure to configure the container
     if 'LOCAL_USER_ID' in os.environ:
@@ -236,6 +235,7 @@ def start_labbook_container(labbook_root: str, config_path: str,
     resource_args = dict()
     memory_limit = lb.client_config.config['container']['memory']
     cpu_limit = lb.client_config.config['container']['cpu']
+    gpu_shared_mem = lb.client_config.config['container']['gpu_shared_mem']
     if memory_limit:
         # If memory_limit not None, pass to Docker to limit memory allocation to container
         resource_args["mem_limit"] = memory_limit
@@ -246,16 +246,18 @@ def start_labbook_container(labbook_root: str, config_path: str,
 
     docker_client = get_docker_client()
 
-    # run with nvidia if we have GPU support in the labmanager 
-    # CUDA must be set (not None) and version must match between labbook and labmanager
-    cudav = Configuration().config['container'].get('cuda_version')
-    logger.info(f"Host CUDA version {cudav}, LabBook CUDA ver {lb.cuda_version}")
-    if cudav and lb.cuda_version:
-        logger.info(f"Launching container with GPU support CUDA version {lb.cuda_version}")
+    # run with nvidia-docker if we have GPU support on the Host compatible with the project
+    should_run_nvidia, reason = should_launch_with_cuda_support(lb.cuda_version)
+    if should_run_nvidia:
+        logger.info(f"Launching container with GPU support:{reason}")
+        if gpu_shared_mem:
+            resource_args["shm_size"] = gpu_shared_mem
+
         container_id = docker_client.containers.run(tag, detach=True, init=True, name=tag,
                                                     environment=env_var, volumes=volumes_dict,
                                                     runtime='nvidia', **resource_args).id
     else:
+        logger.info(f"Launching container without GPU support. {reason}")
         container_id = docker_client.containers.run(tag, detach=True, init=True, name=tag,
                                                     environment=env_var, volumes=volumes_dict,
                                                     **resource_args).id

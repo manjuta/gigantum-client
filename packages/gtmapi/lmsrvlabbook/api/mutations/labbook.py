@@ -30,17 +30,16 @@ from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.labbook import LabBook
 
-from gtmcore.inventory import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.files import FileOperations
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.environment import ComponentManager
 
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
-from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
 
@@ -50,7 +49,6 @@ from lmsrvlabbook.api.connections.labbook import LabbookConnection
 from lmsrvlabbook.api.objects.labbook import Labbook
 from lmsrvlabbook.api.objects.labbookfile import LabbookFavorite, LabbookFile
 from lmsrvlabbook.dataloader.labbook import LabBookLoader
-
 
 logger = LMLogger.get_logger()
 
@@ -192,7 +190,7 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
 
             # Perform delete operation
             mgr = GitLabManager(default_remote, admin_service, access_token=token)
-            mgr.remove_labbook(owner, labbook_name)
+            mgr.remove_repository(owner, labbook_name)
             logger.info(f"Deleted {owner}/{labbook_name} from the remote repository {default_remote}")
 
             # Call Index service to remove project from cloud index and search
@@ -212,7 +210,6 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
                 logger.error(response.json())
             else:
                 logger.info(f"Deleted remote repository {owner}/{labbook_name} from cloud index")
-
 
             # Remove locally any references to that cloud repo that's just been deleted.
             try:
@@ -267,15 +264,15 @@ class ImportLabbook(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         return ImportLabbook()
 
     @classmethod
-    def mutate_and_process_upload(cls, info, **kwargs):
-        if not cls.upload_file_path:
+    def mutate_and_process_upload(cls, info, upload_file_path, upload_filename, **kwargs):
+        if not upload_file_path:
             logger.error('No file uploaded')
             raise ValueError('No file uploaded')
 
         username = get_logged_in_username()
         job_metadata = {'method': 'import_labbook_from_zip'}
         job_kwargs = {
-            'archive_path': cls.upload_file_path,
+            'archive_path': upload_file_path,
             'username': username,
             'owner': username
         }
@@ -313,26 +310,14 @@ class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.configure_git_credentials(default_remote, username)
-        try:
-            collaborators = [collab[1] for collab in mgr.get_collaborators(owner, labbook_name) or []]
-            is_collab = any([username == c for c in collaborators])
-        except:
-            is_collab = username == owner
+        gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
+        gl_mgr.configure_git_credentials(default_remote, username)
 
-        # IF user is collaborator, then clone in order to support collaboration
-        # ELSE, this means we are cloning a public repo and can't push back
-        #       so we change to owner to the given user so they can (re)publish
-        #       and do whatever with it.
-        make_owner = not is_collab
-        logger.info(f"Getting from remote, make_owner = {make_owner}")
-        lb = loaders.from_remote(remote_url, username, owner, labbook_name, labbook=lb,
-                                 make_owner=make_owner)
-        import_owner = InventoryManager().query_labbook_owner(lb)
+        wf = LabbookWorkflow.import_from_remote(remote_url, username=username)
+        import_owner = InventoryManager().query_owner(wf.labbook)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=labbook_name),
+        lbedge = LabbookConnection.Edge(node=Labbook(owner=import_owner, name=wf.labbook.name),
                                         cursor=cursor)
         return ImportRemoteLabbook(new_labbook_edge=lbedge)
 
@@ -374,7 +359,7 @@ class SetLabbookDescription(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         lb.description = description_content
         with lb.lock():
-            lb.git.add(os.path.join(lb.root_dir, '.gigantum/labbook.yaml'))
+            lb.git.add(os.path.join(lb.config_path))
             commit = lb.git.commit('Updating description')
 
             adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
@@ -430,32 +415,35 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
 
     @classmethod
     def mutate_and_wait_for_chunks(cls, info, **kwargs):
-        return AddLabbookFile(new_labbook_file_edge=
-            LabbookFileConnection.Edge(node=None, cursor="null"))
+        return AddLabbookFile(new_labbook_file_edge=LabbookFileConnection.Edge(node=None, cursor="null"))
 
     @classmethod
-    def mutate_and_process_upload(cls, info, owner, labbook_name, section,
-                                  file_path, chunk_upload_params,
-                                  transaction_id, client_mutation_id=None):
-        if not cls.upload_file_path:
+    def mutate_and_process_upload(cls, info, upload_file_path, upload_filename, **kwargs):
+        if not upload_file_path:
             logger.error('No file uploaded')
             raise ValueError('No file uploaded')
+
+        owner = kwargs.get('owner')
+        labbook_name = kwargs.get('labbook_name')
+        section = kwargs.get('section')
+        transaction_id = kwargs.get('transaction_id')
+        file_path = kwargs.get('file_path')
 
         try:
             username = get_logged_in_username()
             lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                                  author=get_logged_in_author())
-            dstpath = os.path.join(os.path.dirname(file_path), cls.filename)
+            dst_path = os.path.join(os.path.dirname(file_path), upload_filename)
             with lb.lock():
                 fops = FileOperations.put_file(labbook=lb,
                                                section=section,
-                                               src_file=cls.upload_file_path,
-                                               dst_path=dstpath,
+                                               src_file=upload_file_path,
+                                               dst_path=dst_path,
                                                txid=transaction_id)
         finally:
             try:
-                logger.debug(f"Removing temp file {cls.upload_file_path}")
-                os.remove(cls.upload_file_path)
+                logger.debug(f"Removing temp file {upload_file_path}")
+                os.remove(upload_file_path)
             except FileNotFoundError:
                 pass
 
@@ -466,12 +454,10 @@ class AddLabbookFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
                        'key': fops['key'],
                        '_file_info': fops}
 
-        # TODO: Fix cursor implementation..
-        # this currently doesn't make sense when adding edges
+        # TODO: Fix cursor implementation..this currently doesn't make sense when adding edges without a refresh
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        return AddLabbookFile(new_labbook_file_edge=
-            LabbookFileConnection.Edge(node=LabbookFile(**create_data),
-                                       cursor=cursor))
+        return AddLabbookFile(new_labbook_file_edge=LabbookFileConnection.Edge(node=LabbookFile(**create_data),
+                                                                               cursor=cursor))
 
 
 class DeleteLabbookFiles(graphene.ClientIDMutation):
@@ -505,7 +491,7 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         src_path = graphene.String(required=True)
         dst_path = graphene.String(required=True)
 
-    updated_edges = graphene.relay.ConnectionField(LabbookFileConnection)
+    updated_edges = graphene.List(LabbookFileConnection.Edge)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, section, src_path, dst_path,
@@ -531,13 +517,9 @@ class MoveLabbookFile(graphene.ClientIDMutation):
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
                    for cnt, x in enumerate(file_edges)]
 
-        lbc = ListBasedConnection(file_edges, cursors, kwargs)
-        lbc.apply()
+        edge_objs = [LabbookFileConnection.Edge(node=e, cursor=c) for e, c in zip(file_edges, cursors)]
 
-        edge_objs = []
-        for edge, cursor in zip(lbc.edges, lbc.cursors):
-            edge_objs.append(LabbookFileConnection.Edge(node=edge, cursor=cursor))
-        return MoveLabbookFile(updated_edges=LabbookFileConnection(edges=edge_objs, page_info=lbc.page_info))
+        return MoveLabbookFile(updated_edges=edge_objs)
 
 
 class MakeLabbookDirectory(graphene.ClientIDMutation):
@@ -693,11 +675,12 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         username = graphene.String(required=True)
+        permissions = graphene.String(required=True)
 
     updated_labbook = graphene.Field(Labbook)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, username,
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, username, permissions,
                                client_mutation_id=None):
         #TODO(billvb/dmk) - Here "username" refers to the intended recipient username.
         # it should probably be renamed here and in the frontend to "collaboratorUsername"
@@ -720,13 +703,28 @@ class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
             raise ValueError("Authorization header not provided. "
                              "Must have a valid session to query for collaborators")
 
-        # Add collaborator to remote service
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.add_collaborator(owner, labbook_name, username)
+        if permissions == 'readonly':
+            perm = ProjectPermissions.READ_ONLY
+        elif permissions == 'readwrite':
+            perm = ProjectPermissions.READ_WRITE
+        elif permissions == 'owner':
+            perm = ProjectPermissions.OWNER
+        else:
+            raise ValueError(f"Unknown permission set: {permissions}")
 
-        # Prime dataloader with labbook you just created
-        dataloader = LabBookLoader()
-        dataloader.prime(f"{logged_in_username}&{owner}&{lb.name}", lb)
+        mgr = GitLabManager(default_remote, admin_service, token)
+
+        existing_collabs = mgr.get_collaborators(owner, labbook_name)
+
+        if username not in [n[1] for n in existing_collabs]:
+            logger.info(f"Adding user {username} to {owner}/{labbook_name}"
+                        f"with permission {perm}")
+            mgr.add_collaborator(owner, labbook_name, username, perm)
+        else:
+            logger.warning(f"Changing permission of {username} on"
+                           f"{owner}/{labbook_name} to {perm}")
+            mgr.delete_collaborator(owner, labbook_name, username)
+            mgr.add_collaborator(owner, labbook_name, username, perm)
 
         create_data = {"owner": owner,
                        "name": labbook_name}
@@ -772,7 +770,7 @@ class DeleteLabbookCollaborator(graphene.relay.ClientIDMutation):
         return DeleteLabbookCollaborator(updated_labbook=Labbook(**create_data))
 
 
-class WriteReadme(graphene.relay.ClientIDMutation):
+class WriteLabbookReadme(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
@@ -790,7 +788,7 @@ class WriteReadme(graphene.relay.ClientIDMutation):
         with lb.lock():
             lb.write_readme(content)
 
-        return WriteReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))
+        return WriteLabbookReadme(updated_labbook=Labbook(owner=owner, name=labbook_name))
 
 
 class FetchLabbookEdge(graphene.relay.ClientIDMutation):

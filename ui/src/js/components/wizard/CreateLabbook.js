@@ -4,14 +4,16 @@ import uuidv4 from 'uuid/v4';
 // utilities
 import validation from 'JS/utils/Validation';
 // components
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
 import { setMultiInfoMessage } from 'JS/redux/reducers/footer';
+// assets
+import './CreateLabbook.scss';
 
 export default class CreateLabbook extends React.Component {
   constructor(props) {
@@ -23,8 +25,8 @@ export default class CreateLabbook extends React.Component {
       showError: false,
       errorType: '',
       remoteURL: '',
-      textWarning: 'CreateLabbook__warning--hidden',
-      textLength: 0,
+      textWarning: 'CreateLabbook__warning--green',
+      textLength: 80,
       isUserValid: false,
       showLoginPrompt: false,
     };
@@ -71,8 +73,8 @@ export default class CreateLabbook extends React.Component {
                     setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
 
                     BuildImageMutation(
-                      labbookName,
                       owner,
+                      labbookName,
                       false,
                       (response, error) => {
                         if (error) {
@@ -84,8 +86,8 @@ export default class CreateLabbook extends React.Component {
                     self.props.history.replace(`/projects/${owner}/${labbookName}`);
                   } else {
                     BuildImageMutation(
-                      labbookName,
                       localStorage.getItem('username'),
+                      labbookName,
                       false,
                       (response, error) => {
                         if (error) {
@@ -140,18 +142,15 @@ export default class CreateLabbook extends React.Component {
       });
 
       this.props.toggleDisabledContinue((evt.target.value === '') || (isMatch === false));
-    }
-    const textLength = 260 - evt.target.value.length;
-    if (textLength >= 100) {
-      state.textWarning = 'CreateLabbook__warning--hidden';
-    } else if ((textLength <= 100) && (textLength > 50)) {
-      state.textWarning = 'CreateLabbook__warning--green';
-    } else if ((textLength <= 50) && (textLength > 20)) {
-      state.textWarning = 'CreateLabbook__warning--yellow';
     } else {
-      state.textWarning = 'CreateLabbook__warning--red';
+      const textLength = 80 - evt.target.value.length;
+      if (textLength > 21) {
+        state.textWarning = 'CreateLabbook__warning--green';
+      } else if ((textLength <= 21)) {
+        state.textWarning = 'CreateLabbook__warning--orange';
+      }
+      state.textLength = textLength;
     }
-    state.textLength = textLength;
 
     this.setState(state);
   }
@@ -189,9 +188,10 @@ export default class CreateLabbook extends React.Component {
           <LoginPrompt closeModal={this._closeLoginPromptModal} />
         }
         <div>
-          <div>
-            <label>Title</label>
+          <div className="CreateLabbook__name">
+            <label htmlFor="CreateLabbookName">Title</label>
             <input
+              id="CreateLabbookName"
               type="text"
               maxLength="36"
               className={this.state.showError ? 'invalid' : ''}
@@ -201,15 +201,16 @@ export default class CreateLabbook extends React.Component {
             <span className={this.state.showError ? 'error' : 'hidden'}>{this._getErrorText()}</span>
           </div>
 
-          <div>
-            <label>Description</label>
+          <div className="CreateLabbook__description">
+            <label htmlFor="CreateLabbookDescription">Description</label>
             <textarea
-              maxLength="260"
+              id="CreateLabbookDescription"
+              maxLength="80"
               className="CreateLabbook__description-input"
               type="text"
               onChange={evt => this._updateTextState(evt, 'description')}
 
-              placeholder="Briefly describe this Project, its purpose and any other key details. "
+              placeholder={`Briefly describe this ${this.props.datasets ? 'Dataset' : 'Project'}, its purpose and any other key details.`}
             />
             <p className={`CreateLabbook__warning ${this.state.textWarning}`}>{`${this.state.textLength} characters remaining`}</p>
           </div>

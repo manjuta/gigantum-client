@@ -1,30 +1,51 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+import re
 from typing import (Any, Dict, List)
 
 from gtmcore.logging import LMLogger
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
 from gtmcore.activity import ActivityRecord, ActivityDetailType, ActivityDetailRecord, ActivityAction
-from gtmcore.labbook import LabBook
 
 logger = LMLogger.get_logger()
+
+
+class JupyterLabCellVisibilityProcessor(ActivityProcessor):
+    """Class to set visibility in activity record based on cell metadata
+
+    Currently, 4 variations on tracking metadata can be set:
+      - auto
+      - show
+      - hide
+      - ignore
+    """
+
+    # This is actually fairly permissive - the comment can be anywhere and we're not fussy about whitespace
+    # We'll only get the first one below
+    comment_re = re.compile(r'# *gtm:(\w+)')
+
+    def process(self, result_obj: ActivityRecord, data: List[ExecutionData],
+                status: Dict[str, Any], metadata: Dict[str, Any]) -> ActivityRecord:
+        with result_obj.inspect_detail_objects() as old_details:
+            for idx, detail in enumerate(old_details):
+                if detail.type is ActivityDetailType.CODE_EXECUTED:
+                    code = detail.data['text/markdown']
+                    res = self.comment_re.search(code)
+                    if res:
+                        directive = res[1]
+                        if directive == 'auto':
+                            # This is the default behavior
+                            pass
+                        elif directive in ['show', 'hide', 'ignore']:
+                            for tag in detail.tags:
+                                # currently, the 'ex1' type tags are the only ones...
+                                if tag.startswith('ex'):
+                                    result_obj.modify_tag_visibility(tag, directive)
+                        else:
+                            # TODO DC Currently we don't have a mechanism to highlight any problem to users.
+                            # But this is where we could signal an unknown comment directive. Another place
+                            # would be in the jupyterlab extension. We need to think through this UX!
+                            pass
+
+        return result_obj
 
 
 class JupyterLabCodeProcessor(ActivityProcessor):
@@ -63,66 +84,6 @@ class JupyterLabCodeProcessor(ActivityProcessor):
         # Set Activity Record Message
         cell_str = f"{cell_cnt} cells" if cell_cnt > 1 else "cell"
         result_obj.message = f"Executed {cell_str} in notebook {metadata['path']}"
-
-        return result_obj
-
-
-class JupyterLabFileChangeProcessor(ActivityProcessor):
-    """Class to process file changes based on git-status into activity detail records"""
-
-    def process(self, result_obj: ActivityRecord, data: List[ExecutionData],
-                status: Dict[str, Any], metadata: Dict[str, Any]) -> ActivityRecord:
-        """Method to update a result object based on code and result data
-
-        Args:
-            result_obj(ActivityNote): An object containing the note
-            data(list): A list of ExecutionData instances containing the data for this record
-            status(dict): A dict containing the result of git status from gitlib
-            metadata(str): A dictionary containing Dev Env specific or other developer defined data
-
-        Returns:
-            ActivityRecord
-        """
-        for cnt, filename in enumerate(status['untracked']):
-            # skip any file in .git or .gigantum dirs
-            if ".git" in filename or ".gigantum" in filename:
-                continue
-
-            activity_type, activity_detail_type, section = LabBook.infer_section_from_relative_path(filename)
-
-            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255-cnt, 0),
-                                       action=ActivityAction.CREATE)
-            if section == "LabBook Root":
-                msg = f"Created new file `{filename}` in the LabBook Root."
-                msg = f"{msg}Note, it is best practice to use the Code, Input, and Output sections exclusively."
-            else:
-                msg = f"Created new {section} file `{filename}`"
-            adr.add_value('text/markdown', msg)
-            result_obj.add_detail_object(adr)
-
-        cnt = 0
-        for filename, change in status['unstaged']:
-            # skip any file in .git or .gigantum dirs
-            if ".git" in filename or ".gigantum" in filename:
-                continue
-
-            activity_type, activity_detail_type, section = LabBook.infer_section_from_relative_path(filename)
-
-            if change == "deleted":
-                action = ActivityAction.DELETE
-            elif change == "added":
-                action = ActivityAction.CREATE
-            elif change == "modified":
-                action = ActivityAction.EDIT
-            elif change == "renamed":
-                action = ActivityAction.EDIT
-            else:
-                action = ActivityAction.NOACTION
-
-            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255-cnt, 0), action=action)
-            adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
-            result_obj.add_detail_object(adr)
-            cnt += 1
 
         return result_obj
 

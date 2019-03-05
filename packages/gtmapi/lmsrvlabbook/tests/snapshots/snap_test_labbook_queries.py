@@ -1039,6 +1039,14 @@ snapshots['TestLabBookServiceQueries.test_list_files_many 1'] = {
                                 'key': 'result.dat',
                                 'size': '3'
                             }
+                        },
+                        {
+                            'node': {
+                                'id': 'TGFiYm9va0ZpbGU6ZGVmYXVsdCZsYWJib29rMSZvdXRwdXQmdW50cmFja2VkLw==',
+                                'key': 'untracked/',
+                                'size': '0',
+                                'isDir': True
+                            }
                         }
                     ]
                 }
@@ -1098,6 +1106,7 @@ snapshots['TestLabBookServiceQueries.test_list_files_many 2'] = {
             'output': {
                 'files': {
                     'edges': [
+
                     ]
                 }
             }
@@ -1476,6 +1485,14 @@ snapshots['TestLabBookServiceQueries.test_list_all_files_many 1'] = {
                         },
                         {
                             'node': {
+                                'id': 'TGFiYm9va0ZpbGU6ZGVmYXVsdCZsYWJib29rMSZvdXRwdXQmdW50cmFja2VkLw==',
+                                'key': 'untracked/',
+                                'size': '0',
+                                'isDir': True
+                            }
+                        },
+                        {
+                            'node': {
                                 'id': 'TGFiYm9va0ZpbGU6ZGVmYXVsdCZsYWJib29rMSZvdXRwdXQmcmVzdWx0LmRhdA==',
                                 'isDir': False,
                                 'key': 'result.dat',
@@ -1841,27 +1858,6 @@ snapshots['TestLabBookServiceQueries.test_get_detail_records 1'] = {
                 }
             ],
             'name': 'labbook11'
-        }
-    }
-}
-
-snapshots['TestLabBookServiceQueries.test_get_labbook_readme 1'] = {
-    'data': {
-        'labbook': {
-            'description': 'my test description',
-            'name': 'labbook1',
-            'readme': None
-        }
-    }
-}
-
-snapshots['TestLabBookServiceQueries.test_get_labbook_readme 2'] = {
-    'data': {
-        'labbook': {
-            'description': 'my test description',
-            'name': 'labbook1',
-            'readme': '''##Summary
-This is my readme!!'''
         }
     }
 }

@@ -19,6 +19,7 @@ $footerElements: basic, progressBar, status, section, message, button;
     font-weight: 100;
 
     @include flex(space-between, column);
+    max-height: 75vh;
 }
 
 .Footer * {

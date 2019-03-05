@@ -24,7 +24,8 @@
   white-space: pre-line;
   font-size: 15px;
   position: absolute;
-  background: $white;
+  background: $slateBlue;
+  color: $white;
   z-index: index($elements, popup);
   padding: 15px;
   border-radius: 8px;
@@ -40,7 +41,7 @@
   position: absolute;
   z-index: index($elements, popup) + 1;
   animation: slide-down-fade-in forwards .25s;
-  @include triangle('up', 14px, $white);
+  @include triangle('up', 14px, $slateBlue);
 }
 
 .ToolTip__glow-ring-outer {
@@ -269,12 +270,13 @@
     bottom: 25px;
   }
   .ToolTip__pointer{
-    right: -7px;
-    bottom: 7px;
+    @include triangle('left', 14px, $white);
+    right: -30px;
+    bottom: 18px;
   }
   .ToolTip__message{
-    left: 100px;
-    top: -7px;
+    left: 300px;
+    top: -100px;
   }
 }
 

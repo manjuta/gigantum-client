@@ -1,0 +1,264 @@
+@import '~Styles/_imports.scss';
+
+.Header__wrapper {
+
+  min-height: 30px;
+
+  height: auto;
+
+  @include flex(space-between, row);
+}
+
+.Header__bar{
+  flex-wrap: nowrap;
+
+  height: 100px;
+
+  @include flex(space-between, row);
+}
+
+.Header {
+  position: fixed;
+  z-index: index($elements, labbookHeader);
+
+  flex: 1 0 auto;
+  height: 180px;
+  width: calc(100% - 190px);
+  min-width: 700px;
+  min-height: 60px;
+  padding: 10px 0 0 0;
+  background-color: $background-color;
+
+  transition: height 0.25s;
+
+  &--sticky{
+
+    z-index: index($elements, labbookHeader);
+
+    width: calc(100% - 140px);
+    height: 100px;
+    margin: 0px 0 0 -20px;
+    padding: 20px 20px 0;
+
+    background-color: $background-color;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 6px 2px;
+
+    .Header__bar{
+      height: 60px;
+    }
+    .Container {
+      margin-top: -25px;
+    }
+    .Navigation {
+      position: absolute;
+      margin: 0;
+      bottom: 0;
+      width: 100%;
+      .Header__nav{
+        border: none;
+      }
+
+    }
+
+    .Header__name,
+    .Branches{
+      display: none;
+    }
+
+    .Branches {
+      max-width: calc(100% + 40px);
+      margin: 10px -20px;
+
+      &--collapsed{
+          padding: 0px;
+      }
+
+    }
+
+    .Header__columnContainer{
+      align-content: center;
+      align-items: center;
+
+      height: 40px;
+
+      @include flex(flex-end, row-reverse);
+
+      &--flex-1{
+          justify-content: flex-start;
+
+          @include flex(flex-end, row);
+      }
+
+      .Title {
+        flex: 0 1;
+
+        margin-top: 15px;
+
+        white-space: nowrap;
+      }
+
+      .Header__branchTitle{
+        flex: 1;
+
+        cursor: default;
+
+        opacity: 0;
+
+        .Header__name{
+          cursor: default;
+        }
+      }
+    }
+
+    .BranchMenu{
+       margin: 10px 0 0 30px;
+    }
+
+    .ContainerStatus{
+      .ContainerStatus__plugins-button,
+      .ContainerStatus__plugins-button{
+        width: 96px;
+        font-size: 0px;
+        top: 4px;
+        border-radius: 10px 0 0 10px;
+        left: -67px;
+        .ContainerStatus__selected-tool{
+          border-radius: 10px 0 0 10px;
+          font-size: 12px;
+        }
+      }
+      .ContainerStatus__expand-tools,
+      .ContainerStatus__plugins-menu{
+        display: none;
+      }
+    }
+
+    .BranchMenu__button{
+      width: 60px;
+
+      font-size: 0px;
+    }
+
+    .Header__branchTitle{
+        height: 0px;
+    }
+  }
+
+
+  &--branchesOpen{
+    .Header__navContainer{
+      display: none;
+    }
+  }
+}
+
+.Header__columnContainer{
+  .TitleSection {
+    height: 70px;
+  }
+
+  .BranchMenu {
+    height: 45px;
+    align-items: flex-end;
+  }
+
+}
+
+.Header__flex {
+  @include flex(space-between, row);
+}
+
+.Header__columnContainer{
+  transition: height 0.5s;
+
+  @include flex(space-between, column);
+
+  &--flex-1{
+    flex: 1;
+    max-width: 780px;
+  }
+
+  &--fixed-width {
+    width: 316px;
+  }
+}
+.Header--sticky.Header--is-deprecated {
+  margin: -10px 0 0 -20px;
+}
+
+
+
+.Header__name-container{
+  @include flex(flex-start, row);
+  min-width: 50%;
+}
+
+.Header__name {
+  overflow: hidden;
+  align-content: baseline;
+  align-self: flex-end;
+  min-width: 200px;
+  height: 49px;
+
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+
+  font-size: 34px;
+  font-weight: 100;
+  line-height: 48px;
+  &:hover {
+    width: 78%;
+    position: absolute;
+  }
+}
+
+.Header__branchToggle {
+  align-self: center;
+
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  margin: 20px 15px 0;
+
+  cursor: pointer;
+}
+
+.Header__branchTitle{
+  opacity: 1;
+
+  @include flex(space-between, row);
+
+  h2 {
+      margin: 2px 0;
+      padding: 0 0 10px 0;
+
+      cursor: pointer;
+
+      font-weight: 100;
+  }
+
+  h2:hover {
+    color: $turquise;
+  }
+}
+
+.Header__name:hover  {
+  opacity: 1;
+}
+
+.Header__branchName{
+  color: $jet;
+
+  font-size: 1.4vw;
+}
+
+
+
+@media screen and (max-width: 50000px) and (min-width: 1480px) {
+
+  .Header--sticky{
+    margin: -10px 0 0 -35px !important;
+  }
+}

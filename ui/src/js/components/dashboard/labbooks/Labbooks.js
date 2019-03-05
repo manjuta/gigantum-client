@@ -5,11 +5,11 @@ import classNames from 'classnames';
 import { connect } from 'react-redux';
 // components
 import WizardModal from 'Components/wizard/WizardModal';
-import Loader from 'Components/shared/Loader';
+import Loader from 'Components/common/Loader';
 import LocalLabbooksContainer, { LocalLabbooks } from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
 import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
-import LoginPrompt from 'Components/labbook/labbookHeader/branchMenu/modals/LoginPrompt';
-import ToolTip from 'Components/shared/ToolTip';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
+import ToolTip from 'Components/common/ToolTip';
 import LabbookFilterBy from './filters/LabbookFilterBy';
 import LabbookSort from './filters/LabbookSort';
 // utils
@@ -62,6 +62,8 @@ class Labbooks extends Component {
     this._changeSearchParam = this._changeSearchParam.bind(this);
     this._hideSearchClear = this._hideSearchClear.bind(this);
     this._setFilterValue = this._setFilterValue.bind(this);
+    this._toggleSortMenu = this._toggleSortMenu.bind(this);
+    this._toggleFilterMenu = this._toggleFilterMenu.bind(this);
   }
 
   /**
@@ -125,7 +127,7 @@ class Labbooks extends Component {
   */
 
   _closeSortMenu(evt) {
-    const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('Labbooks__sort') > -1);
+    const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('LabbookSort__selector') > -1);
 
     if (!isSortMenu && this.state.sortMenuOpen) {
       this.setState({ sortMenuOpen: false });
@@ -138,7 +140,7 @@ class Labbooks extends Component {
     * hides the filter menu dropdown from the view
   */
   _closeFilterMenu(evt) {
-    const isFilterMenu = evt.target.className.indexOf('Labbooks__filter') > -1;
+    const isFilterMenu = evt.target.className.indexOf('LabbookFilterBy__selector') > -1;
 
     if (!isFilterMenu && this.state.filterMenuOpen) {
       this.setState({ filterMenuOpen: false });
@@ -212,6 +214,19 @@ class Labbooks extends Component {
   _setFilter(filter) {
     this.setState({ filterMenuOpen: false, filter });
     this._changeSearchParam({ filter });
+  }
+
+  /**
+   sets state for filter menu
+  */
+  _toggleFilterMenu() {
+    this.setState({ filterMenuOpen: !this.state.filterMenuOpen });
+  }
+  /**
+   sets state for sort menu
+  */
+  _toggleSortMenu() {
+    this.setState({ sortMenuOpen: !this.state.sortMenuOpen });
   }
   /**
    * @param {string} section
@@ -376,7 +391,6 @@ class Labbooks extends Component {
         'Labbooks__nav-item--cloud': true,
         'Labbooks__nav-item--selected': this.state.selectedSection === 'cloud',
       });
-
       return (
 
         <div className={labbooksCSS}>
@@ -390,7 +404,7 @@ class Labbooks extends Component {
 
           <div className="Labbooks__panel-bar">
             <h6 className="Labbooks__username">{localStorage.getItem('username')}</h6>
-            <h2 className="Labbooks__title" onClick={() => this.refs.wizardModal._showModal()} >
+            <h2 className="Labbooks__title">
                 Projects
             </h2>
 
@@ -410,8 +424,8 @@ class Labbooks extends Component {
             </ul>
 
           </div>
-          <div className="Labbooks__subheader">
-            <div className="Labbooks__search-container">
+          <div className="Labbooks__subheader grid">
+            <div className="Labbooks__search-container column-2-span-6 padding--0">
               {
                   this.state.showSearchCancel &&
                   (this.props.filterText.length !== 0) &&
@@ -436,10 +450,12 @@ class Labbooks extends Component {
 
             <LabbookFilterBy
               {...this.state}
+              toggleFilterMenu={() => this.setState({ filterMenuOpen: !this.state.filterMenuOpen })}
               setFilter={this._setFilter}
             />
             <LabbookSort
               {...this.state}
+              toggleSortMenu={this._toggleSortMenu}
               setSortFilter={this._setSortFilter}
             />
 
@@ -450,6 +466,7 @@ class Labbooks extends Component {
                   loading
                   showModal={this._showModal}
                   section={this.props.section}
+                  history={this.props.history}
                 />
               :
               this.state.selectedSection === 'local' ?
@@ -494,9 +511,18 @@ class Labbooks extends Component {
           setErrorMessage('Failed to fetch Projects.', [{ message: 'There was an error while fetching Projects. This likely means you have a corrupted Project directory.' }]);
           return (
             <div className="Labbooks__fetch-error">
-                There was an error attempting to fetch Projects. <br />
-                Try restarting Gigantum and refresh the page.<br />
-                If the problem persists <a target="_blank" href="https://docs.gigantum.com/discuss" rel="noopener noreferrer">request assistance here.</a>
+                There was an error attempting to fetch Projects.
+                <br />
+                Try restarting Gigantum and refresh the page.
+                <br />
+                If the problem persists
+                <a
+                  target="_blank"
+                  href="https://spectrum.chat/gigantum"
+                rel="noopener noreferrer"
+                >
+                request assistance here.
+                </a>
             </div>
           );
         }

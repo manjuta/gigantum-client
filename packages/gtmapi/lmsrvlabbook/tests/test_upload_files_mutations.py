@@ -11,7 +11,7 @@ from werkzeug.datastructures import FileStorage
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
-from lmsrvcore.middleware import LabBookLoaderMiddleware
+from lmsrvcore.middleware import DataloaderMiddleware
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
 
 
@@ -41,7 +41,7 @@ class TestUploadFilesMutations(object):
                 self.labbook_loader = None
                 self.files = {'uploadChunk': file_handle}
 
-        client = Client(mock_create_labbooks[3], middleware=[LabBookLoaderMiddleware()])
+        client = Client(mock_create_labbooks[3], middleware=[DataloaderMiddleware()])
 
         # Create file to upload
         test_file = os.path.join(tempfile.gettempdir(), "myValidFile.dat")
@@ -98,6 +98,7 @@ class TestUploadFilesMutations(object):
                                           key
                                           isDir
                                           size
+                                          modifiedAt
                                         }}
                                       }}
                                     }}
@@ -109,6 +110,9 @@ class TestUploadFilesMutations(object):
         assert r['data']['addLabbookFile']['newLabbookFileEdge']['node']['isDir'] is False
         assert r['data']['addLabbookFile']['newLabbookFileEdge']['node']['key'] == 'newdir/myValidFile.dat'
         assert r['data']['addLabbookFile']['newLabbookFileEdge']['node']['size'] == f"{new_file_size}"
+        assert isinstance(r['data']['addLabbookFile']['newLabbookFileEdge']['node']['modifiedAt'], float)
+        assert r['data']['addLabbookFile']['newLabbookFileEdge']['node']['modifiedAt'] != \
+               round(r['data']['addLabbookFile']['newLabbookFileEdge']['node']['modifiedAt'])
         # When done uploading, file should exist in the labbook
         assert os.path.exists(target_file)
         assert os.path.isfile(target_file)
@@ -137,7 +141,7 @@ class TestUploadFilesMutations(object):
                 self.labbook_loader = None
                 self.files = {'uploadChunk': file_handle}
 
-        client = Client(mock_create_labbooks[3], middleware=[LabBookLoaderMiddleware()])
+        client = Client(mock_create_labbooks[3], middleware=[DataloaderMiddleware()])
 
         new_file_size = 9000000
         # Create file to upload

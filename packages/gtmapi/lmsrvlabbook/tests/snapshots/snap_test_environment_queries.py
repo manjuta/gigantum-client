@@ -124,31 +124,87 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager 3'] = {
     }
 }
 
+snapshots['TestEnvironmentServiceQueries.test_get_package_manager 2'] = {
+    'data': {
+        'labbook': {
+            'environment': {
+                'packageDependencies': {
+                    'edges': [
+                        {
+                            'cursor': 'MA==',
+                            'node': {
+                                'fromBase': False,
+                                'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmZG9ja2VyJmxhdGVzdA==',
+                                'manager': 'apt',
+                                'package': 'docker',
+                                'version': 'latest'
+                            }
+                        },
+                        {
+                            'cursor': 'MQ==',
+                            'node': {
+                                'fromBase': False,
+                                'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmbHhtbCYzLjQ=',
+                                'manager': 'apt',
+                                'package': 'lxml',
+                                'version': '3.4'
+                            }
+                        },
+                        {
+                            'cursor': 'Mg==',
+                            'node': {
+                                'fromBase': False,
+                                'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmbnVtcHkmMS4xMg==',
+                                'manager': 'pip',
+                                'package': 'numpy',
+                                'version': '1.12'
+                            }
+                        },
+                        {
+                            'cursor': 'Mw==',
+                            'node': {
+                                'fromBase': False,
+                                'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmcmVxdWVzdHMmMS4z',
+                                'manager': 'pip',
+                                'package': 'requests',
+                                'version': '1.3'
+                            }
+                        }
+                    ],
+                    'pageInfo': {
+                        'hasNextPage': False
+                    }
+                }
+            }
+        }
+    }
+}
+
 snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors 1'] = {
     'data': {
         'labbook': {
             'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s1',
             'packages': [
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmbnVtcHkmMS4xNC4y',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDEmMC4yLjQ=',
                     'isValid': True,
                     'manager': 'pip',
-                    'package': 'numpy',
-                    'version': '1.14.2'
+                    'package': 'gtmunit1',
+                    'version': '0.2.4'
                 },
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmcGxvdGx5JjEwMC4wMA==',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDImMTAwLjAw',
                     'isValid': False,
                     'manager': 'pip',
-                    'package': 'plotly',
+                    'package': 'gtmunit2',
                     'version': '100.00'
                 },
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmc2NpcHkmMS4yLjA=',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDMmNS4w',
                     'isValid': True,
                     'manager': 'pip',
-                    'package': 'scipy',
-                    'version': '1.2.0'
+                    'package': 'gtmunit3',
+                    'version': '5.0'
                 },
                 {
                     'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmYXNkZmFzZGZhc2RmJg==',
@@ -168,80 +224,20 @@ snapshots['TestEnvironmentServiceQueries.test_package_query 1'] = {
             'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s2',
             'packages': [
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmbnVtcHkmMS4xNC4y',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDEmMC4yLjQ=',
                     'isValid': True,
                     'manager': 'pip',
-                    'package': 'numpy',
-                    'version': '1.14.2'
+                    'package': 'gtmunit1',
+                    'version': '0.2.4'
                 },
                 {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmc2NpcHkmMS4yLjA=',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDImMTIuMg==',
                     'isValid': True,
                     'manager': 'pip',
-                    'package': 'scipy',
-                    'version': '1.2.0'
+                    'package': 'gtmunit2',
+                    'version': '12.2'
                 }
             ]
-        }
-    }
-}
-
-snapshots['TestEnvironmentServiceQueries.test_get_package_manager 2'] = {
-    'data': {
-        'labbook': {
-            'environment': {
-                'packageDependencies': {
-                    'edges': [
-                        {
-                            'cursor': 'MA==',
-                            'node': {
-                                'fromBase': False,
-                                'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmZG9ja2VyJmxhdGVzdA==',
-                                'manager': 'apt',
-                                'package': 'docker',
-                                'schema': 1,
-                                'version': 'latest'
-                            }
-                        },
-                        {
-                            'cursor': 'MQ==',
-                            'node': {
-                                'fromBase': False,
-                                'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmbHhtbCYzLjQ=',
-                                'manager': 'apt',
-                                'package': 'lxml',
-                                'schema': 1,
-                                'version': '3.4'
-                            }
-                        },
-                        {
-                            'cursor': 'Mg==',
-                            'node': {
-                                'fromBase': False,
-                                'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmbnVtcHkmMS4xMg==',
-                                'manager': 'pip',
-                                'package': 'numpy',
-                                'schema': 1,
-                                'version': '1.12'
-                            }
-                        },
-                        {
-                            'cursor': 'Mw==',
-                            'node': {
-                                'fromBase': False,
-                                'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmcmVxdWVzdHMmMS4z',
-                                'manager': 'pip',
-                                'package': 'requests',
-                                'schema': 1,
-                                'version': '1.3'
-                            }
-                        }
-                    ],
-                    'pageInfo': {
-                        'hasNextPage': False
-                    }
-                }
-            }
         }
     }
 }
