@@ -144,7 +144,7 @@ class BranchMenu extends Component {
   */
   @boundMethod
   _switchBranch(branch) {
-    const { state } = this,
+    const { props, state } = this,
           self = this,
           data = {
             branchName: branch.branchName,
@@ -156,6 +156,7 @@ class BranchMenu extends Component {
       this._toggleCover('Switching Branches');
       state.branchMutations.switchBranch(data, (response, error) => {
         self.setState({ switchingBranch: false });
+        props.updateMigationState(response);
         this._toggleCover(null);
       });
   }

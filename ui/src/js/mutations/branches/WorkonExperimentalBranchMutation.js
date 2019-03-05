@@ -9,6 +9,9 @@ const mutation = graphql`
   mutation WorkonExperimentalBranchMutation($input: WorkonBranchInput!, $first: Int, $cursor: String, $hasNext: Boolean!){
     workonExperimentalBranch(input: $input){
       labbook{
+        id
+        isDeprecated
+        shouldMigrate
         ...Labbook_labbook
       }
       clientMutationId

@@ -112,6 +112,7 @@ class Labbook extends Component {
     const branchMap = new Map();
     const mergedBranches = [];
     const newDeletedBranches = state.deletedBranches.slice();
+    const { labbook } = nextProps;
 
     propBranches.forEach((branch) => {
       if (newDeletedBranches.indexOf(branch.id) === -1) {
@@ -131,6 +132,7 @@ class Labbook extends Component {
       mergedBranches.push(branch);
     });
     const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
+
     return {
       ...state,
       deletedBranches: newDeletedBranches,
@@ -171,6 +173,18 @@ class Labbook extends Component {
   }
 
   /**
+    @param {}
+    removes event listeners
+  */
+  componentWillUnmount() {
+    setLatestPackages({});
+    this.mounted = false;
+    window.removeEventListener('scroll', this._setStickHeader);
+
+    window.removeEventListener('click', this._branchViewClickedOff);
+  }
+
+  /**
    * @param {}
    * checks if project is deprecated and should migrate and sets state
   */
@@ -193,15 +207,19 @@ class Labbook extends Component {
   }
 
   /**
-    @param {}
-    removes event listeners
+  *  @param {object} - response
+  *  update state from switch mutation
+  *  @return {}
   */
-  componentWillUnmount() {
-    setLatestPackages({});
-    this.mounted = false;
-    window.removeEventListener('scroll', this._setStickHeader);
-
-    window.removeEventListener('click', this._branchViewClickedOff);
+  @boundMethod
+  _updateMigationState(response) {
+    if (response) {
+      const { isDeprecated, shouldMigrate } = response.workonExperimentalBranch.labbook;
+      this.setState({
+        isDeprecated,
+        shouldMigrate,
+      });
+    }
   }
 
   /**
@@ -575,6 +593,7 @@ class Labbook extends Component {
               branches={state.branches}
               setBranchUptodate={this._setBranchUptodate}
               isDeprecated={state.isDeprecated}
+              updateMigationState={this._updateMigationState}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
