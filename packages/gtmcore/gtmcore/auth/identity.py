@@ -87,7 +87,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        demo_labbook_name = 'awful-intersections-demo.lbk'
+        demo_labbook_name = 'my-first-project.zip'
         working_directory = self.config.config['git']['working_directory']
 
         if not username:
