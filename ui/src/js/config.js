@@ -2,7 +2,7 @@ import tips from './tips';
 
 const CONFIG = {
   api: process.env.NODE_ENV,
-  domain: 'gigantum.io',
+  domain: 'gtm-dev.cloud',
   labbook_navigation_items: [
     { id: 'overview', name: 'Overview' },
     { id: 'activity', name: 'Activity', fragment: '...Activity_labbook' },
