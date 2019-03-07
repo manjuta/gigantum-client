@@ -5,51 +5,107 @@
 }
 
 .column-1-span-1{
-  @include spanColumns(1);
+  @include spanColumns(1, 1);
 }
 
 .column-1-span-2{
-  @include spanColumns(2);
+  @include spanColumns(2, 1);
 }
 
 .column-1-span-3{
-  @include spanColumns(3);
+  @include spanColumns(3, 1);
 }
 
 .column-1-span-4{
-  @include spanColumns(4);
+  @include spanColumns(4, 1);
 }
 
 .column-1-span-5{
-  @include spanColumns(5);
+  @include spanColumns(5, 1);
 }
 
 .column-1-span-6{
-  @include spanColumns(6);
+  @include spanColumns(6, 1);
 }
 
 .column-1-span-7{
-  @include spanColumns(7);
+  @include spanColumns(7, 1);
 }
 
 .column-1-span-8{
-  @include spanColumns(8);
+  @include spanColumns(8, 1);
 }
 
 .column-1-span-9{
-  @include spanColumns(9);
+  @include spanColumns(9, 1);
 }
 
 .column-1-span-10{
-  @include spanColumns(10);
+  @include spanColumns(10, 1);
 }
 
 .column-1-span-11{
-  @include spanColumns(11);
+  @include spanColumns(11, 1);
 }
 
 .column-1-span-12{
-  @include spanColumns(12);
+  @include spanColumns(12, 1);
+  &--limitCollapse {
+    @include spanColumnsLimited(12, 1);
+  }
+}
+
+.Labbook--sidePanelVisible {
+  .column-1-span-1{
+    @include spanColumns(1, 4);
+  }
+
+  .column-1-span-2{
+    @include spanColumns(2, 4);
+  }
+
+  .column-1-span-3{
+    @include spanColumns(3, 4);
+  }
+
+  .column-1-span-4{
+    @include spanColumns(4, 4);
+  }
+
+  .column-1-span-5{
+    @include spanColumns(5, 4);
+  }
+
+  .column-1-span-6{
+    @include spanColumns(6, 4);
+  }
+
+  .column-1-span-7{
+    @include spanColumns(7, 4);
+  }
+
+  .column-1-span-8{
+    @include spanColumns(8, 4);
+  }
+
+  .column-1-span-9{
+    @include spanColumns(9, 4);
+  }
+
+  .column-1-span-10{
+    @include spanColumns(10, 4);
+  }
+
+  .column-1-span-11{
+    @include spanColumns(11, 4);
+  }
+
+  .column-1-span-12{
+    @include spanColumns(12, 4);
+    &--limitCollapse {
+      @include spanColumnsLimited(12, 4);
+    }
+  }
 }
 
 

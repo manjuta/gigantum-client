@@ -111,7 +111,7 @@ export default class SectionWrapper extends Component {
       const sectionId = this.props.labbookId || this.props.datasetId;
       return (
 
-        <div className="SectionWrapper">
+        <div className="SectionWrapper grid">
           {
             (section !== 'data') && sectionObject[section].isUntracked &&
             <div className="SectionWrapper__tracked-container">
@@ -121,7 +121,7 @@ export default class SectionWrapper extends Component {
             </div>
           }
           { (section !== 'data') && (labbook[section].hasFiles || labbook[section].hasFavorites) &&
-            <div>
+            <div className="column-1-span-12">
               <div className="SectionWrapper__header">
                 <div className="SectionWrapper__toolbar">
                   <a ref="favorites" className={favoritesCSS} onClick={() => this._selectFilter('favorites')}>Favorites</a>
@@ -155,7 +155,7 @@ export default class SectionWrapper extends Component {
             </div>
           }
 
-          <div className="SectionWrapper__file-browser">
+          <div className="SectionWrapper__file-browser column-1-span-12--limitCollapse">
             <Browser
               selectedFiles={this.state.selectedFiles}
               clearSelectedFiles={this._clearSelectedFiles}

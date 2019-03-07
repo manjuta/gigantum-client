@@ -15,6 +15,7 @@ export const SELECTED_COMPONENT = 'SELECTED_COMPONENT';
 export const UPDATE_BRANCHES_VIEW = 'UPDATE_BRANCHES_VIEW';
 export const UPDATE_ALL = 'UPDATE_ALL';
 export const UPDATE_STICKY_STATE = 'UPDATE_STICKY_STATE';
+export const UPDATE_SIDEPANEL_VISIBLE = 'UPDATE_SIDEPANEL_VISIBLE';
 export const MERGE_MODE = 'MERGE_MODE';
 
 
@@ -30,6 +31,7 @@ export const setExportingState = isExporting => dispatcher(IS_EXPORTING, { isExp
 export const setModalVisible = modalVisible => dispatcher(MODAL_VISIBLE, { modalVisible });
 export const setUpdateDetailView = detailMode => dispatcher(UPDATE_DETAIL_VIEW, { detailMode });
 export const setStickyDate = isSticky => dispatcher(UPDATE_STICKY_STATE, { isSticky });
+export const setSidepanelVisible = sidePanelVisible => dispatcher(UPDATE_SIDEPANEL_VISIBLE, { sidePanelVisible });
 
 
 export default (
@@ -48,6 +50,7 @@ export default (
     branchesOpen: false,
     isSticky: false,
     mergeFilter: false,
+    sidePanelVisible: false,
   },
   action,
 ) => {
@@ -132,6 +135,11 @@ export default (
       ...state,
       labbookName: action.payload.labbookName,
       owner: action.payload.owner,
+    };
+  } else if (action.type === UPDATE_SIDEPANEL_VISIBLE) {
+    return {
+      ...state,
+      sidePanelVisible: action.payload.sidePanelVisible,
     };
   }
 

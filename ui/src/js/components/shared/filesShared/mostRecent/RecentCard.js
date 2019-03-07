@@ -71,7 +71,7 @@ export default class RecentCard extends Component {
     const path = `${this.props.section}/${this.props.file.node.key.replace(filename, '')}`;
     return (
       <div
-        className="Recent__card-wrapper"
+        className="Recent__card-wrapper column-3-span-4"
       >
         <div
           className="Recent__card Card"

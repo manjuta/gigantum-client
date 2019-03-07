@@ -120,7 +120,7 @@ export default class ActivityCard extends Component {
 
     const activityCardStyle = this._processCardStyle();
     return (
-      <div className="ActivityCard__container column-1-span-10">
+      <div className="ActivityCard__container column-1-span-9">
 
         <div className={activityCardCSS} ref="card" style={activityCardStyle}>
 

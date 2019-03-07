@@ -121,22 +121,25 @@
   padding: 10px;
 }
 
-@mixin removeColumns($width, $span, $columnsToRemove){
+@mixin removeColumns($width, $span, $columnsToRemove, $offset){
   $columnWidth: 105px;
-  $columnSpan: ((80px * $span) + (25px * ($span - 1)));
 
-
-
-  $maxScreenWidth: $width - (($columnsToRemove - 1) * $columnWidth) + 205px;
+  $maxScreenWidth: $width - (($columnsToRemove - $offset) * $columnWidth) + 205px;
 
   $minScreenWidth: $maxScreenWidth - $columnWidth;
+
+  // @if $columnsToRemove >= 5 {
+    $minScreenWidth: 0px;
+  // }
+
+
   @media screen and (max-width: $maxScreenWidth) and (min-width: $minScreenWidth) {
     width: (($span - $columnsToRemove) * 80px) + (($span - ($columnsToRemove + 1)) * 25px) !important;
     max-width: $width;
   }
 }
 
-@mixin spanColumns($span) {
+@mixin spanColumns($span, $offset) {
   $width: ($span * 80px) + (($span - 1) * 25px);
 
   width: ($span * 80px) + (($span - 1) * 25px);
@@ -145,24 +148,62 @@
   /************************************
     remove 1 column
   *************************************/
-  @include removeColumns($width, $span, 1);
+  @include removeColumns($width, $span, 1, $offset);
   /************************************
     remove 2 columns
   *************************************/
-  @include removeColumns($width, $span, 2);
+  @include removeColumns($width, $span, 2, $offset);
 
   /************************************
     remove 3 columns
   *************************************/
-  @include removeColumns($width, $span, 3);
+  @include removeColumns($width, $span, 3, $offset);
 
   /************************************
     remove 4 columns
   *************************************/
-  @include removeColumns($width, $span, 4);
+  @include removeColumns($width, $span, 4, $offset);
 
   /************************************
     remove 5 columns
   *************************************/
-  @include removeColumns($width, $span, 5);
+  @include removeColumns($width, $span, 5, $offset);
+
+  @if $span >= 10 {
+    @include removeColumns($width, $span, 6, $offset);
+  }
+  @if $span >= 11 {
+    @include removeColumns($width, $span, 7, $offset);
+  }
+  @if $span == 12 {
+    @include removeColumns($width, $span, 8, $offset);
+  }
+}
+
+
+@mixin spanColumnsLimited($span, $offset) {
+  $width: ($span * 80px) + (($span - 1) * 25px);
+
+  width: ($span * 80px) + (($span - 1) * 25px);
+  margin: 12.5px;
+
+  /************************************
+    remove 1 column
+  *************************************/
+  @include removeColumns($width, $span, 1, $offset);
+  /************************************
+    remove 2 columns
+  *************************************/
+  @include removeColumns($width, $span, 2, $offset);
+
+  /************************************
+    remove 3 columns
+  *************************************/
+  @include removeColumns($width, $span, 3, $offset);
+
+  /************************************
+    remove 4 columns
+  *************************************/
+  @include removeColumns($width, $span, 4, $offset);
+
 }
