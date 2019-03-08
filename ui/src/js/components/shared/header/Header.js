@@ -14,7 +14,7 @@ import {
 // config
 import Config from 'JS/config';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';
 import ActionsSection from './actionsSection/ActionsSection';

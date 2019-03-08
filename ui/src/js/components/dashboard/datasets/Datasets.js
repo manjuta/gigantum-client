@@ -4,12 +4,12 @@ import queryString from 'querystring';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // components
-import WizardModal from 'Components/wizard/WizardModal';
+import WizardModal from 'Components/shared/modals/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalDatasetsContainer, { LocalDatasets } from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
 import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import DatasetFilterBy from './filters/DatasetFilterBy';
 import DatasetSort from './filters/DatasetSort';
 // utils
@@ -409,9 +409,7 @@ class Datasets extends Component {
 
           <div className="Datasets__panel-bar">
             <h6 className="Datasets__username">{localStorage.getItem('username')}</h6>
-            <h2 className="Datasets__title">
-                Datasets
-            </h2>
+            <h2>Datasets</h2>
 
           </div>
           <div className="Datasets__menu  mui-container flex-0-0-auto">
@@ -425,7 +423,7 @@ class Datasets extends Component {
 
               <hr className={`Datasets__navigation-slider Datasets__navigation-slider--${this.state.selectedSection}`} />
 
-              <ToolTip section="cloudLocal" />
+              <Tooltip section="cloudLocal" />
             </ul>
 
           </div>

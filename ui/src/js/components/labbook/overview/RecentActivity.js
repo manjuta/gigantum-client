@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import Moment from 'moment';
 // components
 import CodeBlock from 'Components/labbook/renderers/CodeBlock';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import Lightbox from 'Components/common/Lightbox';
 // store
 import store from 'JS/redux/store';
@@ -153,10 +153,10 @@ export default class RecentActivity extends Component {
       return (<div className="RecentActivity">
         <div className="RecentActivity__title-container">
 
-          <h5 className="RecentActivity__header">
+          <h2>
             Recent Activity
-            <ToolTip section="recentActivity" />
-          </h5>
+            <Tooltip section="recentActivity" />
+          </h2>
         </div>
 
         <div className="RecentActivity__list grid">
@@ -210,7 +210,7 @@ export default class RecentActivity extends Component {
 
     return (
       <div className="RecentActivity">
-        <h5 className="RecentActivity__header">Activity</h5>
+        <h2 className="RecentActivity__header">Activity</h2>
         <div className="RecentActivity__list grid">
           <div className="RecentActivity__card--loading" />
           <div className="RecentActivity__card--loading" />

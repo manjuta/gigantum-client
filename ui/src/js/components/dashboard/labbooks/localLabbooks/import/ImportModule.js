@@ -7,7 +7,7 @@ import JobStatus from 'JS/utils/JobStatus';
 import ChunkUploader from 'JS/utils/ChunkUploader';
 // components
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import Modal from 'Components/common/Modal';
 // store
 import store from 'JS/redux/store';
@@ -685,8 +685,7 @@ export default class ImportModule extends Component {
 
       <div
         className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
-        key="AddLabbookCollaboratorPayload"
-      >
+        key="AddLabbookCollaboratorPayload">
         <ImportMain self={this} />
         <div className={loadingMaskCSS} />
       </div>
@@ -726,8 +725,7 @@ const ImportMain = ({ self }) => {
                 className="ImportDropzone"
                 ref={div => self.dropZone = div}
                 type="file" onDragEnd={evt => self._dragendHandler(evt)}
-                onDrop={evt => self._dropHandler(evt)} onDragOver={evt => self._dragoverHandler(evt)}
-              >
+                onDrop={evt => self._dropHandler(evt)} onDragOver={evt => self._dragoverHandler(evt)}>
                 {
                   self.state.readyLabbook && self.state.files[0] ?
                   <div className="Import__ReadyLabbook">
@@ -744,14 +742,12 @@ const ImportMain = ({ self }) => {
               <div className="Import__buttonContainer">
                 <button
                   onClick={() => self._closeImportModal()}
-                  className="Btn--flat"
-                >
+                  className="Btn--flat">
                 Cancel
                 </button>
                 <button
                   onClick={() => { self.importLabbook(); }}
-                  disabled={!self.state.readyLabbook}
-                >
+                  disabled={!self.state.readyLabbook}>
                   Import
                 </button>
               </div>
@@ -766,7 +762,7 @@ const ImportMain = ({ self }) => {
         <div className="Import__labbook-add-icon" />
       </div>
       <div className="Import__labbook-title">
-        <h4>Add Project</h4>
+        <h2 className="Import__h2 Import__h2--azure">Add Project</h2>
       </div>
 
     </div>
@@ -775,8 +771,7 @@ const ImportMain = ({ self }) => {
       className="btn--import"
       onClick={(evt) => {
         self._showModal(evt);
-      }}
-    >
+      }}>
       Create New
     </div>
 
@@ -784,12 +779,11 @@ const ImportMain = ({ self }) => {
       className="btn--import"
       onClick={(evt) => {
         self.setState({ showImportModal: true });
-      }}
-    >
+      }}>
       Import Existing
     </div>
 
-    <ToolTip section="createLabbook" />
+    <Tooltip section="createLabbook" />
 
 
   </div>);

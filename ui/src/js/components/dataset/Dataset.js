@@ -19,7 +19,8 @@ import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import DatasetHeader from '../shared/header/Header';
+import Tooltip from 'Components/common/Tooltip';
+import DatasetHeader from 'Components/shared/header/Header';
 // assets
 import './Dataset.scss';
 
@@ -179,8 +180,7 @@ class Dataset extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="datasetSectionError"
-                          key="activity"
-                        >
+                          key="activity">
 
                           <Overview
                             key={`${this.props.datasetName}_overview`}
@@ -200,8 +200,7 @@ class Dataset extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="datasetSectionError"
-                          key="activity"
-                        >
+                          key="activity">
 
                           <Activity
                                key={`${this.props.datasetName}_activity`}
@@ -221,8 +220,7 @@ class Dataset extends Component {
                       render={() => (
                         <ErrorBoundary
                           type="datasetSectionError"
-                          key="code"
-                        >
+                          key="code">
 
                           <Data
                                dataset={dataset}

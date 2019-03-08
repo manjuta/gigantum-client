@@ -4,24 +4,20 @@
 
   padding: 20px;
 }
-.PackageDependencies__header {
-  color: $romanSilver;
-}
 
 .PackageDependencies__tab {
   line-height: 30px;
   width: calc(25% - 20px);
   background-color: $grey-light;
-  color: $romanSilver;
+  color: $jet;
 
   &:hover {
     background-color: $white;
-    color: $turquise;
   }
 
   &--selected {
     background-color: $white;
-    color: $romanSilver;
+    color: $jet;
     border-bottom: 1px solid $white;
   }
 }

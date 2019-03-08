@@ -4,7 +4,7 @@
 input[type="text"] {
   height: 31px;
   line-height: 20px;
-  margin: 5px;
+  margin: 0 5px;
   border: 0;
   outline: none;
   width: 100%;
@@ -12,13 +12,13 @@ input[type="text"] {
   padding: 0 20px;
   width: 100%;
   background: transparent;
+  font-size: 18px;
 }
 
 input[type="text"]:focus {
   padding: 0 20px;
   background: $white;
-  border: 0;
-  @include boxShadowDark();
+  @include boxShadow();
 
 }
 

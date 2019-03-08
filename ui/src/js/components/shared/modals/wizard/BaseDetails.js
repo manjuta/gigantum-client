@@ -1,5 +1,8 @@
+// vendor
 import React, { Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
+// assets
+import './BaseDetails.scss';
 
 
 export default class BaseDetails extends React.Component {

@@ -73,7 +73,7 @@ const CONFIG = {
       return encodeURI(apiURL);
     },
   },
-  getToolTipText: section => tips[section],
+  getTooltipText: section => tips[section],
   demoHostName: 'try.gigantum.com',
   /**
     @param {number} bytes

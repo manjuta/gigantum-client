@@ -1,35 +1,11 @@
+@import '~Styles/_imports.scss';
+
 .SelectBase {
   color: $romanSilver;
   font-weight: 100;
   p {
     margin: 0px
   }
-
-  .slick-slider{
-    margin-bottom: 0px;
-  }
-
-  .slick-arrow.slick-next {
-    background: url(../images/icons/right-arrow-silver.svg) no-repeat 50% 50%;
-    background-size: 30px;
-  }
-  .slick-arrow.slick-prev {
-    background: url(../images/icons/left-arrow-silver.svg) no-repeat 50% 50%;
-    background-size: 30px;
-  }
-  .slick-arrow:hover{
-    border: none;
-  }
-  .slick-disabled{
-    cursor: auto;
-    opacity: 0.2;
-  }
-
-  .slick-list, .slick-initialized{
-    height: 100%;
-  }
-
-
 }
 
 .SelectBase__inner-container {
@@ -59,33 +35,6 @@
 .SelectBase__viewer-container {
   min-width: 100%;
   margin: 0 240px;
-}
-
-.SelectBase__tabs-container {
-
-}
-
-.SelectBase__tabs-list {
-  @extend .tabs-list;
-}
-
-.SelectBase__tab {
-  white-space: nowrap;
-  @extend .tab;
-  width: 125px;
-}
-
-.SelectBase__tab--selected {
-  @extend .tab--selected;
-}
-
-.SelectedBase__header {
-    margin: 0 0 20px 0;
-    padding: 0 0 20px 0;
-    color: $azure;
-    text-align: center;
-    font-weight: 400;
-    border-bottom: 1px solid $azure;
 }
 
 .SelectedBase__modal-header {
@@ -303,4 +252,3 @@
 .SelectBase__readme{
   @include flex(flex-end, column)
 }
-

@@ -4,12 +4,12 @@ import queryString from 'querystring';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // components
-import WizardModal from 'Components/wizard/WizardModal';
+import WizardModal from 'Components/shared/modals/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalLabbooksContainer, { LocalLabbooks } from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
 import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import LabbookFilterBy from './filters/LabbookFilterBy';
 import LabbookSort from './filters/LabbookSort';
 // utils
@@ -404,9 +404,7 @@ class Labbooks extends Component {
 
           <div className="Labbooks__panel-bar">
             <h6 className="Labbooks__username">{localStorage.getItem('username')}</h6>
-            <h2 className="Labbooks__title">
-                Projects
-            </h2>
+            <h1>Projects</h1>
 
           </div>
           <div className="Labbooks__menu  mui-container flex-0-0-auto">
@@ -420,7 +418,7 @@ class Labbooks extends Component {
 
               <hr className={`Labbooks__navigation-slider Labbooks__navigation-slider--${this.state.selectedSection}`} />
 
-              <ToolTip section="cloudLocal" />
+              <Tooltip section="cloudLocal" />
             </ul>
 
           </div>
@@ -440,7 +438,6 @@ class Labbooks extends Component {
               <input
                 type="text"
                 ref="labbookSearch"
-                className="Labbooks__search no--margin"
                 placeholder="Filter Projects by name or description"
                 defaultValue={this.props.filterText}
                 onKeyUp={evt => this._setFilterValue(evt)}

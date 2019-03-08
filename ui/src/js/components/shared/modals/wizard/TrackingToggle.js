@@ -1,7 +1,10 @@
+// vendor
 import React from 'react';
 import classNames from 'classnames';
+// assets
+import './TrackingToggle.scss';
 
-export default class BaseDetails extends React.Component {
+export default class TrackingToggle extends React.Component {
   constructor(props) {
     super(props);
     this.state = {

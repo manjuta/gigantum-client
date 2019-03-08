@@ -2,7 +2,7 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 // assets
 import './Rollback.scss';
 
@@ -34,7 +34,7 @@ export default class Rollback extends Component {
         <div
           className={rollbackCSS}
           data-tooltip="Can't rollback when the container is running.">
-            <ToolTip section="activitySubmenu" />
+            <Tooltip section="activitySubmenu" />
             <button
               disabled={props.isLocked}
               className="Rollback__button"

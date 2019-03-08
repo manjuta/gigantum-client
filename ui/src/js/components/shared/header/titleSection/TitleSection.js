@@ -6,7 +6,7 @@ import store from 'JS/redux/store';
 // mutations
 import SetLabbookDescriptionMutation from 'Mutations/SetLabbookDescriptionMutation';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import Description from './description/Description';
 // assets
 import './TitleSection.scss';

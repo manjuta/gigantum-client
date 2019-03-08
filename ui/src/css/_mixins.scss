@@ -123,11 +123,11 @@
 
 @mixin removeColumns($width, $span, $columnsToRemove){
   $columnWidth: 105px;
-  $columnSpan: ((80px * $span) + (25px * ($span - 1)));
+  // $columnSpan: (80px * ($span + 3)) + (25px * ($span + 2));
 
 
 
-  $maxScreenWidth: $width - (($columnsToRemove - 1) * $columnWidth) + 205px;
+  $maxScreenWidth: $width - (($columnsToRemove ) * $columnWidth) + 205px ;
 
   $minScreenWidth: $maxScreenWidth - $columnWidth;
   @media screen and (max-width: $maxScreenWidth) and (min-width: $minScreenWidth) {
@@ -165,4 +165,18 @@
     remove 5 columns
   *************************************/
   @include removeColumns($width, $span, 5);
+}
+
+
+@mixin spanColumnsSidePanel($span) {
+  $width: ($span * 80px) + (($span - 1) * 25px);
+
+  width: ($span * 80px) + (($span - 1) * 25px);
+  margin: 12.5px;
+
+  /************************************
+    remove 1 column
+  *************************************/
+  @include removeColumnsSidePanel($width, $span, 3);
+
 }

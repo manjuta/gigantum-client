@@ -5,7 +5,6 @@ html, body, .root {
   padding: 0;
   color: $jet;
   font-family: 'NunitoSans', arial;
-  //position: relative;
 }
 
 .root.no-overflow{
@@ -20,6 +19,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   background-color: $background-color;
+  font-size: $body-fontsize;
 }
 
 a {
@@ -46,10 +46,6 @@ h6 {
   font-weight: 100;
 }
 
-h5{
-  margin-top: 50px;
-}
-
 ul {
   margin: 0;
 }
@@ -61,8 +57,28 @@ h4 { font-size: $h4-fontsize; line-height: 110%;}
 h5 { font-size: $h5-fontsize; line-height: 110%;}
 h6 { font-size: $h6-fontsize; line-height: 110%;}
 
-h6 {
-  font-size: 1.2rem;
+h1, h2 {
+  color: $jet;
+}
+
+h3, h4, h5, h6 {
+  color: $mineShaft;
+}
+
+h1 {
+  font-weight: 100;
+}
+
+h2, h5, h6 {
+  font-weight: 300;
+}
+
+h3, h4 {
+  font-weight: 600;
+}
+
+p, a{
+  font-size: 14px;
 }
 
 li > code,

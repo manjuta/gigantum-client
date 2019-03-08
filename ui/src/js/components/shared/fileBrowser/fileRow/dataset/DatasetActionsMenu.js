@@ -232,7 +232,7 @@ export default class DatasetActionsMenu extends Component {
           popupCSS = classNames({
             DatasetActionsMenu__popup: true,
             hidden: !this.state.popupVisible,
-            ToolTip__message: true,
+            Tooltip__message: true,
           }),
           removeCSS = classNames({
             'DatasetActionsMenu__item DatasetActionsMenu__item--remove': true,
@@ -268,7 +268,7 @@ export default class DatasetActionsMenu extends Component {
                 onClick={(evt) => { this._togglePopup(evt, true); }} >
 
                 <div className={popupCSS}>
-                  <div className="ToolTip__pointer"></div>
+                  <div className="Tooltip__pointer"></div>
                   <p>Are you sure?</p>
                   <div className="flex justify--space-around">
                     <button

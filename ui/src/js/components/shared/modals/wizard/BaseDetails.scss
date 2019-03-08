@@ -1,3 +1,5 @@
+@import '~Styles/_imports.scss';
+
 .BaseDetails {
   height: 360px;
 
@@ -5,10 +7,6 @@
     font-weight: 400;
     padding: 2px 0;
   }
-}
-
-.BaseDetails__button {
-
 }
 
 .BaseDetails__base {

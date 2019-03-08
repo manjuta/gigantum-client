@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import classNames from 'classnames';
 // Components
 import CodeBlock from 'Components/labbook/renderers/CodeBlock';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 // mutations
 import AddCustomDockerMutation from 'Mutations/AddCustomDockerMutation';
 // store
@@ -122,9 +122,6 @@ export default class CustomDockerfile extends Component {
             'column-1-span-11': true,
             empty: !this.state.dockerfileContent,
           }),
-          dockerSnippetsCSS = classNames({
-            CustomDockerfile__header: true,
-          }),
           editDockerfileButtonCSS = classNames({
             'CustomDockerfile__edit-button': true,
             hidden: state.editingDockerfile,
@@ -137,12 +134,10 @@ export default class CustomDockerfile extends Component {
 
         <div className="Environment__headerContainer">
 
-          <h5
-            className={dockerSnippetsCSS}
-          >
+          <h2>
             Custom Docker Instructions
-            <ToolTip section="dockerInstructionsEnvironment" />
-          </h5>
+            <Tooltip section="dockerInstructionsEnvironment" />
+          </h2>
 
         </div>
 

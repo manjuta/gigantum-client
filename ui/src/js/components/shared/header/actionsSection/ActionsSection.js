@@ -5,7 +5,7 @@ import classNames from 'classnames';
 // config
 import Config from 'JS/config';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import Collaborators from './collaborators/Collaborators';
 import ActionsMenu from './actionsMenu/ActionsMenu';

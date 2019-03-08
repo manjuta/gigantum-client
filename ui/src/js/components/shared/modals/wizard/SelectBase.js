@@ -1,16 +1,17 @@
 // vendor
-import React, { Fragment } from 'react';
+import React, { Fragment, Component } from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
 import Slider from 'react-slick';
 import classNames from 'classnames';
 import ReactMarkdown from 'react-markdown';
+// utilites
+import environment from 'JS/createRelayEnvironment';
 // components
 import Loader from 'Components/common/Loader';
 import AdvancedSearch from 'Components/common/AdvancedSearch';
 import BaseDetails from './BaseDetails';
-// utilites
-import environment from 'JS/createRelayEnvironment';
-
+// assets
+import './SelectBase.scss';
 
 const BaseQuery = graphql`query SelectBaseQuery($first: Int!, $cursor: String){
   availableBases(first: $first, after: $cursor)@connection(key: "SelectBase_availableBases"){
@@ -111,7 +112,7 @@ const searchTagsForMatch = ((node, tags, lowercaseJSON, isReturned) => {
   return isReturned;
 });
 
-export default class SelectBase extends React.Component {
+export default class SelectBase extends Component {
   constructor(props) {
   	super(props);
   	this.state = {

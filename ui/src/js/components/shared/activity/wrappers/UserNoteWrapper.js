@@ -2,7 +2,7 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import UserNote from '../UserNote';
 // assets
 import './UserNoteWrapper.scss';
@@ -43,7 +43,7 @@ export default class UserNoteWrapper extends Component {
           });
     return (
       <div className={userActivityContainerCSS}>
-        <ToolTip section="userNote" />
+        <Tooltip section="userNote" />
         <div
           className={buttonCSS}
           onClick={() => this._toggleUserNote(!state.userNoteVisible)}>

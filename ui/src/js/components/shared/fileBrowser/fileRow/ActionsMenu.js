@@ -127,7 +127,7 @@ export default class ActionsMenu extends Component {
           popupCSS = classNames({
             ActionsMenu__popup: true,
             hidden: !this.state.popupVisible,
-            ToolTip__message: true,
+            Tooltip__message: true,
           }),
 
           deleteCSS = classNames({
@@ -160,7 +160,7 @@ export default class ActionsMenu extends Component {
                 onClick={(evt) => { this._togglePopup(evt, true); }} >
 
                 <div className={popupCSS}>
-                  <div className="ToolTip__pointer"></div>
+                  <div className="Tooltip__pointer"></div>
                   <p>Are you sure?</p>
                   <div className="flex justify--space-around">
                     <button

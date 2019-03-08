@@ -15,7 +15,6 @@ import history from 'JS/history';
 import SideBar from 'Components/common/SideBar';
 import Footer from 'Components/common/footer/Footer';
 import Prompt from 'Components/common/Prompt';
-import Profile from 'Components/profile/Profile';
 import Helper from 'Components/common/Helper';
 // config
 import config from 'JS/config';
@@ -272,13 +271,6 @@ class Routes extends Component {
                       }
 
                       }
-                    />
-
-                    <Route
-                      path="/profile"
-                      render={props => (
-                        <Profile />
-                        )}
                     />
 
                     <Helper

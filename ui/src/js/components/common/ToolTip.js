@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 import store from 'JS/redux/store';
 // config
 import config from 'JS/config';
+// assets
+import './Tooltip.scss';
 
-class ToolTip extends Component {
+class Tooltip extends Component {
   constructor(props) {
     super(props);
     const { isVisible } = store.getState().helper;
@@ -14,7 +16,7 @@ class ToolTip extends Component {
       toolTipExpanded: false,
       isVisible,
     };
-    this._hideToolTip = this._hideToolTip.bind(this);
+    this._hideTooltip = this._hideTooltip.bind(this);
   }
 
 
@@ -31,21 +33,21 @@ class ToolTip extends Component {
     * subscribe to store to update state
   */
   componentDidMount() {
-    window.addEventListener('click', this._hideToolTip);
+    window.addEventListener('click', this._hideTooltip);
   }
   /**
     @param {}
     unsubscribe from event listeners
   */
   componentWillUnmount() {
-    window.removeEventListener('click', this._hideToolTip);
+    window.removeEventListener('click', this._hideTooltip);
   }
   /**
    *  @param {event} evt
    *  closes tooltip box when tooltip is open and the tooltip has not been clicked on
    *
   */
-  _hideToolTip(evt) {
+  _hideTooltip(evt) {
     if (this.state.toolTipExpanded && evt.target.className.indexOf(this.props.section) === -1) {
       this.setState({ toolTipExpanded: false });
     }
@@ -54,23 +56,23 @@ class ToolTip extends Component {
   render() {
     const { section } = this.props;
     const toolTipCSS = classNames({
-      ToolTip: this.props.isVisible,
+      Tooltip: this.props.isVisible,
       hidden: !this.props.isVisible,
       [section]: true,
       isSticky: store.getState().labbook.isSticky,
     });
     const toggleCSS = classNames({
-      ToolTip__toggle: true,
+      Tooltip__toggle: true,
       [section]: true,
       active: this.state.toolTipExpanded,
     });
     const messsageCSS = classNames({
-      ToolTip__message: this.state.toolTipExpanded,
+      Tooltip__message: this.state.toolTipExpanded,
       hidden: !this.state.toolTipExpanded,
       [section]: true,
     });
     const pointerCSS = classNames({
-      ToolTip__pointer: this.state.toolTipExpanded,
+      Tooltip__pointer: this.state.toolTipExpanded,
       hidden: !this.state.toolTipExpanded,
       [section]: true,
     });
@@ -79,13 +81,12 @@ class ToolTip extends Component {
 
         <div
           className={toggleCSS}
-          onClick={() => this.setState({ toolTipExpanded: !this.state.toolTipExpanded })}
-        >
+          onClick={() => this.setState({ toolTipExpanded: !this.state.toolTipExpanded })}>
           {
             !this.state.toolTipExpanded &&
-            <div className="ToolTip__glow-container">
-              <div className="ToolTip__glow-ring-outer">
-                <div className="ToolTip__glow-ring-inner" />
+            <div className="Tooltip__glow-container">
+              <div className="Tooltip__glow-ring-outer">
+                <div className="Tooltip__glow-ring-inner" />
               </div>
             </div>
           }
@@ -94,7 +95,7 @@ class ToolTip extends Component {
 
         <div className={pointerCSS} />
         <div className={messsageCSS}>
-          {config.getToolTipText(section)}
+          {config.getTooltipText(section)}
         </div>
 
       </div>
@@ -109,4 +110,4 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = dispatch => ({
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ToolTip);
+export default connect(mapStateToProps, mapDispatchToProps)(Tooltip);

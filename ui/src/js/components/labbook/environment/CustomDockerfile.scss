@@ -9,15 +9,10 @@
   }
 }
 
-.CustomDockerfile__header {
-  color: $romanSilver;
-  position: relative;
-}
-
 .CustomDockerfile__sub-header {
   margin-top: 0;
   font-size: 14px;
-  color: $romanSilver;
+  color: $mineShaft;
   p{
     margin: 5px 0;
 
@@ -28,13 +23,13 @@
 
   code {
     font-family: monospace;
+    text-align: center;
   }
 }
 
 .CustomDockerfile--code-snippet code{
-  padding: 2px 10px;
-  margin: -4px 0 4px 11px;
- }
+  padding: 0px 10px;
+}
 
 .CustomDockerfile__content {
   padding: 10px !important;
@@ -79,7 +74,7 @@
   }
 
   .empty {
-    color: $romanSilver;
+    color: $mineShaft;
     opacity: 0.5;
     font-style: oblique;
   }

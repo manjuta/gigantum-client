@@ -15,7 +15,7 @@ import {
   setUpdateDetailView,
 } from 'JS/redux/reducers/labbook/labbook';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 // assets
 import './Navigation.scss';
 

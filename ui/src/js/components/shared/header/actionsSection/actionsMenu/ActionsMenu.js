@@ -25,7 +25,7 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
 // components
 import CreateBranch from 'Components/shared/modals/CreateBranch';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import VisibilityModal from 'Components/shared/modals/VisibilityModal';
 import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
@@ -636,7 +636,7 @@ class ActionsMenu extends Component {
 
         </div>
 
-        <ToolTip section="actionMenu" />
+        <Tooltip section="actionMenu" />
 
       </div>
     );

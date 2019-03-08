@@ -12,7 +12,7 @@ import { setPackageMenuVisible } from 'JS/redux/reducers/labbook/environment/pac
 import { setBuildingState, setMergeMode } from 'JS/redux/reducers/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/reducers/footer';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 // assets
 import './ContainerStatus.scss';
 
@@ -390,7 +390,7 @@ class ContainerStatus extends Component {
           </div>
         }
 
-        <ToolTip
+        <Tooltip
           section="containerStatus"
         />
       </div>);

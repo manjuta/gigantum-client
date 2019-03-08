@@ -1,19 +1,21 @@
 // vendor
 import React from 'react';
 import classNames from 'classnames';
-// components
-import CreateLabbook from './CreateLabbook';
-import SelectBase from './SelectBase';
-import TrackingToggle from './TrackingToggle';
-import Loader from 'Components/common/Loader';
-import ButtonLoader from 'Components/common/ButtonLoader';
-import Modal from 'Components/common/Modal';
 // mutations
 import CreateLabbookMutation from 'Mutations/CreateLabbookMutation';
 import CreateDatasetMutation from 'Mutations/CreateDatasetMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
+// components
+import Loader from 'Components/common/Loader';
+import ButtonLoader from 'Components/common/ButtonLoader';
+import Modal from 'Components/common/Modal';
+import CreateLabbook from './CreateLabbook';
+import SelectBase from './SelectBase';
+import TrackingToggle from './TrackingToggle';
+// assets
+import './WizardModal.scss';
 
 export default class WizardModal extends React.Component {
   constructor(props) {

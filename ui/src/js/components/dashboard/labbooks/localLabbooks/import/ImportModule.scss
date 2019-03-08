@@ -2,6 +2,12 @@
 .ImportModule {
   padding: 10px;
 }
+
+.Import__h2{
+  &--azure {
+    color: $azure;
+  }
+}
 .Card--add {
   align-items: center;
 
@@ -259,8 +265,8 @@ input.Import__input--paste{
 
 .Import__labbook-add-icon{
   position: absolute;
-  top: 51px;
-  left: 40px;
+  top: 47px;
+  left: 70px;
 
   width: 20px;
   height: 20px;

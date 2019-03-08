@@ -3,8 +3,6 @@ import React from 'react';
 import uuidv4 from 'uuid/v4';
 // utilities
 import validation from 'JS/utils/Validation';
-// components
-import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // mutations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
@@ -12,6 +10,8 @@ import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
 import { setMultiInfoMessage } from 'JS/redux/reducers/footer';
+// components
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // assets
 import './CreateLabbook.scss';
 

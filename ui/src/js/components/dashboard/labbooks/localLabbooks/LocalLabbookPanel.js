@@ -216,7 +216,7 @@ export default class LocalLabbookPanel extends Component {
 
           <div>
 
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
               onClick={() => this.props.goToLabbook(edge.node.name, edge.node.owner)}>
 
@@ -228,7 +228,7 @@ export default class LocalLabbookPanel extends Component {
                 textToHighlight={edge.node.name}
               />
 
-            </h6>
+            </h5>
 
           </div>
 

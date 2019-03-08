@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
-// components
-import User from './User';
-import ToolTip from 'Components/common/ToolTip';
 // store
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
 // config
 import config from 'JS/config';
+// components
+import Tooltip from 'Components/common/Tooltip';
+import User from './User';
+
 
 export default class SideBar extends Component {
   constructor(props) {
@@ -82,7 +83,7 @@ export default class SideBar extends Component {
                 />
                 Projects
               </Link>
-              <ToolTip section="labbookListing" />
+              <Tooltip section="labbookListing" />
             </li>
             <li className="SideBar__list-item Tooltip-data Tooltip-data--right"
                 data-tooltip="View Dataset listing page"
@@ -96,7 +97,7 @@ export default class SideBar extends Component {
                 />
                 Datasets
               </Link>
-              <ToolTip section="dataSets" />
+              <Tooltip section="dataSets" />
             </li>
           </ul>
 

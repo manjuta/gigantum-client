@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import ActivityCard from '../ActivityCard';
 import Rollback from './Rollback';
 // assets

@@ -660,7 +660,7 @@ class FileBrowser extends Component {
       popupCSS = classNames({
         FileBrowser__popup: true,
         hidden: !this.state.popupVisible,
-        ToolTip__message: true,
+        Tooltip__message: true,
       }),
       multiSelectCSS = classNames({
         'FileBrowser__multiselect flex justify--start': true,
@@ -735,7 +735,7 @@ class FileBrowser extends Component {
                 onClick={() => { this._togglePopup(true); }} />
 
               <div className={popupCSS}>
-                <div className="ToolTip__pointer"></div>
+                <div className="Tooltip__pointer"></div>
                 <p>Are you sure?</p>
                 <div className="flex justify--space-around">
                   <button
