@@ -26,7 +26,12 @@ export default class RecentCard extends Component {
     this._handleFileFavoriting = this._handleFileFavoriting.bind(this);
   }
 
-  _handleFileFavoriting(evt, file) {
+  /**
+    @param {Object} file
+    handles favoriting of files
+    @return {}
+  */
+  _handleFileFavoriting(file) {
     if (!file.node.isFavorite) {
       AddFavoriteMutation(
         this.props.favoriteConnection,
@@ -71,34 +76,27 @@ export default class RecentCard extends Component {
     const path = `${this.props.section}/${this.props.file.node.key.replace(filename, '')}`;
     return (
       <div
-        className="Recent__card-wrapper column-3-span-4"
+        className="Recent__card Card column-3-span-4--shrink"
       >
         <div
-          className="Recent__card Card"
-        >
-          <div
-            onClick={evt => this._handleFileFavoriting(evt, this.props.file)}
-            className={this.props.file.node.isFavorite ? 'Favorite__star' : 'Favorite__star--off'}
-          />
-          <div className="Recent__header-section">
-            <h6 className="Recent__card-header">
-              <TextTruncate
-                 className="Favorite__card-header"
-                 line={1}
-                 truncateText="…"
-                 text={filename}
-               />
-              </h6>
-          </div>
+          onClick={() => this._handleFileFavoriting(this.props.file)}
+          className={this.props.file.node.isFavorite ? 'Favorite__star' : 'Favorite__star--off'}
+        />
+        <div className="Recent__header-section">
+          <h6 className="Recent__card-header">
+            {filename}
+          </h6>
+        </div>
 
-          <div className="Recent__path-section">
-            <p className="Recent__path">{path}</p>
+        <div className="Recent__path-section">
+          <div className="Recent__path">
+            {path}
           </div>
+        </div>
 
-          <div className="Recent__description-section">
-            <p>Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}</p>
-            <p>Size: {config.humanFileSize(this.props.file.node.size)} </p>
-          </div>
+        <div className="Recent__description-section">
+          <p>Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}</p>
+          <p>Size: {config.humanFileSize(this.props.file.node.size)} </p>
         </div>
       </div>
     );

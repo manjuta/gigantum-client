@@ -50,9 +50,6 @@
 
 .column-1-span-12{
   @include spanColumns(12, 1);
-  &--limitCollapse {
-    @include spanColumnsLimited(12, 1);
-  }
 }
 
 .Labbook--sidePanelVisible {
@@ -102,29 +99,95 @@
 
   .column-1-span-12{
     @include spanColumns(12, 4);
-    &--limitCollapse {
-      @include spanColumnsLimited(12, 4);
-    }
   }
 }
 
 
 .column-2-span-6{
   @include column(2);
+  &--shrink {
+    @include columnShrink(2, 2);
+  }
 }
 
 .column-3-span-4{
   @include column(3);
+  &--shrink {
+    @include columnShrink(3, 2);
+  }
 }
 
 .column-4-span-3{
   @include column(4);
+  &--shrink {
+    @include columnShrink(4, 2);
+  }
 }
 
 .column-6-span-2{
   @include column(6);
+  &--shrink {
+    @include columnShrink(6, 2);
+  }
 }
 
 .column-12-span-1{
   @include column(12);
+  &--shrink {
+    @include columnShrink(12, 2);
+  }
+}
+
+@media screen and (max-width: 1440px) and (min-width: 0) {
+  .Labbook--sidePanelVisible {
+    .column-3-span-4--shrink:nth-child(2){
+      margin: 12.5px 2px !important;
+    }
+  }
+}
+
+@media screen and (max-width: 1124px) and (min-width: 0) {
+  .column-3-span-4--shrink:nth-child(2){
+    margin: 12.5px 2px !important;
+  }
+}
+
+@media screen and (max-width: 1755px) and (min-width: 0) {
+  .Labbook--sidePanelVisible {
+    .column-2-span-6{
+      @include column(3);
+      &--shrink {
+        @include columnShrink(3, 1);
+      }
+    }
+
+    .column-3-span-4{
+      @include column(4);
+      &--shrink {
+        @include columnShrink(4, 1);
+      }
+    }
+
+    .column-4-span-3{
+      @include column(5);
+      &--shrink {
+        @include columnShrink(5, 1);
+      }
+    }
+
+    .column-6-span-2{
+      @include column(7);
+      &--shrink {
+        @include columnShrink(7, 1);
+      }
+    }
+
+    .column-12-span-1{
+      @include column(12);
+      &--shrink {
+        @include columnShrink(12, 1);
+      }
+    }
+
+  }
 }

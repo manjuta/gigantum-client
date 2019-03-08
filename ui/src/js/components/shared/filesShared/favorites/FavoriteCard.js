@@ -210,7 +210,7 @@ class FavoriteCard extends Component {
     const favoriteCardCSS = classNames({
       'Favorite__card Card': (this.props.favorite.index !== undefined),
       'Favorite__card--opaque Card': !(this.props.favorite.index !== undefined),
-      'column-3-span-4': true,
+      'column-3-span-4--shrink': true,
       'Favorite__card--hidden': this.props.isOverCurrent,
       'Favorite__card--isDragging': isDragging,
     });
