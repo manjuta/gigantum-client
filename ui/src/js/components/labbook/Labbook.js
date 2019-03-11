@@ -86,7 +86,7 @@ class Labbook extends Component {
   state = {
     containerStatus: this.props.labbook.environment.containerStatus,
     imageStatus: this.props.labbook.environment.imageStatus,
-    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
+    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || (this.props.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (this.props.labbook.environment.imageStatus === 'BUILD_QUEUED') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     visibility: this.props.labbook.visibility,
@@ -131,7 +131,7 @@ class Labbook extends Component {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-    const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
+    const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (nextProps.labbook.environment.imageStatus === 'BUILD_QUEUED') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
 
     return {
       ...state,
@@ -213,7 +213,7 @@ class Labbook extends Component {
   */
   @boundMethod
   _updateMigationState(response) {
-    if (response) {
+    if (response && response.workonExperimentalBranch) {
       const { isDeprecated, shouldMigrate } = response.workonExperimentalBranch.labbook;
       this.setState({
         isDeprecated,
@@ -441,6 +441,9 @@ class Labbook extends Component {
             Labbook__deprecated: true,
             'Labbook__deprecated--demo': isDemo,
           }),
+          migrationButtonCSS = classNames({
+            'Tooltip-data': state.isLocked,
+          }),
           { migrationText, showMigrationButton } = this._getMigrationInfo(),
           oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName)),
           migrationModalType = state.migrateComplete ? 'large' : 'large-long';
@@ -463,12 +466,16 @@ class Labbook extends Component {
                 </a>
                 {
                   showMigrationButton &&
+                  <div
+                    className={migrationButtonCSS}
+                    data-tooltip="To migrate the project container must be Stopped.">
                   <button
-                    className="Labbook__deprecated-action"
+                    className="Button Labbook__deprecated-action"
                     onClick={() => this._toggleMigrationModal()}
-                    disabled={state.migrationInProgress}>
+                    disabled={state.migrationInProgress || state.isLocked }>
                     Migrate
                   </button>
+                  </div>
                 }
               </div>
             }
@@ -594,6 +601,7 @@ class Labbook extends Component {
               setBranchUptodate={this._setBranchUptodate}
               isDeprecated={state.isDeprecated}
               updateMigationState={this._updateMigationState}
+              showMigrationButton={showMigrationButton}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">

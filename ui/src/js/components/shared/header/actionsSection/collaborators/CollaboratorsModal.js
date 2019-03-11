@@ -478,7 +478,7 @@ export default class CollaboratorsModal extends Component {
                   </li>
                   <li onClick={() => this._setPermission('owner')}>
                     <div className="CollaboratorsModal__permissions-header">Admin</div>
-                    <div className="CollaboratorsModal__permissions-subtext">“Admin permissions. Can sync to master and manage collaborators</div>
+                    <div className="CollaboratorsModal__permissions-subtext">Admin permissions. Can sync to master and manage collaborators</div>
                   </li>
                 </ul>
               </div>
@@ -540,7 +540,7 @@ export default class CollaboratorsModal extends Component {
                           CollaboratorModal__PermissionsSelector: true,
                           'CollaboratorModal__PermissionsSelector--individual': true,
                           'CollaboratorModal__PermissionsSelector--open': this.state.userExpanded === collaboratorName,
-                          'CollaboratorModal__PermissionsSelector--disabled': collaboratorName === localStorage.getItem('username') || !this.props.canManageCollaborators,
+                          'CollaboratorModal__PermissionsSelector--disabled': (collaboratorName === localStorage.getItem('username')) || !this.props.canManageCollaborators || (collaboratorName === this.state.owner),
                           'CollaboratorModal__PermissionsSelector--collapsed': this.state.userExpanded !== collaboratorName,
                         }),
                         individualPermissionsMenuCSS = classNames({

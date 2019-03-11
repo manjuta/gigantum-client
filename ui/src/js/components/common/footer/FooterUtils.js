@@ -142,7 +142,7 @@ const FooterUtils = {
               if (method === 'build_image') {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
               }
-              if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
+              if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'syncDataset') || (type === 'publishDataset')) {
                 failureCall(response.data.jobStatus.failureMessage);
               }
               if (type === 'downloadDatasetFiles') {

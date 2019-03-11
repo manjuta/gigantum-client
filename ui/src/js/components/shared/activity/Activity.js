@@ -820,7 +820,7 @@ class Activity extends Component {
                   <PaginationLoader
                     key={`Actvity_paginationLoader${index}`}
                     index={index}
-                    isLoadingMore={state.isPaginating || (state.activityCardCount < 10)}
+                    isLoadingMore={state.isPaginating || ((state.activityCardCount < 10) && section.activityRecords.pageInfo.hasNextPage)}
                   />
                   ))
               }

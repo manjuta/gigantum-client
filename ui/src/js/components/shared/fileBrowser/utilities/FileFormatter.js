@@ -119,7 +119,7 @@ export const fileHandler = () => {
         }
         sortEdges(edgesToSort)
 
-        const hash = btoa(JSON.stringify(fileObject) + search);
+        const hash = btoa(unescape(encodeURIComponent(JSON.stringify(fileObject) + search)));
         postMessage({ files: fileObject, hash });
     });
 };
