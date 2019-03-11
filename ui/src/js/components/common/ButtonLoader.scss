@@ -2,8 +2,6 @@
 
 .ButtonLoader{
   transition: all 0.5s;
-
-  border: 2px solid $azure;
 }
 
 @keyframes spin {
@@ -15,30 +13,19 @@
 .ButtonLoader--loading:focus,
 .ButtonLoader--loading:hover,
 .ButtonLoader--loading:disabled{
-  width: 24px;
-  height: 24px;
-  padding: 0px;
 
-  animation: spin 1s infinite linear;
+  background: url(~Images/loaders/loading.svg) no-repeat 50% 50%;
+  background-size: 24px;
 
   color: transparent;
-  border: 2px solid $romanSilver !important;
-  border-left: 2px solid $azure !important;
-  border-radius: 12px;
-  background: transparent !important;;
 }
 
 .ButtonLoader--finished,
 .ButtonLoader--finished:focus,
 .ButtonLoader--finished:hover,
 .ButtonLoader--finished:disabled{
-  width: 24px;
-  height: 24px;
-  padding: 0px;
 
   color: $white;
-  border: 2px solid $azure;
-  border-radius: 12px;
   background: none !important;
   background-color: $azure !important;
 }
@@ -48,13 +35,8 @@
 .ButtonLoader--error:hover,
 .ButtonLoader--error:focus,
 .ButtonLoader--error:disabled{
-  width: 24px;
-  height: 24px;
-  padding: 0px;
 
   color: transparent !important;
-  border: 2px solid $crimson !important;
-  border-radius: 12px;
   background: $crimson url(~Images/icons/close-white.svg) no-repeat 50% 50% !important;
   background-size: 14px;;;
 }

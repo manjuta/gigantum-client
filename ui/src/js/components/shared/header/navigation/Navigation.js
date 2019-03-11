@@ -62,13 +62,13 @@ class Navigation extends Component {
     return (
       <div className="Navigation flex-0-0-auto">
 
-      <ul className="Navigation__ul flex flex--row">
+      <ul className="Tabs flex flex--row">
         {
           Config[`${this.props.sectionType}_navigation_items`].map((item, index) => {
             const pathArray = props.location.pathname.split('/'),
                   selectedPath = (pathArray.length > 4) ? pathArray[pathArray.length - 1] : 'overview', // sets avtive nav item to overview if there is no menu item in the url
                   navItemCSS = classNames({
-                    'Navigation__list-item--selected': (selectedPath === item.id),
+                    'Tab--selected': (selectedPath === item.id),
                     [`Navigation__list-item Navigation__list-item--${item.id}`]: (!selectedPath !== item.id),
                     [`Navigation__list-item--${index}`]: true,
                   });

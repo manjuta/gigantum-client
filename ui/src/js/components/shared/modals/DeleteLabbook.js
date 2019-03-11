@@ -140,9 +140,9 @@ export default class DeleteLabbook extends Component {
         header={deleteText}
         handleClose={() => this.props.handleClose()}
         size="medium"
-        renderContent={() =>
-          (<div className="DeleteLabbook">
+        renderContent={() => <div className="DeleteLabbook">
             {this._getExplanationText()}
+
             <input
               id="deleteInput"
               placeholder={`Enter ${labbookName} to delete`}
@@ -151,16 +151,17 @@ export default class DeleteLabbook extends Component {
               type="text"
             />
 
-
-            <ButtonLoader
-              buttonState={this.state.deleteLabbookButtonState}
-              buttonText={deleteText}
-              className=""
-              params={{}}
-              buttonDisabled={this.state.deletePending || labbookName !== this.state.labbookName}
-              clicked={this._deleteLabbook}
-            />
-           </div>)
+            <div className="DeleteProject__buttons">
+              <ButtonLoader
+                className="Btn--last"
+                buttonState={this.state.deleteLabbookButtonState}
+                buttonText={deleteText}
+                params={{}}
+                buttonDisabled={this.state.deletePending || labbookName !== this.state.labbookName}
+                clicked={this._deleteLabbook}
+              />
+            </div>
+          </div>
         }
       />
     );

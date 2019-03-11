@@ -1,0 +1,29 @@
+.Tabs {
+  min-width: 720px;
+  border-bottom: 1px solid $grey;
+  @include flex(flex-start, row);
+}
+
+.Tab {
+  a {
+    display: inline-block;
+    margin: 0;
+    padding: .5rem 10px;
+    text-decoration: none !important;
+    color: $jet;
+    border-bottom: 2px solid $azure;
+  }
+
+  &:hover,
+  &--selected {
+    a {
+      position: relative;
+      z-index: 6;
+      color: $white;
+      background: $azure;
+      &:hover {
+        color: $white;
+      }
+    }
+  }
+}

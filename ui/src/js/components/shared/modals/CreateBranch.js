@@ -266,27 +266,24 @@ export default class CreateBranchModal extends Component {
             </div>
 
             <div className="CreateBranch_nav">
-              <div className="CreateBranch__navGroup">
-                <div className="CreateBranch_navItem">
-                  <button
-                    type="submit"
-                    disabled={inputsDisabled}
-                    onClick={() => { this._hideModal(); }}
-                    className="CreateBranch__btn--progress button--flat">
-                    Cancel
-                  </button>
-                </div>
+              <div className="CreateBranch__buttons">
+                <button
+                  type="submit"
+                  disabled={inputsDisabled}
+                  onClick={() => { this._hideModal(); }}
+                  className="CreateBranch__btn--progress Btn--flat">
+                  Cancel
+                </button>
 
-                <div className="CreateBranch_navItem">
-                  <ButtonLoader
-                    ref="buttonLoaderCreateBranch"
-                    buttonState={state.buttonLoaderCreateBranch}
-                    buttonText="Create"
-                    params={{}}
-                    buttonDisabled={createDisabled}
-                    clicked={this._createNewBranch}
-                  />
-                </div>
+                <ButtonLoader
+                  className="Btn--last"
+                  ref="buttonLoaderCreateBranch"
+                  buttonState={state.buttonLoaderCreateBranch}
+                  buttonText="Create"
+                  params={{}}
+                  buttonDisabled={createDisabled}
+                  clicked={this._createNewBranch}
+                />
               </div>
             </div>
           </div>)

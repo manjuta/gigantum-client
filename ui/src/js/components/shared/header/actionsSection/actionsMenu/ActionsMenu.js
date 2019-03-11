@@ -565,7 +565,7 @@ class ActionsMenu extends Component {
 
         <button
           onClick={() => { this._toggleMenu(); }}
-          className="ActionsMenu__btn">
+          className="ActionsMenu__btn Btn--last">
         </button>
 
         <div className={branchMenuCSS}>
