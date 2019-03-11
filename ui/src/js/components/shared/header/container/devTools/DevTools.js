@@ -178,7 +178,7 @@ class DevTools extends Component {
           <div className="DevTools__flex">
             <button
               type="submit"
-              className="DevTools__btn DevTools__btn--launch Btn--columns"
+              className="DevTools__btn DevTools__btn--launch Btn--columns Btn-last"
               onClick={() => { this._openDevToolMuation(state.selectedDevTool); }}>
                 <div className="Btn--label">Launch:</div>
                 <div className="Btn--text">{state.selectedDevTool}</div>

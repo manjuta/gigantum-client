@@ -178,7 +178,7 @@ export default class CustomDockerfile extends Component {
 
                       <button
                         onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
-                        className="CustomDockerfile__content-cancel-button button--flat">
+                        className="CustomDockerfile__content-cancel-button Btn--flat">
                       Cancel
                       </button>
 

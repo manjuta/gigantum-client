@@ -258,10 +258,8 @@ export default class PublishModal extends Component {
             </div>
 
             <div className="VisibilityModal__buttons">
-
-              <button onClick={() => { this._modifyVisibility(); }}>{props.buttonText}</button>
               <button className="Btn--flat" onClick={() => { props.toggleModal(props.modalStateValue); }}>Cancel</button>
-
+              <button className="Btn--last" onClick={() => { this._modifyVisibility(); }}>{props.buttonText}</button>
             </div>
 
            </div>)

@@ -54,7 +54,7 @@ export default class Modal extends Component {
             }
             { props.header
               && <Fragment>
-                <h4 className="Modal__header">{props.header}</h4>
+                <h1 className="Modal__header">{props.header}</h1>
                 <hr />
               </Fragment>
             }
