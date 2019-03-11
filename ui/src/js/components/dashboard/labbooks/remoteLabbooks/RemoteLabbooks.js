@@ -7,7 +7,7 @@ import {
 // components
 import RemoteLabbookPanel from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
 import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
-import LabbooksPaginationLoader from '../labbookLoaders/LabbookPaginationLoader';
+import CardLoader from 'Components/dashboard/loaders/CardLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -151,7 +151,7 @@ class RemoteLabbooks extends Component {
           }
             {
             Array(5).fill(1).map((value, index) => (
-              <LabbooksPaginationLoader
+              <CardLoader
                 key={`RemoteLabbooks_paginationLoader${index}`}
                 index={index}
                 isLoadingMore={this.state.isPaginating}

@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import LocalLabbookPanel from 'Components/dashboard/labbooks/localLabbooks/LocalLabbookPanel';
-import LabbooksPaginationLoader from 'Components/dashboard/labbooks/labbookLoaders/LabbookPaginationLoader';
+import CardLoader from 'Components/dashboard/loaders/CardLoader';
 import ImportModule from './import/ImportModule';
 // helpers
 import ContainerLookup from './lookups/ContainerLookup';
@@ -255,7 +255,7 @@ export class LocalLabbooks extends Component {
 
             {
               Array(5).fill(1).map((value, index) => (
-                <LabbooksPaginationLoader
+                <CardLoader
                   key={`LocalLabbooks_paginationLoader${index}`}
                   index={index}
                   isLoadingMore={this.state.isPaginating || this.props.loading}

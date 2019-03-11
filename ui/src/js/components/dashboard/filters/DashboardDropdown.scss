@@ -1,15 +1,22 @@
 @import '~Styles/_imports.scss';
 
-.LabbookFilterBy {
-  color: $font-grey;
+.DashboardDropdown {
+  color: $mineShaft;
   position: relative;
+  align-items: center;
+  cursor: pointer;
+  @include flex(space-between, row);
+
+  .Dropdown__menu {
+    top: 35px;
+  }
 }
 
-.LabbookFilterBy__selector {
+.DashboardDropdown__selector {
    width: 208px;
 }
 
-.LabbookFilterBy__list-item{
+.DashboardDropdown__list-item{
 
   height: 40px;
   padding: 10px 5px !important;
@@ -17,7 +24,7 @@
 
   user-select: none;
 
-  border-bottom: 1px solid $grey;
+  border-bottom: 1px solid $mineShaft;
 
   &:last-child{
     border-bottom: none;

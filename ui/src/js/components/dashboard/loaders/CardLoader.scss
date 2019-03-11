@@ -1,7 +1,7 @@
 @import '~Styles/_imports.scss';
 
-.DatasetPaginationLoader {
-  background: $white url('~Images/icons/labbooks-placeholder.svg') no-repeat center center;
+.CardLoader {
+  background: $white url('~Images/icons/labbooks-placeholder.svg') no-repeat center center !important;
   background-size: 275px;
   opacity: 1;
 

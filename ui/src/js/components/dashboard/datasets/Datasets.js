@@ -10,8 +10,8 @@ import LocalDatasetsContainer, { LocalDatasets } from 'Components/dashboard/data
 import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Tooltip from 'Components/common/Tooltip';
-import DatasetFilterBy from './filters/DatasetFilterBy';
-import DatasetSort from './filters/DatasetSort';
+import FilterByDropdown from 'Components/dashboard/filters/FilterByDropdown';
+import SortByDropdown from 'Components/dashboard/filters/SortByDropdown';
 // utils
 import Validation from 'JS/utils/Validation';
 // queries
@@ -127,7 +127,7 @@ class Datasets extends Component {
   */
 
   _closeSortMenu(evt) {
-    const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('DatasetSort__selector') > -1);
+    const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('Dropdown__sort-selector') > -1);
 
     if (!isSortMenu && this.state.sortMenuOpen) {
       this.setState({ sortMenuOpen: false });
@@ -140,7 +140,7 @@ class Datasets extends Component {
     * hides the filter menu dropdown from the view
   */
   _closeFilterMenu(evt) {
-    const isFilterMenu = evt.target.className.indexOf('DatasetFilterBy__selector') > -1;
+    const isFilterMenu = evt.target.className.indexOf('Dropdown__filter-selector') > -1;
 
     if (!isFilterMenu && this.state.filterMenuOpen) {
       this.setState({ filterMenuOpen: false });
@@ -384,15 +384,15 @@ class Datasets extends Component {
 
     if (props.datasetList !== null || props.loading) {
       const localNavItemCSS = classNames({
-        'Datasets__nav-item': true,
-        'Datasets__nav-item--local': true,
-        'Datasets__nav-item--selected': this.state.selectedSection === 'local',
+        Tab: true,
+        'Tab--local': true,
+        'Tab--selected': this.state.selectedSection === 'local',
       });
 
       const cloudNavItemCSS = classNames({
-        'Datasets__nav-item': true,
-        'Datasets__nav-item--cloud': true,
-        'Datasets__nav-item--selected': this.state.selectedSection === 'cloud',
+        Tab: true,
+        'Tab--cloud': true,
+        'Tab--selected': this.state.selectedSection === 'cloud',
       });
 
       return (
@@ -409,11 +409,11 @@ class Datasets extends Component {
 
           <div className="Datasets__panel-bar">
             <h6 className="Datasets__username">{localStorage.getItem('username')}</h6>
-            <h2>Datasets</h2>
+            <h1>Datasets</h1>
 
           </div>
           <div className="Datasets__menu  mui-container flex-0-0-auto">
-            <ul className="Datasets__nav  flex flex--row">
+            <ul className="Tabs">
               <li className={localNavItemCSS}>
                 <a onClick={() => this._setSection('local')}>Local</a>
               </li>
@@ -451,12 +451,13 @@ class Datasets extends Component {
               />
             </div>
 
-            <DatasetFilterBy
+            <FilterByDropdown
               {...this.state}
+              type="Datasets"
               toggleFilterMenu={this._toggleFilterMenu}
               setFilter={this._setFilter}
             />
-            <DatasetSort
+            <SortByDropdown
               {...this.state}
               toggleSortMenu={this._toggleSortMenu}
               setSortFilter={this._setSortFilter}

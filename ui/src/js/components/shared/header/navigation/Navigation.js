@@ -68,9 +68,8 @@ class Navigation extends Component {
             const pathArray = props.location.pathname.split('/'),
                   selectedPath = (pathArray.length > 4) ? pathArray[pathArray.length - 1] : 'overview', // sets avtive nav item to overview if there is no menu item in the url
                   navItemCSS = classNames({
+                    Tab: true,
                     'Tab--selected': (selectedPath === item.id),
-                    [`Navigation__list-item Navigation__list-item--${item.id}`]: (!selectedPath !== item.id),
-                    [`Navigation__list-item--${index}`]: true,
                   });
 
             return (

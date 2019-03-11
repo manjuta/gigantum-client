@@ -7,7 +7,7 @@ import {
 // components
 import RemoteDatasetPanel from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasetsPanel';
 import DeleteDataset from 'Components/shared/modals/DeleteDataset';
-import DatasetsPaginationLoader from '../datasetsLoaders/datasetsPaginationLoader';
+import CardLoader from 'Components/dashboard/loaders/CardLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -151,7 +151,7 @@ class RemoteDatasets extends Component {
           }
             {
             Array(5).fill(1).map((value, index) => (
-              <DatasetsPaginationLoader
+              <CardLoader
                 key={`RemoteDatasets_paginationLoader${index}`}
                 index={index}
                 isLoadingMore={this.state.isPaginating}

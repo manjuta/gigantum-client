@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import LocalDatasetPanel from 'Components/dashboard/datasets/localDatasets/LocalDatasetsPanel';
-import DatasetsPaginationLoader from '../datasetsLoaders/datasetsPaginationLoader';
+import CardLoader from 'Components/dashboard/loaders/CardLoader';
 import ImportModule from './import/ImportModule';
 // helpers
 import DatasetVisibilityLookup from './lookups/DatasetVisibilityLookup';
@@ -212,7 +212,7 @@ export class LocalDatasets extends Component {
 
             {
               Array(5).fill(1).map((value, index) => (
-                <DatasetsPaginationLoader
+                <CardLoader
                   key={`LocalDatasets_paginationLoader${index}`}
                   index={index}
                   isLoadingMore={this.state.isPaginating || this.props.loading}

@@ -2,21 +2,22 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 // assets
-import './DatasetFilterBy.scss';
+import './DashboardDropdown.scss';
 
 
-class DatasetFilterBy extends Component {
+class FilterByDropdown extends Component {
 
   /**
     *  @param {}
     *  gets filter value and displays it to the UI more clearly
+    * @return {}
   */
   _getFilter() {
     switch (this.props.filter) {
       case 'all':
         return 'All';
       case 'owner':
-        return 'My Datasets';
+        return 'My Projects';
       case 'others':
         return 'Shared With Me';
       default:
@@ -27,45 +28,52 @@ class DatasetFilterBy extends Component {
   render() {
     const { props } = this;
 
-    const datasetFilterSeclectorCSS = classNames({
-      'Dropdown DatasetFilterBy__selector': true,
+    const labbookFilterSeclectorCSS = classNames({
+      'Dropdown__filter-selector Dropdown': true,
       'Dropdown--open': props.filterMenuOpen,
       'Dropdown--collapsed': !props.filterMenuOpen,
     });
 
-    const datasetFilterMenuCSS = classNames({
-      'Dropdown__menu DatasetFilterBy__menu box-shadow': true,
+    const labbookFilterMenuCSS = classNames({
+      'Dropdown__menu box-shadow': true,
       hidden: !props.filterMenuOpen,
     });
 
     return (
 
-      <div className="DatasetFilterBy column-4-span-3 padding--0">
-        Filter by:
-        <span
-          className={datasetFilterSeclectorCSS}
+      <div className="DashboardDropdown column-4-span-3 padding--0">
+        <div>Filter by:</div>
+        <div
+          className={labbookFilterSeclectorCSS}
           onClick={props.toggleFilterMenu}>
           {this._getFilter()}
-        </span>
-        <ul className={datasetFilterMenuCSS}>
+        </div>
+
+        <ul
+          className={labbookFilterMenuCSS}>
           <li
-            className="DatasetFilterBy__list-item"
+            className="DashboardDropdown__list-item"
             onClick={() => props.setFilter('all')}>
-            All { (props.filter === 'all') ? '✓ ' : ''}
+            All
+            {props.filter === 'all' ? ' ✓ ' : ''}
           </li>
           <li
-            className="DatasetFilterBy__list-item"
+            className="DashboardDropdown__list-item"
             onClick={() => props.setFilter('owner')}>
-            My Datasets { (props.filter === 'owner') ? '✓ ' : ''}
+           My
+           {` ${props.type}`}
+           {props.filter === 'owner' ? ' ✓ ' : ''}
           </li>
           <li
-            className="DatasetFilterBy__list-item"
+            className="DashboardDropdown__list-item"
             onClick={() => props.setFilter('others')}>
-            Shared with me { (props.filter === 'others') ? '✓ ' : ''}
+            Shared with me
+            {props.filter === 'others' ? ' ✓ ' : ''}
           </li>
         </ul>
+
       </div>);
   }
 }
 
-export default DatasetFilterBy;
+export default FilterByDropdown;

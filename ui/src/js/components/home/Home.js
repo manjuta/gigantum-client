@@ -19,12 +19,13 @@ export default class Home extends Component {
     sets authentication response to the state
   */
   componentDidMount() {
+    const { state } = this;
     this.props.auth.isAuthenticated().then((response) => {
       let isAuthenticated = response;
       if (isAuthenticated === null) {
         isAuthenticated = false;
       }
-      if (isAuthenticated !== this.state.authenticated) {
+      if (isAuthenticated !== state.authenticated) {
         this.setState({ authenticated: isAuthenticated });
       }
     });
