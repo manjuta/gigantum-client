@@ -151,23 +151,24 @@ export default class SectionWrapper extends Component {
                   />
                 }
               </div>
-              <hr />
             </div>
           }
+          <hr className="column-1-span-12" />
+          <div className="grid">
+            <div className="SectionWrapper__file-browser column-1-span-12">
+              <Browser
+                selectedFiles={this.state.selectedFiles}
+                clearSelectedFiles={this._clearSelectedFiles}
+                labbookId={sectionId}
+                sectionId={innerSection.id}
+                section={section}
+                loadStatus={this._loadStatus}
+                isLocked={this.props.isLocked}
+                {...sectionProps}
+                linkedDatasets={sectionObject.linkedDatasets || null}
 
-          <div className="SectionWrapper__file-browser">
-            <Browser
-              selectedFiles={this.state.selectedFiles}
-              clearSelectedFiles={this._clearSelectedFiles}
-              labbookId={sectionId}
-              sectionId={innerSection.id}
-              section={section}
-              loadStatus={this._loadStatus}
-              isLocked={this.props.isLocked}
-              {...sectionProps}
-              linkedDatasets={sectionObject.linkedDatasets || null}
-
-            />
+              />
+            </div>
           </div>
         </div>
       );

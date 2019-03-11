@@ -15,6 +15,8 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
+// store
+import { setSidepanelVisible } from 'JS/redux/reducers/labbook/labbook';
 // assets
 import './BranchMenu.scss';
 
@@ -47,7 +49,6 @@ class BranchMenu extends Component {
       owner: this.props.section.owner,
     }),
     switchingBranch: false,
-    sidePanelVisible: false,
     forceSyncModalVisible: false,
     publishModalVisible: false,
     publishDatasetsModalVisible: false,
@@ -57,19 +58,6 @@ class BranchMenu extends Component {
     isDataset: this.props.sectionType !== 'labbook',
     action: null,
   };
-
-
-  /**
-    @param {object} nextProps
-    @param {object} nextState
-    closes sidepanel if isLocked is passed
-  */
-  static getDerivedStateFromProps(nextProps, nextState) {
-    return {
-      ...nextState,
-      sidePanelVisible: nextProps.isLocked ? false : nextState.sidePanelVisible,
-    };
-  }
 
   componentDidMount() {
     window.addEventListener('click', this._closePopups);
@@ -249,7 +237,8 @@ class BranchMenu extends Component {
   @boundMethod
   _toggleSidePanel(sidePanelVisible) {
       if (!this.props.isLocked && !this.state.isDataset) {
-        this.setState({ sidePanelVisible, switchMenuVisible: false });
+        this.setState({ switchMenuVisible: false });
+        setSidepanelVisible(sidePanelVisible);
       }
   }
 
@@ -722,7 +711,7 @@ class BranchMenu extends Component {
           />
 
           <Branches
-            sidePanelVisible={state.sidePanelVisible}
+            sidePanelVisible={props.sidePanelVisible}
             toggleSidePanel={this._toggleSidePanel}
             defaultRemote={props.defaultRemote}
             branches={props.branches}

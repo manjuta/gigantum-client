@@ -687,7 +687,7 @@ class Activity extends Component {
           className={activityCSS}>
           {
             (!state.refetchEnabled && state.newActivityAvailable)
-            && <div className="Activity__new-record-wrapper column-1-span-10">
+            && <div className="Activity__new-record-wrapper column-1-span-9">
               <div
                 onClick={() => this._getNewActivities()}
                 className={newActivityCSS}>

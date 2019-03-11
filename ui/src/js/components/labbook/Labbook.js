@@ -427,6 +427,7 @@ class Labbook extends Component {
 
     if (props.labbook) {
       const { labbook, branchesOpen } = props,
+            sidePanelVisible = !isLocked && props.sidePanelVisible,
             branchName = '',
             isDemo = window.location.hostname === Config.demoHostName,
             labbookCSS = classNames({
@@ -436,6 +437,7 @@ class Labbook extends Component {
             'Labbook--demo-mode': isDemo,
             'Labbook--deprecated': state.isDeprecated,
             'Labbook--demo-deprecated': state.isDeprecated && isDemo,
+            'Labbook--sidePanelVisible': sidePanelVisible,
           }),
           deprecatedCSS = classNames({
             Labbook__deprecated: true,
@@ -594,6 +596,7 @@ class Labbook extends Component {
               setBranchUptodate={this._setBranchUptodate}
               isDeprecated={state.isDeprecated}
               updateMigationState={this._updateMigationState}
+              sidePanelVisible={sidePanelVisible}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -638,7 +641,8 @@ class Labbook extends Component {
                                isPublishing={props.isPublishing}
                                scrollToTop={this._scrollToTop}
                                sectionType="labbook"
-                                history={this.props.history}
+
+                               history={this.props.history}
                              />
                         </ErrorBoundary>
                             )}
