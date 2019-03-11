@@ -33,7 +33,7 @@
     width: 100%
 }
 .activityCardError{
-    @include spanColumns(10);
+    @include spanColumns(10, 1);
     height: 80px;
     margin: 0;
     z-index: index($elements, card);
