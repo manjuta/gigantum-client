@@ -44,7 +44,7 @@ export default class MostRecentList extends Component {
         'MostRecentOutput_allFiles';
 
     return (
-      <div className="Recent__list">
+      <div className="Recent__list grid">
         {
           shownFiles.map((edge, index) => (
             <RecentCard

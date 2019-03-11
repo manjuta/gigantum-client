@@ -16,8 +16,8 @@
     100% {
       opacity: 0.1;
     }
-
 }
+
 .Favorite__card {
   cursor: grab;
   &--opaque {
@@ -87,6 +87,13 @@
   overflow: hidden;
     p{
       margin: 0;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      white-space: pre-line;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 3;
+      line-height: 18px;
     }
 }
 
@@ -114,6 +121,11 @@
   height: 28px;
   .Favorite__path{
     margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    overflow: hidden;
+    padding-right: 20px;
   }
 }
 
@@ -124,6 +136,10 @@
   color: $slateBlue;
   word-break: break-all;
   max-width: 300px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding-right: 30px;
 }
 
 .Favorite__star {

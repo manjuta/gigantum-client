@@ -55,7 +55,7 @@ export default class ClusterCardWrapper extends Component {
         shouldBeFaded = props.hoveredRollback > props.record.flatIndex,
         clusterCSS = classNames({
           'ActivityCard--cluster': true,
-          'column-1-span-10': true,
+          'column-1-span-9': true,
           faded: shouldBeFaded,
         }),
         clusterWrapperCSS = classNames({

@@ -855,6 +855,7 @@ class FileBrowser extends Component {
                     section={this.props.section}
                     updateChildState={this._updateChildState}
                     parentDownloading={this.state.downloadingAll}
+                    rootFolder
                     codeDirUpload={this._codeDirUpload}>
                   </Folder>);
                 } else if (isFile) {
