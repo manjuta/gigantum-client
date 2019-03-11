@@ -25,24 +25,6 @@
 @import 'atoms/containerStatus.scss';
 @import 'atoms/dropdown.scss';
 
-//shared components
-@import 'components/shared/sideBar';
-@import 'components/shared/prompt';
-@import 'components/shared/loader';
-@import 'components/shared/buttonLoader';
-@import 'components/shared/user';
-@import 'components/shared/header';
-@import 'components/shared/helper';
-@import 'components/shared/componentError';
-  //footer
-@import 'components/shared/footer/footer';
-@import 'components/shared/footer/footerNotificationList';
-@import 'components/shared/footer/footerUploadBar';
-//root
-@import 'components/routes.scss';
-@import 'components/login.scss';
-@import 'components/home.scss';
-
 body * {
   font-family: "NunitoSans";
 }

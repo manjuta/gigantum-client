@@ -1,5 +1,8 @@
+// vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+// assets
+import './User.scss';
 
 export default class User extends Component {
   constructor(props) {

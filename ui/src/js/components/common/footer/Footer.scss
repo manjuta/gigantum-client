@@ -1,4 +1,4 @@
-$footerElements: basic, progressBar, status, section, message, button;
+@import '~Styles/_imports.scss';
 
 .Footer__container {
     position: relative;
@@ -14,7 +14,6 @@ $footerElements: basic, progressBar, status, section, message, button;
     transition: height 0.5s;
 
     color: $white;
-    //background-color: $slateBlue;
 
     font-weight: 100;
 
@@ -38,9 +37,9 @@ $footerElements: basic, progressBar, status, section, message, button;
     cursor: pointer;
     transition: all 0.25s;
     border-radius: 50%;
-    background: $azure url(../images/icons/notifications/notification.svg) no-repeat center center;
+    background: $azure url(~Images/icons/notifications/notification.svg) no-repeat center center;
     background-size: 60px;
-    @extend .box-shadow;
+    @include boxShadow();
 }
 
 .Footer__dist-button--side-view{
@@ -50,7 +49,7 @@ $footerElements: basic, progressBar, status, section, message, button;
   border-radius: 20px 0 0 20px;
   right: 0px;
   transition: bottom 0.25s;
-  background: $azure url(../images/icons/notifications/notification-simple.svg) no-repeat center center;
+  background: $azure url(~Images/icons/notifications/notification-simple.svg) no-repeat center center;
   background-size: 26px;
 }
 
@@ -76,7 +75,7 @@ $footerElements: basic, progressBar, status, section, message, button;
     width: 40px;
     height: 40px;
 
-    background: $azure url(../images/icons/notifications/notification-close.svg) no-repeat center center;
+    background: $azure url(~Images/icons/notifications/notification-close.svg) no-repeat center center;
     background-size: 40px;
     border-radius: 50%;
 
@@ -148,7 +147,7 @@ $footerElements: basic, progressBar, status, section, message, button;
 }
 
 .Footer__message-icon{
-  background: url(../images/icons/notifications/info-exclamation.svg) no-repeat center center;
+  background: url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
   background-size: 26px;
   height: 22px;
   width: 22px;
@@ -161,14 +160,14 @@ $footerElements: basic, progressBar, status, section, message, button;
 }
 .Footer__message--error{
   .Footer__message-icon{
-    background: $crimson url(../images/icons/notifications/info-exclamation.svg) no-repeat center center;
+    background: $crimson url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
     background-size: 26px;
     transform: rotate(0deg);
   }
 }
 .Footer__message--warning{
   .Footer__message-icon{
-    background: $goldenLemon url(../images/icons/notifications/info-exclamation.svg) no-repeat center center;
+    background: $goldenLemon url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
     background-size: 26px;
     transform: rotate(0deg);
   }

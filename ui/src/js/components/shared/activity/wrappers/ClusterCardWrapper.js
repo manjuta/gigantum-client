@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import ActivityCard from '../ActivityCard';
 import CardWrapper from './CardWrapper';
 // Styles
@@ -67,7 +67,7 @@ export default class ClusterCardWrapper extends Component {
       return (
         <div className="CardWrapper CardWrapper--cluster">
 
-          <ToolTip section="activityCluster" />
+          <Tooltip section="activityCluster" />
 
           <div
             className={clusterCSS}

@@ -1,6 +1,8 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+// assets
+import './ButtonLoader.scss';
 
 export default class ButtonLoader extends Component {
   constructor(props) {

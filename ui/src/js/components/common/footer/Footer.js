@@ -1,8 +1,6 @@
+// vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-// components
-import FooterNotificationList from './FooterNotificationList';
-import FooterUploadBar from './FooterUploadBar';
 import { connect } from 'react-redux';
 // store
 import {
@@ -15,7 +13,11 @@ import {
   setToggleMessageList,
 } from 'JS/redux/reducers/footer';
 import { setPauseUpload } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
-
+// // components
+import FooterNotificationList from './FooterNotificationList';
+import FooterUploadBar from './FooterUploadBar';
+// assets
+import './Footer.scss';
 
 class Footer extends Component {
   constructor(props) {

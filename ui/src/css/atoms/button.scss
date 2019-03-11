@@ -1,64 +1,42 @@
 button {
-  height: 26px;
-  line-height: 22px;
-  padding: 0px 20px;
-  border: 2px solid $azure;
-  border-radius: 10px;
-  color: $white;
-  background: $azure;
+  width: 162px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin: 0 12.5px;
+
   cursor: pointer;
-  font-weight: 100;
 
-}
-
-button:hover {
   color: $white;
-  background: $turquise;
-  border: 2px solid $turquise;
-}
-
-button:focus {
-  color: $white;
+  border: 0;
+  border-radius: 4px;
   background: $azure;
+
+  font-weight: 400;
+  line-height: 1rem;
+
+  &:hover {
+    color: $white;
+    @include boxShadow();
+  }
+
+  &:focus {
+    color: $white;
+    background: $azure;
+  }
+
+  &:disabled,
+  &:hover:disabled {
+    overflow: hidden;
+
+    color: $white;
+    border: 0;
+    background: $romanSilver;
+    box-shadow: none !important;
+  }
 }
 
 
-button:disabled {
-  color: $grey;
-  background: $grey-light;
-  border: 2px solid $grey;
-  overflow: hidden;
-}
-
-.button--flat {
-  padding: 0px 20px;
-  border: 0px solid $azure;
-  border-radius: 0px;
-  color: $font-grey;
-  background: none;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.button--flat:hover {
-  color: $turquise;
-  background: none;
-  border: 0px solid $turquise;
-}
-.button--flat:focus {
-  color: $azure;
-  background: none;
-  border: 0px solid $azure;
-}
-.button--flat:disabled,
-.button--flat:disabled:focus,
-.button--flat:disabled:hover{
-  color: $grey;
-  background: $grey-light;
-  border: 2px solid $grey;
-}
-
-.Btn{
+.Btn {
    background-color: $azure;
    border: 0px;
    border-radius: 8px;
@@ -70,6 +48,40 @@ button:disabled {
 
    &:hover{
      background-color: $turquise;
+   }
+
+
+   &--flat {
+     padding: 7px 20px;
+     border: 0px solid $azure;
+     border-radius: 0px;
+     width: auto;
+     color: $azure;
+     background: none;
+     cursor: pointer;
+     text-decoration: underline;
+     box-shadow: none;
+
+     &:hover {
+       color: $turquise;
+       background: none;
+       border: 0px solid $turquise;
+       box-shadow: none;
+     }
+
+     &:focus {
+       color: $azure;
+       background: none;
+       border: 0px solid $azure;
+     }
+
+     &:disabled,
+     &:disabled:focus,
+     &:disabled:hover{
+       color: $romanSilver;
+       background: transparent;
+       border: 0px solid $grey;
+     }
    }
 
    &--large {
@@ -134,6 +146,7 @@ button:disabled {
     background-size: 15px;
     border: none;
     z-index: 1;
+
     span {
       display: none;
     }
@@ -246,35 +259,6 @@ button:disabled {
      }
   }
 
-
-  &--flat {
-    padding: 0px 20px;
-    border: 0px solid $azure;
-    border-radius: 0px;
-    color: $azure;
-    background: none;
-    cursor: pointer;
-    text-decoration: none;
-  }
-
-  &--flat:hover {
-    color: $turquise;
-    background: none;
-    border: 0px solid $turquise;
-  }
-  &--flat:focus {
-    color: $azure;
-    background: none;
-    border: 0px solid $azure;
-  }
-  &--flat:disabled,
-  &--flat:disabled:focus,
-  &--flat:disabled:hover{
-    color: $grey;
-    background: $grey-light;
-    border: 2px solid $grey;
-  }
-
   &--no-underline {
     text-decoration: none;
   }
@@ -293,5 +277,13 @@ button:disabled {
 
   &--text {
     font-size: 16px;
+  }
+
+  &--last {
+    margin-right: 0px;
+  }
+
+  &--first {
+    margin-left: 0px;
   }
 }

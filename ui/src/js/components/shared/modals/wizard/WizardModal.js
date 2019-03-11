@@ -301,15 +301,17 @@ export default class WizardModal extends React.Component {
   }
 
   render() {
-    const loaderCSS = classNames({
-      hidden: !this.state.modalBlur,
-    });
-    const currentComponent = this._currentComponent();
-    const modalSize = (currentComponent.header === 'Select A Base') ? 'large-long' : 'large';
+    const { props, state } = this,
+            loaderCSS = classNames({
+            hidden: !this.state.modalBlur,
+          }),
+          currentComponent = this._currentComponent(),
+          modalSize = (currentComponent.header === 'Select A Base') ? 'large-long' : 'large';
+
     return (
       <div>
         {
-          this.state.modal_visible &&
+          state.modal_visible &&
           <Modal
             size={modalSize}
             icon="add"
@@ -324,13 +326,13 @@ export default class WizardModal extends React.Component {
                 }
                 <ModalNav
                   self={this}
-                  state={this.state}
+                  state={state}
                   getSelectedComponentId={this._getSelectedComponentId}
                   setComponent={this._setComponent}
                   hideModal={this._hideModal}
                   continueSave={this._continueSave}
                   createLabbookCallback={this._createLabbookCallback}
-                  isDataset={this.props.datasets}
+                  isDataset={props.datasets}
                 />
                </div>)
             }
@@ -402,51 +404,47 @@ function ModalNav({
   self, state, getSelectedComponentId, setComponent, hideModal, continueSave, isDataset,
 }) {
   const backButton = classNames({
-    'WizardModal__progress-button': true,
-    'button--flat': true,
-    hidden: (state.selectedComponentId === 'createLabbook'),
-  });
-
-  const trackingButton = classNames({
-    hidden: (state.selectedComponentId !== 'createLabbook') || isDataset,
-  });
-
-  const wizardModalNav = classNames({
-    WizardModal__nav: true,
-    hidden: !state.menuVisibility,
-  });
+          'WizardModal__progress-button': true,
+          'Btn--flat': true,
+          hidden: (state.selectedComponentId === 'createLabbook'),
+       }),
+       trackingButton = classNames({
+          hidden: (state.selectedComponentId !== 'createLabbook') || isDataset,
+       }),
+       wizardModalNav = classNames({
+          WizardModal__actions: true,
+          hidden: !state.menuVisibility,
+       }),
+       buttonText = isDataset ? 'Create Dataset' : 'Create Project';
 
   return (
     <div className={wizardModalNav}>
       <div>
-        <button
-          onClick={() => { setComponent('createLabbook'); }}
-          className={backButton}
-        >
-          Back
-        </button>
         <div className={trackingButton}>
           <TrackingToggle
             setTracking={self._setTracking}
           />
         </div>
       </div>
-      <div className="WizardModal__nav-group">
-        <div className="WizardModal__nav-item">
-          <button
-            onClick={() => { hideModal(); }}
-            className="WizardModal__progress-button button--flat"
-          >
-            Cancel
-          </button>
-        </div>
+      <div className="WizardModal__buttons">
+        <button
+          onClick={() => { setComponent('createLabbook'); }}
+          className={backButton}>
+          Back
+        </button>
 
-        <div className="WizardModal__nav-item">
+        <button
+          onClick={() => { hideModal(); }}
+          className="Btn--flat">
+          Cancel
+        </button>
+
+        <div>
           { (state.selectedComponentId === 'createLabbook') &&
             <button
+              className="Btn--last"
               onClick={() => { continueSave({ isSkip: false, text: 'Continue' }); }}
-              disabled={(state.continueDisabled)}
-            >
+              disabled={(state.continueDisabled)}>
               Continue
             </button>
           }
@@ -454,9 +452,12 @@ function ModalNav({
           { (state.selectedComponentId === 'selectBase') &&
             <ButtonLoader
               buttonState={state.createLabbookButtonState}
-              buttonText={isDataset ? 'Create Dataset' : 'Create Project'}
-              className=""
-              params={{ isSkip: false, text: 'Create Project' }}
+              buttonText={buttonText}
+              className="Btn--last"
+              params={{
+                isSkip: false,
+                text: 'Create Project'
+              }}
               buttonDisabled={state.continueDisabled}
               clicked={continueSave}
             />

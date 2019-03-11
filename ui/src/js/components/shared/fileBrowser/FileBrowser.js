@@ -697,7 +697,7 @@ class FileBrowser extends Component {
                  <div className="FileBrowser__button-container flex justify--space-around">
 
                    <button
-                     className="button--flat"
+                     className="Btn--flat"
                      onClick={() => this._cancelUpload()}>
                      Cancel Upload
                    </button>

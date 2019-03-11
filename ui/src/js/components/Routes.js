@@ -18,6 +18,8 @@ import Prompt from 'Components/common/Prompt';
 import Helper from 'Components/common/Helper';
 // config
 import config from 'JS/config';
+// assets
+import './Routes.scss';
 
 const Loading = () => <div />;
 

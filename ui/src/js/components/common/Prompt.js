@@ -1,5 +1,8 @@
+// vendor
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
+// assets
+import './Prompt.scss';
 
 let updateAvailable = false;
 

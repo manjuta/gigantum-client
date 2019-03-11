@@ -1,3 +1,5 @@
+@import '~Styles/_imports.scss';
+
 .SideBar {
   position: fixed;
   z-index: index($elements, sideBar);
@@ -19,7 +21,7 @@
   height: 30px;
   width: 120px;
   margin: 10px auto;
-  background: url(../images/logos/gigantum-white-logo.svg) no-repeat 50% 50%;
+  background: url(~Images/logos/gigantum-white-logo.svg) no-repeat 50% 50%;
   background-size: 100%;
 
 }
@@ -80,7 +82,7 @@
   align-items: center;
   text-decoration: none !important;
   &:hover .SideBar__icon--datasets {
-    background: url('../images/icons/datasets-selected.svg') no-repeat center center;
+    background: url('~Images/icons/datasets-selected.svg') no-repeat center center;
     background-size: 40px;
   }
 }
@@ -89,7 +91,7 @@
   align-items: center;
   text-decoration: none !important;
   &:hover .SideBar__icon--labbooks {
-    background: url('../images/icons/labbooks-selected.svg') no-repeat center center;
+    background: url('~Images/icons/labbooks-selected.svg') no-repeat center center;
     background-size: 40px;
   }
 }
@@ -103,7 +105,7 @@
 }
 
 .SideBar__icon--datasets {
-  background: url('../images/icons/datasets.svg') no-repeat center center;
+  background: url('~Images/icons/datasets.svg') no-repeat center center;
   background-size: 40px;
 }
 
@@ -121,18 +123,18 @@
 
 .SideBar__icon--datasets-selected,
 .SideBar__icon--datasets:hover,{
-  background: url('../images/icons/datasets-selected.svg') no-repeat center center;
+  background: url('~Images/icons/datasets-selected.svg') no-repeat center center;
   background-size: 40px;
 }
 
 .SideBar__icon--labbooks {
-  background: url('../images/icons/labbooks.svg') no-repeat center center;
+  background: url('~Images/icons/labbooks.svg') no-repeat center center;
   background-size: 40px;
 }
 
 .SideBar__icon--labbooks-selected,
 .SideBar__icon--labbooks:hover {
-  background: url('../images/icons/labbooks-selected.svg') no-repeat center center;
+  background: url('~Images/icons/labbooks-selected.svg') no-repeat center center;
   background-size: 40px;
 }
 

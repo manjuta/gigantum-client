@@ -2,7 +2,7 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 // components
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 // mutations
 import SetLabbookDescriptionMutation from 'Mutations/SetLabbookDescriptionMutation';
 import SetDatasetDescriptionMutation from 'Mutations/SetDatasetDescriptionMutation';
@@ -226,7 +226,7 @@ export default class Description extends Component {
                     </p>
             }
             </div>
-        <ToolTip section="descriptionOverview" />
+        <Tooltip section="descriptionOverview" />
      </div>
     );
   }

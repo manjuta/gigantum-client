@@ -1,3 +1,5 @@
+@import '~Styles/_imports.scss';
+
 .Prompt {
     position: relative;
 }
@@ -6,13 +8,16 @@
     position: fixed;
     z-index: index($elements, prompt);
     top: 0;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
-    background: $slateBlue;
-    color: white;
-    font-size: 20px;
+
     text-align: center;
+
+    color: white;
+    background: $slateBlue;
+
+    font-size: 20px;
     line-height: 300px;
 }
 
@@ -20,9 +25,12 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+
     width: 500px;
     height: 130px;
+
+    transform: translate(-50%, -50%);
+
     background: url(https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg) no-repeat 50% 50%;
     background-size: 100%;
 }
@@ -31,11 +39,13 @@
     position: absolute;
     top: 40%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    transition: top 2s ease 0s;
 
     width: 500px;
     height: 130px;
+
+    transition: top 2s ease 0s;
+    transform: translate(-50%, -50%);
+
     background: url(https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg) no-repeat 50% 50%;
     background-size: 100%;
 }
@@ -44,10 +54,13 @@
     position: absolute;
     top: 30%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    transition: top 2s ease 0s;
+
     width: 500px;
     height: 130px;
+
+    transition: top 2s ease 0s;
+    transform: translate(-50%, -50%);
+
     background: url(https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg) no-repeat 50% 50%;
     background-size: 100%;
 }
@@ -56,10 +69,12 @@
     position: absolute;
     top: 50%;
     left: 50%;
+
     transform: translate(-50%, -50%);
-    opacity: 0;
     animation: fade-in-out 13s linear;
     animation-delay: 2s;
+
+    opacity: 0;
 
 }
 
@@ -67,24 +82,27 @@
   position: absolute;
   top: 45%;
   left: calc(50% - 400px);
-  width: 800px;
 
-
-  @include flex(space-between, column);
   align-items: center;
 
+  width: 800px;
+
+  @include flex(space-between, column);
+
   img{
-    margin-top: 20px;
     width: 600px;
     height: auto;
+    margin-top: 20px;
   }
 }
 
 .Prompt__failure-text {
-    line-height: 1.5;
-    opacity: 0;
     animation: fade-in 3s forwards;
     animation-delay: 2s;
+
+    opacity: 0;
+
+    line-height: 1.5;
 
     p {
         margin: 0
@@ -97,39 +115,39 @@
 }
 
 .Prompt__cli {
-    opacity: 0;
+    width: 600px;
+    height: 300px;
 
     animation: fade-in 3s forwards;
     animation-delay: 2s;
 
-    background: url(../images/logos/cli.png) no-repeat 50% 50%;
+    opacity: 0;
+    background: url(~Images/logos/cli.png) no-repeat 50% 50%;
     background-size: 100%;
-    height: 300px;
-    width: 600px;
 }
 
 .Prompt__mac {
-    opacity: 0;
+    width: 600px;
+    height: 300px;
 
     animation: fade-in 3s forwards;
     animation-delay: 2s;
 
-    background: url(../images/logos/app-mac.png) no-repeat 50% 50%;
+    opacity: 0;
+    background: url(~Images/logos/app-mac.png) no-repeat 50% 50%;
     background-size: 50%;
-    height: 300px;
-    width: 600px;
 }
 
 .Prompt__windows {
-    opacity: 0;
+    width: 600px;
+    height: 300px;
 
     animation: fade-in 3s forwards;
     animation-delay: 2s;
 
-    background: url(../images/logos/app-win.png) no-repeat 50% 50%;
+    opacity: 0;
+    background: url(~Images/logos/app-win.png) no-repeat 50% 50%;
     background-size: 50%;
-    height: 300px;
-    width: 600px;
 }
 
 @keyframes fade-in {
@@ -148,18 +166,18 @@
 
 .Prompt__refresh {
     position: fixed;
+    z-index: index($elements, popup);
     bottom: 20px;
     left: 180px;
-    z-index: index($elements, popup);
-    padding: 20px;
-
-    border-radius: 8px;
 
     width: 500px;
+    padding: 20px;
+
+    text-align: center;
+    word-wrap: break-word;
 
     color: $romanSilver;
+    border-radius: 8px;
     background: $white;
-    word-wrap: break-word;
     box-shadow: 0 0px 12px 0 rgba(0,0,0,.20);
-    text-align: center;
 }

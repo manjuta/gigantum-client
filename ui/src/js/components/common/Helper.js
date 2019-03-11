@@ -7,6 +7,8 @@ import {
   setResizeHelper,
 } from 'JS/redux/reducers/helper';
 import { setHelperVisible } from 'JS/redux/reducers/footer';
+// assets
+import './Helper.scss';
 
 
 class Helper extends Component {

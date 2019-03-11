@@ -7,13 +7,6 @@
     align-items: center;
 }
 
-.TrackingToggle__checkbox--on {
-  border: 1px solid $azure;
-}
-.TrackingToggle__checkbox--off {
-  border: 1px solid $romanSilver;
-}
-
 .TrackingToggle__checkbox {
   display: inline-block;
   position: relative;
@@ -24,10 +17,17 @@
   overflow: hidden;
   border-radius: 8px;
   margin:10px;
+
+  &--on {
+    border: 1px solid $azure;
+  }
+  &--off {
+    border: 1px solid $romanSilver;
+  }
 }
 
 .TrackingToggle__text {
-  width: 300px;
+  width: 250px;
 }
 
 .TrackingToggle input {

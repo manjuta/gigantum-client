@@ -1,6 +1,10 @@
+// vendor
 import React, { Component } from 'react';
+// components
 import Dashboard from 'Components/dashboard/Dashboard';
 import Login from 'Components/login/Login';
+// assets
+import './Home.scss';
 
 export default class Home extends Component {
   // login for Auth0 function

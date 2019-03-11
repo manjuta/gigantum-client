@@ -299,7 +299,7 @@ export default class PublishDatasetsModal extends Component {
                       <p>This Project is linked to unpublished (local-only) Datasets</p>
                       <p>
                         In order to publish a Project, all linked Datasets must also be published.
-                         <button className="button--flat" onClick={() => this.setState({ moreInfo: !this.state.moreInfo })}>{moreInfoText}</button>
+                         <button className="Btn--flat" onClick={() => this.setState({ moreInfo: !this.state.moreInfo })}>{moreInfoText}</button>
                         </p>
                     </div>
                     {
@@ -325,7 +325,7 @@ export default class PublishDatasetsModal extends Component {
                   </div>
 
                   <div className="PublishDatasetsModal__buttons">
-                    <button className="button--flat" onClick={() => { props.toggleModal(false, true); }}>Cancel</button>
+                    <button className="Btn--flat" onClick={() => { props.toggleModal(false, true); }}>Cancel</button>
                     <button onClick={() => { this.setState({ showPrompt: false }); }}>Continue</button>
                   </div>
                 </div>
@@ -475,7 +475,7 @@ export default class PublishDatasetsModal extends Component {
                     {
                       !this.state.isProcessing &&
                       <div className="PublishDatasetsModal__buttons">
-                        <button className="button--flat" onClick={() => { props.toggleModal(false, true); }}>Cancel</button>
+                        <button className="Btn--flat" onClick={() => { props.toggleModal(false, true); }}>Cancel</button>
                         <button disabled={isDisabled} onClick={() => { this._publishLabbook(); }}>
                           {props.buttonText}
                           {this.props.header === 'Sync' && ' And Sync'}

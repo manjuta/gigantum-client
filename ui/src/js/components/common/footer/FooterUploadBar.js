@@ -1,6 +1,8 @@
+// vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-
+// assets
+import './FooterUploadBar.scss';
 
 export default class FooterUploadBar extends Component {
   render() {
@@ -24,12 +26,6 @@ export default class FooterUploadBar extends Component {
           className="Footer__progress-bar"
         />
 
-        {/* <button // commented out until backend bugs are fixed
-              onClick={() =>{ self._pauseUpload() }}
-              className="Footer__button Footer__button--cancel">
-              Cancel
-            </button> */
-        }
         {
           this.props.parentState.uploadError && <div
             onClick={() => {

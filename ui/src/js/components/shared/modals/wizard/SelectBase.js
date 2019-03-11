@@ -559,7 +559,7 @@ const BaseSlide = ({ node, self }) => {
         <div className={actionCSS}>
           <button
             onClick={() => self._setExpandedNode(node.name)}
-            className="button--flat"
+            className="Btn--flat"
           ></button>
         </div>
     </div>
@@ -583,7 +583,7 @@ const DatasetSlide = ({ node, self }) => {
     'SelectBase__image-actions--expanded': self.state.expandedNode === node.name,
   });
   return (<div
-    onClick={evt => evt && evt.target.className.indexOf('button--flat') === -1 && self._selectBase(node)}
+    onClick={evt => evt && evt.target.className.indexOf('Btn--flat') === -1 && self._selectBase(node)}
     className="SelectBase__image-wrapper"
   >
     <div
@@ -614,7 +614,7 @@ const DatasetSlide = ({ node, self }) => {
       <div className={actionCSS}>
         <button
             onClick={() => self._setExpandedNode(node.name)}
-            className="button--flat"
+            className="Btn--flat"
         ></button>
       </div>
     </div>

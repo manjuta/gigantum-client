@@ -8,7 +8,8 @@ import config from 'JS/config';
 // components
 import Tooltip from 'Components/common/Tooltip';
 import User from './User';
-
+// assets
+import './SideBar.scss';
 
 export default class SideBar extends Component {
   constructor(props) {
