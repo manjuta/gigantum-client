@@ -434,6 +434,7 @@ class PackageDependencies extends Component {
                     installDependenciesButtonState: 'finished',
                   });
                   props.fetchPackageVersion();
+                  props.buildCallback();
                   setTimeout(() => {
                     self.setState({ installDependenciesButtonState: '' });
                   }, 2000);
@@ -550,7 +551,6 @@ class PackageDependencies extends Component {
             duplicates.push(this.state.updatePackages[manager][pkg].id);
           });
         });
-
         AddPackageComponentsMutation(
           labbookName,
           owner,
