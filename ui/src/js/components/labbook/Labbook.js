@@ -209,15 +209,20 @@ class Labbook extends Component {
   @boundMethod
   _fetchPackageVersion() {
     const { props, state } = this,
-          { owner, name } = props.labbook;
-
-    if (!state.isFetchingPackages) {
+          { owner, name } = props.labbook,
+          currentTimestamp = new Date().getTime(),
+          timestamp = localStorage.getItem('latestVersionTimestamp'),
+          delayRefetch = timestamp && ((currentTimestamp - timestamp) < 120000);
+    if (!state.isFetchingPackages && !delayRefetch) {
       this.setState({ isFetchingPackages: true });
+      const date = new Date();
+      localStorage.setItem('latestVersionTimestamp', date.getTime());
       fetchPagkageLatestVersion.getPackageVersions(owner, name, 1000, null).then((response) => {
         if (response.labbook) {
           const packageLatestVersions = response.labbook.environment.packageDependencies.edges;
           this.setState({ packageLatestVersions });
         }
+        localStorage.setItem('latestVersionTimestamp', 0);
         if (this.state.queuePackageFetch) {
           this.setState({
             isFetchingPackages: false,
