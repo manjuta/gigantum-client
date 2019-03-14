@@ -20,6 +20,9 @@ from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityReco
 from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 from lmsrvlabbook.api.objects.overview import DatasetOverview
 
+from gtmcore.logging import LMLogger
+logger = LMLogger.get_logger()
+
 
 class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository)):
     """A type representing a Dataset and all of its contents
@@ -262,11 +265,12 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             has_next_page = True
 
             # Get the message of the linked commit and check if it is the non-activity record dataset creation commit
-            if edges[-1].linked_commit != "no-linked-commit":
-                linked_msg = dataset.git.log_entry(edges[-1].linked_commit)['message']
-                if linked_msg == f"Creating new empty Dataset: {dataset.name}" and "_GTM_ACTIVITY_" not in linked_msg:
-                    # if you get here, this is the first activity record
-                    has_next_page = False
+            if len(edges) > 1:
+                if edges[-2].linked_commit != "no-linked-commit":
+                    linked_msg = dataset.git.log_entry(edges[-2].linked_commit)['message']
+                    if linked_msg == f"Creating new empty Dataset: {dataset.name}" and "_GTM_ACTIVITY_" not in linked_msg:
+                        # if you get here, this is the first activity record
+                        has_next_page = False
 
             end_cursor = cursors[-1]
         else:
@@ -402,7 +406,11 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         if remotes:
             url = [x['url'] for x in remotes if x['name'] == 'origin']
             if url:
-                return url[0]
+                url = url[0]
+                if "http" in url and url[-4:] != ".git":
+                    logger.warning(f"Fixing remote URL format: {dataset.name}: {url}")
+                    url = f"{url}.git"
+                return url
             else:
                 dataset.warning(f"There exist remotes in {str(dataset)}, but no origin found.")
         return None

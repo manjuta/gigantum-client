@@ -3,7 +3,6 @@ import JobStatus from 'JS/utils/JobStatus';
 import store from 'JS/redux/store';
 import AnsiUp from 'ansi_up';
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/reducers/footer';
-import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
@@ -71,11 +70,6 @@ const FooterUtils = {
               message = fullMessage.slice(res[res.length - 2], res[res.length - 1]);
             }
 
-            if ((response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'finished') && store.getState().packageDependencies.refetchPending) {
-              setForceRefetch(true);
-              setRefetchPending(false);
-            }
-
             if (response.data.jobStatus.status === 'started') {
               if (html.length) {
                 setMultiInfoMessage(id || response.data.jobStatus.id, message, false, false, [{ message: html }]);
@@ -134,6 +128,8 @@ const FooterUtils = {
                     },
                     );
                 }
+              } else if (type === 'importRemoteLabbook') {
+                successCall();
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
@@ -142,7 +138,7 @@ const FooterUtils = {
               if (method === 'build_image') {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
               }
-              if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
+              if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'syncDataset') || (type === 'publishDataset')) {
                 failureCall(response.data.jobStatus.failureMessage);
               }
               if (type === 'downloadDatasetFiles') {
@@ -158,7 +154,7 @@ const FooterUtils = {
                     owner,
                     labbookName,
                     () => {
-                      failureCall();
+                      failureCall(response.data.jobStatus.failureMessage);
                     },
                     );
                 } else {
@@ -168,13 +164,15 @@ const FooterUtils = {
                     owner,
                     labbookName,
                     () => {
-                      failureCall();
+                      failureCall(response.data.jobStatus.failureMessage);
                     },
                     );
                 }
                 errorMessage = `Failed to download ${failureKeys.length} of ${totalAmount} Files.`;
                 reportedFailureMessage = 'Failed to download the following Files:';
                 failureKeys.forEach(failedKey => reportedFailureMessage = `${reportedFailureMessage}\n${failedKey}`);
+              } else if (type === 'importRemoteLabbook') {
+                failureCall();
               }
               html += `\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
               setMultiInfoMessage(id || response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);

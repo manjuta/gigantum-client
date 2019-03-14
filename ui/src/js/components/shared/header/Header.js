@@ -196,13 +196,15 @@ class Header extends Component {
           }),
           hiddenStickCSS = classNames({
             hidden: props.isStick,
-          }),
-          branches = props.branches || [{
+          });
+    let branches = props.branches || [{
             branchName: 'master',
             isActive: true,
             commitsBehind: 0,
             commitsAhead: 0,
           }];
+
+    branches = props.showMigrationButton ? branches.filter(({ branchName }) => branchName !== 'master') : branches;
 
     return (
 

@@ -244,7 +244,7 @@ class ActionsMenu extends Component {
                     failureCall,
                     (error) => {
                       if (error) {
-                        failureCall();
+                        failureCall(error);
                       }
                     },
                   );

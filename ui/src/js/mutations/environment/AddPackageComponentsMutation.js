@@ -142,14 +142,14 @@ export default function AddPackageComponentsMutation(
             } = edge.node;
             const pkg = edge.node.package;
             store.delete(id);
-            const node = store.create(id, 'package');
+            const node = store.get(id) ? store.get(id) : store.create(id, 'package');
             if (node) {
               node.setValue(manager, 'manager');
               node.setValue(pkg, 'package');
               node.setValue(version, 'version');
               node.setValue(schema, 'schema');
               node.setValue(fromBase, 'fromBase');
-              node.setValue(latestVersion, 'latestVersion');
+              node.setValue(null, 'latestVersion');
               node.setValue(id, 'id');
               tempID++;
               const newEdge = store.create(
@@ -174,7 +174,6 @@ export default function AddPackageComponentsMutation(
             const pkg = item.package;
             node.setValue(manager, 'manager');
             node.setValue(pkg, 'package');
-
             node.setValue(version, 'version');
             node.setValue(labbookName, 'labbookName');
             node.setValue(owner, 'owner');

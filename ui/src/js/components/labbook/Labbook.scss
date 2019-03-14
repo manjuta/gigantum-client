@@ -104,9 +104,10 @@
   background-size: cover;
   z-index: index($elements, loader);
   border-top: 1px solid $white;
+  @include flex(flex-startm, row);
   a,
   a:visited{
-    margin-left: 10px;
+    margin: 0 10px;
     text-decoration: underline;
     font-weight: bold;
     cursor: pointer;
@@ -125,6 +126,12 @@
     background: $white;
     color: $orange;
     border: 2px solid $orange;
+  }
+
+  &:disabled:hover, &:focus {
+    background: $grey-background;
+    color: $romanSilver;
+    border: 2px solid $romanSilver;
   }
 }
 

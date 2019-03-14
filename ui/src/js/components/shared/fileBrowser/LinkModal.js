@@ -4,7 +4,6 @@ import { QueryRenderer, graphql } from 'react-relay';
 import store from 'JS/redux/store';
 import environment from 'JS/createRelayEnvironment';
 import classNames from 'classnames';
-import Moment from 'moment';
 // mutations
 import ModifyDatasetLinkMutation from 'Mutations/ModifyDatasetLinkMutation';
 // component
@@ -12,8 +11,9 @@ import Modal from 'Components/common/Modal';
 import Loader from 'Components/common/Loader';
 import ButtonLoader from 'Components/common/ButtonLoader';
 import AdvancedSearch from 'Components/common/AdvancedSearch';
+import LinkCard from './LinkCard';
 // store
-import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 // assets
 import './LinkModal.scss';
 
@@ -199,38 +199,16 @@ export default class LinkModal extends Component {
                                     <div className="LinkModal__dataset-container">
                                         {
                                             localDatasetEdges.map((edge) => {
-                                                    // TODO make this a component
                                                     const node = edge.node;
-                                                    const LinkModalCard = classNames({
-                                                      'LinkModal__dataset--selected': this.state.selectedDataset && this.state.selectedDataset.owner === node.owner
-                                                      && this.state.selectedDataset.name === node.name,
-                                                      LinkModal__dataset: true,
-                                                      Card: true,
-                                                    });
 
                                                     return (<div
                                                             key={node.id}
                                                             onClick={() => { this._updateSelected(edge); }}
                                                             className="LinkModal__wrapper">
-                                                            <div className={LinkModalCard}>
-                                                                    <img
-                                                                        alt=""
-                                                                        src={`data:image/jpeg;base64,${node.datasetType.icon}`}
-                                                                        height="50"
-                                                                        width="50"
-                                                                    />
-                                                                    <div className="LinkModal__details">
-                                                                        <h6 className="LinkModal__name">{node.name}</h6>
-                                                                        <h6 className="LinkModal__type">{node.datasetType.isManaged ? 'Managed' : 'Unmanaged'}</h6>
-                                                                        <h6>{`Created on ${Moment(edge.node.createdOnUtc).format('MM/DD/YY')}`}</h6>
-                                                                        <h6>{`Modified ${Moment(edge.node.modifiedOnUtc).fromNow()}`}</h6>
-                                                                    </div>
-                                                                    <div className="LinkModal__text">
-                                                                        <p className="LinkModal__description">
-                                                                            {node.description}
-                                                                        </p>
-                                                                    </div>
-                                                            </div>
+                                                            <LinkCard
+                                                                node={node}
+                                                                selectedDataset={this.state.selectedDataset}
+                                                            />
                                                         </div>);
                                             })
                                         }

@@ -1,24 +1,13 @@
 // vendor
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
 import { boundMethod } from 'autobind-decorator';
 import shallowCompare from 'react-addons-shallow-compare';
-// config
-import Config from 'JS/config';
 // store
-import store from 'JS/redux/store';
-import {
-  setSyncingState,
-  setPublishingState,
-  setExportingState,
-  setModalVisible,
-  setUpdateDetailView,
-} from 'JS/redux/reducers/labbook/labbook';
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 // components
-import Tooltip from 'Components/common/Tooltip';
-import SidePanel from './SidePanel';
 import ForceMerge from 'Components/shared/modals/ForceMerge';
+import SidePanel from './SidePanel';
 // assets
 import './Branches.scss';
 
@@ -160,6 +149,7 @@ class Branches extends Component {
           if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
             self._toggleMergeModal();
           }
+          setErrorMessage('Failed to merge branch', error);
         } else {
           self.setState({ action: null, mergeModalVisible: null });
         }
@@ -184,7 +174,7 @@ class Branches extends Component {
     this.props.toggleCover('Resetting Branch');
     this.props.branchMutations.resetBranch((response, error) => {
       if (error) {
-        console.log(error)
+        setErrorMessage('Failed to reset branch', error);
       }
       this.props.setBranchUptodate();
       self.setState({ resetModalVisible: null });
@@ -206,7 +196,7 @@ class Branches extends Component {
     };
     this.props.branchMutations.deleteBranch(data, (response, error) => {
       if (error) {
-        console.log(error);
+        setErrorMessage('Failed to delete branch', error);
       }
       self.setState({ deleteModalVisible: null });
       this.props.toggleCover(null);
@@ -489,6 +479,7 @@ class Branches extends Component {
     const filteredBranches = props.branches.filter(branch => branch.branchName !== props.activeBranch.branchName).slice(state.currentIndex, state.currentIndex + 5);
     const activeUpToDate = props.activeBranch.commitsAhead === 0 && props.activeBranch.commitsBehind === 0;
     const statusText = props.activeBranch.isLocal ? props.activeBranch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only';
+    const activeCommitsText = `${props.activeBranch.commitsBehind ? `${props.activeBranch.commitsBehind} Commits Behind, ` : ''} ${props.activeBranch.commitsAhead ? `${props.activeBranch.commitsAhead} Commits Ahead` : ''}`;
     return (
       <div>
         {
@@ -529,7 +520,11 @@ class Branches extends Component {
                     <div className="Branches__details">
                       {
                          !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) && (props.activeBranch.commitsAhead !== null) &&
-                        <div className="Branches__commits">
+                        <div
+                          className="Branches__commits Tooltip-data"
+                          data-tooltip={activeCommitsText}
+                        >
+
                           {
                            (props.activeBranch.commitsBehind !== 0) &&
                             <div className="Branches__commits--commits-behind">{ props.activeBranch.commitsBehind }</div>
@@ -586,6 +581,7 @@ class Branches extends Component {
                   branchBaseSectionCSS = classNames({
                     'Branches__base-section': true,
                   });
+                  const commitsText = `${branch.commitsBehind ? `${branch.commitsBehind} Commits Behind, ` : ''} ${branch.commitsAhead ? `${branch.commitsAhead} Commits Ahead` : ''}`;
                   return (
                     <div
                       key={branch.branchName}
@@ -599,7 +595,10 @@ class Branches extends Component {
                           <div className="Branches__details">
                             {
                               !branchUpToDate && (branch.commitsAhead !== undefined) && (branch.commitsAhead !== null) &&
-                              <div className="Branches__commits">
+                              <div
+                                className="Branches__commits Tooltip-data"
+                                data-tooltip={commitsText}
+                              >
                                 {
                                   (branch.commitsBehind !== 0) &&
                                   <div className="Branches__commits--commits-behind">{ branch.commitsBehind }</div>

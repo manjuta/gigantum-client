@@ -151,7 +151,9 @@ export default class Description extends Component {
       let element = document.getElementsByClassName('Description__container')[0];
       let width = element.offsetWidth - 30;
       let height = element.offsetHeight - 4;
-      this.setState({ editingDescription: true, textareaWidth: `${width}px`, textareaHeight: `${height}px` });
+      this.setState({ editingDescription: true, textareaWidth: `${width}px`, textareaHeight: `${height}px` }, () => {
+        this.descriptionInput.focus();
+      });
     }
   }
   /**
@@ -191,6 +193,7 @@ export default class Description extends Component {
                 state.editingDescription ?
                   <Fragment>
                     <textarea
+                        ref={(input) => { this.descriptionInput = input; }}
                         maxLength="80"
                         className="Description__input"
                         type="text"

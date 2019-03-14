@@ -19,12 +19,14 @@
 # SOFTWARE.
 import os
 import pprint
-import pytest
 import shutil
 import tempfile
 
+from mock import patch
+
 from gtmcore.configuration import get_docker_client
 from gtmcore.dispatcher import jobs
+from gtmcore.workflows import GitWorkflow, LabbookWorkflow
 import gtmcore.fixtures
 from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file
 
@@ -107,6 +109,19 @@ class TestJobs(object):
             except Exception as e:
                 pprint.pprint(e)
                 raise
+
+    def test_import_labbook_from_remote(self, mock_config_with_repo, monkeypatch):
+        def _mock_import_labbook_from_remote(remote_url, username, config_file):
+            print('X' * 200)
+            lb = InventoryManager(config_file).create_labbook(username, username, remote_url.split('/')[-1])
+            return LabbookWorkflow(lb)
+
+        monkeypatch.setattr(LabbookWorkflow, 'import_from_remote', _mock_import_labbook_from_remote)
+        # Mock out actual import, as it's already tested in workflows.
+        root_dir = jobs.import_labbook_from_remote('http://mocked-url.com/unittester/mock-labbook', 'unittester',
+                                                   config_file=mock_config_with_repo[0])
+        assert '/labbooks/' in root_dir
+        assert 'mock-labbook' == root_dir.split('/')[-1]
 
     def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
