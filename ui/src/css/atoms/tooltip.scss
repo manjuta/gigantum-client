@@ -41,7 +41,8 @@
 
       content: attr(data-tooltip);
       word-wrap: normal;
-      word-break: break-word;
+      word-break: normal;
+      white-space: normal;
       line-height: 18px;
 
       color: $white;

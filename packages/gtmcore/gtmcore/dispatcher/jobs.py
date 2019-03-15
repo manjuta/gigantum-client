@@ -22,7 +22,6 @@ import json
 import os
 import time
 from typing import Optional, List
-import base64
 import sys
 
 from rq import get_current_job
@@ -108,6 +107,33 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
         return cnt
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_repository: {e}")
+        raise
+
+
+def import_labbook_from_remote(remote_url: str, username: str, config_file: str = None) -> str:
+    """Return the root directory of the newly imported Project"""
+    p = os.getpid()
+    logger = LMLogger.get_logger()
+    logger.info(f"(Job {p}) Starting import_labbook_from_remote({remote_url}, {username})")
+
+    def update_meta(msg):
+        job = get_current_job()
+        if not job:
+            return
+        if 'feedback' not in job.meta:
+            job.meta['feedback'] = msg
+        else:
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+        job.save_meta()
+
+    try:
+        update_meta(f"Importing Project from {remote_url}...")
+        wf = LabbookWorkflow.import_from_remote(remote_url, username, config_file)
+        update_meta(f"Imported Project {wf.labbook.name}!")
+        return wf.labbook.root_dir
+    except Exception as e:
+        update_meta(f"Could not import Project from {remote_url}.")
+        logger.exception(f"(Job {p}) Error on import_labbook_from_remote: {e}")
         raise
 
 

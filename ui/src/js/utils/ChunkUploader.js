@@ -126,7 +126,7 @@ const uploadFileBrowserChunk = (data, chunkData, file, chunk, accessToken, usern
   if (fileBrowser.pause || (footer.totalFiles > 0)) {
     const cbFunction = (result, error) => {
 
-      if (result && (error === undefined)) {
+      if (result && !error) {
         getChunkCallback(file, result);
         if (store.getState().footer.totalFiles > 1) {
           const lastChunk = (chunkData.totalChunks - 1) === chunkData.chunkIndex;

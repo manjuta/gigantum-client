@@ -147,7 +147,7 @@ export default class DeleteDataset extends Component {
         return (
           <div>
             <p>This will delete <b>{this.props.remoteDatasetName}</b> from the cloud.</p>
-            <p>The Dataset will still exist locally.`</p>
+            <p>The Dataset will still exist locally.</p>
           </div>
         );
       }

@@ -13,6 +13,8 @@ import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
+// store
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
 // assets
@@ -98,7 +100,7 @@ class BranchMenu extends Component {
     this._toggleCover('Resetting Branch');
     this.state.branchMutations.resetBranch((response, error) => {
       if (error) {
-        console.log(error)
+        setErrorMessage('Failed to reset branch.', error);
       }
       this._toggleCover(null);
       this.props.setBranchUptodate();
@@ -155,9 +157,18 @@ class BranchMenu extends Component {
       });
       this._toggleCover('Switching Branches');
       state.branchMutations.switchBranch(data, (response, error) => {
+        if (error) {
+          setErrorMessage('Failed to switch branches.', error);
+        }
         self.setState({ switchingBranch: false });
-        props.updateMigationState(response);
         this._toggleCover(null);
+        props.updateMigationState(response);
+
+        state.branchMutations.buildImage((response, error) => {
+            if (error) {
+              setErrorMessage('Failed to switch branches.', error);
+            }
+        });
       });
   }
   /**
@@ -261,6 +272,15 @@ class BranchMenu extends Component {
   @boundMethod
   _closeLoginPromptModal() {
     this.setState({ showLoginPrompt: false });
+  }
+  /**
+  *  @param {Boolean} - commitsHovered
+  *  sets hoverstate for committs
+  *  @return {}
+  */
+  @boundMethod
+  _hovercommits(commitsHovered) {
+    this.setState({ commitsHovered });
   }
   /**
   *  @param {Boolean} blockReset
@@ -421,6 +441,7 @@ class BranchMenu extends Component {
         createTooltip: props.isLocked ? 'Cannot Create Branch while Project is in use' : state.isDataset ? defaultDatasetMessage : 'Create Branch',
         resetTooltip: state.isDataset ? defaultDatasetMessage : props.isLocked ? 'Cannot Reset Branch while Project is in use' : !activeBranch.isRemote ? 'Branch must be remote' : activeBranch.commitsAhead === undefined ? 'Please wait while branch data is being fetched' : upToDate ? 'Branch up to date' : 'Reset Branch to Remote',
         switchTooltip: props.isLocked ? 'Cannot switch branches while Project is in use' : state.isDataset ? defaultDatasetMessage : '',
+        commitTooltip: `${activeBranch.commitsBehind ? `${activeBranch.commitsBehind} Commits Behind, ` : ''} ${activeBranch.commitsAhead ? `${activeBranch.commitsAhead} Commits Ahead` : ''}`,
       };
     }
 
@@ -455,16 +476,16 @@ class BranchMenu extends Component {
           allowSync = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && hasWriteAccess,
           allowSyncPull = !((activeBranch.branchName !== 'master') && !this.props.defaultRemote) && !props.isLocked && props.defaultRemote,
           allowReset = !props.isLocked && !upToDate && activeBranch.isRemote && (activeBranch.commitsAhead !== undefined),
-          smallWidth = window.innerWidth <= 1180,
           statusText = activeBranch.isRemote ? 'Local & Remote' : 'Local only',
           showPullOnly = props.defaultRemote && !hasWriteAccess && !waitingOnCollabs,
-          disableDropdown = !allowSyncPull || state.isDataset || !props.defaultRemote || showPullOnly,
+          disableDropdown = !allowSyncPull || !props.defaultRemote || showPullOnly,
           {
             syncTooltip,
             manageTooltip,
             createTooltip,
             resetTooltip,
             switchTooltip,
+            commitTooltip,
           } = this._getTooltipText(activeBranch, hasWriteAccess, upToDate),
           syncButtonText = props.defaultRemote ? showPullOnly ? 'Pull' : 'Sync' : 'Publish',
           switchDropdownCSS = classNames({
@@ -502,7 +523,7 @@ class BranchMenu extends Component {
             'BranchMenu__btn--sync--pull--disabled': showPullOnly && !allowSyncPull,
             'BranchMenu__btn--sync--publish--disabled': !props.defaultRemote && !allowSync,
             'BranchMenu__btn--sync--upToDate--disabled': props.defaultRemote && !allowSync && !showPullOnly,
-            'Tooltip-data': true,
+            'Tooltip-data': !state.commitsHovered,
           }),
           manageCSS = classNames({
             'BranchMenu__btn BranchMenu__btn--manage': true,
@@ -666,7 +687,12 @@ class BranchMenu extends Component {
                 type="Submit">
                 {
                   !upToDate && allowSync && (activeBranch.commitsAhead !== undefined) &&
-                  <div className="BranchMenu__sync-status">
+                  <div
+                    className="BranchMenu__sync-status Tooltip-data Tooltip-data--small"
+                    data-tooltip={commitTooltip}
+                    onMouseEnter={() => this._hovercommits(true)}
+                    onMouseLeave={() => this._hovercommits(false)}
+                  >
                     {
                       (activeBranch.commitsBehind !== 0) &&
                       <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>

@@ -17,7 +17,6 @@ import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
 import { setMergeMode, setBuildingState, setStickyDate } from 'JS/redux/reducers/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/reducers/routes';
-import { setLatestPackages } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 import { setInfoMessage } from 'JS/redux/reducers/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
@@ -36,7 +35,8 @@ import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMuta
 import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
 import MigrateProjectMutation from 'Mutations/MigrateProjectMutation';
 // query
-import fetchMigrationInfoQuery from './fetchMigrationInfoQuery'
+import fetchMigrationInfoQuery from './queries/fetchMigrationInfoQuery';
+import fetchPagkageLatestVersion from './queries/fetchPackageLatestVersionQuery';
 // assets
 import './Labbook.scss';
 
@@ -76,6 +76,7 @@ const Environment = Loadable({
 class Labbook extends Component {
   constructor(props) {
   	super(props);
+
     localStorage.setItem('owner', store.getState().routes.owner);
     // bind functions here
     this._toggleBranchesView = this._toggleBranchesView.bind(this);
@@ -86,7 +87,7 @@ class Labbook extends Component {
   state = {
     containerStatus: this.props.labbook.environment.containerStatus,
     imageStatus: this.props.labbook.environment.imageStatus,
-    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
+    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || (this.props.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (this.props.labbook.environment.imageStatus === 'BUILD_QUEUED') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     visibility: this.props.labbook.visibility,
@@ -103,11 +104,15 @@ class Labbook extends Component {
     isDeprecated: null,
     shouldMigrate: null,
     buttonState: '',
+    packageLatestVersions: [],
+    isFetchingPackages: false,
+    queuePackageFetch: false,
+    activeBranchName: this.props.labbook.activeBranchName
   }
 
   static getDerivedStateFromProps(nextProps, state) {
     setCallbackRoute(nextProps.location.pathname);
-    const propBranches = nextProps.labbook ? nextProps.labbook.branches : [];
+    const propBranches = nextProps.labbook && nextProps.labbook.branches ? nextProps.labbook.branches : [];
     const stateBranches = state.branches;
     const branchMap = new Map();
     const mergedBranches = [];
@@ -131,7 +136,7 @@ class Labbook extends Component {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-    const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
+    const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (nextProps.labbook.environment.imageStatus === 'BUILD_QUEUED') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
 
     return {
       ...state,
@@ -165,6 +170,8 @@ class Labbook extends Component {
 
     this._fetchMigrationInfo();
 
+    this._fetchPackageVersion();
+
     this._setStickHeader();
     this._fetchStatus(true);
 
@@ -172,16 +179,66 @@ class Labbook extends Component {
     window.addEventListener('click', this._branchViewClickedOff);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { props, state } = this,
+          { activeBranchName } = props.labbook;
+
+    if (activeBranchName !== state.activeBranchName) {
+      this.setState({ activeBranchName });
+
+      this._fetchPackageVersion();
+    }
+  }
+
   /**
     @param {}
     removes event listeners
   */
   componentWillUnmount() {
-    setLatestPackages({});
     this.mounted = false;
     window.removeEventListener('scroll', this._setStickHeader);
 
     window.removeEventListener('click', this._branchViewClickedOff);
+  }
+
+
+  /**
+    @param {}
+    gets latest version for packages
+  */
+  @boundMethod
+  _fetchPackageVersion() {
+    const { props, state } = this,
+          { owner, name } = props.labbook,
+          currentTimestamp = new Date().getTime(),
+          timestamp = localStorage.getItem('latestVersionTimestamp'),
+          delayRefetch = timestamp && ((currentTimestamp - timestamp) < 120000);
+    if (!state.isFetchingPackages && !delayRefetch) {
+      this.setState({ isFetchingPackages: true });
+      const date = new Date();
+      localStorage.setItem('latestVersionTimestamp', date.getTime());
+      fetchPagkageLatestVersion.getPackageVersions(owner, name, 1000, null).then((response) => {
+        if (response.labbook) {
+          const packageLatestVersions = response.labbook.environment.packageDependencies.edges;
+          this.setState({ packageLatestVersions });
+        }
+        localStorage.setItem('latestVersionTimestamp', 0);
+        if (this.state.queuePackageFetch) {
+          this.setState({
+            isFetchingPackages: false,
+            queuePackageFetch: false,
+          });
+          this._fetchPackageVersion();
+        } else {
+          this.setState({
+            isFetchingPackages: false,
+            queuePackageFetch: false,
+          });
+        }
+      });
+    } else {
+      this.setState({ queuePackageFetch: true });
+    }
   }
 
   /**
@@ -213,7 +270,7 @@ class Labbook extends Component {
   */
   @boundMethod
   _updateMigationState(response) {
-    if (response) {
+    if (response && response.workonExperimentalBranch) {
       const { isDeprecated, shouldMigrate } = response.workonExperimentalBranch.labbook;
       this.setState({
         isDeprecated,
@@ -441,6 +498,9 @@ class Labbook extends Component {
             Labbook__deprecated: true,
             'Labbook__deprecated--demo': isDemo,
           }),
+          migrationButtonCSS = classNames({
+            'Tooltip-data': state.isLocked,
+          }),
           { migrationText, showMigrationButton } = this._getMigrationInfo(),
           oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName)),
           migrationModalType = state.migrateComplete ? 'large' : 'large-long';
@@ -463,12 +523,16 @@ class Labbook extends Component {
                 </a>
                 {
                   showMigrationButton &&
+                  <div
+                    className={migrationButtonCSS}
+                    data-tooltip="To migrate the project container must be Stopped.">
                   <button
-                    className="Labbook__deprecated-action"
+                    className="Button Labbook__deprecated-action"
                     onClick={() => this._toggleMigrationModal()}
-                    disabled={state.migrationInProgress}>
+                    disabled={state.migrationInProgress || state.isLocked }>
                     Migrate
                   </button>
+                  </div>
                 }
               </div>
             }
@@ -594,6 +658,7 @@ class Labbook extends Component {
               setBranchUptodate={this._setBranchUptodate}
               isDeprecated={state.isDeprecated}
               updateMigationState={this._updateMigationState}
+              showMigrationButton={showMigrationButton}
             />
 
             <div className="Labbook__routes flex flex-1-0-auto">
@@ -681,6 +746,8 @@ class Labbook extends Component {
                                containerStatus={this.refs.ContainerStatus}
                                overview={labbook.overview}
                                isLocked={isLocked}
+                               packageLatestVersions={state.packageLatestVersions}
+                               fetchPackageVersion={this._fetchPackageVersion}
                                {...props}
                              />
                         </ErrorBoundary>)}
