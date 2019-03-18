@@ -643,7 +643,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             None
         """
         url = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
-        response = requests.delete(url, headers=self._object_service_headers(), timeout=10)
+        response = requests.delete(url, headers=self._object_service_headers(), timeout=30)
 
         if response.status_code != 200:
             logger.error(f"Failed to remove {dataset.namespace}/{dataset.name} from cloud index. "

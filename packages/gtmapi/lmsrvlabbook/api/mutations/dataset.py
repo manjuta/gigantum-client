@@ -222,7 +222,7 @@ class DeleteDataset(graphene.ClientIDMutation):
             repo_id = mgr.get_repository_id(owner, dataset_name)
             response = requests.delete(f"https://{remote_config['index_service']}/index/{repo_id}",
                                        headers={"Authorization": f"Bearer {access_token}",
-                                                "Identity": id_token}, timeout=10)
+                                                "Identity": id_token}, timeout=30)
 
             if response.status_code != 204:
                 # Soft failure, still continue
