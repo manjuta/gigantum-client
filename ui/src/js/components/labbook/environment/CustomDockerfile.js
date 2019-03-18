@@ -123,7 +123,7 @@ export default class CustomDockerfile extends Component {
             empty: !this.state.dockerfileContent,
           }),
           editDockerfileButtonCSS = classNames({
-            'CustomDockerfile__edit-button': true,
+            'Btn Btn--feature Btn--feature--edit': true,
             hidden: state.editingDockerfile,
             'Tooltip-data': props.isLocked,
           }),

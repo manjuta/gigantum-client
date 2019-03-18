@@ -500,12 +500,12 @@ class BranchMenu extends Component {
             hidden: !state.syncMenuVisible,
           }),
           syncMenuDropdownButtonCSS = classNames({
-            'BranchMenu__btn BranchMenu__btn--sync-dropdown': true,
+            'BranchMenu__btn Btn--action BranchMenu__btn--sync-dropdown': true,
             'BranchMenu__btn--sync-dropdown--disabled': disableDropdown,
             'BranchMenu__btn--sync-open': state.syncMenuVisible,
           }),
           syncCSS = classNames({
-            'BranchMenu__btn BranchMenu__btn--sync': true,
+            'BranchMenu__btn Btn--action BranchMenu__btn--sync': true,
             'BranchMenu__btn--sync--publish': !props.defaultRemote,
             'BranchMenu__btn--sync--pull': showPullOnly,
             'BranchMenu__btn--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined)) && !showPullOnly,
@@ -515,17 +515,17 @@ class BranchMenu extends Component {
             'Tooltip-data': !state.commitsHovered,
           }),
           manageCSS = classNames({
-            'BranchMenu__btn BranchMenu__btn--manage': true,
+            'BranchMenu__btn Btn--action BranchMenu__btn--manage': true,
             'BranchMenu__btn--manage--disabled': props.isLocked || state.isDataset,
             'Tooltip-data': true,
           }),
           resetCSS = classNames({
-            'BranchMenu__btn BranchMenu__btn--reset': true,
+            'BranchMenu__btn Btn--action BranchMenu__btn--reset': true,
             'BranchMenu__btn--reset--disabled': !allowReset || state.isDataset,
             'Tooltip-data': true,
           }),
           createCSS = classNames({
-            'BranchMenu__btn BranchMenu__btn--create': true,
+            'BranchMenu__btn Btn--action BranchMenu__btn--create': true,
             'BranchMenu__btn--create--disabled': props.isLocked || state.isDataset,
             'Tooltip-data': true,
           }),

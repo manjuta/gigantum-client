@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>icon/branch/local48-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="icon/branch/local48-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-2-Copy-10" transform="translate(10.000000, 12.000000)" fill="#007EA8" fill-rule="nonzero">
+            <path d="M4,4 L4,13.6 L24,13.6 L24,4 L4,4 Z M4,2.22044605e-16 L24,2.22044605e-16 C26.209139,-1.83767646e-16 28,1.790861 28,4 L28,13.6 C28,15.809139 26.209139,17.6 24,17.6 L4,17.6 C1.790861,17.6 2.705415e-16,15.809139 0,13.6 L0,4 C-2.705415e-16,1.790861 1.790861,1.83767646e-16 4,2.22044605e-16 Z" id="Rectangle"></path>
+            <polygon id="Line-2" points="12 14.8 16 14.8 16 22 12 22"></polygon>
+            <path d="M9.01694915,24 C7.90301889,24 7,23.1045695 7,22 C7,20.8954305 7.90301889,20 9.01694915,20 L18.9830508,20 C20.0969811,20 21,20.8954305 21,22 C21,23.1045695 20.0969811,24 18.9830508,24 L9.01694915,24 Z" id="Line-3"></path>
+        </g>
+    </g>
+</svg>

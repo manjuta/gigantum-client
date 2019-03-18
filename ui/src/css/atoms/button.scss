@@ -13,24 +13,17 @@ button {
 
   font-weight: 400;
   line-height: 1rem;
+  outline: none;
 
   &:hover {
-    color: $white;
     @include boxShadowDark();
-  }
-
-  &:focus {
-    color: $white;
-    background: $azure;
   }
 
   &:disabled,
   &:hover:disabled {
     overflow: hidden;
-
-    color: $white;
     border: 0;
-    background: $romanSilver;
+    background-color: $romanSilver;
     box-shadow: none !important;
   }
 }
@@ -42,94 +35,80 @@ button {
    border-radius: 8px;
    outline: none;
 
-   &:focus {
-     outline: none;
-   }
+   &:hover {
+    @include boxShadowDark();
+  }
 
-   &:hover{
-     background-color: $turquise;
-   }
-
-
-   &--flat {
-     padding: 7px 20px;
-     border: 0px solid $azure;
-     border-radius: 0px;
-     width: auto;
-     color: $azure;
-     background: none;
-     cursor: pointer;
-     text-decoration: underline;
-     box-shadow: none;
-
-     &:hover {
-       color: $turquise;
-       background: none;
-       border: 0px solid $turquise;
-       box-shadow: none;
-     }
-
-     &:focus {
-       color: $azure;
-       background: none;
-       border: 0px solid $azure;
-     }
-
-     &:disabled,
-     &:disabled:focus,
-     &:disabled:hover{
-       color: $romanSilver;
-       background: transparent;
-       border: 0px solid $grey;
-     }
-   }
-
-   &--large {
-     padding: 10px 30px;
-   }
-
-   &--medium {
-     padding: 5px 15px;
-   }
-
-   &--small{
-     padding: 0px;
-   }
+  &--flat {
+      padding: 7px 20px;
+      border: 0;
+      border-radius: 0px;
+      width: auto;
+      color: $azure;
+      background: none;
+      cursor: pointer;
+      text-decoration: underline;
+      box-shadow: none !important;
+      &:hover {
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+      }
+      &:disabled{
+        color: $romanSilver;
+        text-shadow: none;
+        background: transparent !important;
+        border: 0px solid $grey;
+        text-decoration: none;
+      }
+  }
+  &--action{
+    width: auto;
+  }
 
    &--round {
      height: 34px;
      width: 34px;
      border-radius: 15px;
    }
-
-   &--redirect {
-    transition: all 0.25s ease, background-position 1ms;
+   &--feature {
+    transition: all 0.25s ease, background-position 0ms, font-size 0ms;
     width: 30px;
     height: 30px;
     border-radius: 30px;
-    position: absolute;
-    right: 15px;
-    top: -20px;
+    font-size: 0;
     padding: 0;
-    background: $azure url('~Images/icons/continue-arrow.svg') no-repeat -1px center;
-    background-size: 30px;
-    border: none;
+    position: absolute;
+    border: 2px solid $white;
     z-index: 1;
-    span {
-      display: none;
-    }
-
-    &:hover,
-    &:focus {
-      border: none;
+    &:hover, &:focus {
       width: auto;
+      font-size: 14px;
       padding: 0 40px 0 15px;
-      background: $azure url('~Images/icons/continue-arrow.svg') no-repeat right 1px center;
+    }
+    &:disabled, &:disabled:hover, &:disabled:focus {
       background-size: 30px;
-
-      span {
-        display: block;
+      width: 30px;
+      font-size: 0;
+      padding: 0;
+    }
+    &--redirect {
+      right: 15px;
+      top: -20px;
+      background: $azure url('~Images/icons/continue-arrow.svg') no-repeat -1px center;
+      background-size: 30px;
+      &:hover, &:focus {
+        background-position: right 1px center;
+        background-size: 30px;
       }
+    }
+    &--edit {
+      top: -20px;
+      right: 15px;
+      background: $azure url('~Images/icons/edit-azure.svg') no-repeat center center;
+      background-size: 18px;
+    }
+    &:hover, &:focus {
+      background: $azure url('~Images/icons/edit-azure.svg') no-repeat right 7px center;
+      background-size: 18px;
     }
    }
 

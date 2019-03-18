@@ -232,7 +232,7 @@ export default class Overview extends Component {
           }),
 
           overviewReadmeButtonCSS = classNames({
-            'Overview__readme-edit-button': true,
+            'Btn Btn--feature Btn--feature--edit': true,
             hidden: state.editingReadme,
           }),
           sectionProps = props[props.sectionType],
@@ -382,7 +382,7 @@ export default class Overview extends Component {
               <div className="grid">
                 <div className="Overview__environment column-1-span-12">
                   <button
-                    className="Btn--redirect"
+                    className="Btn Btn--feature Btn--feature--redirect"
                     onClick={() => this._handleRedirect('environment')}>
                     <span>View Environment Details</span>
                   </button>

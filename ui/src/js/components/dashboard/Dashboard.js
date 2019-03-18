@@ -71,10 +71,6 @@ export default class DashboardContainer extends Component {
   *  @return {jsx}
   */
   _displaySelectedComponent() {
-    // if (this.state.selectedComponent === '/datasets/:labbookSection') {
-    //   return (<DatasetSets />);
-    // }
-
     const paths = this.props.history.location.pathname.split('/');
     const sectionRoute = paths.length > 2 ? paths[2] : 'local';
 

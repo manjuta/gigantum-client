@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>icon/global/close</title>
+    <desc>Created with Sketch.</desc>
+    <g id="icon/global/close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M24,46 C36.1502645,46 46,36.1502645 46,24 C46,11.8497355 36.1502645,2 24,2 C11.8497355,2 2,11.8497355 2,24 C2,36.1502645 11.8497355,46 24,46 Z M24,48 C10.745166,48 -7.10542736e-15,37.254834 -7.10542736e-15,24 C-7.10542736e-15,10.745166 10.745166,7.10542736e-15 24,7.10542736e-15 C37.254834,7.10542736e-15 48,10.745166 48,24 C48,37.254834 37.254834,48 24,48 Z" id="Oval-2" fill="#1ad8c1" fill-rule="nonzero" transform="translate(24.000000, 24.000000) rotate(-360.000000) translate(-24.000000, -24.000000) "></path>
+        <g id="Group" transform="translate(24.000000, 24.000000) rotate(-45.000000) translate(-24.000000, -24.000000) translate(10.000000, 10.000000)" fill="#1ad8c1" fill-rule="nonzero">
+            <path d="M12,2 C12,0.8954305 12.8954305,0 14,0 C15.1045695,0 16,0.8954305 16,2 L16,26 C16,27.1045695 15.1045695,28 14,28 C12.8954305,28 12,27.1045695 12,26 L12,2 Z" id="Shape"></path>
+            <path d="M26,12 C27.1045695,12 28,12.8954305 28,14 C28,15.1045695 27.1045695,16 26,16 L2,16 C0.8954305,16 6.66133815e-16,15.1045695 0,14 C-4.4408921e-16,12.8954305 0.8954305,12 2,12 L26,12 Z" id="Shape"></path>
+        </g>
+    </g>
+</svg>
