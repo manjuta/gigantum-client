@@ -16,6 +16,7 @@
   border-radius: 3px;
 
   &--launch {
+    width: auto;
     padding: 8px 30px 8px 20px;
     text-align: left;
     align-items: flex-start;
@@ -50,7 +51,7 @@
     background-size: 20px;
 
     &:hover, &:focus:hover{
-      background: $turquise url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+      background: $azure url('~Images/icons/up-arrow-white.svg') no-repeat center center;
       background-size: 20px;
     }
 

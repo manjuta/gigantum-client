@@ -330,7 +330,6 @@ class Branches extends Component {
       'Tooltip-data': true,
       'Tooltip-data--small': true,
       'Branches__btn--merge': true,
-      'Branches__btn--merge--disabled': branch.isActive,
       'Branches__btn--merge--selected': mergeModalVisible,
     }),
     deleteButtonCSS = classNames({
@@ -338,7 +337,6 @@ class Branches extends Component {
       'Tooltip-data': true,
       'Tooltip-data--small': true,
       'Branches__btn--delete': true,
-      'Branches__btn--delete--disabled': branch.isActive || branch.branchName === 'master',
       'Branches__btn--delete--selected': deleteModalVisible,
     }),
     switchButtonCSS = classNames({
@@ -346,14 +344,12 @@ class Branches extends Component {
       'Tooltip-data': true,
       'Tooltip-data--small': true,
       'Branches__btn--switch': true,
-      'Branches__btn--switch--disabled': branch.isActive,
     }),
     resetButtonCSS = classNames({
       Branches__btn: true,
       'Tooltip-data': true,
       'Tooltip-data--small': true,
       'Branches__btn--reset': true,
-      'Branches__btn--reset--disabled': !branch.isRemote || upToDate,
     }),
     syncButtonCSS = classNames({
       Branches__btn: true,
@@ -362,13 +358,9 @@ class Branches extends Component {
       'Branches__btn--sync': props.defaultRemote,
       'Branches__btn--push': !props.defaultRemote,
       'Branches__btn--pull': props.showPullOnly,
-      'Branches__btn--push--disabled': !props.defaultRemote && !props.allowSync,
-      'Branches__btn--sync--disabled': !props.allowSync && !props.showPullOnly,
-      'Branches__btn--pull--disabled': props.showPullOnly && !props.allowSyncPull,
     }),
     syncMenuDropdownButtonCSS = classNames({
       'Branches__btn Branches__btn--sync-dropdown': true,
-      'Branches__btn--sync-dropdown--disabled': props.disableDropdown,
       'Branches__btn--sync-open': state.syncMenuVisible,
       'Tooltip-data': props.disableDropdown && props.showPullOnly,
     }),
@@ -376,6 +368,7 @@ class Branches extends Component {
       'Branches__dropdown-menu': state.syncMenuVisible && !props.disableDropdown,
       hidden: !state.syncMenuVisible,
     });
+    const syncDisabled = (props.showPullOnly && !props.allowSyncPull) || (!props.allowSync && !props.showPullOnly) || (!props.defaultRemote && !props.allowSync);
     let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset Branch to Remote' : 'Branch must be remote';
     let syncTooltip = props.syncTooltip;
     let mergeTooltip = branch.isActive ? 'Cannot merge active branch with itself' : 'Merge into active branch';
@@ -387,21 +380,25 @@ class Branches extends Component {
           <Fragment>
             <button
               className="Branches__btn Branches__btn--create Tooltip-data Tooltip-data--small"
+              disabled={!branch.isActive}
               data-tooltip="Create Branch"
               onClick={() => props.toggleModal('createBranchVisible') }
             />
             <button
               className={resetButtonCSS}
               data-tooltip={resetTooltip}
+              disabled={!branch.isRemote || upToDate}
               onClick={() => this._toggleModal('resetModal', branch.branchName) }
             />
             <button
               className={syncButtonCSS}
               data-tooltip={syncTooltip}
+              disabled={syncDisabled}
               onClick={() => props.handleSyncButton(props.showPullOnly, props.allowSync, props.allowSyncPull) }
             />
             <button
               className={syncMenuDropdownButtonCSS}
+              disabled={props.disableDropdown}
               data-tooltip="You do not have the appropriate permissions to sync"
               onClick={() => { this._toggleSyncDropdown(); }}
             />
@@ -439,6 +436,7 @@ class Branches extends Component {
             <button
               className={deleteButtonCSS}
               data-tooltip={deleteTooltip}
+              disabled={branch.branchName === 'master'}
               onClick={() => this._toggleModal('deleteModal', branch.branchName) }
               />
           </Fragment>

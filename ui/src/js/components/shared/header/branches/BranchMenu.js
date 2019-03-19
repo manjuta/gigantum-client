@@ -468,6 +468,7 @@ class BranchMenu extends Component {
           statusText = activeBranch.isRemote ? 'Local & Remote' : 'Local only',
           showPullOnly = props.defaultRemote && !hasWriteAccess && !waitingOnCollabs,
           disableDropdown = !allowSyncPull || !props.defaultRemote || showPullOnly,
+          syncButtonDisabled = (showPullOnly && !allowSyncPull) || (!props.defaultRemote && !allowSync) || props.defaultRemote && !allowSync && !showPullOnly,
           {
             syncTooltip,
             manageTooltip,
@@ -501,7 +502,6 @@ class BranchMenu extends Component {
           }),
           syncMenuDropdownButtonCSS = classNames({
             'BranchMenu__btn Btn--action BranchMenu__btn--sync-dropdown': true,
-            'BranchMenu__btn--sync-dropdown--disabled': disableDropdown,
             'BranchMenu__btn--sync-open': state.syncMenuVisible,
           }),
           syncCSS = classNames({
@@ -509,24 +509,18 @@ class BranchMenu extends Component {
             'BranchMenu__btn--sync--publish': !props.defaultRemote,
             'BranchMenu__btn--sync--pull': showPullOnly,
             'BranchMenu__btn--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined)) && !showPullOnly,
-            'BranchMenu__btn--sync--pull--disabled': showPullOnly && !allowSyncPull,
-            'BranchMenu__btn--sync--publish--disabled': !props.defaultRemote && !allowSync,
-            'BranchMenu__btn--sync--upToDate--disabled': props.defaultRemote && !allowSync && !showPullOnly,
             'Tooltip-data': !state.commitsHovered,
           }),
           manageCSS = classNames({
             'BranchMenu__btn Btn--action BranchMenu__btn--manage': true,
-            'BranchMenu__btn--manage--disabled': props.isLocked || state.isDataset,
             'Tooltip-data': true,
           }),
           resetCSS = classNames({
             'BranchMenu__btn Btn--action BranchMenu__btn--reset': true,
-            'BranchMenu__btn--reset--disabled': !allowReset || state.isDataset,
             'Tooltip-data': true,
           }),
           createCSS = classNames({
             'BranchMenu__btn Btn--action BranchMenu__btn--create': true,
-            'BranchMenu__btn--create--disabled': props.isLocked || state.isDataset,
             'Tooltip-data': true,
           }),
           popupCSS = classNames({
@@ -633,12 +627,14 @@ class BranchMenu extends Component {
             <button
               onClick={() => this._toggleSidePanel(true)}
               className={manageCSS}
+              disabled={props.isLocked || state.isDataset}
               data-tooltip={manageTooltip}
               type="Submit">
             </button>
             <button
               className={createCSS}
               type="Submit"
+              disabled={props.isLocked || state.isDataset}
               data-tooltip={createTooltip}
               onClick={() => this._setModalState('createBranchVisible') }>
             </button>
@@ -646,6 +642,7 @@ class BranchMenu extends Component {
               <button
                 className={resetCSS}
                 type="Submit"
+                disabled={!allowReset || state.isDataset}
                 data-tooltip={resetTooltip}
                 onClick={() => this._toggleResetPopup(!allowReset || state.isDataset)}
                 >
@@ -672,6 +669,7 @@ class BranchMenu extends Component {
               <button
                 className={syncCSS}
                 onClick={() => { this._handleSyncButton(showPullOnly, allowSync, allowSyncPull); }}
+                disabled={syncButtonDisabled}
                 data-tooltip={syncTooltip}
                 type="Submit">
                 {
@@ -701,6 +699,7 @@ class BranchMenu extends Component {
 
               <button
                 className={syncMenuDropdownButtonCSS}
+                disabled={disableDropdown}
                 onClick={() => { this._toggleSyncDropdown(disableDropdown); }}
                 type="Submit">
               </button>
