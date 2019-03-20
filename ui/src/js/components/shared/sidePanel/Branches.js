@@ -146,7 +146,7 @@ class Branches extends Component {
       props.branchMutations.mergeBranch(data, (response, error) => {
         if (error) {
           const errorMessage = error[0].message;
-          if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
+          if (errorMessage.indexOf('Merge conflict') > -1) {
             self._toggleMergeModal();
           }
           setErrorMessage('Failed to merge branch', error);

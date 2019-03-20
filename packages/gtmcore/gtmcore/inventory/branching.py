@@ -215,9 +215,9 @@ class BranchManager(object):
                 call_subprocess(f'git merge {other_branch}'.split(), cwd=self.repository.root_dir)
             except subprocess.CalledProcessError as merge_error:
                 logger.warning(f"Merge conflict syncing {str(self.repository)}")
-                # TODO - This should be cleaned up (The UI attempts to match on the token "Cannot merge")
+                # TODO - This should be cleaned up (The UI attempts to match on the token "Merge conflict")
                 conflicted_files = self._infer_conflicted_files(merge_error.stdout.decode())
-                raise MergeConflict(f"Cannot merge - {merge_error}",
+                raise MergeConflict(f"Merge conflict - {merge_error}",
                                     file_conflicts=conflicted_files)
             self.repository.git.commit(f'Merged from branch `{other_branch}`')
         except Exception as e:
