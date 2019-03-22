@@ -1,18 +1,19 @@
 // vendor
 import React, { Component } from 'react';
+// config
+import config from 'JS/config';
+// store
+import { setErrorMessage, setWarningMessage, setInfoMessage } from 'JS/redux/reducers/footer';
+import store from 'JS/redux/store';
 // Mutations
 import DeleteDatasetMutation from 'Mutations/DeleteDatasetMutation';
 import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
 // components
 import ButtonLoader from 'Components/common/ButtonLoader';
 import Modal from 'Components/common/Modal';
-// store
-import { setErrorMessage, setWarningMessage, setInfoMessage } from 'JS/redux/reducers/footer';
-import store from 'JS/redux/store';
 // assets
 import './DeleteDataset.scss';
-// config
-import config from 'JS/config';
+
 
 export default class DeleteDataset extends Component {
   constructor(props) {
@@ -146,22 +147,39 @@ export default class DeleteDataset extends Component {
       if (this.props.existsLocally) {
         return (
           <div>
-            <p>This will delete <b>{this.props.remoteDatasetName}</b> from the cloud.</p>
+            <p>
+              This will delete
+              <b>{this.props.remoteDatasetName}</b>
+              from the cloud.
+            </p>
             <p>The Dataset will still exist locally.</p>
           </div>
         );
       }
       return (
-        <p>This will delete <b>{this.props.remoteDatasetName}</b> from the cloud. All data will be removed and can not be recovered.</p>
+        <p>
+          This will delete
+          <b>{this.props.remoteDatasetName}</b>
+          from the cloud.
+          All data will be removed and can not be recovered.
+        </p>
       );
     } else if (this.props.remoteAdded) {
       return (
         <div>
-          <p>This will delete <b>{datasetName}</b> from this Gigantum client.</p>
-          <p>You can still download it from gigantum.com/{owner}/{datasetName}.</p>
+          <p>
+            This will delete
+            <b>{datasetName}</b>
+            from this Gigantum client.
+          </p>
+          <p>{`You can still download it from gigantum.com/${owner}/${datasetName}.`}</p>
         </div>);
     }
-    return (<p>This will delete <b>{datasetName}</b> from this Gigantum instance. All data will be removed and can not be recovered.</p>);
+    return (<p>
+      This will delete
+      <b>{datasetName}</b>
+      from this Gigantum instance. All data will be removed and can not be recovered.
+    </p>);
   }
 
   render() {
@@ -173,8 +191,7 @@ export default class DeleteDataset extends Component {
         header={deleteText}
         handleClose={() => this.props.handleClose()}
         size="medium"
-        renderContent={() =>
-          (<div className="DeleteDataset">
+        renderContent={() => (<div className="DeleteDataset">
             {this._getExplanationText()}
             <input
               id="deleteInput"
@@ -183,7 +200,6 @@ export default class DeleteDataset extends Component {
               onChange={(evt) => { this._setDatasetName(evt); }}
               type="text"
             />
-
 
             <ButtonLoader
               buttonState={this.state.deleteDatasetButtonState}

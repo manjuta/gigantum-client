@@ -240,22 +240,24 @@ class FavoriteCard extends Component {
 
           { !this.state.editMode && (this.props.favorite.description.length > 0) &&
 
-          <p className="Favorite__description">{this.props.favorite.description} <button
-                                                                                   onClick={() => this._editDescription(true)}
-                                                                                   className="Favorite__edit-button" />
+          <p className="Favorite__description">
+            {this.props.favorite.description}
+            <button
+              onClick={() => this._editDescription(true)}
+              className="Favorite__edit-button" />
           </p>
 	            }
 
-          { !this.state.editMode && (this.props.favorite.description.length < 1) &&
-
-          <p
-            onDoubleClick={() => this._handleClickDescription()}
-            className="Favorite__description-filler">
-            Enter a short description <button
-                                        onClick={() => this._editDescription(true)}
-                                        className="Favorite__edit-button" />
-          </p>
-	            }
+          { (!this.state.editMode && (this.props.favorite.description.length < 1))
+            && <p
+              onDoubleClick={() => this._handleClickDescription()}
+              className="Favorite__description-filler">
+              Enter a short description
+              <button
+               onClick={() => this._editDescription(true)}
+               className="Favorite__edit-button" />
+            </p>
+	        }
 
           {
 	              this.state.editMode &&

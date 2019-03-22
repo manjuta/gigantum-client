@@ -1,13 +1,13 @@
 import React from 'react';
 import { DragSource } from 'react-dnd';
 import uuidv4 from 'uuid/v4';
-import FileBrowserMutations from './FileBrowserMutations';
-// utilities
-import CreateFiles from './../utilities/CreateFiles';
 // store
 import store from 'JS/redux/store';
 // config
 import config from 'JS/config';
+// utilities
+import FileBrowserMutations from './FileBrowserMutations';
+import CreateFiles from './CreateFiles';
 
 
 /**

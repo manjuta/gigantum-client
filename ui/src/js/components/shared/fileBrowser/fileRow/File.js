@@ -6,19 +6,20 @@ import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import TextTruncate from 'react-text-truncate';
-// components
-import Connectors from './../utilities/Connectors';
-import ActionsMenu from './ActionsMenu';
-import DatasetActionsMenu from './dataset/DatasetActionsMenu';
-// mutations
-import StartContainerMutation from 'Mutations/container/StartContainerMutation';
-import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
 // config
 import config from 'JS/config';
 // store
 import store from 'JS/redux/store';
 import { setMergeMode } from 'JS/redux/reducers/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/reducers/footer';
+// mutations
+import StartContainerMutation from 'Mutations/container/StartContainerMutation';
+import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
+// components
+import ActionsMenu from './ActionsMenu';
+import DatasetActionsMenu from './dataset/DatasetActionsMenu';
+// utils
+import Connectors from '../utilities/Connectors';
 // assets
 import './File.scss';
 

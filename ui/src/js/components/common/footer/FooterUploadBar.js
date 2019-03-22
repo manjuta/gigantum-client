@@ -6,38 +6,37 @@ import './FooterUploadBar.scss';
 
 export default class FooterUploadBar extends Component {
   render() {
+    const { props } = this;
     const footerUploadClass = classNames({
-      hidden: !this.props.parentState.uploadOpen,
-      'Footer__upload-status': this.props.parentState.uploadOpen,
-      'Footer__upload-error': this.props.parentState.uploadError,
+      hidden: !props.parentState.uploadOpen,
+      'FooterUploadBar--status': props.parentState.uploadOpen,
+      'FooterUploadBar--error': props.parentState.uploadError,
     });
 
     return (
       <div className={footerUploadClass}>
-        <div className="Footer__upload-message">
-          {this.props.parentState.uploadMessage}
+        <div className="FooterUploadBar__message">
+          {props.parentState.uploadMessage}
         </div>
 
         <div
           id="footerProgressBar"
-          style={{
-            width: `${this.props.parentState.progessBarPercentage}%`,
-          }}
-          className="Footer__progress-bar"
+          style={{ width: `${props.parentState.progessBarPercentage}%` }}
+          className="FooterUploadBar__progressBar"
         />
 
         {
-          this.props.parentState.uploadError && <div
-            onClick={() => {
-                this.props.closeFooter();
-              }}
+          props.parentState.uploadError
+          && <div
+            onClick={() => { props.closeFooter(); }}
             className="Footer__close"
           />
         }
         {
-          this.props.parentState.labbookSuccess && <button className="Footer__button" onClick={() => this.props.openLabbook()}>
+          props.parentState.labbookSuccess
+          && <button onClick={() => props.openLabbook()}>
               Open Project
-          </button>
+             </button>
         }
       </div>
     );

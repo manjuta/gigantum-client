@@ -140,11 +140,14 @@ class RemoteLabbooks extends Component {
 
               <h3 className="Labbooks__h3">No Results Found</h3>
 
-              <p>Edit your filters above or <span
+              <p>
+                Edit your filters above or
+              <span
                 className="Labbooks__span"
-                onClick={() => this.props.setFilterValue({ target: { value: '' } })}
-              >clear
-                                            </span> to try again.
+                onClick={() => this.props.setFilterValue({ target: { value: '' } })}>
+                clear
+                </span>
+                to try again.
               </p>
 
             </div>

@@ -45,7 +45,10 @@ export default class Summary extends Component {
         return (
           <div className="Summary">
           <div className="Overview__container">
-            <h2>Summary <Tooltip section="summary" /> </h2>
+            <h2>
+              Summary
+              <Tooltip section="summary" />
+            </h2>
           </div>
             <div className="grid">
               <div className="Summary__card Card column-1-span-12">

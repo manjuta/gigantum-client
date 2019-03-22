@@ -4,6 +4,8 @@ import { QueryRenderer, graphql } from 'react-relay';
 import store from 'JS/redux/store';
 import environment from 'JS/createRelayEnvironment';
 import classNames from 'classnames';
+// store
+import { setErrorMessage } from 'JS/redux/reducers/footer';
 // mutations
 import ModifyDatasetLinkMutation from 'Mutations/ModifyDatasetLinkMutation';
 // component
@@ -12,8 +14,6 @@ import Loader from 'Components/common/Loader';
 import ButtonLoader from 'Components/common/ButtonLoader';
 import AdvancedSearch from 'Components/common/AdvancedSearch';
 import LinkCard from './LinkCard';
-// store
-import { setErrorMessage } from 'JS/redux/reducers/footer';
 // assets
 import './LinkModal.scss';
 
@@ -166,7 +166,7 @@ export default class LinkModal extends Component {
         handleClose={() => props.closeLinkModal()}
         size="large-long"
         noPadding
-        renderContent={() =>(<div className="LinkModal">
+        renderContent={() => (<div className="LinkModal">
             <div
                 className="LinkModal__info Tooltip-data"
                 data-tooltip="Linking a dataset will allow you to reference its files within the Project">

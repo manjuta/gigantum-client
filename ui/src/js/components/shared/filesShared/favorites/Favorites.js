@@ -90,7 +90,9 @@ export default class Favorites extends Component {
       return (
         <div className="Favorite__none flex flex--column justify--center">
           <div className="Favorite__icon--star"></div>
-          <p className="Favorite__p"><b>No {capitalSection} Favorites</b></p>
+          <p className="Favorite__p">
+            <b>{`No ${capitalSection} Favorites}`}</b>
+          </p>
           <p className="Favorite__p">Add a favorite and enter a description to highlight important items.</p>
         </div>
       );

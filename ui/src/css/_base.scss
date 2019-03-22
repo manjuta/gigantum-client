@@ -79,7 +79,7 @@ h3, h4 {
 }
 
 p, a{
-  font-size: 14px;
+  font-size: $body-fontsize;
 }
 
 li > code,
@@ -103,8 +103,4 @@ li {
 
 table {
   width: 100%;
-}
-
-* {
-  outline: none;
 }

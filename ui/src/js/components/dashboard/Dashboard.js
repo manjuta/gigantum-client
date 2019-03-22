@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import { graphql, QueryRenderer } from 'react-relay';
 import queryString from 'querystring';
+// redux
+import { setCallbackRoute } from 'JS/redux/reducers/routes';
 // components
+import environment from 'JS/createRelayEnvironment';
+import Loader from 'Components/common/Loader';
 import LocalLabbooksContainer from './labbooks/localLabbooks/LocalLabbooksContainer';
 import LocalDatasetsContainer from './datasets/localDatasets/LocalDatasetsContainer';
 import RemoteDatasetsContainer from './datasets/remoteDatasets/RemoteDatasetsContainer';
 import RemoteLabbooksContainer from './labbooks/remoteLabbooks/RemoteLabbooksContainer';
-import environment from 'JS/createRelayEnvironment';
-import Loader from 'Components/common/Loader';
 // assets
 import './Dashboard.scss';
-// redux
-import { setCallbackRoute } from 'JS/redux/reducers/routes';
 
 
 const LocalListingQuery = graphql`query DashboardLocalQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){

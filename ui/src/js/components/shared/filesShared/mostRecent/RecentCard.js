@@ -2,14 +2,15 @@
 import React, { Component } from 'react';
 import Moment from 'moment';
 import TextTruncate from 'react-text-truncate';
-// Mutations
-import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
-import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
+// config
+import config from 'JS/config';
 // store
 import { setErrorMessage } from 'JS/redux/reducers/footer';
 import store from 'JS/redux/store';
-// config
-import config from 'JS/config';
+// Mutations
+import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
+import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
+
 
 export default class RecentCard extends Component {
   constructor(props) {
@@ -75,9 +76,7 @@ export default class RecentCard extends Component {
     const filename = fileDirectories[fileDirectories.length - 1];
     const path = `${this.props.section}/${this.props.file.node.key.replace(filename, '')}`;
     return (
-      <div
-        className="Recent__card Card column-3-span-4--shrink"
-      >
+      <div className="Recent__card Card column-3-span-4--shrink">
         <div
           onClick={() => this._handleFileFavoriting(this.props.file)}
           className={this.props.file.node.isFavorite ? 'Favorite__star' : 'Favorite__star--off'}
@@ -95,8 +94,8 @@ export default class RecentCard extends Component {
         </div>
 
         <div className="Recent__description-section">
-          <p>Last Modified: {Moment(this.props.file.node.modifiedAt * 1000).fromNow()}</p>
-          <p>Size: {config.humanFileSize(this.props.file.node.size)} </p>
+          <p>{`Last Modified: ${Moment(this.props.file.node.modifiedAt * 1000).fromNow()}`}</p>
+          <p>{`Size: ${config.humanFileSize(this.props.file.node.size)}`}</p>
         </div>
       </div>
     );

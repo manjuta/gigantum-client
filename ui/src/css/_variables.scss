@@ -66,13 +66,16 @@ $footerElements: basic, progressBar, status, section, message, button;
 * font sizes
 *
 ***********************/
-$h1-fontsize: 40px !default;
-$h2-fontsize: 26px !default;
-$h3-fontsize: 22px !default;
-$h4-fontsize: 18px !default;
-$h5-fontsize: 18px !default;
-$h6-fontsize: 16px !default;
-$body-fontsize: 14px !default;
+$h1-fontsize: 3.052em;
+$h2-fontsize: 2.441em;
+$h3-fontsize: 1.953em;
+$h4-fontsize: 1.563em;
+$h5-fontsize: 1.25em;
+$h6-fontsize: 1em;
+$body-fontsize: 15px !default;
+$tooltip: 0.8em;
+$annotation: 0.64em;
+$superscript: 0.512em;
 /*****************************
 *
 * width

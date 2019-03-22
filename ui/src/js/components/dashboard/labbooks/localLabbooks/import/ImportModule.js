@@ -694,11 +694,19 @@ export default class ImportModule extends Component {
 }
 
 const ImportMain = ({ self }) => {
+
+  let owner = '',
+      labbookName = '';
   const importCSS = classNames({
     'btn--import': true,
     'btn--expand': self.state.importTransition,
     'btn--collapse': !self.state.importTransition && self.state.importTransition !== null,
   });
+
+  if (self.state.readyLabbook) {
+     owner = self.state.readyLabbook.owner
+     labbookName = self.state.readyLabbook.labbookName;
+  }
 
   return (<div className="Import__labbook-main">
     {
@@ -707,8 +715,7 @@ const ImportMain = ({ self }) => {
         header="Import Project"
         handleClose={() => self._closeImportModal()}
         size="large"
-        renderContent={() =>
-          (<Fragment>
+        renderContent={() => (<Fragment>
             <div className="ImportModal">
               <p>Import a Project by either pasting a URL or drag & dropping below</p>
               <input
@@ -730,10 +737,10 @@ const ImportMain = ({ self }) => {
                   <div className="Import__ReadyLabbook">
                     <div>Select Import to import the following Project</div>
                     <hr/>
-                    <div>Project Owner: {self.state.readyLabbook.owner}</div>
-                    <div>Project Name: {self.state.readyLabbook.labbookName}</div>
+                    <div>{`Project Owner: ${owner}`}</div>
+                    <div>{`Project Name: ${labbookName}`}</div>
                   </div> :
-                  <div className= "DropZone">
+                  <div className="DropZone">
                      <p>Drag and drop an exported Project here</p>
                   </div>
                 }
@@ -746,8 +753,7 @@ const ImportMain = ({ self }) => {
                 </button>
                 <button
                   onClick={() => { self.importLabbook(); }}
-                  disabled={!self.state.readyLabbook || self.state.isImporting}
-                >
+                  disabled={!self.state.readyLabbook || self.state.isImporting}>
                   Import
                 </button>
               </div>
@@ -764,27 +770,21 @@ const ImportMain = ({ self }) => {
       <div className="Import__labbook-title">
         <h2 className="Import__h2 Import__h2--azure">Add Project</h2>
       </div>
-
     </div>
 
     <div
       className="btn--import"
-      onClick={(evt) => {
-        self._showModal(evt);
-      }}>
+      onClick={(evt) => { self._showModal(evt); }}>
       Create New
     </div>
 
     <div
       className="btn--import"
-      onClick={(evt) => {
-        self.setState({ showImportModal: true });
-      }}>
+      onClick={(evt) => { self.setState({ showImportModal: true }); }}>
       Import Existing
     </div>
 
     <Tooltip section="createLabbook" />
-
 
   </div>);
 };

@@ -109,27 +109,45 @@ export default class DeleteLabbook extends Component {
     *  determines the warning text to be displayed to the user
   */
   _getExplanationText() {
+    const { props } = this;
     const { labbookName, owner } = store.getState().routes;
     if (this.props.remoteDelete) {
       if (this.props.existsLocally) {
         return (
           <div>
-            <p>This will delete <b>{this.props.remoteLabbookName}</b> from the cloud.</p>
+            <p>
+              This will delete
+              <b>{props.remoteLabbookName}</b>
+              from the cloud.
+            </p>
             <p>The Project will still exist locally.</p>
           </div>
         );
       }
       return (
-        <p>This will delete <b>{this.props.remoteLabbookName}</b> from the cloud. All data will be removed and can not be recovered.</p>
+        <p>
+          This will delete
+          <b>{props.remoteLabbookName}</b>
+          from the cloud. All data will be removed and can not be recovered.
+        </p>
       );
-    } else if (this.props.remoteAdded) {
+    } else if (props.remoteAdded) {
       return (
         <div>
-          <p>This will delete <b>{labbookName}</b> from this Gigantum client.</p>
-          <p>You can still download it from gigantum.com/{owner}/{labbookName}.</p>
+          <p>
+            This will delete
+            <b>{labbookName}</b>
+            from this Gigantum client.
+          </p>
+          <p>{`You can still download it from gigantum.com/${owner}/${labbookName}.`}</p>
         </div>);
     }
-    return (<p>This will delete <b>{labbookName}</b> from this Gigantum instance. All data will be removed and can not be recovered.</p>);
+    return (
+      <p>
+        This will delete
+        <b>{labbookName}</b>
+        from this Gigantum instance. All data will be removed and can not be recovered.
+      </p>);
   }
 
   render() {

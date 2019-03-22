@@ -149,7 +149,12 @@ export default class FilePreview extends Component {
 }
 
 
-const FilePreviewSection = ({ self, owner, name, sectionData }) => {
+const FilePreviewSection = ({
+  self,
+  owner,
+  name,
+  sectionData,
+}) => {
   const {
           section,
           sectionType,

@@ -12,9 +12,6 @@ import Description from './description/Description';
 import './TitleSection.scss';
 
 export default class TitleSection extends Component {
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     const { props } = this,

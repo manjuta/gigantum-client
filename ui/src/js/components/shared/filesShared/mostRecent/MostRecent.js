@@ -1,10 +1,10 @@
 // vendor
 import React, { Component } from 'react';
+// store
+import store from 'JS/redux/store';
 // componenets
 import FileEmpty from 'Components/labbook/overview/FileEmpty';
 import MostRecentList from './MostRecentList';
-// store
-import store from 'JS/redux/store';
 // assets
 import './MostRecent.scss';
 

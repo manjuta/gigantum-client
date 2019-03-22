@@ -3,21 +3,12 @@ import React, { Component } from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
 // environment
 import environment from 'JS/createRelayEnvironment';
-
-// components
-import Labbook from './Labbook';
-import Loader from 'Components/common/Loader';
 // store
 import { setUpdateAll } from 'JS/redux/reducers/routes';
-// labbook query with notes fragment
-export const LabbookQuery = graphql`
-  query LabbookQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $hasNext: Boolean!){
-    labbook(name: $name, owner: $owner){
-      id
-      description
-      ...Labbook_labbook
-    }
-  }`;
+// components
+import Loader from 'Components/common/Loader';
+import Labbook from './Labbook';
+
 
 class LabbookQueryContainer extends Component {
   componentDidMount() {
@@ -66,5 +57,16 @@ class LabbookQueryContainer extends Component {
     />);
   }
 }
+
+
+// labbook query with notes fragment
+export const LabbookQuery = graphql`
+  query LabbookQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $hasNext: Boolean!){
+    labbook(name: $name, owner: $owner){
+      id
+      description
+      ...Labbook_labbook
+    }
+  }`;
 
 export default LabbookQueryContainer;

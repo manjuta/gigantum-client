@@ -207,20 +207,13 @@ export default class PublishModal extends Component {
         header={props.header}
         handleClose={() => props.toggleModal(props.modalStateValue)}
         size="large"
-        renderContent={() =>
-
-          (<div className="VisibilityModal">
-
+        renderContent={() => (<div className="VisibilityModal">
             <div>
-
               <p>You are about to change the visibility of the project.</p>
-
             </div>
 
             <div>
-
               <div className="VisibilityModal__private">
-
                 <input
                   defaultChecked={(props.visibility === 'private') || !this.state.isPublic}
                   type="radio"

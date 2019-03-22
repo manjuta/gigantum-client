@@ -107,7 +107,7 @@ class Labbook extends Component {
     packageLatestVersions: [],
     isFetchingPackages: false,
     queuePackageFetch: false,
-    activeBranchName: this.props.labbook.activeBranchName
+    activeBranchName: this.props.labbook.activeBranchName,
   }
 
   static getDerivedStateFromProps(nextProps, state) {

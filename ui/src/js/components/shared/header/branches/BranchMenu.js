@@ -3,6 +3,12 @@ import React, { Component } from 'react';
 import { boundMethod } from 'autobind-decorator';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
+// store
+import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setSidepanelVisible } from 'JS/redux/reducers/labbook/labbook';
+// queries
+import UserIdentity from 'JS/Auth/UserIdentity';
+import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
 // componenets
 import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ForceSync from 'Components/shared/modals/ForceSync';
@@ -10,15 +16,8 @@ import Branches from 'Components/shared/sidePanel/Branches';
 import VisibilityModal from 'Components/shared/modals/VisibilityModal';
 import PublishDatasetsModal from 'Components/shared/modals/PublishDatasetsModal';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
-// queries
-import UserIdentity from 'JS/Auth/UserIdentity';
-import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
-// store
-import { setErrorMessage } from 'JS/redux/reducers/footer';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
-// store
-import { setSidepanelVisible } from 'JS/redux/reducers/labbook/labbook';
 // assets
 import './BranchMenu.scss';
 

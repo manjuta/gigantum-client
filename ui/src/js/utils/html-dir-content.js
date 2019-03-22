@@ -41,9 +41,7 @@ const getFileFromFileEntry = function getFileFromFileEntry(entry) {
     } else {
       resolve(null);
     }
-  })).catch(() =>
-  // swallow errors
-    null);
+  })).catch(() => null); // swallows errors
 };
 
 const isItemFileEntry = function isItemFileEntry(item) {

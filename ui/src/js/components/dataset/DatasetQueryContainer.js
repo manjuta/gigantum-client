@@ -3,21 +3,11 @@ import React, { Component } from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
 // environment
 import environment from 'JS/createRelayEnvironment';
-
-// components
-import Dataset from './Dataset';
-import Loader from 'Components/common/Loader';
 // store
 import { setUpdateAll } from 'JS/redux/reducers/routes';
-// dataset query with notes fragment
-export const DatasetQuery = graphql`
-  query DatasetQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String){
-    dataset(name: $name, owner: $owner){
-      id
-      description
-      ...Dataset_dataset
-    }
-  }`;
+// components
+import Loader from 'Components/common/Loader';
+import Dataset from './Dataset';
 
 class DatasetQueryContainer extends Component {
   componentDidMount() {
@@ -67,5 +57,15 @@ class DatasetQueryContainer extends Component {
     />);
   }
 }
+
+// dataset query with notes fragment
+export const DatasetQuery = graphql`
+  query DatasetQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String){
+    dataset(name: $name, owner: $owner){
+      id
+      description
+      ...Dataset_dataset
+    }
+}`;
 
 export default DatasetQueryContainer;

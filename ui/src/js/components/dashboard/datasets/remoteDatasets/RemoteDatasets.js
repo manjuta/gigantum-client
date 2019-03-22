@@ -140,11 +140,14 @@ class RemoteDatasets extends Component {
 
               <h3 className="Datasets__h3">No Results Found</h3>
 
-              <p>Edit your filters above or <span
+              <p>
+                Edit your filters above or
+                <span
                 className="Datasets__span"
-                onClick={() => this.props.setFilterValue({ target: { value: '' } })}
-              >clear
-                                            </span> to try again.
+                onClick={() => this.props.setFilterValue({ target: { value: '' } })}>
+                clear
+                </span>
+                to try again.
               </p>
 
             </div>

@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
+// components
+import Connectors from '../utilities/Connectors';
 // assets
 import './AddSubfolder.scss';
-// components
-import Connectors from './../utilities/Connectors';
 
 
 class AddSubfolder extends Component {

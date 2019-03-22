@@ -1,6 +1,6 @@
 @import '~Styles/_imports.scss';
 
-.Footer__messages-section {
+.Footer__messageContainer {
     position: relative;
     z-index: index($footerElements, section);
 
@@ -15,33 +15,60 @@
     background: $azure;
 
     @include boxShadow();
+
+    &--collapsed{
+        border-width: 0;
+    }
+
+    &--helper-open{
+      width: calc(100% - 280px);
+    }
 }
 
-.Footer__messages-section--collapsed{
-    border-width: 0;
+
+.Footer__messageList {
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    max-height: 75vh;
+    height: auto;
+    min-height: 80px;
+    padding: 0 20px;
+
+    transition: height 0.25s, max-height 0.25s, opacity 0.25s;
+
+    opacity: 1;
+
+    &--collapsed {
+        overflow: hidden;
+
+        height: 0px !important;
+        min-height: 0px !important;
+
+        opacity: 0 !important;
+    }
+
+    &::-webkit-scrollbar {
+      	width: 8px;
+
+      	background-color: rgba(255,255,255,0.5);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      	background-color: #fff;
+    }
 }
 
-.Footer__message-section--helper-open{
-  width: calc(100% - 280px);
-}
-
-.Footer__message,
-.Footer__message--error,
-.Footer__message--warning{
+.Footer__message{
   height: 60px;
 
   border-bottom: 1px solid $white;
+
+  &:last-child {
+    border-bottom: 0px solid $white;
+  }
 }
 
-.Footer__body-height{
-  height: auto !important;
-}
-
-.Footer__message:last-child,
-.Footer__message--error:last-child
-.Footer__message--warning:last-child{
-  border-bottom: 0px solid $white;
-}
 
 .Footer__message-body-content{
     margin: 20px;
@@ -50,18 +77,17 @@
     color: $mineShaft;
     border-radius: 8px;
     background: $white;
-}
 
-.Footer__message-body-content--text {
-    white-space: pre-wrap;
-    word-break: break-all;
+    &--text {
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
 }
 
 .Footer__flex-container {
-    display: flex;
     align-content: center;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    @include flex(flex-start, row);
 }
 
 
@@ -80,8 +106,6 @@
   padding: 0 10px;
 
   color: $white;
-
-  font-size: 14px;
 }
 
 .Footer__message-expand{
@@ -103,88 +127,22 @@
     background-size: 10px;
 
     line-height: 18px;
+
+    &:hover {
+        color: $turquise;
+    }
 }
 
-.Footer__message-title--collapsed{
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-
-    text-overflow: ellipsis;
-    word-break: break-all;
-
-    -webkit-line-clamp: 2;
-}
 .Footer__message-title{
     word-break: break-all;
-}
 
-.Footer__message-dismiss:hover {
-    color: $turquise;
-}
+    &--collapsed{
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
 
-.Footer__message-list {
-    overflow-x: hidden;
-    overflow-y: auto;
+        text-overflow: ellipsis;
 
-    height: auto;
-    min-height: 80px;
-    padding: 0 20px;
-
-    transition: height 0.25s, max-height 0.25s, opacity 0.25s;
-
-    opacity: 1;
-}
-
-.Footer__message-list::-webkit-scrollbar {
-  	width: 8px;
-
-  	background-color: rgba(255,255,255,0.5);
-}
-
-.Footer__message-list::-webkit-scrollbar-thumb {
-  	background-color: #fff;
-}
-
-.Footer__button--view-all{
-    position: absolute;
-    top: -14px;
-    right: 30px;
-
-    width: 110px;
-    padding: 2px 20px;
-
-    cursor: pointer;
-    text-align: center;
-
-    border: 1px solid $white;
-    border-radius: 12px;
-    background: $azure;
-}
-
-.Footer__message-list--collapsed {
-    overflow: hidden;
-
-    height: 0px !important;
-    min-height: 0px !important;
-
-    opacity: 0 !important;
-}
-
-
-.Footer__button--toggle {
-    flex: 0 1 30px;
-
-    width: 24px;
-    height: 24px;
-
-    cursor: pointer;
-
-    background: url('~Images/icons/down-arrow-white.svg') no-repeat center center;
-    background-size: 18px;
-}
-
-.Footer__button--toggle.open {
-    background: url('~Images/icons/up-arrow-white.svg') no-repeat center center;
-    background-size: 18px;
+        -webkit-line-clamp: 2;
+    }
 }

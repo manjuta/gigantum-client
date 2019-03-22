@@ -8,15 +8,15 @@ import shallowCompare from 'react-addons-shallow-compare'; // ES6
 // assets
 import './FileBrowser.scss';
 // components
+import Modal from 'Components/common/Modal';
 import LinkModal from './LinkModal';
 import File from './fileRow/File';
 import Folder from './fileRow/Folder';
 import Dataset from './fileRow/dataset/Dataset';
 import AddSubfolder from './fileRow/AddSubfolder';
+// util
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
-import Modal from 'Components/common/Modal';
-// util
 import FileFormatter, { fileHandler } from './utilities/FileFormatter';
 
 
@@ -772,26 +772,23 @@ class FileBrowser extends Component {
                 <div
                   className="FileBrowser__button FileBrowser__button--add-folder"
                   data-tooltip="Add Folder"
-                  onClick={() => this.setState({ addFolderVisible: !this.state.addFolderVisible })}
-                >
+                  onClick={() => this.setState({ addFolderVisible: !this.state.addFolderVisible })}>
 
                 </div>
                 {
-                  this.props.section === 'input' &&
+                  (this.props.section === 'input') &&
                   <div
                     className="FileBrowser__button FileBrowser__button--add-dataset"
                     onClick={() => this.setState({ showLinkModal: true })}
-                    data-tooltip="Link Dataset"
-                  >
+                    data-tooltip="Link Dataset">
                   </div>
                 }
                 {
-                  this.props.section === 'data' &&
+                  (this.props.section === 'data') &&
                   <div
                     className={downloadAllCSS}
                     onClick={() => this._handleDownloadAll(allFilesLocal)}
-                    data-tooltip={allFilesLocal ? 'Downloaded' : 'Download All'}
-                  >
+                    data-tooltip={allFilesLocal ? 'Downloaded' : 'Download All'}>
                     {
                       this.state.downloadingAll &&
                       <div></div>

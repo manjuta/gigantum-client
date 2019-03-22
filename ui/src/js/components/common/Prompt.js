@@ -91,18 +91,21 @@ export default class Prompt extends Component {
                 window.location.hostname === 'localhost' ?
                   <div>
                     <p>Ensure Gigantum is running or restart the application</p>
-                    <p>If the problem continues to persist, follow the steps <a href="https://docs.gigantum.com/docs/client-interface-fails-to-load" rel="noopener noreferrer" target="_blank">here</a>.</p>
-
+                    <p>
+                    If the problem continues to persist, follow the steps
+                    <a href="https://docs.gigantum.com/docs/client-interface-fails-to-load" rel="noopener noreferrer" target="_blank">here</a>
+                    .
+                    </p>
                   </div>
                 :
                   <div>
                     <p>Please ensure you have a valid internet connection.</p>
-                    <p>If the problem continues to persist, please report it&nbsp;
+                    <p>
+                    If the problem continues to persist, please report it&nbsp;
                       <a
                         href="https://spectrum.chat/gigantum"
                         rel="noopener noreferrer"
-                        target="_blank"
-                      >
+                        target="_blank">
                         here
                       </a>
                       .

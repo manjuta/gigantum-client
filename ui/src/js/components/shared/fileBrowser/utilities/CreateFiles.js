@@ -1,11 +1,5 @@
 // vendor
 import uuidv4 from 'uuid/v4';
-// utilities
-import ChunkUploader from 'JS/utils/ChunkUploader';
-import config from 'JS/config';
-import FolderUpload from './FolderUpload';
-import ignore from 'ignore';
-import gitIgnoreJson from 'JS/data/gitignore.json';
 // store
 import {
   setErrorMessage,
@@ -22,6 +16,12 @@ import {
 } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
 import { setUpdateDetailView } from 'JS/redux/reducers/labbook/labbook';
 import store from 'JS/redux/store';
+// utilities
+import ChunkUploader from 'JS/utils/ChunkUploader';
+import config from 'JS/config';
+import ignore from 'ignore';
+import gitIgnoreJson from 'JS/data/gitignore.json';
+import FolderUpload from './FolderUpload';
 
 const ig = ignore().add(gitIgnoreJson.gitIgnore);
 /**

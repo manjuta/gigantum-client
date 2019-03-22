@@ -12,6 +12,7 @@ module.exports = {
  ],
  "plugins": [
    "relay",
+   "../../babel-plugin-selenium-id",
    "@babel/plugin-syntax-dynamic-import",
    ["@babel/plugin-proposal-decorators", {
        "legacy": true,
@@ -46,6 +47,7 @@ module.exports = {
       '@babel/preset-react',
     ],
     "plugins": [
+      "../../babel-plugin-selenium-id",
       '@babel/plugin-transform-modules-commonjs',
       'babel-plugin-dynamic-import-node-babel-7',
       ["@babel/plugin-proposal-decorators", {

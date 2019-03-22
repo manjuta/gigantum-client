@@ -25,8 +25,7 @@ export default class LoginPrompt extends Component {
       <Modal
         size="small"
         handleClose={() => this.props.closeModal()}
-        renderContent={() =>
-          (navigator.onLine ?
+        renderContent={() => (navigator.onLine ?
             <div className="LoginPrompt">
               <div>
                 <p>Your authentication token has expired and must be renewed to perform this action.</p>

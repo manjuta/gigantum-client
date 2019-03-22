@@ -4,15 +4,15 @@ import classNames from 'classnames';
 import Moment from 'moment';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
-// assets
-import './Folder.scss';
 // components
 import ActionsMenu from './ActionsMenu';
 import File from './File';
 import AddSubfolder from './AddSubfolder';
 import DatasetActionsMenu from './dataset/DatasetActionsMenu';
-// components
-import Connectors from './../utilities/Connectors';
+// utils
+import Connectors from '../utilities/Connectors';
+// assets
+import './Folder.scss';
 
 
 class Folder extends Component {

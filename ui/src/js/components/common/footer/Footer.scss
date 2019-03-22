@@ -19,10 +19,14 @@
 
     @include flex(space-between, column);
     max-height: 75vh;
-}
 
-.Footer * {
-    font-weight: 400;
+    &--expand {
+      height: auto;
+    }
+
+    &--expand-extra {
+        max-height: 240px !important;
+    }
 }
 
 .Footer__disc-button {
@@ -37,113 +41,92 @@
     cursor: pointer;
     transition: all 0.25s;
     border-radius: 50%;
-    background: $azure url(~Images/icons/notifications/notification.svg) no-repeat center center;
+    background: $azure url('~Images/icons/notifications/notification.svg') no-repeat center center;
     background-size: 60px;
     @include boxShadow();
+
+    &--open {
+        position: absolute;
+        top: -20px;
+        right: 80px;
+
+        width: 40px;
+        height: 40px;
+
+        background: $azure url(~Images/icons/notifications/notification-close.svg) no-repeat center center;
+        background-size: 40px;
+        border-radius: 50%;
+    }
+
+    &--bottom {
+      bottom: 50px;
+    }
+
+    &--side-view {
+      bottom: 80px;
+      width: 40px;
+      height: 40px;
+      border-radius: 20px 0 0 20px;
+      right: 0px;
+      transition: bottom 0.25s;
+      background: $azure url('~Images/icons/notifications/notification-simple.svg') no-repeat center center;
+      background-size: 26px;
+
+      &.Footer__disc-button--helper-open{
+        right: 0px;
+        bottom: 295px;
+
+        &.Footer__disc-button--open{
+          right: 240px;
+        }
+      }
+    }
+
+    &.Footer__disc-button--helper-open{
+      right: 240px;
+    }
 }
 
-.Footer__dist-button--side-view{
-  bottom: 80px;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px 0 0 20px;
-  right: 0px;
-  transition: bottom 0.25s;
-  background: $azure url(~Images/icons/notifications/notification-simple.svg) no-repeat center center;
-  background-size: 26px;
-}
-
-.Footer__disc-button.Footer__disc-button--helper-open{
-  right: 240px;
-}
-
-.Footer__dist-button--side-view.Footer__disc-button--helper-open{
-
-  right: 0px;
-  bottom: 295px;
-}
-
-.Footer__disc-button--helper-open.Footer__disc-button--open{
-  right: 240px;
-}
-
-.Footer__disc-button--open {
-    position: absolute;
-    top: -20px;
-    right: 80px;
-
-    width: 40px;
-    height: 40px;
-
-    background: $azure url(~Images/icons/notifications/notification-close.svg) no-repeat center center;
-    background-size: 40px;
-    border-radius: 50%;
-
-}
-
-.Footer__disc-button--bottom{
-  bottom: 50px;
-}
-
-
-
-
-.Footer--expand {
-  height: auto;
-}
-
-.Footer--expand-extra {
-    max-height: 240px !important;
-}
-
-
-
-
-.Footer--error {
-    color: $white;
-}
-
-
-.Footer__status--error {
+.Footer__status {
+  &--error {
     background-color: $crimson;
-}
+  }
 
-.Footer__status--warning {
+  &--warning {
     color: $jet;
     background-color: $goldenLemon;
+  }
 }
 
-
-
-.Footer__button {
-    position: absolute;
-    z-index: index($footerElements, button);
-    top: 5px;
-    right: 10px;
-
-    height: 30px;
-
-    color: $white;
-    border: 1px solid $white;
-    border-radius: 20px;
-    background-color: $azure !important;
-
-    line-height: 10px;
-}
-
-.Footer__button--cancel {
-
-}
-
-.Footer__button:hover {
-    color: $jet ;
-    background-color: $white !important;
+.Footer {
+  .Btn--feature {
+      position: absolute;
+      z-index: index($footerElements, button);
+      top: -20px;
+      right: 30px;
+  }
 }
 
 .Footer__message {
     flex: 1;
 
     color: $white;
+
+    &--error{
+      .Footer__message-icon{
+        background: $crimson url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
+        background-size: 26px;
+        transform: rotate(0deg);
+      }
+    }
+
+    &--warning{
+      .Footer__message-icon{
+        background: $goldenLemon url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
+        background-size: 26px;
+        transform: rotate(0deg);
+      }
+    }
 }
 
 .Footer__message-icon{
@@ -157,18 +140,4 @@
   flex: 0 1 22px;
   min-height: 22px;
   min-width: 22px;
-}
-.Footer__message--error{
-  .Footer__message-icon{
-    background: $crimson url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
-    background-size: 26px;
-    transform: rotate(0deg);
-  }
-}
-.Footer__message--warning{
-  .Footer__message-icon{
-    background: $goldenLemon url(~Images/icons/notifications/info-exclamation.svg) no-repeat center center;
-    background-size: 26px;
-    transform: rotate(0deg);
-  }
 }

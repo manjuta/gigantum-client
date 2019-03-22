@@ -12,10 +12,17 @@ export default class TrackingToggle extends React.Component {
     };
   }
 
+  /**
+    @param {}
+    updates trackingOn state
+    updates parents state via setTracking prop
+  */
   _toggleTrackingState() {
-    this.setState({ isTrackingOn: !this.state.isTrackingOn });
+    const { state } = this;
 
-    this.props.setTracking(!this.state.isTrackingOn);
+    this.setState({ isTrackingOn: !state.isTrackingOn });
+
+    this.props.setTracking(!state.isTrackingOn);
   }
 
   render() {
@@ -35,9 +42,11 @@ export default class TrackingToggle extends React.Component {
     return (
       <div
         className="TrackingToggle"
-        onClick={() => this._toggleTrackingState()}
-      >
-        <div className="TrackingToggle__text">Input/Output Version Tracking {trackingState}</div>
+        onClick={() => this._toggleTrackingState()}>
+        <div className="TrackingToggle__text">
+          Input/Output Version Tracking
+          {trackingState}
+        </div>
         <span className={toggleCheckboxCondition}>
 
           <input
@@ -51,8 +60,8 @@ export default class TrackingToggle extends React.Component {
           />
           <label
             className={toggleCondition}
-            htmlFor="TrackingToggle__input"
-          />
+            htmlFor="TrackingToggle__input">
+          </label>
         </span>
       </div>
     );

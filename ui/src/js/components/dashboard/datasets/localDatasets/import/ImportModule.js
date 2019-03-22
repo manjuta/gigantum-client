@@ -581,11 +581,18 @@ export default class ImportModule extends Component {
 }
 
 const ImportMain = ({ self }) => {
+  let owner = '',
+      datasetName = '';
   const importCSS = classNames({
     'btn--import': true,
     'btn--expand': self.state.importTransition,
     'btn--collapse': !self.state.importTransition && self.state.importTransition !== null,
   });
+
+  if (self.state.readyDataset) {
+    owner = self.state.readyDataset.owner;
+    datasetName = self.state.readyDataset.datasetName;
+  }
 
   return (<div className="Import__dataset-main">
     {
@@ -594,8 +601,7 @@ const ImportMain = ({ self }) => {
         header="Import Dataset"
         handleClose={() => self._closeImportModal()}
         size="large"
-        renderContent={() =>
-          (<Fragment>
+        renderContent={() => (<Fragment>
             <div className="ImportModal">
               <p>Import a dataset by either pasting a URL or drag & dropping below</p>
               <input
@@ -613,17 +619,16 @@ const ImportMain = ({ self }) => {
                 type="file"
                 onDragEnd={evt => self._dragendHandler(evt)}
                 onDrop={evt => self._dropHandler(evt)}
-                onDragOver={evt => self._dragoverHandler(evt)}
-              >
+                onDragOver={evt => self._dragoverHandler(evt)}>
                 {
                   self.state.readyDataset && self.state.files[0] ?
                   <div className="Import__ReadyDataset">
                     <div>Select Import to import the following dataset</div>
                     <hr/>
-                    <div>Dataset Owner: {self.state.readyDataset.owner}</div>
-                    <div>Dataset Name: {self.state.readyDataset.datasetName}</div>
+                    <div>{`Dataset Owner: ${owner}`}</div>
+                    <div>{`Dataset Name: ${datasetName}`}</div>
                   </div> :
-                  <div className= "DropZone">
+                  <div className="DropZone">
                      <p>Drag and drop an exported Dataset here</p>
                   </div>
                 }
@@ -637,8 +642,7 @@ const ImportMain = ({ self }) => {
                 </button>
                 <button
                   onClick={() => { self.importDataset(); }}
-                  disabled={!self.state.readyDataset || self.state.isImporting}
-                >
+                  disabled={!self.state.readyDataset || self.state.isImporting}>
                   Import
                 </button>
               </div>
@@ -660,24 +664,17 @@ const ImportMain = ({ self }) => {
 
     <div
       className="btn--import"
-      onClick={(evt) => {
-        self._showModal(evt);
-      }}
-    >
+      onClick={(evt) => { self._showModal(evt); }}>
       Create New
     </div>
 
     <div
       className="btn--import"
-      onClick={(evt) => {
-        self.setState({ showImportModal: true });
-      }}
-    >
+      onClick={(evt) => { self.setState({ showImportModal: true }); }}>
       Import Existing
     </div>
 
     <Tooltip section="createLabbook" />
-
 
   </div>);
 };

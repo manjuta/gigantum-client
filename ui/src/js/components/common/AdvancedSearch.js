@@ -102,21 +102,18 @@ export default class Modal extends Component {
         {
           Object.keys(this.props.filterCategories).map((category, index) => <div
             key={category}
-            className="AdvancedSearch__filter-container"
-          >
+            className="AdvancedSearch__filter-container">
             <div
                 className={`AdvancedSearch__filter-section ${this.state.expandedIndex === index ? 'selected' : ''}`}
                 onClick={() => this.setState({ expandedIndex: this.state.expandedIndex === index ? null : index })}
-                key={category}
-            >
+                key={category}>
                 {category}
             </div>
             {
-              category === 'CUDA Version' &&
-              <div
+              (category === 'CUDA Version')
+              && <div
                 className="AdvancedSearch__info"
-                onClick={() => this.setState({ tooltipShown: !this.state.tooltipShown })}
-              >
+                onClick={() => this.setState({ tooltipShown: !this.state.tooltipShown })}>
                 {
                   this.state.tooltipShown &&
                   <div className="InfoTooltip">
@@ -124,24 +121,21 @@ export default class Modal extends Component {
                     <a
                       target="_blank"
                       href="https://docs.gigantum.com/docs/using-cuda-with-nvidia-gpus"
-                      rel="noopener noreferrer"
-                    >
+                      rel="noopener noreferrer">
                       Learn more.
                     </a>
                   </div>
                 }
               </div>
             }
+
             {
-                this.state.expandedIndex === index &&
-                <ul
-                    className="AdvancedSearch__filter-list"
-                >
+                (this.state.expandedIndex === index)
+                && <ul className="AdvancedSearch__filter-list">
                     {
                         this.props.filterCategories[category].map(filter => <li
                                 key={filter}
-                                onClick={() => this._handleAddition({ id: filter, text: filter }, category)}
-                            >
+                                onClick={() => this._handleAddition({ id: filter, text: filter }, category)}>
                                 {filter}
                             </li>)
                     }

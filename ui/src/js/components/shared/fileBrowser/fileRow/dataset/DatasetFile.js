@@ -6,10 +6,10 @@ import classNames from 'classnames';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import TextTruncate from 'react-text-truncate';
-// components
-import ActionsMenu from './DatasetActionsMenu';
 // config
 import config from 'JS/config';
+// components
+import ActionsMenu from './DatasetActionsMenu';
 // assets
 import './DatasetFile.scss';
 

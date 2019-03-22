@@ -84,14 +84,12 @@ const network = Network.create(fetchQuery);
 
 const handlerProvider = function handlerProvider(handle) {
   switch (handle) {
-    // Augment (or remove from) this list:
+    // Augment (or remove from) this list
     case 'connection': return ConnectionHandler;
     case 'viewer': return ViewerHandler;
+    default: return ConnectionHandler;
   }
-  throw new Error(
-    `handlerProvider: No handler provided for ${handle}`
-  );
-}
+};
 
 const source = new RecordSource();
 const store = new Store(source);

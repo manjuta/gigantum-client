@@ -62,8 +62,7 @@ export default class ForceSync extends Component {
         header="Sync Conflict"
         handleClose={() => this.props.toggleSyncModal()}
         size="medium"
-        renderContent={() =>
-          (<Fragment>
+        renderContent={() => (<Fragment>
             <div>
               <p>Your Project conflicts with changes already synced to the server. You can choose which changes to use</p>
               <p><b>**Note: This will overwrite the unselected conflicting files.</b></p>

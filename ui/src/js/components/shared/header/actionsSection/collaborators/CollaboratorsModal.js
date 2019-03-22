@@ -133,10 +133,12 @@ export default class CollaboratorsModal extends Component {
     if (this.props.canManageCollaborators) {
       if (userExpanded) {
         if (userExpanded !== localStorage.getItem('username')) {
-          this.setState({ userExpanded: this.state.userExpanded === userExpanded ? null : userExpanded});
+          this.setState({
+            userExpanded: (this.state.userExpanded === userExpanded) ? null : userExpanded,
+          });
         }
       } else {
-        this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen});
+        this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen });
       }
     }
   }
@@ -419,8 +421,7 @@ export default class CollaboratorsModal extends Component {
         size="large"
         overflow="visible"
         handleClose={() => { this.props.toggleCollaborators(); }}
-        renderContent={() =>
-          (<div>
+        renderContent={() => (<div>
             {
               this.props.canManageCollaborators ?
               <div className="CollaboratorsModal__add">
@@ -449,14 +450,12 @@ export default class CollaboratorsModal extends Component {
                     return (<li
                       onClick={() => this._completeColloborator(collaborator)}
                       className={listItemCSS}
-                      key={collaborator.username}
-                    >
+                      key={collaborator.username}>
 
                       <div className="CollaboratorsModal__listItem--username">{collaborator.username}</div>
 
                       <div className="CollaboratorsModal__listItem--name">{collaborator.name}</div>
-
-                            </li>);
+                   </li>);
                   })
                 }
                 </ul>
@@ -590,13 +589,9 @@ export default class CollaboratorsModal extends Component {
 
                         </li>);
                     })
-
                   }
-
                 </ul>
-
               }
-
               </div>
             </div>
           </div>)

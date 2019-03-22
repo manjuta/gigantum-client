@@ -1,17 +1,18 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { unregister } from './registerServiceWorker';
-import './../css/critical.scss';
 import UserIdentity from 'JS/Auth/UserIdentity';
 import Auth from 'JS/Auth/Auth';
 import { Provider } from 'react-redux';
 import { detect } from 'detect-browser';
-
+// store
+import store from 'JS/redux/store';
 // components
 import Routes from 'Components/Routes';
 import BrowserSupport from 'Components/browserSupport/BrowserSupport';
-// store
-import store from 'JS/redux/store';
+// service worker
+import { unregister } from './registerServiceWorker';
+// assets
+import '../css/critical.scss';
 
 const auth = new Auth();
 let routes;

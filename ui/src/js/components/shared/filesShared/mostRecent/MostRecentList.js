@@ -1,9 +1,9 @@
 // vendor
 import React, { Component } from 'react';
-// componenets
-import RecentCard from './RecentCard';
 // store
 import store from 'JS/redux/store';
+// componenets
+import RecentCard from './RecentCard';
 
 export default class MostRecentList extends Component {
   constructor(props) {

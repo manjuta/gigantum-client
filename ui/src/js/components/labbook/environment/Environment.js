@@ -101,7 +101,10 @@ class Environment extends Component {
       return (
         <div className="Environment">
           <div className="Base__headerContainer">
-            <h2>Base&nbsp;&nbsp;&nbsp; <Tooltip section="baseEnvironment" /></h2>
+            <h2>
+                Base&nbsp;&nbsp;&nbsp;
+                <Tooltip section="baseEnvironment" />
+            </h2>
           </div>
           <ErrorBoundary type="baseError" key="base">
             <Base

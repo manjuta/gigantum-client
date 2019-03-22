@@ -61,13 +61,17 @@ export default class WizardModal extends React.Component {
     this.setState(state);
   }
   /**
-    @param {bool} menuVisibility
+    @param {boolean} menuVisibility
     shows hides navigation menu
   */
   _toggleMenuVisibility(menuVisibility) {
     this.setState({ menuVisibility });
   }
 
+  /**
+    @param {boolean} trackingState
+    updates trackingState
+  */
   _setTracking(trackingState) {
     this.setState({
       isTrackingOn: trackingState,
@@ -319,8 +323,7 @@ export default class WizardModal extends React.Component {
             header={currentComponent.header}
             preHeader={currentComponent.preHeader}
             noPadding
-            renderContent={() =>
-              (<div>
+            renderContent={() => (<div>
                 {
                   currentComponent.component
                 }
@@ -456,7 +459,7 @@ function ModalNav({
               className="Btn--last"
               params={{
                 isSkip: false,
-                text: 'Create Project'
+                text: 'Create Project',
               }}
               buttonDisabled={state.continueDisabled}
               clicked={continueSave}
