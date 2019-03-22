@@ -410,6 +410,26 @@ class InventoryManager(object):
 
             return labbook.root_dir
 
+    def delete_labbook(self, username: str, owner: str, labbook_name: str) -> None:
+        """Delete a LabBook from this Gigantum working directory.
+
+        Args:
+            username: Active username
+            owner: Namespace in which to place this Dataset
+            labbook_name: Name of the Labbook
+
+        Returns:
+            None
+
+        """
+        lb = self.load_labbook(username, owner, labbook_name)
+
+        # Remove indices
+        lb.drop_indexes()
+
+        # Delete labbook repository from working dir
+        shutil.rmtree(lb.root_dir, ignore_errors=True)
+
     def create_dataset(self, username: str, owner: str, dataset_name: str, storage_type: str,
                        description: Optional[str] = None, author: Optional[GitAuthor] = None) -> Dataset:
         """Create a new Dataset in this Gigantum working directory.

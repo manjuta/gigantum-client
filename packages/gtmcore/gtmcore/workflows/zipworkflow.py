@@ -142,6 +142,7 @@ class ZipExporter(object):
             statusmsg = f'{statusmsg}\nImport Complete'
             update_meta(statusmsg)
 
+            # TODO RB -- temp dir is littering whoosh indexes here.
             return repo
 
     @classmethod
