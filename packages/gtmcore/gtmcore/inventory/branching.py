@@ -102,6 +102,9 @@ class BranchManager(object):
 
     def fetch(self) -> None:
         """Perform a git fetch"""
+        # Updates local references to remote branches.
+        call_subprocess("git remote update origin --prune".split(),
+                        cwd=self.repository.root_dir)
         self.repository.git.fetch()
 
     def create_branch(self, title: str, revision: Optional[str] = None) -> str:
