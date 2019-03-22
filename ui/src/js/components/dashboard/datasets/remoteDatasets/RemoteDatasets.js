@@ -6,7 +6,7 @@ import {
 } from 'react-relay';
 // components
 import RemoteDatasetPanel from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasetsPanel';
-import DeleteDataset from 'Components/shared/header/branchMenu/modals/DeleteDataset';
+import DeleteDataset from 'Components/shared/modals/DeleteDataset';
 import DatasetsPaginationLoader from '../datasetsLoaders/datasetsPaginationLoader';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';

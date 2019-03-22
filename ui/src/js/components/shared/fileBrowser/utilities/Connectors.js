@@ -12,14 +12,16 @@ import config from 'JS/config';
 
 /**
 * @param {Array:[Object]} files
-* @param {Boolean} prompt
+* @param {String} promptType
 *
 * @return {number} totalFiles
 */
-const checkFileSize = (files, prompt) => {
+const checkFileSize = (files, promptType) => {
+
   const tenMB = 10 * 1000 * 1000;
   const oneHundredMB = 100 * 1000 * 1000;
-  const eighteenHundredMB = oneHundredMB * 18;
+  const fiveHundredMB = oneHundredMB * 5;
+  const fiveGigs = oneHundredMB * 50;
   const fileSizePrompt = [];
   const fileSizeNotAllowed = [];
 
@@ -34,9 +36,8 @@ const checkFileSize = (files, prompt) => {
       });
     } else {
       const extension = file.name ? file.name.replace(/.*\./, '') : file.entry.fullPath.replace(/.*\./, '');
-
       if ((config.fileBrowser.excludedFiles.indexOf(extension) < 0) && ((file.entry && file.entry.isFile) || (typeof file.type === 'string'))) {
-        if (prompt) {
+        if (promptType === 'code') {
           if (file.size > oneHundredMB) {
             fileSizeNotAllowed.push(file);
           }
@@ -44,14 +45,22 @@ const checkFileSize = (files, prompt) => {
           if ((file.size > tenMB) && (file.size < oneHundredMB)) {
             fileSizePrompt.push(file);
           }
-        } else if (file.size > eighteenHundredMB) {
+        } else if ((promptType === 'output') || (promptType === 'input')) {
+              if (file.size > fiveHundredMB) {
+                fileSizeNotAllowed.push(file);
+              }
+
+              if ((file.size > oneHundredMB) && (file.size < fiveHundredMB)) {
+                fileSizePrompt.push(file);
+              }
+
+        } else if (file.size > fiveGigs) {
           fileSizeNotAllowed.push(file);
         }
       }
     }
   }
   filesRecursionCount(files);
-
   return { fileSizeNotAllowed, fileSizePrompt };
 };
 
@@ -201,11 +210,10 @@ const targetSource = {
      const { uploading } = store.getState().fileBrowser;
      return monitor.isOver({ shallow: true }) && !uploading;
   },
-  drop(props, monitor, component) {
+  drop(props, monitor, component, comp) {
     // TODO: clean up this code, some of this logic is being duplicated. make better use of functions
     const dndItem = monitor.getItem();
-    const prompt = (props.section === 'code') || (props.mutationData && (props.mutationData.section === 'code'));
-
+    const promptType = props.section ? props.section : ((props.mutationData) && (props.mutationData.section)) ? props.mutationData.section : '';
     let newPath,
         fileKey,
         path,
@@ -222,7 +230,7 @@ const targetSource = {
               fileKey = props.fileKey;
           } else {
             // check if user needs to be prompted to accept some files in upload
-            let fileSizeData = checkFileSize(dndItem.files, prompt);
+            let fileSizeData = checkFileSize(dndItem.files, promptType);
             if (fileSizeData.fileSizePrompt.length === 0) {
                uploadDirContent(dndItem, props, props.mutationData, fileSizeData);
             } else {
@@ -252,7 +260,7 @@ const targetSource = {
           // check to see if it is an upload
           if (item.files) {
             // check to see if user needs to be prompted for upload
-            let fileSizeData = checkFileSize(item.files, prompt);
+            let fileSizeData = checkFileSize(item.files, promptType);
             if (fileSizeData.fileSizePrompt.length === 0) {
               if (dndItem.dirContent) {
                  uploadDirContent(dndItem, props, mutationData, fileSizeData);

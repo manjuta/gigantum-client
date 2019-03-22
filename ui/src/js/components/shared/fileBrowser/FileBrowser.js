@@ -5,7 +5,6 @@ import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import shallowCompare from 'react-addons-shallow-compare'; // ES6
-import { connect } from 'react-redux';
 // assets
 import './FileBrowser.scss';
 // components
@@ -423,23 +422,25 @@ class FileBrowser extends Component {
   */
  _childSort(array, type, reverse, children, section) {
     array.sort((a, b) => {
+      const isAUntracked = (a === 'untracked') && (section === 'folder') && (this.props.section === 'output');
+      const isBUntracked = (b === 'untracked') && (section === 'folder') && (this.props.section === 'output');
       let lowerA,
       lowerB;
-      if (type === 'az' || type === 'size' && section === 'folder') {
+      if ((type === 'az') || ((type === 'size') && (section === 'folder'))) {
         lowerA = a.toLowerCase();
         lowerB = b.toLowerCase();
         if (type === 'size' || !reverse) {
-          return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
+          return isAUntracked ? -1 : isBUntracked ? 1 : (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
         }
-        return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
+        return isAUntracked ? -1 : isBUntracked ? 1 : (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;
       } else if (type === 'modified') {
         lowerA = children[a].edge.node.modifiedAt;
         lowerB = children[b].edge.node.modifiedAt;
-        return reverse ? lowerB - lowerA : lowerA - lowerB;
+        return isAUntracked ? -1 : isBUntracked ? 1 : reverse ? lowerB - lowerA : lowerA - lowerB;
       } else if (type === 'size') {
         lowerA = children[a].edge.node.size;
         lowerB = children[b].edge.node.size;
-        return reverse ? lowerB - lowerA : lowerA - lowerB;
+        return isAUntracked ? -1 : isBUntracked ? 1 : reverse ? lowerB - lowerA : lowerA - lowerB;
       }
       return 0;
     });
@@ -597,6 +598,20 @@ class FileBrowser extends Component {
     this.setState({ fileSizePromptVisible: false });
   }
 
+  /**
+  *  @param {}
+  *  gets file prompt text individual sections
+  *  @return {string}
+  */
+  _getFilePromptText() {
+    const { props } = this;
+    const section = props.section.charAt(0).toUpperCase() + props.section.substr(1, props.section.length - 1);
+    const text = (props.section === 'code')
+          ? "You're uploading some large files to the Code Section, are you sure you don't want to place these in the Input Section? Note, putting large files in the Code Section can hurt performance"
+          : `You're uploading some large files to the ${section} Section, are you sure you don't want to place these in a Dataset?`;
+    return text;
+  }
+
   render() {
     const files = this.state.files,
           { mutationData } = this.state,
@@ -608,6 +623,7 @@ class FileBrowser extends Component {
     let childrenKeys = folderKeys.concat(fileKeys);
     const { isSelected } = this._checkChildState();
     const allFilesLocal = checkLocal(files);
+    const uploadPromptText = this._getFilePromptText()
 
     const fileBrowserCSS = classNames({
         FileBrowser: true,
@@ -658,12 +674,12 @@ class FileBrowser extends Component {
       });
 
    return (
-       this.props.connectDropTarget(<div className={fileBrowserCSS} style={{ zIndex: this.state.fileSizePromptVisible ? 13 : 0 }}>
+       this.props.connectDropTarget(<div ref={ref => ref } className={fileBrowserCSS} style={{ zIndex: this.state.fileSizePromptVisible ? 13 : 0 }}>
         {
           this.state.showLinkModal &&
           <LinkModal
             closeLinkModal={() => this.setState({ showLinkModal: false })}
-            linkedDatasets={this.props.linkedDatasets}
+            linkedDatasets={this.props.linkedDatasets || []}
           />
         }
          {
@@ -672,18 +688,18 @@ class FileBrowser extends Component {
                header="Large File Warning"
                handleClose={() => this._cancelUpload()}
                size="medium"
-               renderContent={() =>
+               renderContent={() => <div className="FileBrowser__modal-body flex justify--space-between flex--column">
 
-               <div className="FileBrowser__modal-body flex justify--space-between flex--column">
-
-                 <p>You're uploading some large files to the Code Section, are you sure you don't want to place these in the Input Section? Note, putting large files in the Code Section can hurt performance.</p>
+                 <p>
+                    { uploadPromptText }
+                 </p>
 
                  <div className="FileBrowser__button-container flex justify--space-around">
 
                    <button
                      className="button--flat"
-                     onClick={() => this._cancelUpload()}
-                   >Cancel Upload
+                     onClick={() => this._cancelUpload()}>
+                     Cancel Upload
                    </button>
 
                    <button onClick={() => this._userRejectsUpload()}>Skip Large Files</button>
@@ -701,7 +717,7 @@ class FileBrowser extends Component {
 
             <div className="FileBrowser__search flex-1">
               <input
-                className="FileBrowser__input full--border"
+                className="FileBrowser__input search"
                 type="text"
                 placeholder="Search Files Here"
                 onChange={(evt) => { this._updateSearchState(evt); } }
@@ -800,8 +816,9 @@ class FileBrowser extends Component {
               const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
               const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
               const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
-
                 if (isDataset) {
+                  const currentDataset = this.props.linkedDatasets.filter(dataset => dataset.name === file)[0];
+                  const commitsBehind = currentDataset && currentDataset.commitsBehind;
                   return (
                     <Dataset
                       ref={file}
@@ -818,6 +835,7 @@ class FileBrowser extends Component {
                       childrenState={this.state.childrenState}
                       updateChildState={this._updateChildState}
                       codeDirUpload={this._codeDirUpload}
+                      commitsBehind={commitsBehind}
                     />
                   );
                 } else if (isDir) {
@@ -892,19 +910,8 @@ class FileBrowser extends Component {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  isProcessing: state.dataset.isProcessing,
-});
-
-const mapDispatchToProps = dispatch => ({
-
-});
-
-const FileBrowserContainer = connect(mapStateToProps, mapDispatchToProps)(FileBrowser);
-
-
 export default DropTarget(
     ['card', NativeTypes.FILE],
     Connectors.targetSource,
     Connectors.targetCollect,
-  )(FileBrowserContainer);
+  )(FileBrowser);

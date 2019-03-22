@@ -31,7 +31,7 @@
   width: 200px;
   color: $white;
   border-radius: 20px;
-  top: 140px;
+  top: 130px;
 
   border: 1px solid $turquise;
 
@@ -166,7 +166,6 @@
   transition: height 0.125s;
 }
 
-.Activity__card-container div:last-child:before,
 .Activity__card-container div:last-child:after{
   display: none;
 }

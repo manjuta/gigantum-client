@@ -8,7 +8,7 @@ import WizardModal from 'Components/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalDatasetsContainer, { LocalDatasets } from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
 import RemoteDatasets from 'Components/dashboard/datasets/remoteDatasets/RemoteDatasets';
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import ToolTip from 'Components/common/ToolTip';
 import DatasetFilterBy from './filters/DatasetFilterBy';
 import DatasetSort from './filters/DatasetSort';
@@ -429,8 +429,8 @@ class Datasets extends Component {
             </ul>
 
           </div>
-          <div className="Datasets__subheader">
-            <div className="Datasets__search-container">
+          <div className="Datasets__subheader grid">
+            <div className="Datasets__search-container column-2-span-6 padding--0">
               {
                   this.state.showSearchCancel &&
                   (this.props.filterText.length !== 0) &&
@@ -445,7 +445,7 @@ class Datasets extends Component {
               <input
                 type="text"
                 ref="datasetSearch"
-                className="Datasets__search no--margin"
+                className="Datasets__search margin--0"
                 placeholder="Filter Datasets by name or description"
                 defaultValue={this.props.filterText}
                 onKeyUp={evt => this._setFilterValue(evt)}
@@ -471,6 +471,7 @@ class Datasets extends Component {
                 showModal={this._showModal}
                 filterDatasets={this._filterDatasets}
                 section={this.props.section}
+                history={this.props.history}
               />
             :
             this.state.selectedSection === 'local' ?
@@ -514,9 +515,18 @@ class Datasets extends Component {
           setErrorMessage('Failed to fetch Datasets.', [{ message: 'There was an error while fetching Datasets. This likely means you have a corrupted Dataset directory.' }]);
           return (
             <div className="Datasets__fetch-error">
-                There was an error attempting to fetch Datasets. <br />
-                Try restarting Gigantum and refresh the page.<br />
-                If the problem persists <a target="_blank" href="https://docs.gigantum.com/discuss" rel="noopener noreferrer">request assistance here.</a>
+                There was an error attempting to fetch Datasets.
+                <br />
+                Try restarting Gigantum and refresh the page.
+                <br />
+                If the problem persists
+                <a
+                  target="_blank"
+                  href="https://spectrum.chat/gigantum"
+                  rel="noopener noreferrer"
+                >
+                {' request assistance here.'}
+                </a>
             </div>
           );
         }

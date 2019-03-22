@@ -5,8 +5,11 @@ import './../css/critical.scss';
 import UserIdentity from 'JS/Auth/UserIdentity';
 import Auth from 'JS/Auth/Auth';
 import { Provider } from 'react-redux';
+import { detect } from 'detect-browser';
+
 // components
-import Routes from './components/Routes';
+import Routes from 'Components/Routes';
+import BrowserSupport from 'Components/browserSupport/BrowserSupport';
 // store
 import store from 'JS/redux/store';
 
@@ -46,18 +49,25 @@ UserIdentity.getUserIdentity().then((response) => {
       forceLoginScreen = true;
     }
   }
-
-  render(
-    <Provider store={store}>
-      <Routes
-        ref={el => routes = el}
-        auth={auth}
-        forceLoginScreen={forceLoginScreen}
-        loadingRenew={loadingRenew}
-      />
-    </Provider>
-    , document.getElementById('root') || document.createElement('div'),
-  );
+  const browser = detect();
+  if ((browser.name === 'chrome') || (browser.name === 'firefox')) {
+    render(
+      <Provider store={store}>
+        <Routes
+          ref={el => routes = el}
+          auth={auth}
+          forceLoginScreen={forceLoginScreen}
+          loadingRenew={loadingRenew}
+        />
+      </Provider>,
+      document.getElementById('root') || document.createElement('div'),
+    );
+  } else {
+    render(
+     <BrowserSupport />,
+     document.getElementById('root') || document.createElement('div'),
+    );
+  }
 });
 
 unregister();

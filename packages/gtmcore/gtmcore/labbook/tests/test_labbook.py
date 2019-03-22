@@ -40,12 +40,11 @@ class TestLabBook(object):
         assert os.path.exists(checkout_file) is True
 
         parts = checkout_id.split("-")
-        assert len(parts) == 6
+        assert len(parts) == 5
         assert parts[0] == "test"
         assert parts[1] == "test"
         assert parts[2] == "labbook1"
-        assert parts[3] == "gm.workspace"
-        assert len(parts[5]) == 10
+        assert len(parts[-1]) == 10
 
         # Check repo is clean
         status = lb.git.status()
@@ -82,24 +81,17 @@ class TestLabBook(object):
         """Test loading a labbook from a directory"""
         im = InventoryManager(mock_config_file[0])
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook")
-        lb.name = "new-labbook-1"
         lb.description = "an updated description"
 
         # Reload and see changes
-        lb_loaded = im.load_labbook("test", "test", "new-labbook-1")
-        assert lb_loaded.active_branch == 'gm.workspace-test'
-
-        assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "new-labbook-1")
-        assert type(lb) == LabBook
+        lb_loaded = im.load_labbook("test", "test", 'labbook1')
 
         # Validate labbook data file
         assert lb_loaded.id == lb.id
-        assert lb_loaded.name == "new-labbook-1"
         assert lb_loaded.description == "an updated description"
 
     def test_validate_new_labbook_name(self, mock_config_file):
         im = InventoryManager(mock_config_file[0])
-        lb = im.create_labbook('test', 'test', 'name-validate-test', description="validate tests.")
 
         bad_labbook_names = [
             None, "", "-", "--", "--a", '_', "-a", "a-", "$#Q", "Catbook4me", "--MeowMe", "-meow-4-me-",
@@ -113,12 +105,13 @@ class TestLabBook(object):
             '9' * 50
         ]
 
-        for bad in bad_labbook_names:
-            with pytest.raises(ValueError):
-                lb.name = bad
+        for bad_name in bad_labbook_names:
+            with pytest.raises(Exception):
+                # Either TypeError or ValueError
+                lb = im.create_labbook('test', 'test', bad_name)
 
-        for good in allowed_labbook_names:
-            lb.name = good
+        for good_name in allowed_labbook_names:
+            lb = im.create_labbook('test', 'test', good_name)
 
     def test_make_path_relative(self):
         vectors = [
@@ -238,29 +231,6 @@ class TestLabBook(object):
         lb.git.commit("Added file")
         assert lb.is_repo_clean
 
-    def test_is_labbook_create_date(self, mock_config_file):
-        """Test getting the create date, both when stored in the buildinfo file and when using git fallback"""
-        im = InventoryManager(mock_config_file[0])
-        lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
-                               author=GitAuthor(name="test", email="test@test.com"))
-        time.sleep(3)
-        lb.write_readme("doing something to change the modified time")
-
-        create_on = lb.creation_date
-
-        os.remove(os.path.join(lb.root_dir, '.gigantum', 'buildinfo'))
-        create_on_fallback = lb.creation_date
-
-        assert abs((create_on - create_on_fallback).seconds) < 2
-
-        assert create_on.microsecond == 0
-        assert create_on.tzname() == "UTC"
-        assert create_on_fallback.microsecond == 0
-        assert create_on_fallback.tzname() == "UTC"
-
-        assert (datetime.datetime.now(datetime.timezone.utc) - create_on).total_seconds() < 10
-        assert (datetime.datetime.now(datetime.timezone.utc) - create_on_fallback).total_seconds() < 10
-
     def test_is_labbook_modified_date(self, mock_config_file):
         """Test getting the modified date"""
         im = InventoryManager(mock_config_file[0])
@@ -283,3 +253,24 @@ class TestLabBook(object):
 
         assert (datetime.datetime.now(datetime.timezone.utc) - modified_1).total_seconds() < 10
         assert (datetime.datetime.now(datetime.timezone.utc) - modified_2).total_seconds() < 10
+
+    def test_untracked_output_dir(self, mock_config_file):
+        """Test that contents of the untracked directory (in output) truly is untracked. """
+        im = InventoryManager(mock_config_file[0])
+        lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
+                               author=GitAuthor(name="test", email="test@test.com"))
+
+        assert os.path.isdir(os.path.join(lb.root_dir, 'output', 'untracked'))
+        altered_file = os.path.join(lb.root_dir, 'output', 'untracked', 'samplefiles')
+        with open(altered_file, 'w') as f:
+            f.write('Initial Content')
+        lb.sweep_uncommitted_changes()
+        c1 = lb.git.commit_hash
+
+        with open(altered_file, 'w') as f:
+            f.write('Changed Content')
+        lb.sweep_uncommitted_changes()
+        c2 = lb.git.commit_hash
+
+        # Assert that Git detects no changes
+        assert c1 == c2

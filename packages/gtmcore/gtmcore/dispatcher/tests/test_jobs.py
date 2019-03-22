@@ -19,12 +19,14 @@
 # SOFTWARE.
 import os
 import pprint
-import pytest
 import shutil
 import tempfile
 
+from mock import patch
+
 from gtmcore.configuration import get_docker_client
 from gtmcore.dispatcher import jobs
+from gtmcore.workflows import GitWorkflow, LabbookWorkflow
 import gtmcore.fixtures
 from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file
 
@@ -81,11 +83,6 @@ class TestJobs(object):
             ib.assemble_dockerfile(write=True)
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
-            assert import_lb.data['owner']['username'] == 'unittester2'
-
-            # After importing, the new user (in this case "cat") should be the current, active workspace.
-            # And be created, if necessary.
-            assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
             # Repeat the above, except with the original user (e.g., re-importing their own labbook)
@@ -96,10 +93,8 @@ class TestJobs(object):
             # New path should reflect username of new owner and user.
             assert user_import_lb
             import_lb2 = InventoryManager(mock_config_with_repo[0]).load_labbook_from_directory(user_import_lb)
-            assert import_lb2.data['owner']['username'] == 'unittester'
             # After importing, the new user (in this case "cat") should be the current, active workspace.
             # And be created, if necessary.
-            assert import_lb2.active_branch == "gm.workspace-unittester"
             assert not import_lb2.has_remote
 
             build_kwargs = {
@@ -114,6 +109,19 @@ class TestJobs(object):
             except Exception as e:
                 pprint.pprint(e)
                 raise
+
+    def test_import_labbook_from_remote(self, mock_config_with_repo, monkeypatch):
+        def _mock_import_labbook_from_remote(remote_url, username, config_file):
+            print('X' * 200)
+            lb = InventoryManager(config_file).create_labbook(username, username, remote_url.split('/')[-1])
+            return LabbookWorkflow(lb)
+
+        monkeypatch.setattr(LabbookWorkflow, 'import_from_remote', _mock_import_labbook_from_remote)
+        # Mock out actual import, as it's already tested in workflows.
+        root_dir = jobs.import_labbook_from_remote('http://mocked-url.com/unittester/mock-labbook', 'unittester',
+                                                   config_file=mock_config_with_repo[0])
+        assert '/labbooks/' in root_dir
+        assert 'mock-labbook' == root_dir.split('/')[-1]
 
     def test_success_import_export_lbk(self, mock_config_with_repo):
         """Test legacy .lbk extension still works"""
@@ -164,11 +172,6 @@ class TestJobs(object):
             ib.assemble_dockerfile(write=True)
             assert os.path.exists(os.path.join(imported_lb_path, '.gigantum', 'env', 'Dockerfile'))
 
-            assert import_lb.data['owner']['username'] == 'unittester2'
-
-            # After importing, the new user (in this case "cat") should be the current, active workspace.
-            # And be created, if necessary.
-            assert import_lb.active_branch == "gm.workspace-unittester2"
             assert not import_lb.has_remote
 
     def test_fail_import_export_zip(self, mock_config_with_repo):

@@ -775,7 +775,7 @@ snapshots['TestDatasetQueries.test_get_dataset_all_fields 1'] = {
                     }
                 ],
                 'pageInfo': {
-                    'hasNextPage': True,
+                    'hasNextPage': False,
                     'hasPreviousPage': False
                 }
             },
@@ -799,7 +799,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             'description': 'Cats 8',
             'id': 'RGF0YXNldDpkZWZhdWx0JmRhdGFzZXQ4',
             'name': 'dataset8',
-            'schemaVersion': 1
+            'schemaVersion': 2
         }
     }
 }

@@ -4,12 +4,12 @@ import flask
 import os
 
 from gtmcore.dataset import Dataset
-from gtmcore.inventory import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
+from gtmcore.workflows import DatasetWorkflow, MergeOverride
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -18,7 +18,6 @@ from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
 
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.dataset import Dataset as DatasetObject
-from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 
 logger = LMLogger.get_logger()
 
@@ -66,13 +65,15 @@ class SyncDataset(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         dataset_name = graphene.String(required=True)
-        force = graphene.Boolean(required=False)
+        pull_only = graphene.Boolean(required=False)
+        override_method = graphene.String(required=False)
 
     job_key = graphene.String()
 
     @classmethod
     @logged_mutation
-    def mutate_and_get_payload(cls, root, info, owner, dataset_name, force=False, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, pull_only=False,
+                               override_method="abort", client_mutation_id=None):
         # Load Dataset
         username = get_logged_in_username()
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
@@ -101,11 +102,13 @@ class SyncDataset(graphene.relay.ClientIDMutation):
         mgr = GitLabManager(default_remote, admin_service, access_token=token)
         mgr.configure_git_credentials(default_remote, username)
 
+        override = MergeOverride(override_method)
         job_metadata = {'method': 'sync_dataset',
                         'dataset': ds.key}
         job_kwargs = {'repository': ds,
                       'username': username,
-                      'force': force,
+                      'pull_only': pull_only,
+                      'override': override,
                       'access_token': token,
                       'id_token': flask.g.id_token}
 
@@ -129,6 +132,7 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         logger.info(f"Importing remote dataset from {remote_url}")
         ds = Dataset(author=get_logged_in_author())
+
         default_remote = ds.client_config.config['git']['default_remote']
         admin_service = None
         for remote in ds.client_config.config['git']['remotes']:
@@ -142,25 +146,16 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         else:
             raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
 
-        mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.configure_git_credentials(default_remote, username)
-        try:
-            collaborators = [collab[1] for collab in mgr.get_collaborators(owner, dataset_name) or []]
-            is_collab = any([username == c for c in collaborators])
-        except:
-            is_collab = username == owner
+        gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
+        gl_mgr.configure_git_credentials(default_remote, username)
 
-        # IF user is collaborator, then clone in order to support collaboration
-        # ELSE, this means we are cloning a public repo and can't push back
-        #       so we change to owner to the given user so they can (re)publish
-        #       and do whatever with it.
-        make_owner = not is_collab
-        logger.info(f"Getting from remote, make_owner = {make_owner}")
-        ds = loaders.dataset_from_remote(remote_url, username, owner, dataset=ds, make_owner=make_owner)
+        wf = DatasetWorkflow.import_from_remote(remote_url, username=username)
+        ds = wf.dataset
+
         import_owner = InventoryManager().query_owner(ds)
         # TODO: Fix cursor implementation, this currently doesn't make sense
         cursor = base64.b64encode(f"{0}".encode('utf-8'))
-        dsedge = DatasetConnection.Edge(node=DatasetObject(owner=import_owner, name=dataset_name),
+        dsedge = DatasetConnection.Edge(node=DatasetObject(owner=import_owner, name=ds.name),
                                         cursor=cursor)
         return ImportRemoteDataset(new_dataset_edge=dsedge)
 
@@ -221,14 +216,15 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         dataset_name = graphene.String(required=True)
         username = graphene.String(required=True)
+        permissions = graphene.String(required=True)
 
     updated_dataset = graphene.Field(DatasetObject)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, dataset_name, username,
+    def mutate_and_get_payload(cls, root, info, owner, dataset_name, username, permissions,
                                client_mutation_id=None):
-        #TODO(billvb/dmk) - Here "username" refers to the intended recipient username.
-        # it should probably be renamed here and in the frontend to "collaboratorUsername"
+        # Here "username" refers to the intended recipient username.
+        # Todo: it should probably be renamed here and in the frontend to "collaboratorUsername"
         logged_in_username = get_logged_in_username()
         lb = InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
                                              author=get_logged_in_author())
@@ -248,10 +244,29 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
             raise ValueError("Authorization header not provided. "
                              "Must have a valid session to query for collaborators")
 
+        if permissions == 'readonly':
+            perm = ProjectPermissions.READ_ONLY
+        elif permissions == 'readwrite':
+            perm = ProjectPermissions.READ_WRITE
+        elif permissions == 'owner':
+            perm = ProjectPermissions.OWNER
+        else:
+            raise ValueError(f"Unknown permission set: {permissions}")
+
         # Add collaborator to remote service
         mgr = GitLabManager(default_remote, admin_service, token)
-        mgr.add_collaborator(owner, dataset_name, username)
 
+        existing_collabs = mgr.get_collaborators(owner, dataset_name)
+
+        if username not in [n[1] for n in existing_collabs]:
+            logger.info(f"Adding user {username} to {owner}/{dataset_name}"
+                        f"with permission {perm}")
+            mgr.add_collaborator(owner, dataset_name, username, perm)
+        else:
+            logger.warning(f"Changing permission of {username} on"
+                           f"{owner}/{dataset_name} to {perm}")
+            mgr.delete_collaborator(owner, dataset_name, username)
+            mgr.add_collaborator(owner, dataset_name, username, perm)
         create_data = {"owner": owner,
                        "name": dataset_name}
 

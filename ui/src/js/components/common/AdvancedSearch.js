@@ -1,7 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { WithContext as ReactTags } from 'react-tag-input';
+import { WithContext, WithOutContext } from 'react-tag-input';
 // assets
 import './AdvancedSearch.scss';
 
@@ -57,6 +57,7 @@ export default class Modal extends Component {
     add tag to list
   */
   _handleAddition = (tag, category) => {
+
     const { tags } = this.props;
     if (category) {
       tag.className = category;
@@ -67,9 +68,11 @@ export default class Modal extends Component {
   }
 
   render() {
-    const { tags } = this.props;
+    const { tags, withoutContext } = this.props;
     const suggestions = [];
     const rawKeys = [];
+    const Component = withoutContext ? WithOutContext : WithContext;
+
     Object.keys(this.props.filterCategories).forEach((category) => {
       this.props.filterCategories[category].forEach((key) => {
         if (rawKeys.indexOf(key) === -1) {
@@ -86,8 +89,8 @@ export default class Modal extends Component {
 
     return (
       <div className={advancedSearchCSS}>
-        <ReactTags
-           id="TagsInput"
+        <Component
+           id="AdvancedSearch"
            tags={tags}
            autocomplete
            suggestions={suggestions}
@@ -119,7 +122,9 @@ export default class Modal extends Component {
                   <div className="InfoTooltip">
                     CUDA enabled bases will automatically use the NVIDIA Container Runtime when NVIDIA drivers on the host are compatible with the CUDA version installed in the Base.&nbsp;&nbsp;
                     <a
-                      target="_blank" href="https://docs.gigantum.com/" rel="noopener noreferrer"
+                      target="_blank"
+                      href="https://docs.gigantum.com/docs/using-cuda-with-nvidia-gpus"
+                      rel="noopener noreferrer"
                     >
                       Learn more.
                     </a>

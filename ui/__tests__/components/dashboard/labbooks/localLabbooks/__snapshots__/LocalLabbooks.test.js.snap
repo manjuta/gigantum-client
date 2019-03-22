@@ -8,12 +8,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     className="grid"
   >
     <div
-      className="ImportModule Card Card-300 Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
-      id="dropZone"
-      onDragEnd={[Function]}
-      onDragOver={[Function]}
-      onDrop={[Function]}
-      type="file"
+      className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
     >
       <div
         className="Import__labbook-main"
@@ -25,11 +20,11 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             className="Import__labbook-icon"
           >
             <div
-              className="Import__add-icon"
+              className="Import__labbook-add-icon"
             />
           </div>
           <div
-            className="Import__title"
+            className="Import__labbook-title"
           >
             <h4>
               Add Project
@@ -41,6 +36,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           onClick={[Function]}
         >
           Create New
+        </div>
+        <div
+          className="btn--import"
+          onClick={[Function]}
+        >
+          Import Existing
         </div>
         <div
           className="hidden createLabbook"
@@ -70,42 +71,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
             Clicking on the 'Create New' button will open the new Project window, letting you name and select a Base for the new Project.
           </div>
         </div>
-        <div
-          className="btn--import"
-          onClick={[Function]}
-        >
-          Import Existing
-        </div>
-        <div
-          className="hidden importLabbook"
-        >
-          <div
-            className="ToolTip__toggle importLabbook"
-            onClick={[Function]}
-          >
-            <div
-              className="ToolTip__glow-container"
-            >
-              <div
-                className="ToolTip__glow-ring-outer"
-              >
-                <div
-                  className="ToolTip__glow-ring-inner"
-                />
-              </div>
-            </div>
-          </div>
-          <div
-            className="hidden importLabbook"
-          />
-          <div
-            className="hidden importLabbook"
-          >
-            Clicking on the Import Existing' button transition the card to Import mode. 
- You can import by using a URL of a published Project or by uploading an exported Project's .zip file. 
- You can also directly import Projects that have been shared with you in the Cloud view.
-          </div>
-        </div>
       </div>
       <div
         className="hidden"
@@ -122,14 +87,26 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <div
           className="LocalLabbooks__containerStatus"
         >
-          <button
-            className="ContainerStatus__container-state LocalLabbooks__containerStatus--state loading box-shadow"
+          <div
+            className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+            data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
             onClick={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            
-          </button>
+            <div
+              className="ContainerStatus__text"
+            >
+              
+            </div>
+            <div
+              className="ContainerStatus__toggle"
+            >
+              <div
+                className="ContainerStatus__toggle-btn"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -190,14 +167,26 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <div
           className="LocalLabbooks__containerStatus"
         >
-          <button
-            className="ContainerStatus__container-state LocalLabbooks__containerStatus--state loading box-shadow"
+          <div
+            className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+            data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
             onClick={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            
-          </button>
+            <div
+              className="ContainerStatus__text"
+            >
+              
+            </div>
+            <div
+              className="ContainerStatus__toggle"
+            >
+              <div
+                className="ContainerStatus__toggle-btn"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -261,14 +250,26 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <div
           className="LocalLabbooks__containerStatus"
         >
-          <button
-            className="ContainerStatus__container-state LocalLabbooks__containerStatus--state loading box-shadow"
+          <div
+            className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+            data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
             onClick={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            
-          </button>
+            <div
+              className="ContainerStatus__text"
+            >
+              
+            </div>
+            <div
+              className="ContainerStatus__toggle"
+            >
+              <div
+                className="ContainerStatus__toggle-btn"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -329,14 +330,26 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <div
           className="LocalLabbooks__containerStatus"
         >
-          <button
-            className="ContainerStatus__container-state LocalLabbooks__containerStatus--state loading box-shadow"
+          <div
+            className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+            data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
             onClick={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            
-          </button>
+            <div
+              className="ContainerStatus__text"
+            >
+              
+            </div>
+            <div
+              className="ContainerStatus__toggle"
+            >
+              <div
+                className="ContainerStatus__toggle-btn"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -397,14 +410,26 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         <div
           className="LocalLabbooks__containerStatus"
         >
-          <button
-            className="ContainerStatus__container-state LocalLabbooks__containerStatus--state loading box-shadow"
+          <div
+            className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+            data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
             onClick={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            
-          </button>
+            <div
+              className="ContainerStatus__text"
+            >
+              
+            </div>
+            <div
+              className="ContainerStatus__toggle"
+            >
+              <div
+                className="ContainerStatus__toggle-btn"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div

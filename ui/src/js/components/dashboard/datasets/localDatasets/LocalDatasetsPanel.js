@@ -97,7 +97,7 @@ export default class LocalDatasetPanel extends Component {
         { !(this.props.visibility === 'local') &&
           <div
             data-tooltip={`${this.props.visibility}`}
-            className={`Tooltip LocalDatasetPanel__${this.props.visibility}`}
+            className={`Tooltip LocalDatasetPanel__${this.props.visibility} Tooltip-data Tooltip-data--small`}
           />
         }
       </Link>);

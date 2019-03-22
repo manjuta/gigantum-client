@@ -95,9 +95,11 @@ export default class ClusterCardWrapper extends Component {
          </div>
         {
           props.record.cluster.map(record => <CardWrapper
+               key={`CardWrapper__${record.edge.node.id}`}
                toggleCluster={this._toggleCluster}
                {...props}
                record={record}
+               isLocked={props.isLocked}
           />)
         }
       </div>

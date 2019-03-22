@@ -20,6 +20,7 @@ export default function SetDatasetDescriptionMutation(
   owner,
   datasetName,
   description,
+  sectionId,
   callback,
 ) {
   const variables = {
@@ -42,6 +43,21 @@ export default function SetDatasetDescriptionMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
+      optimisticUpdater: (store) => {
+         const node = store.get(sectionId);
+         if (node) {
+           node.setValue(description, 'description');
+         }
+
+      },
+      updater: (store, response) => {
+          if (response.setDatasetDescription.clientMutationId) {
+            const node = store.get(sectionId);
+            if (node) {
+              node.setValue(description, 'description');
+            }
+          }
+      },
     },
   );
 }

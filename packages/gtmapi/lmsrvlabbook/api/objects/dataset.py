@@ -9,14 +9,19 @@ from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.api.connections import ListBasedConnection
 
 from gtmcore.dataset.manifest import Manifest
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory.branching import BranchManager
 
 from lmsrvlabbook.api.objects.datasettype import DatasetType
+from lmsrvlabbook.api.objects.collaborator import Collaborator
 from lmsrvlabbook.api.connections.activity import ActivityConnection
 from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityRecordObject
 from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 from lmsrvlabbook.api.objects.overview import DatasetOverview
+
+from gtmcore.logging import LMLogger
+logger = LMLogger.get_logger()
 
 
 class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository)):
@@ -25,6 +30,9 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     Datasets are uniquely identified by both the "owner" and the "name" of the Dataset
 
     """
+    # Store collaborator data so it is only fetched once per request
+    _collaborators = None
+
     # A short description of the dataset limited to 140 UTF-8 characters
     description = graphene.String()
 
@@ -38,11 +46,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # Creation date/timestamp in UTC in ISO format
     created_on_utc = graphene.types.datetime.DateTime()
 
-    # Store collaborator data so it is only fetched once per request
-    _collaborators = None
-
     # List of collaborators
-    collaborators = graphene.List(graphene.String)
+    collaborators = graphene.List(Collaborator)
 
     # A boolean indicating if the current user can manage collaborators
     can_manage_collaborators = graphene.Boolean()
@@ -67,6 +72,9 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     # Overview Information
     overview = graphene.Field(DatasetOverview)
+
+    # Temporary commits behind field before full branching is supported to indicate if a dataset is out of date
+    commits_behind = graphene.Int()
 
     @classmethod
     def get_node(cls, info, id):
@@ -124,7 +132,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             info: The graphene info object for this requests
 
         """
-        # TODO: Future work will look up remote in Dataset data, allowing user to select remote.
+        # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
         default_remote = dataset.client_config.config['git']['default_remote']
         admin_service = None
         for remote in dataset.client_config.config['git']['remotes']:
@@ -141,7 +149,10 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Get collaborators from remote service
         mgr = GitLabManager(default_remote, admin_service, token)
         try:
-            self._collaborators = mgr.get_collaborators(self.owner, self.name)
+            self._collaborators = [Collaborator(owner=self.owner, name=self.name,
+                                                collaborator_username=c[1],
+                                                permission=ProjectPermissions(c[2]).name)
+                                   for c in mgr.get_collaborators(self.owner, self.name)]
         except ValueError:
             # If ValueError Raised, assume repo doesn't exist yet
             self._collaborators = []
@@ -154,8 +165,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         self._fetch_collaborators(dataset, info)
-
-        return [x[1] for x in self._collaborators]
+        return self._collaborators
 
     def resolve_collaborators(self, info):
         """Method to get the list of collaborators for a dataset
@@ -170,9 +180,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             # If here, put the fetch for collaborators in the promise
             return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
                 lambda dataset: self.helper_resolve_collaborators(dataset, info))
-
-        # If here, you've already fetched the collaborators once and it's already saved in this Dataset object
-        return [x[1] for x in self._collaborators]
+        else:
+            return self._collaborators
 
     def helper_resolve_can_manage_collaborators(self, dataset, info):
         """Helper method to fetch this dataset's collaborators and check if user can manage collaborators
@@ -182,15 +191,13 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         self._fetch_collaborators(dataset, info)
-
-        can_manage = False
         username = get_logged_in_username()
         for c in self._collaborators:
-            if c[1] == username:
-                if c[2] is True:
-                    can_manage = True
+            if c.collaborator_username == username:
+                if c.permission == ProjectPermissions.OWNER.name:
+                    return True
 
-        return can_manage
+        return False
 
     def resolve_can_manage_collaborators(self, info):
         """Method to check if the user is the "owner" of the dataset and can manage collaborators
@@ -206,14 +213,11 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
                 lambda dataset: self.helper_resolve_can_manage_collaborators(dataset, info))
 
-        can_manage = False
         username = get_logged_in_username()
         for c in self._collaborators:
-            if c[1] == username:
-                if c[2] is True:
-                    can_manage = True
-
-        return can_manage
+            if c[1] == username and c[2] == ProjectPermissions.OWNER.name:
+                return True
+        return False
 
     def resolve_modified_on_utc(self, info):
         """Return the creation timestamp (if available - otherwise empty string)
@@ -261,11 +265,12 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             has_next_page = True
 
             # Get the message of the linked commit and check if it is the non-activity record dataset creation commit
-            if edges[-1].linked_commit != "no-linked-commit":
-                linked_msg = dataset.git.log_entry(edges[-1].linked_commit)['message']
-                if linked_msg == f"Creating new empty Dataset: {dataset.name}" and "_GTM_ACTIVITY_" not in linked_msg:
-                    # if you get here, this is the first activity record
-                    has_next_page = False
+            if len(edges) > 1:
+                if edges[-2].linked_commit != "no-linked-commit":
+                    linked_msg = dataset.git.log_entry(edges[-2].linked_commit)['message']
+                    if linked_msg == f"Creating new empty Dataset: {dataset.name}" and "_GTM_ACTIVITY_" not in linked_msg:
+                        # if you get here, this is the first activity record
+                        has_next_page = False
 
             end_cursor = cursors[-1]
         else:
@@ -401,7 +406,11 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         if remotes:
             url = [x['url'] for x in remotes if x['name'] == 'origin']
             if url:
-                return url[0]
+                url = url[0]
+                if "http" in url and url[-4:] != ".git":
+                    logger.warning(f"Fixing remote URL format: {dataset.name}: {url}")
+                    url = f"{url}.git"
+                return url
             else:
                 dataset.warning(f"There exist remotes in {str(dataset)}, but no origin found.")
         return None
@@ -419,3 +428,26 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_default_remote(dataset))
+
+    @staticmethod
+    def helper_resolve_commits_behind(dataset):
+        """Temporary Helper to get the commits behind for a dataset. Used for linked datasets to see if
+        they are out of date"""
+        bm = BranchManager(dataset)
+        bm.fetch()
+        return bm.get_commits_behind(branch_name='master')
+
+    def resolve_commits_behind(self, info):
+        """Method to get the commits behind for a dataset. Used for linked datasets to see if
+        they are out of date
+
+        Args:
+            args:
+            context:
+            info:
+
+        Returns:
+
+        """
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_commits_behind(dataset))

@@ -75,7 +75,7 @@ export default class FooterNotificationList extends Component {
                       <div className="Footer__flex-container">
                         <div className="Footer__message-icon" />
 
-                        <div className="Footer__message-time">{Moment(messageItem.date).fromNow()}</div>
+                        <div className="Footer__message-time">{Moment(messageItem.date).fromNow()}:</div>
                         <div className="Footer__message-item">
                           <p className={messageTitleCSS}>
                             {messageItem.message}

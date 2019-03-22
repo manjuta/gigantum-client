@@ -135,18 +135,10 @@ Labbook__nav end
 
 .Labbooks__subheader {
   position: relative;
-
-  display: flex;
-  justify-content: flex-start;
-  height: 28px;
-  margin: 10px;
-  margin: 60px 0 10px 0;
+  margin-top: 20px;
 }
 
 .Labbooks__search-container{
-  flex-grow: 1;
-  margin-right: 20px;
-  align-self: flex-end;
   position: relative;
 }
 
@@ -167,7 +159,7 @@ Labbook__nav end
   height: 24px;
   width: 24px;
   top: 2px;
-  right: 6px;
+  right: 40px;
   background: url('~Images/icons/close.svg') no-repeat center center;
   background-size: 24px;
   cursor: pointer;
@@ -176,7 +168,7 @@ Labbook__nav end
 .Labbooks__search-cancel--text{
   color: $romanSilver;
   position: absolute;
-  right: 35px;
+  right: 68px;
   top: 4px;
   text-align: right;
 }

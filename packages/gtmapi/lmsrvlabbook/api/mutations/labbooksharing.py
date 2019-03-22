@@ -17,14 +17,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import os
 import base64
 import graphene
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows import MergeOverride, LabbookWorkflow
+from gtmcore.labbook import LabBook
 
 from lmsrvcore.api import logged_mutation
 from lmsrvcore.auth.identity import parse_token
@@ -76,13 +77,15 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        force = graphene.Boolean(required=False)
+        pull_only = graphene.Boolean(required=False, default=False)
+        override_method = graphene.String(default="abort")
 
     job_key = graphene.String()
 
     @classmethod
     @logged_mutation
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, force=False, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, pull_only=False,
+                               override_method="abort", client_mutation_id=None):
         # Load LabBook
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
@@ -95,7 +98,8 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
                 token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
 
         if not token:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+            raise ValueError("Authorization header not provided. "
+                             "Must have a valid session to query for collaborators")
 
         default_remote = lb.client_config.config['git']['default_remote']
         admin_service = None
@@ -111,11 +115,14 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
         mgr = GitLabManager(default_remote, admin_service, access_token=token)
         mgr.configure_git_credentials(default_remote, username)
 
+        override = MergeOverride(override_method)
+
         job_metadata = {'method': 'sync_labbook',
                         'labbook': lb.key}
         job_kwargs = {'repository': lb,
+                      'pull_only': pull_only,
                       'username': username,
-                      'force': force}
+                      'override': override}
         dispatcher = Dispatcher()
         job_key = dispatcher.dispatch_task(jobs.sync_repository, kwargs=job_kwargs, metadata=job_metadata)
         logger.info(f"Syncing LabBook {lb.root_dir} in background job with key {job_key.key_str}")
@@ -172,3 +179,68 @@ class SetVisibility(graphene.relay.ClientIDMutation):
         lbedge = LabbookConnection.Edge(node=LabbookObject(owner=owner, name=labbook_name),
                                         cursor=cursor)
         return SetVisibility(new_labbook_edge=lbedge)
+
+
+
+class ImportRemoteLabbook(graphene.relay.ClientIDMutation):
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+        remote_url = graphene.String(required=True)
+
+    job_key = graphene.String()
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, remote_url, client_mutation_id=None):
+        username = get_logged_in_username()
+        logger.info(f"Importing remote labbook from {remote_url}")
+        lb = LabBook(author=get_logged_in_author())
+        default_remote = lb.client_config.config['git']['default_remote']
+        admin_service = None
+        for remote in lb.client_config.config['git']['remotes']:
+            if default_remote == remote:
+                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
+                break
+
+        # Extract valid Bearer token
+        if hasattr(info.context, 'headers') and "HTTP_AUTHORIZATION" in info.context.headers.environ:
+            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
+        else:
+            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+
+        gl_mgr = GitLabManager(default_remote, admin_service=admin_service, access_token=token)
+        gl_mgr.configure_git_credentials(default_remote, username)
+
+        job_metadata = {'method': 'import_labbook_from_remote'}
+        job_kwargs = {
+            'remote_url': remote_url,
+            'username': username
+        }
+
+        dispatcher = Dispatcher()
+        job_key = dispatcher.dispatch_task(jobs.import_labbook_from_remote, metadata=job_metadata,
+                                           kwargs=job_kwargs)
+        logger.info(f"Dispatched import_labbook_from_remote({remote_url}) to Job {job_key}")
+
+        return ImportRemoteLabbook(job_key=job_key.key_str)
+
+
+class AddLabbookRemote(graphene.relay.ClientIDMutation):
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+        remote_name = graphene.String(required=True)
+        remote_url = graphene.String(required=True)
+
+    success = graphene.Boolean()
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name,
+                               remote_name, remote_url,
+                               client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            lb.add_remote(remote_name, remote_url)
+        return AddLabbookRemote(success=True)

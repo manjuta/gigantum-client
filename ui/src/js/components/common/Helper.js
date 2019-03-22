@@ -117,7 +117,7 @@ class Helper extends Component {
           </div>
           <div
             className="Helper__menu-discussion"
-            onClick={() => window.open('https://docs.gigantum.com/discuss')}
+            onClick={() => window.open('https://spectrum.chat/gigantum')}
           >
             <h5>Discuss</h5>
             <div

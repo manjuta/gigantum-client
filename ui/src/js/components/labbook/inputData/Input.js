@@ -19,6 +19,7 @@ export default createFragmentContainer(
         linkedDatasets {
           name
           owner
+          commitsBehind
           allFiles{
             edges{
               node{

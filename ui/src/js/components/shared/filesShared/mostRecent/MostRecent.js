@@ -41,7 +41,7 @@ export default class MostRecent extends Component {
     handle state and addd listeners when component mounts
   */
   componentDidMount() {
-    if (this.state.files.allFiles &&
+    if (this.state.files && this.state.files.allFiles &&
         this.state.files.allFiles.pageInfo.hasNextPage) {
       this._loadMore(); // routes query only loads 2, call loadMore
     }

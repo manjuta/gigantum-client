@@ -240,6 +240,7 @@ export default class DatasetActionsMenu extends Component {
           isLoading = this.state.fileDownloading || ((this.props.parentDownloading || this.props.isDownloading) && !fileIsLocal),
           downloadCSS = classNames({
             DatasetActionsMenu__item: true,
+            'Tooltip-data Tooltip-data--small': !isLoading,
             'DatasetActionsMenu__item--download': fileIsNotLocal && (this.props.section !== 'data') && !this.state.fileDownloading && !isLoading,
             'DatasetActionsMenu__item--downloaded': fileIsLocal && (this.props.section !== 'data') && !this.state.fileDownloading && !isLoading,
             'DatasetActionsMenu__item--download-grey': (fileIsNotLocal) && (this.props.section === 'data') && !this.state.fileDownloading && !isLoading,
@@ -250,6 +251,7 @@ export default class DatasetActionsMenu extends Component {
           unlinkCSS = classNames({
             'DatasetActionsMenu__item DatasetActionsMenu__item--unlink': true,
             'DatasetActionsMenu__popup-visible': this.state.popupVisible,
+            'Tooltip-data Tooltip-data--small': !this.state.popupVisible,
           });
 
     return (
@@ -258,33 +260,11 @@ export default class DatasetActionsMenu extends Component {
           className="DatasetActionsMenu"
           key={`${this.props.edge.node.id}-action-menu}`}
           ref={this._setWrapperRef}>
-
-          { this.props.edge.node.isDatasetRoot &&
-            <div className="DatasetActionsMenu__database-actions">
-              <div
-                  onClick={() => { this._updateItems(true); }}
-                  className="DatasetActionsMenu__item DatasetActionsMenu__item--details"
-                  name="Details">
-                  Details
-              </div>
-              <div
-                onClick={ () => { this._remove(); }}
-                className={removeCSS}
-                name="Remove">
-              </div>
-
-              <div
-                onClick={ () => { this._manageDatasets(); }}
-                className={manageCSS}
-                name="Manage">
-              </div>
-            </div>
-          }
           {
             this.props.isParent &&
               <div
                 className={unlinkCSS}
-                name="Unlink Dataset"
+                data-tooltip="Unlink Dataset"
                 onClick={(evt) => { this._togglePopup(evt, true); }} >
 
                 <div className={popupCSS}>
@@ -305,7 +285,7 @@ export default class DatasetActionsMenu extends Component {
           <div
             onClick={() => this._downloadFile(blockDownload)}
             className={downloadCSS}
-            name={downloadText}>
+            data-tooltip={downloadText}>
           </div>
         </div>
     );

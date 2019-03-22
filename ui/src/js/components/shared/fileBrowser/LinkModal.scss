@@ -10,15 +10,15 @@
   @include flex(flex-start, row);
   flex-wrap: wrap;
   overflow: auto;
-  height: 400px;
+  height: 600px;
   border-bottom: 1px solid $slateBlue;
 }
 
 .Link__buttonContainer {
   margin-top: 10px;
-  button {
-    margin: 0 10px;
-  }
+  align-self: flex-end;
+  width: 300px;
+  @include flex(space-between, row);
 }
 
 .LinkModal__card{
@@ -31,4 +31,15 @@
   .Card{
     height: 230px;
   }
+}
+
+.LinkModal__dataset-container{
+  margin-top: 100px;
+  height: 376px;
+  overflow: auto;
+  width: 100%;
+}
+
+.LinkModal__wrapper{
+  margin: 0 7px;
 }

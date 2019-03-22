@@ -29,7 +29,8 @@ $tintBlue: #007fa4;
 $backgroundGrey: rgb(196, 199, 201);
 $lightblue: #74a4bc;
 $selected-blue: #53667C;
-$darkGrey: #4A4A4A;
+$mineShaft: #4A4A4A;
+$orange: rgb(236, 128, 11);
 
 
 /***********************
@@ -57,7 +58,7 @@ $white: #fefefe;
 * z-index: index($elements, labbookHeader)
 *
 ***********************/
-$elements: basic, psuedoCard, card, fixedDate, date, button, sideBar, headerStrip, veil, popup, head, modalCoverNested, labbookHeader, footer, loader, helper, modalCover, modal, login, prompt;
+$elements: basic, psuedoCard, card, fixedDate, date, button,labbookHeader, sideBar, headerStrip, veil, popup, head, modalCoverNested, loader, modalCover, modal, footer, helper, login, prompt;
 
 /*********************
 *
@@ -70,7 +71,7 @@ $h3-fontsize: 2.92rem !default;
 $h4-fontsize: 2.28rem !default;
 $h5-fontsize: 1.64rem !default;
 $h6-fontsize: 1rem !default;
-
+$body-fontsize: 14px !default;
 /*****************************
 *
 * width

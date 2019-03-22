@@ -301,6 +301,10 @@ export default class SelectBase extends React.Component {
         isReturned = false;
         mostRecentNode = node;
       }
+      if (!mostRecent && node.componentId === 'python3-data-science') {
+        isReturned = false;
+        mostRecentNode = node;
+      }
       // check if tags match base image
       isReturned = searchTagsForMatch(node, tags, lowercaseJSON, isReturned);
       return isReturned;
@@ -364,11 +368,12 @@ export default class SelectBase extends React.Component {
                         <div className={selecBaseImage}>
                           {
                             filteredProjects.map(({ node }) => {
+                              const isMostRecent = mostRecent === node.componentId;
                               const BaseWrapper = classNames({
                                 BaseSlide__wrapper: true,
                                 'BaseSlide__wrapper--recent': mostRecent === node.componentId,
+                                'BaseSlide__wrapper--popular': !mostRecent && node.componentId === 'python3-data-science',
                               });
-                              const isMostRecent = mostRecent === node.componentId;
                               return (
                               <div
                                 key={node.id}
@@ -420,6 +425,27 @@ export default class SelectBase extends React.Component {
                                 node={node}
                                 self={this}
                               />
+                              {
+                                <div className="BaseSlide__coming-soon">
+                                  <p>
+                                    More Dataset Types coming soon.&nbsp;
+                                    <a
+                                      href="https://docs.gigantum.com/docs/datasets-overview"
+                                      rel="noopener noreferrer"
+                                      target="_blank">
+                                      Learn More.
+                                    </a>
+                                    <br/>
+                                    Have an idea for a useful Dataset Type? Suggest it&nbsp;
+                                    <a
+                                      href="https://feedback.gigantum.com"
+                                      rel="noopener noreferrer"
+                                      target="_blank">
+                                      here.
+                                    </a>
+                                  </p>
+                                </div>
+                              }
                             </div>
                               ))
                         }

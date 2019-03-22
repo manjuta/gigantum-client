@@ -41,7 +41,8 @@ export default class Summary extends Component {
         const mangagedType = this.props.isManaged ? 'Managed' : 'Unmanaged';
         const tooltipText = this.props.isManaged ? 'The contents of a Managed Dataset can be modified via file browser on the data tab.  ' : 'The contents of an Unmanaged Dataset are verified by the Gigantum Client, but managed externally.  ';
         return (
-            <div className="Summary Card">
+          <div className="grid">
+            <div className="Summary Card column-1-span-12">
                 <div className="Summary__file-count">
                     <div className="Summary__subheader">Number of Files</div>
                     <div className="Summary__content">{this.props.numFiles}</div>
@@ -91,7 +92,7 @@ export default class Summary extends Component {
                                 {tooltipText}
                                 <a
                                     target="_blank"
-                                    href="https://docs.gigantum.com/"
+                                    href="https://docs.gigantum.com/docs/datasets-overview#section-dataset-overview"
                                     rel="noopener noreferrer"
                                 >
                                 Learn more.
@@ -102,6 +103,7 @@ export default class Summary extends Component {
                     </div>
                 </div>
             </div>
+          </div>
         );
     }
 }

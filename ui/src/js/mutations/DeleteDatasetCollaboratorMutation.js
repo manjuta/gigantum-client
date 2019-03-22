@@ -11,7 +11,13 @@ const mutation = graphql`
     deleteDatasetCollaborator(input: $input){
       updatedDataset{
         id
-        collaborators
+        collaborators {
+          id
+          owner
+          name
+          collaboratorUsername
+          permission
+        }
       }
       clientMutationId
     }

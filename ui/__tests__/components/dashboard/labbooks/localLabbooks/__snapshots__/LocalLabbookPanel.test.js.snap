@@ -12,14 +12,26 @@ exports[`Test LocalLabbooks rendering 1`] = `
     <div
       className="LocalLabbooks__containerStatus"
     >
-      <button
-        className="ContainerStatus__container-state LocalLabbooks__containerStatus--state loading box-shadow"
+      <div
+        className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+        data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
         onClick={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        
-      </button>
+        <div
+          className="ContainerStatus__text"
+        >
+          
+        </div>
+        <div
+          className="ContainerStatus__toggle"
+        >
+          <div
+            className="ContainerStatus__toggle-btn"
+          />
+        </div>
+      </div>
     </div>
   </div>
   <div

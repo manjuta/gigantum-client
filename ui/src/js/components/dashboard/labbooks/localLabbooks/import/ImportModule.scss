@@ -256,3 +256,21 @@ input.Import__input--paste{
 .Import__section--paste{
   position: relative;
 }
+
+.Import__labbook-add-icon{
+  position: absolute;
+  top: 51px;
+  left: 40px;
+
+  width: 20px;
+  height: 20px;
+
+  -webkit-transition: all .3s;
+  -o-transition: all .3s;
+  transition: all .3s;
+
+  border: 0px solid $romanSilver;
+  border-radius: 12px;
+  background: #007ea8 url('~Images/icons/add.svg') no-repeat 50%;
+  background-size: 12px;
+}

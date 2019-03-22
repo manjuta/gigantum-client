@@ -8,7 +8,7 @@ import WizardModal from 'Components/wizard/WizardModal';
 import Loader from 'Components/common/Loader';
 import LocalLabbooksContainer, { LocalLabbooks } from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
 import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import ToolTip from 'Components/common/ToolTip';
 import LabbookFilterBy from './filters/LabbookFilterBy';
 import LabbookSort from './filters/LabbookSort';
@@ -391,7 +391,6 @@ class Labbooks extends Component {
         'Labbooks__nav-item--cloud': true,
         'Labbooks__nav-item--selected': this.state.selectedSection === 'cloud',
       });
-
       return (
 
         <div className={labbooksCSS}>
@@ -425,8 +424,8 @@ class Labbooks extends Component {
             </ul>
 
           </div>
-          <div className="Labbooks__subheader">
-            <div className="Labbooks__search-container">
+          <div className="Labbooks__subheader grid">
+            <div className="Labbooks__search-container column-2-span-6 padding--0">
               {
                   this.state.showSearchCancel &&
                   (this.props.filterText.length !== 0) &&
@@ -467,6 +466,7 @@ class Labbooks extends Component {
                   loading
                   showModal={this._showModal}
                   section={this.props.section}
+                  history={this.props.history}
                 />
               :
               this.state.selectedSection === 'local' ?
@@ -511,9 +511,18 @@ class Labbooks extends Component {
           setErrorMessage('Failed to fetch Projects.', [{ message: 'There was an error while fetching Projects. This likely means you have a corrupted Project directory.' }]);
           return (
             <div className="Labbooks__fetch-error">
-                There was an error attempting to fetch Projects. <br />
-                Try restarting Gigantum and refresh the page.<br />
-                If the problem persists <a target="_blank" href="https://docs.gigantum.com/discuss" rel="noopener noreferrer">request assistance here.</a>
+                There was an error attempting to fetch Projects.
+                <br />
+                Try restarting Gigantum and refresh the page.
+                <br />
+                If the problem persists
+                <a
+                  target="_blank"
+                  href="https://spectrum.chat/gigantum"
+                rel="noopener noreferrer"
+                >
+                request assistance here.
+                </a>
             </div>
           );
         }

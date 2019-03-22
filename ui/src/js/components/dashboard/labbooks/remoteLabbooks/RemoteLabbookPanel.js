@@ -6,14 +6,14 @@ import classNames from 'classnames';
 import Moment from 'moment';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
-import BuildImageMutation from 'Mutations/BuildImageMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import store from 'JS/redux/store';
 import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/reducers/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
-import LoginPrompt from 'Components/shared/header/branchMenu/modals/LoginPrompt';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
@@ -84,6 +84,9 @@ export default class RemoteLabbookPanel extends Component {
     *  changes state of isImporting to false
   */
   _clearState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.add('hidden');
+    }
     this.setState({
       isImporting: false,
     });
@@ -93,6 +96,9 @@ export default class RemoteLabbookPanel extends Component {
     *  changes state of isImporting to true
   */
   _importingState = () => {
+    if (document.getElementById('dashboard__cover')) {
+      document.getElementById('dashboard__cover').classList.remove('hidden');
+    }
     this.setState({
       isImporting: true,
     });
@@ -114,47 +120,40 @@ export default class RemoteLabbookPanel extends Component {
          if (response.data.userIdentity.isSessionValid) {
            this._importingState();
            setMultiInfoMessage(id, 'Importing Project please wait', false, false);
+           const successCall = () => {
+            this._clearState();
+
+            setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
+
+
+            BuildImageMutation(
+              owner,
+              labbookName,
+              false,
+              (response, error) => {
+                if (error) {
+                  console.error(error);
+                  setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
+                }
+              },
+            );
+
+            self.props.history.replace(`/projects/${owner}/${labbookName}`);
+           };
+           const failureCall = (error) => {
+            this._clearState();
+            setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
+           };
+
            ImportRemoteLabbookMutation(
              owner,
              labbookName,
              remote,
+             successCall,
+             failureCall,
              (response, error) => {
-               this._clearState();
-
                if (error) {
-                 console.error(error);
-                 setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
-               } else if (response) {
-                 const labbookName = response.importRemoteLabbook.newLabbookEdge.node.name;
-                 const owner = response.importRemoteLabbook.newLabbookEdge.node.owner;
-                 setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
-
-
-                 BuildImageMutation(
-                   labbookName,
-                   owner,
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                     }
-                   },
-                 );
-
-                 self.props.history.replace(`/projects/${owner}/${labbookName}`);
-               } else {
-                 BuildImageMutation(
-                   labbookName,
-                   localStorage.getItem('username'),
-                   false,
-                   (response, error) => {
-                     if (error) {
-                       console.error(error);
-                       setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
-                     }
-                   },
-                 );
+                 failurecall(error);
                }
              },
            );
@@ -181,6 +180,7 @@ export default class RemoteLabbookPanel extends Component {
    });
    const deleteCSS = classNames({
      RemoteLabbooks__icon: true,
+     'Tooltip-data Tooltip-data--small': localStorage.getItem('username') !== edge.node.owner,
      'RemoteLabbooks__icon--delete': localStorage.getItem('username') === edge.node.owner,
      'RemoteLabbooks__icon--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
    });
@@ -197,7 +197,7 @@ export default class RemoteLabbookPanel extends Component {
          {
           this.props.existsLocally ?
             <button
-              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud"
+              className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud Tooltip-data Tooltip-data--small"
               data-tooltip="Project exists locally"
               disabled
             >
@@ -266,7 +266,7 @@ export default class RemoteLabbookPanel extends Component {
          </p>
        </div>
        { !(edge.node.visibility === 'local') &&
-       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}`} />
+       <div data-tooltip={`${edge.node.visibility}`} className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility}   Tooltip-data Tooltip-data--small`} />
         }
        {
           this.state.isImporting &&

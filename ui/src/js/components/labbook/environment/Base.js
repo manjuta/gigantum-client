@@ -52,8 +52,8 @@ class Base extends Component {
     if (base) {
       return (
         <div className="Base">
-          <div className="Base__info">
-            <div className="Base__card Card--auto Card--no-hover">
+          <div className="Base__info grid">
+            <div className="Base__card Card--auto Card--no-hover column-1-span-12">
 
               <div className="Base__imageContainer">
                 <img

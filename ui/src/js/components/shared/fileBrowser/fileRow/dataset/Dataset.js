@@ -340,6 +340,15 @@ class Dataset extends Component {
                       <div className="DatasetBrowser__name">
                           {datasetName}
                       </div>
+                      {
+                        this.props.commitsBehind !== 0 &&
+                        <div
+                          className="DatasetBrowser__commits Tooltip-data"
+                          data-tooltip={`This dataset is ${this.props.commitsBehind} commits behind. To update this dataset unlink and relink it.`}
+                        >
+                          <div className="DatasetBrowser__commits--commits-behind">{this.props.commitsBehind }</div>
+                        </div>
+                      }
                     </div>
                     <div className="DatasetBrowser__cell DatasetBrowser__cell--size">
 

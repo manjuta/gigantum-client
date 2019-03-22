@@ -11,6 +11,7 @@ mutation FetchLabbookDatasetFilesMutation($input: FetchLabbookEdgeInput!){
     newLabbookEdge{
       node {
         linkedDatasets{
+          commitsBehind
           allFiles{
             edges{
               node{

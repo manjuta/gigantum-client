@@ -358,6 +358,7 @@ export default class ImportModule extends Component {
               readyDataset: {
                 datasetName: self._getFilename(file.name),
                 owner: localStorage.getItem('username'),
+                method: 'local',
               },
             });
           };
@@ -406,7 +407,7 @@ export default class ImportModule extends Component {
   *  @return {}
   */
   _clearState = () => {
-    this.setState({ files: [], isImporting: false, readyDataset: null });
+    this.setState({ files: [], isImporting: false });
   }
 
   /**
@@ -498,6 +499,7 @@ export default class ImportModule extends Component {
     const self = this;
 
     ImportRemoteDatasetMutation(owner, datasetName, remote, (response, error) => {
+
       this._clearState();
       if (error) {
         console.error(error);
@@ -539,6 +541,7 @@ export default class ImportModule extends Component {
         readyDataset: {
           datasetName,
           owner,
+          method: 'remote',
         },
       });
     }
@@ -566,7 +569,9 @@ export default class ImportModule extends Component {
 
     return (<Fragment>
 
-      <div className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3" key="AddDatasetCollaboratorPayload">
+      <div
+        className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
+        key="AddDatasetCollaboratorPayload">
         <ImportMain self={this} />
         <div className={loadingMaskCSS} />
       </div>
@@ -592,7 +597,7 @@ const ImportMain = ({ self }) => {
         renderContent={() =>
           (<Fragment>
             <div className="ImportModal">
-              <p>In order to import a dataset by either pasting a URL or drag & dropping below</p>
+              <p>Import a dataset by either pasting a URL or drag & dropping below</p>
               <input
                 className="Import__input"
                 type="text"
@@ -601,9 +606,17 @@ const ImportMain = ({ self }) => {
                 defaultValue={self.state.remoteUrl}
               />
 
-              <div id="dropZone" className="ImportDropzone" ref={div => self.dropZone = div} type="file" onDragEnd={evt => self._dragendHandler(evt)} onDrop={evt => self._dropHandler(evt)} onDragOver={evt => self._dragoverHandler(evt)}>
+              <div
+                id="dropZone"
+                className="ImportDropzone"
+                ref={div => self.dropZone = div}
+                type="file"
+                onDragEnd={evt => self._dragendHandler(evt)}
+                onDrop={evt => self._dropHandler(evt)}
+                onDragOver={evt => self._dragoverHandler(evt)}
+              >
                 {
-                  self.state.readyDataset ?
+                  self.state.readyDataset && self.state.files[0] ?
                   <div className="Import__ReadyDataset">
                     <div>Select Import to import the following dataset</div>
                     <hr/>
@@ -611,18 +624,23 @@ const ImportMain = ({ self }) => {
                     <div>Dataset Name: {self.state.readyDataset.datasetName}</div>
                   </div> :
                   <div className= "DropZone">
-                     <p>Drag and drop the exported Dataset here</p>
+                     <p>Drag and drop an exported Dataset here</p>
                   </div>
                 }
               </div>
               <div className="Import__buttonContainer">
                 <button
+                  onClick={() => self._closeImportModal()}
+                  className="Btn--flat"
+                >
+                Cancel
+                </button>
+                <button
                   onClick={() => { self.importDataset(); }}
-                  disabled={!self.state.readyDataset}
+                  disabled={!self.state.readyDataset || self.state.isImporting}
                 >
                   Import
                 </button>
-                <button onClick={() => self._closeImportModal()}>Cancel</button>
               </div>
             </div>
             </Fragment>)

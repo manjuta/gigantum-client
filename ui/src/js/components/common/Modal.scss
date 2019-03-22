@@ -5,6 +5,11 @@
   padding: 0 40px;
   z-index: index($elements, modal);
   overflow: hidden;
+  transition: all 0.25s;
+}
+
+.Modal__wrapper {
+  z-index: index($elements, modal);
 }
 
 .Modal__container{
@@ -74,6 +79,14 @@
   @include modal(500px, 960px);
 }
 
+.Modal__content.large-long{
+  padding: 0 60px 20px 60px;
+  @include modal(700px, 960px);
+  .SelectBase__images {
+    max-height: 429px !important;
+  }
+}
+
 .Modal__content.medium{
   @include modal(440px, 660px);
 }
@@ -102,10 +115,10 @@
   bottom: 0px;
   right: 0px;
   left: 0px;
-  background-color: $white;
+  background-color: $slateBlueOpaque;
   animation: fade-in-modal forwards .25s;
   opacity: 0.5;
-  z-index: index($elements, modalCoverNested);
+  z-index: index($elements, modalCover);
 }
 
 .Modal__close{

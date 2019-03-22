@@ -11,7 +11,13 @@ const mutation = graphql`
     addDatasetCollaborator(input: $input){
       updatedDataset{
         id
-        collaborators
+        collaborators {
+          id
+          owner
+          name
+          collaboratorUsername
+          permission
+        }
       }
       clientMutationId
     }
@@ -24,6 +30,7 @@ export default function AddCollaboratorMutation(
   datasetName,
   owner,
   username,
+  permissions,
   callback,
 ) {
   const variables = {
@@ -31,6 +38,7 @@ export default function AddCollaboratorMutation(
       datasetName,
       owner,
       username,
+      permissions,
       clientMutationId: tempID++,
     },
   };

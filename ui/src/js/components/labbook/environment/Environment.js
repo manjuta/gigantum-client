@@ -1,22 +1,23 @@
 // vendor
 import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
+// store
+import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setBuildingState } from 'JS/redux/reducers/labbook/labbook';
+import store from 'JS/redux/store';
+// mutations
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
+import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // components
+import ErrorBoundary from 'Components/common/ErrorBoundary';
+import ToolTip from 'Components/common/ToolTip';
 import Loader from 'Components/common/Loader';
 import Base from './Base';
 import PackageDependencies from './PackageDependencies';
 import CustomDockerfile from './CustomDockerfile';
-import ErrorBoundary from 'Components/common/ErrorBoundary';
-import ToolTip from 'Components/common/ToolTip';
-// mutations
-import BuildImageMutation from 'Mutations/BuildImageMutation';
-import StopContainerMutation from 'Mutations/StopContainerMutation';
-// store
-import { setErrorMessage } from 'JS/redux/reducers/footer';
-import { setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
-import store from 'JS/redux/store';
 // assets
 import './Environment.scss';
+
 
 class Environment extends Component {
   constructor(props) {
@@ -37,34 +38,31 @@ class Environment extends Component {
   }
 
   /**
-  *  @param {None}
+  *  @param {}
   *  callback that triggers buildImage mutation
   */
-  _buildCallback = (refetchPending) => {
+  _buildCallback = () => {
     const { labbookName, owner } = this.state;
-    this.props.setBuildingState(true);
+
+    setBuildingState(true);
     if (store.getState().containerStatus.status === 'Running') {
       StopContainerMutation(
-        labbookName,
         owner,
-        'clientMutationId',
+        labbookName,
         (response, error) => {
           if (error) {
             console.log(error);
             setErrorMessage(`Problem stopping ${labbookName}`, error);
           } else {
             BuildImageMutation(
-              labbookName,
               owner,
+              labbookName,
               false,
               (response, error) => {
                 if (error) {
                   setErrorMessage(`${labbookName} failed to build`, error);
                 }
 
-                if (refetchPending) {
-                  setRefetchPending(true);
-                }
 
                 return 'finished';
               },
@@ -74,19 +72,13 @@ class Environment extends Component {
       );
     } else {
       BuildImageMutation(
-        labbookName,
         owner,
+        labbookName,
         false,
         (response, error) => {
           if (error) {
             setErrorMessage(`${labbookName} failed to build`, error);
           }
-
-          if (refetchPending) {
-            setRefetchPending(true);
-          }
-
-
           return 'finished';
         },
       );
@@ -103,8 +95,9 @@ class Environment extends Component {
 
   render() {
     if (this.props.labbook) {
-      const env = this.props.labbook.environment;
-      const { base } = env;
+      const { props, state } = this;
+      const { environment } = props.labbook;
+      const { base } = environment;
       return (
         <div className="Environment">
           <div className="Base__headerContainer">
@@ -113,39 +106,45 @@ class Environment extends Component {
           <ErrorBoundary type="baseError" key="base">
             <Base
               ref="base"
-              environment={this.props.labbook.environment}
-              environmentId={this.props.labbook.environment.id}
+              environment={environment}
+              environmentId={environment.id}
               editVisible
-              containerStatus={this.props.containerStatus}
+              containerStatus={props.containerStatus}
               setComponent={this._setComponent}
               setBase={this._setBase}
               buildCallback={this._buildCallback}
               blockClass="Environment"
               base={base}
+              isLocked={props.isLocked}
             />
           </ErrorBoundary>
           <div className="Environment__headerContainer">
-            <h5 className="PackageDependencies__header">Packages <ToolTip section="packagesEnvironment" /></h5>
+            <h5 className="PackageDependencies__header">
+              Packages
+              <ToolTip section="packagesEnvironment" />
+            </h5>
           </div>
           <ErrorBoundary type="packageDependenciesError" key="packageDependencies">
             <PackageDependencies
               componentRef={ref => this.packageDependencies = ref}
-              environment={this.props.labbook.environment}
-              environmentId={this.props.labbook.environment.id}
-              labbookId={this.props.labbook.id}
-              containerStatus={this.props.containerStatus}
+              environment={props.labbook.environment}
+              environmentId={props.labbook.environment.id}
+              labbookId={props.labbook.id}
+              containerStatus={props.containerStatus}
               setBase={this._setBase}
               setComponent={this._setComponent}
               buildCallback={this._buildCallback}
-              overview={this.props.overview}
+              overview={props.overview}
               base={base}
-              isLocked={this.props.isLocked}
+              isLocked={props.isLocked}
+              packageLatestVersions={props.packageLatestVersions}
+              fetchPackageVersion={props.fetchPackageVersion}
             />
           </ErrorBoundary>
           <CustomDockerfile
-            dockerfile={this.props.labbook.environment.dockerSnippet}
+            dockerfile={props.labbook.environment.dockerSnippet}
             buildCallback={this._buildCallback}
-            isLocked={this.props.isLocked}
+            isLocked={props.isLocked}
           />
         </div>
       );

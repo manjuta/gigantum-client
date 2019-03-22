@@ -5,13 +5,13 @@ exports[`ActionsMenu Component Renders a snapshot 1`] = `
   className="ActionsMenu"
 >
   <div
-    className="ActionsMenu__item ActionsMenu__item--AddSubfolder visibility-hidden"
-    name="Add Folder"
+    className="ActionsMenu__item Tooltip-data Tooltip-data--small ActionsMenu__item--AddSubfolder visibility-hidden"
+    data-tooltip="Add Subfolder"
     onClick={[Function]}
   />
   <div
-    className="ActionsMenu__item ActionsMenu__item--delete"
-    name="Delete"
+    className="ActionsMenu__item ActionsMenu__item--delete Tooltip-data Tooltip-data--small"
+    data-tooltip="Delete"
     onClick={[Function]}
   >
     <div
@@ -38,13 +38,13 @@ exports[`ActionsMenu Component Renders a snapshot 1`] = `
     </div>
   </div>
   <div
-    className="ActionsMenu__item ActionsMenu__item--rename"
-    name="Rename"
+    className="ActionsMenu__item ActionsMenu__item--rename Tooltip-data Tooltip-data--small"
+    data-tooltip="Rename"
     onClick={[Function]}
   />
   <div
-    className="ActionsMenu__item ActionsMenu__item--favorite-off"
-    name="Favorite"
+    className="ActionsMenu__item Tooltip-data Tooltip-data--small ActionsMenu__item--favorite-off"
+    data-tooltip="Favorite"
     onClick={[Function]}
   />
 </div>

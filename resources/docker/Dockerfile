@@ -98,7 +98,7 @@ COPY $ENTRYPOINT_FILE /usr/local/bin/entrypoint.sh
 RUN chmod u+x /usr/local/bin/entrypoint.sh
 
 # Setup demo labbook
-COPY resources/awful-intersections-demo.lbk /opt/awful-intersections-demo.lbk
+COPY resources/my-first-project.zip /opt/my-first-project.zip
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

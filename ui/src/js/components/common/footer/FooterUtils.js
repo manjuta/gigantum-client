@@ -3,7 +3,6 @@ import JobStatus from 'JS/utils/JobStatus';
 import store from 'JS/redux/store';
 import AnsiUp from 'ansi_up';
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/reducers/footer';
-import { setForceRefetch, setRefetchPending } from 'JS/redux/reducers/labbook/environment/packageDependencies';
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
@@ -18,7 +17,7 @@ const FooterUtils = {
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
-  getJobStatus: (result, type, key, successCall, failureCall) => {
+  getJobStatus: (result, type, key, successCall, failureCall, id) => {
     /**
       *  @param {}
       *  refetches job status
@@ -44,6 +43,7 @@ const FooterUtils = {
           if (response.data &&
             response.data.jobStatus &&
             response.data.jobStatus.jobMetadata) {
+
             let fullMessage = (response.data.jobStatus.jobMetadata.indexOf('feedback') > -1) ? JSON.parse(response.data.jobStatus.jobMetadata).feedback : '';
             fullMessage = fullMessage.lastIndexOf('\n') === (fullMessage.length - 1)
               ? fullMessage.slice(0, fullMessage.length - 1)
@@ -70,18 +70,13 @@ const FooterUtils = {
               message = fullMessage.slice(res[res.length - 2], res[res.length - 1]);
             }
 
-            if ((response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'finished') && store.getState().packageDependencies.refetchPending) {
-              setForceRefetch(true);
-              setRefetchPending(false);
-            }
-
             if (response.data.jobStatus.status === 'started') {
               if (html.length) {
-                setMultiInfoMessage(response.data.jobStatus.id, message, false, false, [{ message: html }]);
+                setMultiInfoMessage(id || response.data.jobStatus.id, message, false, false, [{ message: html }]);
               }
               refetch();
             } else if (response.data.jobStatus.status === 'finished') {
-              setMultiInfoMessage(response.data.jobStatus.id, message, true, null, [{ message: html }]);
+              setMultiInfoMessage(id || response.data.jobStatus.id, message, true, null, [{ message: html }]);
               if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'publishDataset') || (type === 'syncDataset')) {
                 successCall();
                 const section = type.indexOf('Dataset') > -1 ? 'dataset' : 'labbook';
@@ -99,7 +94,7 @@ const FooterUtils = {
                     },
                   )
                   :
-                  FetchLabbookDatasetFilesMutation(
+                  FetchDatasetEdgeMutation(
                     owner,
                     labbookName,
                     (error) => {
@@ -133,6 +128,8 @@ const FooterUtils = {
                     },
                     );
                 }
+              } else if (type === 'importRemoteLabbook') {
+                successCall();
               }
             } else if (response.data.jobStatus.status === 'failed') {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
@@ -141,7 +138,7 @@ const FooterUtils = {
               if (method === 'build_image') {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
               }
-              if ((type === 'syncLabbook') || (type === 'publishLabbook')) {
+              if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'syncDataset') || (type === 'publishDataset')) {
                 failureCall(response.data.jobStatus.failureMessage);
               }
               if (type === 'downloadDatasetFiles') {
@@ -157,7 +154,7 @@ const FooterUtils = {
                     owner,
                     labbookName,
                     () => {
-                      failureCall();
+                      failureCall(response.data.jobStatus.failureMessage);
                     },
                     );
                 } else {
@@ -167,16 +164,18 @@ const FooterUtils = {
                     owner,
                     labbookName,
                     () => {
-                      failureCall();
+                      failureCall(response.data.jobStatus.failureMessage);
                     },
                     );
                 }
                 errorMessage = `Failed to download ${failureKeys.length} of ${totalAmount} Files.`;
                 reportedFailureMessage = 'Failed to download the following Files:';
                 failureKeys.forEach(failedKey => reportedFailureMessage = `${reportedFailureMessage}\n${failedKey}`);
+              } else if (type === 'importRemoteLabbook') {
+                failureCall();
               }
               html += `\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
-              setMultiInfoMessage(response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
+              setMultiInfoMessage(id || response.data.jobStatus.id, errorMessage, true, true, [{ message: html }]);
             } else {
               // refetch status data not ready
               refetch();

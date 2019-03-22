@@ -26,7 +26,8 @@ import requests
 from gtmcore.configuration import Configuration
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
-from gtmcore.gitlib.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.dataset.io.manager import IOManager
 from gtmcore.exceptions import GigantumException
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
@@ -221,7 +222,7 @@ class DeleteDataset(graphene.ClientIDMutation):
             repo_id = mgr.get_repository_id(owner, dataset_name)
             response = requests.delete(f"https://{remote_config['index_service']}/index/{repo_id}",
                                        headers={"Authorization": f"Bearer {access_token}",
-                                                "Identity": id_token}, timeout=10)
+                                                "Identity": id_token}, timeout=30)
 
             if response.status_code != 204:
                 # Soft failure, still continue

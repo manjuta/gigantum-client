@@ -173,10 +173,25 @@
         background-size: 20px;
         line-height: 24px;
       }
+  }
+}
 
-      // .File__row,
-      // .Dataset__row {
-      //   padding-left: 30px;
-      // }
+.DatasetBrowser__commits {
+  @include flex(space-around, row);
+  align-items: center;
+  flex-wrap: nowrap;
+  color: $white;
+  font-weight: 100;
+  font-size: 12px;
+  margin: 2px 20px;
+  padding: 2px;
+  background: $azure;
+  border-radius: 10px;
+  height: 20px;
+
+  &--commits-behind {
+      padding: 2px 15px 2px 2px;
+      background: url(~Images/icons/branches/commit-behind.svg) no-repeat right -6px top;
+      background-size: 25px;
   }
 }

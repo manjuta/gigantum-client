@@ -7,6 +7,7 @@ import LocalDatasetsContainer from './datasets/localDatasets/LocalDatasetsContai
 import RemoteDatasetsContainer from './datasets/remoteDatasets/RemoteDatasetsContainer';
 import RemoteLabbooksContainer from './labbooks/remoteLabbooks/RemoteLabbooksContainer';
 import environment from 'JS/createRelayEnvironment';
+import Loader from 'Components/common/Loader';
 // assets
 import './Dashboard.scss';
 // redux
@@ -180,6 +181,9 @@ export default class DashboardContainer extends Component {
       <div className="Dashboard flex flex-column">
 
         <div className="Dashboard__view flex-1-0-auto">
+          <div id="dashboard__cover" className="Dashboard__cover hidden">
+            <Loader/>
+          </div>
           {
             this._displaySelectedComponent()
           }

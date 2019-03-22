@@ -6,16 +6,34 @@ import environment from 'JS/createRelayEnvironment';
 
 
 const mutation = graphql`
-mutation FetchLabbookEdgeMutation($input: FetchLabbookEdgeInput!){
+mutation FetchLabbookEdgeMutation($input: FetchLabbookEdgeInput!, $first: Int!, $cursor: String,){
     fetchLabbookEdge(input: $input){
         newLabbookEdge{
             node{
                 owner
                 name
-                collaborators,
+                branches {
+                  id
+                  owner
+                  name
+                  branchName
+                  isActive
+                  isLocal
+                  isRemote
+                }
+                collaborators {
+                  id
+                  owner
+                  name
+                  collaboratorUsername
+                  permission
+                }
                 canManageCollaborators,
                 visibility,
                 defaultRemote
+                ...Code_labbook
+                ...Input_labbook
+                ...Output_labbook
             }
         }
         clientMutationId
@@ -36,6 +54,8 @@ export default function FetchLabbookEdgeMutation(
       owner,
       labbookName,
     },
+    first: 10,
+    cursor: null,
   };
   commitMutation(environment, {
     mutation,
