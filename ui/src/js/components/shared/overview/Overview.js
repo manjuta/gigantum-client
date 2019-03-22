@@ -37,14 +37,12 @@ export default class Overview extends Component {
       simpleExists: false,
       editorFullscreen: false,
     };
-    this._handleClick = this._handleClick.bind(this);
   }
   /*
     runs state check when component mounts
   */
   componentDidMount() {
     this._setExpand();
-    window.addEventListener('click', this._handleClick);
   }
   /*
     runs state check when component updates
@@ -99,15 +97,7 @@ export default class Overview extends Component {
       this.setState({ overflowExists: false });
     }
   }
-  /**
-   @param {event} evt
-   hides warning when not clicked on
-   */
-  _handleClick(evt) {
-    if ((evt.target.className.indexOf('Overview__readme-save') === -1) && this.state.readMeWarning) {
-      this.setState({ readMeWarning: null });
-    }
-  }
+
   /**
    @param {}
    reverts readme to have a max size
@@ -185,17 +175,11 @@ export default class Overview extends Component {
    handles calling mutation functions to save readme
    */
   _saveReadme() {
-    if (this.props.isPublishing) {
-      this.setState({ readMeWarning: 'publishing' });
-    } else if (this.props.isSyncing) {
-      this.setState({ readMeWarning: 'syncing' });
+    const { owner, labbookName } = store.getState().routes;
+    if (this.props.sectionType === 'labbook') {
+      this._saveLabbookReadme(owner, labbookName);
     } else {
-      const { owner, labbookName } = store.getState().routes;
-      if (this.props.sectionType === 'labbook') {
-        this._saveLabbookReadme(owner, labbookName);
-      } else {
-        this._saveDatasetReadme(owner, labbookName);
-      }
+      this._saveDatasetReadme(owner, labbookName);
     }
   }
   /**
@@ -277,32 +261,17 @@ export default class Overview extends Component {
                 />
 
                 <div className="Overview__readme--editing-buttons">
+                  <button
+                    className="Overview__readme-cancel Btn--flat"
+                    onClick={() => { this._closeReadme(); }}>
+                    Cancel
+                  </button>
 
                   <button
                     className="Overview__readme-save"
                     disabled={false}
                     onClick={() => { this._saveReadme(); }}>
                     Save
-                  </button>
-
-                  {
-                    state.readMeWarning &&
-
-                    <Fragment>
-
-                      <div className="BranchMenu__menu-pointer" />
-
-                      <div className="BranchMenu__button-menu">
-                        Readme cannot be edited while project is
-                        {state.readMeWarning}
-                        .
-                      </div>
-                    </Fragment>
-                  }
-                  <button
-                    className="Overview__readme-cancel"
-                    onClick={() => { this._closeReadme(); }}>
-                    Cancel
                   </button>
                 </div>
               </div>

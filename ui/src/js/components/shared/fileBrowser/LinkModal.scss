@@ -9,7 +9,7 @@
 .LinkModal__container {
   @include flex(flex-start, row);
   flex-wrap: wrap;
-  overflow: auto;
+  overflow: hidden;
   height: 600px;
   border-bottom: 1px solid $slateBlue;
 }

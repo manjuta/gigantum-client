@@ -463,16 +463,12 @@ class Branches extends Component {
             'Branches__Modal-cover--coverall': state.action,
           }),
           bottomIndexSelectorCSS = classNames({
-            Branches__scroll: true,
-            'Branches__scroll--down': true,
-            'Branches__scroll--hidden': props.branches.length - 1 <= 5,
-            'Branches__scroll--disabled': (state.currentIndex + 5) >= (props.branches.length - 1),
+            'Btn Btn--loadMore Btn--loadMore--down': true,
+            hidden: props.branches.length - 1 <= 5,
           }),
           topIndexSelectorCSS = classNames({
-            Branches__scroll: true,
-            'Branches__scroll--up': true,
-            'Branches__scroll--hidden': props.branches.length - 1 <= 5,
-            'Branches__scroll--disabled': state.currentIndex === 0,
+            'Btn Btn--loadMore Btn--loadMore--up': true,
+             hidden: props.branches.length - 1 <= 5,
           });
     const filteredBranches = props.branches.filter(branch => branch.branchName !== props.activeBranch.branchName).slice(state.currentIndex, state.currentIndex + 5);
     const activeUpToDate = props.activeBranch.commitsAhead === 0 && props.activeBranch.commitsBehind === 0;
@@ -561,9 +557,10 @@ class Branches extends Component {
                 (filteredBranches.length !== 0) &&
                 <div className="Branches__label">Other Branches:</div>
               }
-              <div
+              <button
                 className={topIndexSelectorCSS}
                 onClick={() => this._setIndex()}
+                disabled={state.currentIndex === 0}
               />
               {
                 filteredBranches.map((branch) => {
@@ -636,9 +633,10 @@ class Branches extends Component {
                   );
                 })
               }
-              <div
+              <button
                 className={bottomIndexSelectorCSS}
                 onClick={() => this._setIndex(true)}
+                disabled={(state.currentIndex + 5) >= (props.branches.length - 1)}
               />
             </div>
           }

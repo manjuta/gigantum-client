@@ -501,26 +501,26 @@ class BranchMenu extends Component {
             hidden: !state.syncMenuVisible,
           }),
           syncMenuDropdownButtonCSS = classNames({
-            'BranchMenu__btn Btn--action BranchMenu__btn--sync-dropdown': true,
-            'BranchMenu__btn--sync-open': state.syncMenuVisible,
+            'Btn--branch Btn--action Btn--branch--sync-dropdown': true,
+            'Btn--branch--sync-open': state.syncMenuVisible,
           }),
           syncCSS = classNames({
-            'BranchMenu__btn Btn--action BranchMenu__btn--sync': true,
-            'BranchMenu__btn--sync--publish': !props.defaultRemote,
-            'BranchMenu__btn--sync--pull': showPullOnly,
-            'BranchMenu__btn--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined)) && !showPullOnly,
+            'Btn--branch Btn--action Btn--branch--sync': true,
+            'Btn--branch--sync--publish': !props.defaultRemote,
+            'Btn--branch--sync--pull': showPullOnly,
+            'Btn--branch--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined)) && !showPullOnly,
             'Tooltip-data': !state.commitsHovered,
           }),
           manageCSS = classNames({
-            'BranchMenu__btn Btn--action BranchMenu__btn--manage': true,
+            'Btn--branch Btn--action Btn--branch--manage': true,
             'Tooltip-data': true,
           }),
           resetCSS = classNames({
-            'BranchMenu__btn Btn--action BranchMenu__btn--reset': true,
+            'Btn--branch Btn--action Btn--branch--reset': true,
             'Tooltip-data': true,
           }),
           createCSS = classNames({
-            'BranchMenu__btn Btn--action BranchMenu__btn--create': true,
+            'Btn--branch Btn--action Btn--branch--create': true,
             'Tooltip-data': true,
           }),
           popupCSS = classNames({
@@ -691,7 +691,7 @@ class BranchMenu extends Component {
                   </div>
                 }
                 <div
-                  className="BranchMenu__btn--text"
+                  className="Btn--branch--text"
                 >
                   {syncButtonText}
                 </div>

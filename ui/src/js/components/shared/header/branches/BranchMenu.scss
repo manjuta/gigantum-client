@@ -102,7 +102,7 @@ $dropBoxWidth: 250px;
   flex-wrap: nowrap;
   margin: 0 0 0 10px;
 }
-.BranchMenu__btn {
+.Btn--branch {
   height: 40px;
   line-height: 30px;
   color: $azure;
@@ -520,10 +520,10 @@ $dropBoxWidth: 250px;
   .BranchMenu__buttons{
     font-size: 0 !important;
   }
-  .BranchMenu__btn {
+  .Btn--branch {
     padding-right: 5px !important;
-  }
-  .BranchMenu__btn--sync{
-    background-position: center center !important;
+    &--sync{
+      background-position: center center !important;
+    }
   }
 }
