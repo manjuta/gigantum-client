@@ -73,6 +73,7 @@ export default class ActivityDefaultList extends Component {
 
   render() {
     const { props, state } = this;
+    console.log(props.categorizedDetails.detailObjects[this.props.itemKey][0].type, props.categorizedDetails.detailObjects)
     let keys = this.props.categorizedDetails.detailKeys[this.props.itemKey],
       type = this.props.categorizedDetails.detailObjects[this.props.itemKey][0].type.toLowerCase();
     const activityDetailsCSS = classNames({

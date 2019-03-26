@@ -28,4 +28,25 @@
       }
     }
   }
+
+  &--light {
+      border-top: 1px solid $grey;
+      border-right: 1px solid $grey;
+      border-left: 1px solid $grey;
+      border-bottom: 1px solid $romanSilver;
+      color: $romanSilver;
+      padding: .5rem 10px;
+      margin: 0 1em -1px 1em;
+  }
+
+  &--light .Tab--selected {
+      background: $white;
+      border-top: 1px solid $grey;
+      border-right: 1px solid $grey;
+      border-left: 1px solid $grey;
+      border-bottom: 1px solid $white;
+      color: $romanSilver;
+      padding: .5rem 10px;
+  }
+
 }

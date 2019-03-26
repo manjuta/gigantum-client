@@ -79,7 +79,7 @@ export default class Prompt extends Component {
       <div className="Prompt">
         <div className={this.state.promptState ? 'hidden' : 'Prompt__info'}>
           <div
-            className={this.state.failureCount >= 2 ? this.state.failureCount >= 8 ? 'Prompt__logo--final' : 'Prompt__logo--raised' : 'Prompt__logo'}
+            className={this.state.failureCount >= 2 ? this.state.failureCount >= 8 ? 'Prompt__logo--final' : 'Prompt__logo Prompt__logo--raised' : 'Prompt__logo'}
           />
           <div className={this.state.failureCount >= 2 && this.state.failureCount < 8 ? 'Prompt__loading-text' : 'hidden'}>
             Loading Please Wait...

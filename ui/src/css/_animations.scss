@@ -1,0 +1,95 @@
+// animations mixin
+@mixin keyframes($animation-name) {
+    @-webkit-keyframes #{$animation-name} {
+        @content;
+    }
+    @-moz-keyframes #{$animation-name} {
+        @content;
+    }
+    @-ms-keyframes #{$animation-name} {
+        @content;
+    }
+    @-o-keyframes #{$animation-name} {
+        @content;
+    }
+    @keyframes #{$animation-name} {
+        @content;
+    }
+}
+
+@mixin animation($str) {
+  -webkit-animation: #{$str};
+  -moz-animation: #{$str};
+  -ms-animation: #{$str};
+  -o-animation: #{$str};
+  animation: #{$str};
+}
+
+@keyframes slide-left-fade-in{
+  0% {
+      opacity:0;
+      transform:  translate(120px,0px)  ;
+  }
+  100% {
+      opacity:1;
+      transform:  translate(0px,0px)  ;
+  }
+}
+
+@keyframes fade-in{
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@keyframes slide-up-fade-in{
+  0% {
+      opacity:0;
+      transform:  translate(0px,40px)  ;
+  }
+  100% {
+      opacity:1;
+      transform:  translate(0px,0px)  ;
+  }
+}
+
+@keyframes slide-down-fade-in{
+  0% {
+      opacity:0;
+      transform:  translate(0px,-10px)  ;
+  }
+  100% {
+      opacity:1;
+      transform:  translate(0px,0px)  ;
+  }
+}
+
+@keyframes delayed-fade-in{
+  0% { opacity:0; }
+  75% { opacity:0; }
+  100% { opacity:1; }
+}
+
+@keyframes buttonLoading {
+  0% {
+    border-top: 3px solid $azure;
+  }
+  33% {
+    border-right: 3px solid $azure;
+  }
+  66% {
+    border-bottom: 3px solid $azure;
+  }
+  100% {
+    border-left: 3px solid $azure;
+
+  }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

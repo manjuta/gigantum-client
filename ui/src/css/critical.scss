@@ -12,6 +12,7 @@
 @import '_fonts';
 @import '_base';
 @import '_grid';
+@import '_animations';
 //atoms
 @import 'atoms/button.scss';
 @import 'atoms/loader.scss';
@@ -34,6 +35,11 @@ body .fa {
   font-family: "Font Awesome 5 Free";
 }
 
+@include keyframes(fade-in-modal) {
+  0% { opacity: 0; }
+  100% { opacity: 0.5; }
+}
+
 .modal__cover{
   position: fixed;
   top: 0px;
@@ -41,18 +47,10 @@ body .fa {
   right: 0px;
   left: 0px;
   background-color: $slateBlueOpaque;
-  animation: fade-in-modal forwards .25s;
+  @include animation('fade-in-modal forwards 0.25s');
+  //animation: fade-in-modal forwards .25s;
   opacity: 0.5;
   z-index: index($elements, modalCover);
-}
-
-@keyframes fade-in-modal{
-  0% {
-    opacity:0;
-  }
-  100% {
-    opacity:0.5;
-  }
 }
 
 .rendered-react-keyed-file-browser{
@@ -114,4 +112,35 @@ code {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.InfoTooltip {
+  &:before {
+    content: '';
+    @include triangle('up', 8px, $slateBlue);
+    position: absolute;
+    right: 100px;
+    top: -8px;
+  }
+  box-shadow: 0 0px 12px 0 rgba(0,0,0,.30);
+  user-select: none;
+  animation: slide-down-fade-in 0.25s;
+  position: absolute;
+  font-size: 14px;
+  background: $slateBlue;
+  color: white;
+  padding: 15px;
+  width: 250px;
+  top: 25px;
+  right: -100px;
+  word-break: break-word;
+  a {
+    text-decoration: underline;
+  }
+  &.summary {
+    &:before {
+      right: 9px;
+    }
+    right: -10px;
+  }
 }

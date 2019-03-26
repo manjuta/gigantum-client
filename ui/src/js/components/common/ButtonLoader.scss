@@ -7,8 +7,6 @@
   &--loading:hover,
   &--loading:disabled {
     transition: all 0.25s;
-    // background: url(~Images/loaders/loading.svg) no-repeat 50% 50%;
-    // background: $romanSilver url(~Images/icons/button-loader-spinner.svg) no-repeat center center;
     background: $white;
     animation: buttonLoading 1.5s ease-in-out infinite;
     background-size: 24px;
@@ -31,9 +29,4 @@
     background: $crimson url(~Images/icons/close-white.svg) no-repeat 50% 50% !important;
     background-size: 14px;
   }
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }

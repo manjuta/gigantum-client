@@ -45,57 +45,50 @@ export default class SideBar extends Component {
     const sidebarCSS = classNames({
       'SideBar col-sm-1': this.state.authenticated || this.state.authenticated === null,
       hidden: !(this.state.authenticated || this.state.authenticated === null),
-      'is-demo': window.location.hostname === config.demoHostName,
+      'SideBar--demo': window.location.hostname === config.demoHostName,
     });
     const projectsCSS = classNames({
-      SideBar__icon: true,
-      'SideBar__icon--labbooks-selected': isLabbooks,
-      'SideBar__icon SideBar__icon--labbooks': !isLabbooks,
-    }),
-    datasetCSS = classNames({
-      SideBar__icon: true,
-      'SideBar__icon SideBar__icon--datasets': isLabbooks,
-      'SideBar__icon SideBar__icon--datasets-selected': !isLabbooks,
-    }),
-    labbookSideBarItemCSS = classNames({
-      'SideBar__nav-item SideBar__nav-item--labbooks': true,
-      'SideBar__nav-item--selected': isLabbooks,
-    }),
-    datasetSideBarItemCSS = classNames({
-      'SideBar__nav-item SideBar__nav-item--datasets': true,
-      'SideBar__nav-item--selected': !isLabbooks,
-    });
+        SideBar__icon: true,
+        'SideBar__icon--labbooks-selected': isLabbooks,
+        'SideBar__icon SideBar__icon--labbooks': !isLabbooks,
+      }),
+      datasetCSS = classNames({
+        SideBar__icon: true,
+        'SideBar__icon SideBar__icon--datasets': isLabbooks,
+        'SideBar__icon SideBar__icon--datasets-selected': !isLabbooks,
+      }),
+      labbookSideBarItemCSS = classNames({
+        'SideBar__nav-item SideBar__nav-item--labbooks': true,
+        'SideBar__nav-item--selected': isLabbooks,
+      }),
+      datasetSideBarItemCSS = classNames({
+        'SideBar__nav-item SideBar__nav-item--datasets': true,
+        'SideBar__nav-item--selected': !isLabbooks,
+      });
     return (
       <div className={sidebarCSS}>
         <div className="SideBar__inner-container">
           <div className="SideBar__logo" />
           <ul className="SideBar__nav">
             <li
-              className="SideBar__list-item Tooltip-data Tooltip-data--right"
-              data-tooltip="View Project listing page"
-            >
+              className="SideBar__list-item Tooltip-data Tooltip-data--right relative"
+              data-tooltip="View Project listing page">
               <Link
                 onClick={() => setCallbackRoute('/projects/local')}
                 className={labbookSideBarItemCSS}
-                to={{ pathname: '/projects/local' }}
-              >
-                <div
-                  className={projectsCSS}
-                />
+                to={{ pathname: '/projects/local' }}>
+                <div className={projectsCSS}></div>
                 Projects
               </Link>
               <Tooltip section="labbookListing" />
             </li>
-            <li className="SideBar__list-item Tooltip-data Tooltip-data--right"
-                data-tooltip="View Dataset listing page"
-            >
+            <li className="SideBar__list-item Tooltip-data Tooltip-data--right relative"
+                data-tooltip="View Dataset listing page">
               <Link
                 onClick={() => setCallbackRoute('/datasets/local')}
                 className={datasetSideBarItemCSS}
-                to={{ pathname: '/datasets/local' }}
-              >
-                <div className={datasetCSS}
-                />
+                to={{ pathname: '/datasets/local' }}>
+                <div className={datasetCSS}></div>
                 Datasets
               </Link>
               <Tooltip section="dataSets" />

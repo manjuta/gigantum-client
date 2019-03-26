@@ -31,23 +31,27 @@
 
     transform: translate(-50%, -50%);
 
-    background: url(https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg) no-repeat 50% 50%;
+    background: url('https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg') no-repeat 50% 50%;
     background-size: 100%;
-}
+    &--raised {
+      top: 40%;
 
-.Prompt__logo--raised {
-    position: absolute;
-    top: 40%;
-    left: 50%;
+      transition: top 2s ease 0s;
+      transform: translate(-50%, -50%);
 
-    width: 500px;
-    height: 130px;
+      background: url('https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg') no-repeat 50% 50%;
+      background-size: 100%;
+    }
 
-    transition: top 2s ease 0s;
-    transform: translate(-50%, -50%);
+    &--final {
+        top: 30%;
 
-    background: url(https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg) no-repeat 50% 50%;
-    background-size: 100%;
+        transition: top 2s ease 0s;
+        transform: translate(-50%, -50%);
+
+        background: url('https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg') no-repeat 50% 50%;
+        background-size: 100%;
+    }
 }
 
 .Prompt__logo--final {
@@ -71,7 +75,8 @@
     left: 50%;
 
     transform: translate(-50%, -50%);
-    animation: fade-in-out 13s linear;
+
+    @include animation('fade-in-out 13s linear');
     animation-delay: 2s;
 
     opacity: 0;
@@ -97,7 +102,7 @@
 }
 
 .Prompt__failure-text {
-    animation: fade-in 3s forwards;
+    @include animation('fade-in 3s forwards');
     animation-delay: 2s;
 
     opacity: 0;
@@ -110,15 +115,13 @@
     a {
         color: $turquise;
     }
-
-
 }
 
 .Prompt__cli {
     width: 600px;
     height: 300px;
 
-    animation: fade-in 3s forwards;
+    @include animation('fade-in 3s forwards');
     animation-delay: 2s;
 
     opacity: 0;
@@ -130,7 +133,7 @@
     width: 600px;
     height: 300px;
 
-    animation: fade-in 3s forwards;
+    @include animation('fade-in 3s forwards');
     animation-delay: 2s;
 
     opacity: 0;

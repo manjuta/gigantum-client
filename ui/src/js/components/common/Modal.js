@@ -19,7 +19,6 @@ export default class Modal extends Component {
     }
   }
 
-
   render() {
     const { props } = this;
     const modalContentCSS = classNames({

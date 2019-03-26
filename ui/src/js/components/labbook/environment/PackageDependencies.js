@@ -645,12 +645,12 @@ class PackageDependencies extends Component {
         <div className="PackageDependencies grid">
           <div className="PackageDependencies__card Card Card--auto Card--no-hover column-1-span-12">
             <div className="PackageDependencies__tabs">
-              <ul className="tabs-list">
+              <ul className="Tabs">
                 {
                 packageManagersTabs.map((tab, index) => {
                   const packageTab = classNames({
-                    'PackageDependencies__tab tab': true,
-                    'PackageDependencies__tab--selected tab-selected': (state.selectedTab === tab.tabName),
+                    'PackageDependencies__tab Tab Tab--light': true,
+                    'PackageDependencies__tab--selected Tab-selected': (state.selectedTab === tab.tabName),
                   });
 
                   return (<li

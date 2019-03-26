@@ -10,10 +10,10 @@
   background: $jet;
   background: linear-gradient($jet, $azure);
   width: $sideBarWidth;
-}
 
-.SideBar.is-demo {
-  top: 60px;
+  &--demo {
+    top: 60px;
+  }
 }
 
 .SideBar__logo {
@@ -21,7 +21,7 @@
   height: 30px;
   width: 120px;
   margin: 10px auto;
-  background: url(~Images/logos/gigantum-white-logo.svg) no-repeat 50% 50%;
+  background: url('~Images/logos/gigantum-white-logo.svg') no-repeat 50% 50%;
   background-size: 100%;
 
 }
@@ -38,20 +38,13 @@
 
 .SideBar__list-item {
   width: 100%;
-  position: relative;
-}
-
-.SideBar__list-item--selected {
-  @extend .SideBar__list-item;
-}
-
-.SideBar__list-item--selected:after {
 }
 
 .SideBar__nav {
   align-items: center;
   height: 50%;
   @include flex(flex-start, column);
+
   .Tooltip-data:after {
     top: calc(50% - 24px);
   }
@@ -72,27 +65,28 @@
   text-align: center;
 
   @include flex(center, column)
-}
 
-.SideBar__nav-item--selected {
-  color: $turquise;
-}
 
-.SideBar__nav-item--datasets {
-  align-items: center;
-  text-decoration: none !important;
-  &:hover .SideBar__icon--datasets {
-    background: url('~Images/icons/datasets-selected.svg') no-repeat center center;
-    background-size: 40px;
+  &--selected {
+    color: $turquise;
   }
-}
 
-.SideBar__nav-item--labbooks {
-  align-items: center;
-  text-decoration: none !important;
-  &:hover .SideBar__icon--labbooks {
-    background: url('~Images/icons/labbooks-selected.svg') no-repeat center center;
-    background-size: 40px;
+  &--datasets {
+    align-items: center;
+    text-decoration: none !important;
+    &:hover .SideBar__icon--datasets {
+      background: url('~Images/icons/datasets-selected.svg') no-repeat center center;
+      background-size: 40px;
+    }
+  }
+
+  &--labbooks {
+    align-items: center;
+    text-decoration: none !important;
+    &:hover .SideBar__icon--labbooks {
+      background: url('~Images/icons/labbooks-selected.svg') no-repeat center center;
+      background-size: 40px;
+    }
   }
 }
 
@@ -102,56 +96,55 @@
   margin: 0 2px;
   align-items: center;
   position: relative;
-}
 
-.SideBar__icon--datasets {
-  background: url('~Images/icons/datasets.svg') no-repeat center center;
-  background-size: 40px;
-}
+  &--datasets {
+    background: url('~Images/icons/datasets.svg') no-repeat center center;
+    background-size: 40px;
+  }
 
-.SideBar__icon--datasets-selected:before,
-.SideBar__icon--labbooks-selected:before,{
-    content: "";
-    position: absolute;
-    background: $turquise;
-    width: 5px;
-    height: 55px;
-    right: -40px;
-    margin-top: 7px;
-}
+  &--datasets-selected:before,
+  &--labbooks-selected:before,{
+      content: "";
+      position: absolute;
+      background: $turquise;
+      width: 5px;
+      height: 55px;
+      right: -40px;
+      margin-top: 7px;
+  }
 
+  &--datasets-selected,
+  &--datasets:hover,{
+    background: url('~Images/icons/datasets-selected.svg') no-repeat center center;
+    background-size: 40px;
+  }
 
-.SideBar__icon--datasets-selected,
-.SideBar__icon--datasets:hover,{
-  background: url('~Images/icons/datasets-selected.svg') no-repeat center center;
-  background-size: 40px;
-}
+  &--labbooks {
+    background: url('~Images/icons/labbooks.svg') no-repeat center center;
+    background-size: 40px;
+  }
 
-.SideBar__icon--labbooks {
-  background: url('~Images/icons/labbooks.svg') no-repeat center center;
-  background-size: 40px;
-}
-
-.SideBar__icon--labbooks-selected,
-.SideBar__icon--labbooks:hover {
-  background: url('~Images/icons/labbooks-selected.svg') no-repeat center center;
-  background-size: 40px;
+  &--labbooks-selected,
+  &--labbooks:hover {
+    background: url('~Images/icons/labbooks-selected.svg') no-repeat center center;
+    background-size: 40px;
+  }
 }
 
 .SideBar__button {
   background-color: none;
   border: 1px solid $white;
   color: $white;
-}
 
-.SideBar__button:hover {
-  background-color: $white;
-  border: 1px solid $white;
-  border-width: 0px;
-  color: $azure;
-}
+  &:hover {
+    background-color: $white;
+    border: 1px solid $white;
+    border-width: 0px;
+    color: $azure;
+  }
 
-.SideBar__button--logout {
-  position: absolute;
-  top: 20px;
+  &--logout {
+    position: absolute;
+    top: 20px;
+  }
 }

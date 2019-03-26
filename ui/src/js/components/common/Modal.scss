@@ -31,41 +31,6 @@
   }
 }
 
-.Modal__content.create .Modal__container{
-  .Modal__header{
-    background: url('~Images/icons/create-azure.svg') no-repeat 207px 45px;
-    background-size: 50px;
-  }
-}
-
-.Modal__content.user .Modal__container{
-  .Modal__header{
-    background: url('~Images/icons/user-azure.svg') no-repeat 160px 34px;
-    background-size: 50px;
-  }
-}
-
-.Modal__content.add .Modal__container{
-  .Modal__header{
-    background: url('~Images/icons/add.svg') no-repeat 160px 34px;
-    background-size: 50px;
-  }
-}
-
-.Modal__content.rollback .Modal__container{
-  .Modal__header{
-    background: url('~Images/icons/rollback.svg') no-repeat 160px 34px;
-    background-size: 50px;
-  }
-}
-
-.Modal__content.project .Modal__container{
-  .Modal__header{
-    background: url('~Images/icons/labbooks-blue.svg') no-repeat 274px 40px;
-    background-size: 42px;
-  }
-}
-
 .Modal__sub-container{
   height: calc(100% - 60px);
   padding: 0 20px;
@@ -103,22 +68,9 @@
   padding: 0;
 
   @include modal(200px, 300px);
-  p{
+  p {
     line-height: 20px;
   }
-}
-
-
-.Modal__header{
-  margin: 0;
-  padding: 40px 0 5px 20px;
-
-  text-align: center;
-
-  color: $azure;
-  background-size: 50px;
-
-  font-weight: 600;
 }
 
 .Modal__cover{
@@ -129,10 +81,10 @@
   bottom: 0px;
   left: 0px;
 
-  animation: fade-in-modal forwards .25s;
-
   opacity: 0.5;
   background-color: $slateBlueOpaque;
+
+  @include animation('fade-in-modal forwards .25s');
 }
 
 .Modal__close{
@@ -147,4 +99,53 @@
   text-align: center;
 
   color: #007ea8;
+}
+
+// modal header
+
+.Modal__header{
+  margin: 0;
+  padding: 40px 0 5px 20px;
+
+  text-align: center;
+
+  color: $azure;
+  background-size: 50px;
+
+  font-weight: 600;
+}
+
+.Modal__content.create .Modal__container{
+  .Modal__header {
+    background: url('~Images/icons/create-azure.svg') no-repeat 207px 45px;
+    background-size: 50px;
+  }
+}
+
+.Modal__content.user .Modal__container{
+  .Modal__header {
+    background: url('~Images/icons/user-azure.svg') no-repeat 160px 34px;
+    background-size: 50px;
+  }
+}
+
+.Modal__content.add .Modal__container{
+  .Modal__header {
+    background: url('~Images/icons/add.svg') no-repeat 160px 34px;
+    background-size: 50px;
+  }
+}
+
+.Modal__content.rollback .Modal__container {
+  .Modal__header {
+    background: url('~Images/icons/rollback.svg') no-repeat 160px 34px;
+    background-size: 50px;
+  }
+}
+
+.Modal__content.project .Modal__container{
+  .Modal__header {
+    background: url('~Images/icons/labbooks-blue.svg') no-repeat 274px 40px;
+    background-size: 42px;
+  }
 }
