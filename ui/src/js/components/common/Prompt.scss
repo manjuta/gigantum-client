@@ -65,7 +65,7 @@
     transition: top 2s ease 0s;
     transform: translate(-50%, -50%);
 
-    background: url(https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg) no-repeat 50% 50%;
+    background: url('https://s3.amazonaws.com/io.gigantum.assets/gigantum-turquise-logo.svg') no-repeat 50% 50%;
     background-size: 100%;
 }
 
@@ -76,10 +76,10 @@
 
     transform: translate(-50%, -50%);
 
+    opacity: 0;
+
     @include animation('fade-in-out 13s linear');
     animation-delay: 2s;
-
-    opacity: 0;
 
 }
 
@@ -102,12 +102,13 @@
 }
 
 .Prompt__failure-text {
-    @include animation('fade-in 3s forwards');
-    animation-delay: 2s;
 
     opacity: 0;
 
     line-height: 1.5;
+
+    @include animation('fade-in 3s forwards');
+    animation-delay: 2s;
 
     p {
         margin: 0
@@ -121,50 +122,36 @@
     width: 600px;
     height: 300px;
 
+    opacity: 0;
+    background: url('~Images/logos/cli.png') no-repeat 50% 50%;
+    background-size: 100%;
+
     @include animation('fade-in 3s forwards');
     animation-delay: 2s;
-
-    opacity: 0;
-    background: url(~Images/logos/cli.png) no-repeat 50% 50%;
-    background-size: 100%;
 }
 
 .Prompt__mac {
     width: 600px;
     height: 300px;
 
+    opacity: 0;
+    background: url('~Images/logos/app-mac.png') no-repeat 50% 50%;
+    background-size: 50%;
+
     @include animation('fade-in 3s forwards');
     animation-delay: 2s;
-
-    opacity: 0;
-    background: url(~Images/logos/app-mac.png) no-repeat 50% 50%;
-    background-size: 50%;
 }
 
 .Prompt__windows {
     width: 600px;
     height: 300px;
 
-    animation: fade-in 3s forwards;
-    animation-delay: 2s;
-
     opacity: 0;
-    background: url(~Images/logos/app-win.png) no-repeat 50% 50%;
+    background: url('~Images/logos/app-win.png') no-repeat 50% 50%;
     background-size: 50%;
-}
 
-@keyframes fade-in {
-    0% { opacity: 0 }
-    100% { opacity: 1 }
-}
-
-@keyframes fade-in-out {
-    0%, 100% { opacity: 0 }
-    10%, 90% { opacity: 1 }
-}
-
-.hidden {
-    display: none;
+    @include animation('fade-in 3s forwards');
+    animation-delay: 2s;
 }
 
 .Prompt__refresh {

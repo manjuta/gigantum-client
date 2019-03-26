@@ -62,9 +62,17 @@ export default class User extends Component {
 
   render() {
     const usernameCSS = classNames({
-      User__name: !this.state.dropdownVisible,
+      User__name: true,
       'User__name--active': this.state.dropdownVisible,
       'User__name--long': this.state.username.length >= 10,
+    }),
+    userDropdownCSS = classNames({
+       User__dropdown: true,
+       hidden: !this.state.dropdownVisible,
+    }),
+    arrowCSS = classNames({
+      'User__dropdown--arrow': true,
+      hidden: !this.state.dropdownVisible,
     });
 
 
@@ -80,26 +88,23 @@ export default class User extends Component {
           className={usernameCSS}
           data-tooltip={this.state.username}>
           {this.state.username}
-
         </h6>
 
-        <div className={this.state.dropdownVisible ? 'User__dropdown--arrow' : 'hidden'} />
+        <div className={arrowCSS}></div>
 
-        <div className={this.state.dropdownVisible ? 'User__dropdown' : 'hidden'}>
+        <div className={userDropdownCSS}>
           <a
             id="profile"
             href="http://gigantum.com/profile"
             rel="noopener noreferrer"
             target="_blank"
-            className="User__button"
-          >
+            className="User__button">
             Profile
           </a>
           <button
             id="logout"
-            className="User__button btn-margin"
-            onClick={this.logout.bind(this)}
-          >
+            className="User__button btn-margin Btn Btn--flat"
+            onClick={this.logout.bind(this)}>
             Logout
           </button>
 

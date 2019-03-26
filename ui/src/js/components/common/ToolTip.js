@@ -36,7 +36,7 @@ class Tooltip extends Component {
     window.addEventListener('click', this._hideTooltip);
   }
   /**
-    @param {}
+    @param {} -
     unsubscribe from event listeners
   */
   componentWillUnmount() {
@@ -48,32 +48,33 @@ class Tooltip extends Component {
    *
   */
   _hideTooltip(evt) {
-    if (this.state.toolTipExpanded && evt.target.className.indexOf(this.props.section) === -1) {
+    if (this.state.toolTipExpanded && (evt.target.className.indexOf(this.props.section) === -1)) {
       this.setState({ toolTipExpanded: false });
     }
   }
 
   render() {
-    const { section } = this.props;
+    const { props, state } = this;
+    const { section } = props;
     const toolTipCSS = classNames({
-      Tooltip: this.props.isVisible,
-      hidden: !this.props.isVisible,
+      Tooltip: props.isVisible,
+      hidden: !props.isVisible,
       [section]: true,
       isSticky: store.getState().labbook.isSticky,
     });
     const toggleCSS = classNames({
       Tooltip__toggle: true,
       [section]: true,
-      active: this.state.toolTipExpanded,
+      'Tooltip__toggle--active': state.toolTipExpanded,
     });
     const messsageCSS = classNames({
-      Tooltip__message: this.state.toolTipExpanded,
-      hidden: !this.state.toolTipExpanded,
+      Tooltip__message: state.toolTipExpanded,
+      hidden: !state.toolTipExpanded,
       [section]: true,
     });
     const pointerCSS = classNames({
-      Tooltip__pointer: this.state.toolTipExpanded,
-      hidden: !this.state.toolTipExpanded,
+      Tooltip__pointer: state.toolTipExpanded,
+      hidden: !state.toolTipExpanded,
       [section]: true,
     });
     return (
@@ -81,17 +82,16 @@ class Tooltip extends Component {
 
         <div
           className={toggleCSS}
-          onClick={() => this.setState({ toolTipExpanded: !this.state.toolTipExpanded })}>
+          onClick={() => this.setState({ toolTipExpanded: !state.toolTipExpanded })}>
           {
-            !this.state.toolTipExpanded &&
-            <div className="Tooltip__glow-container">
+            !state.toolTipExpanded
+            && <div className="Tooltip__glow-container">
               <div className="Tooltip__glow-ring-outer">
-                <div className="Tooltip__glow-ring-inner" />
+                <div className="Tooltip__glow-ring-inner"></div>
               </div>
             </div>
           }
         </div>
-
 
         <div className={pointerCSS} />
         <div className={messsageCSS}>

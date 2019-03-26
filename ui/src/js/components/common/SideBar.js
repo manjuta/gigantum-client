@@ -40,6 +40,7 @@ export default class SideBar extends Component {
     this.props.auth.logout();
   }
   render() {
+    const { props, state } = this;
     const isLabbooks = (window.location.href.indexOf('projects') > 0) || (window.location.href.indexOf('datasets') === -1);
 
     const sidebarCSS = classNames({
@@ -96,9 +97,7 @@ export default class SideBar extends Component {
           </ul>
 
           {
-            this.state.authenticated && (
-            <User {...this.props} />
-              )
+            state.authenticated && (<User {...this.props} />)
           }
         </div>
       </div>
