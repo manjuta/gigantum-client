@@ -154,6 +154,11 @@ class Branches extends Component {
           self.setState({ action: null, mergeModalVisible: null });
         }
         props.toggleCover(null);
+        props.branchMutations.buildImage((response, error) => {
+          if (error) {
+            setErrorMessage(`${props.labbookName} failed to build`, error);
+          }
+        });
       });
   }
     /**
