@@ -3,6 +3,7 @@
 exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
 <div
   className="Labbooks__listing"
+  data-selenium-id="LocalLabbooks"
 >
   <div
     className="grid"
@@ -45,6 +46,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </div>
         <div
           className="hidden createLabbook"
+          data-selenium-id="ToolTip"
         >
           <div
             className="ToolTip__toggle createLabbook"
@@ -78,6 +80,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     </div>
     <a
       className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+      data-selenium-id="LocalLabbookPanel"
       href="/projects/uitest/ui-test-remote"
       onClick={[Function]}
     >
@@ -152,12 +155,13 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip-Listing LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
         data-tooltip="loading"
       />
     </a>
     <a
       className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+      data-selenium-id="LocalLabbookPanel"
       href="/projects/uitest/ui-test-project"
       onClick={[Function]}
     >
@@ -235,12 +239,13 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip-Listing LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
         data-tooltip="loading"
       />
     </a>
     <a
       className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+      data-selenium-id="LocalLabbookPanel"
       href="/projects/uitest/test-tt"
       onClick={[Function]}
     >
@@ -315,12 +320,13 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip-Listing LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
         data-tooltip="loading"
       />
     </a>
     <a
       className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+      data-selenium-id="LocalLabbookPanel"
       href="/projects/uitest/new-project"
       onClick={[Function]}
     >
@@ -395,12 +401,13 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip-Listing LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
         data-tooltip="loading"
       />
     </a>
     <a
       className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+      data-selenium-id="LocalLabbookPanel"
       href="/projects/uitest/awful-intersections-demo"
       onClick={[Function]}
     >
@@ -477,32 +484,37 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
         </p>
       </div>
       <div
-        className="Tooltip-Listing LocalLabbookPanel__loading"
+        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
         data-tooltip="loading"
       />
     </a>
     <div
       className="LabbookPaginationLoader--hidden"
+      data-selenium-id="LabbookPaginationLoader"
     >
       <div />
     </div>
     <div
       className="LabbookPaginationLoader--hidden"
+      data-selenium-id="LabbookPaginationLoader"
     >
       <div />
     </div>
     <div
       className="LabbookPaginationLoader--hidden"
+      data-selenium-id="LabbookPaginationLoader"
     >
       <div />
     </div>
     <div
       className="LabbookPaginationLoader--hidden"
+      data-selenium-id="LabbookPaginationLoader"
     >
       <div />
     </div>
     <div
       className="LabbookPaginationLoader--hidden"
+      data-selenium-id="LabbookPaginationLoader"
     >
       <div />
     </div>

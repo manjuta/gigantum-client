@@ -1,3 +1,11 @@
+.fixed {
+  position: fixed;
+
+  &--important {
+    position: fixed !important;
+  }
+}
+
 .light {
   font-weight: 100;
 }

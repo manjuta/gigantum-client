@@ -3,6 +3,7 @@
 exports[`LocalDatasets Renders a snapshot 1`] = `
 <div
   className="Datasets__listing"
+  data-selenium-id="LocalDatasets"
 >
   <div
     className="grid"
@@ -45,6 +46,7 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
         </div>
         <div
           className="hidden createLabbook"
+          data-selenium-id="ToolTip"
         >
           <div
             className="ToolTip__toggle createLabbook"
@@ -78,26 +80,31 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
     </div>
     <div
       className="DatasetPaginationLoader--hidden"
+      data-selenium-id="datasetsPaginationLoader"
     >
       <div />
     </div>
     <div
       className="DatasetPaginationLoader--hidden"
+      data-selenium-id="datasetsPaginationLoader"
     >
       <div />
     </div>
     <div
       className="DatasetPaginationLoader--hidden"
+      data-selenium-id="datasetsPaginationLoader"
     >
       <div />
     </div>
     <div
       className="DatasetPaginationLoader--hidden"
+      data-selenium-id="datasetsPaginationLoader"
     >
       <div />
     </div>
     <div
       className="DatasetPaginationLoader--hidden"
+      data-selenium-id="datasetsPaginationLoader"
     >
       <div />
     </div>

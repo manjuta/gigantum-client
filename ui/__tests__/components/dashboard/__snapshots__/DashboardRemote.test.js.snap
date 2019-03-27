@@ -3,8 +3,11 @@
 exports[`DashboardRemote Renders a snapshot 1`] = `
 <div
   className="Labbooks"
+  data-selenium-id="Labbooks"
 >
-  <div />
+  <div
+    data-selenium-id="WizardModal"
+  />
   <div
     className="Labbooks__panel-bar"
   >
@@ -48,6 +51,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       />
       <div
         className="hidden cloudLocal"
+        data-selenium-id="ToolTip"
       >
         <div
           className="ToolTip__toggle cloudLocal"
@@ -93,6 +97,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
     </div>
     <div
       className="LabbookFilterBy column-4-span-3 padding--0"
+      data-selenium-id="LabbookFilterBy"
     >
       Filter by:
       <span
@@ -129,6 +134,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
     </div>
     <div
       className="LabbookSort column-4-span-3 padding--0"
+      data-selenium-id="LabbookSort"
     >
       Sort by:
       <span
@@ -187,12 +193,14 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
   </div>
   <div
     className="Labbooks__listing"
+    data-selenium-id="RemoteLabbooks"
   >
     <div
       className="grid"
     >
       <div
         className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="RemoteLabbookPanel"
       >
         <div
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
@@ -265,26 +273,31 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       </div>
       <div
         className="LabbookPaginationLoader--hidden"
+        data-selenium-id="LabbookPaginationLoader"
       >
         <div />
       </div>
       <div
         className="LabbookPaginationLoader--hidden"
+        data-selenium-id="LabbookPaginationLoader"
       >
         <div />
       </div>
       <div
         className="LabbookPaginationLoader--hidden"
+        data-selenium-id="LabbookPaginationLoader"
       >
         <div />
       </div>
       <div
         className="LabbookPaginationLoader--hidden"
+        data-selenium-id="LabbookPaginationLoader"
       >
         <div />
       </div>
       <div
         className="LabbookPaginationLoader--hidden"
+        data-selenium-id="LabbookPaginationLoader"
       >
         <div />
       </div>

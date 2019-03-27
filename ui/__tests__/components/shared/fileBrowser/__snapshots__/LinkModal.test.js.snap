@@ -3,13 +3,14 @@
 exports[`Test LinkModal 1`] = `
 <div
   className="Modal"
+  data-selenium-id="Modal"
 >
   <div
     className="Modal__cover"
     onClick={[Function]}
   />
   <div
-    className="Modal__content large"
+    className="Modal__content large-long"
     style={
       Object {
         "overflow": "hidden",
@@ -30,13 +31,18 @@ exports[`Test LinkModal 1`] = `
       </h4>
       <hr />
       <div
-        className="Modal__sub-container"
+        className="Modal__sub-container Modal__sub-container--nopadding"
       >
         <div
           className="LinkModal"
         >
           <div
+            className="LinkModal__info Tooltip-data"
+            data-tooltip="Linking a dataset will allow you to reference its files within the Project"
+          />
+          <div
             className="Loader"
+            data-selenium-id="Loader"
           />
         </div>
       </div>

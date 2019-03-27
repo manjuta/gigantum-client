@@ -77,6 +77,10 @@ const FooterUtils = {
               refetch();
             } else if (response.data.jobStatus.status === 'finished') {
               setMultiInfoMessage(id || response.data.jobStatus.id, message, true, null, [{ message: html }]);
+
+              document.getElementById('modal__cover').classList.add('hidden');
+              document.getElementById('loader').classList.add('hidden');
+
               if ((type === 'syncLabbook') || (type === 'publishLabbook') || (type === 'publishDataset') || (type === 'syncDataset')) {
                 successCall();
                 const section = type.indexOf('Dataset') > -1 ? 'dataset' : 'labbook';
@@ -135,6 +139,9 @@ const FooterUtils = {
               const method = JSON.parse(response.data.jobStatus.jobMetadata).method;
               let reportedFailureMessage = response.data.jobStatus.failureMessage;
               let errorMessage = response.data.jobStatus.failureMessage;
+
+              document.getElementById('modal__cover').classList.add('hidden');
+              document.getElementById('loader').classList.add('hidden');
               if (method === 'build_image') {
                 errorMessage = 'Project failed to build: Check for and remove invalid dependencies and try again.';
               }
