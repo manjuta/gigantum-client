@@ -611,10 +611,8 @@ class Repository(object):
             logger.info(f"Checking out branch {branch_name}...")
             self.git.checkout(branch_name=branch_name)
 
-            # TODO RB BVB needs to be a launched as a background job 
-            # Start a background job to index the activity.
-            ars = ActivityStore(self)
-            ars.index_activity()
+            # Index the activity on the labbook.
+            self.update_indexes()
             
             # Clear out checkout context
             if self._root_dir and os.path.exists(os.path.join(self._root_dir, ".gigantum", ".checkout")):
@@ -1017,6 +1015,8 @@ class Repository(object):
         Returns:
             None (updates the whoosh index)
         """
+        # TODO RB BVB needs to be a launched as a background job 
+        # Start a background job to index the activity.
         ars = ActivityStore(self)
         ars.index_activity()
 

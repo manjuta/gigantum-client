@@ -141,8 +141,7 @@ class ZipExporter(object):
                                    update_meta=update_meta)
 
             # Index the activity on the labbook.
-            ars = ActivityStore(repo) 
-            ars.index_activity()
+            repo.update_indexes()
 
             return cast(LabBook, repo)
 

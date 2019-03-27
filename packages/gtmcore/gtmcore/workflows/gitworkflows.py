@@ -124,6 +124,9 @@ class GitWorkflow(ABC):
         updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
                                                      override=override.value, pull_only=pull_only,
                                                      feedback_callback=feedback_callback)
+        # Index the activity on the labbook.
+        self.repository.update_indexes()
+
         return updates_cnt
 
     def reset(self, username: str):
@@ -154,6 +157,10 @@ class LabbookWorkflow(GitWorkflow):
                                       load_repository=inv_manager.load_labbook_from_directory,
                                       put_repository=inv_manager.put_labbook)
             logger.info(f"Imported remote Project {str(repo)} on branch {repo.active_branch}")
+
+            # Index the activity on the labbook.
+            repo.update_indexes()
+
             return cls(repo)
         except Exception as e:
             logger.error(e)

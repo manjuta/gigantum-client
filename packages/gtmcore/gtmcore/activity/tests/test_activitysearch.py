@@ -6,12 +6,12 @@ import mock
 from datetime import datetime
 
 from gtmcore.labbook import LabBook
-from gtmcore.inventory import loaders
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
-from gtmcore.activity import ActivitySearch, ActivityRecord, ActivityDetailRecord, ActivityType, ActivityDetailType, ActivityStore
+from gtmcore.activity import ActivityRecord, ActivityDetailRecord, ActivityType, ActivityDetailType, ActivityStore
+from gtmcore.workflows import LabbookWorkflow, DatasetWorkflow, MergeError, MergeOverride
+from gtmcore.activity.search import ActivitySearch
 from gtmcore.fixtures import (mock_config_with_activitystore, mock_config_lfs_disabled, mock_labbook_lfs_disabled, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo)
-from gtmcore.workflows import GitWorkflow
 
 
 def helper_create_labbook_change(labbook, cnt=0):
@@ -221,7 +221,7 @@ class TestActivitySearch():
         res = test_activitysearch.search("*","*")
         assert(len(res)==4)
 
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_index_fromremote(self, mock_labbook_lfs_disabled, mock_config_lfs_disabled):
         """Create. Make records. Push to remote.  Delete. Pull.
            and then verify that the whoosh index was rebuilt correctly."""
@@ -229,7 +229,7 @@ class TestActivitySearch():
         lb = mock_labbook_lfs_disabled[2]
 
         ## 1 - Make initial set of contributions to Labbook.
-        assert lb.active_branch == "gm.workspace-test"
+        assert lb.active_branch == "master"
         FileOperations.makedir(lb, relative_path='code/testy-tacked-dir', create_activity_record=True)
         FileOperations.makedir(lb, relative_path='input/input-dir', create_activity_record=True)
         FileOperations.makedir(lb, relative_path='output/output-dir', create_activity_record=True)
@@ -240,23 +240,22 @@ class TestActivitySearch():
         assert(len(res)==3)
 
         # push the labbook to remote`
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         # Now publish to remote (creating it in the process).
         wf.publish(username='test')
 
-        # grab the remote location
-        repo_location = lb.remote
-        lb_name = lb.name
+        # grab the remote
+        remote = wf.remote
 
-        # delete labbook and indexes
+        # delete indexes and root
         res = astore.asearch.delete()
         shutil.rmtree(lb.root_dir)
 
-        # get a from labbook
-        fr_lb = LabBook(mock_config_lfs_disabled[0])
-
         # now pull a remote
-        fr_lb = loaders.labbook_from_remote(repo_location, username="test", owner="test", labbook=fr_lb)
+        fr_wf = LabbookWorkflow.import_from_remote(remote_url=remote, username="test",
+                                                      config_file=mock_config_lfs_disabled[0])
+        fr_lb = fr_wf.repository
+
         # Count the whoosh records and make sure there are three
         astore = ActivityStore(fr_lb)
         res = astore.asearch.search("*","*")
@@ -270,13 +269,14 @@ class TestActivitySearch():
         res = astore.asearch.search("*","*")
         assert(len(res)==5)
 
-        # delete labbook and indexes
+        # delete indexes and root
         res = astore.asearch.delete()
         shutil.rmtree(fr_lb.root_dir)
 
         # get another from labbook
-        fr_lb = LabBook(mock_config_lfs_disabled[0])
-        fr_lb = loaders.labbook_from_remote(repo_location, username="test", owner="test", labbook=fr_lb)
+        fr_wf = LabbookWorkflow.import_from_remote(remote_url=remote, username="test",
+                                                      config_file=mock_config_lfs_disabled[0])
+        fr_lb = fr_wf.repository
 
         # should still be three -- no sync
         astore = ActivityStore(fr_lb)
@@ -293,29 +293,25 @@ class TestActivitySearch():
 
         # and sync to remote
         # push the labbook to remote`
-        wf = GitWorkflow(fr_lb)
+        fr_wf = LabbookWorkflow(fr_lb)
         # Now publish to remote (creating it in the process).
-        wf.sync(username='test')
+        fr_wf.sync(username='test')
 
-        # delete labbook and indexes
+        # delete indexes and root
         res = astore.asearch.delete()
         shutil.rmtree(fr_lb.root_dir)
 
         # get another from labbook
-        fr_lb = LabBook(mock_config_lfs_disabled[0])
-        fr_lb = loaders.labbook_from_remote(repo_location, username="test", owner="test", labbook=fr_lb)
+        fr_wf = LabbookWorkflow.import_from_remote(remote_url=remote, username="test",
+                                                      config_file=mock_config_lfs_disabled[0])
+        fr_lb = fr_wf.repository
 
         # should be five -- after sync
         astore = ActivityStore(fr_lb)
         res = astore.asearch.search("*","*")
         assert(len(res)==5)
 
-        # delete labbook and indexes
-        res = astore.asearch.delete()
-        shutil.rmtree(fr_lb.root_dir)
-
-
-    @mock.patch('gtmcore.workflows.core.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
+    @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_merge_fromremote(self, mock_labbook_lfs_disabled, mock_config_lfs_disabled):
         """Create (in LB1), push, pull (as LB2), modify, sync, pull (changes from LB2 to LB1)
             Check index merge.
@@ -324,7 +320,7 @@ class TestActivitySearch():
         lb = mock_labbook_lfs_disabled[2]
 
         ## 1 - Make initial set of contributions to Labbook.
-        assert lb.active_branch == "gm.workspace-test"
+        assert lb.active_branch == "master"
         FileOperations.makedir(lb, relative_path='code/testy-tacked-dir', create_activity_record=True)
         FileOperations.makedir(lb, relative_path='input/input-dir', create_activity_record=True)
         FileOperations.makedir(lb, relative_path='output/output-dir', create_activity_record=True)
@@ -335,18 +331,18 @@ class TestActivitySearch():
         assert(len(res)==3)
 
         # push the labbook to remote`
-        wf = GitWorkflow(lb)
+        wf = LabbookWorkflow(lb)
         # Now publish to remote (creating it in the process).
         wf.publish(username='test')
 
-        # grab the remote location
-        repo_location = lb.remote
-        lb_name = lb.name
+        # grab the remote
+        remote = wf.remote
 
-        # get afrom labbook
-        fr_lb = LabBook(mock_config_lfs_disabled[0])
-        fr_lb = loaders.labbook_from_remote(repo_location, username="other", owner="other", labbook=fr_lb)
-        assert fr_lb.active_branch == "gm.workspace-other"
+        # get another from labbook
+        fr_wf = LabbookWorkflow.import_from_remote(remote_url=wf.remote, username="other",
+                                                      config_file=mock_config_lfs_disabled[0])
+        fr_lb = fr_wf.repository
+        assert fr_lb.active_branch == "master"
 
         # Count the whoosh records and make sure there are three
         fr_astore = ActivityStore(fr_lb)
@@ -363,7 +359,7 @@ class TestActivitySearch():
 
         # and sync to remote
         # push the labbook to remote`
-        fr_wf = GitWorkflow(fr_lb)
+        fr_wf = LabbookWorkflow(fr_lb)
         # Now publish to remote (creating it in the process).
         fr_wf.sync(username='other')
 
@@ -381,7 +377,7 @@ class TestActivitySearch():
         lb = mock_labbook_lfs_disabled[2]
 
         ## 1 - Make initial set of contributions to Labbook.
-        assert lb.active_branch == "gm.workspace-test"
+        assert lb.active_branch == "master"
         FileOperations.makedir(lb, relative_path='code/testy-tacked-dir', create_activity_record=True)
         FileOperations.makedir(lb, relative_path='input/input-dir', create_activity_record=True)
         FileOperations.makedir(lb, relative_path='output/output-dir', create_activity_record=True)
@@ -406,7 +402,7 @@ class TestActivitySearch():
         astore.asearch.delete()
 
         # Checkout original branch -- this should update index
-        lb.checkout_branch("gm.workspace-test")
+        lb.checkout_branch("master")
 
         # make sure there are 3.  This is what's visible in this branch.
         res = astore.asearch.search("*","*")
@@ -415,7 +411,7 @@ class TestActivitySearch():
         # Checkout a different branch
         lb.checkout_branch("other-branch")
 
-        # make sure there are 5. This is a partial merge of other branch.
+        # make sure there are 5. This is a partial index merge of other branch.
         res = astore.asearch.search("*","*")
         assert(len(res)==5)
 

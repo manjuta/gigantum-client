@@ -184,8 +184,8 @@ class BranchManager(object):
         self.repository.checkout_branch(branch_name=branch_name)
         logger.info(f'Checked out branch {self.active_branch} in {str(self.repository)}')
 
-        # TODO RB BVB F needs to be a launched as a background job 
-        # The labbook is fully populated.  Start a background job to index the activity.
+        # TODO RB F BVB do as a background job 
+        # Index the activity on the labbook.
         ars = ActivityStore(self.repository)
         ars.index_activity()
 
