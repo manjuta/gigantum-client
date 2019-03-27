@@ -769,6 +769,7 @@ class BranchMenu extends Component {
             isDeprecated={props.isDeprecated}
             setBranchUptodate={this.props.setBranchUptodate}
             showPullOnly={showPullOnly}
+            labbookName={props.section.name}
           />
           {
           state.publishModalVisible &&
