@@ -184,7 +184,7 @@ class ActionsMenu extends Component {
 
                 const failureCall = (errorMessage) => {
                   this.props.setSyncingState(false);
-                  if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
+                  if (errorMessage.indexOf('Merge conflict') > -1) {
                     self._toggleSyncModal();
                   }
                 };

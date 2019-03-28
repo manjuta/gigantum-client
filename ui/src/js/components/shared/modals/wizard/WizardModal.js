@@ -193,7 +193,11 @@ export default class WizardModal extends React.Component {
 
     this.setState({
       createLabbookButtonState: 'loading',
+       modal_visible: false,
     });
+
+    document.getElementById('modal__cover').classList.remove('hidden');
+    document.getElementById('loader').classList.remove('hidden');
 
     CreateLabbookMutation(
       name,
@@ -229,6 +233,8 @@ export default class WizardModal extends React.Component {
               createLabbookButtonState: '',
             }, () => {
               self.props.history.push(`../projects/${owner}/${name}`);
+              document.getElementById('modal__cover').classList.add('hidden');
+              document.getElementById('loader').classList.add('hidden');
             });
           }, 2000);
         }

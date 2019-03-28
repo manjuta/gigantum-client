@@ -201,7 +201,7 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
             repo_id = mgr.get_repository_id(owner, labbook_name)
             response = requests.delete(f"https://{index_service}/index/{repo_id}",
                                        headers={"Authorization": f"Bearer {access_token}",
-                                                "Identity": id_token}, timeout=10)
+                                                "Identity": id_token}, timeout=30)
 
             if response.status_code != 204:
                 logger.error(f"Failed to remove project from cloud index. "

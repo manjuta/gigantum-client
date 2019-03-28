@@ -525,7 +525,7 @@ class TestWorkflowsBranching(object):
         """
         r = client.execute(merge_q)
         assert 'errors' in r
-        assert 'Cannot merge' in r['errors'][0]['message']
+        assert 'Merge conflict' in r['errors'][0]['message']
 
     def test_conflicted_merge_from_force_success(self, mock_create_labbooks):
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]

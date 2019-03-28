@@ -9,6 +9,7 @@ import ChunkUploader from 'JS/utils/ChunkUploader';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Tooltip from 'Components/common/Tooltip';
 import Modal from 'Components/common/Modal';
+import Loader from 'Components/common/Loader';
 // store
 import store from 'JS/redux/store';
 import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
@@ -141,6 +142,8 @@ export default class ImportModule extends Component {
       };
     }
 
+    this.setState({ isImporting: false });
+
     window.addEventListener('drop', this._drop);
     window.addEventListener('dragover', this._dragover);
     window.addEventListener('dragleave', this._dragleave);
@@ -167,9 +170,14 @@ export default class ImportModule extends Component {
   *  sets state of app for importing
   *  @return {}
   */
- _importingState = () => {
-  this.setState({ isImporting: true });
-}
+  _importingState = () => {
+    this.setState({
+      isImporting: true,
+      showImportModal: false,
+    });
+    document.getElementById('modal__cover').classList.remove('hidden');
+    document.getElementById('loader').classList.remove('hidden');
+  }
 
   /**
   *  @param {object}
@@ -686,7 +694,9 @@ export default class ImportModule extends Component {
         className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
         key="AddLabbookCollaboratorPayload">
         <ImportMain self={this} />
+
         <div className={loadingMaskCSS} />
+
       </div>
 
     </Fragment>);
@@ -697,33 +707,37 @@ const ImportMain = ({ self }) => {
 
   let owner = '',
       labbookName = '';
+  const { props, state } = self;
   const importCSS = classNames({
     'btn--import': true,
-    'btn--expand': self.state.importTransition,
-    'btn--collapse': !self.state.importTransition && self.state.importTransition !== null,
+    'btn--expand': state.importTransition,
+    'btn--collapse': !state.importTransition && state.importTransition !== null,
+  }),
+  loaderCSS = classNames({
+     Import__loader: state.isImporting,
+     hidden: !state.isImporting,
   });
 
-  if (self.state.readyLabbook) {
-     owner = self.state.readyLabbook.owner
-     labbookName = self.state.readyLabbook.labbookName;
+  if (state.readyLabbook) {
+     owner = state.readyLabbook.owner
+     labbookName = state.readyLabbook.labbookName;
   }
 
   return (<div className="Import__labbook-main">
     {
-      self.state.showImportModal &&
+      state.showImportModal &&
       <Modal
         header="Import Project"
         handleClose={() => self._closeImportModal()}
         size="large"
-        renderContent={() => (<Fragment>
-            <div className="ImportModal">
+        renderContent={() => (<div className="ImportModal">
               <p>Import a Project by either pasting a URL or drag & dropping below</p>
               <input
                 className="Import__input"
                 type="text"
                 placeholder="Paste Project URL"
                 onChange={evt => self._updateRemoteUrl(evt)}
-                defaultValue={self.state.remoteUrl}
+                defaultValue={state.remoteUrl}
               />
 
               <div
@@ -733,8 +747,8 @@ const ImportMain = ({ self }) => {
                 type="file" onDragEnd={evt => self._dragendHandler(evt)}
                 onDrop={evt => self._dropHandler(evt)} onDragOver={evt => self._dragoverHandler(evt)}>
                 {
-                  self.state.readyLabbook && self.state.files[0] ?
-                  <div className="Import__ReadyLabbook">
+                 (state.readyLabbook && state.files[0])
+                  ? <div className="Import__ReadyLabbook">
                     <div>Select Import to import the following Project</div>
                     <hr/>
                     <div>{`Project Owner: ${owner}`}</div>
@@ -745,11 +759,12 @@ const ImportMain = ({ self }) => {
                   </div>
                 }
               </div>
+
               <div className="Import__buttonContainer">
                 <button
                   onClick={() => self._closeImportModal()}
                   className="Btn--flat">
-                Cancel
+                  Cancel
                 </button>
                 <button
                   onClick={() => { self.importLabbook(); }}
@@ -757,15 +772,14 @@ const ImportMain = ({ self }) => {
                   Import
                 </button>
               </div>
-            </div>
-            </Fragment>)
+            </div>)
         }
       />
     }
 
     <div className="Import__labbook-header">
       <div className="Import__labbook-icon">
-        <div className="Import__labbook-add-icon" />
+        <div className="Import__labbook-add-icon"></div>
       </div>
       <div className="Import__labbook-title">
         <h2 className="Import__h2 Import__h2--azure">Add Project</h2>

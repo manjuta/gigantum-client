@@ -5,7 +5,7 @@
     position: relative;
 
     cursor: pointer;
-
+    &--visible:before,
     &:hover::before{
       position: absolute;
       top: calc(100% - 0px);
@@ -27,6 +27,7 @@
             transform: translate(-50%, 0);
         }
     }
+    &--visible::after,
     &:hover::after{
       z-index: index($elements, popup);
       font-family: 'NunitoSans';
@@ -104,5 +105,13 @@
         right: 10px;
         top: calc(50% - 7px);
         cursor: pointer;
+    }
+
+    &--visible::after,
+    &--visible:hover::after {
+      width: 140px !important;
+      padding: 5px !important;
+      left: 50% !important;
+      transform: translate(-50%, 0)
     }
   }

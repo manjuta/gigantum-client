@@ -344,8 +344,7 @@ class Dataset extends Component {
                         this.props.commitsBehind !== 0 &&
                         <div
                           className="DatasetBrowser__commits Tooltip-data"
-                          data-tooltip={`This dataset is ${this.props.commitsBehind} commits behind. To update this dataset unlink and relink it.`}
-                        >
+                          data-tooltip={`This dataset is ${this.props.commitsBehind} commits behind. To update this dataset unlink and relink it.`}>
                           <div className="DatasetBrowser__commits--commits-behind">{this.props.commitsBehind }</div>
                         </div>
                       }
@@ -428,19 +427,9 @@ class Dataset extends Component {
                                 </File>
                             );
                           } else if (children[file]) {
-                            return (
-                              <div
-                                key={file + index}
-                              />
-                              );
+                            return (<div key={file + index}></div>);
                           }
-                          return (
-                            <div
-                                key={file + index}
-                            >
-                              Loading
-                            </div>
-                            );
+                          return (<div key={file + index}> Loading </div>);
                       })
                   }
                 </div>

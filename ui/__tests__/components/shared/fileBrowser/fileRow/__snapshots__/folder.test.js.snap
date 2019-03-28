@@ -3,6 +3,7 @@
 exports[`File component File Snapshot 1`] = `
 <div
   className="Folder"
+  data-selenium-id="Folder"
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
   onMouseOut={[Function]}
@@ -76,6 +77,7 @@ exports[`File component File Snapshot 1`] = `
     >
       <div
         className="ActionsMenu"
+        data-selenium-id="ActionsMenu"
       >
         <div
           className="ActionsMenu__item Tooltip-data Tooltip-data--small ActionsMenu__item--AddSubfolder"
