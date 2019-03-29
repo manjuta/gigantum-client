@@ -191,6 +191,15 @@ class Activity extends Component {
       behavior: 'smooth',
     });
   }
+  /**
+   * @param {}
+   * sets hovered rollback position
+   * @return {}
+   */
+  @boundMethod
+  _setHoveredRollback(position) {
+    this.setState({ hoveredRollback : position });
+  }
 
   /**
    * @param {}
@@ -808,6 +817,7 @@ class Activity extends Component {
                                 toggleSubmenu={this._toggleSubmenu}
                                 toggleRollbackMenu={this._toggleRollbackMenu}
                                 isLocked={props.isLocked}
+                                setHoveredRollback={this._setHoveredRollback}
                               />);
                           })
                         }
