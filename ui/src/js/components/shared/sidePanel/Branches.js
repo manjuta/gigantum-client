@@ -468,11 +468,11 @@ class Branches extends Component {
             'Branches__Modal-cover--coverall': state.action,
           }),
           bottomIndexSelectorCSS = classNames({
-            'Btn Btn--loadMore Btn--loadMore--down': true,
+            'Btn Btn__loadMore Btn__loadMore--down': true,
             hidden: props.branches.length - 1 <= 5,
           }),
           topIndexSelectorCSS = classNames({
-            'Btn Btn--loadMore Btn--loadMore--up': true,
+            'Btn Btn__loadMore Btn__loadMore--up': true,
              hidden: props.branches.length - 1 <= 5,
           });
     const filteredBranches = props.branches.filter(branch => branch.branchName !== props.activeBranch.branchName).slice(state.currentIndex, state.currentIndex + 5);
@@ -481,10 +481,8 @@ class Branches extends Component {
     const activeCommitsText = `${props.activeBranch.commitsBehind ? `${props.activeBranch.commitsBehind} Commits Behind, ` : ''} ${props.activeBranch.commitsAhead ? `${props.activeBranch.commitsAhead} Commits Ahead` : ''}`;
     return (
       <div>
-        {
-          state.forceMergeModalVisible &&
-
-          <ForceMerge
+        { state.forceMergeModalVisible
+          && <ForceMerge
             toggleModal={this._toggleMergeModal}
             sectionType={props.sectionType}
             merge={this._mergeBranch}
@@ -498,14 +496,11 @@ class Branches extends Component {
             isDeprecated={props.isDeprecated}
             renderContent={() => <div className="Branches">
                 {
-                  (state.mergeModalVisible || state.deleteModalVisible || state.resetModalVisible || state.action) &&
-                  <div className={modalCoverCSS}>
-                    {
-                      state.action &&
-                      <div>
-                        {`${state.action}...`}
-                      </div>
-                    }
+                  (state.mergeModalVisible || state.deleteModalVisible || state.resetModalVisible || state.action)
+                  && <div className={modalCoverCSS}>
+                      { state.action &&
+                        <div>{`${state.action}...`}</div>
+                      }
                   </div>
                 }
                 <div className="Branches__header">
@@ -521,110 +516,89 @@ class Branches extends Component {
                          !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) && (props.activeBranch.commitsAhead !== null) &&
                         <div
                           className="Branches__commits Tooltip-data"
-                          data-tooltip={activeCommitsText}
-                        >
-
-                          {
-                           (props.activeBranch.commitsBehind !== 0) &&
-                            <div className="Branches__commits--commits-behind">{ props.activeBranch.commitsBehind }</div>
+                          data-tooltip={activeCommitsText}>
+                          { (props.activeBranch.commitsBehind !== 0)
+                           && <div className="Branches__commits--commits-behind">
+                                { props.activeBranch.commitsBehind }
+                              </div>
                           }
-                          {
-                            (props.activeBranch.commitsAhead !== 0) &&
-                            <div className="Branches__commits--commits-ahead">{ props.activeBranch.commitsAhead }</div>
+                          { (props.activeBranch.commitsAhead !== 0)
+                            && <div className="Branches__commits--commits-ahead">
+                                { props.activeBranch.commitsAhead }
+                            </div>
                           }
                         </div>
                       }
                       <div
                         className="Branches__status Tooltip-data Tooltip-data--small"
-                        data-tooltip={statusText}
-                      >
-                        {
-                          props.activeBranch.isLocal ?
-                          <div className="Branches__status--local"></div>
-                          :
-                          <div></div>
+                        data-tooltip={statusText}>
+                        { props.activeBranch.isLocal
+                          ? <div className="Branches__status--local"></div>
+                          : <div></div>
                         }
-                        {
-                          props.activeBranch.isRemote ?
-                          <div className="Branches__status--remote"></div>
-                          :
-                          <div></div>
+                        { props.activeBranch.isRemote
+                          ? <div className="Branches__status--remote"></div>
+                          : <div></div>
                         }
                         </div>
                     </div>
                   </div>
                 </div>
-                {
-                  this._renderActions(props.activeBranch)
-                }
+                { this._renderActions(props.activeBranch) }
               </div>
-              {
-                (filteredBranches.length !== 0) &&
-                <div className="Branches__label">Other Branches:</div>
+              { (filteredBranches.length !== 0)
+                && <div className="Branches__label">Other Branches:</div>
               }
               <button
                 className={topIndexSelectorCSS}
                 onClick={() => this._setIndex()}
                 disabled={state.currentIndex === 0}
               />
-              {
-                filteredBranches.map((branch) => {
-                  const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
-                  const deleteModalVisible = this.state.deleteModalVisible === branch.branchName;
+              { filteredBranches.map((branch) => {
+                  const mergeModalVisible = (state.mergeModalVisible === branch.branchName);
+                  const deleteModalVisible = (state.deleteModalVisible === branch.branchName);
                   const branchUpToDate = branch.commitsAhead === 0 && branch.commitsBehind === 0;
                   const branchStatusText = branch.isLocal ? branch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only',
-                  branchContainerCSS = classNames({
-                    Branches__branch: true,
-                    'Branches__branch--selected': (branch.branchName === state.mergeModalVisible) || (branch.branchName === state.deleteModalVisible),
-                    'Branches__branch--active': ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible),
-                  }),
-                  branchBaseSectionCSS = classNames({
-                    'Branches__base-section': true,
-                  });
-                  const commitsText = `${branch.commitsBehind ? `${branch.commitsBehind} Commits Behind, ` : ''} ${branch.commitsAhead ? `${branch.commitsAhead} Commits Ahead` : ''}`;
+                    branchContainerCSS = classNames({
+                      Branches__branch: true,
+                      'Branches__branch--selected': (branch.branchName === state.mergeModalVisible) || (branch.branchName === state.deleteModalVisible),
+                      'Branches__branch--active': ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible),
+                    }),
+                    branchBaseSectionCSS = classNames({
+                      'Branches__base-section': true,
+                    });
+                    const commitsText = `${branch.commitsBehind ? `${branch.commitsBehind} Commits Behind, ` : ''} ${branch.commitsAhead ? `${branch.commitsAhead} Commits Ahead` : ''}`;
                   return (
                     <div
                       key={branch.branchName}
                       className={branchContainerCSS}
                       onMouseEnter={evt => this._selectBranchname(evt, branch.branchName)}
-                      onMouseLeave={evt => this._selectBranchname(evt, null)}
-                    >
+                      onMouseLeave={evt => this._selectBranchname(evt, null)}>
                       <div className={branchBaseSectionCSS}>
                         <div className="Branches__branchname-container">
                           <div className="Branches__branchname">{branch.branchName}</div>
                           <div className="Branches__details">
-                            {
-                              !branchUpToDate && (branch.commitsAhead !== undefined) && (branch.commitsAhead !== null) &&
-                              <div
+                            { !branchUpToDate && (branch.commitsAhead !== undefined) && (branch.commitsAhead !== null) && <div
                                 className="Branches__commits Tooltip-data"
-                                data-tooltip={commitsText}
-                              >
-                                {
-                                  (branch.commitsBehind !== 0) &&
-                                  <div className="Branches__commits--commits-behind">{ branch.commitsBehind }</div>
+                                data-tooltip={commitsText}>
+                                { (branch.commitsBehind !== 0)
+                                  && <div className="Branches__commits--commits-behind">{ branch.commitsBehind }</div>
                                 }
-                                {
-                                  (branch.commitsAhead !== 0) &&
-                                  <div className="Branches__commits--commits-ahead">{ branch.commitsAhead }</div>
+                                { (branch.commitsAhead !== 0)
+                                  && <div className="Branches__commits--commits-ahead">{ branch.commitsAhead }</div>
                                 }
                               </div>
                             }
                             <div
                               className="Branches__status Tooltip-data Tooltip-data--small"
-                              data-tooltip={branchStatusText}
-
-                            >
-                            {
-                              branch.isLocal ?
-                              <div className="Branches__status--local"></div>
-                              :
-                              <div></div>
+                              data-tooltip={branchStatusText}>
+                            { branch.isLocal
+                              ? <div className="Branches__status--local"></div>
+                              : <div></div>
                             }
-                            {
-                              branch.isRemote ?
-                              <div className="Branches__status--remote"></div>
-                              :
-                              <div></div>
+                            { branch.isRemote
+                              ? <div className="Branches__status--remote"></div>
+                              : <div></div>
                             }
                             </div>
                           </div>
@@ -645,7 +619,7 @@ class Branches extends Component {
               />
             </div>
           }
-           />
+        />
       }
       </div>
     );

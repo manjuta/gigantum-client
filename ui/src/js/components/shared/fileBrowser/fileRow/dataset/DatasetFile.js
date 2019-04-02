@@ -63,27 +63,28 @@ class File extends Component {
   }
 
   render() {
-    const { node } = this.props.fileData.edge;
-    const { index } = this.props.fileData;
-    const fileName = this.props.filename;
+    const { props, state } = this;
+    const { node } = props.fileData.edge;
+    const { index } = props.fileData;
+    const fileName = props.filename;
     const fileRowCSS = classNames({
             File__row: true,
-            'File__row--hover': this.state.hover,
-            'File__row--background': this.props.isDragging,
+            'File__row--hover': state.hover,
+            'File__row--background': props.isDragging,
           }),
           buttonCSS = classNames({
             'Btn Btn--round': true,
-            'Btn--uncheck': !this.state.isSelected,
-            'Btn--check': this.state.isSelected,
+            Btn__uncheck: !state.isSelected,
+            Btn__check: state.isSelected,
           }),
           textIconsCSS = classNames({
             'File__cell File__cell--name': true,
-            hidden: this.state.renameEditMode,
+            hidden: state.renameEditMode,
           }),
           paddingLeft = 40 * index,
           rowStyle = { paddingLeft: `${paddingLeft}px` };
     return (<div
-      style={this.props.style}
+      style={props.style}
       className="File">
 
              <div
@@ -118,14 +119,13 @@ class File extends Component {
 
                 <div className="File__cell File__cell--menu">
                   <ActionsMenu
-                    edge={this.props.fileData.edge}
-                    mutationData={this.props.mutationData}
-                    mutations={this.props.mutations}
+                    edge={props.fileData.edge}
+                    mutationData={props.mutationData}
+                    mutations={props.mutations}
                     renameEditMode={ this._renameEditMode }
-                    isDownloading={this.props.isDownloading}
+                    isDownloading={props.isDownloading}
                   />
                 </div>
-
             </div>
         </div>);
   }

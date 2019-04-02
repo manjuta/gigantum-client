@@ -2,9 +2,10 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import uuidv4 from 'uuid/v4';
-// utilities
-import JobStatus from 'JS/utils/JobStatus';
-import ChunkUploader from 'JS/utils/ChunkUploader';
+// config
+import config from 'JS/config';
+// queries
+import UserIdentity from 'JS/Auth/UserIdentity';
 // components
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Tooltip from 'Components/common/Tooltip';
@@ -13,85 +14,19 @@ import Loader from 'Components/common/Loader';
 // store
 import store from 'JS/redux/store';
 import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
-// queries
-import UserIdentity from 'JS/Auth/UserIdentity';
 // mutations
+import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
-// config
-import config from 'JS/config';
+// utilities
+import JobStatus from 'JS/utils/JobStatus';
+import ChunkUploader from 'JS/utils/ChunkUploader';
+import ImportUtils from './ImportUtils';
 // assets
 import './ImportModule.scss';
 
 let counter = 0;
 const dropZoneId = uuidv4();
-
-/*
- @param {object} workerData
- uses redux to dispatch file upload to the footer
-*/
-const dispatchLoadingProgress = (wokerData) => {
-  let bytesUploaded = (wokerData.chunkSize * (wokerData.chunkIndex + 1)) / 1000;
-  const totalBytes = wokerData.fileSizeKb;
-  bytesUploaded = bytesUploaded < totalBytes
-    ? bytesUploaded
-    : totalBytes;
-  const totalBytesString = config.humanFileSize(totalBytes);
-  const bytesUploadedString = config.humanFileSize(bytesUploaded);
-
-  store.dispatch({
-    type: 'UPLOAD_MESSAGE_UPDATE',
-    payload: {
-      id: '',
-      uploadMessage: `${bytesUploadedString} of ${totalBytesString} uploaded`,
-      totalBytes,
-      percentage: (Math.floor((bytesUploaded / totalBytes) * 100) <= 100)
-        ? Math.floor((bytesUploaded / totalBytes) * 100)
-        : 100,
-    },
-  });
-
-  if (document.getElementById('footerProgressBar')) {
-    const width = Math.floor((bytesUploaded / totalBytes) * 100);
-    document.getElementById('footerProgressBar').style.width = `${width}%`;
-  }
-};
-
-/*
- @param {}
- uses redux to dispatch file upload failed status to the footer
-*/
-const dispatchFailedStatus = () => {
-  store.dispatch({
-    type: 'UPLOAD_MESSAGE_UPDATE',
-    payload: {
-      uploadMessage: 'Import failed',
-      id: '',
-      percentage: 0,
-      uploadError: true,
-    },
-  });
-};
-
-/*
- @param {string} filePath
-  gets new labbook name and url route
- @return
-*/
-const getRoute = (filepath) => {
-  const filename = filepath.split('/')[filepath.split('/').length - 1];
-  return filename.split('_')[0];
-};
-/*
- @param {string} filePath
- dispatched upload success message and passes labbookName/route to the footer
-*/
-const dispatchFinishedStatus = (filepath, history, buildImage) => {
-  const route = getRoute(filepath);
-  history.push(`/projects/${localStorage.getItem('username')}/${route}`);
-  buildImage(route, localStorage.getItem('username'), uuidv4());
-  setUploadMessageRemove('', uuidv4(), 0);
-};
 
 export default class ImportModule extends Component {
   constructor(props) {
@@ -290,8 +225,8 @@ export default class ImportModule extends Component {
                 filename: file.name,
               },
             ],
-            readyLabbook: {
-              labbookName: self._getFilename(file.name),
+            ready: {
+              name: self._getFilename(file.name),
               owner: localStorage.getItem('username'),
               method: 'local',
             },
@@ -332,7 +267,7 @@ export default class ImportModule extends Component {
     evt.dataTransfer.effectAllowed = 'none';
     evt.dataTransfer.dropEffect = 'none';
     this._getBlob(dataTransfer);
-
+    console.log(evt, dataTransfer)
     return false;
   }
 
@@ -371,6 +306,7 @@ export default class ImportModule extends Component {
   *   trigger file upload
   */
   _fileUpload = () => { // this code is going to be moved to the footer to complete the progress bar
+    const { props } = this;
     const self = this;
 
     this._importingState();
@@ -381,76 +317,79 @@ export default class ImportModule extends Component {
       filepath,
       username: localStorage.getItem('username'),
       accessToken: localStorage.getItem('access_token'),
+      type: props.section,
     };
 
     // dispatch loading progress
     store.dispatch({
       type: 'UPLOAD_MESSAGE_SETTER',
       payload: {
-        uploadMessage: 'Prepparing Import ...',
+        uploadMessage: 'Preparing Import ...',
         totalBytes: this.state.files[0].file.size / 1000,
         percentage: 0,
         id: '',
       },
     });
 
-    const postMessage = (wokerData) => {
-      if (wokerData.importLabbook) {
-        store.dispatch({
-          type: 'UPLOAD_MESSAGE_UPDATE',
-          payload: {
-            uploadMessage: 'Upload Complete',
-            percentage: 100,
-            id: '',
-          },
-        });
-
-        const importLabbook = wokerData.importLabbook;
-        JobStatus.getJobStatus(importLabbook.importJobKey).then((response) => {
+    const postMessage = (workerData) => {
+      if (workerData) {
+        const importObject = (props.section === 'labbook') ? workerData.importLabbook : workerData.importDataset
+        if (importObject) {
           store.dispatch({
             type: 'UPLOAD_MESSAGE_UPDATE',
             payload: {
-              uploadMessage: 'Unzipping Project',
+              uploadMessage: 'Upload Complete',
               percentage: 100,
               id: '',
             },
           });
 
-          if (response.jobStatus.status === 'finished') {
-            self._clearState();
-            dispatchFinishedStatus(response.jobStatus.result, self.props.history, self._buildImage);
-          } else if (response.jobStatus.status === 'failed') {
-            dispatchFailedStatus();
+          JobStatus.getJobStatus(importObject.importJobKey).then((response) => {
+            store.dispatch({
+              type: 'UPLOAD_MESSAGE_UPDATE',
+              payload: {
+                uploadMessage: 'Unzipping Project',
+                percentage: 100,
+                id: '',
+              },
+            });
+            console.log(response.jobStatus.status)
+            if (response.jobStatus.status === 'finished') {
+              self._clearState();
+              ImportUtils.dispatchFinishedStatus(response.jobStatus.result, self.props, self._buildImage);
+            } else if (response.jobStatus.status === 'failed') {
+              ImportUtils.dispatchFailedStatus();
 
-            self._clearState();
-          }
-        }).catch((error) => {
-          console.log(error);
+              self._clearState();
+            }
+          }).catch((error) => {
+            console.log(error);
 
+            store.dispatch({
+              type: 'UPLOAD_MESSAGE_UPDATE',
+              payload: {
+                uploadMessage: 'Import failed',
+                uploadError: true,
+                id: '',
+                percentage: 0,
+              },
+            });
+            self._clearState();
+          });
+        } else if (workerData.chunkSize) {
+          ImportUtils.dispatchLoadingProgress(workerData);
+        } else {
           store.dispatch({
             type: 'UPLOAD_MESSAGE_UPDATE',
             payload: {
-              uploadMessage: 'Import failed',
+              uploadMessage: workerData[0].message,
               uploadError: true,
               id: '',
               percentage: 0,
             },
           });
           self._clearState();
-        });
-      } else if (wokerData.chunkSize) {
-        dispatchLoadingProgress(wokerData);
-      } else {
-        store.dispatch({
-          type: 'UPLOAD_MESSAGE_UPDATE',
-          payload: {
-            uploadMessage: wokerData[0].message,
-            uploadError: true,
-            id: '',
-            percentage: 0,
-          },
-        });
-        self._clearState();
+        }
       }
     };
 
@@ -547,12 +486,12 @@ export default class ImportModule extends Component {
   */
   _updateRemoteUrl(evt) {
     const newValue = evt.target.value;
-    const labbookName = newValue.split('/')[newValue.split('/').length - 1];
+    const name = newValue.split('/')[newValue.split('/').length - 1];
     const owner = newValue.split('/')[newValue.split('/').length - 2];
-    if (newValue.indexOf('gigantum.com/') > -1 && labbookName && owner) {
+    if (newValue.indexOf('gigantum.com/') > -1 && name && owner) {
       this.setState({
-        readyLabbook: {
-          labbookName,
+        ready: {
+          name,
           owner,
           method: 'remote',
         },
@@ -566,12 +505,13 @@ export default class ImportModule extends Component {
   *  imports labbook from remote url, builds the image, and redirects to imported labbook
   *  @return {}
   */
-  importLabbook = (evt) => {
-    if (!this.state.files[0]) {
+  _import = (evt) => {
+    const { props, state } = this;
+    if (!state.files[0]) {
       const id = uuidv4(),
-        labbookName = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 1],
-        owner = this.state.remoteURL.split('/')[this.state.remoteURL.split('/').length - 2],
-        remote = `https://repo.${config.domain}/${owner}/${labbookName}.git`;
+        name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1],
+        owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2],
+        remote = `https://repo.${config.domain}/${owner}/${name}.git`;
 
       const self = this;
 
@@ -590,20 +530,23 @@ export default class ImportModule extends Component {
                   error: false,
                 },
               });
-
-              self._importRemoteProject(owner, labbookName, remote, id);
+              if (props.section === 'labbook') {
+                self._importRemoteProject(owner, name, remote, id);
+              } else {
+                self._importRemoteDataset(owner, name, remote, id);
+              }
             } else {
-              this.props.auth.renewToken(true, () => {
+              props.auth.renewToken(true, () => {
                 this.setState({ showLoginPrompt: true });
               }, () => {
-                this.importLabbook();
+                this._import();
               });
             }
           }
         } else {
           this.setState({ showLoginPrompt: true });
         }
-    });
+      });
     } else {
       this._fileUpload();
     }
@@ -620,7 +563,7 @@ export default class ImportModule extends Component {
   *  trigers ImportRemoteLabbookMutation
   *  @return {}
   */
-  _importRemoteProject(owner, labbookName, remote, id) {
+  _importRemoteProject(owner, name, remote, id) {
     const self = this;
     const sucessCall = () => {
       this._clearState();
@@ -628,15 +571,15 @@ export default class ImportModule extends Component {
         type: 'MULTIPART_INFO_MESSAGE',
         payload: {
           id,
-          message: `Successfully imported remote Project ${labbookName}`,
+          message: `Successfully imported remote Project ${name}`,
           isLast: true,
           error: false,
         },
       });
 
-      self._buildImage(labbookName, owner, id);
+      self._buildImage(name, owner, id);
 
-      self.props.history.replace(`/projects/${owner}/${labbookName}`);
+      self.props.history.replace(`/projects/${owner}/${name}`);
     };
 
     const failureCall = (error) => {
@@ -652,9 +595,47 @@ export default class ImportModule extends Component {
         },
       });
     };
-    ImportRemoteLabbookMutation(owner, labbookName, remote, sucessCall, failureCall, (response, error) => {
+    ImportRemoteLabbookMutation(owner, name, remote, sucessCall, failureCall, (response, error) => {
       if (error) {
         failurecall(error);
+      }
+    });
+  }
+
+
+  /**
+  *  @param {String, String, String, String}
+  *  trigers ImportRemoteDatasetMutation
+  *  @return {}
+  */
+  _importRemoteDataset(owner, name, remote, id) {
+    const self = this;
+
+    ImportRemoteDatasetMutation(owner, name, remote, (response, error) => {
+
+      this._clearState();
+      if (error) {
+        console.error(error);
+        store.dispatch({
+          type: 'MULTIPART_INFO_MESSAGE',
+          payload: {
+            id,
+            message: 'ERROR: Could not import remote Dataset',
+            messageBody: error,
+            error: true,
+          },
+        });
+      } else if (response) {
+        store.dispatch({
+          type: 'MULTIPART_INFO_MESSAGE',
+          payload: {
+            id,
+            message: `Successfully imported remote Dataset ${name}`,
+            isLast: true,
+            error: false,
+          },
+        });
+        self.props.history.replace(`/datasets/${response.importRemoteDataset.newDatasetEdge.node.owner}/${name}`);
       }
     });
   }
@@ -664,8 +645,9 @@ export default class ImportModule extends Component {
   *  trigers §
   *  @return {}
   */
-  _buildImage(labbookName, owner, id) {
-    BuildImageMutation(owner, labbookName, false, (response, error) => {
+  _buildImage(name, owner, id) {
+    console.log(owner, name)
+    BuildImageMutation(owner, name, false, (response, error) => {
       if (error) {
         console.error(error);
 
@@ -673,7 +655,7 @@ export default class ImportModule extends Component {
           type: 'MULTIPART_INFO_MESSAGE',
           payload: {
             id,
-            message: `ERROR: Failed to build ${labbookName}`,
+            message: `ERROR: Failed to build ${name}`,
             messsagesList: error,
             error: true,
           },
@@ -683,59 +665,77 @@ export default class ImportModule extends Component {
   }
 
   render() {
+    const { props, state } = this;
     const loadingMaskCSS = classNames({
       'ImportModule__loading-mask': this.state.isImporting,
       hidden: !this.state.isImporting,
     });
 
-    return (<Fragment>
-
+    return (
       <div
         className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
         key="AddLabbookCollaboratorPayload">
-        <ImportMain self={this} />
 
+        <ImportModal self={this} />
+
+        <div className="Import__header">
+          <div className={`Import__icon Import__icon--${props.section}`}>
+            <div className="Import__add-icon"></div>
+          </div>
+          <div className="Import__title">
+            <h2 className="Import__h2 Import__h2--azure">{props.title}</h2>
+          </div>
+        </div>
+
+        <div
+          className="btn--import"
+          onClick={(evt) => { this._showModal(evt); }}>
+          Create New
+        </div>
+
+        <div
+          className="btn--import"
+          onClick={(evt) => { this.setState({ showImportModal: true }); }}>
+          Import Existing
+        </div>
+
+        <Tooltip section="createLabbook" />
         <div className={loadingMaskCSS} />
-
-      </div>
-
-    </Fragment>);
+      </div>);
   }
 }
 
-const ImportMain = ({ self }) => {
+const ImportModal = ({ self }) => {
 
   let owner = '',
-      labbookName = '';
+      name = '';
   const { props, state } = self;
   const importCSS = classNames({
     'btn--import': true,
     'btn--expand': state.importTransition,
     'btn--collapse': !state.importTransition && state.importTransition !== null,
-  }),
-  loaderCSS = classNames({
-     Import__loader: state.isImporting,
-     hidden: !state.isImporting,
   });
 
-  if (state.readyLabbook) {
-     owner = state.readyLabbook.owner
-     labbookName = state.readyLabbook.labbookName;
+  const section = props.section === 'labbook' ? 'Project' : 'Dataset';
+
+  if (state.ready) {
+     owner = state.ready.owner;
+     name = state.ready.name;
   }
 
-  return (<div className="Import__labbook-main">
+  return (<div className="Import__main">
     {
       state.showImportModal &&
       <Modal
-        header="Import Project"
+        header={`Import ${section}`}
         handleClose={() => self._closeImportModal()}
         size="large"
         renderContent={() => (<div className="ImportModal">
-              <p>Import a Project by either pasting a URL or drag & dropping below</p>
+              <p>{`Import a ${section} by either pasting a URL or drag & dropping below`}</p>
               <input
                 className="Import__input"
                 type="text"
-                placeholder="Paste Project URL"
+                placeholder={`Paste ${section} URL`}
                 onChange={evt => self._updateRemoteUrl(evt)}
                 defaultValue={state.remoteUrl}
               />
@@ -744,18 +744,20 @@ const ImportMain = ({ self }) => {
                 id="dropZone"
                 className="ImportDropzone"
                 ref={div => self.dropZone = div}
-                type="file" onDragEnd={evt => self._dragendHandler(evt)}
-                onDrop={evt => self._dropHandler(evt)} onDragOver={evt => self._dragoverHandler(evt)}>
+                type="file"
+                onDragEnd={evt => self._dragendHandler(evt)}
+                onDrop={evt => self._dropHandler(evt)}
+                onDragOver={evt => self._dragoverHandler(evt)}>
                 {
-                 (state.readyLabbook && state.files[0])
-                  ? <div className="Import__ReadyLabbook">
-                    <div>Select Import to import the following Project</div>
+                 (state.ready && state.files[0])
+                  ? <div className="Import__ready">
+                    <div>{`Select Import to import the following ${section}`}</div>
                     <hr/>
-                    <div>{`Project Owner: ${owner}`}</div>
-                    <div>{`Project Name: ${labbookName}`}</div>
+                    <div>{`${section} Owner: ${owner}`}</div>
+                    <div>{`${section} Name: ${name}`}</div>
                   </div> :
                   <div className="DropZone">
-                     <p>Drag and drop an exported Project here</p>
+                     <p>{`Drag and drop an exported ${section} here`}</p>
                   </div>
                 }
               </div>
@@ -767,8 +769,8 @@ const ImportMain = ({ self }) => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => { self.importLabbook(); }}
-                  disabled={!self.state.readyLabbook || self.state.isImporting}>
+                  onClick={() => { self._import(); }}
+                  disabled={!self.state.ready || self.state.isImporting}>
                   Import
                 </button>
               </div>
@@ -776,29 +778,6 @@ const ImportMain = ({ self }) => {
         }
       />
     }
-
-    <div className="Import__labbook-header">
-      <div className="Import__labbook-icon">
-        <div className="Import__labbook-add-icon"></div>
-      </div>
-      <div className="Import__labbook-title">
-        <h2 className="Import__h2 Import__h2--azure">Add Project</h2>
-      </div>
-    </div>
-
-    <div
-      className="btn--import"
-      onClick={(evt) => { self._showModal(evt); }}>
-      Create New
-    </div>
-
-    <div
-      className="btn--import"
-      onClick={(evt) => { self.setState({ showImportModal: true }); }}>
-      Import Existing
-    </div>
-
-    <Tooltip section="createLabbook" />
 
   </div>);
 };

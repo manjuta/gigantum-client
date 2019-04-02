@@ -29,7 +29,7 @@ export default class Lightbox extends Component {
             />
             <div className="Lightbox__container">
                 <button
-                    className="Btn--expandable-close"
+                    className="Btn__expandable-close"
                     onClick={onClose}>
                     <span>Close</span>
                 </button>

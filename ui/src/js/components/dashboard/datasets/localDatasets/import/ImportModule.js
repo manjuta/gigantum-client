@@ -2,23 +2,23 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import uuidv4 from 'uuid/v4';
-// components
-import Tooltip from 'Components/common/Tooltip';
-import Modal from 'Components/common/Modal';
+// utils
 import JobStatus from 'JS/utils/JobStatus';
 import ChunkUploader from 'JS/utils/ChunkUploader';
-import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
+// config
+import config from 'JS/config';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
 import store from 'JS/redux/store';
-// assets
-import './ImportModule.scss';
+import { setUploadMessageRemove } from 'JS/redux/reducers/footer';
 // mutations
 import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
-// config
-import config from 'JS/config';
-
+// components
+import Tooltip from 'Components/common/Tooltip';
+import Modal from 'Components/common/Modal';
+// assets
+import './ImportModule.scss';
 
 let counter = 0;
 const dropZoneId = uuidv4();
@@ -244,7 +244,7 @@ export default class ImportModule extends Component {
     store.dispatch({
       type: 'UPLOAD_MESSAGE_SETTER',
       payload: {
-        uploadMessage: 'Prepparing Import ...',
+        uploadMessage: 'Preparing Import ...',
         totalBytes: this.state.files[0].file.size / 1000,
         percentage: 0,
         id: '',
@@ -356,7 +356,7 @@ export default class ImportModule extends Component {
                 },
               ],
               readyDataset: {
-                datasetName: self._getFilename(file.name),
+                name: self._getFilename(file.name),
                 owner: localStorage.getItem('username'),
                 method: 'local',
               },
@@ -567,16 +567,13 @@ export default class ImportModule extends Component {
       hidden: !this.state.isImporting,
     });
 
-    return (<Fragment>
-
+    return (
       <div
         className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
         key="AddDatasetCollaboratorPayload">
         <ImportMain self={this} />
         <div className={loadingMaskCSS} />
-      </div>
-
-    </Fragment>);
+      </div>);
   }
 }
 
@@ -601,8 +598,7 @@ const ImportMain = ({ self }) => {
         header="Import Dataset"
         handleClose={() => self._closeImportModal()}
         size="large"
-        renderContent={() => (<Fragment>
-            <div className="ImportModal">
+        renderContent={() => (<div className="ImportModal">
               <p>Import a dataset by either pasting a URL or drag & dropping below</p>
               <input
                 className="Import__input"
@@ -615,7 +611,7 @@ const ImportMain = ({ self }) => {
               <div
                 id="dropZone"
                 className="ImportDropzone"
-                ref={div => self.dropZone = div}
+                ref={ref => self.dropZone = ref}
                 type="file"
                 onDragEnd={evt => self._dragendHandler(evt)}
                 onDrop={evt => self._dropHandler(evt)}
@@ -636,8 +632,7 @@ const ImportMain = ({ self }) => {
               <div className="Import__buttonContainer">
                 <button
                   onClick={() => self._closeImportModal()}
-                  className="Btn--flat"
-                >
+                  className="Btn--flat">
                 Cancel
                 </button>
                 <button
@@ -646,8 +641,7 @@ const ImportMain = ({ self }) => {
                   Import
                 </button>
               </div>
-            </div>
-            </Fragment>)
+            </div>)
         }
       />
     }
@@ -657,7 +651,7 @@ const ImportMain = ({ self }) => {
         <div className="Import__dataset-add-icon" />
       </div>
       <div className="Import__dataset-title">
-        <h4>Add Dataset</h4>
+        <h2>Add Dataset</h2>
       </div>
 
     </div>

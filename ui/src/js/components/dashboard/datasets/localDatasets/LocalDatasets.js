@@ -7,7 +7,7 @@ import {
 // components
 import LocalDatasetPanel from 'Components/dashboard/datasets/localDatasets/LocalDatasetsPanel';
 import CardLoader from 'Components/dashboard/loaders/CardLoader';
-import ImportModule from './import/ImportModule';
+import ImportModule from 'Components/dashboard/import/ImportModule';
 // helpers
 import DatasetVisibilityLookup from './lookups/DatasetVisibilityLookup';
 // assets
@@ -173,6 +173,8 @@ export class LocalDatasets extends Component {
                 <ImportModule
                   ref="ImportModule_localLabooks"
                   {...this.props}
+                  section="dataset"
+                  title="Add Dataset"
                   showModal={this.props.showModal}
                   history={this.props.history}
                 />

@@ -92,19 +92,20 @@ export default class MostRecent extends Component {
   }
 
   render() {
-    if (this.state.files && this.state.files.allFiles) {
-      let loadingClass = (this.state.showAmount < this.state.files.allFiles.edges.length) ? 'Recent__action-bar' : 'hidden';
-      loadingClass = (this.state.loading) ? 'Recent__action-bar--loading' : loadingClass;
+    const { props, state } = this;
+    if (state.files && state.files.allFiles) {
+      let loadingClass = (state.showAmount < state.files.allFiles.edges.length) ? 'Recent__action-bar' : 'hidden';
+      loadingClass = (state.loading) ? 'Recent__action-bar--loading' : loadingClass;
 
-      if (this.state.files.allFiles.edges.length > 0) {
-        let allFiles = this.state.files.allFiles.edges.filter(edge => edge && edge.node && (edge.node !== undefined) && !edge.node.isDir);
+      if (state.files.allFiles.edges.length > 0) {
+        let allFiles = state.files.allFiles.edges.filter(edge => edge && edge.node && (edge.node !== undefined) && !edge.node.isDir);
         allFiles = this._sortFiles(allFiles);
         return (
           <div className="Recent">
             <MostRecentList
               allFiles={allFiles}
-              showAmount={this.state.showAmount}
-              edgeId={this.props.edgeId}
+              showAmount={state.showAmount}
+              edgeId={props.edgeId}
             />
           </div>
 
@@ -112,7 +113,7 @@ export default class MostRecent extends Component {
       }
       return (
         <FileEmpty
-          section={this.state.fullPathName}
+          section={state.fullPathName}
           mainText="This Project has No Recent Files"
         />
       );

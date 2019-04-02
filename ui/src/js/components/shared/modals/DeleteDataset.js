@@ -149,7 +149,9 @@ export default class DeleteDataset extends Component {
           <div>
             <p>
               This will delete
+              {' '}
               <b>{this.props.remoteDatasetName}</b>
+              {' '}
               from the cloud.
             </p>
             <p>The Dataset will still exist locally.</p>
@@ -159,7 +161,9 @@ export default class DeleteDataset extends Component {
       return (
         <p>
           This will delete
+          {' '}
           <b>{this.props.remoteDatasetName}</b>
+          {' '}
           from the cloud.
           All data will be removed and can not be recovered.
         </p>
@@ -169,7 +173,9 @@ export default class DeleteDataset extends Component {
         <div>
           <p>
             This will delete
+            {' '}
             <b>{datasetName}</b>
+             {' '}
             from this Gigantum client.
           </p>
           <p>{`You can still download it from gigantum.com/${owner}/${datasetName}.`}</p>
@@ -177,7 +183,9 @@ export default class DeleteDataset extends Component {
     }
     return (<p>
       This will delete
+      {' '}
       <b>{datasetName}</b>
+      {' '}
       from this Gigantum instance. All data will be removed and can not be recovered.
     </p>);
   }
