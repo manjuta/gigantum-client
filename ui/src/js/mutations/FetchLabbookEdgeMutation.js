@@ -11,6 +11,13 @@ mutation FetchLabbookEdgeMutation($input: FetchLabbookEdgeInput!, $first: Int!, 
     newLabbookEdge{
       node {
         ...Labbook_labbook
+        collaborators {
+          id
+          owner
+          collaboratorUsername
+          permission
+        }
+        canManageCollaborators
       }
     }
     clientMutationId

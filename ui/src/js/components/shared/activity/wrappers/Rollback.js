@@ -37,6 +37,8 @@ export default class Rollback extends Component {
             <Tooltip section="activitySubmenu" />
             <button
               disabled={props.isLocked}
+              onMouseEnter={() => props.setHoveredRollback(record.flatIndex)}
+              onMouseLeave={() => props.setHoveredRollback(null)}
               className="Rollback__button"
               onClick={evt => this._toggleRollback(evt)}>
               Rollback

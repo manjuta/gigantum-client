@@ -28,6 +28,8 @@ export default class CardWrapper extends Component {
 
           { hasRollback
               && <Rollback
+                setHoveredRollback={props.setHoveredRollback}
+                hoveredRollback={props.hoveredRollback}
                 toggleRollbackMenu={props.toggleRollbackMenu}
                 record={record}
                 sectionType={props.sectionType}
@@ -40,6 +42,7 @@ export default class CardWrapper extends Component {
               key={`activityCard${record.edge.node.id}`}>
                 <ActivityCard
                   sectionType={props.sectionType}
+                  hoveredRollback={props.hoveredRollback}
                   isFirstCard={props.indexItem.timestampIndex === 0}
                   position={record.flatIndex}
                   key={`${record.edge.node.id}_activity-card`}
