@@ -12,7 +12,6 @@ module.exports = {
  ],
  "plugins": [
    "relay",
-   "../../babel-plugin-selenium-id",
    "@babel/plugin-syntax-dynamic-import",
    ["@gigantum/babel-plugin-selenium-id"],
    ["@babel/plugin-proposal-decorators", {

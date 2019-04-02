@@ -63,11 +63,34 @@ button {
   &--action{
     width: auto;
   }
-
+  &--plus {
+    background: $azure url('~Images/icons/add-white.svg') no-repeat center center;
+    background-size: 20px !important;
+    &:disabled {
+      background-image: url('~Images/icons/add-white.svg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 20px !important;
+    }
+  }
+  &--close {
+    background: $azure url('~Images/icons/close-white.svg') no-repeat center center;
+    background-size: 20px !important;
+    &:disabled {
+      background-image: url('~Images/icons/close-white.svg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 20px !important;
+    }
+  }
    &--round {
      height: 34px;
      width: 34px;
      border-radius: 15px;
+     padding: 0;
+     &--small {
+
+     }
    }
    &--feature {
     transition: all 0.25s ease, background-position 0ms, font-size 0ms;
@@ -211,23 +234,23 @@ button {
      }
    }
 
-   &--close {
-     background: url(~Images/icons/close.svg) no-repeat center center;
-     background-size: 30px;
-     border: 0px;
+  //  &--close {
+  //    background: url(~Images/icons/close.svg) no-repeat center center;
+  //    background-size: 30px;
+  //    border: 0px;
 
-     &:focus {
-       background: url(~Images/icons/close.svg) no-repeat center center;
-       background-size: 30px;
-       border: 0px;
-     }
+  //    &:focus {
+  //      background: url(~Images/icons/close.svg) no-repeat center center;
+  //      background-size: 30px;
+  //      border: 0px;
+  //    }
 
-     &:hover {
-       background: url(~Images/icons/close.svg) no-repeat center center;
-       background-size: 34px;
-       border: 0px;
-     }
-   }
+  //    &:hover {
+  //      background: url(~Images/icons/close.svg) no-repeat center center;
+  //      background-size: 34px;
+  //      border: 0px;
+  //    }
+  //  }
 
    &--delete {
      background: url(~Images/icons/trash-dark.svg) no-repeat center center;

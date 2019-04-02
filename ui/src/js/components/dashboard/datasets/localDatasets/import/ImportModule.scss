@@ -47,8 +47,8 @@
 
 .Import__dataset-add-icon{
   position: absolute;
-  top: 44px;
-  left: 40px;
+  top: 46px;
+  left: 49px;
 
   width: 20px;
   height: 20px;
@@ -286,19 +286,13 @@ input.Import__input--paste{
 
 }
 
-.Import__buttonContainer {
-  button {
-    margin: 0 10px;
-  }
-}
-
 .ImportModule__drop-area-highlight{
   border: 2px dashed $azure;
 
 }
 
 .Import__buttonContainer {
-  justify-content: space-between;
+  justify-content: flex-end;
   width: 300px;
   display: flex;
   margin-top: 10px;

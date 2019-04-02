@@ -697,7 +697,7 @@ class PackageDependencies extends Component {
                   <button
                     disabled={(this.state.packageName.length === 0)}
                     onClick={() => this._addStatePackage()}
-                    className="PackageDependencies__btn--margin PackageDependencies__btn--round PackageDependencies__btn--add"
+                    className="PackageDependencies__btn--margin Btn--round Btn--plus"
                   />
                 </div>
 

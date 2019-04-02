@@ -482,7 +482,7 @@ export default class CollaboratorsModal extends Component {
                 </ul>
               </div>
               <ButtonLoader
-                className="CollaboratorsModal__btn--add"
+                className="Btn--round Btn--plus"
                 ref="addCollaborator"
 
                 buttonState={this.state.buttonLoaderAddCollaborator}
@@ -581,7 +581,7 @@ export default class CollaboratorsModal extends Component {
                             ref={collaboratorName}
                             buttonState={this.state.buttonLoaderRemoveCollaborator[collaboratorName]}
                             buttonText=""
-                            className="CollaboratorsModal__btn"
+                            className="Btn--close Btn--round Btn--round-small"
                             params={{ collaborator: collaboratorName, button: this }}
                             buttonDisabled={collaboratorName === localStorage.getItem('username') || !this.props.canManageCollaborators}
                             clicked={this._removeCollaborator}

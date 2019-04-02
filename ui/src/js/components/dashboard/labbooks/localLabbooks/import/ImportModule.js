@@ -768,6 +768,7 @@ const ImportMain = ({ self }) => {
                 </button>
                 <button
                   onClick={() => { self.importLabbook(); }}
+                  className="Btn--last"
                   disabled={!self.state.readyLabbook || self.state.isImporting}>
                   Import
                 </button>

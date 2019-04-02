@@ -642,6 +642,7 @@ const ImportMain = ({ self }) => {
                 </button>
                 <button
                   onClick={() => { self.importDataset(); }}
+                  className="Btn--last"
                   disabled={!self.state.readyDataset || self.state.isImporting}>
                   Import
                 </button>
