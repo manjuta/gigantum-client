@@ -7,7 +7,7 @@ import {
 // components
 import LocalLabbookPanel from 'Components/dashboard/labbooks/localLabbooks/LocalLabbookPanel';
 import CardLoader from 'Components/dashboard/loaders/CardLoader';
-import ImportModule from './import/ImportModule';
+import ImportModule from 'Components/dashboard/import/ImportModule';
 // helpers
 import ContainerLookup from './lookups/ContainerLookup';
 import VisibilityLookup from './lookups/VisibilityLookup';
@@ -213,6 +213,8 @@ export class LocalLabbooks extends Component {
                 <ImportModule
                   ref="ImportModule_localLabooks"
                   {...this.props}
+                  section="labbook"
+                  title="Add Project"
                   showModal={this.props.showModal}
                   history={this.props.history}
                 />

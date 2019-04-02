@@ -613,13 +613,14 @@ class FileBrowser extends Component {
   }
 
   render() {
+    const { props, state } = this;
     const files = this.state.files,
           { mutationData } = this.state,
           { isOver } = this.props;
     let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
-    folderKeys = this._childSort(folderKeys, this.state.sort, this.state.reverse, files, 'folder');
+    folderKeys = this._childSort(folderKeys, state.sort, state.reverse, files, 'folder');
     let fileKeys = files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir) || [];
-    fileKeys = this._childSort(fileKeys, this.state.sort, this.state.reverse, files, 'files');
+    fileKeys = this._childSort(fileKeys, state.sort, state.reverse, files, 'files');
     let childrenKeys = folderKeys.concat(fileKeys);
     const { isSelected } = this._checkChildState();
     const allFilesLocal = checkLocal(files);
@@ -627,39 +628,39 @@ class FileBrowser extends Component {
 
     const fileBrowserCSS = classNames({
         FileBrowser: true,
-        'FileBrowser--linkVisible': this.state.showLinkModal,
+        'FileBrowser--linkVisible': state.showLinkModal,
         'FileBrowser--highlight': isOver,
         'FileBrowser--dropzone': fileKeys.length === 0,
       }),
       deleteButtonCSS = classNames({
-        'Btn Btn--round Btn--delete': true,
+        'Btn Btn--round Btn__delete': true,
         hidden: !isSelected,
       }),
       multiSelectButtonCSS = classNames({
         'Btn--multiSelect': true,
         'Btn Btn--round': true,
-        'Btn--check': this.state.multiSelect === 'all',
-        'Btn--uncheck': this.state.multiSelect === 'none',
-        'Btn--partial': this.state.multiSelect === 'partial',
+        Btn__check: state.multiSelect === 'all',
+        Btn__uncheck: state.multiSelect === 'none',
+        Btn__partial: state.multiSelect === 'partial',
       }),
       nameHeaderCSS = classNames({
         'FileBrowser__name-text': true,
-        'FileBroser__sort--asc': this.state.sort === 'az' && !this.state.reverse,
-        'FileBroser__sort--desc': this.state.sort === 'az' && this.state.reverse,
+        'FileBroser__sort--asc': state.sort === 'az' && !state.reverse,
+        'FileBroser__sort--desc': state.sort === 'az' && state.reverse,
       }),
       sizeHeaderCSS = classNames({
         'FileBrowser__header--size': true,
-        'FileBroser__sort--asc': this.state.sort === 'size' && !this.state.reverse,
-        'FileBroser__sort--desc': this.state.sort === 'size' && this.state.reverse,
+        'FileBroser__sort--asc': state.sort === 'size' && !state.reverse,
+        'FileBroser__sort--desc': state.sort === 'size' && state.reverse,
       }),
       modifiedHeaderCSS = classNames({
         'FileBrowser__header--date': true,
-        'FileBroser__sort--asc': this.state.sort === 'modified' && !this.state.reverse,
-        'FileBroser__sort--desc': this.state.sort === 'modified' && this.state.reverse,
+        'FileBroser__sort--asc': state.sort === 'modified' && !state.reverse,
+        'FileBroser__sort--desc': state.sort === 'modified' && state.reverse,
       }),
       popupCSS = classNames({
         FileBrowser__popup: true,
-        hidden: !this.state.popupVisible,
+        hidden: !state.popupVisible,
         Tooltip__message: true,
       }),
       multiSelectCSS = classNames({
@@ -668,20 +669,22 @@ class FileBrowser extends Component {
       }),
       downloadAllCSS = classNames({
         FileBrowser__button: true,
-        'FileBrowser__button--download-all': !this.state.downloadingAll && !allFilesLocal,
-        'FileBrowser__button--downloaded': !this.state.downloadingAll && allFilesLocal,
-        'FileBrowser__button--downloading': this.state.downloadingAll,
+        'FileBrowser__button--download-all': !state.downloadingAll && !allFilesLocal,
+        'FileBrowser__button--downloaded': !state.downloadingAll && allFilesLocal,
+        'FileBrowser__button--downloading': state.downloadingAll,
       });
 
    return (
-       this.props.connectDropTarget(<div ref={ref => ref } className={fileBrowserCSS} style={{ zIndex: this.state.fileSizePromptVisible ? 13 : 0 }}>
-        {
-          this.state.showLinkModal &&
-          <LinkModal
-            closeLinkModal={() => this.setState({ showLinkModal: false })}
-            linkedDatasets={this.props.linkedDatasets || []}
-          />
-        }
+       props.connectDropTarget(<div
+         ref={ref => ref }
+         className={fileBrowserCSS}
+         style={{ zIndex: state.fileSizePromptVisible ? 13 : 0 }}>
+         { state.showLinkModal &&
+            <LinkModal
+              closeLinkModal={() => this.setState({ showLinkModal: false })}
+              linkedDatasets={props.linkedDatasets || []}
+            />
+         }
          {
            this.state.fileSizePromptVisible &&
              <Modal
@@ -690,9 +693,7 @@ class FileBrowser extends Component {
                size="medium"
                renderContent={() => <div className="FileBrowser__modal-body flex justify--space-between flex--column">
 
-                 <p>
-                    { uploadPromptText }
-                 </p>
+                 <p>{ uploadPromptText }</p>
 
                  <div className="FileBrowser__button-container flex justify--space-around">
 
@@ -802,9 +803,9 @@ class FileBrowser extends Component {
             key={'rootAddSubfolder'}
             folderKey=""
             mutationData={mutationData}
-            mutations={this.state.mutations}
+            mutations={state.mutations}
             setAddFolderVisible={visibility => this.setState({ addFolderVisible: visibility })}
-            addFolderVisible={this.state.addFolderVisible}
+            addFolderVisible={state.addFolderVisible}
           />
 
           {
@@ -820,16 +821,16 @@ class FileBrowser extends Component {
                     <Dataset
                       ref={file}
                       filename={file}
-                      section={this.props.section}
+                      section={props.section}
                       key={files[file].edge.node.key}
-                      multiSelect={this.state.multiSelect}
+                      multiSelect={state.multiSelect}
                       mutationData={mutationData}
                       fileData={files[file]}
-                      mutations={this.state.mutations}
+                      mutations={state.mutations}
                       setState={this._setState}
-                      sort={this.state.sort}
-                      reverse={this.state.reverse}
-                      childrenState={this.state.childrenState}
+                      sort={state.sort}
+                      reverse={state.reverse}
+                      childrenState={state.childrenState}
                       updateChildState={this._updateChildState}
                       codeDirUpload={this._codeDirUpload}
                       commitsBehind={commitsBehind}
@@ -840,18 +841,18 @@ class FileBrowser extends Component {
                     ref={file}
                     filename={file}
                     key={files[file].edge.node.key}
-                    multiSelect={this.state.multiSelect}
+                    multiSelect={state.multiSelect}
                     mutationData={mutationData}
                     fileData={files[file]}
-                    mutations={this.state.mutations}
+                    mutations={state.mutations}
                     setState={this._setState}
                     rowStyle={{}}
-                    sort={this.state.sort}
-                    reverse={this.state.reverse}
-                    childrenState={this.state.childrenState}
-                    section={this.props.section}
+                    sort={state.sort}
+                    reverse={state.reverse}
+                    childrenState={state.childrenState}
+                    section={props.section}
                     updateChildState={this._updateChildState}
-                    parentDownloading={this.state.downloadingAll}
+                    parentDownloading={state.downloadingAll}
                     rootFolder
                     codeDirUpload={this._codeDirUpload}>
                   </Folder>);
@@ -860,16 +861,16 @@ class FileBrowser extends Component {
                     ref={file}
                     filename={file}
                     key={files[file].edge.node.key}
-                    multiSelect={this.state.multiSelect}
+                    multiSelect={state.multiSelect}
                     mutationData={mutationData}
                     fileData={files[file]}
-                    childrenState={this.state.childrenState}
-                    mutations={this.state.mutations}
+                    childrenState={state.childrenState}
+                    mutations={state.mutations}
                     expanded
-                    section={this.props.section}
-                    isOverChildFile={this.state.isOverChildFile}
+                    section={props.section}
+                    isOverChildFile={state.isOverChildFile}
                     updateParentDropZone={this._updateDropZone}
-                    parentDownloading={this.state.downloadingAll}
+                    parentDownloading={state.downloadingAll}
                     updateChildState={this._updateChildState}>
                   </File>);
                 } else if (children[file]) {
@@ -888,19 +889,16 @@ class FileBrowser extends Component {
           }
           { (childrenKeys.length === 0) &&
             <div className="FileBrowser__empty">
-               {
-                this.state.search !== '' ?
-                  <h5>No files match your search.</h5>
-                  :
-                  <h5>Upload Files by Dragging & Dropping Here</h5>
+               { (state.search !== '')
+                  ? <h5>No files match your search.</h5>
+                  : <h5>Upload Files by Dragging & Dropping Here</h5>
                }
             </div>
           }
-          {
-            this.props.isProcessing &&
-            <div className="FileBrowser__veil">
-              <span></span>
-            </div>
+          { props.isProcessing
+            && <div className="FileBrowser__veil">
+                <span></span>
+               </div>
           }
       </div>
   </div>)

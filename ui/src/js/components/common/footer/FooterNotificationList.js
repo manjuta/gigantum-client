@@ -9,7 +9,7 @@ import './FooterNotificationList.scss';
 
 export default class FooterNotificationList extends Component {
   render() {
-    const { props } = this;
+    const { props, state } = this;
     const messageList = props.parentState.viewHistory ? props.parentState.messageStackHistory : props.parentState.messageStack;
 
     const messageListOpenItems = messageList.filter(message => message.messageBodyOpen);
@@ -54,8 +54,8 @@ export default class FooterNotificationList extends Component {
                 });
 
                 const toggleButton = classNames({
-                  'Btn Btn--toggle': true,
-                  'Btn--toggle-open': messageItem.messageBodyOpen,
+                  'Btn Btn__toggle': true,
+                  'Btn__toggle--open': messageItem.messageBodyOpen,
                 });
 
                 const bodyCSS = classNames({
@@ -74,21 +74,17 @@ export default class FooterNotificationList extends Component {
                       <div className="Footer__flex-container">
                         <div className="Footer__message-icon" />
 
-                        <div className="Footer__message-time">
-                          { `${Moment(messageItem.date).fromNow()}:` }
-                        </div>
+                        <div className="Footer__message-time">{ `${Moment(messageItem.date).fromNow()}:` }</div>
                         <div className="Footer__message-item">
-                          <p className={messageTitleCSS}>
-                            {messageItem.message}
-                          </p>
+                          <p className={messageTitleCSS}>{messageItem.message}</p>
                         </div>
 
-                        { (messageItem.messageBody.length > 0) &&
-                          <div className="Footer__message-expand">
+                        { (messageItem.messageBody.length > 0)
+                          && <div className="Footer__message-expand">
                             <div
                               className={toggleButton}
-                              onClick={() => { props.showMessageBody(index); }}
-                            />
+                              onClick={() => { props.showMessageBody(index); }}>
+                            </div>
                           </div>
 
                         }
@@ -112,22 +108,17 @@ export default class FooterNotificationList extends Component {
                 })
               }
 
-            {
-                  (messageList.length === 0) &&
-
-                  <li className="Footer__message">
-                    <div className="Footer__message-body">
-                      <div className="Footer__flex-container">
-
-                        <div className="Footer__message-item">
-                          <p className="Footer__message-title">
-                            No Notifications
-                          </p>
-                        </div>
+            { (messageList.length === 0)
+              && <li className="Footer__message">
+                  <div className="Footer__message-body">
+                    <div className="Footer__flex-container">
+                      <div className="Footer__message-item">
+                        <p className="Footer__message-title">No Notifications</p>
                       </div>
                     </div>
-                  </li>
-               }
+                 </div>
+               </li>
+            }
 
           </ul>
         </div>

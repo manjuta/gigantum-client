@@ -324,7 +324,6 @@ export default class DatasetActionsMenu extends Component {
             className={downloadCSS}
             data-tooltip={downloadText}>
           </div>
-
         </div>
     );
   }

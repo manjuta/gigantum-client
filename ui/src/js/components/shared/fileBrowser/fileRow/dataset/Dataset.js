@@ -285,35 +285,36 @@ class Dataset extends Component {
     }
 
     render() {
-        const { node } = this.props.fileData.edge,
-              { children, index } = this.props.fileData,
-              { isOver } = this.props,
+        const { props, state } = this;
+        const { node } = props.fileData.edge,
+              { children, index } = props.fileData,
+              { isOver } = props,
               splitKey = node.key.split('/'),
-              datasetName = this.props.filename,
+              datasetName = props.filename,
               datasetRowCSS = classNames({
                 DatasetBrowser__row: true,
-                'DatasetBrowser__row--expanded': this.state.expanded,
-                'DatasetBrowser__row--hover': this.state.hover,
+                'DatasetBrowser__row--expanded': state.expanded,
+                'DatasetBrowser__row--hover': state.hover,
               }),
               buttonCSS = classNames({
                 'Btn Btn--round': true,
-                'Btn--uncheck': !this.state.isSelected && !this.state.isIncomplete,
-                'Btn--check': this.state.isSelected && !this.state.isIncomplete,
-                'Btn--partial': this.state.isIncomplete,
+                Btn__uncheck: !state.isSelected && !state.isIncomplete,
+                Btn__check: state.isSelected && !state.isIncomplete,
+                Btn__partial: state.isIncomplete,
               }),
               datasetChildCSS = classNames({
                 Folder__child: true,
-                hidden: !this.state.expanded,
+                hidden: !state.expanded,
               }),
               datasetNameCSS = classNames({
                 'DatasetBrowser__cell DatasetBrowser__cell--name': true,
-                'DatasetBrowser__cell--open': this.state.expanded,
-                hidden: this.state.renameEditMode,
+                'DatasetBrowser__cell--open': state.expanded,
+                hidden: state.renameEditMode,
               }),
               datasetCSS = classNames({
                 DatasetBrowser: true,
                 'DatasetBrowser--highlight': isOver,
-                'DatasetBrowser--background': this.props.isDragging,
+                'DatasetBrowser--background': props.isDragging,
               }),
               paddingLeft = 40 * index,
               rowStyle = { paddingLeft: `${paddingLeft}px` },
@@ -322,13 +323,13 @@ class Dataset extends Component {
                 backgroundPositionX: `${99 + paddingLeft}px`,
               };
         let folderKeys = children && Object.keys(children).filter(child => children[child].edge && children[child].edge.node.isDir) || [];
-        folderKeys = this._childSort(folderKeys, this.props.sort, this.props.reverse, children, 'folder');
+        folderKeys = this._childSort(folderKeys, props.sort, props.reverse, children, 'folder');
         let fileKeys = children && Object.keys(children).filter(child => children[child].edge && !children[child].edge.node.isDir) || [];
-        fileKeys = this._childSort(fileKeys, this.props.sort, this.props.reverse, children, 'files');
+        fileKeys = this._childSort(fileKeys, props.sort, props.reverse, children, 'files');
         let childrenKeys = folderKeys.concat(fileKeys);
 
         return (<div
-          style={this.props.style}
+          style={props.style}
           className={ datasetCSS }>
                 <div
                     className={datasetRowCSS}
@@ -340,12 +341,11 @@ class Dataset extends Component {
                       <div className="DatasetBrowser__name">
                           {datasetName}
                       </div>
-                      {
-                        this.props.commitsBehind !== 0 &&
-                        <div
+                      { (props.commitsBehind !== 0)
+                        && <div
                           className="DatasetBrowser__commits Tooltip-data"
-                          data-tooltip={`This dataset is ${this.props.commitsBehind} commits behind. To update this dataset unlink and relink it.`}>
-                          <div className="DatasetBrowser__commits--commits-behind">{this.props.commitsBehind }</div>
+                          data-tooltip={`This dataset is ${props.commitsBehind} commits behind. To update this dataset unlink and relink it.`}>
+                          <div className="DatasetBrowser__commits--commits-behind">{props.commitsBehind }</div>
                         </div>
                       }
                     </div>
@@ -357,22 +357,21 @@ class Dataset extends Component {
                     </div>
                     <div className="DatasetBrowser__cell DatasetBrowser__cell--menu">
                       <ActionsMenu
-                        edge={this.props.fileData.edge}
-                        mutationData={this.props.mutationData}
-                        mutations={this.props.mutations}
+                        edge={props.fileData.edge}
+                        mutationData={props.mutationData}
+                        mutations={props.mutations}
                         addFolderVisible={this._addFolderVisible}
                         folder
                         renameEditMode={ this._renameEditMode}
-                        fullEdge={this.props.fileData}
+                        fullEdge={props.fileData}
                         isParent
                         setFolderIsDownloading={this._setFolderIsDownloading}
-                        isDownloading={this.state.isDownloading || this.props.isDownloading}
+                        isDownloading={state.isDownloading || props.isDownloading}
                       />
                     </div>
                 </div>
                 <div className={datasetChildCSS}>
-                  {
-                    this.state.expanded &&
+                  { state.expanded &&
                       childrenKeys.map((file, index) => {
                           if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
                               return (
@@ -382,23 +381,23 @@ class Dataset extends Component {
                                       key={children[file].edge.node.key}
                                       ref={children[file].edge.node.key}
                                       mutations={this.props.mutations}
-                                      mutationData={this.props.mutationData}
+                                      mutationData={props.mutationData}
                                       fileData={children[file]}
-                                      isSelected={this.state.isSelected}
-                                      multiSelect={this.props.multiSelect}
+                                      isSelected={state.isSelected}
+                                      multiSelect={props.multiSelect}
                                       setIncomplete={this._setIncomplete}
                                       checkParent={this._checkParent}
                                       setState={this._setState}
                                       setParentHoverState={this._setHoverState}
-                                      expanded={this.state.expanded}
+                                      expanded={state.expanded}
                                       setParentDragFalse={() => this.setState({ isDragging: false })}
                                       setParentDragTrue={this._checkHover}
-                                      parentIsDragged={this.state.isDragging || this.props.parentIsDragged}
-                                      childrenState={this.props.childrenState}
-                                      listRef={this.props.listRef}
-                                      updateChildState={this.props.updateChildState}
-                                      isDownloading={this.state.isDownloading || this.props.isDownloading}
-                                      codeDirUpload={this.props.codeDirUpload}
+                                      parentIsDragged={state.isDragging || props.parentIsDragged}
+                                      childrenState={props.childrenState}
+                                      listRef={props.listRef}
+                                      updateChildState={props.updateChildState}
+                                      isDownloading={state.isDownloading || props.isDownloading}
+                                      codeDirUpload={props.codeDirUpload}
                                       >
                                   </Folder>
                               );
@@ -406,24 +405,24 @@ class Dataset extends Component {
                             return (
                                 <File
                                     filename={file}
-                                    mutations={this.props.mutations}
-                                    mutationData={this.props.mutationData}
+                                    mutations={props.mutations}
+                                    mutationData={props.mutationData}
                                     ref={children[file].edge.node.key}
                                     fileData={children[file]}
                                     key={children[file].edge.node.key}
-                                    isSelected={this.state.isSelected}
-                                    multiSelect={this.props.multiSelect}
+                                    isSelected={state.isSelected}
+                                    multiSelect={props.multiSelect}
                                     checkParent={this._checkParent}
-                                    expanded={this.state.expanded}
+                                    expanded={state.expanded}
                                     setParentHoverState={this._setHoverState}
                                     setParentDragFalse={(() => this.setState({ isDragging: false }))}
                                     setParentDragTrue={this._checkHover}
-                                    isOverChildFile={this.state.isOverChildFile}
+                                    isOverChildFile={state.isOverChildFile}
                                     updateParentDropZone={this._updateDropZone}
-                                    childrenState={this.props.childrenState}
-                                    isDownloading={this.state.isDownloading || this.props.isDownloading}
-                                    parentDownloading={this.props.parentDownloading}
-                                    updateChildState={this.props.updateChildState}>
+                                    childrenState={props.childrenState}
+                                    isDownloading={state.isDownloading || props.isDownloading}
+                                    parentDownloading={props.parentDownloading}
+                                    updateChildState={props.updateChildState}>
                                 </File>
                             );
                           } else if (children[file]) {

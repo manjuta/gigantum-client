@@ -10,6 +10,8 @@ import store from 'JS/redux/store';
 // Mutations
 import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
+// assets
+import '../FileCard.scss';
 
 
 export default class RecentCard extends Component {
@@ -76,24 +78,16 @@ export default class RecentCard extends Component {
     const filename = fileDirectories[fileDirectories.length - 1];
     const path = `${this.props.section}/${this.props.file.node.key.replace(filename, '')}`;
     return (
-      <div className="Recent__card Card column-3-span-4--shrink">
+      <div className="FileCard Card column-3-span-4--shrink">
         <div
           onClick={() => this._handleFileFavoriting(this.props.file)}
-          className={this.props.file.node.isFavorite ? 'Favorite__star' : 'Favorite__star--off'}
+          className={this.props.file.node.isFavorite ? 'FileCard__star' : 'FileCard__star FileCard__star--off'}
         />
-        <div className="Recent__header-section">
-          <h6 className="Recent__card-header">
-            {filename}
-          </h6>
-        </div>
+        <h6 className="FileCard__header">{filename}</h6>
 
-        <div className="Recent__path-section">
-          <div className="Recent__path">
-            {path}
-          </div>
-        </div>
+        <div className="FileCard__path">{path}</div>
 
-        <div className="Recent__description-section">
+        <div className="FileCard__description">
           <p>{`Last Modified: ${Moment(this.props.file.node.modifiedAt * 1000).fromNow()}`}</p>
           <p>{`Size: ${config.humanFileSize(this.props.file.node.size)}`}</p>
         </div>
