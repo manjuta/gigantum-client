@@ -26,7 +26,7 @@ export default class FooterNotificationList extends Component {
     });
 
     const viewAllButtonClass = classNames({
-      'Btn Btn--feature': true,
+      'Btn Btn--feature Btn--feature--expanded Btn--feature--noPadding': true,
       hidden: (props.parentState.viewHistory || !props.parentState.messageListOpen),
     });
 

@@ -54,28 +54,14 @@
     background: url('~Images/icons/labbooks-dark-blue.svg') no-repeat 50%;
     background-size: 50px;
   }
-  &---dataset {
+  &--dataset {
     background: url('~Images/icons/datasets-dark-blue.svg') no-repeat 50%;
     background-size: 50px;
+    .Import__add-icon {
+      top: 43px;
+      left: 25px;
+    }
   }
-}
-
-.Import__add-icon{
-  position: absolute;
-  top: 53px;
-  left: 43px;
-
-  width: 20px;
-  height: 20px;
-
-  -webkit-transition: all .3s;
-  -o-transition: all .3s;
-  transition: all .3s;
-
-  border: 0px solid $romanSilver;
-  border-radius: 12px;
-  background: #007ea8 url('~Images/icons/add.svg') no-repeat 50%;
-  background-size: 12px;
 }
 
 .Import__h4{
@@ -339,8 +325,8 @@ input.Import__input--paste{
 
 .Import__add-icon{
   position: absolute;
-  top: 50px;
-  left: 54px;
+  top: 48px;
+  left: 28px;
 
   width: 20px;
   height: 20px;
