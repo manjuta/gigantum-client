@@ -37,15 +37,13 @@ export default class Modal extends Component {
         <div className="Modal">
         <div
           className="Modal__cover"
-          onClick={props.handleClose}
-        />
+          onClick={props.handleClose}></div>
 
         <div className={modalContentCSS} style={{ overflow }}>
           { props.handleClose
             && <div
               className="Modal__close"
-              onClick={() => props.handleClose()}
-            />
+              onClick={() => props.handleClose()}></div>
           }
           <div className="Modal__container">
             { props.preHeader
@@ -57,11 +55,7 @@ export default class Modal extends Component {
                 <hr />
               </Fragment>
             }
-            <div className={modalContainerCSS}>
-              {
-                props.renderContent()
-              }
-            </div>
+            <div className={modalContainerCSS}>{props.renderContent()}</div>
           </div>
         </div>
       </div>,

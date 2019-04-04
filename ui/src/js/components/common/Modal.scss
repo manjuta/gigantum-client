@@ -53,10 +53,23 @@
 
 .Modal__content.large-long{
   padding: 0 60px 20px 60px;
+  position: fixed;
+  left: 50%;
+  top: 15px;
+  bottom: 15px;
+  z-index: 16;
+  width: 960px;
+  max-height: 1000px;
+  margin: 0 0 0 -480px;
+  border: 1px solid #fefefe;
+  border-radius: 8px;
+  background-color: #fefefe;
+  box-shadow: 0 0px 12px 0 rgba(0, 0, 0, 0.1);
 
-  @include modal(700px, 960px);
-  .SelectBase__images {
-    max-height: 429px !important;
+  @include animation('slide-up-fade-in forwards .25s');
+
+  .Modal__container {
+    height: 100%;
   }
 }
 

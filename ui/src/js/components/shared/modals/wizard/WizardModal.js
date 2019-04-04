@@ -316,40 +316,36 @@ export default class WizardModal extends React.Component {
             hidden: !this.state.modalBlur,
           }),
           currentComponent = this._currentComponent(),
-          modalSize = (currentComponent.header === 'Select A Base') ? 'large-long' : 'large';
+          modalSize = (currentComponent.header === 'Select A Type' || currentComponent.header === 'Select A Base') ? 'large-long' : 'large';
 
     return (
       <div>
-        {
-          state.modal_visible &&
-          <Modal
-            size={modalSize}
-            icon="add"
-            handleClose={() => this._hideModal()}
-            header={currentComponent.header}
-            preHeader={currentComponent.preHeader}
-            noPadding
-            renderContent={() => (<div>
-                {
-                  currentComponent.component
-                }
-                <ModalNav
-                  self={this}
-                  state={state}
-                  getSelectedComponentId={this._getSelectedComponentId}
-                  setComponent={this._setComponent}
-                  hideModal={this._hideModal}
-                  continueSave={this._continueSave}
-                  createLabbookCallback={this._createLabbookCallback}
-                  isDataset={props.datasets}
-                />
-               </div>)
-            }
-          />
+        { state.modal_visible
+          && <Modal
+              size={modalSize}
+              icon="add"
+              handleClose={() => this._hideModal()}
+              header={currentComponent.header}
+              preHeader={currentComponent.preHeader}
+              noPadding
+              renderContent={() => (<div className="WizardModal">
+                  { currentComponent.component }
+                  <ModalNav
+                    self={this}
+                    state={state}
+                    getSelectedComponentId={this._getSelectedComponentId}
+                    setComponent={this._setComponent}
+                    hideModal={this._hideModal}
+                    continueSave={this._continueSave}
+                    createLabbookCallback={this._createLabbookCallback}
+                    isDataset={props.datasets}
+                  />
+              </div>)
+              }
+            />
         }
-        {
-          this.state.modalBlur &&
-          <Loader className={loaderCSS} />
+        { state.modalBlur
+          && <Loader className={loaderCSS} />
         }
       </div>
     );

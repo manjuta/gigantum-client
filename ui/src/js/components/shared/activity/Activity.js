@@ -198,7 +198,7 @@ class Activity extends Component {
    */
   @boundMethod
   _setHoveredRollback(position) {
-    this.setState({ hoveredRollback : position });
+    this.setState({ hoveredRollback: position });
   }
 
   /**

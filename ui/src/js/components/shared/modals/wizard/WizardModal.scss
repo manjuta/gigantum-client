@@ -1,5 +1,9 @@
 @import '~Styles/_imports.scss';
 
+.WizardModal {
+  height: 100%;
+}
+
 .WizardModal__actions {
   @include flex(space-between, row);
   align-items: center;
