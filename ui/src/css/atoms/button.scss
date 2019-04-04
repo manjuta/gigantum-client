@@ -82,7 +82,7 @@ button {
 
    font-size: 0;
 
-   &:hover, &:focus {
+   &:hover, &:focus, &--expanded {
      width: auto;
      padding: 0 40px 0 15px;
 
@@ -95,6 +95,9 @@ button {
      background-size: 30px;
 
      font-size: 0;
+   }
+   &--noPadding {
+     padding: 0 15px !important;
    }
   }
 
