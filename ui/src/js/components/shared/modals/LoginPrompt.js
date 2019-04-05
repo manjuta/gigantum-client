@@ -25,6 +25,7 @@ export default class LoginPrompt extends Component {
       <Modal
         size="small"
         handleClose={() => this.props.closeModal()}
+        icon="login"
         renderContent={() => (navigator.onLine ?
             <div className="LoginPrompt">
               <div>

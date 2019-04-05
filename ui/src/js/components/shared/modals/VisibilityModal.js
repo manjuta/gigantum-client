@@ -207,6 +207,7 @@ export default class PublishModal extends Component {
         header={props.header}
         handleClose={() => props.toggleModal(props.modalStateValue)}
         size="large"
+        icon={props.visibility}
         renderContent={() => (<div className="VisibilityModal">
             <div>
               <p>You are about to change the visibility of the project.</p>

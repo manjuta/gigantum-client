@@ -24,7 +24,7 @@ export default class Modal extends Component {
     const modalContentCSS = classNames({
       Modal__content: true,
       [props.size]: props.size, // large, medium, small
-      [props.icon]: props.icon,
+      [props.icon]: !!props.icon,
     });
     const modalContainerCSS = classNames({
       'Modal__sub-container': true,
@@ -51,7 +51,10 @@ export default class Modal extends Component {
             }
             { props.header
               && <Fragment>
-                <h1 className="Modal__header">{props.header}</h1>
+                <h1 className="Modal__header">
+                  <div className={`Icon Icon--${props.icon}`}></div>
+                  {props.header}
+                </h1>
                 <hr />
               </Fragment>
             }

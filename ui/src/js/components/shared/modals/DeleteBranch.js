@@ -66,6 +66,7 @@ export default class DeleteBranch extends Component {
         handleClose={() => this.props.toggleModal('deleteModalVisible')}
         size="medium"
         header="Delete Branch"
+        icon="delete"
         renderContent={() => (<Fragment>
             <p className="DeleteBranch__text DeleteBranch__text--red">
               {`You are going to delete ${owner}/${cleanBranchName}. Deleted branches cannot be restored. Are you sure?`}

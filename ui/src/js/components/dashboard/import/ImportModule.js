@@ -730,6 +730,7 @@ const ImportModal = ({ self }) => {
         header={`Import ${section}`}
         handleClose={() => self._closeImportModal()}
         size="large"
+        icon="add"
         renderContent={() => (<div className="ImportModal">
               <p>{`Import a ${section} by either pasting a URL or drag & dropping below`}</p>
               <input

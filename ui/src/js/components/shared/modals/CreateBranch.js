@@ -223,7 +223,7 @@ export default class CreateBranchModal extends Component {
             hidden: !state.showError,
           }),
           branchModalTitle = props.selected ? 'Create Rollback Branch' : 'Create Branch',
-          icon = props.selected ? 'rollback' : 'create';
+          icon = props.selected ? 'rollback' : 'add';
 
     return (
       <div>

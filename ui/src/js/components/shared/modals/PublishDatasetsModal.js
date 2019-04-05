@@ -287,7 +287,7 @@ export default class PublishDatasetsModal extends Component {
           header={props.header}
           handleClose={this.state.isProcessing ? null : () => props.toggleModal(false, true)}
           size="large"
-          icon="project"
+          icon="dataset"
           renderContent={() => (
             <div className="PublishDatasetsModal">
               {
@@ -331,17 +331,16 @@ export default class PublishDatasetsModal extends Component {
               :
               <div>
                   <div className={containerCSS}>
-                    {
-                      this.props.header === 'Publish' || this.state.isProcessing ?
+                    { (this.props.header === 'Publish') || this.state.isProcessing ?
                       <Fragment>
                         <p>Select the visibility for the project and datasets to be published.</p>
 
                         <h5 className="PublishDatasetsModal__Label">Project</h5>
                         <div className="PublishDatasetsModal__radio-container">
-                        {`${this.props.owner}/${this.props.labbookName}`}
+                          {`${this.props.owner}/${this.props.labbookName}`}
+
                           <div className="PublishDatasetsModal__radio-subcontainer">
-                          {
-                            !this.state.isProcessing ?
+                          { !this.state.isProcessing ?
                               <Fragment>
                                   <div className="PublishDatasetsModal__private">
                                     <input
@@ -354,8 +353,6 @@ export default class PublishDatasetsModal extends Component {
                                     <label htmlFor="project_private">
                                       <b>Private</b>
                                     </label>
-
-                                    {/* <p className="PublishDatasetsModal__paragraph">Private projects are only visible to collaborators. Users that are added as a collaborator will be able to view and edit.</p> */}
 
                                     </div>
 
@@ -371,8 +368,6 @@ export default class PublishDatasetsModal extends Component {
                                     <label htmlFor="project_public">
                                       <b>Public</b>
                                     </label>
-
-                                    {/* <p className="PublishDatasetsModal__paragraph">Public projects are visible to everyone. Users will be able to import a copy. Only users that are added as a collaborator will be able to edit.</p> */}
 
                                     </div>
                               </Fragment>
@@ -416,13 +411,11 @@ export default class PublishDatasetsModal extends Component {
                           return (
                           <li
                             key={name}
-                            className="flex"
-                          >
+                            className="flex">
                             {name}
                             <div className="PublishDatasetsModal__Datasets-radio-container">
-                            {
-                              !this.state.isProcessing ?
-                              <Fragment>
+                            { (!this.state.isProcessing)
+                              ? <Fragment>
                                 <div>
                                   <input
                                     type="radio"
@@ -432,8 +425,7 @@ export default class PublishDatasetsModal extends Component {
                                   />
                                   <label
                                     htmlFor={`${name}_private`}
-                                    className="PublishDatasetsModal__private-label"
-                                  >
+                                    className="PublishDatasetsModal__private-label">
                                     <b>Private</b>
                                   </label>
                                 </div>
@@ -446,8 +438,7 @@ export default class PublishDatasetsModal extends Component {
                                   />
                                   <label
                                     htmlFor={`${name}_public`}
-                                    className="PublishDatasetsModal__public-label"
-                                  >
+                                    className="PublishDatasetsModal__public-label">
                                     <b>Public</b>
                                   </label>
                                 </div>
@@ -471,11 +462,16 @@ export default class PublishDatasetsModal extends Component {
                     </ul>
 
                     </div>
-                    {
-                      !this.state.isProcessing &&
-                      <div className="PublishDatasetsModal__buttons">
-                        <button className="Btn--flat" onClick={() => { props.toggleModal(false, true); }}>Cancel</button>
-                        <button disabled={isDisabled} onClick={() => { this._publishLabbook(); }}>
+                    { (!this.state.isProcessing)
+                      && <div className="PublishDatasetsModal__buttons">
+                        <button
+                        className="Btn--flat"
+                        onClick={() => { props.toggleModal(false, true); }}>
+                        Cancel
+                       </button>
+                        <button
+                          disabled={isDisabled}
+                          onClick={() => { this._publishLabbook(); }}>
                           {props.buttonText}
                           {this.props.header === 'Sync' && ' And Sync'}
                         </button>

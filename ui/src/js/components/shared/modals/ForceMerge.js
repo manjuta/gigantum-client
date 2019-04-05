@@ -24,6 +24,7 @@ export default class ForceMerge extends Component {
         handleClose={() => this.props.toggleModal()}
         header="Merge Conflict"
         size="medium"
+        icon="merge"
         renderContent={() => (<Fragment>
             <p className="ForceMege__text">Merge failed due to conflicts. Which changes would you like to use?</p>
 

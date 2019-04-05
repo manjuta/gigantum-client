@@ -166,6 +166,7 @@ export default class DeleteLabbook extends Component {
         header={deleteText}
         handleClose={() => this.props.handleClose()}
         size="medium"
+        icon="delete"
         renderContent={() => <div className="DeleteLabbook">
             {this._getExplanationText()}
 

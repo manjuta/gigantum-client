@@ -25,10 +25,10 @@ export default class Overview extends Component {
               width="50"
           />
           <div className="LinkCard__details">
-              <h6 className="LinkCard__name">{node.name}</h6>
-              <h6 className="LinkCard__type">{node.datasetType.isManaged ? 'Managed' : 'Unmanaged'}</h6>
-              <h6>{`Created on ${Moment(node.createdOnUtc).format('MM/DD/YY')}`}</h6>
-              <h6>{`Modified ${Moment(node.modifiedOnUtc).fromNow()}`}</h6>
+              <h6><b>{node.name}</b></h6>
+              <p>{node.datasetType.isManaged ? 'Managed' : 'Unmanaged'}</p>
+              <p>{`Created on ${Moment(node.createdOnUtc).format('MM/DD/YY')}`}</p>
+              <p>{`Modified ${Moment(node.modifiedOnUtc).fromNow()}`}</p>
           </div>
           <div className="LinkCard__text">
               <p className="LinkCard__description">

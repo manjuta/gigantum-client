@@ -165,6 +165,7 @@ export default class LinkModal extends Component {
         header="Link Dataset"
         handleClose={() => props.closeLinkModal()}
         size="large-long"
+        icon="dataset"
         noPadding
         renderContent={() => (<div className="LinkModal">
             <div
