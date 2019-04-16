@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
+import Auth from 'JS/Auth/Auth';
 import {
   BrowserRouter as Router,
   Route,
@@ -18,10 +19,13 @@ import Prompt from 'Components/common/Prompt';
 import Helper from 'Components/common/Helper';
 // config
 import config from 'JS/config';
+// auth
+import UserIdentity from 'JS/Auth/UserIdentity';
 // assets
 import './Routes.scss';
 
 const Loading = () => <div />;
+const auth = new Auth();
 
 const Home = Loadable({
   loader: () => import('Components/home/Home'),
@@ -44,8 +48,9 @@ class Routes extends Component {
     this.state = {
       history,
       hasError: false,
-      forceLoginScreen: this.props.forceLoginScreen,
-      loadingRenew: this.props.loadingRenew,
+      forceLoginScreen: true,
+      loadingRenew: true,
+      userIdentityReturned: false,
       showYT: false,
       showDefaultMessage: true,
     };
@@ -59,7 +64,49 @@ class Routes extends Component {
     calls flip header text function
   */
   componentDidMount() {
+    const self = this;
     this._flipDemoHeaderText();
+
+    UserIdentity.getUserIdentity().then((response) => {
+      const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
+      let forceLoginScreen = true;
+      let loadingRenew = false;
+
+      if (response.data) {
+        if (response.data.userIdentity && ((response.data.userIdentity.isSessionValid && navigator.onLine) || !navigator.onLine)) {
+          localStorage.setItem('family_name', response.data.userIdentity.familyName);
+          localStorage.setItem('given_name', response.data.userIdentity.givenName);
+          localStorage.setItem('email', response.data.userIdentity.email);
+          localStorage.setItem('username', response.data.userIdentity.username);
+          localStorage.setItem('expires_at', expiresAt);
+          forceLoginScreen = false;
+        } else if (response.data.userIdentity && localStorage.getItem('access_token')) {
+          loadingRenew = true;
+          auth.renewToken(null, null, () => {
+            setTimeout(() => {
+              self.setState({ loadingRenew: false });
+            }, 2000);
+          }, true, () => {
+            self.setState({ forceLoginScreen: true, loadingRenew: false });
+          });
+        } else if (!response.data.userIdentity && !localStorage.getItem('access_token')) {
+          localStorage.removeItem('family_name');
+          localStorage.removeItem('given_name');
+          localStorage.removeItem('email');
+          localStorage.removeItem('username');
+          localStorage.removeItem('expires_at');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('id_token');
+          forceLoginScreen = true;
+        }
+      }
+
+      this.setState({
+        forceLoginScreen,
+        loadingRenew,
+        userIdentityReturned: true,
+      });
+    });
   }
 
   /**
@@ -75,9 +122,10 @@ class Routes extends Component {
     changes text of demo header message
   */
   _flipDemoHeaderText() {
+    const { state } = this;
     const self = this;
     setTimeout(() => {
-      self.setState({ showDefaultMessage: !this.state.showDefaultMessage });
+      self.setState({ showDefaultMessage: !state.showDefaultMessage });
       self._flipDemoHeaderText();
     }, 15000);
   }
@@ -87,7 +135,8 @@ class Routes extends Component {
     logs user out in using auth0
   */
   login() {
-    this.props.auth.login();
+    const { props } = this;
+    auth.login();
   }
 
   /**
@@ -95,7 +144,8 @@ class Routes extends Component {
     logs user out using auth0
   */
   logout() {
-    this.props.auth.logout();
+    const { props } = this;
+    auth.logout();
   }
 
   /**
@@ -103,13 +153,18 @@ class Routes extends Component {
     sets state of forceloginscreen
   */
   _setForceLoginScreen(forceLoginScreen) {
-    if (forceLoginScreen !== this.state.forceLoginScreen) {
+    const { state } = this;
+    if (forceLoginScreen !== state.forceLoginScreen) {
       this.setState({ forceLoginScreen });
     }
   }
 
   render() {
-    if (!this.state.hasError) {
+    const { props, state } = this;
+    if (!state.hasError) {
+      // declare variables
+      const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
+      // declare css
       const headerCSS = classNames({
         HeaderBar: true,
         'is-demo': window.location.hostname === config.demoHostName,
@@ -118,7 +173,16 @@ class Routes extends Component {
         Routes__main: true,
       });
 
-      const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
+      if (state.forceLoginScreen) {
+        return (
+          <Home
+            userIdentityReturned={state.userIdentityReturned}
+            history={history}
+            auth={auth}
+            {...props}
+          />
+        );
+      }
 
       return (
 
@@ -132,7 +196,7 @@ class Routes extends Component {
                 <div className="Routes">
                   {
                     window.location.hostname === config.demoHostName
-                    && (this.state.showDefaultMessage
+                    && (state.showDefaultMessage
                       ? (
                         <div
                           id="demo-header"
@@ -161,7 +225,7 @@ class Routes extends Component {
                       ))
                   }
                   {
-                    this.state.showYT
+                    state.showYT
                       && (
                       <div
                         id="yt-lightbox"
@@ -178,7 +242,7 @@ class Routes extends Component {
                   }
                   <div className={headerCSS} />
                   <SideBar
-                    auth={this.props.auth}
+                    auth={auth}
                     history={history}
                   />
                   <div className={routesCSS}>
@@ -186,12 +250,13 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/"
-                      render={props => (
+                      render={parentProps => (
                         <Home
-                          loadingRenew={this.state.loadingRenew}
+                          loadingRenew={state.loadingRenew}
+                          userIdentityReturned={state.userIdentityReturned}
                           history={history}
-                          auth={this.props.auth}
-                          {...props}
+                          auth={auth}
+                          {...parentProps}
                         />
                       )
                     }
@@ -200,12 +265,13 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/login"
-                      render={props => (
+                      render={parentProps => (
                         <Home
-                          loadingRenew={this.state.loadingRenew}
+                          userIdentityReturned={state.userIdentityReturned}
+                          loadingRenew={state.loadingRenew}
                           history={history}
-                          auth={this.props.auth}
-                          {...props}
+                          auth={auth}
+                          {...parentProps}
                         />
                       )
                       }
@@ -226,12 +292,13 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/datasets/:labbookSection"
-                      render={props => (
+                      render={parentProps => (
                         <Home
-                          loadingRenew={this.state.loadingRenew}
+                          userIdentityReturned={state.userIdentityReturned}
+                          loadingRenew={state.loadingRenew}
                           history={history}
-                          auth={this.props.auth}
-                          {...props}
+                          auth={auth}
+                          {...parentProps}
                         />
                       )
                       }
@@ -241,12 +308,13 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/projects/:labbookSection"
-                      render={props => (
+                      render={parentProps => (
                         <Home
-                          loadingRenew={this.state.loadingRenew}
+                          userIdentityReturned={state.userIdentityReturned}
+                          loadingRenew={state.loadingRenew}
                           history={history}
-                          auth={this.props.auth}
-                          {...props}
+                          auth={auth}
+                          {...parentProps}
                         />
                       )
                       }
@@ -254,9 +322,9 @@ class Routes extends Component {
 
                     <Route
                       path="/datasets/:owner/:datasetName"
-                      auth={this.props.auth}
+                      auth={auth}
                       render={(parentProps) => {
-                        if (this.state.forceLoginScreen) {
+                        if (state.forceLoginScreen) {
                           return <Redirect to="/login" />;
                         }
 
@@ -264,11 +332,12 @@ class Routes extends Component {
                           <DatasetQueryContainer
                             datasetName={parentProps.match.params.datasetName}
                             owner={parentProps.match.params.owner}
-                            auth={this.props.auth}
+                            auth={auth}
                             history={history}
-                            {...this.props}
+                            {...props}
                             {...parentProps}
-                          />);
+                          />
+                        );
                       }
 
                       }
@@ -276,9 +345,9 @@ class Routes extends Component {
 
                     <Route
                       path="/projects/:owner/:labbookName"
-                      auth={this.props.auth}
+                      auth={auth}
                       render={(parentProps) => {
-                        if (this.state.forceLoginScreen) {
+                        if (state.forceLoginScreen) {
                           return <Redirect to="/login" />;
                         }
 
@@ -286,23 +355,20 @@ class Routes extends Component {
                           <LabbookQueryContainer
                             labbookName={parentProps.match.params.labbookName}
                             owner={parentProps.match.params.owner}
-                            auth={this.props.auth}
+                            auth={auth}
                             history={history}
-                            {...this.props}
+                            {...props}
                             {...parentProps}
-                          />);
+                          />
+                        );
                       }
 
                       }
                     />
 
-                    <Helper
-                      auth={this.props.auth}
-                    />
+                    <Helper auth={auth} />
 
-                    <Prompt
-                      ref="prompt"
-                    />
+                    <Prompt ref="prompt" />
 
                     <Footer
                       ref="footer"

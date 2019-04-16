@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { graphql, QueryRenderer } from 'react-relay';
 import queryString from 'querystring';
+import { boundMethod } from 'autobind-decorator'
 // redux
 import { setCallbackRoute } from 'JS/redux/actions/routes';
 // components
@@ -33,15 +34,18 @@ export default class DashboardContainer extends Component {
   constructor(props) {
     super(props);
 
-    const { orderBy, sort } = queryString.parse(this.props.history.location.search.slice(1));
+    const { orderBy, sort } = queryString.parse(props.history.location.search.slice(1));
 
     this.state = {
       selectedComponent: props.match.path,
       orderBy: orderBy || 'modified_on',
       sort: sort || 'desc',
     };
+  }
+
+  componentDidMount() {
+    const { props } = this;
     setCallbackRoute(props.history.location.pathname);
-    this._refetchSort = this._refetchSort.bind(this);
   }
 
   /**
@@ -59,8 +63,10 @@ export default class DashboardContainer extends Component {
     * @param {string, string} orderBy, sort
     * sets state of orderBy and sort, passed to child components
   */
+  @boundMethod
   _refetchSort(orderBy, sort) {
-    if (this.state.orderBy !== orderBy || this.state.sort !== sort) {
+    const { state } = this;
+    if (state.orderBy !== orderBy || state.sort !== sort) {
       this.setState({ orderBy, sort });
     }
   }
@@ -72,16 +78,17 @@ export default class DashboardContainer extends Component {
   *  @return {jsx}
   */
   _displaySelectedComponent() {
-    const paths = this.props.history.location.pathname.split('/');
+    const { props, state } = this;
+    const paths = props.history.location.pathname.split('/');
     const sectionRoute = paths.length > 2 ? paths[2] : 'local';
 
     if (paths[2] !== 'cloud' && paths[2] !== 'local') {
-      this.props.history.replace('../../../../projects/local');
+      props.history.replace('../../../../projects/local');
     }
 
 
     let query;
-    if (this.state.selectedComponent === '/datasets/:labbookSection') {
+    if (state.selectedComponent === '/datasets/:labbookSection') {
       query = sectionRoute === 'cloud' ? RemoteDatasetListingQuery : LocalDatasetListingQuery;
     } else if (sectionRoute === 'cloud') {
       query = RemoteListingQuery;
@@ -96,20 +103,22 @@ export default class DashboardContainer extends Component {
         variables={{
           first: sectionRoute === 'cloud' ? 8 : 100,
           cursor: null,
-          orderBy: this.state.orderBy,
-          sort: this.state.sort,
+          orderBy: state.orderBy,
+          sort: state.sort,
         }}
-        render={({ error, props }) => {
+        render={(response) => {
+          const { error } = this;
+          const queryProps = response.props;
           if (error) {
             console.log(error);
-          } else if (props) {
-            if (this.state.selectedComponent === '/datasets/:labbookSection') {
+          } else if (queryProps) {
+            if (state.selectedComponent === '/datasets/:labbookSection') {
               if (sectionRoute === 'cloud') {
                 return (
                   <RemoteDatasetsContainer
-                    auth={this.props.auth}
-                    datasetList={props}
-                    history={this.props.history}
+                    auth={props.auth}
+                    datasetList={queryProps}
+                    history={props.history}
                     section={sectionRoute}
                     refetchSort={this._refetchSort}
                   />
@@ -117,9 +126,9 @@ export default class DashboardContainer extends Component {
               }
               return (
                 <LocalDatasetsContainer
-                  auth={this.props.auth}
-                  datasetList={props}
-                  history={this.props.history}
+                  auth={props.auth}
+                  datasetList={queryProps}
+                  history={props.history}
                   section={sectionRoute}
                   refetchSort={this._refetchSort}
                 />
@@ -128,9 +137,9 @@ export default class DashboardContainer extends Component {
             if (sectionRoute === 'cloud') {
               return (
                 <RemoteLabbooksContainer
-                  auth={this.props.auth}
-                  labbookList={props}
-                  history={this.props.history}
+                  auth={props.auth}
+                  labbookList={queryProps}
+                  history={props.history}
                   refetchSort={this._refetchSort}
                 />
               );
@@ -138,19 +147,19 @@ export default class DashboardContainer extends Component {
 
             return (
               <LocalLabbooksContainer
-                auth={this.props.auth}
-                labbookList={props}
-                history={this.props.history}
+                auth={props.auth}
+                labbookList={queryProps}
+                history={props.history}
                 refetchSort={this._refetchSort}
               />
             );
           } else {
-            if (this.state.selectedComponent === '/datasets/:labbookSection') {
+            if (state.selectedComponent === '/datasets/:labbookSection') {
               return (
                 <LocalDatasetsContainer
-                  auth={this.props.auth}
-                  datasetList={props}
-                  history={this.props.history}
+                  auth={props.auth}
+                  datasetList={queryProps}
+                  history={props.history}
                   section={sectionRoute}
                   refetchSort={this._refetchSort}
                   loading
@@ -160,9 +169,9 @@ export default class DashboardContainer extends Component {
 
             return (
               <LocalLabbooksContainer
-                auth={this.props.auth}
-                labbookList={props}
-                history={this.props.history}
+                auth={props.auth}
+                labbookList={queryProps}
+                history={props.history}
                 section={sectionRoute}
                 refetchSort={this._refetchSort}
                 loading
