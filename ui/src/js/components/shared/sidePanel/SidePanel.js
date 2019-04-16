@@ -1,24 +1,10 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import ReactDom from 'react-dom';
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
 import { boundMethod } from 'autobind-decorator';
 // config
-import Config from 'JS/config';
-// store
-import store from 'JS/redux/store';
-import {
-  setSyncingState,
-  setPublishingState,
-  setExportingState,
-  setModalVisible,
-  setUpdateDetailView,
-} from 'JS/redux/reducers/labbook/labbook';
-// config
 import config from 'JS/config';
-// components
-import Tooltip from 'Components/common/Tooltip';
 // assets
 import './SidePanel.scss';
 
@@ -39,15 +25,13 @@ class SidePanel extends Component {
   }
 
   render() {
-    const { props, state } = this;
-
-
-    const isPushedDownTwice = (window.location.hostname === config.demoHostName) && props.isDeprecated;
-
-
-    const isPushedDownOnce = ((window.location.hostname === config.demoHostName) || props.isDeprecated) && !isPushedDownTwice;
-
-
+    const { props } = this;
+    const isPushedDownTwice = (window.location.hostname === config.demoHostName)
+      && props.isDeprecated;
+    const isPushedDownOnce = ((window.location.hostname === config.demoHostName)
+      || props.isDeprecated)
+      && !isPushedDownTwice;
+    // declare css here
     const sidePanelCSS = classNames({
       SidePanel: true,
       'SidePanel--sticky': props.isSticky && !props.isDeprecated,
@@ -56,6 +40,7 @@ class SidePanel extends Component {
       'SidePanel--is-deprecated-demo-sticky': isPushedDownTwice && props.isSticky,
       'SidePanel--is-deprecated-sticky': isPushedDownOnce && props.isSticky,
     });
+
     return (
       ReactDom.createPortal(
         <div className={sidePanelCSS}>
