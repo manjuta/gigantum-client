@@ -65,14 +65,28 @@ class Branches extends Component {
     @return {}
   */
   _toggleModal(modalName, branch) {
-    if ((modalName === 'mergeModal') && (this.props.activeBranch.branchName !== branch)) {
-      this.setState({ mergeModalVisible: branch || !this.state.mergeModalVisible });
-    } else if ((modalName === 'deleteModal') && (this.props.activeBranch.branchName !== branch) && (branch !== 'master')) {
-      this.setState({ deleteModalVisible: branch || !this.state.deleteModalVisible, localSelected: false, remoteSelected: false });
-    } else if ((modalName === 'resetModal') && (!branch || (this.props.activeBranch.branchName === branch))) {
-      const upToDate = (this.props.activeBranch.commitsAhead === 0) && (this.props.activeBranch.commitsBehind === 0);
-      if (this.props.activeBranch.isRemote && !upToDate) {
-        this.setState({ resetModalVisible: branch || !this.state.resetModalVisible });
+    const { props, state } = this;
+
+    if ((modalName === 'mergeModal') && (props.activeBranch.branchName !== branch)) {
+      const mergeModalVisible = branch || !state.mergeModalVisible;
+      this.setState({ mergeModalVisible });
+    } else if ((modalName === 'deleteModal')
+      && (props.activeBranch.branchName !== branch)
+      && (branch !== 'master')) {
+      const deleteModalVisible = branch || !state.deleteModalVisible;
+      this.setState({
+        deleteModalVisible,
+        localSelected: false,
+        remoteSelected: false,
+      });
+    } else if ((modalName === 'resetModal')
+      && (!branch || (props.activeBranch.branchName === branch))) {
+      const upToDate = (props.activeBranch.commitsAhead === 0)
+        && (props.activeBranch.commitsBehind === 0);
+
+      if (props.activeBranch.isRemote && !upToDate) {
+        const resetModalVisible = branch || !state.resetModalVisible;
+        this.setState({ resetModalVisible });
       }
     }
   }
@@ -100,7 +114,8 @@ class Branches extends Component {
     @return {}
   */
   _selectBranchname(evt, selectedBranchname) {
-    if (this.state.selectedBranchname !== selectedBranchname) {
+    const { state } = this;
+    if (state.selectedBranchname !== selectedBranchname) {
       this.setState({ selectedBranchname });
     }
   }
@@ -110,8 +125,9 @@ class Branches extends Component {
     sets current index for viewing branches
   */
   _setIndex(isDown) {
-    const branchCount = this.props.branches.length - 1;
-    const currentIndex = this.state.currentIndex;
+    const { props, state } = this;
+    const branchCount = props.branches.length - 1;
+    const { currentIndex } = state;
     if (isDown) {
       const newIndex = ((currentIndex + 5) > branchCount - 5) ? branchCount - 5 : currentIndex + 5;
       this.setState({ currentIndex: newIndex });
@@ -128,9 +144,12 @@ class Branches extends Component {
   */
   @boundMethod
   _toggleSyncDropdown() {
-    if (!this.props.disableDropdown) {
-      const { state } = this;
-      this.setState({ syncMenuVisible: !state.syncMenuVisible });
+    const { props } = this;
+    if (!props.disableDropdown) {
+      this.setState((state) => {
+        const syncMenuVisible = !state.syncMenuVisible;
+        return { syncMenuVisible };
+      });
     }
   }
 
@@ -178,7 +197,10 @@ class Branches extends Component {
     */
    @boundMethod
   _toggleMergeModal() {
-    this.setState({ forceMergeModalVisible: !this.state.forceMergeModalVisible });
+    this.setState((state) => {
+      const forceMergeModalVisible = !state.forceMergeModalVisible;
+      return { forceMergeModalVisible };
+    });
   }
 
   /**
@@ -186,15 +208,16 @@ class Branches extends Component {
   */
   @boundMethod
    _resetBranch() {
+     const { props } = this;
      const self = this;
-     this.props.toggleCover('Resetting Branch');
-     this.props.branchMutations.resetBranch((response, error) => {
+     props.toggleCover('Resetting Branch');
+     props.branchMutations.resetBranch((response, error) => {
        if (error) {
          setErrorMessage('Failed to reset branch', error);
        }
-       this.props.setBranchUptodate();
+       props.setBranchUptodate();
        self.setState({ resetModalVisible: null });
-       this.props.toggleCover(null);
+       props.toggleCover(null);
      });
    }
 
@@ -204,19 +227,20 @@ class Branches extends Component {
   */
   @boundMethod
   _deleteBranch(branch) {
+    const { props, state } = this;
     const self = this;
-    this.props.toggleCover('Deleting Branch');
+    props.toggleCover('Deleting Branch');
     const data = {
       branchName: branch.branchName,
-      deleteLocal: this.state.localSelected,
-      deleteRemote: this.state.remoteSelected,
+      deleteLocal: state.localSelected,
+      deleteRemote: state.remoteSelected,
     };
-    this.props.branchMutations.deleteBranch(data, (response, error) => {
+    props.branchMutations.deleteBranch(data, (response, error) => {
       if (error) {
         setErrorMessage('Failed to delete branch', error);
       }
       self.setState({ deleteModalVisible: null });
-      this.props.toggleCover(null);
+      props.toggleCover(null);
     });
   }
 
