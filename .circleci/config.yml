@@ -165,11 +165,11 @@ workflows:
     jobs:
       - mypy-gtmcore
       - mypy-gtmapi
-      - test-long-running-env
       - test-harness:
           requires:
             - mypy-gtmcore
             - mypy-gtmapi
+#      - test-long-running-env
 #      - test-confhttpproxy:
 #          requires:
 #            - mypy-gtmcore
