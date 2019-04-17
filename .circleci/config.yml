@@ -50,11 +50,8 @@ jobs:
     working_directory: ~
     steps:
       - run:
-          name: Clone gigantum-client
+          name: Clone, install, and run gigantum-client
           command: git clone https://github.com/gigantum/gigantum-testing.git
-      - run:
-          name: Install test harness stuff
-          command: |
             cd ~/gigantum-testing
             bash .circleci/ubuntu1404-install.sh
 
