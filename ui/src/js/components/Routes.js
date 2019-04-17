@@ -250,6 +250,7 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/"
+                      
                       render={parentProps => (
                         <Home
                           loadingRenew={state.loadingRenew}

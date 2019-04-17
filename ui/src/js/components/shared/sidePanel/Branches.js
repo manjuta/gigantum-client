@@ -11,9 +11,22 @@ import SidePanel from './SidePanel';
 // assets
 import './Branches.scss';
 
+/**
+  @param {String} action
+  returns headr text for the modal
+  @return {string}
+*/
+const getHeaderText = (action) => {
+  let headerText = action === 'merge' ? 'Merge Branches' : '';
+  headerText = action === 'delete' ? 'Delete Branch' : headerText;
+  headerText = action === 'reset' ? 'Reset Branch' : headerText;
+
+  return headerText;
+};
+
 class Branches extends Component {
   state = {
-    sidePanelVisible: this.props.sidePanelVisible,
+    sidePanelVisible: false,
     selectedBranchname: null,
     action: null,
     mergeModalVisible: false,
@@ -32,12 +45,12 @@ class Branches extends Component {
     });
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
-
   componentDidMount() {
     window.addEventListener('click', this._closePopups);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   componentWillUnmount() {
@@ -51,7 +64,6 @@ class Branches extends Component {
   */
   @boundMethod
   _closePopups(evt) {
-    const { state } = this;
     if (evt.target.className.indexOf('Branches__btn--sync-dropdown') < 0) {
       this.setState({
         syncMenuVisible: false,
@@ -161,15 +173,12 @@ class Branches extends Component {
   @boundMethod
   _mergeBranch(branchName, overrideMethod) {
     const { props } = this;
-
-
     const self = this;
-
-
     const data = {
       branchName,
       overrideMethod,
     };
+
     props.toggleCover('Merging Branches');
     props.branchMutations.mergeBranch(data, (response, error) => {
       if (error) {
@@ -251,8 +260,9 @@ class Branches extends Component {
     @return {JSX}
   */
   _renderModal(branch, action) {
-    const headerText = action === 'merge' ? 'Merge Branches' : action === 'delete' ? 'Delete Branch' : action === 'reset' ? 'Reset Branch' : '';
-    const disableSubmit = action === 'delete' && !this.state.localSelected && !this.state.remoteSelected;
+    const { props, state } = this;
+    const headerText = getHeaderText(action);
+    const disableSubmit = (action === 'delete') && !state.localSelected && !state.remoteSelected;
 
     const localCheckboxCSS = classNames({
       'Tooltip-data': !branch.isLocal,
@@ -267,100 +277,97 @@ class Branches extends Component {
       'Branches__label--disabled': !branch.isRemote,
     });
     return (
-      <Fragment>
-        <div className={`Branches__Modal Branches__Modal--${action}`}>
-          <div
-            className="Branches__close"
-            onClick={() => this._toggleModal(`${action}Modal`)}
-          />
-          <div className="Branches__Modal-header">
-            {headerText}
-          </div>
-          <div className="Branches__Modal-text">
-            {
-              action === 'merge'
-              && (
-              <Fragment>
-                You are about to merge the branch
-                <b>{` ${branch.branchName} `}</b>
-                with the current branch
-                <b>{` ${this.props.activeBranch.branchName}`}</b>
-                . Click 'Confirm' to proceed.
-              </Fragment>
-              )
-            }
-            {
-              action === 'delete'
-              && (
-              <Fragment>
-                You are about to delete this branch. This action can lead to data loss. Please type
-                <b>{` ${branch.branchName} `}</b>
-                and click 'Confirm' to proceed.
-              </Fragment>
-              )
-            }
-            {
-              action === 'reset'
-              && (
-              <Fragment>
-                You are about to reset this branch. Resetting a branch will get rid of local changes. Click 'Confirm' to proceed.
-              </Fragment>
-              )
-            }
-          </div>
-          {
-            action === 'delete'
+      <div className={`Branches__Modal Branches__Modal--${action}`}>
+        <button
+          type="button"
+          className="Btn Btn--flat Branches__close"
+          onClick={() => this._toggleModal(`${action}Modal`)}
+        />
+        <div className="Branches__Modal-header">
+          {headerText}
+        </div>
+        <div className="Branches__Modal-text">
+          { (action === 'merge')
             && (
-            <div className="Branches__input-container">
-              <label
-                htmlFor="delete_local"
-                className={localCheckboxCSS}
-                data-tooltip="Branch does not exist Locally"
-              >
-                <input
-                  type="checkbox"
-                  name="delete_local"
-                  id="delete_local"
-                  defaultChecked={!branch.isLocal}
-                  disabled={!branch.isLocal}
-                  onClick={() => this.setState({ localSelected: !this.state.localSelected })}
-                />
-              Local
-              </label>
-              <label
-                htmlFor="delete_remote"
-                className={remoteCheckboxCSS}
-                data-tooltip="Branch does not exist Remotely"
-              >
-                <input
-                  type="checkbox"
-                  name="delete_remote"
-                  id="delete_remote"
-                  disabled={!branch.isRemote}
-                  onClick={() => this.setState({ remoteSelected: !this.state.remoteSelected })}
-                />
-              Remote
-              </label>
-            </div>
+            <p>
+              You are about to merge the branch
+              <b>{` ${branch.branchName} `}</b>
+              with the current branch
+              <b>{` ${props.activeBranch.branchName}`}</b>
+              . Click 'Confirm' to proceed.
+            </p>
             )
           }
-          <div className="Branches__Modal-buttons">
-            <button
-              onClick={() => this._toggleModal(`${action}Modal`)}
-              className="Btn--flat"
-            >
-              Cancel
-            </button>
-            <button
-              className="Branches__Modal-confirm"
-              disabled={disableSubmit}
-              onClick={() => this._handleConfirm(branch, action)}
-            >
-              Confirm
-            </button>
-          </div>
+          { (action === 'delete')
+            && (
+            <p>
+              You are about to delete this branch. This action can lead to data loss. Please type
+              <b>{` ${branch.branchName} `}</b>
+              and click 'Confirm' to proceed.
+            </p>
+            )
+          }
+          { (action === 'reset')
+            && (
+            <p>
+              You are about to reset this branch. Resetting a branch will get rid of local changes. Click 'Confirm' to proceed.
+            </p>
+            )
+          }
         </div>
-      </Fragment>
+        { (action === 'delete')
+          && (
+          <div className="Branches__input-container">
+            <label
+              htmlFor="delete_local"
+              className={localCheckboxCSS}
+              data-tooltip="Branch does not exist Locally"
+            >
+              <input
+                type="checkbox"
+                name="delete_local"
+                id="delete_local"
+                defaultChecked={!branch.isLocal}
+                disabled={!branch.isLocal}
+                onClick={() => this.setState({ localSelected: !state.localSelected })}
+              />
+            Local
+            </label>
+            <label
+              htmlFor="delete_remote"
+              className={remoteCheckboxCSS}
+              data-tooltip="Branch does not exist Remotely"
+            >
+              <input
+                type="checkbox"
+                name="delete_remote"
+                id="delete_remote"
+                disabled={!branch.isRemote}
+                onClick={() => this.setState({ remoteSelected: !state.remoteSelected })}
+              />
+            Remote
+            </label>
+          </div>
+          )
+        }
+        <div className="Branches__Modal-buttons">
+          <button
+            type="button"
+            onClick={() => this._toggleModal(`${action}Modal`)}
+            className="Btn--flat"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="Branches__Modal-confirm"
+            disabled={disableSubmit}
+            onClick={() => this._handleConfirm(branch, action)}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
     );
   }
 
