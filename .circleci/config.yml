@@ -5,6 +5,9 @@ executors:
     docker:
       - image: gigantum/circleci-client:0df6fba6a5-2019-02-25
 
+  test_harness_machine:
+    machine: true
+
 jobs:
   mypy-gtmcore:
     executor: gig_client
@@ -42,106 +45,119 @@ jobs:
             python3 runtests.py
             cd ~/repo
 
-  test-gtmcore:
-    executor: gig_client
-    working_directory: ~/repo
+  test-harness:
+    executor: test_harness_machine
+    working_directory: ~
     steps:
-      - checkout
-      - setup_remote_docker
       - run:
-          name: Set authentication credentials
-          command: bash /home/circleci/repo/.circleci/write_auth.sh
+          name: Clone gigantum-client
+          command: git clone https://github.com/gigantum/gigantum-testing.git
       - run:
-          name: Run Core unit and coverage tests
+          name: Install test harness stuff
           command: |
-            export SKIP_CONDA_TESTS=1
-            redis-server > /dev/null 2> /dev/null &
-            rqscheduler --interval=2 2> /dev/null &
-            pytest --cov=gtmcore packages/gtmcore
-            codecov -F core
+            cd ~/gigantum-testing
+            bash .circleci/ubuntu1404-install.sh
 
-  test-gtmapi:
-    executor: gig_client
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Set authentication credentials
-          command: bash /home/circleci/repo/.circleci/write_auth.sh
-      - run:
-          name: Run API unit, integration and coverage tests
-          command: |
-            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
-            export SKIP_CONDA_TESTS=1
-            cd /home/circleci/repo
-            redis-server > /dev/null 2> /dev/null &
-            rqscheduler --interval=2 2> /dev/null &
-            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
-            pytest --cov=lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
-            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvcore
-            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
-            codecov -F api
-
-  test-long-running-env:
-    executor: gig_client
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Set authentication credentials
-          command: bash /home/circleci/repo/.circleci/write_auth.sh
-      - run:
-          name: Run long running conda environment tests
-          command: |
-            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
-            cd /home/circleci/repo
-            redis-server > /dev/null 2> /dev/null &
-            rqscheduler --interval=2 2> /dev/null &
-            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
-            pytest --cov=gtmcore packages/gtmcore/gtmcore/environment/tests/test_conda.py
-            codecov -F core
-
-  test-ui-components:
-    executor: gig_client
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Build frontend production code
-          command: |
-            cd /home/circleci/repo/ui
-            npm install
-            npm install relay
-            npm run relay
-            unset CI && npm run build
-      - run:
-          name: Run jest tests
-          command: |
-            cd /home/circleci/repo/ui
-            jest shared/fileBrowser activity dashboard -u
-
-  fossa:
-    executor: gig_client
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - run:
-          name: Build frontend production code
-          command: |
-            cd /home/circleci/repo/ui
-            npm install
-            npm install relay
-      - run:
-          name: Run Fossa
-          command: fossa
-          working_directory: /home/circleci/repo/
-      - run:
-          name: Enforce Fossa checks
-          command: fossa test --timeout 600
-          working_directory: /home/circleci/repo/
+#  test-gtmcore:
+#    executor: gig_client
+#    working_directory: ~/repo
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          name: Set authentication credentials
+#          command: bash /home/circleci/repo/.circleci/write_auth.sh
+#      - run:
+#          name: Run Core unit and coverage tests
+#          command: |
+#            export SKIP_CONDA_TESTS=1
+#            redis-server > /dev/null 2> /dev/null &
+#            rqscheduler --interval=2 2> /dev/null &
+#            pytest --cov=gtmcore packages/gtmcore
+#            codecov -F core
+#
+#  test-gtmapi:
+#    executor: gig_client
+#    working_directory: ~/repo
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          name: Set authentication credentials
+#          command: bash /home/circleci/repo/.circleci/write_auth.sh
+#      - run:
+#          name: Run API unit, integration and coverage tests
+#          command: |
+#            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
+#            export SKIP_CONDA_TESTS=1
+#            cd /home/circleci/repo
+#            redis-server > /dev/null 2> /dev/null &
+#            rqscheduler --interval=2 2> /dev/null &
+#            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
+#            pytest --cov=lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
+#            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvcore
+#            pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
+#            codecov -F api
+#
+#  test-long-running-env:
+#    executor: gig_client
+#    working_directory: ~/repo
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          name: Set authentication credentials
+#          command: bash /home/circleci/repo/.circleci/write_auth.sh
+#      - run:
+#          name: Run long running conda environment tests
+#          command: |
+#            export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
+#            cd /home/circleci/repo
+#            redis-server > /dev/null 2> /dev/null &
+#            rqscheduler --interval=2 2> /dev/null &
+#            python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py 7 &
+#            pytest --cov=gtmcore packages/gtmcore/gtmcore/environment/tests/test_conda.py
+#            codecov -F core
+#
+#  test-ui-components:
+#    executor: gig_client
+#    working_directory: ~/repo
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          name: Build frontend production code
+#          command: |
+#            cd /home/circleci/repo/ui
+#            npm install
+#            npm install relay
+#            npm run relay
+#            unset CI && npm run build
+#      - run:
+#          name: Run jest tests
+#          command: |
+#            cd /home/circleci/repo/ui
+#            jest shared/fileBrowser activity dashboard -u
+#
+#  fossa:
+#    executor: gig_client
+#    working_directory: ~/repo
+#    steps:
+#      - checkout
+#      - run:
+#          name: Build frontend production code
+#          command: |
+#            cd /home/circleci/repo/ui
+#            npm install
+#            npm install relay
+#      - run:
+#          name: Run Fossa
+#          command: fossa
+#          working_directory: /home/circleci/repo/
+#      - run:
+#          name: Enforce Fossa checks
+#          command: fossa test --timeout 600
+#          working_directory: /home/circleci/repo/
 
 workflows:
   version: 2
@@ -150,22 +166,26 @@ workflows:
       - mypy-gtmcore
       - mypy-gtmapi
       - test-long-running-env
-      - test-confhttpproxy:
+      - test-harness:
           requires:
             - mypy-gtmcore
             - mypy-gtmapi
-      - test-gtmcore:
-          requires:
-            - mypy-gtmcore
-            - mypy-gtmapi
-      - test-gtmapi:
-          requires:
-            - mypy-gtmcore
-            - mypy-gtmapi
-      - test-ui-components:
-          requires:
-            - mypy-gtmcore
-            - mypy-gtmapi
-      - fossa:
-          requires:
-            - test-confhttpproxy
+#      - test-confhttpproxy:
+#          requires:
+#            - mypy-gtmcore
+#            - mypy-gtmapi
+#      - test-gtmcore:
+#          requires:
+#            - mypy-gtmcore
+#            - mypy-gtmapi
+#      - test-gtmapi:
+#          requires:
+#            - mypy-gtmcore
+#            - mypy-gtmapi
+#      - test-ui-components:
+#          requires:
+#            - mypy-gtmcore
+#            - mypy-gtmapi
+#      - fossa:
+#          requires:
+#            - test-confhttpproxy
