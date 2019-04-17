@@ -51,7 +51,8 @@ jobs:
     steps:
       - run:
           name: Clone, install, and run gigantum-client
-          command: git clone https://github.com/gigantum/gigantum-testing.git
+          command: |
+            git clone https://github.com/gigantum/gigantum-testing.git
             cd ~/gigantum-testing
             bash .circleci/ubuntu1404-install.sh
 
