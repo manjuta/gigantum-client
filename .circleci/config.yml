@@ -61,6 +61,7 @@ jobs:
             source gtmenv/bin/activate
             cd gtm
             sudo apt-get -y install python3-dev python3.6-dev && pip install -e .
+            echo -e "y\nn\n\n/home/circleci/project\n" | gtm dev setup
             gtm client build
             gtm client start
             cd ~/gigantum-testing
