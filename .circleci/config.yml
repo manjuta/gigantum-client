@@ -53,16 +53,16 @@ jobs:
       - run:
           name: Clone, install, and run gigantum-testing
           command: |
+            git clone https://github.com/gigantum/gigantum-testing.git
+            cd gigantum-testing
+            bash .circleci/ubuntu1404-install.sh
             cd ~/project
             python3.6 -m venv gtm
             source gtm/bin/activate
             pip3 install -r requirements.txt
             gtm client build
             gtm client start
-            cd ~
-            git clone https://github.com/gigantum/gigantum-testing.git
-            cd gigantum-testing
-            bash .circleci/ubuntu1404-install.sh
+            cd ~/gigantum-testing
             python3.6 -m venv harness-env
             source harness-env/bin/activate
             pip install -r requirements.txt
