@@ -49,12 +49,28 @@ jobs:
     executor: test_harness_machine
     working_directory: ~
     steps:
+      - checkout
+      - run:
+          name: Build and run gigantum
+          command: |
+            cd ~/project
+            python3.6 -m venv gtm
+            source gtm/bin/activate
+            pip3 install -r requirements.txt
+            gtm client build
+            gtm client start
+
       - run:
           name: Clone, install, and run gigantum-client
           command: |
             git clone https://github.com/gigantum/gigantum-testing.git
             cd gigantum-testing
             bash .circleci/ubuntu1404-install.sh
+            python3.6 -m venv harness-env
+            source harness-env/bin/activate
+            pip install -r requirements.txt
+            python3.6 driver.py test_examples
+
 
 #  test-gtmcore:
 #    executor: gig_client
