@@ -53,6 +53,7 @@ jobs:
       - run:
           name: Build and run gigantum
           command: |
+            sudo apt-get install python3.6 python3-pip python3.6-venv
             cd ~/project
             python3.6 -m venv gtm
             source gtm/bin/activate
@@ -61,7 +62,7 @@ jobs:
             gtm client start
 
       - run:
-          name: Clone, install, and run gigantum-client
+          name: Clone, install, and run gigantum-testing
           command: |
             git clone https://github.com/gigantum/gigantum-testing.git
             cd gigantum-testing
