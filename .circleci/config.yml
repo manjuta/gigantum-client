@@ -60,7 +60,7 @@ jobs:
             python3.6 -m venv gtm
             source gtm/bin/activate
             cd gtm
-            sudo apt-get install python3-dev && pip install -e .
+            sudo apt-get -y install python3-dev python3.6-dev && pip install -e .
             gtm client build
             gtm client start
             cd ~/gigantum-testing
