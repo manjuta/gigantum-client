@@ -51,6 +51,7 @@ export default class Home extends Component {
           state.authenticated && (
             <Dashboard
               auth={props.auth}
+              diskLow={props.diskLow}
               footerWorkerCallback={this.footerWorkerCallback}
               section={props.match}
               match={props.match}
@@ -65,6 +66,7 @@ export default class Home extends Component {
             auth={props.auth}
             loadingRenew={loadingRenew}
             userIdentityReturned={props.userIdentityReturned}
+            diskLow={props.diskLow}
           />
           )
         }

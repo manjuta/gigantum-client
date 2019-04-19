@@ -519,6 +519,7 @@ class Branches extends Component {
         <SidePanel
           toggleSidePanel={props.toggleSidePanel}
           isSticky={props.isSticky}
+          diskLow={props.diskLow}
           isDeprecated={props.isDeprecated}
           renderContent={() => (
             <div className="Branches">

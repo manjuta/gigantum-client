@@ -121,6 +121,7 @@ export default class DashboardContainer extends Component {
                     history={props.history}
                     section={sectionRoute}
                     refetchSort={this._refetchSort}
+                    diskLow={props.diskLow}
                   />
                 );
               }
@@ -131,6 +132,7 @@ export default class DashboardContainer extends Component {
                   history={props.history}
                   section={sectionRoute}
                   refetchSort={this._refetchSort}
+                  diskLow={props.diskLow}
                 />
               );
             }
@@ -141,6 +143,7 @@ export default class DashboardContainer extends Component {
                   labbookList={queryProps}
                   history={props.history}
                   refetchSort={this._refetchSort}
+                  diskLow={props.diskLow}
                 />
               );
             }
@@ -151,6 +154,7 @@ export default class DashboardContainer extends Component {
                 labbookList={queryProps}
                 history={props.history}
                 refetchSort={this._refetchSort}
+                diskLow={props.diskLow}
               />
             );
           } else {
@@ -163,6 +167,7 @@ export default class DashboardContainer extends Component {
                   section={sectionRoute}
                   refetchSort={this._refetchSort}
                   loading
+                  diskLow={props.diskLow}
                 />
               );
             }
@@ -175,6 +180,7 @@ export default class DashboardContainer extends Component {
                 section={sectionRoute}
                 refetchSort={this._refetchSort}
                 loading
+                diskLow={props.diskLow}
               />
             );
           }

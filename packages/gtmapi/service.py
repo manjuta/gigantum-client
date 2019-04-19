@@ -21,6 +21,7 @@ import shutil
 import os
 import base64
 import asyncio
+import threading
 
 from confhttpproxy import ProxyRouter
 from flask import Flask, jsonify, request, abort
@@ -38,7 +39,7 @@ from gtmcore.auth.identity import AuthenticationError, get_identity_manager
 from gtmcore.labbook.lock import reset_all_locks
 from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.auth.user import get_logged_in_author
-
+from lmsrvcore import service_telemetry
 
 logger = LMLogger.get_logger()
 
@@ -94,6 +95,12 @@ def handle_auth_error(ex):
     response = jsonify(ex.error)
     response.status_code = ex.status_code
     return response
+
+
+@app.route(f"{api_prefix}/sysinfo")
+@cross_origin(headers=["Content-Type", "Authorization"], max_age=7200)
+def sysinfo():
+    return jsonify(service_telemetry())
 
 
 # Set Unauth'd route for API health-check

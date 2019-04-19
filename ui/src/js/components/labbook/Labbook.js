@@ -499,7 +499,7 @@ class Labbook extends Component {
       const { labbook, branchesOpen } = props;
       const sidePanelVisible = !isLocked && props.sidePanelVisible;
       const branchName = '';
-      const isDemo = window.location.hostname === Config.demoHostName;
+      const isDemo = (window.location.hostname === Config.demoHostName) || props.diskLow;
       const { migrationText, showMigrationButton } = this._getMigrationInfo();
       const oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName));
       const migrationModalType = state.migrateComplete ? 'large' : 'large-long';
@@ -760,6 +760,7 @@ class Labbook extends Component {
                           <Activity
                             key={`${props.labbookName}_activity`}
                             labbook={labbook}
+                            diskLow={props.diskLow}
                             activityRecords={props.activityRecords}
                             labbookId={labbook.id}
                             branchName={branchName}

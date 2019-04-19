@@ -420,7 +420,7 @@ class Datasets extends Component {
     const { props, state } = this;
     const datasetsCSS = classNames({
       Datasets: true,
-      'Datasets--demo': window.location.hostname === config.demoHostName,
+      'Datasets--demo': (window.location.hostname === config.demoHostName) || props.diskLow,
     });
 
     if (props.datasetList !== null || props.loading) {

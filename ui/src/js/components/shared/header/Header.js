@@ -1,6 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 // store
 import store from 'JS/redux/store';
@@ -185,6 +184,7 @@ class Header extends Component {
     const headerCSS = classNames({
       Header: true,
       'Header--sticky': props.isSticky,
+      'Header--demo': (window.location.hostname === Config.demoHostName) || props.diskLow,
       'Header--is-deprecated': props.isDeprecated,
       'Header--branchesOpen': props.branchesOpen,
     });
@@ -195,10 +195,6 @@ class Header extends Component {
       hidden: !props.branchesOpen,
     });
 
-
-    const hiddenStickCSS = classNames({
-      hidden: props.isStick,
-    });
     let branches = props.branches || [{
       branchName: 'master',
       isActive: true,

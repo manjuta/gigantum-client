@@ -809,6 +809,7 @@ class BranchMenu extends Component {
            sidePanelVisible={props.sidePanelVisible}
            toggleSidePanel={this._toggleSidePanel}
            defaultRemote={props.defaultRemote}
+           diskLow={props.diskLow}
            branches={props.branches}
            disableDropdown={disableDropdown}
            activeBranch={activeBranch}

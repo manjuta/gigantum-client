@@ -1,0 +1,1 @@
+from lmsrvcore.telemetry import service_telemetry
