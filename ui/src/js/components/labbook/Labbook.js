@@ -487,13 +487,14 @@ class Labbook extends Component {
 
   render() {
     const { props, state } = this;
+    const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
     const isLockedBrowser = {
       locked: (props.isPublishing || props.isSyncing || props.isExporting),
       isPublishing: props.isPublishing,
       isExporting: props.isExporting,
       isSyncing: props.isSyncing,
+      isLocked,
     };
-    const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
 
     if (props.labbook) {
       const { labbook, branchesOpen } = props;
@@ -716,7 +717,7 @@ class Labbook extends Component {
                         isPublishing={props.isPublishing}
                         scrollToTop={this._scrollToTop}
                         sectionType="labbook"
-                        history={this.props.history}
+                        history={props.history}
                       />
                     </ErrorBoundary>
                   )}
@@ -744,7 +745,7 @@ class Labbook extends Component {
                             scrollToTop={this._scrollToTop}
                             sectionType="labbook"
 
-                            history={this.props.history}
+                            history={props.history}
                           />
                         </ErrorBoundary>
                       )}
@@ -793,7 +794,8 @@ class Labbook extends Component {
                             fetchPackageVersion={this._fetchPackageVersion}
                             {...props}
                           />
-                        </ErrorBoundary>)}
+                        </ErrorBoundary>
+                      )}
                     />
 
                     <Route
@@ -810,8 +812,8 @@ class Labbook extends Component {
                             isLocked={isLockedBrowser}
                             section="code"
                           />
-
-                        </ErrorBoundary>)}
+                        </ErrorBoundary>
+                      )}
                     />
 
                     <Route
@@ -827,7 +829,8 @@ class Labbook extends Component {
                             isLocked={isLockedBrowser}
                             section="input"
                           />
-                        </ErrorBoundary>)}
+                        </ErrorBoundary>
+                      )}
                     />
 
                     <Route
@@ -843,7 +846,8 @@ class Labbook extends Component {
                             isLocked={isLockedBrowser}
                             section="output"
                           />
-                        </ErrorBoundary>)}
+                        </ErrorBoundary>
+                      )}
                     />
 
                   </Switch>
@@ -857,7 +861,8 @@ class Labbook extends Component {
           </div>
           <div className="Labbook__veil" />
 
-        </div>);
+        </div>
+      );
     }
 
     if (state.authenticated) {

@@ -46,7 +46,6 @@ class Routes extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      history,
       hasError: false,
       forceLoginScreen: true,
       loadingRenew: true,
@@ -73,7 +72,9 @@ class Routes extends Component {
       let loadingRenew = false;
 
       if (response.data) {
-        if (response.data.userIdentity && ((response.data.userIdentity.isSessionValid && navigator.onLine) || !navigator.onLine)) {
+        if (response.data.userIdentity
+          && ((response.data.userIdentity.isSessionValid && navigator.onLine)
+          || !navigator.onLine)) {
           localStorage.setItem('family_name', response.data.userIdentity.familyName);
           localStorage.setItem('given_name', response.data.userIdentity.givenName);
           localStorage.setItem('email', response.data.userIdentity.email);
@@ -135,7 +136,6 @@ class Routes extends Component {
     logs user out in using auth0
   */
   login() {
-    const { props } = this;
     auth.login();
   }
 
@@ -144,7 +144,6 @@ class Routes extends Component {
     logs user out using auth0
   */
   logout() {
-    const { props } = this;
     auth.logout();
   }
 
@@ -192,7 +191,7 @@ class Routes extends Component {
 
             <Route
               path=""
-              render={location => (
+              render={() => (
                 <div className="Routes">
                   {
                     window.location.hostname === config.demoHostName
@@ -250,7 +249,6 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/"
-                      
                       render={parentProps => (
                         <Home
                           loadingRenew={state.loadingRenew}

@@ -2,12 +2,10 @@
 import Routes from 'Components/Routes';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
-
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 

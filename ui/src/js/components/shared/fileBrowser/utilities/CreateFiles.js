@@ -22,10 +22,12 @@ const ig = ignore().add(gitIgnoreJson.gitIgnore);
 *  @return {}
 */
 const createFiles = (files, prefix, mutationData, dropZoneProps, fileSizeData) => {
+
   const filenames = files.map((file) => {
     const filename = file.entry ? `D:/${file.entry.fullPath}` : file.name;
     return filename;
   });
+
   const filteredFileNames = ig.filter(filenames);
   const filteredFiles = files.filter((file) => {
     const filename = file.entry ? `D:/${file.entry.fullPath}` : file.name;
