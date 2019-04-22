@@ -72,7 +72,7 @@ class LabBook(Repository):
     @property
     def owner(self) -> Optional[str]:
         try:
-            _, owner, _, project_name = self.root_dir.split('/')
+            _, owner, _, project_name = self.root_dir.rsplit('/', 3)
             return owner
         except Exception as e:
             return None

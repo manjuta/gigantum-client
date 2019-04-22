@@ -50,7 +50,7 @@ class Configuration(object):
 
     @property
     def app_workdir(self):
-        return os.path.expanduser(self.user_config['git']['working_directory'])
+        return os.path.expanduser(self.config['git']['working_directory'])
 
     @property
     def user_config(self) -> Dict[str, Any]:
@@ -98,10 +98,10 @@ class Configuration(object):
 
     def load(self, config_file: str = None) -> Dict[str, Any]:
         """Method to load a config file
-        
+
         Args:
             config_file(str): Absolute path to a configuration file
-        
+
         Returns:
             (dict)
         """
