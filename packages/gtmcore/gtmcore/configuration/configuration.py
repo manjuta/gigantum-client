@@ -49,6 +49,10 @@ class Configuration(object):
             return os.path.join(resource_filename("gtmcore", "configuration/config"), "labmanager.yaml.default")
 
     @property
+    def app_workdir(self):
+        return os.path.expanduser(self.user_config['git']['working_directory'])
+
+    @property
     def user_config(self) -> Dict[str, Any]:
         """Return the configuration items loaded from the user's config.yaml"""
 

@@ -70,6 +70,14 @@ class LabBook(Repository):
         raise ValueError("Cannot set name")
 
     @property
+    def owner(self) -> Optional[str]:
+        try:
+            _, owner, _, project_name = self.root_dir.split('/')
+            return owner
+        except Exception as e:
+            return None
+
+    @property
     def creation_date(self) -> Optional[datetime.datetime]:
         """ Return the timestamp of creation of this project """
         date_str = self._data.get('creation_utc') or self._data['created_on']
@@ -118,14 +126,20 @@ class LabBook(Repository):
 
         return base_data.get('cuda_version')
 
-    def store_secret(self):
+    @property
+    def metadata_path(self) -> str:
+        return os.path.join(self.root_dir, '.gigantum')
+
+    def store_secret(self, host_dir_name: str, target_mnt_path: str) -> None:
+        """
+        Set a mount point for a given secret.
+        """
         workdir = self.client_config.config['git']['working_directory']
         workdir = os.path.expanduser(workdir)
 
     def list_secrets(self, username: str):
         workdir = self.client_config.config['git']['working_directory']
         workdir = os.path.expanduser(workdir)
-
 
 
     @property
