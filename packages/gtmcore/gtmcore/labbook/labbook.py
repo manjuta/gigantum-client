@@ -118,6 +118,16 @@ class LabBook(Repository):
 
         return base_data.get('cuda_version')
 
+    def store_secret(self):
+        workdir = self.client_config.config['git']['working_directory']
+        workdir = os.path.expanduser(workdir)
+
+    def list_secrets(self, username: str):
+        workdir = self.client_config.config['git']['working_directory']
+        workdir = os.path.expanduser(workdir)
+
+
+
     @property
     def config_path(self) -> str:
         if self._data['schema'] == 2:
