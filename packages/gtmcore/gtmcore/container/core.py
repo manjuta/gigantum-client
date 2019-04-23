@@ -203,17 +203,18 @@ def start_labbook_container(labbook_root: str, config_path: str, username: str,
     else:
         tag = override_image_id
 
+    mnt_point = labbook_root.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+    volumes_dict = {
+        mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
+        'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
+    }
+
     secret_store = SecretStore(lb, username)
     for secret_name in secret_store:
         pass
 
     #secret_store.secret_path
 
-    mnt_point = labbook_root.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
-    volumes_dict = {
-        mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
-        'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
-    }
 
     # Set up additional bind mounts for datasets if needed.
     submodules = lb.git.list_submodules()

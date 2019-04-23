@@ -34,6 +34,9 @@ class TestLabbookSecret(object):
         for secret_key in secstore:
             mnt_point = secstore[secret_key]
 
+        print(secstore.as_mount_dict)
+        assert False
+
         del secstore['aws_creds']
         assert len(secstore) == 1
         del secstore['other_cred']
@@ -95,7 +98,7 @@ class TestLabbookSecret(object):
         secstore.clear_files()
         toks = [secstore.labbook.client_config.app_workdir, '.labmanager', 'secrets',
                 'test', secstore.labbook.owner, secstore.labbook.name]
-        assert not os.path.exists(*toks)
+        assert not os.path.exists(os.path.join(*toks))
 
     # def test_insert_file_delete_files_list_files(self, mock_config_file):
     #     secstore = init(mock_config_file[0])

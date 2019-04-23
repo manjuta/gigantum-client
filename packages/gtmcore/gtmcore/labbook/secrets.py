@@ -26,6 +26,11 @@ class SecretStore(object):
         else:
             return {}
 
+    @property
+    def as_mount_dict(self) -> Dict[str, str]:
+        return {path_on_disk(self.labbook, self.username, k): v
+                for k, v in self.secret_map.items()}
+
     def insert_file(self, src_path: str, secret_name: str) -> str:
         owner = self.labbook.owner
         if not owner:
