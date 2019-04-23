@@ -29,8 +29,6 @@ from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.labbook import LabBook
-from gtmcore.configuration import Configuration
-from gtmcore.dataset.cache import get_cache_manager_class
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.inventory import Repository
@@ -299,7 +297,7 @@ def build_labbook_image(path: str, username: Optional[str] = None,
         raise
 
 
-def start_labbook_container(root: str, config_path: str, username: Optional[str] = None,
+def start_labbook_container(root: str, config_path: str, username: str,
                             override_image_id: Optional[str] = None) -> str:
     """Return the ID of the LabBook Docker container ID.
 

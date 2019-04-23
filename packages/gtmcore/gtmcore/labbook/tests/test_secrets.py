@@ -97,34 +97,34 @@ class TestLabbookSecret(object):
                 'test', secstore.labbook.owner, secstore.labbook.name]
         assert not os.path.exists(*toks)
 
-    def test_insert_file_delete_files_list_files(self, mock_config_file):
-        secstore = init(mock_config_file[0])
-        key_name, mnt_target = 'ssh_creds', '/opt/.ssh'
-
-        with tempfile.TemporaryDirectory() as tempdir:
-            with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as tf:
-                tf.write('<<SUPER SECRET PRIVATE KEY>>')
-            with open(os.path.join(tempdir, 'ID_SSH.PUB'), 'w') as tp:
-                tp.write('((NOT SO SECRET PUBLIC KEY))')
-
-            secstore[key_name] = mnt_target
-            dst_path = secstore.insert_file(tf.name, key_name)
-
-            # Now add a second file for that same key (directory)
-            dst_path_2 = secstore.insert_file(tp.name, key_name)
-
-        parts = [secstore.labbook.client_config.app_workdir, '.labmanager',
-                 'secrets', 'test', secstore.labbook.owner, secstore.labbook.name,
-                 key_name, os.path.basename(dst_path)]
-        assumed_path = os.path.join(*parts)
-        assert assumed_path == dst_path
-
-        assert secstore.list_files('invalid') == []
-        assert secstore.list_files('ssh_creds') == ['ID_SSH.KEY', 'ID_SSH.PUB']
-
-        secstore.delete_files('ssh_creds', ['ID_SSH.KEY'])
-        assert secstore.list_files('ssh_creds') == ['ID_SSH.PUB']
-        secstore.delete_files('ssh_creds', ['ID_SSH.PUB'])
-        assert secstore.list_files('ssh_creds') == []
+    # def test_insert_file_delete_files_list_files(self, mock_config_file):
+    #     secstore = init(mock_config_file[0])
+    #     key_name, mnt_target = 'ssh_creds', '/opt/.ssh'
+    #
+    #     with tempfile.TemporaryDirectory() as tempdir:
+    #         with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as tf:
+    #             tf.write('<<SUPER SECRET PRIVATE KEY>>')
+    #         with open(os.path.join(tempdir, 'ID_SSH.PUB'), 'w') as tp:
+    #             tp.write('((NOT SO SECRET PUBLIC KEY))')
+    #
+    #         secstore[key_name] = mnt_target
+    #         dst_path = secstore.insert_file(tf.name, key_name)
+    #
+    #         # Now add a second file for that same key (directory)
+    #         dst_path_2 = secstore.insert_file(tp.name, key_name)
+    #
+    #     parts = [secstore.labbook.client_config.app_workdir, '.labmanager',
+    #              'secrets', 'test', secstore.labbook.owner, secstore.labbook.name,
+    #              key_name, os.path.basename(dst_path)]
+    #     assumed_path = os.path.join(*parts)
+    #     assert assumed_path == dst_path
+    #
+    #     assert secstore.list_files('invalid') == []
+    #     assert secstore.list_files('ssh_creds') == ['ID_SSH.KEY', 'ID_SSH.PUB']
+    #
+    #     secstore.delete_files('ssh_creds', ['ID_SSH.KEY'])
+    #     assert secstore.list_files('ssh_creds') == ['ID_SSH.PUB']
+    #     secstore.delete_files('ssh_creds', ['ID_SSH.PUB'])
+    #     assert secstore.list_files('ssh_creds') == []
 
 

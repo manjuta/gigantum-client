@@ -159,7 +159,7 @@ class ContainerOperations(object):
         return result
 
     @classmethod
-    def start_container(cls, labbook: LabBook, username: Optional[str] = None,
+    def start_container(cls, labbook: LabBook, username: str,
                         override_image_tag: Optional[str] = None) -> Tuple[LabBook, str]:
         """ Start a Docker container for a given labbook LabBook. Return the new labbook instances
             and a list of TCP port mappings.

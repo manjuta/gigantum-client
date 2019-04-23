@@ -8,7 +8,8 @@ from typing import Callable, Optional
 
 from gtmcore.configuration import get_docker_client, Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.inventory.inventory  import InventoryManager, InventoryException
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
+from gtmcore.labbook import SecretStore, SecretStoreException
 from gtmcore.container.utils import infer_docker_image_name, ps_search
 from gtmcore.container.exceptions import ContainerBuildException
 from gtmcore.dataset.cache import get_cache_manager_class
@@ -177,9 +178,8 @@ def build_docker_image(root_dir: str, override_image_tag: Optional[str],
     return image_id
 
 
-def start_labbook_container(labbook_root: str, config_path: str,
-                            override_image_id: Optional[str] = None,
-                            username: Optional[str] = None) -> str:
+def start_labbook_container(labbook_root: str, config_path: str, username: str,
+                            override_image_id: Optional[str] = None) -> str:
     """ Start a Docker container from a given image_name.
 
     Args:
@@ -202,6 +202,12 @@ def start_labbook_container(labbook_root: str, config_path: str,
         tag = infer_docker_image_name(lb.name, owner, username)
     else:
         tag = override_image_id
+
+    secret_store = SecretStore(lb, username)
+    for secret_name in secret_store:
+        pass
+
+    #secret_store.secret_path
 
     mnt_point = labbook_root.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
     volumes_dict = {

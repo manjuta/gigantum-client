@@ -14,7 +14,7 @@ class SecretStoreException(GigantumException):
 
 class SecretStore(object):
 
-    def __init__(self, labbook: LabBook, username: str):
+    def __init__(self, labbook: LabBook, username: str) -> None:
         self.labbook = labbook
         self.username = username
         self.secret_path = os.path.join(self.labbook.metadata_path, 'secrets.json')

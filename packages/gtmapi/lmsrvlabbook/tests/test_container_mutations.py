@@ -136,7 +136,7 @@ class TestContainerMutations(object):
         """Test listing labbooks"""
         # Start the container
         lb, container_id = ContainerOperations.start_container(build_image_for_jupyterlab[0],
-                                                                          username='default')
+                                                               username='default')
 
         try:
             lb = build_image_for_jupyterlab[0]
