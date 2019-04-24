@@ -58,7 +58,6 @@ class SectionBrowser extends Component {
         if (error) {
           console.error(error);
         }
-
         if (self.props[this.props.section].allFiles
          && self.props[this.props.section].allFiles.pageInfo.hasNextPage) {
           self._loadMore();

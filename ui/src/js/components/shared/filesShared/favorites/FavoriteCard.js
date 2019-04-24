@@ -229,9 +229,10 @@ class FavoriteCard extends Component {
     });
     return (
       connectDragSource(connectDropTarget(<div className={favoriteCardCSS}>
-        <div
+        <button
           onClick={() => { this._removeFavorite(props.favorite); }}
-          className="FileCard__star"
+          className="FileCard__star Btn Btn--fileBrowser Btn--round Btn--bordered Btn__Favorite-on"
+          type="button"
         />
         <h6 className="FileCard__header">
           <TextTruncate
@@ -251,7 +252,8 @@ class FavoriteCard extends Component {
             {props.favorite.description}
             <button
               onClick={() => this._editDescription(true)}
-              className="FileCard__edit-button"
+              className="FileCard__edit-button Btn Btn--fileBrowser Btn--bordered Btn--round"
+              type="button"
             />
           </p>
           )
@@ -266,7 +268,7 @@ class FavoriteCard extends Component {
             Enter a short description
             <button
               onClick={() => this._editDescription(true)}
-              className="FileCard__edit-button"
+              className="FileCard__edit-button Btn Btn--fileBrowser Btn--bordered Btn--round"
             />
           </p>
           )

@@ -528,8 +528,8 @@ class Folder extends Component {
 
 
     const addRowStyle = {
-      paddingLeft: `${paddingLeft + 120}px`,
-      backgroundPositionX: `${99 + paddingLeft}px`,
+      paddingLeft: `${paddingLeft + 155}px`,
+      backgroundPositionX: `${112 + paddingLeft}px`,
     };
     let folderKeys = children && Object.keys(children).filter(child => children[child].edge && children[child].edge.node.isDir) || [];
     folderKeys = this._childSort(folderKeys, props.sort, props.reverse, children, 'folder');

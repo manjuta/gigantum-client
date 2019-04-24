@@ -210,11 +210,14 @@ class Routes extends Component {
       });
 
       if (state.forceLoginScreen) {
+        const match = {};
+        match.path = window.location.pathname.indexOf('datasets') > -1 ? '/datasets/:labbookSection' : '/projects/:labbookSection';
         return (
           <Home
             userIdentityReturned={state.userIdentityReturned}
             history={history}
             auth={auth}
+            match={match}
             {...props}
           />
         );

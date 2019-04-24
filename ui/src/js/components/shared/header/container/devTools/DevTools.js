@@ -16,7 +16,7 @@ import './DevTools.scss';
 class DevTools extends Component {
   state = {
     isMouseOver: false,
-    selectedDevTool: 'jupyterlab',
+    selectedDevTool: this.props.labbook.environment.base ? this.props.labbook.environment.base.developmentTools[0] : 'jupyterlab',
     showDevList: false,
   }
 

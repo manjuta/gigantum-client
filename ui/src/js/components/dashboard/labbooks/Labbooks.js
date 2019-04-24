@@ -495,7 +495,7 @@ class Labbooks extends Component {
                     && (
                       <button
                         type="button"
-                        className="Input__clear Btn Btn--flat"
+                        className="Btn Btn--flat"
                         onClick={() => this._setFilterValue({ target: { value: '' } })}
                       >
                        Clear

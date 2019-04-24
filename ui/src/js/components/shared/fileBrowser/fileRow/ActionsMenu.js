@@ -129,9 +129,9 @@ export default class ActionsMenu extends Component {
     const isUntrackedDirectory = (props.edge.node.key === 'untracked/') && props.folder && (props.section === 'output');
 
     const favoriteCSS = classNames({
-      'ActionsMenu__item Tooltip-data Tooltip-data--small Btn--round Btn--bordered': true,
-      'Btn__Favorite-on Btn--noShadow': props.edge.node.isFavorite,
-      'Btn__Favorite-off Btn--noShadow': !props.edge.node.isFavorite,
+      'ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn--bordered': true,
+      'Btn__Favorite-on': props.edge.node.isFavorite,
+      'Btn__Favorite-off': !props.edge.node.isFavorite,
     });
     const popupCSS = classNames({
       ActionsMenu__popup: true,
@@ -139,12 +139,12 @@ export default class ActionsMenu extends Component {
       Tooltip__message: true,
     });
     const deleteCSS = classNames({
-      'ActionsMenu__item Btn__delete Btn--noShadow Btn--round Btn--bordered': true,
+      'ActionsMenu__item Btn Btn--fileBrowser Btn__delete Btn--round Btn--bordered': true,
       'Tooltip-data Tooltip-data--small': !state.popupVisible,
       'ActionsMenu__popup-visible': state.popupVisible,
     });
     const folderCSS = classNames({
-      'ActionsMenu__item Tooltip-data Tooltip-data--small Btn--round Btn--bordered': true,
+      'ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn--bordered': true,
       Btn__addFolder: true,
       'visibility-hidden': !props.folder,
     });
@@ -158,6 +158,7 @@ export default class ActionsMenu extends Component {
         <button
           onClick={() => { props.folder && props.addFolderVisible(true); }}
           className={folderCSS}
+          data-click-id="addFolder"
           data-tooltip="Add Subfolder"
           type="button"
         />
@@ -193,7 +194,7 @@ export default class ActionsMenu extends Component {
               <button
                 disabled={disableButtons}
                 onClick={() => { props.renameEditMode(true); }}
-                className="ActionsMenu__item Btn__rename Btn--noShadow Tooltip-data Tooltip-data--small Btn--bordered Btn--round"
+                className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--bordered Btn--round"
                 data-tooltip={renameTooltip}
                 type="button"
               />

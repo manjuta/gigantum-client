@@ -37,7 +37,7 @@ export default class DashboardContainer extends Component {
     const { orderBy, sort } = queryString.parse(props.history.location.search.slice(1));
 
     this.state = {
-      selectedComponent: props.match.path,
+      selectedComponent: props.match && props.match.path,
       orderBy: orderBy || 'modified_on',
       sort: sort || 'desc',
     };

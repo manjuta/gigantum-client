@@ -24,7 +24,6 @@ class ContainerStatus extends Component {
       status: '',
       isMouseOver: false,
       showDevList: false,
-      showInitialMessage: false,
       attemptingRebuild: false,
     };
 
@@ -58,13 +57,6 @@ class ContainerStatus extends Component {
   */
   componentDidMount() {
     const { props } = this;
-    props.auth.isAuthenticated().then((response) => {
-      const containerMessageShown = localStorage.getItem('containerMessageShown');
-      if (!containerMessageShown && response) {
-        this.setState({ showInitialMessage: true });
-        localStorage.setItem('containerMessageShown', true);
-      }
-    });
 
     const status = this._getContainerStatusText({
       containerStatus: props.containerStatus,
@@ -97,9 +89,6 @@ class ContainerStatus extends Component {
     if (!containerMenuClicked
     && this.props.containerMenuOpen) {
       this.props.setContainerMenuVisibility(false);
-    }
-    if (this.state.showInitialMessage) {
-      this.setState({ showInitialMessage: false });
     }
 
     const pluginsMenuClicked = (evt.target.className.indexOf('ContainerStatus__plugins') > -1);
@@ -209,7 +198,13 @@ class ContainerStatus extends Component {
     const self = this;
 
     props.containerMutations.cancelBuild(
-      (response, error) => {
+      () => {
+        setTimeout(() => {
+          self.setState({
+            status: '',
+            contanerMenuRunning: false,
+          });
+        }, 3000);
       },
     );
   }
@@ -404,17 +399,6 @@ class ContainerStatus extends Component {
             <div className="ContainerStatus__toggle-btn" />
           </div>
         </div>
-
-        { state.showInitialMessage
-          && (
-          <Fragment>
-            <div className="ContainerStatus__initial-pointer" />
-            <div className="ContainerStatus__initial-menu">
-              This shows the current status of your project. To start a Project click on the status indicator or select the development tool that you wish to launch.
-            </div>
-          </Fragment>
-          )
-        }
 
         { props.containerMenuOpen
           && <div className="ContainerStatus__menu-pointer" />
