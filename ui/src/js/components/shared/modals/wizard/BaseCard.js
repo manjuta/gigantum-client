@@ -104,7 +104,12 @@ export default class BaseCard extends Component {
           </div>
 
           <div className="BaseCard__details">
-            <h6 className="BaseCard__name">{node.name}</h6>
+            <h6
+              className="BaseCard__name"
+              data-name={node.componentId}
+            >
+              {node.name}
+            </h6>
             <p className="BaseCard__type">{`${node.osClass} ${node.osRelease}`}</p>
             <p className="BaseCard__languages">{languages}</p>
             <p className="BaseCard__environments">{environments}</p>
