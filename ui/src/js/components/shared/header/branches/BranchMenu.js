@@ -51,10 +51,10 @@ const getSyncTooltip = (props, data) => {
     activeBranch,
   } = data;
   let syncTooltip = props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : '';
+  syncTooltip = !hasWriteAccess ? 'Pull' : 'Sync';
   syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : syncTooltip;
   syncTooltip = !props.defaultRemote ? 'Publish' : syncTooltip;
   syncTooltip = props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : syncTooltip;
-  syncTooltip = !hasWriteAccess ? 'Pull' : 'Sync';
 
   return syncTooltip;
 };

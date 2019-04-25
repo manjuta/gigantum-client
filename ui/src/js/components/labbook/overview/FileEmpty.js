@@ -21,7 +21,7 @@ export default class FileEmpty extends Component {
       (
         <div className="FilePreview__empty column-1-span-12">
           <button
-            className="Btn Btn--feature Btn__redirect"
+            className="Btn Btn--feature Btn__redirect Btn__redirect--featurePosition"
             onClick={() => props.handleRedirect(sectionLink)}
           >
             <span>{`View ${sectionType} Files`}</span>

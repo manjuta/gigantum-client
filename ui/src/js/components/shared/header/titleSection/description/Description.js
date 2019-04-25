@@ -176,29 +176,21 @@ export default class Description extends Component {
 
   render() {
     const { props, state } = this;
-
+    const displayedText = state.descriptionText && state.descriptionText.length ? state.descriptionText : 'Add description...';
+    const defaultText = state.descriptionText ? state.descriptionText : '';
 
     const descriptionCSS = classNames({
       Description__text: true,
       empty: !state.descriptionText,
     });
-
-
     const descriptionContainerCSS = classNames({
       Description__container: true,
       'Description__container--hovered': state.hovered && !state.editingDescription,
       'visibility-hidden': props.hovered,
     });
 
-
-    const displayedText = state.descriptionText && state.descriptionText.length ? state.descriptionText : 'Add description...';
-
-
-    const defaultText = state.descriptionText ? state.descriptionText : '';
-
     return (
       <div className="Description">
-
         <div
           className={descriptionContainerCSS}
           onMouseEnter={() => this.setState({ hovered: true })}
@@ -242,9 +234,9 @@ export default class Description extends Component {
                   )
                   : (
                     <p className={descriptionCSS}>
-                      {displayedText}
+                      <span className="Description__text">{displayedText}</span>
                       { state.hovered
-                          && <button className="Description__edit-button" />
+                          && <button className="Btn Btn__edit Btn__edit--DescriptionPosition Btn--medium Btn--noShadow absolute Btn--noMargin" />
                         }
                     </p>
                   )
