@@ -24,7 +24,8 @@ export default class Overview extends Component {
           width="50"
         />
         <div className="LinkCard__details">
-          <h6><b>{node.name}</b></h6>
+          <h6 data-name={node.name}><b>{node.name}</b></h6>
+          <p data-owner={node.owner}>{`Created By: ${node.owner}`}</p>
           <p>{node.datasetType.isManaged ? 'Managed' : 'Unmanaged'}</p>
           <p>{`Created on ${Moment(node.createdOnUtc).format('MM/DD/YY')}`}</p>
           <p>{`Modified ${Moment(node.modifiedOnUtc).fromNow()}`}</p>

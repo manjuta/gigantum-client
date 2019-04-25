@@ -219,3 +219,12 @@
     align-self: center;
   }
 }
+
+.LocalLabbooks__panel-title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  overflow: hidden;
+  line-height: 30px;
+  width: 250px;
+}
