@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import abc
-from typing import (List, Dict, Optional)
+from typing import (List, Dict, Tuple)
 from collections import namedtuple
 
 from gtmcore.labbook import LabBook
@@ -43,7 +43,7 @@ class PackageManager(metaclass=abc.ABCMeta):
                f":{base['image']['tag']}"
 
     @abc.abstractmethod
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
+    def search(self, search_str: str, labbook: LabBook, username: str) -> List[Tuple[str, str]]:
         """Method to search a package manager for packages based on a string. The string can be a partial string.
 
         Args:
@@ -52,7 +52,7 @@ class PackageManager(metaclass=abc.ABCMeta):
             username: username of current user
 
         Returns:
-            list(str): The list of package names that match the search string
+            list((str,str)): The list of package names and descriptions that match the search string
         """
         raise NotImplemented
 

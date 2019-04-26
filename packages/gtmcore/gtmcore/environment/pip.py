@@ -17,7 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from typing import (Any, List, Dict, Optional)
+from typing import (List, Dict, Tuple)
 import requests
 import json
 from gtmcore.container.container import ContainerOperations
@@ -35,7 +35,7 @@ class PipPackageManager(PackageManager):
     """Class to implement the pip package manager
     """
 
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
+    def search(self, search_str: str, labbook: LabBook, username: str) -> List[Tuple[str, str]]:
         """Method to search a package manager for packages based on a string. The string can be a partial string.
 
         Args:
@@ -51,8 +51,10 @@ class PipPackageManager(PackageManager):
             fallback_image=self.fallback_image(labbook))
 
         lines = search_result.decode().splitlines()
-        packages = [x.split(' ')[0] for x in lines]
-        return sorted(packages)
+        packages = [x.split('- ') for x in lines]
+        packages = sorted(packages)
+        packages = [(x[0].split(' ')[0], x[1].strip()) for x in packages]
+        return packages
 
     def list_versions(self, package_name: str, labbook: LabBook, username: str) -> List[str]:
         """Method to list all available versions of a package based on the package name

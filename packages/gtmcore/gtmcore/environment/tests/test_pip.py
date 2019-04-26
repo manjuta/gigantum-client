@@ -34,8 +34,12 @@ class TestPipPackageManager(object):
 
         result = mrg.search("gigantum", lb, username)
         assert len(result) == 4
-        assert result[0] == "gigantum"
-        assert result[3] == "gtmunit3"
+        assert result[0][0] == "gigantum"
+        assert result[0][1] == "CLI for the Gigantum Platform"
+        assert result[3][0] == "gtmunit3"
+
+        result = mrg.search("thereisnowaythatthispackageshouldexist", lb, username)
+        assert result == []
 
     def test_list_versions(self, build_lb_image_for_env):
         """Test list_versions command"""

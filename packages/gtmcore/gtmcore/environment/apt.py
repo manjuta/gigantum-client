@@ -1,23 +1,4 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-from typing import (List, Dict, Optional)
+from typing import (List, Dict, Tuple)
 
 from gtmcore.environment.packagemanager import PackageManager, PackageResult
 from gtmcore.container.container import ContainerOperations
@@ -33,7 +14,7 @@ class AptPackageManager(PackageManager):
     Note: apt is somewhat limiting in the ability to access old versions of packages
     """
 
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
+    def search(self, search_str: str, labbook: LabBook, username: str) -> List[Tuple[str, str]]:
         """Method to search a package manager for packages based on a string. The string can be a partial string.
 
         Args:
@@ -42,17 +23,14 @@ class AptPackageManager(PackageManager):
             username: username of current user
 
         Returns:
-            list(str): The list of package names that match the search string
+            list((str, str)): List of tuples containing package names and descriptions
         """
         result = ContainerOperations.run_command(f"apt-cache search {search_str}", labbook, username,
                                                  fallback_image=self.fallback_image(labbook))
-
-        packages = []
-        if result:
-            lines = result.decode('utf-8').split('\n')
-            for l in lines:
-                if l:
-                    packages.append(l.split(" - ")[0])
+        lines = result.decode('utf-8').split('\n')
+        lines = [x for x in lines if x]
+        packages = [x.split('- ') for x in lines]
+        packages = [(x[0].strip(), x[1].strip()) for x in packages]
 
         return packages
 
