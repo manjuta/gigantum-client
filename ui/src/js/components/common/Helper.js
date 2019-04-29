@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 import {
   setHelperVisibility,
   setResizeHelper,
-} from 'JS/redux/reducers/helper';
-import { setHelperVisible } from 'JS/redux/reducers/footer';
+} from 'JS/redux/actions/helper';
+import { setHelperVisible } from 'JS/redux/actions/footer';
+// assets
+import './Helper.scss';
 
 
 class Helper extends Component {
@@ -27,8 +29,10 @@ class Helper extends Component {
     * subscribe to store to update state
   */
   componentDidMount() {
+    const { props } = this;
     window.addEventListener('resize', this._resize);
-    this.props.auth.isAuthenticated().then((response) => {
+
+    props.auth.isAuthenticated().then((response) => {
       const guideShown = localStorage.getItem('guideShown');
       if (!guideShown && response) {
         this.setState({ showPopup: true });
@@ -44,15 +48,18 @@ class Helper extends Component {
     * update store
   */
   _toggleIsVisible() {
-    this.props.setHelperVisibility(!this.props.isVisible);
+    const { props } = this;
+    props.setHelperVisibility(!props.isVisible);
   }
+
   /**
     * @param {}
     * toggles menu view
   */
   _toggleMenuView() {
-    setHelperVisible(!this.state.helperMenuOpen);
-    this.setState({ helperMenuOpen: !this.state.helperMenuOpen });
+    const { state } = this;
+    setHelperVisible(!state.helperMenuOpen);
+    this.setState({ helperMenuOpen: !state.helperMenuOpen });
   }
 
   /**
@@ -60,29 +67,29 @@ class Helper extends Component {
     * update store to risize component
   */
   _resize() {
-    this.props.setResizeHelper();
+    const { props } = this;
+    props.setResizeHelper();
   }
 
   render() {
-    const bodyWidth = document.body.clientWidth;
+    const { props, state } = this;
 
     const menuCSS = classNames({
-      Helper__menu: this.state.helperMenuOpen,
-      hidden: !this.state.helperMenuOpen,
-      'Helper__men--footer-open': this.props.footerVisible,
+      Helper__menu: state.helperMenuOpen,
+      hidden: !state.helperMenuOpen,
+      'Helper__men--footer-open': props.footerVisible,
     });
 
     const helperButtonCSS = classNames({
       Helper__button: true,
-      'Helper__button--open': this.state.helperMenuOpen,
-      'Helper__button--side-view': bodyWidth < 1600,
-      'Helper__button--bottom': this.props.uploadOpen && !this.state.helperMenuOpen,
+      'Helper__button--open': state.helperMenuOpen,
+      'Helper__button--bottom': props.uploadOpen && !state.helperMenuOpen,
     });
 
     return (
       <div className="Helper">
-      {
-        this.state.showPopup &&
+        { state.showPopup
+        && (
         <Fragment>
           <div className="Helper__prompt">
             <div>
@@ -91,14 +98,17 @@ class Helper extends Component {
 
             <div>
               <button
+                type="button"
                 className="button--green"
-                onClick={() => this.setState({ showPopup: false })}>
+                onClick={() => this.setState({ showPopup: false })}
+              >
                 Got it!
               </button>
             </div>
           </div>
-          <div className="Helper__prompt-pointer"/>
+          <div className="Helper__prompt-pointer" />
         </Fragment>
+        )
       }
 
         <div
@@ -111,9 +121,7 @@ class Helper extends Component {
             onClick={() => window.open('https://feedback.gigantum.com')}
           >
             <h5>Feedback</h5>
-            <div
-              className="Helper__feedback-button"
-            />
+            <div className="Helper__feedback-button"/>
           </div>
           <div
             className="Helper__menu-discussion"
@@ -129,16 +137,16 @@ class Helper extends Component {
             onClick={() => window.open('https://docs.gigantum.com/docs')}
           >
             <h5>Docs</h5>
-            <div
-              className="Helper__docs-button"
-            />
+            <div className="Helper__docs-button" />
           </div>
-          <div
-            className="Helper__menu-guide"
-          >
+          <div className="Helper__menu-guide">
             <h5>Guide</h5>
-            <label className="Helper-guide-switch">
+            <label
+              htmlFor="guideShown"
+              className="Helper-guide-switch"
+            >
               <input
+                id="guideShown"
                 type="checkbox"
                 defaultChecked={!localStorage.getItem('guideShown')}
                 onClick={() => this._toggleIsVisible()}
@@ -153,7 +161,7 @@ class Helper extends Component {
 }
 
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   resize: state.helper.resize,
   isVisible: state.helper.isVisible,
   footerVisible: state.helper.footerVisible,

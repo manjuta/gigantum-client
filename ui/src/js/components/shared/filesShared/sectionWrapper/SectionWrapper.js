@@ -1,19 +1,19 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { boundMethod } from 'autobind-decorator';
 // assets
 import './SectionWrapper.scss';
 
-const component = './';
-
 const getComponetPaths = ((props) => {
-  const sectionType = props.labbook ? 'labbook' : 'dataset',
-  sectionPathRoot = `${sectionType}`,
-  sectionUpperCase = props.section[0].toUpperCase() + props.section.slice(1),
-  section = ((props.section === 'code') || props.section === 'data') ? props.section : `${props.section}Data`,
-  browserPath = `${sectionPathRoot}/${section}/${sectionUpperCase}Browser`,
-  favoritePath = props.labbook ? `${sectionPathRoot}/${section}/${sectionUpperCase}Favorites` : '',
-  recentPath = props.labbook ? `${sectionPathRoot}/${section}/MostRecent${sectionUpperCase}` : '';
+  const sectionType = props.labbook ? 'labbook' : 'dataset';
+  const sectionPathRoot = `${sectionType}`;
+  const sectionUpperCase = props.section[0].toUpperCase() + props.section.slice(1);
+  const section = ((props.section === 'code') || props.section === 'data') ? props.section : `${props.section}Data`;
+  const browserPath = `${sectionPathRoot}/${section}/${sectionUpperCase}Browser`;
+  const favoritePath = props.labbook ? `${sectionPathRoot}/${section}/${sectionUpperCase}Favorites` : '';
+  const recentPath = props.labbook ? `${sectionPathRoot}/${section}/MostRecent${sectionUpperCase}` : '';
+
   return ({
     browserPath,
     favoritePath,
@@ -22,21 +22,17 @@ const getComponetPaths = ((props) => {
 });
 
 export default class SectionWrapper extends Component {
-  constructor(props) {
-  	super(props);
-    this.state = {
-      selectedFiles: [],
-      selectedFilter: 'recent',
-    };
-    this._setSelectedFiles = this._setSelectedFiles.bind(this);
-    this._clearSelectedFiles = this._clearSelectedFiles.bind(this);
-    this._loadStatus = this._loadStatus.bind(this);
-    this._selectFilter = this._selectFilter.bind(this);
-  }
+  state = {
+    selectedFiles: [],
+    selectedFilter: 'recent',
+  };
 
   componentDidMount() {
-    const { section } = this.props;
-    let selectedFilter = this.props.labbook && this.props.labbook[section] && this.props.labbook[section].hasFavorites ? 'favorites' : this.state.selectedFilter;
+    const { props, state } = this;
+    const { section } = props;
+    const hasFavorites = props.labbook && props.labbook[section] && props.labbook[section].hasFavorites
+    const selectedFilter = hasFavorites ? 'favorites' : state.selectedFilter;
+
     this.setState({ selectedFilter });
   }
 
@@ -45,6 +41,7 @@ export default class SectionWrapper extends Component {
   *  set state with selected filter
   *  @return {}
   */
+  @boundMethod
   _setSelectedFiles(evt) {
     const files = [...evt.target.files];
     this.setState({ selectedFiles: files });
@@ -55,6 +52,7 @@ export default class SectionWrapper extends Component {
   *  clear selected files
   *  @return {}
   */
+  @boundMethod
   _clearSelectedFiles() {
     this.setState({ selectedFiles: [] });
   }
@@ -64,8 +62,10 @@ export default class SectionWrapper extends Component {
   *  udate loading status if state is not the same as result
   *  @return {}
   */
+  @boundMethod
   _loadStatus(result) {
-    if (result !== this.state.loadingStatus) {
+    const { state } = this;
+    if (result !== state.loadingStatus) {
       this.setState({ loadingStatus: result });
     }
   }
@@ -75,99 +75,123 @@ export default class SectionWrapper extends Component {
   *  update filterName and toggle view
   *  @return {}
   */
+  @boundMethod
   _selectFilter(filterName) {
     this.setState({ selectedFilter: filterName });
   }
 
   render() {
-    const sectionObject = this.props.labbook || this.props.dataset;
-    const innerSection = this.props.dataset ? sectionObject : sectionObject[this.props.section];
+    const { props, state } = this;
+    const sectionObject = props.labbook || props.dataset;
+    const innerSection = props.dataset ? sectionObject : sectionObject[props.section];
     const {
       browserPath,
       favoritePath,
       recentPath,
-    } = getComponetPaths(this.props);
+    } = getComponetPaths(props);
 
     if (sectionObject) {
-      let Favorites,
-          MostRecent;
-      const { labbook, section } = this.props,
-            favoritesCSS = classNames({
-              SectionWrapper__filter: true,
-              'SectionWrapper__filter--selected': this.state.selectedFilter === 'favorites',
-            }),
-            recentCSS = classNames({
-              SectionWrapper__filter: true,
-              'SectionWrapper__filter--selected': this.state.selectedFilter === 'recent',
-            }),
-            Browser = require(`./../../../${browserPath}`).default,
-            sectionProps = {
-                [section]: innerSection,
-                };
-        if (section !== 'data') {
-          Favorites = require(`./../../../${favoritePath}`).default;
-          MostRecent = require(`./../../../${recentPath}`).default;
-        }
-      const sectionId = this.props.labbookId || this.props.datasetId;
+      let Favorites;
+      let MostRecent;
+      const Browser = require(`./../../../${browserPath}`).default;
+      const sectionId = props.labbookId || props.datasetId;
+      const { labbook, section } = props;
+
+      if (section !== 'data') {
+        Favorites = require(`./../../../${favoritePath}`).default;
+        MostRecent = require(`./../../../${recentPath}`).default;
+      }
+
+      // declare css
+      const favoritesCSS = classNames({
+        SectionWrapper__filter: true,
+        'SectionWrapper__filter--selected': state.selectedFilter === 'favorites',
+      });
+      const recentCSS = classNames({
+        SectionWrapper__filter: true,
+        'SectionWrapper__filter--selected': state.selectedFilter === 'recent',
+      });
+      const sectionProps = {
+        [section]: innerSection,
+      };
+
       return (
 
         <div className="SectionWrapper">
           {
-            (section !== 'data') && sectionObject[section].isUntracked &&
+            (section !== 'data') && sectionObject[section].isUntracked
+            && (
             <div className="SectionWrapper__tracked-container">
               <div className="SectionWrapper__tracked">
                 Version Tracking Disabled
               </div>
             </div>
+            )
           }
-          { (section !== 'data') && (labbook[section].hasFiles || labbook[section].hasFavorites) &&
+          { (section !== 'data') && (labbook[section].hasFiles || labbook[section].hasFavorites)
+            && (
             <div>
               <div className="SectionWrapper__header">
                 <div className="SectionWrapper__toolbar">
-                  <a ref="favorites" className={favoritesCSS} onClick={() => this._selectFilter('favorites')}>Favorites</a>
-                  <a ref="recent" className={recentCSS} onClick={() => this._selectFilter('recent')}>Most Recent</a>
+                  <a
+                    ref="favorites"
+                    className={favoritesCSS}
+                    onClick={() => this._selectFilter('favorites')}
+                  >
+                    Favorites
+                  </a>
+                  <a
+                    ref="recent"
+                    className={recentCSS}
+                    onClick={() => this._selectFilter('recent')}
+                  >
+                    Most Recent
+                  </a>
                 </div>
 
               </div>
 
               <div className="SectionWrapper__files">
-                {
-                this.state.selectedFilter === 'favorites' &&
-                <Favorites
-                    sectionId={innerSection.id}
-                    labbookId={sectionId}
-                    section={section}
-                    {...sectionProps}
-                />
+                { state.selectedFilter === 'favorites'
+                  && (
+                    <Favorites
+                      sectionId={innerSection.id}
+                      labbookId={sectionId}
+                      section={section}
+                      {...sectionProps}
+                    />
+                  )
                 }
-                {
-                this.state.selectedFilter === 'recent' &&
-                  <MostRecent
-                    edgeId={innerSection.id}
-                    selectedFilter={this.state.selectedFilter}
-                    section={section}
-                    {...sectionProps}
-
-                  />
+                { state.selectedFilter === 'recent'
+                  && (
+                    <MostRecent
+                      edgeId={innerSection.id}
+                      selectedFilter={state.selectedFilter}
+                      section={section}
+                      {...sectionProps}
+                    />
+                  )
                 }
               </div>
-              <hr />
             </div>
+            )
           }
+          <hr className="column-1-span-12" />
+          <div className="grid">
+            <div className="SectionWrapper__file-browser column-1-span-12">
+              <Browser
+                selectedFiles={state.selectedFiles}
+                clearSelectedFiles={this._clearSelectedFiles}
+                labbookId={sectionId}
+                sectionId={innerSection.id}
+                section={section}
+                loadStatus={this._loadStatus}
+                isLocked={props.isLocked}
+                {...sectionProps}
+                linkedDatasets={sectionObject.linkedDatasets || null}
 
-          <div className="SectionWrapper__file-browser">
-            <Browser
-              selectedFiles={this.state.selectedFiles}
-              clearSelectedFiles={this._clearSelectedFiles}
-              labbookId={sectionId}
-              sectionId={innerSection.id}
-              section={section}
-              loadStatus={this._loadStatus}
-              isLocked={this.props.isLocked}
-              {...sectionProps}
-              linkedDatasets={sectionObject.linkedDatasets || null}
-
-            />
+              />
+            </div>
           </div>
         </div>
       );

@@ -9,8 +9,8 @@ import { connect } from 'react-redux';
 import Loadable from 'react-loadable';
 // store
 import store from 'JS/redux/store';
-import { setStickyState } from 'JS/redux/reducers/dataset/dataset';
-import { setCallbackRoute } from 'JS/redux/reducers/routes';
+import { setStickyState } from 'JS/redux/actions/dataset/dataset';
+import { setCallbackRoute } from 'JS/redux/actions/routes';
 // config
 import Config from 'JS/config';
 // utils
@@ -19,7 +19,8 @@ import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import DatasetHeader from '../shared/header/Header';
+import Tooltip from 'Components/common/Tooltip';
+import DatasetHeader from 'Components/shared/header/Header';
 // assets
 import './Dataset.scss';
 
@@ -55,6 +56,7 @@ class Dataset extends Component {
     const { labbookName, owner } = store.getState().routes;
     document.title = `${owner}/${labbookName}`;
   }
+
   /**
     @param {object} nextProps
     @param {object} state
@@ -64,6 +66,7 @@ class Dataset extends Component {
     setCallbackRoute(nextProps.location.pathname);
     return state;
   }
+
   /**
     @param {}
     subscribe to store to update state
@@ -127,12 +130,13 @@ class Dataset extends Component {
   }
 
   render() {
-    if (this.props.dataset) {
-      const { dataset } = this.props;
+    const { props, state } = this;
+    if (props.dataset) {
+      const { dataset } = props;
       const datasetCSS = classNames({
         Dataset: true,
-        'Dataset--detail-mode': this.props.detailMode,
-        'Dataset--demo-mode': window.location.hostname === Config.demoHostName,
+        'Dataset--detail-mode': props.detailMode,
+        'Dataset--demo-mode': (window.location.hostname === Config.demoHostName) || props.diskLow,
       });
 
       return (
@@ -143,10 +147,10 @@ class Dataset extends Component {
             <DatasetHeader
               description={dataset.description}
               toggleBranchesView={() => {}}
-              branchName={''}
+              branchName=""
               dataset={dataset}
-              sectionType={'dataset'}
-              {...this.props}
+              sectionType="dataset"
+              {...props}
             />
 
             <div className="Dataset__routes flex flex-1-0-auto">
@@ -154,28 +158,28 @@ class Dataset extends Component {
               <Switch>
                 <Route
                   exact
-                  path={`${this.props.match.path}`}
+                  path={`${props.match.path}`}
                   render={() => (
                     <ErrorBoundary type="datasetSectionError" key="overview">
                       <Overview
-                        key={`${this.props.datasetName}_overview`}
+                        key={`${props.datasetName}_overview`}
                         dataset={dataset}
                         isManaged={dataset.datasetType.isManaged}
                         datasetId={dataset.id}
                         scrollToTop={this._scrollToTop}
                         sectionType="dataset"
                         datasetType={dataset.datasetType}
-                        />
+                      />
                     </ErrorBoundary>
                   )}
                 />
 
-                <Route path={`${this.props.match.path}/:datasetMenu`}>
+                <Route path={`${props.match.path}/:datasetMenu`}>
 
                   <Switch>
 
                     <Route
-                      path={`${this.props.match.path}/overview`}
+                      path={`${props.match.path}/overview`}
                       render={() => (
                         <ErrorBoundary
                           type="datasetSectionError"
@@ -183,20 +187,20 @@ class Dataset extends Component {
                         >
 
                           <Overview
-                            key={`${this.props.datasetName}_overview`}
+                            key={`${props.datasetName}_overview`}
                             dataset={dataset}
                             isManaged={dataset.datasetType.isManaged}
                             datasetId={dataset.id}
                             scrollToTop={this._scrollToTop}
                             sectionType="dataset"
                             datasetType={dataset.datasetType}
-                             />
+                          />
 
                         </ErrorBoundary>
-                          )}
+                      )}
                     />
                     <Route
-                      path={`${this.props.match.path}/activity`}
+                      path={`${props.match.path}/activity`}
                       render={() => (
                         <ErrorBoundary
                           type="datasetSectionError"
@@ -204,20 +208,21 @@ class Dataset extends Component {
                         >
 
                           <Activity
-                               key={`${this.props.datasetName}_activity`}
-                               dataset={dataset}
-                               activityRecords={this.props.activityRecords}
-                               datasetId={dataset.id}
-                               activeBranch={dataset.activeBranch}
-                               sectionType={'dataset'}
-                               {...this.props}
-                             />
+                            key={`${props.datasetName}_activity`}
+                            dataset={dataset}
+                            diskLow={props.diskLow}
+                            activityRecords={props.activityRecords}
+                            datasetId={dataset.id}
+                            activeBranch={dataset.activeBranch}
+                            sectionType="dataset"
+                            {...props}
+                          />
 
                         </ErrorBoundary>
-                          )}
+                      )}
                     />
                     <Route
-                      path={`${this.props.match.url}/data`}
+                      path={`${props.match.url}/data`}
                       render={() => (
                         <ErrorBoundary
                           type="datasetSectionError"
@@ -225,11 +230,11 @@ class Dataset extends Component {
                         >
 
                           <Data
-                               dataset={dataset}
-                               datasetId={dataset.id}
-                               type="dataset"
-                               section="data"
-                             />
+                            dataset={dataset}
+                            datasetId={dataset.id}
+                            type="dataset"
+                            section="data"
+                          />
 
                         </ErrorBoundary>)}
                     />
@@ -249,11 +254,11 @@ class Dataset extends Component {
         </div>);
     }
 
-    if (this.state.authenticated) {
+    if (state.authenticated) {
       return (<Loader />);
     }
 
-    return (<Login auth={this.props.auth} />);
+    return (<Login auth={props.auth} />);
   }
 }
 
@@ -297,8 +302,10 @@ const DatasetFragmentContainer = createFragmentContainer(
 );
 
 const backend = (manager: Object) => {
-  const backend = HTML5Backend(manager),
-    orgTopDropCapture = backend.handleTopDropCapture;
+  const backend = HTML5Backend(manager);
+
+
+  const orgTopDropCapture = backend.handleTopDropCapture;
 
   backend.handleTopDropCapture = (e) => {
     e.preventDefault();

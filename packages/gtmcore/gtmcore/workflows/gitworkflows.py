@@ -135,6 +135,11 @@ class GitWorkflow(ABC):
             call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
                             cwd=self.repository.root_dir)
             call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
+            self.repository.git.clear_checkout_context()
+
+            # update dataset references on reset
+            if isinstance(self.repository, LabBook):
+                InventoryManager().update_linked_dataset(self.repository, username, init=True)
 
 
 class LabbookWorkflow(GitWorkflow):

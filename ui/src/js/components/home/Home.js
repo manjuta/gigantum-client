@@ -1,6 +1,10 @@
+// vendor
 import React, { Component } from 'react';
+// components
 import Dashboard from 'Components/dashboard/Dashboard';
 import Login from 'Components/login/Login';
+// assets
+import './Home.scss';
 
 export default class Home extends Component {
   // login for Auth0 function
@@ -11,50 +15,60 @@ export default class Home extends Component {
     };
     this.footerWorkerCallback = this.footerWorkerCallback.bind(this);
   }
+
   /*
     sets authentication response to the state
   */
   componentDidMount() {
-    this.props.auth.isAuthenticated().then((response) => {
+    const { props, state } = this;
+    props.auth.isAuthenticated().then((response) => {
       let isAuthenticated = response;
       if (isAuthenticated === null) {
         isAuthenticated = false;
       }
-      if (isAuthenticated !== this.state.authenticated) {
+      if (isAuthenticated !== state.authenticated) {
         this.setState({ authenticated: isAuthenticated });
       }
     });
   }
+
   login() {
-    this.props.auth.login();
+    const { props } = this;
+    props.auth.login();
   }
 
   footerWorkerCallback(worker, filepath) {
-    this.props.footerWorkerCallback(worker, filepath);
+    const { props } = this;
+    props.footerWorkerCallback(worker, filepath);
   }
+
   render() {
-    const { loadingRenew } = this.props;
+    const { props, state } = this;
+    const { loadingRenew } = props;
     return (
       <div className="Home">
         {
-          this.state.authenticated && (
+          state.authenticated && (
             <Dashboard
-              auth={this.props.auth}
+              auth={props.auth}
+              diskLow={props.diskLow}
               footerWorkerCallback={this.footerWorkerCallback}
-              section={this.props.match}
-              match={this.props.match}
-              history={this.props.history}
+              section={props.match}
+              match={props.match}
+              history={props.history}
             />
           )
         }
 
         {
-          !this.state.authenticated && this.state.authenticated !== null && (
+          !state.authenticated && state.authenticated !== null && (
           <Login
-            auth={this.props.auth}
+            auth={props.auth}
             loadingRenew={loadingRenew}
+            userIdentityReturned={props.userIdentityReturned}
+            diskLow={props.diskLow}
           />
-            )
+          )
         }
 
       </div>

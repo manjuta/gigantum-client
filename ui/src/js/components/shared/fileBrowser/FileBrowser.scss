@@ -38,13 +38,10 @@
   background: #f0f1f5;
   border-radius: 12px;
   position: absolute;
+  align-items: center;
   top: 7px;
   left: 0;
   z-index: 2;
-}
-
-.FileBrowser__search {
-  max-width: 500px;
 }
 
 .FileBrowser__input[type='text']{
@@ -76,13 +73,16 @@
     &--size{
         width: 100px;
         position: relative;
+        &:before{
+          left: 75px !important;
+        }
     }
 
     &--date{
         width: 140px;
         position: relative;
         &:before{
-          left: 100px !important;
+          left: 120px !important;
         }
     }
 
@@ -143,7 +143,7 @@
     width: 15px;
     height: 15px;
     left: 50px;
-    top: 4px;
+    top: 10px;
   }
   &--desc:before {
     background: url('~Images/icons/down-arrow-silver.svg') no-repeat center center;
@@ -153,7 +153,7 @@
     width: 15px;
     height: 15px;
     left: 50px;
-    top: 4px;
+    top: 7px;
   }
 }
 
@@ -165,7 +165,7 @@
   text-align: center;
   z-index: index($elements, popup);
 
-  .ToolTip__pointer {
+  .Tooltip__pointer {
     top: -10px;
     right: 55px;
   }
@@ -183,64 +183,29 @@
 }
 
 .FileBrowser__button {
-  height: 30px;
-  width: 45px;
-  border-radius: 10px;
+  height: 23px;
+  width: 23px;
   margin: 0 10px;
   position: relative;
+  border: 1px solid $azure;
 
-  &:hover:after {
-    position: absolute;
-    z-index: index($elements, popup);
-    top: 35px;
-    left: -15px;
-    white-space: nowrap;
-    padding: 5px;
-    border: 2px solid $jet;
-    content: attr(data-tooltip);
-
-    color: $white;
-    background: $azure;
-
-    font-size: 14px;
-}
-
-  &--add-folder {
-    background: $background-color url(~Images/icons/folder-add-new.svg) no-repeat center center;
-    background-size: 30px;
-    &:hover {
-      border: 2px solid $azure;
-      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
-    }
-  }
-
-  &--add-dataset {
-    background: $background-color url(~Images/icons/database-add.svg) no-repeat center center;
-    background-size: 30px;
-    &:hover {
-      border: 2px solid $azure;
-      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
-    }
-  }
   &--download-all {
-    background: $background-color url(~Images/icons/database-dark-download.svg) no-repeat center center;
+    height: 30px;
+    width: 45px;
+    background: transparent url(~Images/icons/database-dark-download.svg) no-repeat center center;
     background-size: 25px;
     margin-right: -8px;
-    &:hover {
-      border: 2px solid $azure;
-      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
-    }
   }
   &--downloaded {
+    height: 30px;
+    width: 45px;
     background: $background-color url(~Images/icons/database-dark-local.svg) no-repeat center center;
     background-size: 25px;
     margin-right: -8px;
-    &:hover {
-      border: 2px solid $azure;
-      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
-    }
   }
   &--downloading{
+    height: 30px;
+    width: 45px;
     background: $background-color no-repeat center center;
     background-size: 25px;
     margin-right: -8px;
@@ -281,18 +246,67 @@
   z-index: 2;
 }
 
-@media screen and (max-width: 1021px) and (min-width: 0px) {
- .FileBrowser .ActionsMenu,
- .File__cell.File__cell--menu,
- .FileBrowser__header--menu {
-   width: 130px !important;
- }
- .FileBrowser__header--date,
- .File__cell--date {
-   width: 100px !important;
- }
+.FileBrowser__menu {
+  @include flex(space-between, row);
+  position: relative;
+  align-items: center;
+  border-bottom: 2px solid $romanSilver;
+  height: 50px;
+  width: 100%;
+  margin-bottom: 10px;
 
- .SectionWrapper {
-   width: calc(100% - 40px);
- }
+  &-buttons {
+    display: flex;
+    align-items: flex-end;
+  }
+}
+
+.FileBrowser__menu-buttons{
+  color: $azure;
+}
+
+.FileBrowser__upload-label {
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+  &:hover {
+    span {
+      text-decoration: underline;
+    }
+    .Btn__upArrow {
+      background: $azure url(~Images/icons/update-white.svg) no-repeat center center;
+      background-size: 18px;
+    }
+  }
+}
+
+.Btn__menuButton {
+  background: transparent;
+  color: $azure;
+  height: 34px;
+  display: flex;
+  align-items: flex-end;
+  width: auto;
+  margin: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.FileBrowser__newFolder {
+  &:hover {
+    .Btn__addFolder {
+      background: $azure url(~Images/icons/folder-add-new-hover.svg) no-repeat left 4px top 2px;
+      background-size: 18px;
+    }
+  }
+}
+.FileBrowser__addDataset{
+  &:hover {
+    .Btn__addDataset {
+      background: $azure url(~Images/icons/database-add-hover.svg) no-repeat center center;
+      background-size: 18px;
+    }
+  }
 }

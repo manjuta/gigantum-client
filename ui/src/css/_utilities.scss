@@ -1,3 +1,51 @@
+/***************
+  poisiton:
+****************/
+.relative {
+  position: relative !important;
+}
+
+.static {
+  position: static;
+}
+
+.absolute {
+  position: absolute;
+
+  &--important {
+    position: absolute !important;
+  }
+}
+
+.fixed {
+  position: fixed;
+
+  &--important {
+    position: fixed !important;
+  }
+}
+
+/***************
+  dimensions
+  height:
+  width:
+****************/
+
+.height-auto {
+  height: auto;
+}
+
+.width-auto {
+  width: auto;
+}
+
+.inline-block{
+  display: inline-block;
+}
+
+/*****************
+  font-weight:
+******************/
 .light {
   font-weight: 100;
 }
@@ -10,6 +58,10 @@
   font-weight: 400;
 }
 
+
+/*****************
+  color:
+******************/
 .error {
   color: $crimson;
 }
@@ -135,9 +187,9 @@
   align-items: center;
 }
 
-/*
-  .text-align: center, left, right
-*/
+/****************
+  text-align: center, left, right
+*****************/
 
 .text-center {
   text-align: center;
@@ -151,10 +203,9 @@
   text-align: right;
 }
 
-/*
-  visibility visible hidden
-*/
-
+/****************
+  visibility: visible hidden
+*****************/
 .visibility-hidden {
   visibility: hidden;
 }
@@ -163,30 +214,47 @@
   visibility: visible;
 }
 
-.tabs-list {
-  @include flex(flex-start, row);
-  border-bottom: 1px solid $romanSilver;
+
+/*********************
+  padding:
+  margin:
+**********************/
+
+.padding {
+  padding: 1em;
 }
 
-.tab {
-  cursor: pointer;
-  margin: 0 0 -1px 15px;
-  padding: 5px 10px;
-  border-top: 1px solid $grey;
-  border-right: 1px solid $grey;
-  border-left: 1px solid $grey;
-  border-bottom: 1px solid $romanSilver;
-  color: $romanSilver;
-  font-size: 20px;
-  height: 40px;
-  width: 100px;
+.padding--small {
+  padding: 1rem;
 }
 
-.tab--selected {
-  border-bottom: 1px solid $white;
-  border-top: 1px solid $romanSilver;
-  border-left: 1px solid $romanSilver;
-  border-right: 1px solid $romanSilver;
+.padding--large {
+  padding: 1rem;
+}
+
+.padding--0 {
+  padding: 0 !important;
+}
+
+
+.margin {
+  margin: 1em;
+}
+
+.margin--small {
+  margin: 1rem;
+}
+
+.margin--large {
+  margin: 2rem;
+}
+
+.margin--0 {
+  margin: 0 !important;
+}
+
+.margin--auto {
+  margin: 0 auto !important;
 }
 
 .blur {
@@ -194,90 +262,21 @@
   filter: blur(5px);
 }
 
-@keyframes slide-left-fade-in{
-  0% {
-      opacity:0;
-      transform:  translate(120px,0px)  ;
-  }
-  100% {
-      opacity:1;
-      transform:  translate(0px,0px)  ;
-  }
-}
-
-@keyframes fade-in{
-  0% {
-    opacity:0;
-  }
-  100% {
-    opacity:1;
-  }
-}
-
-@keyframes slide-up-fade-in{
-  0% {
-      opacity:0;
-      transform:  translate(0px,40px)  ;
-  }
-  100% {
-      opacity:1;
-      transform:  translate(0px,0px)  ;
-  }
-}
-
-@keyframes slide-down-fade-in{
-  0% {
-      opacity:0;
-      transform:  translate(0px,-10px)  ;
-  }
-  100% {
-      opacity:1;
-      transform:  translate(0px,0px)  ;
-  }
-}
-
-@keyframes delayed-fade-in{
-  0% { opacity:0; }
-  75% { opacity:0; }
-  100% { opacity:1; }
-}
-
-.InfoTooltip {
-  &:before {
-    content: '';
-    @include triangle('up', 8px, $slateBlue);
-    position: absolute;
-    right: 100px;
-    top: -8px;
-  }
-  box-shadow: 0 0px 12px 0 rgba(0,0,0,.30);
-  user-select: none;
-  animation: slide-down-fade-in 0.25s;
-  position: absolute;
-  font-size: 14px;
-  background: $slateBlue;
-  color: white;
-  padding: 15px;
-  width: 250px;
-  top: 25px;
-  right: -100px;
+/*********************
+  word-break
+**********************/
+.break-word {
   word-break: break-word;
-  a {
-    text-decoration: underline;
-  }
-  &.summary {
-    &:before {
-      right: 9px;
-    }
-    right: -10px;
-  }
 }
 
-
-.padding--0 {
-  padding: 0 !important;
+.break-word {
+  word-break: break-all;
 }
 
-.margin--0 {
-  margin: 0 !important;
+.word-break--noraml {
+  word-break: normal;
+}
+
+.keep-all {
+  word-break: keep-all;
 }

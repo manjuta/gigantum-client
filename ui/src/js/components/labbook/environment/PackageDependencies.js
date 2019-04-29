@@ -9,11 +9,11 @@ import { boundMethod } from 'autobind-decorator';
 import store from 'JS/redux/store';
 import {
   setPackageMenuVisible,
-} from 'JS/redux/reducers/labbook/environment/packageDependencies';
-import { setErrorMessage, setWarningMessage } from 'JS/redux/reducers/footer';
-import { setContainerMenuWarningMessage } from 'JS/redux/reducers/labbook/environment/environment';
-import { setBuildingState } from 'JS/redux/reducers/labbook/labbook';
-import { setLookingUpPackagesState } from 'JS/redux/reducers/labbook/containerStatus';
+} from 'JS/redux/actions/labbook/environment/packageDependencies';
+import { setErrorMessage, setWarningMessage } from 'JS/redux/actions/footer';
+import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
+import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
+import { setLookingUpPackagesState } from 'JS/redux/actions/labbook/containerStatus';
 // Mutations
 import AddPackageComponentsMutation from 'Mutations/environment/AddPackageComponentsMutation';
 import RemovePackageComponentsMutation from 'Mutations/environment/RemovePackageComponentsMutation';
@@ -59,11 +59,10 @@ class PackageDependencies extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-
     const packages = props.environment.packageDependencies.edges;
 
-    let latestVersionPackages = packages.map((edge) => {
-      let packageObject = { ...edge.node };
+    const latestVersionPackages = packages.map((edge) => {
+      const packageObject = { ...edge.node };
       if (props.packageLatestVersions.length > 0) {
         props.packageLatestVersions.forEach((latestVersionEdge) => {
           if ((packageObject.manager === latestVersionEdge.node.manager) && (packageObject.package === latestVersionEdge.node.package)) {
@@ -80,14 +79,26 @@ class PackageDependencies extends Component {
     };
   }
 
+  /*
+    handle state and addd listeners when component mounts
+  */
+  componentDidMount() {
+    const { props, state } = this;
+    if (state.selectedTab === '') {
+      this.setState({ selectedTab: props.base.packageManagers[0] });
+    }
+  }
+
   componentDidUpdate() {
     const { props, state } = this;
-    const newPackages = this.props.environment.packageDependencies;
-    if (newPackages.edges && (newPackages.edges.length < 11) && newPackages.pageInfo.hasNextPage && !state.loadingMore) {
+    const newPackages = props.environment.packageDependencies;
+
+    if (newPackages.edges && (newPackages.edges.length < 11)
+      && newPackages.pageInfo.hasNextPage && !state.loadingMore) {
       this._loadMore();
     }
 
-    const newUpdatePackages = Object.assign({}, this.state.updatePackages, updateCheck);
+    const newUpdatePackages = Object.assign({}, state.updatePackages, updateCheck);
     Object.keys(newUpdatePackages).forEach((manager) => {
       Object.keys(newUpdatePackages[manager]).forEach((pkg) => {
         if (!newUpdatePackages[manager][pkg].version) {
@@ -96,25 +107,10 @@ class PackageDependencies extends Component {
       });
     });
 
-    if (JSON.stringify(newUpdatePackages) !== JSON.stringify(this.state.updatePackages)) {
+    if (JSON.stringify(newUpdatePackages) !== JSON.stringify(state.updatePackages)) {
       this.setState({ updatePackages: newUpdatePackages });
     }
     updateCheck = {};
-  }
-
-  /*
-    handle state and addd listeners when component mounts
-  */
-  componentDidMount() {
-    const { props, state } = this;
-
-    // if (props.environment.packageDependencies.pageInfo.hasNextPage) {
-    //   this._loadMore(); // routes query only loads 2, call loadMore
-    // }
-
-    if (state.selectedTab === '') {
-      this.setState({ selectedTab: props.base.packageManagers[0] });
-    }
   }
 
   /**
@@ -125,11 +121,12 @@ class PackageDependencies extends Component {
   */
   @boundMethod
   _loadMore() {
-    if (!this.state.loadingMore) {
+    const { props, state } = this;
+    if (!state.loadingMore) {
       this.setState({ loadingMore: true });
 
-      const self = this,
-            { props } = this;
+      const self = this;
+
       props.relay.loadMore(
         10, // Fetch the next 5 feed items
         (response, error) => {
@@ -138,8 +135,8 @@ class PackageDependencies extends Component {
           if (error) {
             console.error(error);
           }
-          if (props.environment.packageDependencies &&
-           props.environment.packageDependencies.pageInfo.hasNextPage) {
+          if (props.environment.packageDependencies
+           && props.environment.packageDependencies.pageInfo.hasNextPage) {
             self._loadMore();
           }
         },
@@ -156,9 +153,9 @@ class PackageDependencies extends Component {
   */
   @boundMethod
   _setSelectedTab(selectedTab, isSelected) {
-    const { props, state } = this,
-          packageMenuVisible = isSelected ? props.packageMenuVisible : false,
-          packages = isSelected ? state.packages : [];
+    const { props, state } = this;
+    const packageMenuVisible = isSelected ? props.packageMenuVisible : false;
+    const packages = isSelected ? state.packages : [];
 
     this.setState({
       selectedTab,
@@ -166,15 +163,15 @@ class PackageDependencies extends Component {
       packages,
     });
   }
+
   /**
   *  @param {object} node
   *  triggers remove package mutation
   */
   _removePackage() {
-    const { status } = store.getState().containerStatus,
-          self = this,
-          { props } = this,
-          canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !props.isLocked;
+    const { status } = store.getState().containerStatus;
+    const { props } = this;
+    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !props.isLocked;
 
     this.setState({ hardDisable: true });
     // have to get state after setting state
@@ -183,13 +180,25 @@ class PackageDependencies extends Component {
     if (navigator.onLine) {
       if (canEditEnvironment) {
         if (!state.hardDisable) {
-          const { labbookName, owner } = store.getState().routes,
-                { environmentId } = props,
-                manager = state.selectedTab,
-                removalPackages = Object.keys(state.removalPackages[manager]),
-                removalIDArr = Object.values(state.removalPackages[manager]),
-                clientMutationId = uuidv4(),
-                connection = 'PackageDependencies_packageDependencies'
+          const { labbookName, owner } = store.getState().routes;
+
+
+          const { environmentId } = props;
+
+
+          const manager = state.selectedTab;
+
+
+          const removalPackages = Object.keys(state.removalPackages[manager]);
+
+
+          const removalIDArr = Object.values(state.removalPackages[manager]);
+
+
+          const clientMutationId = uuidv4();
+
+
+          const connection = 'PackageDependencies_packageDependencies';
 
           this.setState({ removalPackages: {}, updatePackages: {} });
 
@@ -220,6 +229,7 @@ class PackageDependencies extends Component {
       props.setErrorMessage('Cannot remove package at this time.', [{ message: 'An internet connection is required to modify the environment.' }]);
     }
   }
+
   /**
   *  @param {object} node
   *  triggers remove package mutation
@@ -238,6 +248,7 @@ class PackageDependencies extends Component {
       this.props.setErrorMessage('Cannot add package at this time.', [{ message: 'An internet connection is required to modify the environment.' }]);
     }
   }
+
   /**
   *  @param {evt}
   *  updates package name in components state
@@ -261,6 +272,7 @@ class PackageDependencies extends Component {
       this._addStatePackage(evt);
     }
   }
+
   /**
   *  @param {}
   *  updates packages in state
@@ -296,6 +308,7 @@ class PackageDependencies extends Component {
   _promptUserToCloseContainer() {
     this.props.setContainerMenuWarningMessage('Stop Project before editing the environment. \n Be sure to save your changes.');
   }
+
   /**
   *  @param {}
   *  updates packages in state
@@ -309,6 +322,7 @@ class PackageDependencies extends Component {
       packages,
     });
   }
+
   /**
   *  @param {}
   *  triggers add package mutation
@@ -316,12 +330,18 @@ class PackageDependencies extends Component {
   @boundMethod
   _addPackageComponentsMutation() {
     const { props } = this;
-    let self = this,
-      { packages } = this.state,
-      filteredInput = [];
+    const self = this;
 
-    const { labbookName, owner } = store.getState().routes,
-          { environmentId } = props;
+
+    let { packages } = this.state;
+
+
+    let filteredInput = [];
+
+    const { labbookName, owner } = store.getState().routes;
+
+
+    const { environmentId } = props;
 
     packages = packages.map((pkg) => {
       pkg.validity = 'checking';
@@ -384,9 +404,13 @@ class PackageDependencies extends Component {
           });
         } else {
           filteredInput = [];
-          const flatPackages = [],
-                versionReference = {},
-                existingPackages = props.environment.packageDependencies;
+          const flatPackages = [];
+
+
+          const versionReference = {};
+
+
+          const existingPackages = props.environment.packageDependencies;
 
           resPackages.forEach((pkg) => {
             flatPackages.push(pkg.package);
@@ -465,32 +489,36 @@ class PackageDependencies extends Component {
   _setSearchValue(evt) {
     this.setState({ searchValue: evt.target.value });
   }
+
   /** *
   *  @param {evt}
   *  get tabs data
   * */
   _getPackmanagerTabs() {
-    const tabs = this.props.base && this.props.base.packageManagers.map((packageName) => {
+    const { props } = this;
+    const tabs = props.base && props.base.packageManagers.map((packageName) => {
       let count = 0;
-      this.props.environment.packageDependencies.edges.forEach((edge) => {
+      props.environment.packageDependencies.edges.forEach((edge) => {
         if (packageName === edge.node.manager) {
-          count++;
+          count += 1;
         }
       });
       return { tabName: packageName, count };
     });
     return tabs;
   }
+
   /** *
   *  @param {String, String} pkg manager
   *  adds to removalpackages state pending removal of packages
   * */
   _addRemovalPackage(node) {
-    const { manager, id, version } = node,
-          pkg = node.package,
-          newRemovalPackages = Object.assign({}, this.state.removalPackages),
-          newUpdatePackages = Object.assign({}, this.state.updatePackages),
-          updateAvailable = node.latestVersion && (node.version !== node.latestVersion);
+    const { state } = this;
+    const { manager, id, version } = node;
+    const pkg = node.package;
+    const newRemovalPackages = Object.assign({}, state.removalPackages);
+    const newUpdatePackages = Object.assign({}, state.updatePackages);
+    const updateAvailable = node.latestVersion && (node.version !== node.latestVersion);
 
     if (newRemovalPackages[manager]) {
       const index = Object.keys(newRemovalPackages[manager]).indexOf(pkg);
@@ -534,21 +562,26 @@ class PackageDependencies extends Component {
   * */
   @boundMethod
   _updatePackages() {
+    const { props, state } = this;
     const { status } = store.getState().containerStatus;
-    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !this.props.isLocked;
+    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !props.isLocked;
     const self = this;
 
     if (navigator.onLine) {
       if (canEditEnvironment) {
         const { labbookName, owner } = store.getState().routes;
-        const { environmentId } = this.props;
+        const { environmentId } = props;
         const filteredInput = [];
         const duplicates = [];
 
-        Object.keys(this.state.updatePackages).forEach((manager) => {
-          Object.keys(this.state.updatePackages[manager]).forEach((pkg) => {
-            filteredInput.push({ manager, package: pkg, version: this.state.updatePackages[manager][pkg].version });
-            duplicates.push(this.state.updatePackages[manager][pkg].id);
+        Object.keys(state.updatePackages).forEach((manager) => {
+          Object.keys(state.updatePackages[manager]).forEach((pkg) => {
+            filteredInput.push({
+              manager,
+              package: pkg,
+              version: state.updatePackages[manager][pkg].version,
+            });
+            duplicates.push(state.updatePackages[manager][pkg].id);
           });
         });
         AddPackageComponentsMutation(
@@ -561,14 +594,15 @@ class PackageDependencies extends Component {
           duplicates,
           (response, error) => {
             this.setState({ removalPackages: {}, updatePackages: {} });
+
             if (error) {
               this.setState({ disableInstall: false, installDependenciesButtonState: 'error' });
               setTimeout(() => {
                 self.setState({ installDependenciesButtonState: '' });
               }, 2000);
-              this.props.setErrorMessage('Error adding packages.', error);
+              props.setErrorMessage('Error adding packages.', error);
             } else {
-              self.props.buildCallback(true);
+              props.buildCallback(true);
               self.setState({
                 disableInstall: false,
                 packages: [],
@@ -584,7 +618,7 @@ class PackageDependencies extends Component {
         this._promptUserToCloseContainer();
       }
     } else {
-      this.props.setErrorMessage('Cannot remove package at this time.', [{ message: 'An internet connection is required to modify the environment.' }]);
+      props.setErrorMessage('Cannot remove package at this time.', [{ message: 'An internet connection is required to modify the environment.' }]);
     }
   }
 
@@ -593,72 +627,148 @@ class PackageDependencies extends Component {
   *  hides packagemanager modal
   */
   _filterPackageDependencies(packageDependencies) {
-    const { props, state } = this,
-          searchValue = state.searchValue && state.searchValue.toLowerCase();
+    const { state } = this;
+    const searchValue = state.searchValue && state.searchValue.toLowerCase();
 
     const packages = state.latestVersionPackages.filter((node) => {
-      const name = node && node.package ? node.package.toLowerCase() : '',
-            searchMatch = ((searchValue === '') || (name.indexOf(searchValue) > -1));
+      const name = node && node.package ? node.package.toLowerCase() : '';
+
+
+      const searchMatch = ((searchValue === '') || (name.indexOf(searchValue) > -1));
       return (searchMatch && (node.manager === state.selectedTab));
     });
 
     return packages;
   }
 
+  /**
+  *  @param {Object}
+  *  hides packagemanager modal
+  */
+  _packageRow(node, index) {
+    const { state } = this;
+    const installer = node.fromBase ? 'Base' : 'User';
+    const checkboxDisabled = node.fromBase || (node.id === undefined);
+    const isSelected = state.removalPackages[node.manager]
+      && Object.keys(state.removalPackages[node.manager]).indexOf(node.package) > -1;
+    // declare css here
+    const buttonCSS = classNames({
+      'PackageDependencies__btn--round PackageDependencies__btn--remove': !isSelected,
+      'PackageDependencies__btn--round PackageDependencies__btn--remove--selected': isSelected,
+    });
+    const tableRowCSS = classNames({
+      'PackageDependencies__cell--optimistic-updating': node.id === undefined,
+    });
+
+    const checkboxCSS = classNames({
+      Checkbox: true,
+      'Tooltip-data Tooltip-data--left': checkboxDisabled,
+    });
+
+    return (
+      <tr
+        className={tableRowCSS}
+        key={node.package + node.manager + index}
+      >
+        <td>{node.package}</td>
+
+        <td>
+          {node.version}
+        </td>
+
+        <td className="PackageDependencies__cell--latest-column">
+
+          <span>
+            {node.latestVersion}
+          </span>
+          {
+            node.latestVersion && (node.latestVersion !== node.version) && !node.fromBase
+            && <div className="PackageDependencies__updateAvailable" />
+          }
+        </td>
+
+        <td>{installer}</td>
+
+        <td width="60" className="PackageDependencies__cell--select">
+          <label
+            data-tooltip="Packages installed by the base cannot be modified"
+            className={checkboxCSS}
+            htmlFor={node.id}
+          >
+            <input
+              id={node.id}
+              type="checkbox"
+              className={buttonCSS}
+              disabled={checkboxDisabled}
+              onClick={() => this._addRemovalPackage(node)}
+            />
+            <span />
+          </label>
+        </td>
+      </tr>
+    );
+  }
+
   render() {
-    const { props, state } = this,
-          { packageDependencies } = props.environment,
-          packageManagersTabs = this._getPackmanagerTabs(),
-          noRemovalPackages = ((!state.removalPackages[state.selectedTab]) || (state.removalPackages[state.selectedTab] && !Object.keys(state.removalPackages[state.selectedTab]).length)),
-          updateButtonAvailable = state.removalPackages[state.selectedTab] && state.updatePackages[state.selectedTab] && Object.keys(state.removalPackages[state.selectedTab]).length === Object.keys(state.updatePackages[state.selectedTab]).length,
-          removeButtonCSS = classNames({
-            'PackageDependencies__remove-button--full': !updateButtonAvailable,
-            'PackageDependencies__remove-button--half': updateButtonAvailable,
-          });
+    const { props, state } = this;
+    const { packageDependencies } = props.environment;
+    const packageManagersTabs = this._getPackmanagerTabs();
+    const removalKeysLength = state.removalPackages[state.selectedTab] ? Object.keys(state.removalPackages[state.selectedTab]).length : 0;
+    const noRemovalPackages = ((!state.removalPackages[state.selectedTab])
+      || (state.removalPackages[state.selectedTab] && !removalKeysLength));
+    const updateButtonAvailable = state.removalPackages[state.selectedTab]
+      && state.updatePackages[state.selectedTab]
+      && (removalKeysLength === Object.keys(state.updatePackages[state.selectedTab]).length);
+
+    const removeButtonCSS = classNames({
+      'Btn Btn--noMargin': true,
+      'PackageDependencies__remove-button--full': !updateButtonAvailable,
+      'PackageDependencies__remove-button--half': updateButtonAvailable,
+    });
 
     if (state.latestVersionPackages) {
       const filteredPackageDependencies = this._filterPackageDependencies(state.latestVersionPackages);
+      const packagesProcessing = state.packages.filter(packageItem => packageItem.validity === 'checking');
+      const disableInstall = state.disableInstall || ((state.packages.length === 0) || (packagesProcessing.length > 0));
+
       const packageMenu = classNames({
         PackageDependencies__menu: true,
         'PackageDependencies__menu--min-height': !props.packageMenuVisible,
       });
-      const packagesProcessing = state.packages.filter(packageItem => packageItem.validity === 'checking');
-
       const addPackageCSS = classNames({
         PackageDependencies__btn: true,
         'PackageDependencies__btn--line-18': true,
         'PackageDependencies__btn--open': props.packageMenuVisible,
       });
-
       const addPackageContainer = classNames({
         PackageDependencies__addPackage: true,
         'Tooltip-data': props.isLocked,
       });
-
       const tooltipCSS = classNames({
         'Tooltip-data': props.isLocked,
       });
-
-      const disableInstall = state.disableInstall || ((state.packages.length === 0) || (packagesProcessing.length > 0));
 
       return (
         <div className="PackageDependencies grid">
           <div className="PackageDependencies__card Card Card--auto Card--no-hover column-1-span-12">
             <div className="PackageDependencies__tabs">
-              <ul className="tabs-list">
+              <ul className="Tabs">
                 {
                 packageManagersTabs.map((tab, index) => {
                   const packageTab = classNames({
-                    'PackageDependencies__tab tab': true,
-                    'PackageDependencies__tab--selected tab-selected': (state.selectedTab === tab.tabName),
+                    'PackageDependencies__tab Tab Tab--light': true,
+                    'PackageDependencies__tab--selected Tab-selected': (state.selectedTab === tab.tabName),
                   });
 
-                  return (<li
-                    key={tab + index}
-                    className={packageTab}
-                    onClick={() => this._setSelectedTab(tab.tabName, state.selectedTab === tab.tabName)}>
-                    {`${tab.tabName} (${tab.count})`}
-                  </li>);
+                  return (
+                    <li
+                      key={tab + index}
+                      className={packageTab}
+                      onClick={() => this._setSelectedTab(tab.tabName, state.selectedTab === tab.tabName)}
+                    >
+                      {`${tab.tabName} (${tab.count})`}
+                    </li>
+                  );
                 })
               }
               </ul>
@@ -666,13 +776,16 @@ class PackageDependencies extends Component {
             </div>
             <div
               className={addPackageContainer}
-              data-tooltip="Container must be turned off to add packages.">
+              data-tooltip="Container must be turned off to add packages."
+            >
 
               <button
                 disabled={props.isLocked}
-                data-container-popup={true}
+                data-container-popup
                 onClick={() => this._toggleAddPackageMenu()}
-                className={addPackageCSS}>
+                className={addPackageCSS}
+                type="button"
+              >
                 Add Packages
               </button>
 
@@ -695,9 +808,10 @@ class PackageDependencies extends Component {
                     onKeyUp={evt => this._updateVersion(evt)}
                   />
                   <button
-                    disabled={(this.state.packageName.length === 0)}
+                    disabled={(state.packageName.length === 0)}
                     onClick={() => this._addStatePackage()}
-                    className="PackageDependencies__btn--margin PackageDependencies__btn--round PackageDependencies__btn--add"
+                    type="button"
+                    className="PackageDependencies__btn--margin Btn__plus Btn--round Btn--medium"
                   />
                 </div>
 
@@ -711,23 +825,27 @@ class PackageDependencies extends Component {
                           return (
                             <tr
                               className={`PackageDependencies__table-row PackageDependencies__table-row--${node.validity} flex`}
-                              key={node.package + node.version}>
+                              key={node.package + node.version}
+                            >
                               <td className="PackageDependencies__td--package">{`${node.package}`}</td>
                               <td className="PackageDependencies__td--version">
-                              {versionText}
+                                {versionText}
                                 {
-                                node.validity === 'checking' &&
-                                <div className="PackageDependencies__versionLoading" />
+                                node.validity === 'checking'
+                                && <div className="PackageDependencies__versionLoading" />
                               }
 
                               </td>
                               <td className="PackageDependencies__table--no-right-padding" width="30">
                                 {
-                                !disableInstall &&
+                                !disableInstall
+                                && (
                                 <button
                                   className="PackageDependencies__btn--round PackageDependencies__btn--remove--adder"
                                   onClick={() => this._removeStatePackages(node, index)}
+                                  type="button"
                                 />
+                                )
                               }
                               </td>
                             </tr>);
@@ -737,9 +855,9 @@ class PackageDependencies extends Component {
                   </table>
 
                   <ButtonLoader
-                    buttonState={this.state.installDependenciesButtonState}
+                    buttonState={state.installDependenciesButtonState}
                     buttonText="Install Selected Packages"
-                    className="PackageDependencies__btn--absolute"
+                    className="Btn Btn--wide PackageDependencies__btn--absolute"
                     params={{}}
                     buttonDisabled={disableInstall}
                     clicked={this._addPackageComponentsMutation}
@@ -757,102 +875,63 @@ class PackageDependencies extends Component {
                     <th className="PackageDependencies__th">Current</th>
                     <th className="PackageDependencies__th">Latest</th>
                     <th className="PackageDependencies__th">Installed By</th>
-                    {
-                    noRemovalPackages ?
-                      <th className="PackageDependencies__th--last">
-                      Select
-                      </th>
-                    :
-                      <th className="PackageDependencies__th--remove">
-                        <div
-                          data-tooltip="Container must be turned off to remove packages or update packages"
-                          className={tooltipCSS}>
-                          {
-                          updateButtonAvailable &&
+                    { noRemovalPackages
+                      ? (
+                        <th className="PackageDependencies__th--last">
+                          Select
+                        </th>
+                      )
+                      : (
+                        <th className="PackageDependencies__th--remove">
+                          <div
+                            data-tooltip="Container must be turned off to remove packages or update packages"
+                            className={tooltipCSS}
+                          >
+                            { updateButtonAvailable
+                              && (
+                                <button
+                                  type="button"
+                                  disabled={props.isLocked}
+                                  className="PackageDependencies__update-button Btn--noMargin"
+                                  onClick={() => this._updatePackages()}
+                                >
+                                  Update
+                                </button>
+                              )
+                            }
                             <button
+                              type="button"
                               disabled={props.isLocked}
-                              className="PackageDependencies__update-button"
-                              onClick={() => this._updatePackages()}>
-                              Update
-                            </button>
-                        }
-                          <button
-                            disabled={props.isLocked}
-                            className={removeButtonCSS}
-                            onClick={() => this._removePackage()}>
+                              className={removeButtonCSS}
+                              onClick={() => this._removePackage()}
+                            >
                             Delete
-                          </button>
+                            </button>
 
-                        </div>
-                      </th>
+                          </div>
+                        </th>
+                      )
                   }
                   </tr>
                 </thead>
                 <tbody>
-                  {
-                    filteredPackageDependencies.map((node, index) => (this._packageRow(node, index)))
+                  { filteredPackageDependencies.map((node, index) => (
+                    this._packageRow(node, index)))
                   }
                 </tbody>
               </table>
             </div>
           </div>
-        </div>);
+        </div>
+      );
     }
     return (<Loader />);
   }
-
-  _packageRow(node, index) {
-    const installer = node.fromBase ? 'System' : 'User',
-      { version, latestVersion } = node,
-      versionText = version || '',
-      isSelected = this.state.removalPackages[node.manager] && Object.keys(this.state.removalPackages[node.manager]).indexOf(node.package) > -1,
-      updateAvailable = node.version !== node.latestVersion,
-      buttonCSS = classNames({
-        'PackageDependencies__btn--round PackageDependencies__btn--remove': !isSelected,
-        'PackageDependencies__btn--round PackageDependencies__btn--remove--selected': isSelected,
-      }),
-      tableRowCSS = classNames({
-        'PackageDependencies__cell--optimistic-updating': node.id === undefined,
-      });
-
-    return (
-      <tr
-        className={tableRowCSS}
-        key={node.package + node.manager + index}>
-        <td>{node.package}</td>
-
-        <td>
-          {node.version}
-        </td>
-
-        <td className="PackageDependencies__cell--latest-column">
-
-          <span>
-            {node.latestVersion}
-          </span>
-          {
-            node.latestVersion && (node.latestVersion !== node.version) && !node.fromBase &&
-            <div className="PackageDependencies__updateAvailable" />
-          }
-        </td>
-
-        <td>{installer}</td>
-
-        <td width="60" className="PackageDependencies__cell--select">
-
-          <button
-            className={buttonCSS}
-            disabled={node.fromBase || (node.id === undefined)}
-            onClick={() => this._addRemovalPackage(node)}
-          />
-        </td>
-      </tr>);
-  }
 }
 
-const mapStateToProps = (state, ownProps) => state.packageDependencies;
+const mapStateToProps = state => state.packageDependencies;
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = () => ({
   setPackageMenuVisible,
   setErrorMessage,
   setContainerMenuWarningMessage,
@@ -907,7 +986,7 @@ export default createPaginationContainer(
 
       const cursor = props.environment.packageDependencies.edges[length - 1].cursor;
       const hasNext = !props.environment.packageDependencies.pageInfo.hasNextPage;
-      let first = count;
+      const first = count;
 
       return {
         first,

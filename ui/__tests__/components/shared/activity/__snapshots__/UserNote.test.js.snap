@@ -3,6 +3,7 @@
 exports[`UserNote Renders a snapshot 1`] = `
 <div
   className="UserNote flex flex--column"
+  data-selenium-id="UserNote"
 >
   <div
     className="UserNote__close close"

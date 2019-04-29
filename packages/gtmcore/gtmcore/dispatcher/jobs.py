@@ -21,15 +21,18 @@ import importlib
 import json
 import os
 import time
-from typing import Optional, List
+from typing import Callable, Optional, List
 import sys
+import shutil
 
 from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.labbook import LabBook
+from gtmcore.configuration import Configuration
+from gtmcore.dataset.cache import get_cache_manager_class
 
-from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
@@ -71,7 +74,6 @@ def publish_repository(repository: Repository, username: str, access_token: str,
                 wf = DatasetWorkflow(repository) # type: ignore
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta, id_token=id_token)
-
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise
@@ -88,10 +90,13 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
         job = get_current_job()
         if not job:
             return
+        if msg is None or (not msg.strip()):
+            return
+
         if 'feedback' not in job.meta:
-            job.meta['feedback'] = msg
+            job.meta['feedback'] = msg.strip()
         else:
-            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg.strip()}'
         job.save_meta()
 
     try:
@@ -127,7 +132,12 @@ def import_labbook_from_remote(remote_url: str, username: str, config_file: str 
         job.save_meta()
 
     try:
-        update_meta(f"Importing Project from {remote_url}...")
+        toks = remote_url.split("/")
+        if len(toks) > 1:
+            proj_path = f'{toks[-2]}/{toks[-1].replace(".git", "")}'
+        else:
+            proj_path = remote_url
+        update_meta(f"Importing Project from {proj_path!r}...")
         wf = LabbookWorkflow.import_from_remote(remote_url, username, config_file)
         update_meta(f"Imported Project {wf.labbook.name}!")
         return wf.labbook.root_dir
@@ -266,6 +276,9 @@ def build_labbook_image(path: str, username: Optional[str] = None,
 
     try:
         job = get_current_job()
+        if job:
+            job.meta['pid'] = os.getpid()
+            job.save_meta()
 
         def save_metadata_callback(line: str) -> None:
             try:
@@ -314,13 +327,13 @@ def start_labbook_container(root: str, config_path: str, username: Optional[str]
         raise
 
 
-def stop_labbook_container(container_id: str):
+def stop_labbook_container(container_id: str) -> int:
     """Return a dictionary of metadata pertaining to the given task's Redis key.
 
     TODO - Take labbook as argument rather than image tag.
 
     Args:
-        image_tag(str): Container to stop
+        container_id(str): Container to stop
 
     Returns:
         0 to indicate no failure
@@ -418,6 +431,7 @@ def test_sleep(n):
     try:
         job = get_current_job()
         job.meta['sample'] = 'test_sleep metadata'
+        job.meta['pid'] = int(os.getpid())
         job.save_meta()
 
         time.sleep(n)
@@ -525,5 +539,56 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
             sys.exit(-1)
 
     except Exception as err:
+        logger.exception(err)
+        raise
+
+
+def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, dataset_name: str,
+                             cache_location: str, config_file: str = None) -> None:
+    """Method to import a dataset from a zip file
+
+    Args:
+        logged_in_username: username for the currently logged in user
+        dataset_owner: Owner of the labbook if this dataset is linked
+        dataset_name: Name of the labbook if this dataset is linked
+        cache_location: Absolute path to the file cache (inside the container) for this dataset
+        config_file:
+
+    Returns:
+        None
+    """
+    logger = LMLogger.get_logger()
+
+    p = os.getpid()
+    try:
+        logger.info(f"(Job {p}) Starting clean_dataset_file_cache(logged_in_username={logged_in_username},"
+                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
+
+        im = InventoryManager(config_file=config_file)
+
+        # Check for dataset
+        try:
+            im.load_dataset(logged_in_username, dataset_owner, dataset_name)
+            logger.info(f"{logged_in_username}/{dataset_owner}/{dataset_name} still exists. Skipping file cache clean.")
+            return
+        except InventoryException:
+            # Dataset not found, move along
+            pass
+
+        # Check for submodule references
+        for lb in im.list_labbooks(logged_in_username):
+            submodules = lb.git.list_submodules()
+            for submodule in submodules:
+                submodule_dataset_owner, submodule_dataset_name = submodule['name'].split("&")
+                if submodule_dataset_owner == dataset_owner and submodule_dataset_name == dataset_name:
+                    logger.info(f"{logged_in_username}/{dataset_owner}/{dataset_name} still referenced by {str(lb)}."
+                                f" Skipping file cache clean.")
+                    return
+
+        # If you get here the dataset no longer exists and is not used by any projects, clear files
+        shutil.rmtree(cache_location)
+
+    except Exception as err:
+        logger.error(f"(Job {p}) Error in clean_dataset_file_cache job")
         logger.exception(err)
         raise

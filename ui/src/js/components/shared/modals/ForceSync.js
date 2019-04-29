@@ -8,7 +8,7 @@ import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 import Modal from 'Components/common/Modal';
 // store
 import store from 'JS/redux/store';
-import { setMultiInfoMessage } from 'JS/redux/reducers/footer';
+import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 // assets
 import './ForceSync.scss';
 
@@ -56,14 +56,16 @@ export default class ForceSync extends Component {
     }
     this.props.toggleSyncModal();
   }
+
   render() {
     return (
       <Modal
         header="Sync Conflict"
         handleClose={() => this.props.toggleSyncModal()}
         size="medium"
-        renderContent={() =>
-          (<Fragment>
+        icon="sync"
+        renderContent={() => (
+          <Fragment>
             <div>
               <p>Your Project conflicts with changes already synced to the server. You can choose which changes to use</p>
               <p><b>**Note: This will overwrite the unselected conflicting files.</b></p>
@@ -74,7 +76,8 @@ export default class ForceSync extends Component {
               <button onClick={() => { this._forceSync('theirs'); }}>Use Theirs</button>
               <button onClick={() => { this.props.toggleSyncModal(); }}>Abort</button>
             </div>
-           </Fragment>)
+          </Fragment>
+        )
         }
       />
     );

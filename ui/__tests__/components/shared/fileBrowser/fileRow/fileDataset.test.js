@@ -8,6 +8,19 @@ import path from 'path';
 import codeData from 'Tests/components/labbook/code/__relaydata__/CodeBrowser.json';
 // components
 import File from 'Components/shared/fileBrowser/fileRow/File';
+import UserIdentity from 'JS/Auth/UserIdentity';
+
+jest.mock('JS/Auth/UserIdentity', () => {
+    return {
+      getUserIdentity: jest.fn().mockResolvedValue({
+        data: {
+          userIdentity: {
+            isSessionValid: true,
+         },
+       },
+     }),
+   }
+ });
 
 
 let edge = codeData.data.labbook.code.allFiles.edges[0];
@@ -63,12 +76,12 @@ describe('Dataset File component', () => {
 
   const component = mount(<File.DecoratedComponent {...fixtures}/>);
 
-  it('File Snapshot', () => {
+  it('File Snapshot', async () => {
     let evt = {
       stopPropagation: () => {},
     };
 
-    component.find('.DatasetActionsMenu__item--download-grey').simulate('click');
+    await component.find('.Btn__download').simulate('click');
 
     expect(fixtures.mutations.downloadDatasetFiles.mock.calls.length).toEqual(1);
   });

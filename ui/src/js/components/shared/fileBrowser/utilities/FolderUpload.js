@@ -1,53 +1,11 @@
 // vendor
-import { graphql } from 'react-relay';
 import uuidv4 from 'uuid/v4';
 // environment
-import { fetchQuery } from 'JS/createRelayEnvironment';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
 // store
-import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage, setUploadMessageUpdate } from 'JS/redux/actions/footer';
+import { setFinishedUploading, setPauseUploadData } from 'JS/redux/actions/shared/fileBrowser/fileBrowserWrapper';
 import store from 'JS/redux/store';
-import { setUploadMessageUpdate } from 'JS/redux/reducers/footer';
-import { setFinishedUploading, setPauseUploadData } from 'JS/redux/reducers/labbook/fileBrowser/fileBrowserWrapper';
-
-
-const fileExistenceQuery = graphql`
-  query FolderUploadQuery($labbookName: String!, $owner: String!, $path: String!){
-    labbook(name: $labbookName, owner: $owner){
-      id
-      code{
-        files(rootDir: $path, first:1){
-          edges{
-            node{
-              isDir,
-              key
-            }
-          }
-        }
-      }
-      input{
-      	files(rootDir: $path, first: 1){
-          edges{
-            node{
-              isDir,
-              key
-            }
-          }
-        }
-      }
-      output{
-        files(rootDir: $path, first: 1){
-          edges{
-            node{
-              isDir,
-              key
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 
 /**
@@ -55,11 +13,9 @@ const fileExistenceQuery = graphql`
 *  checks if a folder or file exists
 *  @return {promise}
 */
-const checkIfFolderExists = (variables, section, type) => {
-  return new Promise((resolve, reject) => {
-    resolve({ labbook: null, variables });
-  });
-};
+const checkIfFolderExists = (variables, section, type) => new Promise((resolve, reject) => {
+  resolve({ labbook: null, variables });
+});
 
 /**
 *  @param {string} connectionKey

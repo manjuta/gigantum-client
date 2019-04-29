@@ -90,10 +90,9 @@ class MITMProxyOperations(object):
                                                  init=True, name=nametag, volumes=volumes_dict,
                                                  environment=env_var)
 
-        # For now, we hammer repeatedly for 5 seconds
-        # Plan for a better solution is mentioned in #434
-        for _ in range(50):
-            time.sleep(.1)
+        # We hammer repeatedly for 5 seconds (this should be very fast since it's a small, simple container)
+        for _ in range(10):
+            time.sleep(.5)
             # Hope that our container is actually up and reload
             container.reload()
             container_ip = container.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']

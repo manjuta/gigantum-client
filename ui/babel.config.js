@@ -13,6 +13,7 @@ module.exports = {
  "plugins": [
    "relay",
    "@babel/plugin-syntax-dynamic-import",
+   ["@gigantum/babel-plugin-selenium-id"],
    ["@babel/plugin-proposal-decorators", {
        "legacy": true,
    }],
@@ -52,6 +53,7 @@ module.exports = {
         "legacy": true,
       }],
       ["@babel/plugin-proposal-class-properties", { "loose" : true }],
+      ["@gigantum/babel-plugin-selenium-id"],
     ],
   },
 },

@@ -1,278 +1,163 @@
 button {
-  height: 26px;
-  line-height: 22px;
-  padding: 0px 20px;
-  border: 2px solid $azure;
-  border-radius: 10px;
-  color: $white;
-  background: $azure;
+  width: 162px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin: 0 12.5px;
+  outline: none;
   cursor: pointer;
-  font-weight: 100;
 
-}
-
-button:hover {
   color: $white;
-  background: $turquise;
-  border: 2px solid $turquise;
-}
-
-button:focus {
-  color: $white;
+  border: 0;
+  border-radius: 4px;
   background: $azure;
+
+  font-weight: 400;
+  line-height: 1rem;
+
+  &:hover {
+    @include boxShadowDark();
+  }
+
+  &:disabled,
+  &:hover:disabled {
+    overflow: hidden;
+    border: 0;
+    background-color: $romanSilver;
+    box-shadow: none !important;
+  }
 }
 
-
-button:disabled {
-  color: $grey;
-  background: $grey-light;
-  border: 2px solid $grey;
-  overflow: hidden;
-}
-
-.button--flat {
-  padding: 0px 20px;
-  border: 0px solid $azure;
-  border-radius: 0px;
-  color: $font-grey;
-  background: none;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.button--flat:hover {
-  color: $turquise;
-  background: none;
-  border: 0px solid $turquise;
-}
-.button--flat:focus {
-  color: $azure;
-  background: none;
-  border: 0px solid $azure;
-}
-.button--flat:disabled,
-.button--flat:disabled:focus,
-.button--flat:disabled:hover{
-  color: $grey;
-  background: $grey-light;
-  border: 2px solid $grey;
-}
-
-.Btn{
+.Btn {
    background-color: $azure;
    border: 0px;
-   border-radius: 8px;
-   outline: none;
+   border-radius: 4px;
+   margin: 0 12.5px;
+   text-align: center;
+   cursor: pointer;
 
-   &:focus {
-     outline: none;
-   }
-
-   &:hover{
-     background-color: $turquise;
-   }
-
-   &--large {
-     padding: 10px 30px;
-   }
-
-   &--medium {
-     padding: 5px 15px;
-   }
-
-   &--small{
-     padding: 0px;
-   }
-
-   &--round {
-     height: 34px;
-     width: 34px;
-     border-radius: 15px;
-   }
-
-   &--redirect {
-    transition: all 0.25s ease, background-position 1ms;
-    width: 30px;
-    height: 30px;
-    border-radius: 30px;
-    position: absolute;
-    right: 15px;
-    top: -20px;
-    padding: 0;
-    background: $azure url('~Images/icons/continue-arrow.svg') no-repeat -1px center;
-    background-size: 30px;
-    border: none;
-    z-index: 1;
-    span {
-      display: none;
-    }
-
-    &:hover,
-    &:focus {
-      border: none;
-      width: auto;
-      padding: 0 40px 0 15px;
-      background: $azure url('~Images/icons/continue-arrow.svg') no-repeat right 1px center;
-      background-size: 30px;
-
-      span {
-        display: block;
-      }
-    }
-   }
-
-   &--expandable-close {
-    transition: all 0.25s ease, background-position 1ms;
-    width: 30px;
-    height: 30px;
-    border-radius: 30px;
-    position: absolute;
-    right: 15px;
-    top: -20px;
-    padding: 0;
-    background: $azure url('~Images/icons/close-white.svg') no-repeat center center;
-    background-size: 15px;
-    border: none;
-    z-index: 1;
-    span {
-      display: none;
-    }
-
-    &:hover,
-    &:focus {
-      border: none;
-      width: auto;
-      padding: 0 40px 0 15px;
-      background: $azure url('~Images/icons/close-white.svg') no-repeat right 10px center;
-      background-size: 15px;
-
-      span {
-        display: block;
-      }
-    }
-   }
-
-   &--check {
-     background: url(~Images/icons/check-selected.svg) no-repeat center center;
-     background-size: 30px;
-
-
-     &:focus {
-       background: url(~Images/icons/check-selected.svg) no-repeat center center;
-       border: 0px;
-       background-size: 30px;
-     }
-
-     &:hover {
-       background: url(~Images/icons/check-selected.svg) no-repeat center center;
-       border: 0px;
-        background-size: 34px;
-     }
-   }
-
-   &--uncheck {
-     background: url(~Images/icons/check-unselected.svg) no-repeat center center;
-     background-size: 30px;
-
-
-     &:focus {
-       background: url(~Images/icons/check-unselected.svg) no-repeat center center;
-       background-size: 30px;
-       border: 0px;
-     }
-
-     &:hover {
-       background: url(~Images/icons/check-unselected.svg) no-repeat center center;
-       background-size: 34px;
-       border: 0px;
-     }
-   }
-
-   &--partial {
-     background: url(~Images/icons/minus.svg) no-repeat center center;
-     background-size: 30px;
-     &:focus {
-       background: url(~Images/icons/minus.svg) no-repeat center center;
-       background-size: 30px;
-       border: 0px;
-     }
-
-     &:hover {
-       background: url(~Images/icons/minus.svg) no-repeat center center;
-       background-size: 34px;
-       border: 0px;
-     }
-   }
-
-   &--close {
-     background: url(~Images/icons/close.svg) no-repeat center center;
-     background-size: 30px;
-     border: 0px;
-
-     &:focus {
-       background: url(~Images/icons/close.svg) no-repeat center center;
-       background-size: 30px;
-       border: 0px;
-     }
-
-     &:hover {
-       background: url(~Images/icons/close.svg) no-repeat center center;
-       background-size: 34px;
-       border: 0px;
-     }
-   }
-
-   &--delete {
-     background: url(~Images/icons/trash-dark.svg) no-repeat center center;
-     background-size: 20px;
-     border: 0px;
-
-     &:focus {
-       background: url(~Images/icons/trash-dark.svg) no-repeat center center;
-       background-size: 20px;
-       border: 0px;
-     }
-
-     &:hover {
-       background: url(~Images/icons/trash-azure.svg) no-repeat center center;
-       background-size: 20px;
-       border: 0px;
-     }
-
-     &:disabled {
-       background: url(~Images/icons/trash.svg) no-repeat center center;
-       background-size: 20px;
-       border: 0px;
-     }
+   &:hover {
+    @include boxShadowDark();
   }
-
-
+  &--noStyle{
+    width: auto;
+    background: transparent;
+    color: $jet;
+    box-shadow: none !important;
+  }
+  // flat button
   &--flat {
-    padding: 0px 20px;
-    border: 0px solid $azure;
-    border-radius: 0px;
-    color: $azure;
-    background: none;
-    cursor: pointer;
-    text-decoration: none;
+      width: auto;
+      padding: 7px 20px;
+
+      cursor: pointer;
+      text-decoration: underline;
+
+      color: $azure;
+      border: 0;
+      border-radius: 0px;
+      background: none;
+      box-shadow: none !important;
+
+      &:hover {
+        font-size: 17px;
+        padding: 7px 18px 7px 20px;
+      }
+
+      &:disabled{
+        text-decoration: none;
+
+        color: $romanSilver;
+        border: 0px solid $grey;
+        background: transparent !important;
+        text-shadow: none;
+      }
   }
 
-  &--flat:hover {
-    color: $turquise;
-    background: none;
-    border: 0px solid $turquise;
+  // feature or actions buttons
+  &--feature {
+   position: absolute;
+   z-index: 1;
+
+   width: 30px;
+   height: 30px;
+   padding: 0;
+
+   transition: all 0.25s ease, background-position 0ms, font-size 0ms;
+
+   border: 2px solid $white;
+   border-radius: 30px;
+
+   font-size: 0;
+
+   &:hover, &:focus, &--expanded {
+     width: auto;
+     padding: 0 40px 0 15px;
+
+     font-size: 14px;
+   }
+   &--expanded--paddingLeft,
+   &--expanded--paddingLeft:hover,
+   &--expanded--paddingLeft:focus {
+      width: auto;
+      padding: 0 15px 0 40px;
+
+      font-size: 14px;
+   }
+   &:disabled, &:disabled:hover, &:disabled:focus {
+     width: 30px;
+     padding: 0;
+
+     background-size: 30px;
+
+     font-size: 0;
+   }
+   &--noPadding {
+     padding: 0 15px !important;
+   }
   }
-  &--flat:focus {
-    color: $azure;
-    background: none;
-    border: 0px solid $azure;
+
+  &--noShadow {
+    box-shadow: none !important;
   }
-  &--flat:disabled,
-  &--flat:disabled:focus,
-  &--flat:disabled:hover{
-    color: $grey;
-    background: $grey-light;
-    border: 2px solid $grey;
+
+  &--noMargin {
+    margin: 0;
+  }
+
+  &--action{
+    width: auto;
+  }
+
+  &--round {
+     border-radius: 15px;
+  }
+  &--bordered {
+    border: 1px solid $azure;
+    &:disabled{
+      border: 1px solid $romanSilver;
+    }
+  }
+
+
+  &--wide {
+    width: 210px;
+  }
+
+  &--small {
+    width: 20px;
+    height: 20px;
+    background-size: 10px !important;
+  }
+
+  &--medium {
+    width: 30px;
+    height: 30px;
+  }
+
+  &--fileBrowser {
+    width: 25px;
+    height: 25px;
+    background-size: 18px !important;
   }
 
   &--no-underline {
@@ -294,4 +179,438 @@ button:disabled {
   &--text {
     font-size: 16px;
   }
+
+  &--last {
+    margin-right: 0px;
+  }
+
+  &--first {
+    margin-left: 0px;
+  }
+
+  &--noPadding{
+    padding: 0px;
+    &:hover,
+    &:focus,
+    &:disabled{
+      padding: 0px;
+    }
+  }
+
+  &--noMargin{
+    margin: 0px;
+
+    &:hover,
+    &:focus,
+    &:disabled{
+      margin: 0px;
+    }
+  }
+
+
+  /**********************************
+   * feature buttons
+   *
+   *
+   *********************************/
+  &__loadMore{
+    margin: 0;
+    border-radius: 0;
+    width: 315px;
+    height: 25px;
+    background: transparent;
+    box-shadow: none;
+
+    &:hover {
+      box-shadow: none;
+      &:before {
+        text-decoration: underline;
+      }
+    }
+    &--up {
+      background: url('~Images/icons/up-arrow-azure.svg') no-repeat  calc(50% + 50px) 5px;
+      background-size: 20px;
+
+      &:before {
+        color: $azure;
+        line-height: 16px;
+        content: "Show Less";
+      }
+    }
+    &--down {
+      background: url('~Images/icons/down-arrow-azure.svg') no-repeat calc(50% + 50px) 5px;
+      background-size: 20px;
+
+      &:before {
+        color: $azure;
+        line-height: 16px;
+        content: "Load More";
+      }
+    }
+
+
+  }
+
+  &__delete {
+     background: url(~Images/icons/trash-azure.svg) no-repeat center center;
+     background-size: 18px;
+
+     &:focus {
+       background: $azure url(~Images/icons/trash-white.svg) no-repeat center center;
+       background-size: 18px;
+
+     }
+
+     &:hover {
+       background: $azure url(~Images/icons/trash-white.svg) no-repeat center center;
+       background-size: 18px;
+
+     }
+
+     &:disabled {
+       background: transparent url(~Images/icons/trash.svg) no-repeat center center !important;
+       background-size: 18px;
+
+     }
+  }
+
+  &__rename {
+    background: url(~Images/icons/rename-azure.svg) no-repeat center center;
+    background-size: 21px !important;
+
+    &:focus {
+      background: $azure url(~Images/icons/rename-white.svg) no-repeat center center;
+      background-size: 21px !important;
+
+    }
+
+    &:hover {
+      background: $azure url(~Images/icons/rename-white.svg) no-repeat center center;
+      background-size: 21px !important;
+
+    }
+
+    &:disabled {
+      background: transparent url(~Images/icons/rename.svg) no-repeat center center !important;
+      background-size: 21px !important;
+
+    }
+ }
+
+ &__addFolder {
+  background: url(~Images/icons/folder-add-new-azure.svg) no-repeat left 4px top 2px;
+  background-size: 18px;
+
+  &:focus {
+    background: $azure url(~Images/icons/folder-add-new-hover.svg) no-repeat left 4px top 2px;
+    background-size: 18px;
+
+  }
+
+  &:hover {
+    background: $azure url(~Images/icons/folder-add-new-hover.svg) no-repeat left 4px top 2px;
+    background-size: 18px;
+
+  }
+
+  &:disabled {
+    background: transparent url(~Images/icons/folder-add-new.svg) no-repeat left 4px top 2px !important;
+    background-size: 18px;
+
+  }
+ }
+
+ &__addDataset {
+  background: url(~Images/icons/database-add-azure.svg) no-repeat center center;
+  background-size: 18px;
+
+  &:focus {
+    background: $azure url(~Images/icons/database-add-hover.svg) no-repeat center center;
+    background-size: 18px;
+
+  }
+
+  &:hover {
+    background: $azure url(~Images/icons/database-add-hover.svg) no-repeat center center;
+    background-size: 18px;
+  }
+
+  &:disabled {
+    background: transparent url(~Images/icons/database-add.svg) no-repeat center center !important;
+    background-size: 18px;
+
+  }
+ }
+
+
+ &__upArrow {
+  background: url(~Images/icons/update-azure.svg) no-repeat center center;
+  background-size: 18px;
+
+  &:focus {
+    background: $azure url(~Images/icons/update-white.svg) no-repeat center center;
+    background-size: 18px;
+
+  }
+
+  &:hover {
+    background: $azure url(~Images/icons/update-white.svg) no-repeat center center;
+    background-size: 18px;
+
+  }
+
+  &:disabled {
+    background: transparent url(~Images/icons/update-version.svg) no-repeat center center !important;
+    background-size: 18px;
+
+  }
+ }
+
+ &__Favorite-off {
+  background: url(~Images/icons/star__off-azure.svg) no-repeat center top 2px;
+  background-size: 18px;
+
+  &:focus {
+    background: $azure url(~Images/icons/star__off-white.svg) no-repeat center top 2px;
+    background-size: 18px;
+  }
+
+  &:hover {
+    background: $azure url(~Images/icons/star__off-white.svg) no-repeat center top 2px;
+    background-size: 18px;
+  }
+
+  &:disabled {
+    background: url(~Images/icons/star__off.svg) no-repeat center top 2px;
+    background-size: 18px;
+  }
+}
+
+&__Favorite-on {
+  background: url(~Images/icons/star__on.svg) no-repeat center top 2px;
+  background-size: 18px;
+
+  &:focus {
+    background: $azure url(~Images/icons/star__on.svg) no-repeat center top 2px;
+    background-size: 18px;
+  }
+
+  &:hover {
+    background: $azure url(~Images/icons/star__on.svg) no-repeat center top 2px;
+    background-size: 18px;
+  }
+
+  &:disabled {
+    background: url(~Images/icons/star__on.svg) no-repeat center top 2px;
+    background-size: 18px;
+  }
+}
+
+  &__download {
+    background: url('~Images/icons/database-download-azure.svg') no-repeat 50% 50%;
+    background-size: 20px;
+    margin-right: 5px;
+
+    &:hover {
+        //change color here
+        background: url('~Images/icons/database-download-azure.svg') no-repeat 50% 50%;
+        background-size: 22px;
+    }
+  }
+
+  &__downloaded {
+    cursor: auto !important;
+    box-shadow: none !important;
+    background: url('~Images/icons/database-grey-local.svg') no-repeat 50% 50%;
+    background-size: 20px;
+    margin-right: 5px;
+  }
+
+  &__redirect {
+     background: $azure url('~Images/icons/continue-arrow.svg') no-repeat -1px center;
+     background-size: 30px;
+     &:hover, &:focus {
+       background-position: right 1px center;
+       background-size: 30px;
+     }
+     &--featurePosition {
+      right: 15px;
+      top: -20px;
+     }
+  }
+
+  &__edit {
+     background: $azure url('~Images/icons/edit.svg') no-repeat center center;
+     background-size: 18px;
+     &:hover, &:focus {
+       background: $azure url('~Images/icons/edit.svg') no-repeat right 7px center;
+       background-size: 18px;
+     }
+     &--featurePosition {
+      top: -20px;
+      right: 15px;
+     }
+     &--DescriptionPosition {
+      right: 0;
+      top: 0;
+     }
+  }
+
+  &__toggle {
+      flex: 0 1 30px;
+
+      width: 24px;
+      height: 24px;
+
+      cursor: pointer;
+
+      background: url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+      background-size: 18px;
+
+      &:hover{
+        box-shadow: none;
+      }
+
+      &--open {
+          background: url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+          background-size: 18px;
+      }
+  }
+
+
+  &__check {
+    background: url(~Images/icons/check-selected.svg) no-repeat center center;
+    background-size: 30px;
+
+
+    &:focus {
+      background: url(~Images/icons/check-selected.svg) no-repeat center center;
+      border: 0px;
+      background-size: 30px;
+    }
+
+    &:hover {
+      background: url(~Images/icons/check-selected.svg) no-repeat center center;
+      border: 0px;
+       background-size: 34px;
+    }
+  }
+
+  &__uncheck {
+    background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+    background-size: 30px;
+
+
+    &:focus {
+      background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+      background-size: 30px;
+      border: 0px;
+    }
+
+    &:hover {
+      background: url(~Images/icons/check-unselected.svg) no-repeat center center;
+      background-size: 34px;
+      border: 0px;
+    }
+  }
+
+  &__partial {
+    background: url(~Images/icons/minus.svg) no-repeat center center;
+    background-size: 30px;
+    &:focus {
+      background: url(~Images/icons/minus.svg) no-repeat center center;
+      background-size: 30px;
+      border: 0px;
+    }
+
+    &:hover {
+      background: url(~Images/icons/minus.svg) no-repeat center center;
+      background-size: 34px;
+      border: 0px;
+    }
+  }
+
+  &__close {
+    background: url(~Images/icons/close.svg) no-repeat center center;
+    background-size: 30px;
+    border: 0px;
+
+    &:focus {
+      background: url(~Images/icons/close.svg) no-repeat center center;
+      background-size: 30px;
+      border: 0px;
+    }
+
+    &:hover {
+      background: url(~Images/icons/close.svg) no-repeat center center;
+      background-size: 34px;
+      border: 0px;
+    }
+  }
+
+  &__remove {
+    background: $azure url('~Images/icons/close-white.svg') no-repeat center center;
+    background-size: 20px;
+
+    &:disabled {
+      background-image: url('~Images/icons/close-white.svg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 20px;
+    }
+  }
+
+
+  &__expandable-close {
+   transition: all 0.25s ease, background-position 1ms;
+   width: 30px;
+   height: 30px;
+   border-radius: 30px;
+   position: absolute;
+   right: 15px;
+   top: -20px;
+   padding: 0;
+   background: $azure url('~Images/icons/close-white.svg') no-repeat center center;
+   background-size: 15px;
+   border: none;
+   z-index: 1;
+
+   span {
+     display: none;
+   }
+
+   &:hover,
+   &:focus {
+     border: none;
+     width: auto;
+     padding: 0 40px 0 15px;
+     background: $azure url('~Images/icons/close-white.svg') no-repeat right 10px center;
+     background-size: 15px;
+
+     span {
+       display: block;
+     }
+   }
+  }
+
+  &__overview {
+    top: -7px;
+  }
+
+  &__plus {
+    background: $azure url('~Images/icons/add-white.svg') no-repeat center center;
+    background-size: 20px !important;
+    &:disabled {
+      background-image: url('~Images/icons/add-white.svg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 20px !important;
+    }
+  }
+
+  &__dropdown {
+    width: 20px;
+    height: 20px;
+  }
+
 }

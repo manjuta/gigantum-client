@@ -16,6 +16,7 @@ const mutation = graphql`
           modifiedAt
           key
           size
+          isLocal
         }
         cursor
       }
@@ -120,6 +121,7 @@ export default function MakeDatasetDirectoryMutation(
         node.setValue(key, 'key');
         node.setValue(0, 'modifiedAt');
         node.setValue(100, 'size');
+        node.setValue(true, 'isLocal');
 
         sharedUpdater(store, labbookId, connectionKey, node);
       },

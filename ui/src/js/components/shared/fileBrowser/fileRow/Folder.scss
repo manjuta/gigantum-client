@@ -27,6 +27,15 @@
     @include flex(space-between, row);
     align-items: center;
 
+    &--noDrag {
+      background: $background-color !important;
+      cursor: not-allowed !important;
+    }
+    &--canDrag {
+      cursor: copy !important;
+    }
+
+
     &:hover {
 
       .ActionsMenu__item {
@@ -175,4 +184,10 @@
     left: 120px;
     top: 6px;
     cursor: pointer;
+}
+
+.Folder__name {
+    flex: 1;
+    text-align: left;
+    align-self: center;
 }

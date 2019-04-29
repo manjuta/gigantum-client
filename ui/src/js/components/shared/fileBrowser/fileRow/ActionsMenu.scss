@@ -16,37 +16,9 @@
   .ActionsMenu__item {
       position: relative;
 
-      width: 20px;
-      height: 20px;
-
       margin: 0 5px;
 
       cursor: pointer;
-
-
-      &--delete {
-          background: url('~Images/icons/trash.svg') no-repeat 50% 50%;
-          background-size: 20px;
-
-          position: relative;
-
-          &:hover{
-              //change color here
-              background: url('~Images/icons/trash-azure.svg') no-repeat 50% 50%;
-              background-size: 20px;
-          }
-      }
-
-      &--rename {
-          background: url('~Images/icons/rename.svg') no-repeat 50% 50%;
-          background-size: 20px;
-
-          &:hover{
-              //change color here
-              background: url('~Images/icons/rename-azure.svg') no-repeat 50% 50%;
-              background-size: 20px;
-          }
-      }
 
       &--duplicate {
           background: url('~Images/icons/copy-light.svg') no-repeat 50% 50%;
@@ -81,18 +53,6 @@
           }
       }
 
-      &--AddSubfolder {
-          background: url('~Images/icons/folder-add.svg') no-repeat 50% 50%;
-          background-size: 20px;
-          margin-right: 5px;
-
-          &:hover {
-              //change color here
-              background: url('~Images/icons/folder-add.svg') no-repeat 50% 50%;
-              background-size: 20px;
-          }
-      }
-
       &--menu {
           width: 50px;
 
@@ -120,14 +80,14 @@
   width: 140px;
   position: absolute;
   top: 34px;
-  right: -60px;
+  right: -52px;
   text-align: center;
   z-index: index($elements, popup);
   p{
       margin-top: 0;
   }
 
-  .ToolTip__pointer {
+  .Tooltip__pointer {
     top: -10px;
     right: 55px;
   }

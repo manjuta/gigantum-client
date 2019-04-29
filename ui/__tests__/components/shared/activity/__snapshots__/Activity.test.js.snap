@@ -3,6 +3,7 @@
 exports[`Activity renders a snapshot 1`] = `
 <div
   className="Activity"
+  data-selenium-id="Activity"
 >
   <div
     className="Activity__inner-container flex flex--row flex--wrap justify--flex-start"
@@ -10,7 +11,9 @@ exports[`Activity renders a snapshot 1`] = `
     <div
       className="Activity__sizer flex-1-0-auto"
     >
-      <div />
+      <div
+        data-selenium-id="CreateBranch"
+      />
       <div
         className="Activity__date-section Activity__date-section--0"
       >
@@ -39,22 +42,24 @@ exports[`Activity renders a snapshot 1`] = `
         </div>
         <div
           className="UserNote__container"
+          data-selenium-id="UserNoteWrapper"
         >
           <div
             className="hidden userNote"
+            data-selenium-id="Tooltip"
           >
             <div
-              className="ToolTip__toggle userNote"
+              className="Tooltip__toggle userNote"
               onClick={[Function]}
             >
               <div
-                className="ToolTip__glow-container"
+                className="Tooltip__glow-container"
               >
                 <div
-                  className="ToolTip__glow-ring-outer"
+                  className="Tooltip__glow-ring-outer"
                 >
                   <div
-                    className="ToolTip__glow-ring-inner"
+                    className="Tooltip__glow-ring-inner"
                   />
                 </div>
               </div>
@@ -69,19 +74,13 @@ exports[`Activity renders a snapshot 1`] = `
  The note editor supports markdown.
             </div>
           </div>
-          <div
-            className="UserNote__button"
+          <button
+            className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
             onClick={[Function]}
+            type="submit"
           >
-            <div
-              className="UserNote__add-icon"
-            />
-            <div
-              className="UserNote__text"
-            >
-              Add Note
-            </div>
-          </div>
+            Add Note
+          </button>
           <div
             className="UserNote__add UserNote__card column-1-span-10 hidden"
           />
@@ -93,7 +92,8 @@ exports[`Activity renders a snapshot 1`] = `
             className="CardWrapper"
           >
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -116,7 +116,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:59pm
+                        9:59am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -140,23 +140,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -175,12 +177,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -203,7 +208,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:57pm
+                        9:57am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -227,23 +232,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -262,12 +269,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -290,7 +300,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:56pm
+                        9:56am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -314,23 +324,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -349,12 +361,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -377,7 +392,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:55pm
+                        9:55am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -401,23 +416,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -436,12 +453,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -464,7 +484,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -488,23 +508,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -523,12 +545,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -551,7 +576,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -575,23 +600,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -610,12 +637,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -638,7 +668,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -662,23 +692,25 @@ exports[`Activity renders a snapshot 1`] = `
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
-                  className="ToolTip__toggle activitySubmenu"
+                  className="Tooltip__toggle activitySubmenu"
                   onClick={[Function]}
                 >
                   <div
-                    className="ToolTip__glow-container"
+                    className="Tooltip__glow-container"
                   >
                     <div
-                      className="ToolTip__glow-ring-outer"
+                      className="Tooltip__glow-ring-outer"
                     >
                       <div
-                        className="ToolTip__glow-ring-inner"
+                        className="Tooltip__glow-ring-inner"
                       />
                     </div>
                   </div>
@@ -697,12 +729,15 @@ exports[`Activity renders a snapshot 1`] = `
               <button
                 className="Rollback__button"
                 onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
               >
                 Rollback
               </button>
             </div>
             <div
-              className="ActivityCard__container column-1-span-10"
+              className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -725,7 +760,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -747,19 +782,24 @@ exports[`Activity renders a snapshot 1`] = `
         </div>
       </div>
       <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-10"
+        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-10"
+        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-10"
+        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-10"
+        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-10"
+        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
     </div>
   </div>

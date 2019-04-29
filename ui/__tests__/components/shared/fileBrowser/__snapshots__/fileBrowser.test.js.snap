@@ -3,12 +3,48 @@
 exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
 <div
   className="FileBrowser FileBrowser--dropzone"
+  data-selenium-id="FileBrowser"
   style={
     Object {
       "zIndex": 0,
     }
   }
 >
+  <div
+    className="FileBrowser__menu"
+  >
+    <h5>
+      Files
+    </h5>
+    <div
+      className="FileBrowser__menu-buttons"
+    >
+      <button
+        className="FileBrowser__button Btn--round Btn--bordered Btn__upArrow"
+        onClick={[Function]}
+        type="button"
+      />
+      <span>
+        Upload Files
+      </span>
+      <button
+        className="FileBrowser__button Btn--round Btn--bordered Btn__addFolder"
+        onClick={[Function]}
+        type="button"
+      />
+      <span>
+        New Folder
+      </span>
+      <button
+        className="FileBrowser__button Btn--round Btn--bordered Btn__addDataset"
+        data-tooltip="Link Dataset"
+        onClick={[Function]}
+      />
+      <span>
+        Link Dataset
+      </span>
+    </div>
+  </div>
   <div
     className="FileBrowser__tools flex justify--space-between"
   >
@@ -31,18 +67,18 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
       className="FileBrowser__multiselect flex justify--start"
     >
       <button
-        className="Btn--multiSelect Btn Btn--round Btn--uncheck"
+        className="Btn--multiSelect Btn Btn--round Btn--medium Btn__uncheck"
         onClick={[Function]}
       />
       <button
-        className="Btn Btn--round Btn--delete hidden"
+        className="Btn Btn--round Btn__delete Btn--noShadow Btn--action hidden"
         onClick={[Function]}
       />
       <div
-        className="FileBrowser__popup hidden ToolTip__message"
+        className="FileBrowser__popup hidden Tooltip__message"
       >
         <div
-          className="ToolTip__pointer"
+          className="Tooltip__pointer"
         />
         <p>
           Are you sure?
@@ -61,43 +97,37 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
         </div>
       </div>
     </div>
-    <div
-      className="FileBrowser__header--name flex justify--start"
+    <button
+      className="FileBrowser__name-text FileBrowser__header--name flex justify--start Btn--noStyle FileBroser__sort--asc"
       onClick={[Function]}
+      type="button"
     >
-      <div
-        className="FileBrowser__name-text FileBroser__sort--asc"
-      >
-        File
-      </div>
-    </div>
-    <div
-      className="FileBrowser__header--size"
+      File
+    </button>
+    <button
+      className="FileBrowser__header--size Btn--noStyle"
       onClick={[Function]}
+      type="button"
     >
       Size
-    </div>
-    <div
-      className="FileBrowser__header--date"
+    </button>
+    <button
+      className="FileBrowser__header--date Btn--noStyle"
       onClick={[Function]}
+      type="button"
     >
       Modified
-    </div>
+    </button>
     <div
       className="FileBrowser__header--menu flex flex--row justify--right"
-    >
-      <div
-        className="FileBrowser__button FileBrowser__button--add-folder"
-        data-tooltip="Add Folder"
-        onClick={[Function]}
-      />
-    </div>
+    />
   </div>
   <div
     className="FileBrowser__body"
   >
     <div
       className="AddSubfolder hidden"
+      data-selenium-id="AddSubfolder"
       onClick={[Function]}
     >
       <div

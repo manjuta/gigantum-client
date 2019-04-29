@@ -10,10 +10,7 @@ mutation FetchDatasetEdgeMutation($input: FetchDatasetEdgeInput!, $first: Int!, 
     fetchDatasetEdge(input: $input){
         newDatasetEdge{
             node{
-                owner
-                name
-                visibility
-                defaultRemote
+                ...Dataset_dataset
                 collaborators {
                   id
                   owner
@@ -22,7 +19,6 @@ mutation FetchDatasetEdgeMutation($input: FetchDatasetEdgeInput!, $first: Int!, 
                   permission
                 }
                 canManageCollaborators
-                ...Data_dataset
             }
         }
         clientMutationId
@@ -30,7 +26,7 @@ mutation FetchDatasetEdgeMutation($input: FetchDatasetEdgeInput!, $first: Int!, 
 }
 `;
 
-let tempID = 0;
+const tempID = 0;
 
 
 export default function FetchDatasetEdgeMutation(

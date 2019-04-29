@@ -27,8 +27,8 @@ from gtmcore.configuration import Configuration
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
-from gtmcore.dataset.io.manager import IOManager
 from gtmcore.exceptions import GigantumException
+from gtmcore.dispatcher import (Dispatcher, jobs)
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.auth.identity import parse_token
@@ -39,7 +39,6 @@ from gtmcore.activity import ActivityStore, ActivityType, ActivityAction, Activi
 from lmsrvlabbook.api.objects.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
-from lmsrvlabbook.api.connections.datasetfile import DatasetFile, DatasetFileConnection
 from lmsrvlabbook.api.connections.labbook import Labbook, LabbookConnection
 
 
@@ -222,7 +221,7 @@ class DeleteDataset(graphene.ClientIDMutation):
             repo_id = mgr.get_repository_id(owner, dataset_name)
             response = requests.delete(f"https://{remote_config['index_service']}/index/{repo_id}",
                                        headers={"Authorization": f"Bearer {access_token}",
-                                                "Identity": id_token}, timeout=10)
+                                                "Identity": id_token}, timeout=30)
 
             if response.status_code != 204:
                 # Soft failure, still continue
@@ -242,8 +241,24 @@ class DeleteDataset(graphene.ClientIDMutation):
 
         if local:
             logger.info(f"Deleting local Dataset {owner}/{dataset_name}")
-            InventoryManager().delete_dataset(logged_in_user, owner, dataset_name)
+
+            # Delete the dataset
+            dataset_delete_job = InventoryManager().delete_dataset(logged_in_user, owner, dataset_name)
             local_deleted = True
+
+            # Schedule Job to clear file cache if dataset is no longer in use
+            job_metadata = {'method': 'clean_dataset_file_cache'}
+            job_kwargs = {
+                'logged_in_username': logged_in_user,
+                'dataset_owner': dataset_delete_job.namespace,
+                'dataset_name': dataset_delete_job.name,
+                'cache_location': dataset_delete_job.cache_root
+            }
+
+            dispatcher = Dispatcher()
+            job_key = dispatcher.dispatch_task(jobs.clean_dataset_file_cache, metadata=job_metadata,
+                                               kwargs=job_kwargs)
+            logger.info(f"Dispatched clean_dataset_file_cache({owner}/{dataset_name}) to Job {job_key}")
 
         return DeleteDataset(local_deleted=local_deleted, remote_deleted=remote_deleted)
 

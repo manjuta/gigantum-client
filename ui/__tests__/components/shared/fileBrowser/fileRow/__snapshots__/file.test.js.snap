@@ -3,6 +3,7 @@
 exports[`Project File component File Snapshot 1`] = `
 <div
   className="File"
+  data-selenium-id="File"
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
   onMouseOut={[Function]}
@@ -17,7 +18,7 @@ exports[`Project File component File Snapshot 1`] = `
     }
   >
     <button
-      className="Btn Btn--round Btn--check"
+      className="Btn Btn--round Btn--medium Btn__check"
       onClick={[Function]}
     />
     <div
@@ -75,22 +76,29 @@ exports[`Project File component File Snapshot 1`] = `
     >
       <div
         className="ActionsMenu"
+        data-selenium-id="ActionsMenu"
       >
-        <div
-          className="ActionsMenu__item Tooltip-data Tooltip-data--small ActionsMenu__item--AddSubfolder visibility-hidden"
+        <button
+          className="ActionsMenu__item Tooltip-data Tooltip-data--small Btn--round Btn--bordered Btn__addFolder visibility-hidden"
           data-tooltip="Add Subfolder"
           onClick={[Function]}
+          type="button"
         />
         <div
-          className="ActionsMenu__item ActionsMenu__item--delete Tooltip-data Tooltip-data--small"
-          data-tooltip="Delete"
-          onClick={[Function]}
+          className="relative"
         >
+          <button
+            className="ActionsMenu__item Btn__delete Btn--noShadow Btn--round Btn--bordered Tooltip-data Tooltip-data--small"
+            data-tooltip="Delete"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          />
           <div
-            className="ActionsMenu__popup hidden ToolTip__message"
+            className="ActionsMenu__popup hidden Tooltip__message"
           >
             <div
-              className="ToolTip__pointer"
+              className="Tooltip__pointer"
             />
             <p>
               Are you sure?
@@ -101,23 +109,28 @@ exports[`Project File component File Snapshot 1`] = `
               <button
                 className="File__btn--round File__btn--cancel"
                 onClick={[Function]}
+                type="button"
               />
               <button
                 className="File__btn--round File__btn--add"
                 onClick={[Function]}
+                type="button"
               />
             </div>
           </div>
         </div>
-        <div
-          className="ActionsMenu__item ActionsMenu__item--rename Tooltip-data Tooltip-data--small"
+        <button
+          className="ActionsMenu__item Btn__rename Btn--noShadow Tooltip-data Tooltip-data--small Btn--bordered Btn--round"
           data-tooltip="Rename"
+          disabled={false}
           onClick={[Function]}
+          type="button"
         />
-        <div
-          className="ActionsMenu__item Tooltip-data Tooltip-data--small ActionsMenu__item--favorite-off"
+        <button
+          className="ActionsMenu__item Tooltip-data Tooltip-data--small Btn--round Btn--bordered Btn__Favorite-off Btn--noShadow"
           data-tooltip="Favorite"
           onClick={[Function]}
+          type="button"
         />
       </div>
     </div>

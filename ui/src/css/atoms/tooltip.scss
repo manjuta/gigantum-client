@@ -5,7 +5,7 @@
     position: relative;
 
     cursor: pointer;
-
+    &--visible:before,
     &:hover::before{
       position: absolute;
       top: calc(100% - 0px);
@@ -27,6 +27,7 @@
             transform: translate(-50%, 0);
         }
     }
+    &--visible::after,
     &:hover::after{
       z-index: index($elements, popup);
       font-family: 'NunitoSans';
@@ -69,7 +70,7 @@
 
     &--left:hover::before {
       top: calc(50% - 7px);
-      right: calc(100% + 2px);
+      left: -8px;
 
       @include triangle('right', 7px, $slateBlue);
     }
@@ -77,7 +78,7 @@
 
     &--left:hover::after {
       top: calc(50% - 10px);
-      right: calc(100% + 16px);
+      left: -168px;
     }
 
     &--top-offset:hover::before {
@@ -104,5 +105,13 @@
         right: 10px;
         top: calc(50% - 7px);
         cursor: pointer;
+    }
+
+    &--visible::after,
+    &--visible:hover::after {
+      width: 140px !important;
+      padding: 5px !important;
+      left: 50% !important;
+      transform: translate(-50%, 0)
     }
   }

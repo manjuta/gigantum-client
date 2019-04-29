@@ -3,8 +3,11 @@
 exports[`DashboardLocal Renders a snapshot 1`] = `
 <div
   className="Labbooks"
+  data-selenium-id="Labbooks"
 >
-  <div />
+  <div
+    data-selenium-id="WizardModal"
+  />
   <div
     className="Labbooks__panel-bar"
   >
@@ -13,20 +16,18 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
     >
       uitest
     </h6>
-    <h2
-      className="Labbooks__title"
-    >
+    <h1>
       Projects
-    </h2>
+    </h1>
   </div>
   <div
     className="Labbooks__menu  mui-container flex-0-0-auto"
   >
     <ul
-      className="Labbooks__nav  flex flex--row"
+      className="Tabs"
     >
       <li
-        className="Labbooks__nav-item Labbooks__nav-item--local Labbooks__nav-item--selected"
+        className="Tab Tab--local Tab--selected"
       >
         <a
           onClick={[Function]}
@@ -35,7 +36,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
         </a>
       </li>
       <li
-        className="Labbooks__nav-item Labbooks__nav-item--cloud"
+        className="Tab Tab--cloud"
       >
         <a
           onClick={[Function]}
@@ -48,19 +49,20 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
       />
       <div
         className="hidden cloudLocal"
+        data-selenium-id="Tooltip"
       >
         <div
-          className="ToolTip__toggle cloudLocal"
+          className="Tooltip__toggle cloudLocal"
           onClick={[Function]}
         >
           <div
-            className="ToolTip__glow-container"
+            className="Tooltip__glow-container"
           >
             <div
-              className="ToolTip__glow-ring-outer"
+              className="Tooltip__glow-ring-outer"
             >
               <div
-                className="ToolTip__glow-ring-inner"
+                className="Tooltip__glow-ring-inner"
               />
             </div>
           </div>
@@ -82,104 +84,115 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
     <div
       className="Labbooks__search-container column-2-span-6 padding--0"
     >
-      <input
-        className="Labbooks__search no--margin"
-        defaultValue=""
-        onFocus={[Function]}
-        onKeyUp={[Function]}
-        placeholder="Filter Projects by name or description"
-        type="text"
-      />
+      <div
+        className="Input Input--clear"
+      >
+        <input
+          className="margin--0"
+          defaultValue=""
+          onFocus={[Function]}
+          onKeyUp={[Function]}
+          placeholder="Filter Projects by name or description"
+          type="text"
+        />
+      </div>
     </div>
     <div
-      className="LabbookFilterBy column-4-span-3 padding--0"
+      className="DashboardDropdown column-4-span-3 padding--0"
+      data-selenium-id="FilterByDropdown"
     >
-      Filter by:
-      <span
-        className="LabbookFilterBy__selector Dropdown Dropdown--collapsed"
+      <div>
+        Filter by:
+      </div>
+      <div
+        className="Dropdown__filter-selector Dropdown Dropdown--collapsed"
         onClick={[Function]}
       >
         All
-      </span>
+      </div>
       <ul
-        className="LabbookFilterBy__menu Dropdown__menu box-shadow hidden"
+        className="Dropdown__menu box-shadow hidden"
       >
         <li
-          className="LabbookFilterBy__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          All 
-          ✓ 
+          All
+           ✓ 
         </li>
         <li
-          className="LabbookFilterBy__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          My Projects 
+          My
+           Project
           
         </li>
         <li
-          className="LabbookFilterBy__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Shared with me 
+          Shared with me
           
         </li>
       </ul>
     </div>
     <div
-      className="LabbookSort column-4-span-3 padding--0"
+      className="DashboardDropdown column-4-span-3 padding--0"
+      data-selenium-id="SortByDropdown"
     >
-      Sort by:
-      <span
-        className="LabbookSort__selector Dropdown Dropdown--collapsed"
+      <div>
+        Sort by:
+      </div>
+      <div
+        className="Dropdown__sort-selector Dropdown Dropdown--collapsed"
         onClick={[Function]}
       >
         Modified Date (Newest)
-      </span>
+      </div>
       <ul
-        className="LabbookSort__menu Dropdown__menu box-shadow hidden"
+        className="Dropdown__menu box-shadow hidden"
       >
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Modified Date (Newest) 
-          ✓ 
+          Modified Date (Newest)
+           ✓ 
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Modified Date (Oldest) 
+          Modified Date (Oldest)
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Creation Date (Newest) 
+          Creation Date (Newest)
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Creation Date (Oldest) 
+          Creation Date (Oldest)
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          A-Z 
+          A-Z
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Z-A 
+          Z-A
           
         </li>
       </ul>
@@ -187,73 +200,77 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
   </div>
   <div
     className="Labbooks__listing"
+    data-selenium-id="LocalLabbooks"
   >
     <div
       className="grid"
     >
       <div
         className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
+        data-selenium-id="ImportModule"
       >
         <div
-          className="Import__labbook-main"
+          className="Import__main"
+        />
+        <div
+          className="Import__header"
         >
           <div
-            className="Import__labbook-header"
+            className="Import__icon Import__icon--labbook"
           >
             <div
-              className="Import__labbook-icon"
+              className="Import__add-icon"
+            />
+          </div>
+          <div
+            className="Import__title"
+          >
+            <h2
+              className="Import__h2 Import__h2--azure"
+            >
+              Add Project
+            </h2>
+          </div>
+        </div>
+        <div
+          className="btn--import"
+          onClick={[Function]}
+        >
+          Create New
+        </div>
+        <div
+          className="btn--import"
+          onClick={[Function]}
+        >
+          Import Existing
+        </div>
+        <div
+          className="hidden createLabbook"
+          data-selenium-id="Tooltip"
+        >
+          <div
+            className="Tooltip__toggle createLabbook"
+            onClick={[Function]}
+          >
+            <div
+              className="Tooltip__glow-container"
             >
               <div
-                className="Import__labbook-add-icon"
-              />
+                className="Tooltip__glow-ring-outer"
+              >
+                <div
+                  className="Tooltip__glow-ring-inner"
+                />
+              </div>
             </div>
-            <div
-              className="Import__labbook-title"
-            >
-              <h4>
-                Add Project
-              </h4>
-            </div>
-          </div>
-          <div
-            className="btn--import"
-            onClick={[Function]}
-          >
-            Create New
-          </div>
-          <div
-            className="btn--import"
-            onClick={[Function]}
-          >
-            Import Existing
           </div>
           <div
             className="hidden createLabbook"
+          />
+          <div
+            className="hidden createLabbook"
           >
-            <div
-              className="ToolTip__toggle createLabbook"
-              onClick={[Function]}
-            >
-              <div
-                className="ToolTip__glow-container"
-              >
-                <div
-                  className="ToolTip__glow-ring-outer"
-                >
-                  <div
-                    className="ToolTip__glow-ring-inner"
-                  />
-                </div>
-              </div>
-            </div>
-            <div
-              className="hidden createLabbook"
-            />
-            <div
-              className="hidden createLabbook"
-            >
-              Clicking on the 'Create New' button will open the new Project window, letting you name and select a Base for the new Project.
-            </div>
+            Clicking on the 'Create New' button will open the new Project window, letting you name and select a Base for the new Project.
           </div>
         </div>
         <div
@@ -262,6 +279,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
       </div>
       <a
         className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="LocalLabbookPanel"
         href="/projects/uitest/ui-test-remote"
         onClick={[Function]}
       >
@@ -297,7 +315,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           className="LocalLabbooks__row--text"
         >
           <div>
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
@@ -308,7 +326,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
                   ui-test-remote
                 </span>
               </span>
-            </h6>
+            </h5>
           </div>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
@@ -328,20 +346,19 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className="LocalLabbooks__description--blank"
-            >
-              No description provided
+            <span>
+               No description provided
             </span>
           </p>
         </div>
         <div
-          className="Tooltip-Listing LocalLabbookPanel__loading"
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
           data-tooltip="loading"
         />
       </a>
       <a
         className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="LocalLabbookPanel"
         href="/projects/uitest/ui-test-project"
         onClick={[Function]}
       >
@@ -377,7 +394,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           className="LocalLabbooks__row--text"
         >
           <div>
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
@@ -388,7 +405,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
                   ui-test-project
                 </span>
               </span>
-            </h6>
+            </h5>
           </div>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
@@ -419,12 +436,13 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip-Listing LocalLabbookPanel__loading"
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
           data-tooltip="loading"
         />
       </a>
       <a
         className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="LocalLabbookPanel"
         href="/projects/uitest/test-tt"
         onClick={[Function]}
       >
@@ -460,7 +478,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           className="LocalLabbooks__row--text"
         >
           <div>
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
@@ -471,7 +489,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
                   test-tt
                 </span>
               </span>
-            </h6>
+            </h5>
           </div>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
@@ -491,20 +509,19 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className="LocalLabbooks__description--blank"
-            >
-              No description provided
+            <span>
+               No description provided
             </span>
           </p>
         </div>
         <div
-          className="Tooltip-Listing LocalLabbookPanel__loading"
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
           data-tooltip="loading"
         />
       </a>
       <a
         className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="LocalLabbookPanel"
         href="/projects/uitest/new-project"
         onClick={[Function]}
       >
@@ -540,7 +557,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           className="LocalLabbooks__row--text"
         >
           <div>
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
@@ -551,7 +568,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
                   new-project
                 </span>
               </span>
-            </h6>
+            </h5>
           </div>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
@@ -571,20 +588,19 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
           >
-            <span
-              className="LocalLabbooks__description--blank"
-            >
-              No description provided
+            <span>
+               No description provided
             </span>
           </p>
         </div>
         <div
-          className="Tooltip-Listing LocalLabbookPanel__loading"
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
           data-tooltip="loading"
         />
       </a>
       <a
         className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="LocalLabbookPanel"
         href="/projects/uitest/awful-intersections-demo"
         onClick={[Function]}
       >
@@ -620,7 +636,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           className="LocalLabbooks__row--text"
         >
           <div>
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
               onClick={[Function]}
             >
@@ -631,7 +647,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
                   awful-intersections-demo
                 </span>
               </span>
-            </h6>
+            </h5>
           </div>
           <p
             className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner "
@@ -661,32 +677,37 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip-Listing LocalLabbookPanel__loading"
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
           data-tooltip="loading"
         />
       </a>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>

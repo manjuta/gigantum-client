@@ -3,40 +3,50 @@
 exports[`Test LinkModal 1`] = `
 <div
   className="Modal"
+  data-selenium-id="Modal"
 >
   <div
     className="Modal__cover"
     onClick={[Function]}
   />
   <div
-    className="Modal__content large"
+    className="Modal__content Modal__content--large-long dataset"
     style={
       Object {
         "overflow": "hidden",
       }
     }
   >
-    <div
-      className="Modal__close"
+    <button
+      className="Modal__close Btn Btn--flat"
       onClick={[Function]}
+      type="button"
     />
     <div
       className="Modal__container"
     >
-      <h4
+      <h1
         className="Modal__header"
       >
+        <div
+          className="Icon Icon--dataset"
+        />
         Link Dataset
-      </h4>
+      </h1>
       <hr />
       <div
-        className="Modal__sub-container"
+        className="Modal__sub-container Modal__sub-container--nopadding"
       >
         <div
           className="LinkModal"
         >
           <div
+            className="LinkModal__info Tooltip-data"
+            data-tooltip="Linking a dataset will allow you to reference its files within the Project"
+          />
+          <div
             className="Loader"
+            data-selenium-id="Loader"
           />
         </div>
       </div>

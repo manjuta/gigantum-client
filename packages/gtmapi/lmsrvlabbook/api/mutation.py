@@ -37,12 +37,17 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         DeleteDatasetFiles, MoveDatasetFile, MakeDatasetDirectory,
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
-                                        ModifyDatasetLink, WriteDatasetReadme, SetDatasetDescription, ResetBranchToRemote)
+                                        ModifyDatasetLink, WriteDatasetReadme, SetDatasetDescription,
+                                        ResetBranchToRemote, CancelBuild)
 
 from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
+# TODO - Group related mutations into classes, that will each have a corresponding
+# test file.
+
 
 class BranchMutations(object):
+    """ All mutations found in mutations/branching.py """
 
     migrate_labbook_schema = MigrateLabbookSchema.Field()
 
@@ -59,54 +64,13 @@ class BranchMutations(object):
     workon_experimental_branch = WorkonBranch.Field()
 
 
-class LabbookMutations(BranchMutations, graphene.ObjectType):
-    """Entry point for all graphql mutations"""
-
-    # Import a labbook from an uploaded file (Archive as zip).
-    import_labbook = ImportLabbook.Field()
-
-    # Import a labbook from a remote Git repository.
-    import_remote_labbook = ImportRemoteLabbook.Field()
-
-    # Import a Dataset from the Gitlab repository
-    import_remote_dataset = ImportRemoteDataset.Field()
-
-    # Import/Export datasets as zip files
-    import_dataset = ImportDataset.Field()
-    export_dataset = ExportDataset.Field()
-
-    # Export a labbook and return URL to its zipped archive.
-    export_labbook = ExportLabbook.Field()
-
-    # Create a new labbook on the file system.
-    create_labbook = CreateLabbook.Field()
-
-    # Delete a labbook off the file system
-    delete_labbook = DeleteLabbook.Field()
-
-    # Delete a labbook from a remote server
-    delete_remote_labbook = DeleteRemoteLabbook.Field()
-
-    # (Re-)set labbook description
-    set_labbook_description = SetLabbookDescription.Field()
-
-    # Publish a labbook to a remote (for the first time
-    publish_labbook = PublishLabbook.Field()
-
-    # Publish a dataset to a remote (for the first time
-    publish_dataset = PublishDataset.Field()
-
-    # Sync a Labbook with remote (for collaboration)
-    sync_labbook = SyncLabbook.Field()
-
-    # Add a remote to the labbook
-    add_labbook_remote = AddLabbookRemote.Field()
-
-    # Perform a git reset to remote on current branch
-    reset_branch_to_remote = ResetBranchToRemote.Field()
+class LabbookEnvironmentMutations(graphene.ObjectType):
 
     # Build a docker image for a given Labbook.
     build_image = BuildImage.Field()
+
+    # Abort a build-in-progress
+    cancel_build = CancelBuild.Field()
 
     # Start a labbook's Docker container.
     start_container = StartContainer.Field()
@@ -116,9 +80,6 @@ class LabbookMutations(BranchMutations, graphene.ObjectType):
 
     # Start a tool such as Jupyer Lab
     start_dev_tool = StartDevTool.Field()
-
-    # Create a user note in the labbook's current working branch
-    create_user_note = CreateUserNote.Field()
 
     # Add a package to a Labbook environment (e.g., pip package, apt)
     add_package_components = AddPackageComponents.Field()
@@ -131,6 +92,70 @@ class LabbookMutations(BranchMutations, graphene.ObjectType):
 
     # Delete the arbitrary docker snippet.
     remove_custom_docker = RemoveCustomDocker.Field()
+
+
+class LabbookSharingMutations(graphene.ObjectType):
+    """ All mutations found in mutations/labbooksharing.py """
+
+    # Import a labbook from an uploaded file (Archive as zip).
+    import_labbook = ImportLabbook.Field()
+
+    # Export a labbook and return URL to its zipped archive.
+    export_labbook = ExportLabbook.Field()
+
+    # Import a labbook from a remote Git repository.
+    import_remote_labbook = ImportRemoteLabbook.Field()
+
+    # Delete a labbook from a remote server
+    delete_remote_labbook = DeleteRemoteLabbook.Field()
+
+    # Sync a Labbook with remote (for collaboration)
+    sync_labbook = SyncLabbook.Field()
+
+    # Publish a labbook to a remote (for the first time
+    publish_labbook = PublishLabbook.Field()
+
+    # Set a remote project visibility
+    set_visibility = SetVisibility.Field()
+
+    # Add a remote to the labbook
+    add_labbook_remote = AddLabbookRemote.Field()
+
+    # Add a collaborator to a LabBook
+    add_collaborator = AddLabbookCollaborator.Field()
+
+    # Delete a collaborator from a LabBook
+    delete_collaborator = DeleteLabbookCollaborator.Field()
+
+
+class LabbookMutations(BranchMutations, LabbookSharingMutations,
+                       LabbookEnvironmentMutations, graphene.ObjectType):
+    """Entry point for all graphql mutations"""
+
+    # Import a Dataset from the Gitlab repository
+    import_remote_dataset = ImportRemoteDataset.Field()
+
+    # Import/Export datasets as zip files
+    import_dataset = ImportDataset.Field()
+    export_dataset = ExportDataset.Field()
+
+    # Create a new labbook on the file system.
+    create_labbook = CreateLabbook.Field()
+
+    # Delete a labbook off the file system
+    delete_labbook = DeleteLabbook.Field()
+
+    # (Re-)set labbook description
+    set_labbook_description = SetLabbookDescription.Field()
+
+    # Publish a dataset to a remote (for the first time
+    publish_dataset = PublishDataset.Field()
+
+    # Perform a git reset to remote on current branch
+    reset_branch_to_remote = ResetBranchToRemote.Field()
+
+    # Create a user note in the labbook's current working branch
+    create_user_note = CreateUserNote.Field()
 
     # Add a file to a labbook
     add_labbook_file = AddLabbookFile.Field()
@@ -160,21 +185,12 @@ class LabbookMutations(BranchMutations, graphene.ObjectType):
     # Remove a favorite file or dir in a labbook subdirectory (code, input, output)
     remove_favorite = RemoveLabbookFavorite.Field()
 
-    # Add a collaborator to a LabBook
-    add_collaborator = AddLabbookCollaborator.Field()
-
-    # Delete a collaborator from a LabBook
-    delete_collaborator = DeleteLabbookCollaborator.Field()
-
     # Adds a dataset collaborator
     add_dataset_collaborator = AddDatasetCollaborator.Field()
     delete_dataset_collaborator = DeleteDatasetCollaborator.Field()
 
     # Write a readme to a LabBook
     write_labbook_readme = WriteLabbookReadme.Field()
-
-    # Set a remote project visibility
-    set_visibility = SetVisibility.Field()
 
     # Kludge-query to return a labbook edge when querying for job status
     fetch_labbook_edge = FetchLabbookEdge.Field()

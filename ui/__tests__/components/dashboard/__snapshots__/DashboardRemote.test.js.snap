@@ -3,8 +3,11 @@
 exports[`DashboardRemote Renders a snapshot 1`] = `
 <div
   className="Labbooks"
+  data-selenium-id="Labbooks"
 >
-  <div />
+  <div
+    data-selenium-id="WizardModal"
+  />
   <div
     className="Labbooks__panel-bar"
   >
@@ -13,20 +16,18 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
     >
       uitest
     </h6>
-    <h2
-      className="Labbooks__title"
-    >
+    <h1>
       Projects
-    </h2>
+    </h1>
   </div>
   <div
     className="Labbooks__menu  mui-container flex-0-0-auto"
   >
     <ul
-      className="Labbooks__nav  flex flex--row"
+      className="Tabs"
     >
       <li
-        className="Labbooks__nav-item Labbooks__nav-item--local"
+        className="Tab Tab--local"
       >
         <a
           onClick={[Function]}
@@ -35,7 +36,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
         </a>
       </li>
       <li
-        className="Labbooks__nav-item Labbooks__nav-item--cloud Labbooks__nav-item--selected"
+        className="Tab Tab--cloud Tab--selected"
       >
         <a
           onClick={[Function]}
@@ -48,19 +49,20 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       />
       <div
         className="hidden cloudLocal"
+        data-selenium-id="Tooltip"
       >
         <div
-          className="ToolTip__toggle cloudLocal"
+          className="Tooltip__toggle cloudLocal"
           onClick={[Function]}
         >
           <div
-            className="ToolTip__glow-container"
+            className="Tooltip__glow-container"
           >
             <div
-              className="ToolTip__glow-ring-outer"
+              className="Tooltip__glow-ring-outer"
             >
               <div
-                className="ToolTip__glow-ring-inner"
+                className="Tooltip__glow-ring-inner"
               />
             </div>
           </div>
@@ -82,104 +84,115 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
     <div
       className="Labbooks__search-container column-2-span-6 padding--0"
     >
-      <input
-        className="Labbooks__search no--margin"
-        defaultValue=""
-        onFocus={[Function]}
-        onKeyUp={[Function]}
-        placeholder="Filter Projects by name or description"
-        type="text"
-      />
+      <div
+        className="Input Input--clear"
+      >
+        <input
+          className="margin--0"
+          defaultValue=""
+          onFocus={[Function]}
+          onKeyUp={[Function]}
+          placeholder="Filter Projects by name or description"
+          type="text"
+        />
+      </div>
     </div>
     <div
-      className="LabbookFilterBy column-4-span-3 padding--0"
+      className="DashboardDropdown column-4-span-3 padding--0"
+      data-selenium-id="FilterByDropdown"
     >
-      Filter by:
-      <span
-        className="LabbookFilterBy__selector Dropdown Dropdown--collapsed"
+      <div>
+        Filter by:
+      </div>
+      <div
+        className="Dropdown__filter-selector Dropdown Dropdown--collapsed"
         onClick={[Function]}
       >
         All
-      </span>
+      </div>
       <ul
-        className="LabbookFilterBy__menu Dropdown__menu box-shadow hidden"
+        className="Dropdown__menu box-shadow hidden"
       >
         <li
-          className="LabbookFilterBy__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          All 
-          ✓ 
+          All
+           ✓ 
         </li>
         <li
-          className="LabbookFilterBy__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          My Projects 
+          My
+           Project
           
         </li>
         <li
-          className="LabbookFilterBy__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Shared with me 
+          Shared with me
           
         </li>
       </ul>
     </div>
     <div
-      className="LabbookSort column-4-span-3 padding--0"
+      className="DashboardDropdown column-4-span-3 padding--0"
+      data-selenium-id="SortByDropdown"
     >
-      Sort by:
-      <span
-        className="LabbookSort__selector Dropdown Dropdown--collapsed"
+      <div>
+        Sort by:
+      </div>
+      <div
+        className="Dropdown__sort-selector Dropdown Dropdown--collapsed"
         onClick={[Function]}
       >
         Modified Date (Newest)
-      </span>
+      </div>
       <ul
-        className="LabbookSort__menu Dropdown__menu box-shadow hidden"
+        className="Dropdown__menu box-shadow hidden"
       >
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Modified Date (Newest) 
-          ✓ 
+          Modified Date (Newest)
+           ✓ 
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Modified Date (Oldest) 
+          Modified Date (Oldest)
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Creation Date (Newest) 
+          Creation Date (Newest)
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Creation Date (Oldest) 
+          Creation Date (Oldest)
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          A-Z 
+          A-Z
           
         </li>
         <li
-          className="LabbookSort__list-item"
+          className="DashboardDropdown__list-item"
           onClick={[Function]}
         >
-          Z-A 
+          Z-A
           
         </li>
       </ul>
@@ -187,28 +200,32 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
   </div>
   <div
     className="Labbooks__listing"
+    data-selenium-id="RemoteLabbooks"
   >
     <div
       className="grid"
     >
       <div
         className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+        data-selenium-id="RemoteLabbookPanel"
       >
         <div
           className="RemoteLabbooks__row RemoteLabbooks__row--icon"
         >
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--cloud Tooltip-data Tooltip-data--small"
-            data-tooltip="Project exists locally"
+            className="Button__icon Button__icon--cloud Tooltip-data"
+            data-tooltip="This Project has already been imported"
             disabled={true}
+            type="button"
           >
             Imported
           </button>
           <button
-            className="RemoteLabbooks__icon RemoteLabbooks__icon--delete"
+            className="Button__icon Button__icon--delete"
             data-tooltip=""
             disabled={false}
             onClick={[Function]}
+            type="button"
           >
             Delete
           </button>
@@ -259,32 +276,37 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
           </p>
         </div>
         <div
-          className="Tooltip-Listing RemoteLabbooks__private   Tooltip-data Tooltip-data--small"
+          className="Tooltip-Listing RemoteLabbooks__private Tooltip-data Tooltip-data--small"
           data-tooltip="private"
         />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>
       <div
-        className="LabbookPaginationLoader--hidden"
+        className="CardLoader--hidden"
+        data-selenium-id="CardLoader"
       >
         <div />
       </div>

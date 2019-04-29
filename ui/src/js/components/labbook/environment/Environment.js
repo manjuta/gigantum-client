@@ -2,15 +2,15 @@
 import React, { Component } from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
 // store
-import { setErrorMessage } from 'JS/redux/reducers/footer';
-import { setBuildingState } from 'JS/redux/reducers/labbook/labbook';
+import { setErrorMessage } from 'JS/redux/actions/footer';
+import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
 import store from 'JS/redux/store';
 // mutations
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // components
 import ErrorBoundary from 'Components/common/ErrorBoundary';
-import ToolTip from 'Components/common/ToolTip';
+import Tooltip from 'Components/common/Tooltip';
 import Loader from 'Components/common/Loader';
 import Base from './Base';
 import PackageDependencies from './PackageDependencies';
@@ -101,7 +101,10 @@ class Environment extends Component {
       return (
         <div className="Environment">
           <div className="Base__headerContainer">
-            <h5 className="Base__header">Base&nbsp;&nbsp;&nbsp; <ToolTip section="baseEnvironment" /></h5>
+            <h2>
+                Base&nbsp;&nbsp;&nbsp;
+              <Tooltip section="baseEnvironment" />
+            </h2>
           </div>
           <ErrorBoundary type="baseError" key="base">
             <Base
@@ -119,10 +122,10 @@ class Environment extends Component {
             />
           </ErrorBoundary>
           <div className="Environment__headerContainer">
-            <h5 className="PackageDependencies__header">
+            <h2>
               Packages
-              <ToolTip section="packagesEnvironment" />
-            </h5>
+              <Tooltip section="packagesEnvironment" />
+            </h2>
           </div>
           <ErrorBoundary type="packageDependenciesError" key="packageDependencies">
             <PackageDependencies

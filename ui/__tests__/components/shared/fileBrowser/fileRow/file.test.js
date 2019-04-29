@@ -69,7 +69,7 @@ describe('Project File component', () => {
         value: 'NewFileName.js',
       },
     };
-    component.find('.ActionsMenu__item--rename').simulate('click');
+    component.find('.Btn__rename').simulate('click');
     component.find('.File__input').simulate('change', evt);
     expect(component.state('newFileName')).toEqual(evt.target.value);
   });
@@ -86,7 +86,7 @@ describe('Project File component', () => {
         value: 'NewFileName.js',
       },
     };
-    component.find('.ActionsMenu__item--rename').simulate('click');
+    component.find('.Btn__rename').simulate('click');
     component.find('.File__input').simulate('change', evt);
     component.find('.File__btn--rename-add').simulate('click');
     expect(fixtures.mutations.moveLabbookFile.mock.calls.length).toEqual(1);
@@ -131,12 +131,12 @@ describe('Project File component', () => {
   });
 
   it('Set File to unchecked', () => {
-    component.find('.Btn--check').simulate('click');
+    component.find('.Btn__check').simulate('click');
     expect(component.state('isSelected')).toEqual(false);
   });
 
   it('Set File to checked', () => {
-    component.find('.Btn--uncheck').simulate('click');
+    component.find('.Btn__uncheck').simulate('click');
     expect(component.state('isSelected')).toEqual(true);
   });
 });

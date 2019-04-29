@@ -1,14 +1,15 @@
 import os
 import shutil
 import uuid
-import json
 import datetime
 from natsort import natsorted
 from pkg_resources import resource_filename
 import pathlib
 import subprocess
+import glob
+from typing import NamedTuple
 
-from typing import Optional, Generator, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict
 
 from gtmcore.exceptions import GigantumException
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
@@ -33,6 +34,10 @@ class InventoryException(GigantumException):
     pass
 
 
+# Named tuple for Dataset cleanup jobs that need to be scheduled
+DatasetCleanupJob = NamedTuple('DatasetCleanupJob', [('namespace', str), ('name', str), ('cache_root', str)])
+
+
 class InventoryManager(object):
     """ This class absorbs the complexity of accepting data structures into the client's
         working directory. We need this class because interacting with the "inventory"
@@ -53,13 +58,23 @@ class InventoryManager(object):
         return isinstance(other, InventoryManager) \
                and self.inventory_root == other.inventory_root
 
-    def query_owner(self, repository: Repository) -> str:
+    @staticmethod
+    def query_owner(repository: Repository) -> str:
         """Returns the Repository's owner in the Inventory. """
         tokens = repository.root_dir.rsplit('/', 3)
         # expected pattern: gigantum/<username>/<owner>/<labbook or dataset>/<project or dataset name>
         if len(tokens) < 3 or tokens[-2] not in ['labbooks', 'datasets']:
             raise InventoryException(f'Unexpected root in {str(repository)}')
         return tokens[-3]
+
+    @staticmethod
+    def query_owner_of_linked_dataset(dataset: Dataset) -> str:
+        """Returns the Dataset's owner when embedded in a Project repository. """
+        tokens = dataset.root_dir.rsplit('/', 3)
+        # expected pattern: <Project root>/.gigantum/datasets/<owner>/<dataset name>
+        if len(tokens) < 4 or tokens[-3] != 'datasets':
+            raise InventoryException(f'Unexpected root in {str(dataset)}')
+        return tokens[-2]
 
     def _put_labbook(self, path: str, username: str, owner: str) -> LabBook:
         # Validate that given path contains labbook
@@ -83,6 +98,55 @@ class InventoryManager(object):
         lb = self.load_labbook_from_directory(final_path)
         return lb
 
+    @staticmethod
+    def update_linked_dataset(labbook: LabBook, username: str, init: bool = False) -> None:
+        """
+
+        Args:
+            labbook:
+            username:
+            init:
+
+        Returns:
+
+        """
+        # List all existing linked datasets IN this repository
+        existing_dataset_abs_paths = glob.glob(os.path.join(labbook.root_dir, '.gigantum', 'datasets', "*/*"))
+
+        if len(labbook.git.repo.submodules) > 0:
+            for submodule in labbook.git.list_submodules():
+                try:
+                    namespace, dataset_name = submodule['name'].split("&")
+                    rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
+                    submodule_dir = os.path.join(labbook.root_dir, rel_submodule_dir)
+
+                    # If submodule is currently present, init/update it, don't remove it!
+                    if submodule_dir in existing_dataset_abs_paths:
+                        existing_dataset_abs_paths.remove(submodule_dir)
+
+                    if init:
+                        # Optionally Init submodule
+                        call_subprocess(['git', 'submodule', 'init', rel_submodule_dir],
+                                        cwd=labbook.root_dir, check=True)
+                    # Update submodule
+                    call_subprocess(['git', 'submodule', 'update', rel_submodule_dir],
+                                    cwd=labbook.root_dir, check=True)
+
+                    ds = InventoryManager().load_dataset_from_directory(submodule_dir)
+                    ds.namespace = namespace
+                    manifest = Manifest(ds, username)
+                    manifest.link_revision()
+
+                except Exception as err:
+                    logger.error(f"Failed to initialize linked Dataset (submodule reference): {submodule['name']}. "
+                                 f"This may be an actual error or simply due to repository permissions")
+                    logger.exception(err)
+                    continue
+
+        # Clean out lingering dataset files if you previously had a dataset linked, but now don't
+        for submodule_dir in existing_dataset_abs_paths:
+            shutil.rmtree(submodule_dir)
+
     def put_labbook(self, path: str, username: str, owner: str) -> LabBook:
         """ Take given path to a candidate labbook and insert it
         into its proper place in the file system.
@@ -99,28 +163,7 @@ class InventoryManager(object):
             lb = self._put_labbook(path, username, owner)
 
             # Init dataset submodules if present
-            if len(lb.git.repo.submodules) > 0:
-
-                # Link datasets
-                for submodule in lb.git.list_submodules():
-                    try:
-
-                        namespace, dataset_name = submodule['name'].split("&")
-                        rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
-                        submodule_dir = os.path.join(lb.root_dir, rel_submodule_dir)
-                        call_subprocess(['git', 'submodule', 'init', rel_submodule_dir],
-                                        cwd=lb.root_dir, check=True)
-                        call_subprocess(['git', 'submodule', 'update', rel_submodule_dir],
-                                        cwd=lb.root_dir, check=True)
-
-                        ds = InventoryManager().load_dataset_from_directory(submodule_dir)
-                        ds.namespace = namespace
-                        manifest = Manifest(ds, username)
-                        manifest.link_revision()
-
-                    except Exception as err:
-                        logger.exception(f"Failed to import submodule: {submodule['name']}")
-                        continue
+            self.update_linked_dataset(lb, username, init=True)
 
             return lb
         except Exception as e:
@@ -384,6 +427,45 @@ class InventoryManager(object):
 
             return labbook.root_dir
 
+    def delete_labbook(self, username: str, owner: str, labbook_name: str) -> List[DatasetCleanupJob]:
+        """Delete a Labbook from this Gigantum working directory.
+
+        Args:
+            username: Active username
+            owner: Namespace of the Labbook
+            labbook_name: Name of the Labbook
+
+        Returns:
+            None
+
+        """
+        lb = self.load_labbook(username, owner, labbook_name)
+
+        # Get list of datasets and cache roots to schedule for cleanup
+        submodules = lb.git.list_submodules()
+        datasets_to_schedule = list()
+        for submodule in submodules:
+            try:
+                submodule_dataset_owner, submodule_dataset_name = submodule['name'].split("&")
+                rel_submodule_dir = os.path.join('.gigantum', 'datasets',
+                                                 submodule_dataset_owner, submodule_dataset_name)
+                submodule_dir = os.path.join(lb.root_dir, rel_submodule_dir)
+                ds = self.load_dataset_from_directory(submodule_dir)
+                ds.namespace = self.query_owner_of_linked_dataset(ds)
+                m = Manifest(ds, username)
+                datasets_to_schedule.append(DatasetCleanupJob(namespace=submodule_dataset_owner,
+                                                              name=submodule_dataset_name,
+                                                              cache_root=m.cache_mgr.cache_root))
+            except Exception as err:
+                # Skip errors
+                logger.warning(f"Error occurred and ignored while processing submodules during Project delete: {err}")
+                continue
+
+        # Remove labbook contents
+        shutil.rmtree(lb.root_dir, ignore_errors=True)
+
+        return datasets_to_schedule
+
     def create_dataset(self, username: str, owner: str, dataset_name: str, storage_type: str,
                        description: Optional[str] = None, author: Optional[GitAuthor] = None) -> Dataset:
         """Create a new Dataset in this Gigantum working directory.
@@ -463,6 +545,10 @@ class InventoryManager(object):
                 os.path.join('.gigantum', 'activity', 'log')
             ]
 
+            # Create .gitignore default file
+            shutil.copyfile(os.path.join(resource_filename('gtmcore', 'dataset'), 'gitignore.default'),
+                            os.path.join(dataset.root_dir, ".gitignore"))
+
             for d in dirs:
                 p = os.path.join(dataset.root_dir, d, '.gitkeep')
                 os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -474,10 +560,6 @@ class InventoryManager(object):
 
             # Create an empty storage.json file
             dataset.backend_config = {}
-
-            # Create .gitignore default file
-            shutil.copyfile(os.path.join(resource_filename('gtmcore', 'dataset'), 'gitignore.default'),
-                            os.path.join(dataset.root_dir, ".gitignore"))
 
             # Commit
             dataset.git.add_all()
@@ -505,7 +587,7 @@ class InventoryManager(object):
 
             return dataset
 
-    def delete_dataset(self, username: str, owner: str, dataset_name: str) -> None:
+    def delete_dataset(self, username: str, owner: str, dataset_name: str) -> DatasetCleanupJob:
         """Delete a Dataset from this Gigantum working directory.
 
         Args:
@@ -521,10 +603,13 @@ class InventoryManager(object):
 
         # Delete dataset contents from file cache
         m = Manifest(ds, username)
-        shutil.rmtree(m.cache_mgr.cache_root, ignore_errors=True)
 
         # Delete dataset repository from working dir
         shutil.rmtree(ds.root_dir, ignore_errors=True)
+
+        return DatasetCleanupJob(namespace=owner,
+                                 name=dataset_name,
+                                 cache_root=m.cache_mgr.cache_root)
 
     def put_dataset(self, path: str, username: str, owner: str) -> Dataset:
         try:

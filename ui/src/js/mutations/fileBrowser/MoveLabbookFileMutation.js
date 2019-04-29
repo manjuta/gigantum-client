@@ -5,7 +5,7 @@ import {
 import RelayRuntime from 'relay-runtime';
 import environment from 'JS/createRelayEnvironment';
 
-import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage } from 'JS/redux/actions/footer';
 
 const mutation = graphql`
   mutation MoveLabbookFileMutation($input: MoveLabbookFileInput!){
@@ -72,9 +72,9 @@ export default function MoveLabbookFileMutation(
   };
 
   // TODO: remove this, key should propogate down from each section and get passed to the mutation data class
-  const recentConnectionKey = section === 'code' ? 'MostRecentCode_allFiles' :
-    section === 'input' ? 'MostRecentInput_allFiles' :
-      'MostRecentOutput_allFiles';
+  const recentConnectionKey = section === 'code' ? 'MostRecentCode_allFiles'
+    : section === 'input' ? 'MostRecentInput_allFiles'
+      : 'MostRecentOutput_allFiles';
 
   const configs = [{
     type: 'RANGE_ADD',
@@ -117,7 +117,6 @@ export default function MoveLabbookFileMutation(
       },
       onError: err => console.error(err),
       optimisticUpdater: (store) => {
-
         const labbookProxy = store.get(labbookId);
 
         if (labbookProxy && (edge.node !== null)) {

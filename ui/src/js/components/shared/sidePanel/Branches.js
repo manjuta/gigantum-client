@@ -4,10 +4,10 @@ import classNames from 'classnames';
 import { boundMethod } from 'autobind-decorator';
 import shallowCompare from 'react-addons-shallow-compare';
 // store
-import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
-import SidePanel from './SidePanel';
 import ForceMerge from 'Components/shared/modals/ForceMerge';
+import SidePanel from './SidePanel';
 // assets
 import './Branches.scss';
 
@@ -26,10 +26,10 @@ class Branches extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
-     return ({
-       sidePanelVisible: nextProps.sidePanelVisible,
-       ...state,
-     });
+    return ({
+      sidePanelVisible: nextProps.sidePanelVisible,
+      ...state,
+    });
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -44,19 +44,19 @@ class Branches extends Component {
     window.removeEventListener('click', this._closePopups);
   }
 
-    /**
+  /**
     @param {} -
     sets state to toggle the switch dropdown
     @return {}
   */
   @boundMethod
   _closePopups(evt) {
-      const { state } = this;
-      if (evt.target.className.indexOf('Branches__btn--sync-dropdown') < 0) {
-        this.setState({
-          syncMenuVisible: false,
-        });
-      }
+    const { state } = this;
+    if (evt.target.className.indexOf('Branches__btn--sync-dropdown') < 0) {
+      this.setState({
+        syncMenuVisible: false,
+      });
+    }
   }
 
   /**
@@ -72,11 +72,12 @@ class Branches extends Component {
     } else if ((modalName === 'resetModal') && (!branch || (this.props.activeBranch.branchName === branch))) {
       const upToDate = (this.props.activeBranch.commitsAhead === 0) && (this.props.activeBranch.commitsBehind === 0);
       if (this.props.activeBranch.isRemote && !upToDate) {
-      this.setState({ resetModalVisible: branch || !this.state.resetModalVisible });
+        this.setState({ resetModalVisible: branch || !this.state.resetModalVisible });
       }
     }
   }
-    /**
+
+  /**
     @param {Object} branch
     @param {String} action
     Handles confirm button by doing appropriate action
@@ -91,6 +92,7 @@ class Branches extends Component {
       this._resetBranch(branch);
     }
   }
+
   /**
     @param {Event} evt
     @param {String} selectedBranchname
@@ -98,10 +100,11 @@ class Branches extends Component {
     @return {}
   */
   _selectBranchname(evt, selectedBranchname) {
-      if (this.state.selectedBranchname !== selectedBranchname) {
-        this.setState({ selectedBranchname });
-      }
+    if (this.state.selectedBranchname !== selectedBranchname) {
+      this.setState({ selectedBranchname });
+    }
   }
+
   /**
     @param {Boolean} - isDown
     sets current index for viewing branches
@@ -117,6 +120,7 @@ class Branches extends Component {
       this.setState({ currentIndex: newIndex });
     }
   }
+
   /**
     @param {} -
     sets state to toggle the switch dropdown
@@ -129,6 +133,7 @@ class Branches extends Component {
       this.setState({ syncMenuVisible: !state.syncMenuVisible });
     }
   }
+
   /**
     @param {Object} branchName
     @param {String} overrideMethod
@@ -136,52 +141,64 @@ class Branches extends Component {
   */
   @boundMethod
   _mergeBranch(branchName, overrideMethod) {
-    const { props } = this,
-          self = this,
-          data = {
-            branchName,
-            overrideMethod,
-          };
-      props.toggleCover('Merging Branches');
-      props.branchMutations.mergeBranch(data, (response, error) => {
-        if (error) {
-          const errorMessage = error[0].message;
-          if ((errorMessage.indexOf('MergeError') > -1) || (errorMessage.indexOf('Cannot merge') > -1) || (errorMessage.indexOf('Merge conflict') > -1)) {
-            self._toggleMergeModal();
-          }
-          setErrorMessage('Failed to merge branch', error);
-        } else {
-          self.setState({ action: null, mergeModalVisible: null });
+    const { props } = this;
+
+
+    const self = this;
+
+
+    const data = {
+      branchName,
+      overrideMethod,
+    };
+    props.toggleCover('Merging Branches');
+    props.branchMutations.mergeBranch(data, (response, error) => {
+      if (error) {
+        const errorMessage = error[0].message;
+        if (errorMessage.indexOf('Merge conflict') > -1) {
+          self._toggleMergeModal();
         }
-        props.toggleCover(null);
+        setErrorMessage('Failed to merge branch', error);
+      } else {
+        self.setState({ action: null, mergeModalVisible: null });
+      }
+      props.toggleCover(null);
+      props.branchMutations.buildImage((response, error) => {
+        if (error) {
+          setErrorMessage(`${props.labbookName} failed to build`, error);
+        }
       });
+    });
   }
-    /**
+
+  /**
     *  @param {}
     *  toggles merge modal
     *  @return {string}
     */
    @boundMethod
-    _toggleMergeModal() {
-      this.setState({ forceMergeModalVisible: !this.state.forceMergeModalVisible });
-    }
+  _toggleMergeModal() {
+    this.setState({ forceMergeModalVisible: !this.state.forceMergeModalVisible });
+  }
+
   /**
     calls reset branch mutation
   */
   @boundMethod
-  _resetBranch() {
-    const self = this;
-    this.props.toggleCover('Resetting Branch');
-    this.props.branchMutations.resetBranch((response, error) => {
-      if (error) {
-        setErrorMessage('Failed to reset branch', error);
-      }
-      this.props.setBranchUptodate();
-      self.setState({ resetModalVisible: null });
-      this.props.toggleCover(null);
-    });
-  }
-    /**
+   _resetBranch() {
+     const self = this;
+     this.props.toggleCover('Resetting Branch');
+     this.props.branchMutations.resetBranch((response, error) => {
+       if (error) {
+         setErrorMessage('Failed to reset branch', error);
+       }
+       this.props.setBranchUptodate();
+       self.setState({ resetModalVisible: null });
+       this.props.toggleCover(null);
+     });
+   }
+
+  /**
     @param {Object} branch
     calls delete branch mutation
   */
@@ -202,6 +219,7 @@ class Branches extends Component {
       this.props.toggleCover(null);
     });
   }
+
   /**
     @param {Object} branch
     @param {String} action
@@ -211,18 +229,19 @@ class Branches extends Component {
   _renderModal(branch, action) {
     const headerText = action === 'merge' ? 'Merge Branches' : action === 'delete' ? 'Delete Branch' : action === 'reset' ? 'Reset Branch' : '';
     const disableSubmit = action === 'delete' && !this.state.localSelected && !this.state.remoteSelected;
+
     const localCheckboxCSS = classNames({
-            'Tooltip-data Tooltip-data--small': !branch.isLocal,
-            Branches__label: true,
-            'Branches__label--local': true,
-            'Branches__label--disabled': !branch.isLocal,
-          }),
-          remoteCheckboxCSS = classNames({
-            'Tooltip-data Tooltip-data--small': !branch.isRemote,
-            Branches__label: true,
-            'Branches__label--remote': true,
-            'Branches__label--disabled': !branch.isRemote,
-          });
+      'Tooltip-data': !branch.isLocal,
+      Branches__label: true,
+      'Branches__label--local': true,
+      'Branches__label--disabled': !branch.isLocal,
+    });
+    const remoteCheckboxCSS = classNames({
+      'Tooltip-data': !branch.isRemote,
+      Branches__label: true,
+      'Branches__label--remote': true,
+      'Branches__label--disabled': !branch.isRemote,
+    });
     return (
       <Fragment>
         <div className={`Branches__Modal Branches__Modal--${action}`}>
@@ -236,7 +255,7 @@ class Branches extends Component {
           <div className="Branches__Modal-text">
             {
               action === 'merge'
-              &&
+              && (
               <Fragment>
                 You are about to merge the branch
                 <b>{` ${branch.branchName} `}</b>
@@ -244,56 +263,62 @@ class Branches extends Component {
                 <b>{` ${this.props.activeBranch.branchName}`}</b>
                 . Click 'Confirm' to proceed.
               </Fragment>
+              )
             }
             {
               action === 'delete'
-              &&
+              && (
               <Fragment>
                 You are about to delete this branch. This action can lead to data loss. Please type
                 <b>{` ${branch.branchName} `}</b>
                 and click 'Confirm' to proceed.
               </Fragment>
+              )
             }
             {
-              action === 'reset' &&
+              action === 'reset'
+              && (
               <Fragment>
                 You are about to reset this branch. Resetting a branch will get rid of local changes. Click 'Confirm' to proceed.
               </Fragment>
+              )
             }
           </div>
           {
-            action === 'delete' &&
+            action === 'delete'
+            && (
             <div className="Branches__input-container">
-            <label
-              htmlFor="delete_local"
-              className={localCheckboxCSS}
-              data-tooltip="Branch does not exist Locally"
-            >
-              <input
-                type="checkbox"
-                name="delete_local"
-                id="delete_local"
-                defaultChecked={!branch.isLocal}
-                disabled={!branch.isLocal}
-                onClick={() => this.setState({ localSelected: !this.state.localSelected })}
-              />
+              <label
+                htmlFor="delete_local"
+                className={localCheckboxCSS}
+                data-tooltip="Branch does not exist Locally"
+              >
+                <input
+                  type="checkbox"
+                  name="delete_local"
+                  id="delete_local"
+                  defaultChecked={!branch.isLocal}
+                  disabled={!branch.isLocal}
+                  onClick={() => this.setState({ localSelected: !this.state.localSelected })}
+                />
               Local
-             </label>
-             <label
-              htmlFor="delete_remote"
-              className={remoteCheckboxCSS}
-              data-tooltip="Branch does not exist Remotely"
-            >
-              <input
-                type="checkbox"
-                name="delete_remote"
-                id="delete_remote"
-                disabled={!branch.isRemote}
-                onClick={() => this.setState({ remoteSelected: !this.state.remoteSelected })}
-              />
+              </label>
+              <label
+                htmlFor="delete_remote"
+                className={remoteCheckboxCSS}
+                data-tooltip="Branch does not exist Remotely"
+              >
+                <input
+                  type="checkbox"
+                  name="delete_remote"
+                  id="delete_remote"
+                  disabled={!branch.isRemote}
+                  onClick={() => this.setState({ remoteSelected: !this.state.remoteSelected })}
+                />
               Remote
-            </label>
+              </label>
             </div>
+            )
           }
           <div className="Branches__Modal-buttons">
             <button
@@ -314,6 +339,7 @@ class Branches extends Component {
       </Fragment>
     );
   }
+
   /**
     @param {Object} branch
     renders JSX for actions section
@@ -321,197 +347,195 @@ class Branches extends Component {
   */
   _renderActions(branch) {
     const { props, state } = this;
-    const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
-    const deleteModalVisible = this.state.deleteModalVisible === branch.branchName;
-    const resetModalVisible = this.state.resetModalVisible === branch.branchName;
+    const mergeModalVisible = state.mergeModalVisible === branch.branchName;
+    const deleteModalVisible = state.deleteModalVisible === branch.branchName;
+    const resetModalVisible = state.resetModalVisible === branch.branchName;
     const upToDate = (branch.commitsAhead === 0) && (branch.commitsBehind === 0);
+    const syncDisabled = (props.showPullOnly && !props.allowSyncPull) || (!props.allowSync && !props.showPullOnly) || (!props.defaultRemote && !props.allowSync);
+    const resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset Branch to Remote' : 'Branch must be remote';
+    const syncTooltip = props.syncTooltip;
+    const mergeTooltip = branch.isActive ? 'Cannot merge active branch with itself' : 'Merge into active branch';
+    const deleteTooltip = branch.branchName === 'master' ? 'Cannot delete master branch' : branch.isActive ? 'Cannot delete Active branch' : 'Delete Branch';
+    // declare css
     const mergeButtonCSS = classNames({
       Branches__btn: true,
-      'Tooltip-data': true,
-      'Tooltip-data--small': true,
-      'Branches__btn--merge': true,
-      'Branches__btn--merge--disabled': branch.isActive,
+      'Tooltip-data Branches__btn--merge': true,
       'Branches__btn--merge--selected': mergeModalVisible,
-    }),
-    deleteButtonCSS = classNames({
+    });
+    const deleteButtonCSS = classNames({
       Branches__btn: true,
-      'Tooltip-data': true,
-      'Tooltip-data--small': true,
-      'Branches__btn--delete': true,
-      'Branches__btn--delete--disabled': branch.isActive || branch.branchName === 'master',
+      'Tooltip-data Branches__btn--delete': true,
       'Branches__btn--delete--selected': deleteModalVisible,
-    }),
-    switchButtonCSS = classNames({
-      Branches__btn: true,
-      'Tooltip-data': true,
-      'Tooltip-data--small': true,
-      'Branches__btn--switch': true,
-      'Branches__btn--switch--disabled': branch.isActive,
-    }),
-    resetButtonCSS = classNames({
-      Branches__btn: true,
-      'Tooltip-data': true,
-      'Tooltip-data--small': true,
-      'Branches__btn--reset': true,
-      'Branches__btn--reset--disabled': !branch.isRemote || upToDate,
-    }),
-    syncButtonCSS = classNames({
-      Branches__btn: true,
-      'Tooltip-data': true,
-      'Tooltip-data--small': true,
+    });
+    const syncButtonCSS = classNames({
+      'Branches__btn Tooltip-data': true,
       'Branches__btn--sync': props.defaultRemote,
       'Branches__btn--push': !props.defaultRemote,
       'Branches__btn--pull': props.showPullOnly,
-      'Branches__btn--push--disabled': !props.defaultRemote && !props.allowSync,
-      'Branches__btn--sync--disabled': !props.allowSync && !props.showPullOnly,
-      'Branches__btn--pull--disabled': props.showPullOnly && !props.allowSyncPull,
-    }),
-    syncMenuDropdownButtonCSS = classNames({
+    });
+    const syncMenuDropdownButtonCSS = classNames({
       'Branches__btn Branches__btn--sync-dropdown': true,
-      'Branches__btn--sync-dropdown--disabled': props.disableDropdown,
       'Branches__btn--sync-open': state.syncMenuVisible,
       'Tooltip-data': props.disableDropdown && props.showPullOnly,
-    }),
-    syncMenuDropdownCSS = classNames({
+    });
+    const syncMenuDropdownCSS = classNames({
       'Branches__dropdown-menu': state.syncMenuVisible && !props.disableDropdown,
       hidden: !state.syncMenuVisible,
     });
-    let resetTooltip = branch.isRemote ? upToDate ? 'Branch up to date' : 'Reset Branch to Remote' : 'Branch must be remote';
-    let syncTooltip = props.syncTooltip;
-    let mergeTooltip = branch.isActive ? 'Cannot merge active branch with itself' : 'Merge into active branch';
-    let deleteTooltip = branch.branchName === 'master' ? 'Cannot delete master branch' : branch.isActive ? 'Cannot delete Active branch' : 'Delete Branch';
+
     return (
       <div className="Branches__actions-section">
         {
-          branch.isActive ?
-          <Fragment>
-            <button
-              className="Branches__btn Branches__btn--create Tooltip-data Tooltip-data--small"
-              data-tooltip="Create Branch"
-              onClick={() => props.toggleModal('createBranchVisible') }
-            />
-            <button
-              className={resetButtonCSS}
-              data-tooltip={resetTooltip}
-              onClick={() => this._toggleModal('resetModal', branch.branchName) }
-            />
-            <button
-              className={syncButtonCSS}
-              data-tooltip={syncTooltip}
-              onClick={() => props.handleSyncButton(props.showPullOnly, props.allowSync, props.allowSyncPull) }
-            />
-            <button
-              className={syncMenuDropdownButtonCSS}
-              data-tooltip="You do not have the appropriate permissions to sync"
-              onClick={() => { this._toggleSyncDropdown(); }}
-            />
-            <div className={syncMenuDropdownCSS}>
-              <h5 className="Branches__h5">Remote Action</h5>
-              <ul className="Branches__ul">
-                {
-                  props.allowSync &&
+          branch.isActive
+            ? (
+              <Fragment>
+                <button
+                  type="button"
+                  className="Branches__btn Branches__btn--create Tooltip-data"
+                  disabled={!branch.isActive}
+                  data-tooltip="Create Branch"
+                  onClick={() => props.toggleModal('createBranchVisible')}
+                />
+                <button
+                  type="button"
+                  className="Branches__btn Tooltip-data Branches__btn--reset"
+                  data-tooltip={resetTooltip}
+                  disabled={!branch.isRemote || upToDate}
+                  onClick={() => this._toggleModal('resetModal', branch.branchName)}
+                />
+                <button
+                  type="button"
+                  className={syncButtonCSS}
+                  data-tooltip={syncTooltip}
+                  disabled={syncDisabled}
+                  onClick={() => props.handleSyncButton(props.showPullOnly, props.allowSync, props.allowSyncPull)}
+                />
+                <button
+                  type="button"
+                  className={syncMenuDropdownButtonCSS}
+                  disabled={props.disableDropdown}
+                  data-tooltip="You do not have the appropriate permissions to sync"
+                  onClick={() => { this._toggleSyncDropdown(); }}
+                />
+                <div className={syncMenuDropdownCSS}>
+                  <h5 className="Branches__h5">Remote Action</h5>
+                  <ul className="Branches__ul">
+                    {
+                  props.allowSync
+                  && (
                   <li
-                      className="Branches__list-item"
-                      onClick={() => props.handleSyncButton(false, props.allowSync, props.allowSyncPull)}>
+                    className="Branches__list-item"
+                    onClick={() => props.handleSyncButton(false, props.allowSync, props.allowSyncPull)}
+                  >
                       Sync (Pull then Push)
                   </li>
+                  )
                 }
-                <li
-                    className="Branches__list-item"
-                    onClick={() => props.handleSyncButton(true, props.allowSync, props.allowSyncPull)}>
+                    <li
+                      className="Branches__list-item"
+                      onClick={() => props.handleSyncButton(true, props.allowSync, props.allowSyncPull)}
+                    >
                     Pull (Pull-only)
-                </li>
-              </ul>
-            </div>
-          </Fragment>
-          :
-          <Fragment>
-            <button
-              className={switchButtonCSS}
-              data-tooltip="Switch to Branch"
-              onClick={() => this.props.switchBranch(branch) }
-            />
-            <button
-              className={mergeButtonCSS}
-              data-tooltip={mergeTooltip}
-              onClick={() => this._toggleModal('mergeModal', branch.branchName) }
-             />
-            <button
-              className={deleteButtonCSS}
-              data-tooltip={deleteTooltip}
-              onClick={() => this._toggleModal('deleteModal', branch.branchName) }
-              />
-          </Fragment>
+                    </li>
+                  </ul>
+                </div>
+              </Fragment>
+            )
+            : (
+              <Fragment>
+                <button
+                  type="button"
+                  className="Branches__btn Tooltip-data Branches__btn--switch"
+                  data-tooltip="Switch to Branch"
+                  onClick={() => props.switchBranch(branch)}
+                />
+                <button
+                  type="button"
+                  className={mergeButtonCSS}
+                  data-tooltip={mergeTooltip}
+                  onClick={() => this._toggleModal('mergeModal', branch.branchName)}
+                />
+                <button
+                  type="button"
+                  className={deleteButtonCSS}
+                  data-tooltip={deleteTooltip}
+                  disabled={branch.branchName === 'master'}
+                  onClick={() => this._toggleModal('deleteModal', branch.branchName)}
+                />
+              </Fragment>
+            )
         }
         {mergeModalVisible && this._renderModal(branch, 'merge')}
         {deleteModalVisible && this._renderModal(branch, 'delete')}
         {resetModalVisible && this._renderModal(branch, 'reset')}
-    </div>);
+      </div>
+    );
   }
 
   render() {
-    const { props, state } = this,
-          currentBranchNameCSS = classNames({
-            'Branches__current-branchname': true,
-            // TODO change based on commits ahead & behind
-            'Branches__current-branchname--changed': false,
-          }),
-          currentBranchContainerCSS = classNames({
-            'Branches__branch--current': true,
-            'Branches__branch--current--selected': state.mergeModalVisible || state.resetModalVisible,
-          }),
-          modalCoverCSS = classNames({
-            'Branches__Modal-cover': true,
-            'Branches__Modal-cover--coverall': state.action,
-          }),
-          bottomIndexSelectorCSS = classNames({
-            Branches__scroll: true,
-            'Branches__scroll--down': true,
-            'Branches__scroll--hidden': props.branches.length - 1 <= 5,
-            'Branches__scroll--disabled': (state.currentIndex + 5) >= (props.branches.length - 1),
-          }),
-          topIndexSelectorCSS = classNames({
-            Branches__scroll: true,
-            'Branches__scroll--up': true,
-            'Branches__scroll--hidden': props.branches.length - 1 <= 5,
-            'Branches__scroll--disabled': state.currentIndex === 0,
-          });
+    const { props, state } = this;
+
     const filteredBranches = props.branches.filter(branch => branch.branchName !== props.activeBranch.branchName).slice(state.currentIndex, state.currentIndex + 5);
     const activeUpToDate = props.activeBranch.commitsAhead === 0 && props.activeBranch.commitsBehind === 0;
     const statusText = props.activeBranch.isLocal ? props.activeBranch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only';
     const activeCommitsText = `${props.activeBranch.commitsBehind ? `${props.activeBranch.commitsBehind} Commits Behind, ` : ''} ${props.activeBranch.commitsAhead ? `${props.activeBranch.commitsAhead} Commits Ahead` : ''}`;
+
+    // declare css here
+    const currentBranchNameCSS = classNames({
+      'Branches__current-branchname': true,
+      // TODO change based on commits ahead & behind
+      'Branches__current-branchname--changed': false,
+    });
+    const currentBranchContainerCSS = classNames({
+      'Branches__branch--current': true,
+      'Branches__branch--current--selected': state.mergeModalVisible || state.resetModalVisible,
+    });
+    const modalCoverCSS = classNames({
+      'Branches__Modal-cover': true,
+      'Branches__Modal-cover--coverall': state.action,
+    });
+    const bottomIndexSelectorCSS = classNames({
+      'Btn Btn__loadMore Btn__loadMore--down': true,
+      hidden: props.branches.length - 1 <= 5,
+    });
+    const topIndexSelectorCSS = classNames({
+      'Btn Btn__loadMore Btn__loadMore--up': true,
+      hidden: props.branches.length - 1 <= 5,
+    });
     return (
       <div>
-        {
-          state.forceMergeModalVisible &&
-
+        { state.forceMergeModalVisible
+          && (
           <ForceMerge
             toggleModal={this._toggleMergeModal}
             sectionType={props.sectionType}
             merge={this._mergeBranch}
             branchName={state.mergeModalVisible}
           />
+          )
       }
-      { props.sidePanelVisible
-        && <SidePanel
-            toggleSidePanel={props.toggleSidePanel}
-            isSticky={props.isSticky}
-            isDeprecated={props.isDeprecated}
-            renderContent={() => <div className="Branches">
-                {
-                  (state.mergeModalVisible || state.deleteModalVisible || state.resetModalVisible || state.action) &&
+        { props.sidePanelVisible
+        && (
+        <SidePanel
+          toggleSidePanel={props.toggleSidePanel}
+          isSticky={props.isSticky}
+          diskLow={props.diskLow}
+          isDeprecated={props.isDeprecated}
+          renderContent={() => (
+            <div className="Branches">
+              {
+                  (state.mergeModalVisible || state.deleteModalVisible || state.resetModalVisible || state.action)
+                  && (
                   <div className={modalCoverCSS}>
-                    {
-                      state.action &&
-                      <div>
-                        {`${state.action}...`}
-                      </div>
-                    }
+                    { state.action
+                        && <div>{`${state.action}...`}</div>
+                      }
                   </div>
+                  )
                 }
-                <div className="Branches__header">
-                  <div className="Branches__title">Manage Branches</div>
-                </div>
+              <div className="Branches__header">
+                <div className="Branches__title">Manage Branches</div>
+              </div>
               <div className="Branches__label">Current Branch:</div>
               <div className={currentBranchContainerCSS}>
                 <div className="Branches__base-section">
@@ -519,132 +543,130 @@ class Branches extends Component {
                     <div className="Branches__branchname">{props.activeBranch.branchName}</div>
                     <div className="Branches__details">
                       {
-                         !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) && (props.activeBranch.commitsAhead !== null) &&
+                         !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) && (props.activeBranch.commitsAhead !== null)
+                        && (
                         <div
                           className="Branches__commits Tooltip-data"
                           data-tooltip={activeCommitsText}
                         >
-
-                          {
-                           (props.activeBranch.commitsBehind !== 0) &&
-                            <div className="Branches__commits--commits-behind">{ props.activeBranch.commitsBehind }</div>
+                          { (props.activeBranch.commitsBehind !== 0)
+                           && (
+                           <div className="Branches__commits--commits-behind">
+                             { props.activeBranch.commitsBehind }
+                           </div>
+                           )
                           }
-                          {
-                            (props.activeBranch.commitsAhead !== 0) &&
-                            <div className="Branches__commits--commits-ahead">{ props.activeBranch.commitsAhead }</div>
+                          { (props.activeBranch.commitsAhead !== 0)
+                            && (
+                            <div className="Branches__commits--commits-ahead">
+                              { props.activeBranch.commitsAhead }
+                            </div>
+                            )
                           }
                         </div>
+                        )
                       }
                       <div
                         className="Branches__status Tooltip-data Tooltip-data--small"
                         data-tooltip={statusText}
                       >
-                        {
-                          props.activeBranch.isLocal ?
-                          <div className="Branches__status--local"></div>
-                          :
-                          <div></div>
+                        { props.activeBranch.isLocal
+                          ? <div className="Branches__status--local" />
+                          : <div />
                         }
-                        {
-                          props.activeBranch.isRemote ?
-                          <div className="Branches__status--remote"></div>
-                          :
-                          <div></div>
+                        { props.activeBranch.isRemote
+                          ? <div className="Branches__status--remote" />
+                          : <div />
                         }
-                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                {
-                  this._renderActions(props.activeBranch)
-                }
+                { this._renderActions(props.activeBranch) }
               </div>
-              {
-                (filteredBranches.length !== 0) &&
-                <div className="Branches__label">Other Branches:</div>
+              { (filteredBranches.length !== 0)
+                && <div className="Branches__label">Other Branches:</div>
               }
-              <div
+              <button
                 className={topIndexSelectorCSS}
                 onClick={() => this._setIndex()}
+                disabled={state.currentIndex === 0}
               />
-              {
-                filteredBranches.map((branch) => {
-                  const mergeModalVisible = this.state.mergeModalVisible === branch.branchName;
-                  const deleteModalVisible = this.state.deleteModalVisible === branch.branchName;
-                  const branchUpToDate = branch.commitsAhead === 0 && branch.commitsBehind === 0;
-                  const branchStatusText = branch.isLocal ? branch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only',
-                  branchContainerCSS = classNames({
-                    Branches__branch: true,
-                    'Branches__branch--selected': (branch.branchName === state.mergeModalVisible) || (branch.branchName === state.deleteModalVisible),
-                    'Branches__branch--active': ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible),
-                  }),
-                  branchBaseSectionCSS = classNames({
-                    'Branches__base-section': true,
-                  });
-                  const commitsText = `${branch.commitsBehind ? `${branch.commitsBehind} Commits Behind, ` : ''} ${branch.commitsAhead ? `${branch.commitsAhead} Commits Ahead` : ''}`;
-                  return (
-                    <div
-                      key={branch.branchName}
-                      className={branchContainerCSS}
-                      onMouseEnter={evt => this._selectBranchname(evt, branch.branchName)}
-                      onMouseLeave={evt => this._selectBranchname(evt, null)}
-                    >
-                      <div className={branchBaseSectionCSS}>
-                        <div className="Branches__branchname-container">
-                          <div className="Branches__branchname">{branch.branchName}</div>
-                          <div className="Branches__details">
-                            {
-                              !branchUpToDate && (branch.commitsAhead !== undefined) && (branch.commitsAhead !== null) &&
-                              <div
-                                className="Branches__commits Tooltip-data"
-                                data-tooltip={commitsText}
-                              >
-                                {
-                                  (branch.commitsBehind !== 0) &&
-                                  <div className="Branches__commits--commits-behind">{ branch.commitsBehind }</div>
-                                }
-                                {
-                                  (branch.commitsAhead !== 0) &&
-                                  <div className="Branches__commits--commits-ahead">{ branch.commitsAhead }</div>
-                                }
-                              </div>
-                            }
-                            <div
-                              className="Branches__status Tooltip-data Tooltip-data--small"
-                              data-tooltip={branchStatusText}
+              { filteredBranches.map((branch) => {
+                const mergeModalVisible = (state.mergeModalVisible === branch.branchName);
+                const deleteModalVisible = (state.deleteModalVisible === branch.branchName);
+                const branchUpToDate = branch.commitsAhead === 0 && branch.commitsBehind === 0;
+                const branchStatusText = branch.isLocal ? branch.isRemote ? 'Local & Remote' : 'Local only' : 'Remote only';
 
-                            >
-                            {
-                              branch.isLocal ?
-                              <div className="Branches__status--local"></div>
-                              :
-                              <div></div>
+
+                const branchContainerCSS = classNames({
+                  Branches__branch: true,
+                  'Branches__branch--selected': (branch.branchName === state.mergeModalVisible) || (branch.branchName === state.deleteModalVisible),
+                  'Branches__branch--active': ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible),
+                });
+                const branchBaseSectionCSS = classNames({
+                  'Branches__base-section': true,
+                });
+                const commitsText = `${branch.commitsBehind ? `${branch.commitsBehind} Commits Behind, ` : ''} ${branch.commitsAhead ? `${branch.commitsAhead} Commits Ahead` : ''}`;
+                return (
+                  <div
+                    key={branch.branchName}
+                    className={branchContainerCSS}
+                    onMouseEnter={evt => this._selectBranchname(evt, branch.branchName)}
+                    onMouseLeave={evt => this._selectBranchname(evt, null)}
+                  >
+                    <div className={branchBaseSectionCSS}>
+                      <div className="Branches__branchname-container">
+                        <div className="Branches__branchname">{branch.branchName}</div>
+                        <div className="Branches__details">
+                          { !branchUpToDate && (branch.commitsAhead !== undefined) && (branch.commitsAhead !== null) && (
+                          <div
+                            className="Branches__commits Tooltip-data"
+                            data-tooltip={commitsText}
+                          >
+                            { (branch.commitsBehind !== 0)
+                                  && <div className="Branches__commits--commits-behind">{ branch.commitsBehind }</div>
+                                }
+                            { (branch.commitsAhead !== 0)
+                                  && <div className="Branches__commits--commits-ahead">{ branch.commitsAhead }</div>
+                                }
+                          </div>
+                          )
                             }
-                            {
-                              branch.isRemote ?
-                              <div className="Branches__status--remote"></div>
-                              :
-                              <div></div>
+                          <div
+                            className="Branches__status Tooltip-data Tooltip-data--small"
+                            data-tooltip={branchStatusText}
+                          >
+                            { branch.isLocal
+                              ? <div className="Branches__status--local" />
+                              : <div />
                             }
-                            </div>
+                            { branch.isRemote
+                              ? <div className="Branches__status--remote" />
+                              : <div />
+                            }
                           </div>
                         </div>
                       </div>
-                      {
-                        ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible) &&
-                        this._renderActions(branch)
-                      }
                     </div>
-                  );
-                })
+                    { ((state.selectedBranchname === branch.branchName) || mergeModalVisible || deleteModalVisible)
+                        && this._renderActions(branch)
+                    }
+                  </div>
+                );
+              })
               }
-              <div
+              <button
+                type="button"
                 className={bottomIndexSelectorCSS}
                 onClick={() => this._setIndex(true)}
+                disabled={(state.currentIndex + 5) >= (props.branches.length - 1)}
               />
             </div>
+          )
           }
-           />
+        />
+        )
       }
       </div>
     );

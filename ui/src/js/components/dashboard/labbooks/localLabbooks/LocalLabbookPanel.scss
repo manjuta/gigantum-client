@@ -35,7 +35,7 @@
 }
 
 .LocalLabbooks__paragraph{
-  color: $romanSilver;
+  color: $mineShaft;
 
   font-size: 14px;
 
@@ -218,4 +218,13 @@
     box-shadow: none !important;
     align-self: center;
   }
+}
+
+.LocalLabbooks__panel-title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  overflow: hidden;
+  line-height: 30px;
+  width: 250px;
 }

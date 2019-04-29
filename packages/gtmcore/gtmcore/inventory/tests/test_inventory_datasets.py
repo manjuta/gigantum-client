@@ -11,6 +11,8 @@ from gtmcore.dataset.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.gitlib.git import GitAuthor
+from gtmcore.dispatcher import (Dispatcher, jobs)
+from gtmcore.inventory.branching import BranchManager
 
 from gtmcore.fixtures import mock_config_file, mock_labbook, _MOCK_create_remote_repo2
 
@@ -106,9 +108,55 @@ class TestInventoryDatasets(object):
         assert os.path.exists(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt")) is True
         assert os.path.exists(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt")) is True
 
-        inv_manager.delete_dataset("test", "test", "dataset1")
+        dataset_delete_job = inv_manager.delete_dataset("test", "test", "dataset1")
         assert os.path.exists(root_dir) is False
+        assert os.path.exists(m.cache_mgr.cache_root) is True
+        assert dataset_delete_job.namespace == "test"
+        assert dataset_delete_job.name == "dataset1"
+        assert dataset_delete_job.cache_root == m.cache_mgr.cache_root
+
+        jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
+                                      dataset_delete_job.cache_root, config_file=mock_config_file[0])
+
         assert os.path.exists(m.cache_mgr.cache_root) is False
+
+        cache_base, _ = m.cache_mgr.cache_root.rsplit(os.path.sep, 1)
+        assert os.path.exists(cache_base) is True
+
+    def test_delete_dataset_while_linked(self, mock_config_file):
+        inv_manager = InventoryManager(mock_config_file[0])
+        auth = GitAuthor(name="test", email="user1@test.com")
+        lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
+        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
+                                        description="my first dataset",
+                                        author=auth)
+        ds_root_dir = ds.root_dir
+        lb_root_dir = lb.root_dir
+        assert os.path.exists(ds_root_dir) is True
+        assert os.path.exists(lb_root_dir) is True
+
+        # Link dataset
+        inv_manager.link_dataset_to_labbook(f"{ds_root_dir}/.git", "test", "dataset1", lb)
+
+        m = Manifest(ds, 'test')
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfasdf")
+        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt", "dfg")
+
+        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt")) is True
+
+        dataset_delete_job = inv_manager.delete_dataset("test", "test", "dataset1")
+        assert os.path.exists(ds_root_dir) is False
+        assert os.path.exists(lb_root_dir) is True
+        assert os.path.exists(m.cache_mgr.cache_root) is True
+        assert dataset_delete_job.namespace == "test"
+        assert dataset_delete_job.name == "dataset1"
+        assert dataset_delete_job.cache_root == m.cache_mgr.cache_root
+
+        jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
+                                      dataset_delete_job.cache_root, config_file=mock_config_file[0])
+
+        assert os.path.exists(m.cache_mgr.cache_root) is True
 
         cache_base, _ = m.cache_mgr.cache_root.rsplit(os.path.sep, 1)
         assert os.path.exists(cache_base) is True
@@ -316,6 +364,106 @@ class TestInventoryDatasets(object):
         inv_manager.link_dataset_to_labbook(ds.remote, 'test', 'dataset100', lb)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+
+        assert len(data) > 0
+
+    def test_link_unlink_dataset_across_branches(self, mock_labbook):
+        """Test to verify linked Dataset initialization works across branching in Projects
+
+        - Create a project
+        - Create a dataset
+        - Link dataset on master
+        - Switch to another branch
+        - Unlink dataset: dataset is gone
+        - Switch to master: dataset is available
+        - Switch to other branch: dataset is gone
+        - Switch to master: dataset is available
+        """
+        inv_manager = InventoryManager(mock_labbook[0])
+        lb = mock_labbook[2]
+        ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
+
+        # Fake publish to a local bare repo
+        _MOCK_create_remote_repo2(ds, 'test', None, None)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
+
+        # link dataset and make sure it's there
+        inv_manager.link_dataset_to_labbook(ds.remote, 'test', 'dataset100', lb)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+
+        # Create a branch
+        bm = BranchManager(lb, username="test")
+        assert bm.active_branch == 'master'
+        branch_name = bm.create_branch(title="test-branch")
+        assert bm.active_branch == branch_name
+        assert lb.is_repo_clean
+
+        # Dataset still there
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+
+        # Unlink dataset in branch
+        inv_manager.unlink_dataset_from_labbook('test', 'dataset100', lb)
+
+        # Dataset gone
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is False
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is False
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+
+        assert len(data) == 0
+
+        # Switch back to master
+        bm.workon_branch('master')
+        assert bm.active_branch == 'master'
+        assert lb.active_branch == 'master'
+        assert lb.is_repo_clean
+
+        # Dataset is back!
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+
+        assert len(data) > 0
+
+        # Switch back to branch
+        bm.workon_branch('test-branch')
+        assert bm.active_branch == 'test-branch'
+        assert lb.active_branch == 'test-branch'
+        assert lb.is_repo_clean
+
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is False
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is False
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+
+        assert len(data) == 0
+
+        # Switch back to master
+        bm.workon_branch('master')
+        assert bm.active_branch == 'master'
+        assert lb.active_branch == 'master'
+        assert lb.is_repo_clean
+
+        # Dataset is back!
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'test', 'dataset100')
         assert os.path.exists(dataset_submodule_dir) is True
         assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
         with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:

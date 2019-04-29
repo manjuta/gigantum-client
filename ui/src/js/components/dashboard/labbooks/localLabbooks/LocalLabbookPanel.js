@@ -4,33 +4,30 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import classNames from 'classnames';
+import { boundMethod } from 'autobind-decorator';
 // muations
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // store
-import { setErrorMessage, setInfoMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
 // assets
 import './LocalLabbookPanel.scss';
+
 /**
 *  labbook panel is to only render the edge passed to it
 */
 
 export default class LocalLabbookPanel extends Component {
-  constructor(props) {
-    super(props);
+  state = {
+    exportPath: '',
+    status: 'loading',
+    textStatus: '',
+    labbookName: this.props.edge.node.name,
+    owner: this.props.edge.node.owner,
+    cssClass: 'loading',
+  };
 
-    this.state = {
-      exportPath: '',
-      status: 'loading',
-      textStatus: '',
-      labbookName: props.edge.node.name,
-      owner: props.edge.node.owner,
-      cssClass: 'loading',
-    };
-    this._getContainerStatusText = this._getContainerStatusText.bind(this);
-    this._stopStartContainer = this._stopStartContainer.bind(this);
-  }
   /** *
   * @param {Object} nextProps
   * processes container lookup and assigns container status to labbook card
@@ -48,7 +45,7 @@ export default class LocalLabbookPanel extends Component {
       status = ((state.status === 'Starting') && (containerStatus !== 'RUNNING')) || (state.status === 'Stopping' && (containerStatus !== 'NOT_RUNNING')) ? state.status : status;
 
       let textStatus = (status === 'Rebuild') ? 'Stopped' : status;
-      textStatus = (state.textStatus === 'Run') ? 'Run' : textStatus;
+      textStatus = (state.textStatus === 'Start') ? 'Start' : textStatus;
       textStatus = (state.textStatus === 'Stop') ? 'Stop' : textStatus;
 
       state.status = status;
@@ -58,26 +55,13 @@ export default class LocalLabbookPanel extends Component {
 
     return { ...state };
   }
-  /** *
-  * @param {string, string} containerStatus, imageStatus
-  * returns corrent container status by checking both container and imagestatus
-  */
-  _getContainerStatusText(containerStatus, imageStatus) {
-    let status = 'Running';
-    status = (containerStatus === 'NOT_RUNNING') ? 'Stopped' : status;
-    status = (imageStatus === 'BUILD_IN_PROGRESS') ? 'Building' : status;
-    status = (imageStatus === 'BUILD_FAILED') ? 'Rebuild' : status;
-    status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
 
-    const textStatus = (newStatus === 'Rebuild') ? 'Stopped' : textStatus;
-
-    return { status: textStatus, cssClass: newStatus };
-  }
   /** *
   * @param {string} status
   * fires when a componet mounts
   * adds a scoll listener to trigger pagination
   */
+  @boundMethod
   _stopStartContainer(evt, status) {
     evt.preventDefault();
     evt.stopPropagation();
@@ -95,13 +79,11 @@ export default class LocalLabbookPanel extends Component {
     }
   }
 
-  _rebuildContainer() {
-
-  }
   /** *
   * @param {string} status
   * starts labbook conatainer
   */
+  @boundMethod
   _startContainerMutation() {
     const self = this;
 
@@ -121,10 +103,12 @@ export default class LocalLabbookPanel extends Component {
       },
     );
   }
+
   /** *
   * @param {string} status
   * stops labbbok conatainer
   */
+  @boundMethod
   _stopContainerMutation() {
     const { owner, labbookName } = this.state;
 
@@ -146,26 +130,30 @@ export default class LocalLabbookPanel extends Component {
       },
     );
   }
+
   /** *
   * @param {object,string} evt,status
   * stops labbbok conatainer
   ** */
+  @boundMethod
   _updateTextStatusOver(evt, isOver, status) {
-    let newStatus = status;
+    const newStatus = status;
     if (isOver) {
       if (status === 'Running') {
         this.setState({ textStatus: 'Stop' });
       } else if (status === 'Stopped') {
-        this.setState({ textStatus: 'Run' });
+        this.setState({ textStatus: 'Start' });
       }
     } else {
       this.setState({ textStatus: status });
     }
   }
+
   /** *
   * @param {objectstring} evt,status
   * stops labbbok conatainer
   ** */
+  @boundMethod
   _updateTextStatusOut(evt, status) {
     if (status !== 'loading') {
       this.setState({ textStatus: status });
@@ -173,24 +161,26 @@ export default class LocalLabbookPanel extends Component {
   }
 
   render() {
-    const { props, state } = this,
-          { edge } = props,
-          {
-            status,
-            textStatus,
-            cssClass,
-          } = state,
-          containerCSS = classNames({
-            [`ContainerStatus__container-state ContainerStatus__containerStatus--state ${cssClass} box-shadow`]: true,
-            'Tooltip-data': cssClass === 'Rebuild',
-          })
+    const { props, state } = this;
+    const { edge } = props;
+    const {
+      status,
+      textStatus,
+      cssClass,
+    } = state;
+
+    const containerCSS = classNames({
+      [`ContainerStatus__container-state ContainerStatus__containerStatus--state ${cssClass} box-shadow`]: true,
+      'Tooltip-data': cssClass === 'Rebuild',
+    });
 
     return (
       <Link
         to={`/projects/${edge.node.owner}/${edge.node.name}`}
         onClick={() => props.goToLabbook(edge.node.name, edge.node.owner)}
         key={`local${edge.node.name}`}
-        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between">
+        className="Card Card--300 Card--text column-4-span-3 flex flex--column justify--space-between"
+      >
 
         <div className="LocalLabbooks__row--icons">
 
@@ -201,11 +191,12 @@ export default class LocalLabbookPanel extends Component {
               onClick={evt => this._stopStartContainer(evt, cssClass)}
               onMouseOver={evt => this._updateTextStatusOver(evt, true, status)}
               onMouseOut={evt => this._updateTextStatusOut(evt, false, status)}
-              className={containerCSS}>
-             <div className="ContainerStatus__text">{ textStatus }</div>
-             <div className="ContainerStatus__toggle">
-                <div className="ContainerStatus__toggle-btn"></div>
-             </div>
+              className={containerCSS}
+            >
+              <div className="ContainerStatus__text">{ textStatus }</div>
+              <div className="ContainerStatus__toggle">
+                <div className="ContainerStatus__toggle-btn" />
+              </div>
             </div>
 
           </div>
@@ -216,9 +207,10 @@ export default class LocalLabbookPanel extends Component {
 
           <div>
 
-            <h6
+            <h5
               className="LocalLabbooks__panel-title"
-              onClick={() => this.props.goToLabbook(edge.node.name, edge.node.owner)}>
+              onClick={() => this.props.goToLabbook(edge.node.name, edge.node.owner)}
+            >
 
               <Highlighter
                 highlightClassName="LocalLabbooks__highlighted"
@@ -228,7 +220,7 @@ export default class LocalLabbookPanel extends Component {
                 textToHighlight={edge.node.name}
               />
 
-            </h6>
+            </h5>
 
           </div>
 
@@ -238,31 +230,33 @@ export default class LocalLabbookPanel extends Component {
 
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description">
             {
-              edge.node.description && edge.node.description.length ?
-              <Highlighter
-                highlightClassName="LocalLabbooks__highlighted"
-                searchWords={[store.getState().labbookListing.filterText]}
-                autoEscape={false}
-                caseSensitive={false}
-                textToHighlight={edge.node.description}
-              />
-              :
-              <span
-                className="LocalLabbooks__description--blank"
-              >
-              No description provided
-              </span>
+              edge.node.description && edge.node.description.length
+                ? (
+                  <Highlighter
+                    highlightClassName="LocalLabbooks__highlighted"
+                    searchWords={[store.getState().labbookListing.filterText]}
+                    autoEscape={false}
+                    caseSensitive={false}
+                    textToHighlight={edge.node.description}
+                  />
+                )
+                : (
+                  <span> No description provided</span>
+                )
             }
           </p>
 
         </div>
 
-        { !(this.props.visibility === 'local') &&
+        { !(props.visibility === 'local')
+          && (
           <div
-            data-tooltip={`${this.props.visibility}`}
-            className={`Tooltip-Listing LocalLabbookPanel__${this.props.visibility} Tooltip-data Tooltip-data--small`}
+            data-tooltip={`${props.visibility}`}
+            className={`Tooltip-Listing LocalLabbookPanel__${props.visibility} Tooltip-data Tooltip-data--small`}
           />
+          )
         }
-      </Link>);
+      </Link>
+    );
   }
 }

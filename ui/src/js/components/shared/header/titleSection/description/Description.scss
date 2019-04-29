@@ -7,7 +7,7 @@
       margin: 0;
     }
 
-    .empty {
+    .empty span {
       opacity: 0.5;
       color: $romanSilver;
 
@@ -77,19 +77,6 @@
     }
 }
 
-.Description__edit-button,
-.Description__edit-button:focus,
-.Description__edit-button:hover,{
-    position: absolute;
-    right: 0;
-    bottom: 5px;
-    height: 15px;
-    width: 15px;
-    border: 0px;
-    background: $background-color url('~Images/icons/edit.svg') no-repeat center center;
-    background-size: 15px;
-}
-
 .Description__input-buttons{
     height: 30px !important;
     background: $white;
@@ -110,26 +97,16 @@
     width: 20px;
     height: 20px;
     background: url('~Images/icons/x-close-azure.svg') no-repeat center center;
-    background-size: 26px;
+    background-size: 28px;
     border: none;
-    &:hover {
-        background: url('~Images/icons/x-close-turquise.svg') no-repeat center center;
-        background-size: 26px;
-        border: none;
-    }
 }
 .Description__input-save{
     padding: 0;
     width: 20px;
     height: 20px;
     background: url('~Images/icons/check-selected.svg') no-repeat center center;
-    background-size: 27px;
+    background-size: 30px;
     border: none;
-    &:hover {
-        background: url('~Images/icons/check-selected-turquise.svg') no-repeat center center;
-        background-size: 26px;
-        border: none;
-    }
 }
 
 @-moz-document url-prefix() {

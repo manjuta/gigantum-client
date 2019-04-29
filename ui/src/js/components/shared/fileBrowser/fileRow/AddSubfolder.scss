@@ -23,7 +23,7 @@
 .AddSubfolder__edit{
   @include flex(space-around, row);
   align-items: center;
-  width: 500px;
+  width: 450px;
 }
 
 .AddSubfolder__input[type="text"]{
@@ -47,7 +47,7 @@
 
 .AddSubfolder__container {
   position: relative;
-  min-width: 400px;
+  min-width: 350px;
 }
 
 .AddSubfolder__btn {

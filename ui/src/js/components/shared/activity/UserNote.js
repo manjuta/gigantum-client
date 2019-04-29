@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { WithContext as ReactTags } from 'react-tag-input';
 // mutations
 import CreateUserNoteMutation from 'Mutations/CreateUserNoteMutation';
-import { setErrorMessage } from 'JS/redux/reducers/footer';
+import { setErrorMessage } from 'JS/redux/actions/footer';
 // store
 import store from 'JS/redux/store';
 // assets
@@ -143,8 +143,9 @@ export default class UserNote extends Component {
        <div className="UserNote flex flex--column">
 
          <div
-          className="UserNote__close close"
-          onClick={() => this.props.toggleUserNote(false) }></div>
+           className="UserNote__close close"
+           onClick={() => this.props.toggleUserNote(false)}
+         />
 
          <input
            type="text"
@@ -168,10 +169,11 @@ export default class UserNote extends Component {
          />
 
          <button
-          type="submit"
+           type="submit"
            className="UserNote__add-note"
            disabled={state.addNoteDisabled}
-           onClick={() => { this._addNote(); }}>
+           onClick={() => { this._addNote(); }}
+         >
            Add Note
          </button>
        </div>
