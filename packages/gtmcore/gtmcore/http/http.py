@@ -64,9 +64,9 @@ class AsyncHTTPRequestManager(object):
         async with self.session.get(url_obj.url, params=url_obj.params, headers=url_obj.headers) as response:
             url_obj.status_code = response.status
             if url_obj.coroutine_method == "json":
-                url_obj.result_text = await response.json()
-            elif url_obj.coroutine_method == "text":
                 url_obj.result_json = await response.json()
+            elif url_obj.coroutine_method == "text":
+                url_obj.result_text = await response.text()
             else:
                 raise ValueError(f"Unsupported coroutine method to access response data: {url_obj.coroutine_method}. "
                                  f"Use 'json' or 'text'.")
