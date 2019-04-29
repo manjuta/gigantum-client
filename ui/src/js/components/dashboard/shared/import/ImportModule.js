@@ -629,6 +629,8 @@ export default class ImportModule extends Component {
 
     ImportRemoteDatasetMutation(owner, name, remote, (response, error) => {
       this._clearState();
+      document.getElementById('modal__cover').classList.add('hidden');
+      document.getElementById('loader').classList.add('hidden');
       if (error) {
         console.error(error);
         store.dispatch({

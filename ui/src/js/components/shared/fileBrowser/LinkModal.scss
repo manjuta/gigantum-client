@@ -36,11 +36,15 @@
 
 .LinkModal__dataset-container{
   margin-top: 100px;
-  height: calc(100% - 70px);
+  height: calc(100% - 101px);
   overflow: auto;
   width: 100%;
 }
 
 .LinkModal__wrapper{
   margin: 0 7px;
+}
+
+.LinkModal__message {
+  padding: 0 20%;
 }
