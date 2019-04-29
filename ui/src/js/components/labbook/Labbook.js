@@ -16,23 +16,20 @@ import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
 import { setMergeMode, setBuildingState, setStickyDate } from 'JS/redux/actions/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/actions/routes';
-import { setInfoMessage } from 'JS/redux/actions/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
-import BranchMutations from 'Components/shared/utils/BranchMutations';
 // config
 import Config from 'JS/config';
+// mutations
+import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMutation';
+import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
+import BranchMutations from 'Components/shared/utils/BranchMutations';
 // components
 import Login from 'Components/login/Login';
 import Loader from 'Components/common/Loader';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import Header from 'Components/shared/header/Header';
-import ButtonLoader from 'Components/common/ButtonLoader';
-import Modal from 'Components/common/Modal';
-// mutations
-import LabbookContainerStatusMutation from 'Mutations/LabbookContainerStatusMutation';
-import LabbookLookupMutation from 'Mutations/LabbookLookupMutation';
-import MigrateProjectMutation from 'Mutations/MigrateProjectMutation';
+import Migration from './Migration';
 // query
 import fetchMigrationInfoQuery from './queries/fetchMigrationInfoQuery';
 import fetchPackageLatestVersion from './queries/fetchPackageLatestVersionQuery';
@@ -90,8 +87,6 @@ class Labbook extends Component {
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     branches: this.props.labbook.branches,
     deletedBranches: [],
-    migrationInProgress: false,
-    migrateComplete: false,
     branchMutations: new BranchMutations({
       parentId: this.props.labbook.id,
       name: this.props.labbook.name,
@@ -150,9 +145,8 @@ class Labbook extends Component {
   */
   componentDidMount() {
     const { props, state } = this;
-
-
     const { name, owner } = props.labbook;
+
     this.mounted = true;
     document.title = `${owner}/${name}`;
     props.auth.isAuthenticated().then((response) => {
@@ -165,9 +159,8 @@ class Labbook extends Component {
       }
     });
 
-    this._fetchMigrationInfo();
-
     this._fetchPackageVersion();
+    this._fetchMigrationInfo();
 
     this._setStickHeader();
     this._fetchStatus(true);
@@ -178,8 +171,6 @@ class Labbook extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { props, state } = this;
-
-
     const { activeBranchName } = props.labbook;
 
     if (activeBranchName !== state.activeBranchName) {
@@ -243,6 +234,22 @@ class Labbook extends Component {
   }
 
   /**
+  *  @param {object} - response
+  *  update state from switch mutation
+  *  @return {}
+  */
+  @boundMethod
+  _updateMigrationState(response) {
+    if (response && response.workonExperimentalBranch) {
+      const { isDeprecated, shouldMigrate } = response.workonExperimentalBranch.labbook;
+      this.setState({
+        isDeprecated,
+        shouldMigrate,
+      });
+    }
+  }
+
+  /**
    * @param {}
    * checks if project is deprecated and should migrate and sets state
   */
@@ -263,22 +270,6 @@ class Labbook extends Component {
         });
       }
     });
-  }
-
-  /**
-  *  @param {object} - response
-  *  update state from switch mutation
-  *  @return {}
-  */
-  @boundMethod
-  _updateMigationState(response) {
-    if (response && response.workonExperimentalBranch) {
-      const { isDeprecated, shouldMigrate } = response.workonExperimentalBranch.labbook;
-      this.setState({
-        isDeprecated,
-        shouldMigrate,
-      });
-    }
   }
 
   /**
@@ -357,60 +348,6 @@ class Labbook extends Component {
   }
 
   /**
-    migrates project
-  */
-  @boundMethod
-  _migrateProject() {
-    const { props, state } = this;
-    const { owner, name } = props.labbook;
-
-    this.setState({ buttonState: 'loading' });
-    MigrateProjectMutation(owner, name, (response, error) => {
-      if (error) {
-        console.log(error);
-        this.setState({ buttonState: 'error' });
-        setTimeout(() => {
-          this.setState({ buttonState: '' });
-        }, 2000);
-      } else {
-        this.setState({
-          isDeprecated: false,
-          shouldMigrate: false,
-        });
-        const oldBranches = props.labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace')));
-        oldBranches.forEach(({ branchName }, index) => {
-          const data = {
-            branchName,
-            deleteLocal: true,
-            deleteRemote: true,
-          };
-
-          state.branchMutations.deleteBranch(data, (deleteResponse, delteError) => {
-            if (delteError) {
-              this.setState({ buttonState: 'error' });
-
-              setTimeout(() => {
-                this.setState({ buttonState: '' });
-              }, 2000);
-            }
-
-            if (index === oldBranches.length - 1) {
-              this.setState({
-                migrateComplete: true,
-                buttonState: 'finished',
-              });
-              setInfoMessage('Project migrated successfully');
-              setTimeout(() => {
-                this.setState({ buttonState: '' });
-              }, 2000);
-            }
-          });
-        });
-      }
-    });
-  }
-
-  /**
     @param {}
     dispatches sticky state to redux to update state
   */
@@ -441,14 +378,6 @@ class Labbook extends Component {
   }
 
   /**
-    @param {}
-    updates branchOpen state
-  */
-  _toggleMigrationModal() {
-    this.setState({ migrationModalVisible: !this.state.migrationModalVisible });
-  }
-
-  /**
     scrolls to top of window
   */
   _scrollToTop() {
@@ -456,37 +385,20 @@ class Labbook extends Component {
   }
 
   /**
-    scrolls to top of window
-    @return {boolean, string}
+    @param {boolean}
+    updates migration button via callback from migration component
   */
-  _getMigrationInfo() {
-    const { props, state } = this;
-    const isOwner = (localStorage.getItem('username') === props.labbook.owner);
-    const {
-      isDeprecated,
-      shouldMigrate,
-    } = state;
-    const isPublished = typeof props.labbook.defaultRemote === 'string';
-
-    let migrationText = '';
-    let showMigrationButton = false;
-
-    if ((isOwner && isDeprecated && shouldMigrate && isPublished)
-        || (isDeprecated && !isPublished && shouldMigrate)) {
-      migrationText = 'This Project needs to be migrated to the latest Project format';
-      showMigrationButton = true;
-    } else if (!isOwner && isDeprecated && shouldMigrate && isPublished) {
-      migrationText = 'This Project needs to be migrated to the latest Project format. The project owner must migrate and sync this project to update.';
-    } else if ((isDeprecated && !isPublished && !shouldMigrate)
-      || (isDeprecated && isPublished && !shouldMigrate)) {
-      migrationText = 'This project has been migrated. Master is the new primary branch. Old branches should be removed.';
+  @boundMethod
+  _showMigrationButtonCallback(showMigrationButton) {
+    const { state } = this;
+    if (state.showMigrationButton !== showMigrationButton) {
+      this.setState({ showMigrationButton });
     }
-
-    return { showMigrationButton, migrationText };
   }
 
   render() {
     const { props, state } = this;
+    const { showMigrationButton } = state;
     const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
     const isLockedBrowser = {
       locked: (props.isPublishing || props.isSyncing || props.isExporting),
@@ -501,9 +413,6 @@ class Labbook extends Component {
       const sidePanelVisible = !isLocked && props.sidePanelVisible;
       const branchName = '';
       const isDemo = window.location.hostname === Config.demoHostName;
-      const { migrationText, showMigrationButton } = this._getMigrationInfo();
-      const oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName));
-      const migrationModalType = state.migrateComplete ? 'large' : 'large-long';
 
       const labbookCSS = classNames({
         Labbook: true,
@@ -514,13 +423,6 @@ class Labbook extends Component {
         'Labbook--demo-deprecated': state.isDeprecated && isDemo,
         'Labbook--sidePanelVisible': sidePanelVisible,
       });
-      const deprecatedCSS = classNames({
-        Labbook__deprecated: true,
-        'Labbook__deprecated--demo': isDemo,
-      });
-      const migrationButtonCSS = classNames({
-        'Tooltip-data': state.isLocked,
-      });
 
       return (
         <div className={labbookCSS}>
@@ -528,159 +430,14 @@ class Labbook extends Component {
             <Loader />
           </div>
           <div className="Labbook__spacer flex flex--column">
-            {
-              state.isDeprecated
-              && (
-              <div className={deprecatedCSS}>
-                {migrationText}
-                <a
-                  target="_blank"
-                  href="https://docs.gigantum.com/docs/project-migration"
-                  rel="noopener noreferrer"
-                >
-                  Learn More.
-                </a>
-                {
-                  showMigrationButton
-                  && (
-                  <div
-                    className={migrationButtonCSS}
-                    data-tooltip="To migrate the project container must be Stopped."
-                  >
-                    <button
-                      className="Button Labbook__deprecated-action"
-                      onClick={() => this._toggleMigrationModal()}
-                      disabled={state.migrationInProgress || state.isLocked}
-                    >
-                    Migrate
-                    </button>
-                  </div>
-                  )
-                }
-              </div>
-              )
-            }
-            {
-              (state.migrationModalVisible)
-              && (
-              <Modal
-                header="Project Migration"
-                handleClose={() => this._toggleMigrationModal()}
-                size={migrationModalType}
-                renderContent={() => (
-                  <div className="Labbook__migration-modal">
-                    {
-                    !state.migrateComplete
-                      ? (
-                        <div className="Labbook__migration-container">
-                          <div className="Labbook__migration-content">
-                            <p className="Labbook__migration-p"><b>Migration will rename the current branch to 'master' and delete all other branches.</b></p>
-                            <p>Before migrating, you should:</p>
-                            <ul>
-                              <li>
-                          Make sure you are on the branch with your latest changes. This is most likely
-                                <b style={{ whiteSpace: 'nowrap' }}>
-                                  {` gm.workspace-${localStorage.getItem('username')}`}
-                                </b>
-                          . If you just imported this project from a zip file, you should migrate from
-                                <b style={{ whiteSpace: 'nowrap' }}> gm.workspace</b>
-                          .
-                              </li>
-                              <li>Export the project to a zip file as a backup, if desired.</li>
-                            </ul>
-                            <p>
-                              <b>
-                          Branch to be migrated:
-                              </b>
-                              {` ${labbook.activeBranchName}`}
-                            </p>
-                            <b>Branches to be deleted:</b>
-                            {
-                        oldBranches.length
-                          ? (
-                            <ul>
-                              {
-                            oldBranches.map(({ branchName }) => (
-                              <li key={branchName}>{branchName}</li>
-                            ))
-                          }
-                            </ul>
-                          )
-                          : (
-                            <ul>
-                              <li>No other branches to delete.</li>
-                            </ul>
-                          )
-                      }
-                          </div>
-                          <div className="Labbook__migration-buttons">
-                            <button
-                              onClick={() => this._toggleMigrationModal()}
-                              className="Btn--flat"
-                            >
-                            Cancel
-                            </button>
-                            <ButtonLoader
-                              buttonState={this.state.buttonState}
-                              buttonText="Migrate Project"
-                              className=""
-                              params={{}}
-                              buttonDisabled={false}
-                              clicked={() => this._migrateProject()}
-                            />
-                          </div>
-                        </div>
-                      )
-                      : (
-                        <div className="Labbook__migration-container">
-                          <div className="Labbook__migration-content">
-                            <div className="Labbook__migration-center">
-                              {
-                          labbook.defaultRemote
-                            ? (
-                              <Fragment>
-                            You should now click
-                                <b> sync </b>
-                            to push the new
-                                <b> master </b>
-                            branch to the cloud. This is the new primary branch to work from.
-                              </Fragment>
-                            )
-                            : (
-                              <Fragment>
-                            Your work has been migrated to the
-                                <b> master </b>
-                            branch. This is the new primary branch to work from.
-                              </Fragment>
-                            )
-                          }
-                              <a
-                                target="_blank"
-                                href="https://docs.gigantum.com/docs/project-migration"
-                                rel="noopener noreferrer"
-                              >
-                            Learn More.
-                              </a>
-                              <p>Remember to notify collaborators that this project has been migrated. They may need to re-import the project.</p>
-                            </div>
-                            <div className="Labbook__migration-buttons">
-                              <button
-                                className="Labbook__migration--dismiss"
-                                onClick={() => this._toggleMigrationModal()}
-                              >
-                            Dismiss
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                }
-                  </div>
-                )
-                }
-              />
-              )
-            }
+            <Migration
+              labbook={labbook}
+              isDemo={isDemo}
+              isLocked={props.isLocked}
+              isDeprecated={state.isDeprecated}
+              shouldMigrate={state.shouldMigrate}
+              showMigrationButtonCallback={this._showMigrationButtonCallback}
+            />
             <Header
               {...props}
               description={labbook.description}
@@ -696,7 +453,7 @@ class Labbook extends Component {
               branches={state.branches}
               setBranchUptodate={this._setBranchUptodate}
               isDeprecated={state.isDeprecated}
-              updateMigationState={this._updateMigationState}
+              updateMigationState={this._updateMigrationState}
               sidePanelVisible={sidePanelVisible}
               showMigrationButton={showMigrationButton}
             />

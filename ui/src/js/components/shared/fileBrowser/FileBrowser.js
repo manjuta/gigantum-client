@@ -63,7 +63,7 @@ const checkLocalIndividual = (files) => {
 class FileBrowser extends Component {
   constructor(props) {
     super(props);
-
+    console.log(props)
     this.state = {
       mutations: new FileBrowserMutations(this._getMutationData()),
       mutationData: this._getMutationData(),
@@ -76,7 +76,7 @@ class FileBrowser extends Component {
       reverse: false,
       count: 0,
       files: {},
-      aboveSize: window.innerWidth > 1240,
+      aboveSize: (window.innerWidth > 1240),
       popupVisible: false,
       fileSizePromptVisible: false,
       showLinkModal: false,
@@ -881,6 +881,7 @@ class FileBrowser extends Component {
             <span>New Folder</span>
             <button
               type="button"
+              disabled=""
               className="FileBrowser__button Btn--round Btn--bordered Btn__addDataset"
               onClick={() => this.setState({ showLinkModal: true })}
               data-tooltip="Link Dataset"

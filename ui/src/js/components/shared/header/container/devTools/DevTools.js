@@ -1,14 +1,8 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 import { boundMethod } from 'autobind-decorator';
 // store
-import store from 'JS/redux/store';
-import { setContainerState } from 'JS/redux/actions/labbook/overview/overview';
-import { setContainerStatus, setContainerMenuVisibility } from 'JS/redux/actions/labbook/containerStatus';
-import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/redux/actions/labbook/environment/environment';
-import { setPackageMenuVisible } from 'JS/redux/actions/labbook/environment/packageDependencies';
-import { setBuildingState, setMergeMode } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/actions/footer';
 // assets
 import './DevTools.scss';
@@ -60,14 +54,8 @@ class DevTools extends Component {
   @boundMethod
   _openDevToolMuation(developmentTool) {
     const { props, state } = this;
-
-
     const { containerStatus, imageStatus } = props;
-
-
     const { owner, name } = props.labbook;
-
-
     const tabName = `${developmentTool}-${owner}-${name}`;
 
     const labbookCreationDate = Date.parse(`${this.props.creationDateUtc}Z`);
@@ -154,36 +142,11 @@ class DevTools extends Component {
 
   render() {
     const { props, state } = this;
-
-
     const devTools = props.labbook.environment.base ? props.labbook.environment.base.developmentTools : [];
-
-
-    const jupyterButtonCss = classNames({
-      'DevTools-button': true,
-      'ContainerStatus__button--bottom': state.isMouseOver,
-    });
-
-
-    const containerMenuCSS = classNames({
-      'DevTools-menu': true,
-      hidden: !state.showDevList,
-      'DevTools-menu--hover': state.isMouseOver,
-    });
-
-
-    const expandToolsCSS = classNames({
-      'ContainerStatus__expand-tools': true,
-      'ContainerStatus__expand-tools--open': state.showDevList,
-    });
-
-
     const devtToolMenuCSS = classNames({
       'DevTools__dropdown-menu': true,
       hidden: !state.showDevList,
     });
-
-
     const buttonDropdownCSS = classNames({
       'DevTools__btn DevTools__btn--dropdown': true,
       'DevTools__btn--open': state.showDevList,
