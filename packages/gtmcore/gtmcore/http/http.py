@@ -24,6 +24,10 @@ class AsyncURL(metaclass=abc.ABCMeta):
         raise NotImplemented
 
     @property
+    def headers(self) -> dict:
+        raise NotImplemented
+
+    @property
     def extracted_value(self) -> Any:
         raise NotImplemented
 
@@ -34,13 +38,17 @@ class AsyncGetJSON(AsyncURL):
         return 'json'
 
     @property
+    def headers(self) -> dict:
+        return {'accept': 'application/json'}
+
+    @property
     def extracted_value(self) -> Any:
         if not self.extraction_function:
             raise ValueError("Extraction Function not set. Only full response data access possible.")
         return self.extraction_function(self.result_json)
 
 
-class AsyncRequestManager(object):
+class AsyncHTTPRequestManager(object):
     def __init__(self, timeout: int = 60, semaphore_limit: int = 1000) -> None:
         self.timeout = timeout
         self._client_session = None
@@ -53,7 +61,7 @@ class AsyncRequestManager(object):
         return self._client_session
 
     async def fetch(self, url_obj: AsyncURL) -> AsyncURL:
-        async with self.session.get(url_obj.url, params=url_obj.params) as response:
+        async with self.session.get(url_obj.url, params=url_obj.params, headers=url_obj.headers) as response:
             url_obj.status_code = response.status
             if url_obj.coroutine_method == "json":
                 url_obj.result_text = await response.json()
