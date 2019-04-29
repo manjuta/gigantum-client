@@ -12,8 +12,8 @@
     @include flex(flex-start, column);
     p {
       align-self: flex-start;
-      min-width: 375px;
       max-width: 375px;
+      padding: 10px;
     }
     ul {
       margin: 0;
