@@ -37,7 +37,7 @@ class TestConda3PackageManager(object):
         mrg = Conda3PackageManager()
         lb = build_lb_image_for_env_conda[0]
         username = build_lb_image_for_env_conda[1]
-        result = mrg.search("reque*", lb, username)
+        result = mrg.search("requests", lb, username)
         assert type(result) == list
         assert type(result[0]) == str
         assert len(result) > 6

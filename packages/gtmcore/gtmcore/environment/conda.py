@@ -11,10 +11,9 @@ from gtmcore.container.container import ContainerOperations
 from gtmcore.container.exceptions import ContainerException
 from gtmcore.labbook import LabBook
 from gtmcore.logging import LMLogger
+from gtmcore.http import AsyncHTTPRequestManager, AsyncGetJSON
 
 logger = LMLogger.get_logger()
-
-
 
 
 class CondaPackageManagerBase(PackageManager):
@@ -39,30 +38,43 @@ class CondaPackageManagerBase(PackageManager):
         Returns:
             list(str): The list of package names that match the search string
         """
-        # Add wildcard for search
-        if search_str[-1] != '*':
-            search_str = search_str + '*'
+        def process_search(data):
+            # Filter by supported channels (for now)
+            result = list()
+            for pkg in data:
+                if pkg['owner'] in ['anaconda', 'conda-forge']:
+                    result.append((pkg['owner'], pkg['name'],  pkg['latest_version']))
+            return result
 
-        try:
-            result = ContainerOperations.run_command(f'conda search  --json "{search_str}"',
-                                                     labbook=labbook, username=username,
-                                                     fallback_image=self.fallback_image(labbook))
-        except ContainerException as e:
-            logger.error(e)
-            return list()
+        def process_detail(data):
+            # Filter by supported channels (for now)
+            result = list()
+            for pkg in data:
+                latest_version = pkg['latest_version']
+                if pkg['owner'] in ['anaconda', 'conda-forge']:
+                    result.append((pkg['owner'], pkg['name']),)
+            return result
 
-        data = json.loads(result.decode())
-        if 'exception_name' in data:
-            if data.get('exception_name') in ['PackagesNotFoundError', 'PackageNotFoundError']:
-                # This means you entered an invalid package name that didn't resolve to anything
-                return list()
-            else:
-                raise Exception(f"An error occurred while searching for packages: {data.get('exception_name')}")
+        arm = AsyncHTTPRequestManager()
 
-        if data:
-            return list(data.keys())
-        else:
-            return list()
+        # Search for packages
+        search_query = AsyncGetJSON(f"https://api.anaconda.org/search?name={search_str}",
+                                    extraction_function=process_search)
+        search_result = arm.resolve(search_query)
+
+        if search_result.status_code != 200:
+            raise ValueError(f"Failed to search package {search_str}: {search_result.result_json}")
+
+        detail_requests = list()
+        for pkg in search_result.extracted_value:
+            detail_requests.append(AsyncGetJSON(f"https://api.anaconda.org/release/{pkg[0]}/{pkg[1]}/{pkg[2]}"))
+        detail_results = arm.resolve_many(detail_requests)
+
+        # Get downloads and descriptions
+
+        # Sort
+
+        # Return results
 
     def list_versions(self, package_name: str, labbook: LabBook, username: str) -> List[str]:
         """Method to list all available versions of a package based on the package name
