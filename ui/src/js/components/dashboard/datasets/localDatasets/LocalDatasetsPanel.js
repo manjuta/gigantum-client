@@ -38,7 +38,7 @@ export default class LocalDatasetPanel extends Component {
         <div className="LocalDatasets__row--icons" />
         <div className="LocalDatasets__row--text">
           <div>
-            <h6
+            <h5
               className="LocalDatasets__panel-title"
               onClick={() => this._goToDataset()}
             >
@@ -49,7 +49,7 @@ export default class LocalDatasetPanel extends Component {
                 caseSensitive={false}
                 textToHighlight={edge.node.name}
               />
-            </h6>
+            </h5>
 
           </div>
 

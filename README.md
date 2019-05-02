@@ -1,12 +1,15 @@
-# Gigantum Client
+![Gigantum Banner](docs/img/Readme-Banner.png)
 
+[Home](https://gigantum.com)
+&middot; [Demo](https://try.gigantum.com)
+&middot; [Docs](https://docs.gigantum.com)
+&middot; [Twitter](https://twitter.com/gigantumscience)
+&middot; [Community &amp; Support](https://spectrum.chat/gigantum)
+&middot; [Feedback](https://portal.prodpad.com/d47eb9fe-c779-11e8-97cd-06df22ffaf6f)
 
-[![CircleCI](https://circleci.com/gh/gigantum/gigantum-client/tree/master.svg?style=svg)](https://circleci.com/gh/gigantum/gigantum-client/tree/master)  [![codecov](https://codecov.io/gh/gigantum/gigantum-client/branch/master/graph/badge.svg?token=1k6CENUN8G)](https://codecov.io/gh/gigantum/gigantum-client) [![FOSSA Status](https://app.fossa.io/api/projects/custom%2B6007%2FGigantum%20Client.svg?type=small)](https://app.fossa.io/projects/custom%2B6007%2FGigantum%20Client?ref=badge_small)
-
-Monorepo containing the source and build tooling for the Gigantum Client
-
-
-## Overview
+[![CircleCI](https://circleci.com/gh/gigantum/gigantum-client/tree/master.svg?style=svg)](https://circleci.com/gh/gigantum/gigantum-client/tree/master)
+[![codecov](https://codecov.io/gh/gigantum/gigantum-client/branch/master/graph/badge.svg?token=1k6CENUN8G)](https://codecov.io/gh/gigantum/gigantum-client)
+[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B6007%2FGigantum%20Client.svg?type=small)](https://app.fossa.io/projects/custom%2B6007%2FGigantum%20Client?ref=badge_small)
 
 The **Gigantum Client** is a web application to manage the creation and sharing of data science projects. It is run 
 locally and is delivered via a Docker container. The Client is the core component of a larger ecosystem of tools 
@@ -15,7 +18,18 @@ and services, including:
 - [Gigantum Desktop](https://github.com/gigantum/gigantum-desktop) - A desktop app to install and launch the Client 
 - [Gigantum CLI](https://github.com/gigantum/gigantum-cli) - A simple command line tool to install and launch the Client
 
-## Quickstart Guide (Setup and Build)
+## Installation Quickstart
+
+Gigantum is `pip`-installable, note that Docker needs to be installed (See instructions below). Once installed, just open your browser to http://localhost:10000!
+
+```bash
+pip install gigantum
+gigantum install && gigantum start
+```
+
+Gigantum can also be delivered as a convenient desktop application, available on our [Downloads page](https://gigantum.com/download).
+
+## Build and Run Gigantum from Source
 
 ### 1) Install Docker 
 
@@ -27,7 +41,7 @@ Note, Docker must be running to build/run/test the Client.
 
 ### 2) Clone gigantum-client
 
-```
+```bash
 git clone git@github.com:gigantum/gigantum-client.git
 cd gigantum-client
 git submodule update --init --recursive
@@ -44,7 +58,7 @@ app)
 
 ### 3) Create virtual environment
 
-```
+```bash
 python -m venv gtm-env
 source gtm-env/bin/activate
 cd gtm && pip install -e . && cd ..
@@ -57,7 +71,7 @@ The command `gtm` is now available. Run `gtm -h` to see available commands.
 
 ### 4) Configure your development environment
 
-```
+```bash
 gtm dev setup
 ```
 
@@ -72,7 +86,7 @@ development container so that the API starts automatically, but the UI bundle is
 
 ### 5) Build application client container and start working
 
-```
+```bash
 gtm dev -v build
 ```
 
@@ -81,13 +95,13 @@ Once complete, you'll have a container available for use either via your termina
 
 ### 6) Starting and stopping the gigantum client from terminal
 
-```
+```bash
 gtm dev start
 ```
 
 In a new console session, enter the container and kick off the application:
 
-```
+```bash
 gtm dev attach
 /opt/setup.sh
 python3 service.py
@@ -97,7 +111,7 @@ Open your web browser to http://localhost:10000 to access the application.
 
 When finished, run:
 
-```
+```bash
 gtm dev stop
 ```
  

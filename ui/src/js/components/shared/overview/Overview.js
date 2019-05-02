@@ -258,7 +258,7 @@ export default class Overview extends Component {
       hidden: state.editingReadme,
     });
     const overviewReadmeButtonCSS = classNames({
-      'Btn Btn--feature Btn__edit': true,
+      'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
       hidden: state.editingReadme,
     });
 
@@ -354,7 +354,7 @@ export default class Overview extends Component {
                 <div className="Overview__environment column-1-span-12">
                   <button
                     type="button"
-                    className="Btn Btn--feature Btn__redirect Btn__overview"
+                    className="Btn Btn--feature Btn__redirect Btn__redirect--featurePosition Btn__overview"
                     onClick={() => this._handleRedirect('environment')}
                   >
                     <span>View Environment Details</span>

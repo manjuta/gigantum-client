@@ -252,7 +252,6 @@ export default class CreateBranchModal extends Component {
               <div className="CreateBranch">
                 <div className="CreateBranch__name">
                   <label
-                    id="CreateBranchName"
                     htmlFor="CreateBranchName"
                   >
                     Name

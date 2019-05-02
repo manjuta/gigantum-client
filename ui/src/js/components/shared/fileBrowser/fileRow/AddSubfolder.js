@@ -43,9 +43,7 @@ class AddSubfolder extends Component {
   *  @return {}
   */
   _clickedOffInput(evt) {
-    if (!(evt.target.className.indexOf('AddSubfolder') > -1)
-      && !(evt.target.className.indexOf('__addFolder') > -1)
-      && !(evt.target.className.indexOf('FileBrowser__button--add-folder') > -1)
+    if (evt.target.getAttribute('data-click-id') !== 'addFolder'
       && (this.props.addFolderVisible || this.props.addFolderVisible === undefined)) {
       this._clearState();
       if (this.props.setAddFolderVisible) {
@@ -138,7 +136,7 @@ class AddSubfolder extends Component {
 
   render() {
     const subfolderInputCSS = classNames({
-      AddSubfolder__edit: true,
+      'AddSubfolder__edit Input--clear': true,
       hidden: !this.state.editMode && !this.props.addFolderVisible,
     });
 
@@ -175,7 +173,7 @@ class AddSubfolder extends Component {
             { (this.state.folderName.length > 0)
                    && (
                    <button
-                     className="AddSubfolder__btn AddSubfolder__btn--clear"
+                     className="Btn--noShadow Btn Btn--flat"
                      onClick={() => { this._clearInput(); }}
                    >
                      Clear

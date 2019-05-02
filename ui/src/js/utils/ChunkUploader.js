@@ -182,7 +182,7 @@ const ChunkUploader = {
     @param {object} data includes file filepath username and accessToken
   */
   chunkFile: (data, postMessage, passedChunkIndex) => {
-    console.log(data);
+
     const {
       file,
       filepath,
@@ -273,14 +273,11 @@ const ChunkUploader = {
             // }
           }
         } else if (result) { // completes chunk upload task
-          console.log(result);
           componentCallback(result);
         } else { // chunk upload fails
-          console.log(response);
           componentCallback(response);
         }
       } else { // chunk upload fails
-        console.log(response, result);
         componentCallback(response);
       }
     };

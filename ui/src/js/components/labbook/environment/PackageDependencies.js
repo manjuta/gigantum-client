@@ -721,7 +721,7 @@ class PackageDependencies extends Component {
       && (removalKeysLength === Object.keys(state.updatePackages[state.selectedTab]).length);
 
     const removeButtonCSS = classNames({
-      Btn: true,
+      'Btn Btn--noMargin': true,
       'PackageDependencies__remove-button--full': !updateButtonAvailable,
       'PackageDependencies__remove-button--half': updateButtonAvailable,
     });
@@ -892,7 +892,7 @@ class PackageDependencies extends Component {
                                 <button
                                   type="button"
                                   disabled={props.isLocked}
-                                  className="PackageDependencies__update-button"
+                                  className="PackageDependencies__update-button Btn--noMargin"
                                   onClick={() => this._updatePackages()}
                                 >
                                   Update

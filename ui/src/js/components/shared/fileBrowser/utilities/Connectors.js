@@ -91,7 +91,6 @@ const dragSource = {
     const dropResult = monitor.getDropResult();
     const fileNameParts = props.fileData.edge.node.key.split('/');
     const fileName = fileNameParts[fileNameParts.length - 1];
-
     if (dropResult.fileData && !((props.section === 'data') && !dropResult.isLocal)) {
       const pathArray = dropResult.fileData.edge.node.key.split('/');
       // remove filename or empty string
@@ -202,9 +201,9 @@ const uploadDirContent = (dndItem, props, mutationData, fileSizeData) => {
 
 const targetSource = {
   canDrop(props, monitor) {
-    const item = monitor.getItem()
+    const item = monitor.getItem();
     const { uploading } = store.getState().fileBrowser;
-    const mouseoverAllowed = !uploading && !(props.section === 'data' && !item.isLocal);
+    const mouseoverAllowed = !uploading && (!(props.section === 'data' && !item.isLocal) || (!item.fileData));
     return monitor.isOver({ shallow: true }) && mouseoverAllowed;
   },
   drop(props, monitor, component, comp) {
@@ -212,14 +211,8 @@ const targetSource = {
     const dndItem = monitor.getItem();
     const promptType = props.section ? props.section : ((props.mutationData) && (props.mutationData.section)) ? props.mutationData.section : '';
     let newPath;
-
-
     let fileKey;
-
-
     let path;
-
-
     let files;
     // non root folder drop
     if (dndItem && props.fileData) {
@@ -350,6 +343,7 @@ const targetSource = {
 
     return {
       fileData: props.fileData,
+      isLocal: props.isLocal,
     };
   },
 };
@@ -419,6 +413,7 @@ const Connectors = {
   dragCollect,
   targetSource,
   targetCollect,
+  checkFileSize,
 };
 
 export default Connectors;

@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import Moment from 'moment';
 import TextTruncate from 'react-text-truncate';
+import classNames from 'classnames';
 // config
 import config from 'JS/config';
 // store
@@ -77,11 +78,18 @@ export default class RecentCard extends Component {
     const fileDirectories = this.props.file.node.key.split('/');
     const filename = fileDirectories[fileDirectories.length - 1];
     const path = `${this.props.section}/${this.props.file.node.key.replace(filename, '')}`;
+    const favoriteIconCSS = classNames({
+      'FileCard__star Btn Btn--fileBrowser Btn--round Btn--bordered': true,
+      'Btn__Favorite-on': this.props.file.node.isFavorite,
+      'Btn__Favorite-off': !this.props.file.node.isFavorite,
+
+    })
     return (
       <div className="FileCard Card column-3-span-4--shrink">
-        <div
+        <button
           onClick={() => this._handleFileFavoriting(this.props.file)}
-          className={this.props.file.node.isFavorite ? 'FileCard__star' : 'FileCard__star FileCard__star--off'}
+          className={favoriteIconCSS}
+          type="button"
         />
         <h6 className="FileCard__header">{filename}</h6>
 

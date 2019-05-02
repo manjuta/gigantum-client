@@ -15,6 +15,7 @@ import Folder from './fileRow/Folder';
 import Dataset from './fileRow/dataset/Dataset';
 import AddSubfolder from './fileRow/AddSubfolder';
 // util
+import CreateFiles from './utilities/CreateFiles';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 import FileFormatter, { fileHandler } from './utilities/FileFormatter';
@@ -654,6 +655,16 @@ class FileBrowser extends Component {
     return text;
   }
 
+  _uploadFiles(files) {
+    const { props, state } = this;
+
+    // const fileObjects = files.map(file => ({ file, entry: { fullPath: `/${file.name}`, isFile: true } }));
+    const promptType = props.section ? props.section : ((state.mutationData) && (state.mutationData.section)) ? state.mutationData.section : '';
+    const fileSizeData = Connectors.checkFileSize(files, promptType);
+
+    CreateFiles.createFiles(files, '', state.mutationData, props, fileSizeData);
+  }
+
   render() {
     const { props, state } = this;
     const files = this.state.files;
@@ -675,7 +686,7 @@ class FileBrowser extends Component {
       'FileBrowser--dropzone': fileKeys.length === 0,
     });
     const deleteButtonCSS = classNames({
-      'Btn Btn--round Btn__delete Btn--noShadow Btn--action': true,
+      'Btn Btn--fileBrowser Btn--round Btn__delete Btn--action': true,
       hidden: !isSelected,
     });
     const multiSelectButtonCSS = classNames({
@@ -747,13 +758,24 @@ class FileBrowser extends Component {
                      <button
                        className="Btn--flat"
                        onClick={() => this._cancelUpload()}
+                       type="button"
                      >
                      Cancel Upload
                      </button>
 
-                     <button onClick={() => this._userRejectsUpload()}>Skip Large Files</button>
+                     <button
+                       onClick={() => this._userRejectsUpload()}
+                       type="button"
+                     >
+                      Skip Large Files
+                     </button>
 
-                     <button onClick={() => this._userAcceptsUpload()}>Continue Upload</button>
+                     <button
+                       onClick={() => this._userAcceptsUpload()}
+                       type="button"
+                     >
+                      Continue Upload
+                     </button>
 
                    </div>
 
@@ -767,24 +789,46 @@ class FileBrowser extends Component {
         <div className="FileBrowser__menu">
           <h5>Files</h5>
           <div className="FileBrowser__menu-buttons">
+            <label
+              htmlFor="browser_upload"
+              className="FileBrowser__upload-label"
+            >
+              <div className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow inline-block Btn" />
+              <span>Upload Files</span>
+              <input
+                id="browser_upload"
+                className="hidden"
+                type="file"
+                multiple
+                onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
+              />
+            </label>
             <button
-              className="FileBrowser__button Btn--round Btn--bordered Btn__upArrow"
-              onClick={() => this.setState({ addFolderVisible: !this.state.addFolderVisible })}
+              className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
+              data-click-id="addFolder"
+              onClick={() => this.setState({ addFolderVisible: !state.addFolderVisible })}
               type="button"
-            />
-            <span>Upload Files</span>
-            <button
-              className="FileBrowser__button Btn--round Btn--bordered Btn__addFolder"
-              onClick={() => this.setState({ addFolderVisible: !this.state.addFolderVisible })}
-              type="button"
-            />
-            <span>New Folder</span>
-            <button
-              className="FileBrowser__button Btn--round Btn--bordered Btn__addDataset"
-              onClick={() => this.setState({ showLinkModal: true })}
-              data-tooltip="Link Dataset"
-            />
-            <span>Link Dataset</span>
+            >
+              <div
+                className="Btn--fileBrowser Btn--round Btn--bordered Btn__addFolder Btn"
+                data-click-id="addFolder"
+              />
+              New Folder
+            </button>
+            {
+              props.section === 'input'
+              && (
+                <button
+                  className="Btn Btn__menuButton Btn--noShadow FileBrowser__addDataset"
+                  onClick={() => this.setState({ showLinkModal: true })}
+                  data-tooltip="Link Dataset"
+                  type="button"
+                >
+                  <div className="Btn--fileBrowser Btn--round Btn--bordered Btn__addDataset Btn" />
+                  Link Dataset
+                </button>
+              )
+            }
           </div>
         </div>
         <div className="FileBrowser__tools flex justify--space-between">
@@ -804,10 +848,12 @@ class FileBrowser extends Component {
             <button
               className={multiSelectButtonCSS}
               onClick={() => { this._selectFiles(); }}
+              type="button"
             />
             <button
               className={deleteButtonCSS}
               onClick={() => { this._togglePopup(true); }}
+              type="button"
             />
 
             <div className={popupCSS}>
@@ -816,11 +862,13 @@ class FileBrowser extends Component {
               <div className="flex justify--space-around">
                 <button
                   className="File__btn--round File__btn--cancel File__btn--delete"
-                  onClick={(evt) => { this._togglePopup(false); }}
+                  onClick={() => { this._togglePopup(false); }}
+                  type="button"
                 />
                 <button
                   className="File__btn--round File__btn--add File__btn--delete-files"
                   onClick={() => { this._deleteSelectedFiles(); }}
+                  type="button"
                 />
               </div>
             </div>
@@ -951,19 +999,10 @@ class FileBrowser extends Component {
                     checkLocal={checkLocalIndividual}
                   />
                 );
-              } if (children[file]) {
-                return (
-                  <div
-                    style={style}
-                    key={file + index}
-                  />
-                );
               }
-
               return (
                 <div
-                  key={file + index}
-                  style={style}
+                  key={file}
                 >
                   Loading
                 </div>
@@ -988,7 +1027,7 @@ class FileBrowser extends Component {
             )
           }
         </div>
-                              </div>)
+      </div>)
     );
   }
 }

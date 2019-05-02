@@ -221,7 +221,7 @@ export default class DatasetActionsMenu extends Component {
     const { props, state } = this;
     let downloadText = isLocal ? 'Downloaded' : 'Download';
     downloadText = props.isParent ? 'Download All' : downloadText;
-    downloadText = props.folder ? 'Download Directory' : downloadText;
+    downloadText = props.folder && !isLocal ? 'Download Directory' : downloadText;
     downloadText = state.showSessionValidMessage ? 'A valid session is required to download a dataset file.' : downloadText;
     downloadText = props.isDragging && !isLocal ? 'File is not downloaded. Download file to move it.' : downloadText;
 
@@ -234,16 +234,16 @@ export default class DatasetActionsMenu extends Component {
     const fileIsNotLocal = ((!props.edge.node.isLocal || (props.folder)) && !isLocal);
     const fileIsLocal = (props.edge.node.isLocal && isLocal);
     const blockDownload = props.folder ? false : props.edge.node.isLocal || isLocal;
-    const downloadText = this._getTooltipText();
+    const downloadText = this._getTooltipText(fileIsLocal);
     const isLoading = state.fileDownloading || ((props.parentDownloading || props.isDownloading) && !fileIsLocal);
     const showDownloadIcon = (props.section !== 'data') && !state.fileDownloading && !isLoading;
     const popupCSS = classNames({
       DatasetActionsMenu__popup: true,
       hidden: !state.popupVisible,
-      ToolTip__message: true,
+      Tooltip__message: true,
     });
     const downloadCSS = classNames({
-      'DatasetActionsMenu__item Btn--noShadow': true,
+      'DatasetActionsMenu__item Btn--round': true,
       'Tooltip-data Tooltip-data--small': !isLoading,
       'Tooltip-data--visible': state.showSessionValidMessage || (!props.isLocal && props.isDragging),
       'DatasetActionsMenu__item--download': fileIsNotLocal && showDownloadIcon,
@@ -292,7 +292,7 @@ export default class DatasetActionsMenu extends Component {
               )
           }
         <button
-          onClick={() => this._downloadFile(blockDownload)}
+          onClick={() => this._downloadFile(fileIsLocal)}
           className={downloadCSS}
           data-tooltip={downloadText}
         />

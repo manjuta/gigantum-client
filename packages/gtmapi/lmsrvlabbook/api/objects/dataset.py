@@ -360,7 +360,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             edge_objs.append(DatasetFileConnection.Edge(node=DatasetFile(**create_data), cursor=cursor))
 
         has_previous_page = False
-        has_next_page = True
+        has_next_page = len(edges) > 0
         start_cursor = None
         end_cursor = None
         if cursors:

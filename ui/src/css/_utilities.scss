@@ -39,6 +39,9 @@
   width: auto;
 }
 
+.inline-block{
+  display: inline-block;
+}
 
 /*****************
   font-weight:
@@ -257,4 +260,23 @@
 .blur {
   pointer-events: none;
   filter: blur(5px);
+}
+
+/*********************
+  word-break
+**********************/
+.break-word {
+  word-break: break-word;
+}
+
+.break-word {
+  word-break: break-all;
+}
+
+.word-break--noraml {
+  word-break: normal;
+}
+
+.keep-all {
+  word-break: keep-all;
 }

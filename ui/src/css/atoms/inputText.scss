@@ -42,32 +42,30 @@ input[type="text"].full--border:focus {
 }
 
 .Input {
-  position: relative;
-
   &--clear {
-     width: 100%;
+    button {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      padding: 7px 30px 7px 20px;
+      color: $romanSilver;
+      text-decoration: none;
+      background: url('~Images/icons/close.svg') no-repeat center right;
+      background-size: 24px;
+
+      &:hover {
+        color: $romanSilver;
+        padding: 7px 30px 7px 20px;
+        text-decoration: none;
+        background: url('~Images/icons/close.svg') no-repeat center right;
+        background-size: 26px;
+      }
+    }
+    input {
+      padding-right: 84px !important;
+    }
   }
 }
-
-
-.Input__clear {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  padding: 7px 30px 7px 20px;
-  color: $romanSilver;
-  text-decoration: none;
-  background: url('~Images/icons/close.svg') no-repeat center right;
-  background-size: 24px;
-
-  &:hover {
-    color: $romanSilver;
-    padding: 7px 30px 7px 20px;
-    text-decoration: none;
-    background: url('~Images/icons/close.svg') no-repeat center right;
-    background-size: 26px;
-  }
- }
 
 textarea {
   width: 100%;

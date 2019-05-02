@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 const EmptyReadme = ({ editingReadme, setEditingReadme }) => {
   const overviewReadmeButtonCSS = classNames({
-    'Btn Btn--feature Btn__edit': true,
+    'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
     hidden: editingReadme,
   });
 
