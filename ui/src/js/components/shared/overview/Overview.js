@@ -40,6 +40,7 @@ const checkOverflow = (element) => {
    || element.clientHeight < element.scrollHeight;
 
   element.style.overflow = curOverflow;
+
   return isOverflowing;
 };
 
@@ -50,6 +51,7 @@ export default class Overview extends Component {
     overflowExists: false,
     simpleExists: false,
     editorFullscreen: false,
+
   };
 
   /*
@@ -118,20 +120,15 @@ export default class Overview extends Component {
    resets vertical scroll
    */
   @boundMethod
-  _shrinkReadme() {
-    this.setState({ readmeExpanded: false });
-    if (window.pageYOffset > 345) {
-      window.scrollTo(0, 345);
+  _toggleReadme(readmeExpanded) {
+    if (!readmeExpanded) {
+      if (window.pageYOffset > 345) {
+        window.scrollTo(0, 345);
+      }
     }
-  }
+    this.setState({ readmeExpanded: !readmeExpanded });
 
-  /**
-   @param {}
-   sets readmeExpanded as true in state
-   */
-  @boundMethod
-  _expandReadme() {
-    this.setState({ readmeExpanded: true });
+    this._setExpand()
   }
 
   /**
@@ -228,6 +225,8 @@ export default class Overview extends Component {
     const sectionProps = props[props.sectionType];
     const isLabbook = (props.sectionType === 'labbook');
     const typeText = isLabbook ? 'Environment' : 'Type';
+    const showLoadMoreButton = state.overflowExists
+      || (state.readmeExpanded && !state.overflowExists);
 
     const overViewComponent = isLabbook
       ? (
@@ -250,8 +249,9 @@ export default class Overview extends Component {
       'Overview--fullscreen': state.editorFullscreen,
     });
     const readmeCSS = classNames({
+      ReadmeMarkdown: true,
+      'ReadmeMarkdown--collapsed': !state.readmeExpanded,
       'ReadmeMarkdown--expanded': state.readmeExpanded,
-      ReadmeMarkdown: !state.readmeExpanded,
     });
     const overviewReadmeCSS = classNames({
       'Overview__readme Readme Card Card--auto Card--no-hover column-1-span-12': !state.editingReadme,
@@ -262,6 +262,12 @@ export default class Overview extends Component {
       hidden: state.editingReadme,
     });
 
+    const loadMoreCSS = classNames({
+      'Btn Btn__loadMore': true,
+      'Btn__loadMore--down': !state.readmeExpanded,
+      'Btn__loadMore--up': state.readmeExpanded,
+    });
+
     if (sectionProps) {
       return (
 
@@ -270,10 +276,10 @@ export default class Overview extends Component {
 
           <div className="Overview__container">
 
-            <h2 className="Overview__title">
+            <h4 className="Overview__title">
               Readme
               <Tooltip section="readMe" />
-            </h2>
+            </h4>
 
           </div>
 
@@ -306,29 +312,19 @@ export default class Overview extends Component {
                   { (state.overflowExists && !state.readmeExpanded)
                       && <div className="Overview__readme-fadeout" />
                   }
-
-                  <div className="Overview__readme-buttons">
-                    { (state.overflowExists && state.readmeExpanded)
-                      ? (
+                  { showLoadMoreButton
+                    && (
+                      <div className="Overview__readme-buttons">
                         <div className="Overview__readme-bar-less">
                           <button
                             type="button"
-                            className="Btn__loadMore Btn__loadMore--up"
-                            onClick={() => this._shrinkReadme()}
+                            className={loadMoreCSS}
+                            onClick={() => this._toggleReadme(state.readmeExpanded)}
                           />
                         </div>
-                      )
-                      : (
-                        <div className="Overview__readme-bar-more">
-                          <button
-                            type="button"
-                            className="Btn__loadMore Btn__loadMore--down"
-                            onClick={() => this._expandReadme()}
-                          />
-                        </div>
-                      )
-                      }
-                  </div>
+                      </div>
+                    )
+                  }
                 </div>
               </div>
             )
@@ -343,10 +339,10 @@ export default class Overview extends Component {
           }
 
           <div className="Overview__container">
-            <h2>
+            <h4>
               {typeText}
               <Tooltip section="environmentOverview" />
-            </h2>
+            </h4>
           </div>
 
           { isLabbook

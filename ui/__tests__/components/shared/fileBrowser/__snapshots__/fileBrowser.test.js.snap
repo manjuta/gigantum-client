@@ -19,30 +19,36 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
     <div
       className="FileBrowser__menu-buttons"
     >
+      <label
+        className="FileBrowser__upload-label"
+        htmlFor="browser_upload"
+      >
+        <div
+          className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow inline-block Btn"
+        />
+        <span>
+          Upload Files
+        </span>
+        <input
+          className="hidden"
+          id="browser_upload"
+          multiple={true}
+          onChange={[Function]}
+          type="file"
+        />
+      </label>
       <button
-        className="FileBrowser__button Btn--round Btn--bordered Btn__upArrow"
+        className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
+        data-click-id="addFolder"
         onClick={[Function]}
         type="button"
-      />
-      <span>
-        Upload Files
-      </span>
-      <button
-        className="FileBrowser__button Btn--round Btn--bordered Btn__addFolder"
-        onClick={[Function]}
-        type="button"
-      />
-      <span>
+      >
+        <div
+          className="Btn--fileBrowser Btn--round Btn--bordered Btn__addFolder Btn"
+          data-click-id="addFolder"
+        />
         New Folder
-      </span>
-      <button
-        className="FileBrowser__button Btn--round Btn--bordered Btn__addDataset"
-        data-tooltip="Link Dataset"
-        onClick={[Function]}
-      />
-      <span>
-        Link Dataset
-      </span>
+      </button>
     </div>
   </div>
   <div
@@ -67,12 +73,14 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
       className="FileBrowser__multiselect flex justify--start"
     >
       <button
-        className="Btn--multiSelect Btn Btn--round Btn--medium Btn__uncheck"
+        className="CheckboxMultiselect CheckboxMultiselect__uncheck"
         onClick={[Function]}
+        type="button"
       />
       <button
-        className="Btn Btn--round Btn__delete Btn--noShadow Btn--action hidden"
+        className="Btn Btn--fileBrowser Btn--round Btn__delete Btn--action hidden"
         onClick={[Function]}
+        type="button"
       />
       <div
         className="FileBrowser__popup hidden Tooltip__message"
@@ -89,10 +97,12 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
           <button
             className="File__btn--round File__btn--cancel File__btn--delete"
             onClick={[Function]}
+            type="button"
           />
           <button
             className="File__btn--round File__btn--add File__btn--delete-files"
             onClick={[Function]}
+            type="button"
           />
         </div>
       </div>
@@ -136,7 +146,7 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
         Add Folder
       </div>
       <div
-        className="AddSubfolder__edit hidden"
+        className="AddSubfolder__edit Input--clear hidden"
       >
         <div
           className="AddSubfolder__container"

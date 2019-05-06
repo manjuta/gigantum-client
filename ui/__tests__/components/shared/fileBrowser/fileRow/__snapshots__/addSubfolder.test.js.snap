@@ -13,7 +13,7 @@ exports[`AddSubFolder Component Renders a Snapshot 1`] = `
     Add Folder
   </div>
   <div
-    className="AddSubfolder__edit"
+    className="AddSubfolder__edit Input--clear"
   >
     <div
       className="AddSubfolder__container"

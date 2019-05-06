@@ -8,18 +8,15 @@ import './FileEmpty.scss';
 export default class FileEmpty extends Component {
   render() {
     const { props } = this;
-
-
     const {
       owner,
       name,
       sectionType,
       sectionLink,
     } = props;
-
     const sectionTitle = sectionType.charAt(0).toUpperCase() + sectionType.slice(1);
+
     return (
-      (
         <div className="FilePreview__empty column-1-span-12">
           <button
             className="Btn Btn--feature Btn__redirect Btn__redirect--featurePosition"
@@ -37,7 +34,6 @@ export default class FileEmpty extends Component {
             </Link>
           </div>
         </div>
-      )
     );
   }
 }

@@ -12,6 +12,36 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
       className="Activity__sizer flex-1-0-auto"
     >
       <div
+        className="hidden userNote"
+        data-selenium-id="Tooltip"
+      >
+        <div
+          className="Tooltip__toggle userNote"
+          onClick={[Function]}
+        >
+          <div
+            className="Tooltip__glow-container"
+          >
+            <div
+              className="Tooltip__glow-ring-outer"
+            >
+              <div
+                className="Tooltip__glow-ring-inner"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="hidden userNote"
+        />
+        <div
+          className="hidden userNote"
+        >
+          This menu can be used to create a note. A note is added to the current point in the Activity Feed and can be viewed by collaborators when synced. 
+ The note editor supports markdown.
+        </div>
+      </div>
+      <div
         data-selenium-id="CreateBranch"
       />
       <div
@@ -44,36 +74,6 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
           className="UserNote__container"
           data-selenium-id="UserNoteWrapper"
         >
-          <div
-            className="hidden userNote"
-            data-selenium-id="Tooltip"
-          >
-            <div
-              className="Tooltip__toggle userNote"
-              onClick={[Function]}
-            >
-              <div
-                className="Tooltip__glow-container"
-              >
-                <div
-                  className="Tooltip__glow-ring-outer"
-                >
-                  <div
-                    className="Tooltip__glow-ring-inner"
-                  />
-                </div>
-              </div>
-            </div>
-            <div
-              className="hidden userNote"
-            />
-            <div
-              className="hidden userNote"
-            >
-              This menu can be used to create a note. A note is added to the current point in the Activity Feed and can be viewed by collaborators when synced. 
- The note editor supports markdown.
-            </div>
-          </div>
           <button
             className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
             onClick={[Function]}
@@ -116,7 +116,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        12:15pm
+                        5:15pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -163,7 +163,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        12:14pm
+                        5:14pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -210,7 +210,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        12:12pm
+                        5:12pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -257,7 +257,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        12:10pm
+                        5:10pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -304,7 +304,7 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        12:10pm
+                        5:10pm
                       </p>
                       <div
                         className="ActivityCard__user"

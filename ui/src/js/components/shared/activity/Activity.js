@@ -9,12 +9,14 @@ import store from 'JS/redux/store';
 import config from 'JS/config';
 // Components
 import Loader from 'Components/common/Loader';
+import Tooltip from 'Components/common/Tooltip';
 import CreateBranch from 'Components/shared/modals/CreateBranch';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import PaginationLoader from './loaders/PaginationLoader';
 import ClusterCardWrapper from './wrappers/ClusterCardWrapper';
 import CardWrapper from './wrappers/CardWrapper';
 import UserNoteWrapper from './wrappers/UserNoteWrapper';
+
 // utils
 import NewActivity from './NewActivity';
 // assets
@@ -748,16 +750,12 @@ class Activity extends Component {
 
   render() {
     const { props, state } = this;
-
     const section = props[props.sectionType];
-
 
     const activityCSS = classNames({
       Activity: true,
       fullscreen: state.editorFullscreen,
     });
-
-
     const newActivityCSS = classNames({
       'Activity__new-record box-shadow': true,
       'is-demo': ((window.location.hostname === config.demoHostName) || props.diskLow),
@@ -767,7 +765,6 @@ class Activity extends Component {
     if (section) {
       const recordDates = Object.keys(state.activityRecords);
 
-
       const stickyDateCSS = classNames({
         'Activity__date-tab': true,
         fixed: state.stickyDate,
@@ -775,6 +772,7 @@ class Activity extends Component {
         'is-deprecated': props.isDeprecated,
         'is-demo-deprecated': ((window.location.hostname === config.demoHostName) || props.diskLow) && props.isDeprecated,
       });
+
       return (
         <div
           key={props.sectionType}
@@ -821,6 +819,7 @@ class Activity extends Component {
               key={`${props.sectionType}_labbooks__labook-id-container`}
               className="Activity__sizer flex-1-0-auto"
             >
+              <Tooltip section="userNote" />
               <CreateBranch
                 ref="createBranch"
                 selected={state.selectedNode}

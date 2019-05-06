@@ -44,9 +44,6 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           Cloud
         </a>
       </li>
-      <hr
-        className="Labbooks__navigation-slider Labbooks__navigation-slider--local"
-      />
       <div
         className="hidden cloudLocal"
         data-selenium-id="Tooltip"

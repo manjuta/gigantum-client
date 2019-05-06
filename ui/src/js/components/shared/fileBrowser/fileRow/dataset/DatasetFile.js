@@ -75,9 +75,9 @@ class File extends Component {
 
 
     const buttonCSS = classNames({
-      'Btn Btn--round Btn--medium': true,
-      Btn__uncheck: !state.isSelected,
-      Btn__check: state.isSelected,
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__uncheck: !state.isSelected,
+      CheckboxMultiselect__check: state.isSelected,
     });
 
 

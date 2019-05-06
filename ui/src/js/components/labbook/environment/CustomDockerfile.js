@@ -146,10 +146,10 @@ export default class CustomDockerfile extends Component {
 
         <div className="Environment__headerContainer">
 
-          <h2>
+          <h4>
             Custom Docker Instructions
             <Tooltip section="dockerInstructionsEnvironment" />
-          </h2>
+          </h4>
 
         </div>
 
