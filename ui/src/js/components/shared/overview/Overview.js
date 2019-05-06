@@ -335,6 +335,7 @@ export default class Overview extends Component {
             : !state.editingReadme
               && (
               <EmptyReadme
+                sectionType={props.sectionType}
                 editingReadme={state.editingReadme}
                 setEditingReadme={this._setEditingReadme}
               />

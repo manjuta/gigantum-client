@@ -454,7 +454,7 @@ export default class CollaboratorsModal extends Component {
                     <div className={autoCompleteMenu}>
                       <ul className="CollaboratorsModal__list">
                         {
-                  this.state.colloboratorSearchList.map((collaborator, index) => {
+                  this.state.colloboratorSearchList.slice(0, 7).map((collaborator, index) => {
                     const listItemCSS = classNames({
                       CollaboratorsModal__listItem: true,
                       'CollaboratorsModal__listItem--selected': (index === this.state.selectedIndex),

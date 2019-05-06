@@ -165,7 +165,6 @@ const FilePreviewSection = ({
     sectionTooltip,
   } = sectionData;
 
-
   const hasFavorites = section.favorites && section.favorites.edges.length;
   return (
     <div className="FilePreview__section">
@@ -180,6 +179,7 @@ const FilePreviewSection = ({
           hasFavorites
             ? section.favorites.edges.map(edge => (
               <FileCard
+                sectionType={sectionType}
                 key={edge.node.id}
                 edge={edge}
               />

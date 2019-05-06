@@ -39,7 +39,7 @@ export default function SyncDatasetMutation(
     hasNext: false,
   };
   const id = uuidv4();
-  const startMessage = 'Preparing to sync Project...';
+  const startMessage = `Preparing to ${pullOnly ? 'pull' : 'sync'} Dataset...`;
   setMultiInfoMessage(id, startMessage, false, false, [{ message: startMessage }]);
   if (overrideMethod) {
     variables.input.overrideMethod = overrideMethod;

@@ -386,9 +386,7 @@ class Dataset extends Component {
                       }
           </div>
           <div className="DatasetBrowser__cell DatasetBrowser__cell--size" />
-          <div className="DatasetBrowser__cell DatasetBrowser__cell--date">
-            {Moment((node.modifiedAt * 1000), 'x').fromNow()}
-          </div>
+          <div className="DatasetBrowser__cell DatasetBrowser__cell--date" />
           <div className="DatasetBrowser__cell DatasetBrowser__cell--menu">
             <ActionsMenu
               edge={props.fileData.edge}
