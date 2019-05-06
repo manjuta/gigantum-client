@@ -12,6 +12,36 @@ exports[`Activity renders a snapshot 1`] = `
       className="Activity__sizer flex-1-0-auto"
     >
       <div
+        className="hidden userNote"
+        data-selenium-id="Tooltip"
+      >
+        <div
+          className="Tooltip__toggle userNote"
+          onClick={[Function]}
+        >
+          <div
+            className="Tooltip__glow-container"
+          >
+            <div
+              className="Tooltip__glow-ring-outer"
+            >
+              <div
+                className="Tooltip__glow-ring-inner"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="hidden userNote"
+        />
+        <div
+          className="hidden userNote"
+        >
+          This menu can be used to create a note. A note is added to the current point in the Activity Feed and can be viewed by collaborators when synced. 
+ The note editor supports markdown.
+        </div>
+      </div>
+      <div
         data-selenium-id="CreateBranch"
       />
       <div
@@ -44,36 +74,6 @@ exports[`Activity renders a snapshot 1`] = `
           className="UserNote__container"
           data-selenium-id="UserNoteWrapper"
         >
-          <div
-            className="hidden userNote"
-            data-selenium-id="Tooltip"
-          >
-            <div
-              className="Tooltip__toggle userNote"
-              onClick={[Function]}
-            >
-              <div
-                className="Tooltip__glow-container"
-              >
-                <div
-                  className="Tooltip__glow-ring-outer"
-                >
-                  <div
-                    className="Tooltip__glow-ring-inner"
-                  />
-                </div>
-              </div>
-            </div>
-            <div
-              className="hidden userNote"
-            />
-            <div
-              className="hidden userNote"
-            >
-              This menu can be used to create a note. A note is added to the current point in the Activity Feed and can be viewed by collaborators when synced. 
- The note editor supports markdown.
-            </div>
-          </div>
           <button
             className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
             onClick={[Function]}
@@ -116,7 +116,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:59am
+                        2:59pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -208,7 +208,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:57am
+                        2:57pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -300,7 +300,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:56am
+                        2:56pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -392,7 +392,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:55am
+                        2:55pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -484,7 +484,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:54am
+                        2:54pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -576,7 +576,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:54am
+                        2:54pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -668,7 +668,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:54am
+                        2:54pm
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -760,7 +760,7 @@ exports[`Activity renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        9:54am
+                        2:54pm
                       </p>
                       <div
                         className="ActivityCard__user"

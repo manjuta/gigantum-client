@@ -50,8 +50,8 @@ const getSyncTooltip = (props, data) => {
     sectionCollabs,
     activeBranch,
   } = data;
-  let syncTooltip = props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : '';
-  syncTooltip = !hasWriteAccess ? 'Pull' : 'Sync';
+  let syncTooltip = !hasWriteAccess ? 'Pull' : 'Sync';
+  syncTooltip = props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : '';
   syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : syncTooltip;
   syncTooltip = !props.defaultRemote ? 'Publish' : syncTooltip;
   syncTooltip = props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : syncTooltip;
@@ -572,7 +572,7 @@ class BranchMenu extends Component {
        'Btn--branch Btn--action Btn--branch--sync': true,
        'Btn--branch--sync--publish': !props.defaultRemote,
        'Btn--branch--sync--pull': showPullOnly,
-       'Btn--branch--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined)) && !showPullOnly,
+       'Btn--branch--sync--upToDate': props.defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined) || props.isLocked) && !showPullOnly,
        'Tooltip-data': !state.commitsHovered,
      });
      const manageCSS = classNames({

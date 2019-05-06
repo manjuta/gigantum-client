@@ -25,22 +25,10 @@ class Container extends Component {
     });
   }
 
-  /**
-  *  @param {String} status
-  *
-  *  @param {}
-  *  updates container status
-  */
-  @boundMethod
-  _updateStatus(status) {
-    this.setState({ status });
-  }
-
   render() {
     const { props, state } = this;
-
-
     const { labbook } = props;
+
     return (
       <div className="Container">
 

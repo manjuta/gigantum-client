@@ -1,47 +1,68 @@
 // vendor
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { boundMethod } from 'autobind-decorator';
 // mutations
 import FileBrowser from 'Components/shared/fileBrowser/FileBrowser';
 
 class SectionBrowser extends Component {
-  constructor(props) {
-  	super(props);
-
-    this.state = {
-      rootFolder: '',
-      moreLoading: false,
-      dataset: {
-        isProcessing: false,
-      },
-    };
-
-    this._setRootFolder = this._setRootFolder.bind(this);
-    this._loadMore = this._loadMore.bind(this);
+  state = {
+    hasFiles: false,
+    moreLoading: false,
+    dataset: {
+      isProcessing: false,
+    },
   }
 
-  /*
-    loads more if branches are switched
-  */
-  componentDidUpdate() {
-    this.props.loadStatus(this.state.moreLoading);
-    if (!this.state.moreLoading && this.props[this.props.section].allFiles && this.props[this.props.section].allFiles.edges.length < 3 && this.props[this.props.section].allFiles.pageInfo.hasNextPage) {
-      this._loadMore();
-    }
-  }
 
   /*
     handle state and addd listeners when component mounts
   */
   componentDidMount() {
-    this.props.loadStatus(this.state.moreLoading);
-    if (this.props[this.props.section].allFiles
-      && this.props[this.props.section].allFiles.pageInfo.hasNextPage) {
+    const { props, state } = this;
+
+    props.loadStatus(state.moreLoading);
+
+    if (props[props.section].allFiles
+      && props[props.section].allFiles.pageInfo.hasNextPage) {
       this._loadMore(); // routes query only loads 2, call loadMore
     } else {
       this.setState({ moreLoading: false });
     }
   }
+
+
+  static getDerivedStateFromProps(props, state) {
+    let hasFiles = props[props.section]
+      && (props[props.section].allFiles.edges.length > 0);
+    hasFiles = (props.section === 'output') ? (props[props.section]
+      && (props[props.section].allFiles.edges.length > 1)) : hasFiles;
+
+    if ((props.section !== 'data') && (state.hasFiles !== hasFiles)) {
+      props.toggleFavoriteRecent(hasFiles);
+    }
+    return {
+      ...state,
+      hasFiles,
+    };
+  }
+
+  /*
+    loads more if branches are switched
+  */
+  componentDidUpdate(prevProps, prevState) {
+    const { props, state } = this;
+
+    props.loadStatus(state.moreLoading);
+
+    if (!state.moreLoading
+      && props[props.section].allFiles
+      && (props[props.section].allFiles.edges.length < 3)
+      && props[props.section].allFiles.pageInfo.hasNextPage) {
+      this._loadMore();
+    }
+  }
+
 
   /*
     @param {}
@@ -49,60 +70,55 @@ class SectionBrowser extends Component {
     increments by 100
     logs callback
   */
+  @boundMethod
   _loadMore() {
-    this.setState({ moreLoading: true });
+    const { props } = this;
     const self = this;
-    this.props.relay.loadMore(
+    this.setState({ moreLoading: true });
+
+    props.relay.loadMore(
       100, // Fetch the next 100 feed items
       (response, error) => {
         if (error) {
           console.error(error);
         }
-        if (self.props[this.props.section].allFiles
-         && self.props[this.props.section].allFiles.pageInfo.hasNextPage) {
+        if (props[props.section].allFiles
+         && props[props.section].allFiles.pageInfo.hasNextPage) {
           self._loadMore();
         } else {
-          this.setState({ moreLoading: false });
+          self.setState({ moreLoading: false });
         }
       },
     );
   }
 
-  /*
-    @param
-    sets root folder by key
-    loads more files
-  */
-  _setRootFolder(key) {
-    this.setState({ rootFolder: key });
-  }
-
   render() {
-    if (this.props[this.props.section] && this.props[this.props.section].allFiles) {
-      const capitalSection = this.props.section[0].toUpperCase() + this.props.section.slice(1);
-      let files = this.props[this.props.section].allFiles;
-      if (this.props[this.props.section].allFiles.edges.length === 0) {
+    const { props } = this;
+    if (props[props.section] && props[props.section].allFiles) {
+      const capitalSection = props.section[0].toUpperCase() + props.section.slice(1);
+      let files = props[props.section].allFiles;
+
+      if (props[props.section].allFiles.edges.length === 0) {
         files = {
           edges: [],
-          pageInfo: this.props[this.props.section].allFiles.pageInfo,
+          pageInfo: props[props.section].allFiles.pageInfo,
         };
       }
       return (
         <FileBrowser
           ref={inst => inst}
-          // ref={`${this.props.section}Browser`}
-          section={this.props.section}
-          selectedFiles={this.props.selectedFiles}
-          clearSelectedFiles={this.props.clearSelectedFiles}
-          setRootFolder={this._setRootFolder}
+          section={props.section}
+          selectedFiles={props.selectedFiles}
+          clearSelectedFiles={props.clearSelectedFiles}
           files={files}
-          isProcessing={this.props.isProcessing}
-          parentId={this.props.sectionId}
+          isProcessing={props.isProcessing}
+          parentId={props.sectionId}
           connection={`${capitalSection}Browser_allFiles`}
           favoriteConnection={`${capitalSection}Favorites_favorites`}
-          favorites={this.props.favorites}
-          isLocked={this.props.isLocked}
-          {...this.props}
+          mostRecentConnection={`MostRecent${capitalSection}_allFiles`}
+          favorites={props.favorites}
+          isLocked={props.isLocked}
+          {...props}
         />
       );
     }
@@ -111,13 +127,11 @@ class SectionBrowser extends Component {
 }
 
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   isProcessing: state.dataset.isProcessing,
 });
 
-const mapDispatchToProps = dispatch => ({
-
-});
+const mapDispatchToProps = () => ({});
 
 
 export default connect(mapStateToProps, mapDispatchToProps)(SectionBrowser);

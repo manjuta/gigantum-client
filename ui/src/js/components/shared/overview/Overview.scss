@@ -6,6 +6,8 @@
   font-weight: 100;
   width: 100%;
 
+  @include flex(space-between, column);
+
   &--fullscreen {
     z-index: index($elements, modal);
   }
@@ -185,8 +187,6 @@
 }
 
 .ReadmeMarkdown {
-  max-height: 200px;
-  overflow: hidden;
   blockquote {
     border-left: 5px solid $lightblue;
   }
@@ -203,6 +203,11 @@
       list-style-type: disc;
     }
   }
+}
+
+.ReadmeMarkdown--collapsed {
+   max-height: 215px;
+   overflow: hidden;
 }
 
 .editor-preview,

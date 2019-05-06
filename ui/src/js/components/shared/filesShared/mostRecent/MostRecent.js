@@ -31,6 +31,7 @@ export default class MostRecent extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
+
     return {
       ...state,
       files: nextProps[state.selectedPath],
@@ -58,7 +59,7 @@ export default class MostRecent extends Component {
 
     this.setState({ loading: true });
     this.props.relay.loadMore(
-      100, // Fetch the next 100 feed items
+      3, // Fetch the next 100 feed items
       (response, error) => {
         const files = self.props[this.state.selectedPath];
 

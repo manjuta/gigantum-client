@@ -14,7 +14,6 @@ import { setIsProcessing } from 'JS/redux/actions/dataset/dataset';
 import config from 'JS/config';
 
 const uploadImportChunk = (file, chunk, accessToken, getChunkCallback, type) => {
-  console.log(type);
   if (type === 'dataset') {
     ImportDatasetMutation(chunk.blob, chunk, accessToken, (result, error) => {
       console.log(result, error);

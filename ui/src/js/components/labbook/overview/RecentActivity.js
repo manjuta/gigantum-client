@@ -160,10 +160,10 @@ export default class RecentActivity extends Component {
       return (<div className="RecentActivity">
         <div className="RecentActivity__title-container">
 
-          <h2>
+          <h4>
             Recent Activity
             <Tooltip section="recentActivity" />
-          </h2>
+          </h4>
         </div>
 
         <div className="RecentActivity__list grid">
@@ -223,7 +223,7 @@ export default class RecentActivity extends Component {
 
     return (
       <div className="RecentActivity">
-        <h2 className="RecentActivity__header">Activity</h2>
+        <h4 className="RecentActivity__header">Activity</h4>
         <div className="RecentActivity__list grid">
           <div className="RecentActivity__card--loading" />
           <div className="RecentActivity__card--loading" />

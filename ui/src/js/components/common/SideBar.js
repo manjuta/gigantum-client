@@ -103,7 +103,7 @@ export default class SideBar extends Component {
                 <div className={datasetCSS} />
                 Datasets
               </Link>
-              <Tooltip section="dataSets" />
+              <Tooltip section="datasetsTooltip" />
             </li>
           </ul>
 

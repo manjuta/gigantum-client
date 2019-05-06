@@ -152,8 +152,6 @@ class Header extends Component {
 
   render() {
     const { props, state } = this;
-
-
     const {
       labbookName,
       labbook,
@@ -161,8 +159,6 @@ class Header extends Component {
       branchName,
       dataset,
     } = props;
-
-
     const {
       visibility,
       description,
@@ -170,16 +166,17 @@ class Header extends Component {
       defaultRemote,
       id,
     } = labbook || dataset;
-
-
     const section = labbook || dataset;
-
-
     const selectedIndex = this._getSelectedIndex();
-
-
     const isLabbookSection = props.sectionType === 'labbook';
 
+    let branches = props.branches || [{
+      branchName: 'master',
+      isActive: true,
+      commitsBehind: 0,
+      commitsAhead: 0,
+    }];
+    branches = props.showMigrationButton ? branches.filter(({ branchName }) => branchName !== 'master') : branches;
 
     const headerCSS = classNames({
       Header: true,
@@ -188,21 +185,11 @@ class Header extends Component {
       'Header--is-deprecated': props.isDeprecated,
       'Header--branchesOpen': props.branchesOpen,
     });
-
-
     const branchesErrorCSS = classNames({
       BranchesError: props.branchesOpen,
       hidden: !props.branchesOpen,
     });
 
-    let branches = props.branches || [{
-      branchName: 'master',
-      isActive: true,
-      commitsBehind: 0,
-      commitsAhead: 0,
-    }];
-
-    branches = props.showMigrationButton ? branches.filter(({ branchName }) => branchName !== 'master') : branches;
 
     return (
 

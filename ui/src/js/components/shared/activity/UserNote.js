@@ -19,6 +19,7 @@ export default class UserNote extends Component {
       userSummaryText: '',
       addNoteDisabled: true,
       editorFullscreen: false,
+      unsubmittedTag: '',
     };
 
     this._addNote = this._addNote.bind(this);
@@ -56,11 +57,16 @@ export default class UserNote extends Component {
   _addNote = () => {
     const { props, state } = this;
     const self = this;
+    if (state.unsubmittedTag.length) {
+      this._handleAddition({ id: state.unsubmittedTag, text: state.unsubmittedTag });
+    }
+
     const tags = state.tags.map(tag => (tag.text));
     const { labbookName, owner } = store.getState().routes;
     const { labbookId } = props;
 
-    this.setState({ addNoteDisabled: true });
+
+    this.setState({ addNoteDisabled: true, unsubmittedTag: '' });
 
     CreateUserNoteMutation(
       props.sectionType,
@@ -117,7 +123,7 @@ export default class UserNote extends Component {
    _handleAddition = (tag) => {
      const { tags } = this.state;
      tags.push(tag);
-     this.setState(tags);
+     this.setState({ tags, unsubmittedTag: '' });
    }
 
    /**
@@ -136,9 +142,19 @@ export default class UserNote extends Component {
    }
 
 
+   /**
+     @param {String} unsubmittedTag
+     sets unsubmittedTag to state
+   */
+   _updateUnsubmittedTag = (unsubmittedTag) => {
+     this.setState({ unsubmittedTag });
+   }
+
+
    render() {
      const { state } = this;
      const { tags } = state;
+
      return (
        <div className="UserNote flex flex--column">
 
@@ -163,6 +179,7 @@ export default class UserNote extends Component {
          <ReactTags
            id="TagsInput"
            tags={tags}
+           handleInputChange={this._updateUnsubmittedTag}
            handleDelete={(index) => { this._handleDelete(index); }}
            handleAddition={(tag) => { this._handleAddition(tag); }}
            handleDrag={(tag, currPos, newPos) => { this._handleDrag(tag, currPos, newPos); }}

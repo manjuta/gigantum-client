@@ -286,10 +286,10 @@ class Folder extends Component {
 
 
     const buttonCSS = classNames({
-      'Btn Btn--round': true,
-      Btn__uncheck: !state.isSelected && !state.isIncomplete,
-      Btn__check: state.isSelected && !state.isIncomplete,
-      Btn__partial: state.isIncomplete,
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__uncheck: !state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__check: state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__partial: state.isIncomplete,
     });
 
 

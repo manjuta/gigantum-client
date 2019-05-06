@@ -85,7 +85,12 @@ class Labbook extends Component {
   }
 
   state = {
-    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || (this.props.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (this.props.labbook.environment.imageStatus === 'BUILD_QUEUED') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
+    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING')
+      || (this.props.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
+      || (this.props.labbook.environment.imageStatus === 'BUILD_QUEUED')
+      || this.props.isBuilding
+      || this.props.isSynching
+      || this.props.isPublishing,
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     branches: this.props.labbook.branches,
@@ -488,7 +493,6 @@ class Labbook extends Component {
   render() {
     const { props, state } = this;
     const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
-
     if (props.labbook) {
       const { labbook, branchesOpen } = props;
       const sidePanelVisible = !isLocked && props.sidePanelVisible;

@@ -2,12 +2,12 @@ import React from 'react';
 import classNames from 'classnames';
 
 
-const EmptyReadme = ({ editingReadme, setEditingReadme }) => {
+const EmptyReadme = ({ editingReadme, setEditingReadme, sectionType }) => {
   const overviewReadmeButtonCSS = classNames({
     'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
     hidden: editingReadme,
   });
-
+  const section = sectionType === 'labbook' ? 'Project' : 'Dataset'
   return (
     <div className="grid">
       <div className="Overview__empty column-1-span-12">
@@ -19,7 +19,7 @@ const EmptyReadme = ({ editingReadme, setEditingReadme }) => {
           <span>Edit Readme</span>
         </button>
         <div className="Overview__empty-content">
-          <p>This Project Has No Readme</p>
+          <p>{`This ${section} Has No Readme`}</p>
           <button
             type="button"
             className="Overview__empty-action Btn Btn--flat"

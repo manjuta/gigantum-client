@@ -316,10 +316,10 @@ class Dataset extends Component {
 
 
     const buttonCSS = classNames({
-      'Btn Btn--round Btn--medium': true,
-      Btn__uncheck: !state.isSelected && !state.isIncomplete,
-      Btn__check: state.isSelected && !state.isIncomplete,
-      Btn__partial: state.isIncomplete,
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__uncheck: !state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__check: state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__partial: state.isIncomplete,
     });
 
 
@@ -386,9 +386,7 @@ class Dataset extends Component {
                       }
           </div>
           <div className="DatasetBrowser__cell DatasetBrowser__cell--size" />
-          <div className="DatasetBrowser__cell DatasetBrowser__cell--date">
-            {Moment((node.modifiedAt * 1000), 'x').fromNow()}
-          </div>
+          <div className="DatasetBrowser__cell DatasetBrowser__cell--date" />
           <div className="DatasetBrowser__cell DatasetBrowser__cell--menu">
             <ActionsMenu
               edge={props.fileData.edge}
