@@ -936,6 +936,7 @@ class FileBrowser extends Component {
                   section={props.section}
                   key={files[file].edge.node.key}
                   multiSelect={state.multiSelect}
+                  isLocal={checkLocalIndividual(files[file])}
                   mutationData={mutationData}
                   fileData={files[file]}
                   mutations={state.mutations}
@@ -946,6 +947,7 @@ class FileBrowser extends Component {
                   updateChildState={this._updateChildState}
                   codeDirUpload={this._codeDirUpload}
                   commitsBehind={commitsBehind}
+                  checkLocal={checkLocalIndividual}
                 />
               );
             } if (isDir) {
