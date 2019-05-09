@@ -461,8 +461,6 @@ class Datasets extends Component {
                 <a onClick={() => this._setSection('cloud')}>Cloud</a>
               </li>
 
-              <hr className={`Datasets__navigation-slider Datasets__navigation-slider--${state.selectedSection}`} />
-
               <Tooltip section="cloudLocal" />
             </ul>
 

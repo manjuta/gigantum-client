@@ -75,9 +75,9 @@ class File extends Component {
 
 
     const buttonCSS = classNames({
-      'Btn Btn--round Btn--medium': true,
-      Btn__uncheck: !state.isSelected,
-      Btn__check: state.isSelected,
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__uncheck: !state.isSelected,
+      CheckboxMultiselect__check: state.isSelected,
     });
 
 
@@ -133,6 +133,7 @@ class File extends Component {
           <div className="File__cell File__cell--menu">
             <ActionsMenu
               edge={props.fileData.edge}
+              isLocal={props.fileData.edge.node.isLocal}
               mutationData={props.mutationData}
               mutations={props.mutations}
               renameEditMode={this._renameEditMode}

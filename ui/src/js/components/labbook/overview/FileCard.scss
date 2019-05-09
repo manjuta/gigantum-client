@@ -9,25 +9,48 @@
 }
 
 .FileCard__key {
-  font-size: 12px;
+  overflow: hidden;
+
+  height: 28px;
+  margin: 0;
+  padding-right: 20px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 .FileCard__description {
-  font-size: 14px;
   display: -webkit-box;
   overflow: hidden;
+  overflow: hidden;
   -webkit-box-orient: vertical;
+
+  width: calc(100% - 40px);
+  height: 57px;
+  margin: 0;
+
   white-space: pre-line;
   text-overflow: ellipsis;
-  -webkit-line-clamp: 3;
+  word-break: break-word;
+
   line-height: 18px;
+
+  -webkit-line-clamp: 3;
 }
 
 .FileCard__name {
-  margin-top: 20px;
-  color: $jet;
-  font-size: 16px;
+  overflow: hidden;
 
+  max-width: 300px;
+  padding: 0 30px 0 0;
+  margin: 5px 0;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-word;
+
+  font-weight: bold;
 }
 
 .FileCard__favorite {

@@ -2,7 +2,7 @@
 
 .FileCard {
   cursor: grab;
-  height: 120px;
+  height: 140px;
   position: relative;
   text-align: left;
   padding: 10px;
@@ -34,7 +34,7 @@
 
   white-space: nowrap;
   text-overflow: ellipsis;
-  word-break: break-all;
+  word-break: break-word;
 
   font-weight: bold;
 }
@@ -55,7 +55,7 @@
 
   white-space: nowrap;
   text-overflow: ellipsis;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 
@@ -66,12 +66,12 @@
   -webkit-box-orient: vertical;
 
   width: calc(100% - 40px);
-  height: 60px;
+  height: 57px;
   margin: 0;
 
   white-space: pre-line;
   text-overflow: ellipsis;
-  word-break: break-all;
+  word-break: break-word;
 
   line-height: 18px;
 

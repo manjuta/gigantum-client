@@ -78,6 +78,7 @@ function collect(connect, monitor) {
     connectDragSource: connect.dragSource(),
   };
 }
+
 function collectDropTarget(connect, monitor) {
   return {
     connectDropTarget: connect.dropTarget(),
@@ -288,17 +289,19 @@ class FavoriteCard extends Component {
 
               <div className="flex flex--column-reverse justify--space-around align-items--center">
                 <button
+                  type="button"
                   onClick={() => this._editDescription(false)}
                   className="Btn Btn--round Btn--medium Btn__close"
                 />
                 <button
+                  type="button"
                   onClick={(evt) => { this._updateDescription(evt, props.favorite); }}
                   className="Btn Btn--round Btn--medium Btn__check"
                 />
               </div>
             </div>
             )
-	        }
+          }
 
         <div className={favoriteMaskCSS} />
 

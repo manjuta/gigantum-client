@@ -32,7 +32,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     <div
       className="RemoteLabbooks__row RemoteLabbooks__row--title"
     >
-      <h6
+      <h5
         className="RemoteLabbooks__panel-title"
       >
         <span>
@@ -42,7 +42,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             ui-test-remote
           </span>
         </span>
-      </h6>
+      </h5>
     </div>
     <p
       className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"

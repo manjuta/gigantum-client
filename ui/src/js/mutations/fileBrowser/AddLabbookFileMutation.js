@@ -143,7 +143,10 @@ export default function AddLabbookFileMutation(
       },
       onError: err => console.error(err),
       updater: (store, response) => {
-        if (response.addLabbookFile && response.addLabbookFile.newLabbookFileEdge && response.addLabbookFile.newLabbookFileEdge.node) {
+        if (response.addLabbookFile
+          && response.addLabbookFile.newLabbookFileEdge
+          && response.addLabbookFile.newLabbookFileEdge.node) {
+
           const responseNode = response.addLabbookFile.newLabbookFileEdge.node;
           deleteEdge(store, sectionId, optimisticId, connectionKey);
           deleteEdge(store, sectionId, optimisticId, recentConnectionKey);

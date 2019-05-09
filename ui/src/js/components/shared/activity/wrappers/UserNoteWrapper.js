@@ -49,7 +49,6 @@ export default class UserNoteWrapper extends Component {
     });
     return (
       <div className={userActivityContainerCSS}>
-        <Tooltip section="userNote" />
         <button
           className={buttonCSS}
           onClick={() => this._toggleUserNote(!state.userNoteVisible)}

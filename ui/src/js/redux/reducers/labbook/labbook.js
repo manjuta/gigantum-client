@@ -4,6 +4,7 @@ export default (
   state = {
     selectedComponent: '',
     containerState: '',
+    transitionState: '',
     imageStatus: '',
     isBuilding: false,
     isSyncing: false,
@@ -79,6 +80,7 @@ export default (
       ...state,
       selectedComponent: '',
       containerState: '',
+      transitionState: '',
       imageStatus: '',
       isBuilding: false,
       isPublushing: false,
@@ -99,6 +101,11 @@ export default (
     return {
       ...state,
       sidePanelVisible: action.payload.sidePanelVisible,
+    };
+  } if (action.type === types.UPDATE_TRANSITION_STATE) {
+    return {
+      ...state,
+      transitionState: action.payload.transitionState,
     };
   }
 

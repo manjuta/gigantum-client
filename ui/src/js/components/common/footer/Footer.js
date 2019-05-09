@@ -149,8 +149,10 @@ class Footer extends Component {
 
     const footerClass = classNames({
       Footer: true,
+      'Footer--uploading': props.uploadOpen,
       'Footer--expand': (props.open) || props.uploadOpen,
       'Footer--expand-extra': (props.open && props.uploadOpen),
+
     });
     const footerButtonClass = classNames({
       'Footer__disc-button': true,

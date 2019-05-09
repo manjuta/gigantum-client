@@ -261,7 +261,7 @@ class Folder extends Component {
 
   render() {
     const { props, state } = this;
-
+    const isLocal = props.checkLocal(props.fileData);
 
     const { node } = props.fileData.edge;
 
@@ -286,10 +286,10 @@ class Folder extends Component {
 
 
     const buttonCSS = classNames({
-      'Btn Btn--round': true,
-      Btn__uncheck: !state.isSelected && !state.isIncomplete,
-      Btn__check: state.isSelected && !state.isIncomplete,
-      Btn__partial: state.isIncomplete,
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__uncheck: !state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__check: state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__partial: state.isIncomplete,
     });
 
 
@@ -386,6 +386,7 @@ class Folder extends Component {
               folder
               renameEditMode={this._renameEditMode}
               fullEdge={props.fileData}
+              isLocal={isLocal}
               isDownloading={state.isDownloading || props.isDownloading}
               setFolderIsDownloading={this._setFolderIsDownloading}
             />

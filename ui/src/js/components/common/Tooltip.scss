@@ -111,7 +111,7 @@
 .Tooltip.containerStatus{
   .Tooltip__toggle{
     top: -23px;
-    right: -12px;
+    right: -20px;
   }
   .Tooltip__pointer{
     top: -6px;
@@ -125,15 +125,15 @@
 
 .Tooltip.descriptionOverview{
   .Tooltip__toggle{
-    top: -58px;
+    top: -20px;
     right: -18px;
   }
   .Tooltip__pointer{
-    top: -40px;
-    right: -24px;
+    top: 0px;
+    right: -22px;
   }
   .Tooltip__message{
-    top: -26px;
+    top: 10px;
     right: -50px;
   }
 }
@@ -178,31 +178,32 @@
 }
 
 .Tooltip.userNote{
+  z-index: 4;
   .Tooltip__toggle{
-    top: calc(50% - 7.5px);
-    left: 7px;
+    top: 110px;
+    left: 150px;
   }
   .Tooltip__pointer{
-    top: 39px;
-    left: 0;
+    top: 130px;
+    left: 144px;
   }
   .Tooltip__message{
-    top: 51px;
-    left: -7px;
+    top: 140px;
+    left: 110px;
   }
 }
 
 .Tooltip.activitySubmenu{
   .Tooltip__toggle{
-    top: calc(50% - 7.5px);
+    top: calc(50% + 2px);
     left: 7px;
   }
   .Tooltip__pointer{
-    top: calc(50% + 13px);
+    top: calc(50% + 18px);
     left: 0;
   }
   .Tooltip__message{
-    top: calc(50% + 21px);
+    top: calc(50% + 27px);
     left: -7px;
   }
 }
@@ -238,7 +239,7 @@
   }
 }
 
-.Tooltip.dataSets{
+.Tooltip.datasetsTooltip{
   .Tooltip__toggle{
     right: 20px;
     bottom: 60px;
@@ -256,18 +257,18 @@
 .Tooltip.createLabbook,
 .Tooltip.importLabbook{
   .Tooltip__toggle{
-    right: 0;
-    bottom: 25px;
+    right: -90px;
+    bottom: 100px;
   }
   .Tooltip__pointer{
-    right: -30px;
-    bottom: 18px;
+    right: -107px;
+    bottom: 94px;
 
-    @include triangle('left', 14px, $white);
+    @include triangle('left', 14px, $slateBlue);
   }
   .Tooltip__message{
-    top: -100px;
-    left: 300px;
+    bottom: 80px;
+    left: 103px;
   }
 }
 
@@ -280,4 +281,5 @@
     top: 33px;
     left: -100px;
   }
+
 }

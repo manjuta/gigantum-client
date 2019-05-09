@@ -316,10 +316,10 @@ class Dataset extends Component {
 
 
     const buttonCSS = classNames({
-      'Btn Btn--round Btn--medium': true,
-      Btn__uncheck: !state.isSelected && !state.isIncomplete,
-      Btn__check: state.isSelected && !state.isIncomplete,
-      Btn__partial: state.isIncomplete,
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__uncheck: !state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__check: state.isSelected && !state.isIncomplete,
+      CheckboxMultiselect__partial: state.isIncomplete,
     });
 
 
@@ -374,7 +374,7 @@ class Dataset extends Component {
             <div className="DatasetBrowser__name">
               {datasetName}
             </div>
-            { (props.commitsBehind !== 0)
+            { (props.commitsBehind !== 0) && (props.commitsBehind !== null)
                         && (
                         <div
                           className="DatasetBrowser__commits Tooltip-data"
@@ -386,9 +386,7 @@ class Dataset extends Component {
                       }
           </div>
           <div className="DatasetBrowser__cell DatasetBrowser__cell--size" />
-          <div className="DatasetBrowser__cell DatasetBrowser__cell--date">
-            {Moment((node.modifiedAt * 1000), 'x').fromNow()}
-          </div>
+          <div className="DatasetBrowser__cell DatasetBrowser__cell--date" />
           <div className="DatasetBrowser__cell DatasetBrowser__cell--menu">
             <ActionsMenu
               edge={props.fileData.edge}
@@ -398,6 +396,7 @@ class Dataset extends Component {
               folder
               renameEditMode={this._renameEditMode}
               fullEdge={props.fileData}
+              isLocal={props.isLocal}
               isParent
               setFolderIsDownloading={this._setFolderIsDownloading}
               isDownloading={state.isDownloading || props.isDownloading}
@@ -432,6 +431,7 @@ class Dataset extends Component {
                               updateChildState={props.updateChildState}
                               isDownloading={state.isDownloading || props.isDownloading}
                               codeDirUpload={props.codeDirUpload}
+                              checkLocal={props.checkLocal}
                             />
                           );
                         } if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
@@ -456,6 +456,7 @@ class Dataset extends Component {
                               isDownloading={state.isDownloading || props.isDownloading}
                               parentDownloading={props.parentDownloading}
                               updateChildState={props.updateChildState}
+                              checkLocal={props.checkLocal}
                             />
                           );
                         } if (children[file]) {
