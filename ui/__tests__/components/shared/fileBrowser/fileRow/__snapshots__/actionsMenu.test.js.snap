@@ -6,7 +6,8 @@ exports[`ActionsMenu Component Renders a snapshot 1`] = `
   data-selenium-id="ActionsMenu"
 >
   <button
-    className="ActionsMenu__item Tooltip-data Tooltip-data--small Btn--round Btn--bordered Btn__addFolder visibility-hidden"
+    className="ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn--bordered Btn__addFolder visibility-hidden"
+    data-click-id="addFolder"
     data-tooltip="Add Subfolder"
     onClick={[Function]}
     type="button"
@@ -15,7 +16,7 @@ exports[`ActionsMenu Component Renders a snapshot 1`] = `
     className="relative"
   >
     <button
-      className="ActionsMenu__item Btn__delete Btn--noShadow Btn--round Btn--bordered Tooltip-data Tooltip-data--small"
+      className="ActionsMenu__item Btn Btn--fileBrowser Btn__delete Btn--round Btn--bordered Tooltip-data Tooltip-data--small"
       data-tooltip="Delete"
       disabled={false}
       onClick={[Function]}
@@ -47,14 +48,14 @@ exports[`ActionsMenu Component Renders a snapshot 1`] = `
     </div>
   </div>
   <button
-    className="ActionsMenu__item Btn__rename Btn--noShadow Tooltip-data Tooltip-data--small Btn--bordered Btn--round"
+    className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--bordered Btn--round"
     data-tooltip="Rename"
     disabled={false}
     onClick={[Function]}
     type="button"
   />
   <button
-    className="ActionsMenu__item Tooltip-data Tooltip-data--small Btn--round Btn--bordered Btn__Favorite-off Btn--noShadow"
+    className="ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn--bordered Btn__Favorite-off"
     data-tooltip="Favorite"
     onClick={[Function]}
     type="button"

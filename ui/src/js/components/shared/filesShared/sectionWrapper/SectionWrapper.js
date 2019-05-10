@@ -25,12 +25,15 @@ export default class SectionWrapper extends Component {
   state = {
     selectedFiles: [],
     selectedFilter: 'recent',
+    favoriteRecentAdded: false,
   };
 
   componentDidMount() {
     const { props, state } = this;
     const { section } = props;
-    const hasFavorites = props.labbook && props.labbook[section] && props.labbook[section].hasFavorites
+    const hasFavorites = props.labbook
+      && props.labbook[section]
+      && props.labbook[section].hasFavorites;
     const selectedFilter = hasFavorites ? 'favorites' : state.selectedFilter;
 
     this.setState({ selectedFilter });
@@ -80,6 +83,17 @@ export default class SectionWrapper extends Component {
     this.setState({ selectedFilter: filterName });
   }
 
+  /**
+  *  @param {string} favoriteRecentAdded
+  *  shows hides the most recent section after a file has been added or removed
+  *  update filterName and toggle view
+  *  @return {}
+  */
+  @boundMethod
+  _toggleFavoriteRecent(favoriteRecentAdded) {
+    this.setState({ favoriteRecentAdded });
+  }
+
   render() {
     const { props, state } = this;
     const sectionObject = props.labbook || props.dataset;
@@ -91,12 +105,14 @@ export default class SectionWrapper extends Component {
     } = getComponetPaths(props);
 
     if (sectionObject) {
-      let Favorites;
-      let MostRecent;
-      const Browser = require(`./../../../${browserPath}`).default;
       const sectionId = props.labbookId || props.datasetId;
       const { labbook, section } = props;
+      const showFavoritesRecent = (section !== 'data')
+        && (state.favoriteRecentAdded);
+      const Browser = require(`./../../../${browserPath}`).default;
 
+      let Favorites;
+      let MostRecent;
       if (section !== 'data') {
         Favorites = require(`./../../../${favoritePath}`).default;
         MostRecent = require(`./../../../${recentPath}`).default;
@@ -128,7 +144,7 @@ export default class SectionWrapper extends Component {
             </div>
             )
           }
-          { (section !== 'data') && (labbook[section].hasFiles || labbook[section].hasFavorites)
+          { showFavoritesRecent
             && (
             <div>
               <div className="SectionWrapper__header">
@@ -152,17 +168,18 @@ export default class SectionWrapper extends Component {
               </div>
 
               <div className="SectionWrapper__files">
-                { state.selectedFilter === 'favorites'
+                { (state.selectedFilter === 'favorites')
                   && (
                     <Favorites
                       sectionId={innerSection.id}
                       labbookId={sectionId}
+                      toggleFavoriteRecent={this._toggleFavoriteRecent}
                       section={section}
                       {...sectionProps}
                     />
                   )
                 }
-                { state.selectedFilter === 'recent'
+                { (state.selectedFilter === 'recent')
                   && (
                     <MostRecent
                       edgeId={innerSection.id}
@@ -187,8 +204,10 @@ export default class SectionWrapper extends Component {
                 section={section}
                 loadStatus={this._loadStatus}
                 isLocked={props.isLocked}
+                toggleFavoriteRecent={this._toggleFavoriteRecent}
                 {...sectionProps}
                 linkedDatasets={sectionObject.linkedDatasets || null}
+                containerStatus={props.containerStatus}
 
               />
             </div>

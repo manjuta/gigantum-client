@@ -196,6 +196,10 @@ li.DetailsRecords__item-note .ReactMarkdown {
   left: 25px;
 }
 
+.ActivityDetail__details.note .DetailsRecords__container:first-child:before {
+  display: none;
+}
+
 
 div.DetailsRecords__container:last-child .DetailsRecords__item:after {
   content: "";

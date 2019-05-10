@@ -165,21 +165,21 @@ const FilePreviewSection = ({
     sectionTooltip,
   } = sectionData;
 
-
   const hasFavorites = section.favorites && section.favorites.edges.length;
   return (
     <div className="FilePreview__section">
       <div className="FilePreview__container">
-        <h2>
+        <h4>
           {sectionTitle}
           <Tooltip section={sectionTooltip} />
-        </h2>
+        </h4>
       </div>
       <div className="FilePreview__list grid">
         {
           hasFavorites
             ? section.favorites.edges.map(edge => (
               <FileCard
+                sectionType={sectionType}
                 key={edge.node.id}
                 edge={edge}
               />

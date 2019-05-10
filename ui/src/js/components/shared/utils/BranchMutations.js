@@ -272,12 +272,12 @@ class BranchesMutations {
   }
 
   /**
-     *  @param {Object} data
-     *         {string} data.branchName
-     *         {string} data.labbookId
-     *  @param {function} callback
-     *  delete branch
-     */
+   *  @param {Object} data
+   *         {string} data.branchName
+   *         {string} data.labbookId
+   *  @param {function} callback
+   *  delete branch
+   */
   deleteBranch(data, callback) {
     const {
       branchName,

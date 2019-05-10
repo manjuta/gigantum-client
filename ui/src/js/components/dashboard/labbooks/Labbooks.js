@@ -1,5 +1,5 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import queryString from 'querystring';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
@@ -481,8 +481,6 @@ class Labbooks extends Component {
               <li className={cloudNavItemCSS}>
                 <a onClick={() => this._setSection('cloud')}>Cloud</a>
               </li>
-
-              <hr className={`Labbooks__navigation-slider Labbooks__navigation-slider--${state.selectedSection}`} />
 
               <Tooltip section="cloudLocal" />
             </ul>

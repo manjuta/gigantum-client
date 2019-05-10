@@ -101,10 +101,10 @@ class Environment extends Component {
       return (
         <div className="Environment">
           <div className="Base__headerContainer">
-            <h2>
+            <h4>
                 Base&nbsp;&nbsp;&nbsp;
               <Tooltip section="baseEnvironment" />
-            </h2>
+            </h4>
           </div>
           <ErrorBoundary type="baseError" key="base">
             <Base
@@ -122,10 +122,10 @@ class Environment extends Component {
             />
           </ErrorBoundary>
           <div className="Environment__headerContainer">
-            <h2>
+            <h4>
               Packages
               <Tooltip section="packagesEnvironment" />
-            </h2>
+            </h4>
           </div>
           <ErrorBoundary type="packageDependenciesError" key="packageDependencies">
             <PackageDependencies

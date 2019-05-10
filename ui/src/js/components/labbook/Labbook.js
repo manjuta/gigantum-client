@@ -85,7 +85,12 @@ class Labbook extends Component {
   }
 
   state = {
-    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING') || (this.props.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (this.props.labbook.environment.imageStatus === 'BUILD_QUEUED') || this.props.isBuilding || this.props.isSynching || this.props.isPublishing,
+    isLocked: (this.props.labbook.environment.containerStatus !== 'NOT_RUNNING')
+      || (this.props.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
+      || (this.props.labbook.environment.imageStatus === 'BUILD_QUEUED')
+      || this.props.isBuilding
+      || this.props.isSynching
+      || this.props.isPublishing,
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     branches: this.props.labbook.branches,
@@ -178,8 +183,6 @@ class Labbook extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { props, state } = this;
-
-
     const { activeBranchName } = props.labbook;
 
     if (activeBranchName !== state.activeBranchName) {
@@ -488,7 +491,6 @@ class Labbook extends Component {
   render() {
     const { props, state } = this;
     const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
-
     if (props.labbook) {
       const { labbook, branchesOpen } = props;
       const sidePanelVisible = !isLocked && props.sidePanelVisible;
@@ -497,7 +499,7 @@ class Labbook extends Component {
       const { migrationText, showMigrationButton } = this._getMigrationInfo();
       const oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName));
       const migrationModalType = state.migrateComplete ? 'large' : 'large-long';
-
+      const { containerStatus } = props.labbook.environment;
       const labbookCSS = classNames({
         Labbook: true,
         'Labbook--detail-mode': props.detailMode,
@@ -521,8 +523,7 @@ class Labbook extends Component {
             <Loader />
           </div>
           <div className="Labbook__spacer flex flex--column">
-            {
-              state.isDeprecated
+            { state.isDeprecated
               && (
               <div className={deprecatedCSS}>
                 {migrationText}
@@ -803,6 +804,7 @@ class Labbook extends Component {
                             labbookId={labbook.id}
                             setContainerState={this._setContainerState}
                             isLocked={isLocked}
+                            containerStatus={containerStatus}
                             section="code"
                           />
 
@@ -820,6 +822,7 @@ class Labbook extends Component {
                             labbook={labbook}
                             labbookId={labbook.id}
                             isLocked={isLocked}
+                            containerStatus={containerStatus}
                             section="input"
                           />
                         </ErrorBoundary>)}
@@ -836,6 +839,7 @@ class Labbook extends Component {
                             labbook={labbook}
                             labbookId={labbook.id}
                             isLocked={isLocked}
+                            containerStatus={containerStatus}
                             section="output"
                           />
                         </ErrorBoundary>)}

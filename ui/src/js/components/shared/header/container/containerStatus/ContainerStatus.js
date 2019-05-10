@@ -9,7 +9,7 @@ import { setContainerState } from 'JS/redux/actions/labbook/overview/overview';
 import { setContainerStatus, setContainerMenuVisibility } from 'JS/redux/actions/labbook/containerStatus';
 import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/redux/actions/labbook/environment/environment';
 import { setPackageMenuVisible } from 'JS/redux/actions/labbook/environment/packageDependencies';
-import { setBuildingState, setMergeMode } from 'JS/redux/actions/labbook/labbook';
+import { setBuildingState, setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
 // components
 import Tooltip from 'Components/common/Tooltip';
@@ -34,10 +34,9 @@ class ContainerStatus extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
-    // const status = (state.previousContainerStatus === nextProps.containerStatus) ? nextProps.status : '';
     return ({
       ...state,
-      status: nextProps.stateStatus.length ? nextProps.stateStatus : state.status,
+      status: nextProps.transitionState.length ? nextProps.transitionState : state.status,
     });
   }
 
@@ -57,19 +56,17 @@ class ContainerStatus extends Component {
   */
   componentDidMount() {
     const { props } = this;
-
     const status = this._getContainerStatusText({
       containerStatus: props.containerStatus,
       imageStatus: props.imageStatus,
     });
-
-    const hasLabbookId = store.getState().overview.containerStates[this.props.labbookId];
+    const hasLabbookId = store.getState().overview.containerStates[props.labbookId];
 
     if (hasLabbookId) {
-      const storeStatus = store.getState().overview.containerStates[this.props.labbookId];
+      const storeStatus = store.getState().overview.containerStates[props.labbookId];
 
       if (storeStatus !== status) {
-        this.props.setContainerState(this.props.labbookId, status);
+        props.setContainerState(props.labbookId, status);
       }
     }
 
@@ -83,22 +80,23 @@ class ContainerStatus extends Component {
    *
   */
   _closePopupMenus(evt) {
+    const { props, state } = this;
     // TODO fix this implementation, this is not sustainable.
     const containerMenuClicked = evt.target.getAttribute('data-container-popup') === 'true';
 
     if (!containerMenuClicked
-    && this.props.containerMenuOpen) {
-      this.props.setContainerMenuVisibility(false);
+    && props.containerMenuOpen) {
+      props.setContainerMenuVisibility(false);
     }
 
     const pluginsMenuClicked = (evt.target.className.indexOf('ContainerStatus__plugins') > -1);
-    if (!pluginsMenuClicked && this.state.pluginsMenu) {
+    if (!pluginsMenuClicked && state.pluginsMenu) {
       this.setState({
         pluginsMenu: false,
       });
     }
 
-    if (this.state.showDevList && evt.target.className.indexOf('ContainerStatus__expand-tools') === -1) {
+    if (state.showDevList && evt.target.className.indexOf('ContainerStatus__expand-tools') === -1) {
       this.setState({ showDevList: false });
     }
   }
@@ -123,7 +121,7 @@ class ContainerStatus extends Component {
   */
   _getContainerStatusText = ({ containerStatus, imageStatus }) => {
     const { props, state } = this;
-    const labbookCreationDate = Date.parse(`${this.props.creationDateUtc}Z`);
+    const labbookCreationDate = Date.parse(`${props.creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
     const timeDifferenceMS = timeNow - labbookCreationDate;
 
@@ -138,7 +136,7 @@ class ContainerStatus extends Component {
     status = ((status === 'Running') && (state.status === 'Stopping')) ? 'Stopping' : status;
 
     if (store.getState().containerStatus.status !== status) {
-      this.props.setContainerStatus(status);
+      props.setContainerStatus(status);
     }
 
     if ((status === 'Stopped') && state.attemptingRebuild) {
@@ -149,7 +147,7 @@ class ContainerStatus extends Component {
     }
 
     if ((status) && (status !== 'Stopped') && (status !== 'Rebuild')) {
-      this.props.setCloseEnvironmentMenus();
+      props.setCloseEnvironmentMenus();
       setPackageMenuVisible(false);
     }
     let cssClass = status;
@@ -164,11 +162,10 @@ class ContainerStatus extends Component {
     triggers stop container mutation
   */
   _stopContainerMutation() {
-    const { props, state } = this;
+    const { props } = this;
+    const self = this;
 
     props.setContainerMenuVisibility(false);
-
-    const self = this;
 
     props.containerMutations.stopContainer(
       {},
@@ -192,11 +189,9 @@ class ContainerStatus extends Component {
   @boundMethod
   _cancelBuildMutation() {
     const { props } = this;
-
-    props.setContainerMenuVisibility(false);
-
     const self = this;
 
+    props.setContainerMenuVisibility(false);
     props.containerMutations.cancelBuild(
       () => {
         setTimeout(() => {
@@ -215,11 +210,7 @@ class ContainerStatus extends Component {
   */
   _startContainerMutation(launchDevTool) {
     const { state, props } = this;
-
-
     const self = this;
-
-
     const data = launchDevTool ? { devTool: state.selectedDevTool } : {};
 
     props.setCloseEnvironmentMenus();
@@ -235,12 +226,12 @@ class ContainerStatus extends Component {
         });
 
         if (error) {
-          this.props.setErrorMessage(`There was a problem starting ${this.state.labbookName} container`, error);
+          props.setErrorMessage(`There was a problem starting ${this.state.labbookName} container`, error);
           if (error[0].message.indexOf('404 Client Error') > -1) {
             self._rebuildContainer();
           }
         } else {
-          this.props.setCloseEnvironmentMenus();
+          props.setCloseEnvironmentMenus();
           setPackageMenuVisible(false);
         }
       },
@@ -255,27 +246,22 @@ class ContainerStatus extends Component {
    */
   _containerAction(status, cssStatus, evt) {
     const { props } = this;
+
     if (!store.getState().labbook.isBuilding && !props.isLookingUpPackages) {
       if (status === 'Stop') {
-        props.updateStatus('Stopping');
-
+        updateTransitionState('Stopping');
         this.setState({ contanerMenuRunning: false });
         this._stopContainerMutation();
       } else if ((status === 'Start') && (cssStatus !== 'Rebuild')) {
-
-        props.updateStatus('Starting');
-
+        updateTransitionState('Starting');
         this.setState({ contanerMenuRunning: false });
-
         props.setMergeMode(false, false);
         this._startContainerMutation();
       } else if ((status === 'Start') || (status === 'Rebuild')) {
-
         this.setState({
           status: 'Building',
           contanerMenuRunning: false,
         });
-
         this._rebuildContainer(evt, status);
       }
     } else {
@@ -296,9 +282,11 @@ class ContainerStatus extends Component {
     shows message plugin menu
   */
   _openPluginMenu() {
-    const { state } = this;
-    this.setState({
-      pluginsMenu: !state.pluginsMenu,
+    this.setState((state) => {
+      const pluginsMenu = !state.pluginsMenu;
+      return {
+        pluginsMenu,
+      };
     });
   }
 
@@ -320,13 +308,20 @@ class ContainerStatus extends Component {
     let newStatus = status;
 
     newStatus = state.isMouseOver && (status === 'Running') ? 'Stop' : newStatus;
-    newStatus = state.isMouseOver && ((status === 'Stopped') && !props.isLookingUpPackages) ? 'Start' : newStatus;
+    newStatus = state.isMouseOver && ((status === 'Stopped')
+      && !props.isLookingUpPackages) ? 'Start' : newStatus;
     newStatus = state.isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
     newStatus = state.isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
 
-    newStatus = props.isBuilding ? 'Building' : props.isSyncing ? 'Syncing' : props.isPublishing ? 'Publishing' : newStatus;
-    newStatus = state.isMouseOver && (props.isBuilding || status === 'Building') ? 'Cancel' : newStatus;
-    newStatus = ((newStatus === 'Building' || newStatus === 'Cancel') && (state.status === 'Canceling')) ? 'Canceling' : newStatus;
+    newStatus = props.isBuilding
+      ? 'Building' : props.isSyncing
+      ? 'Syncing' : props.isPublishing
+      ? 'Publishing' : newStatus;
+    newStatus = (state.isMouseOver && (props.isBuilding || status === 'Building'))
+      ? 'Cancel' : newStatus;
+    newStatus = ((newStatus === 'Building' || newStatus === 'Cancel') && (state.status === 'Canceling'))
+      ? 'Canceling' : newStatus;
+
     return newStatus;
   }
 
@@ -337,7 +332,6 @@ class ContainerStatus extends Component {
   */
   _rebuildContainer() {
     const { props } = this;
-
     const data = { noCache: true };
 
     props.setContainerMenuVisibility(false);
@@ -357,15 +351,9 @@ class ContainerStatus extends Component {
   render() {
     const { props, state } = this;
     const { constainerStatus, cssClass } = this._getContainerStatusText(props);
-
     const key = 'setStatus';
-
-
     const excludeStatuses = ['Stopping', 'Starting', 'Publishing', 'Syncing'];
-
-
     const notExcluded = (excludeStatuses.indexOf(constainerStatus) === -1);
-
     const status = this._getStatusText(constainerStatus);
 
     const containerStatusCss = classNames({

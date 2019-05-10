@@ -107,10 +107,14 @@ class FileBrowser extends Component {
       if (datasetName && edges.length === 0) {
         const adjustedKey = `${datasetName}/`;
         childrenState[adjustedKey] = {
-          isSelected: (state.childrenState && state.childrenState[adjustedKey]) ? state.childrenState[adjustedKey].isSelected : false,
-          isIncomplete: (state.childrenState && state.childrenState[adjustedKey]) ? state.childrenState[adjustedKey].isIncomplete : false,
-          isExpanded: (state.childrenState && state.childrenState[adjustedKey]) ? state.childrenState[adjustedKey].isExpanded : false,
-          isAddingFolder: (state.childrenState && state.childrenState[adjustedKey]) ? state.childrenState[adjustedKey].isAddingFolder : false,
+          isSelected: (state.childrenState && state.childrenState[adjustedKey])
+            ? state.childrenState[adjustedKey].isSelected : false,
+          isIncomplete: (state.childrenState && state.childrenState[adjustedKey])
+            ? state.childrenState[adjustedKey].isIncomplete : false,
+          isExpanded: (state.childrenState && state.childrenState[adjustedKey])
+            ? state.childrenState[adjustedKey].isExpanded : false,
+          isAddingFolder: (state.childrenState && state.childrenState[adjustedKey])
+            ? state.childrenState[adjustedKey].isAddingFolder : false,
         };
       }
       edges.forEach((edge) => {
@@ -122,10 +126,14 @@ class FileBrowser extends Component {
               const tempKey = `${splitKey.slice(0, index).join('/')}/`;
               if (!childrenState[tempKey] && tempKey !== '/') {
                 childrenState[tempKey] = {
-                  isSelected: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isSelected : false,
-                  isIncomplete: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isIncomplete : false,
-                  isExpanded: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isExpanded : false,
-                  isAddingFolder: (state.childrenState && state.childrenState[tempKey]) ? state.childrenState[tempKey].isAddingFolder : false,
+                  isSelected: (state.childrenState && state.childrenState[tempKey])
+                    ? state.childrenState[tempKey].isSelected : false,
+                  isIncomplete: (state.childrenState && state.childrenState[tempKey])
+                    ? state.childrenState[tempKey].isIncomplete : false,
+                  isExpanded: (state.childrenState && state.childrenState[tempKey])
+                    ? state.childrenState[tempKey].isExpanded : false,
+                  isAddingFolder: (state.childrenState && state.childrenState[tempKey])
+                    ? state.childrenState[tempKey].isAddingFolder : false,
                   edge: {
                     node: {
                       isDir: true,
@@ -140,10 +148,14 @@ class FileBrowser extends Component {
             }
           });
           childrenState[key] = {
-            isSelected: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isSelected : false,
-            isIncomplete: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isIncomplete : false,
-            isExpanded: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isExpanded : false,
-            isAddingFolder: (state.childrenState && state.childrenState[key]) ? state.childrenState[key].isAddingFolder : false,
+            isSelected: (state.childrenState && state.childrenState[key])
+              ? state.childrenState[key].isSelected : false,
+            isIncomplete: (state.childrenState && state.childrenState[key])
+              ? state.childrenState[key].isIncomplete : false,
+            isExpanded: (state.childrenState && state.childrenState[key])
+              ? state.childrenState[key].isExpanded : false,
+            isAddingFolder: (state.childrenState && state.childrenState[key])
+              ? state.childrenState[key].isAddingFolder : false,
             edge,
           };
         }
@@ -281,6 +293,7 @@ class FileBrowser extends Component {
       parentId,
       connection,
       favoriteConnection,
+      mostRecentConnection,
       section,
     } = this.props;
     const { owner, labbookName } = store.getState().routes;
@@ -657,8 +670,6 @@ class FileBrowser extends Component {
 
   _uploadFiles(files) {
     const { props, state } = this;
-
-    // const fileObjects = files.map(file => ({ file, entry: { fullPath: `/${file.name}`, isFile: true } }));
     const promptType = props.section ? props.section : ((state.mutationData) && (state.mutationData.section)) ? state.mutationData.section : '';
     const fileSizeData = Connectors.checkFileSize(files, promptType);
 
@@ -690,11 +701,10 @@ class FileBrowser extends Component {
       hidden: !isSelected,
     });
     const multiSelectButtonCSS = classNames({
-      'Btn--multiSelect': true,
-      'Btn Btn--round Btn--medium': true,
-      Btn__check: state.multiSelect === 'all',
-      Btn__uncheck: state.multiSelect === 'none',
-      Btn__partial: state.multiSelect === 'partial',
+      CheckboxMultiselect: true,
+      CheckboxMultiselect__check: state.multiSelect === 'all',
+      CheckboxMultiselect__uncheck: state.multiSelect === 'none',
+      CheckboxMultiselect__partial: state.multiSelect === 'partial',
     });
     const nameHeaderCSS = classNames({
       'FileBrowser__name-text FileBrowser__header--name flex justify--start Btn--noStyle': true,
@@ -734,15 +744,14 @@ class FileBrowser extends Component {
         style={{ zIndex: state.fileSizePromptVisible ? 13 : 0 }}
       >
         { state.showLinkModal
-            && (
-            <LinkModal
-              closeLinkModal={() => this.setState({ showLinkModal: false })}
-              linkedDatasets={props.linkedDatasets || []}
-            />
-            )
-         }
-        {
-           this.state.fileSizePromptVisible
+          && (
+          <LinkModal
+            closeLinkModal={() => this.setState({ showLinkModal: false })}
+            linkedDatasets={props.linkedDatasets || []}
+          />
+          )
+        }
+        { state.fileSizePromptVisible
              && (
              <Modal
                header="Large File Warning"
@@ -815,8 +824,7 @@ class FileBrowser extends Component {
               />
               New Folder
             </button>
-            {
-              props.section === 'input'
+            { props.section === 'input'
               && (
                 <button
                   className="Btn Btn__menuButton Btn--noShadow FileBrowser__addDataset"
@@ -899,23 +907,21 @@ class FileBrowser extends Component {
           </button>
 
           <div className="FileBrowser__header--menu flex flex--row justify--right">
-            {
-                  (this.props.section === 'data')
-                  && (
-                  <button
-                    className={downloadAllCSS}
-                    onClick={() => this._handleDownloadAll(allFilesLocal)}
-                    data-tooltip={allFilesLocal ? 'Downloaded' : 'Download All'}
-                    type="button"
-                  >
-                    {
-                      this.state.downloadingAll
-                      && <div />
-                    }
-                  </button>
-                  )
-                }
-          </div>
+            { (props.section === 'data')
+               && (
+               <button
+                 className={downloadAllCSS}
+                 onClick={() => this._handleDownloadAll(allFilesLocal)}
+                 data-tooltip={allFilesLocal ? 'Downloaded' : 'Download All'}
+                 type="button"
+               >
+                 { state.downloadingAll
+                    && <div />
+                 }
+              </button>
+              )
+           }
+         </div>
         </div>
         <div className="FileBrowser__body">
           <AddSubfolder
@@ -927,88 +933,91 @@ class FileBrowser extends Component {
             addFolderVisible={state.addFolderVisible}
           />
 
-          {
+          { childrenKeys.map((file) => {
+            const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
+            const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
+            const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
 
-            childrenKeys.map((file) => {
-              const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
-              const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
-              const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
-              if (isDataset) {
-                const currentDataset = this.props.linkedDatasets.filter(dataset => dataset.name === file)[0];
-                const commitsBehind = currentDataset && currentDataset.commitsBehind;
-                return (
-                  <Dataset
-                    ref={file}
-                    filename={file}
-                    section={props.section}
-                    key={files[file].edge.node.key}
-                    multiSelect={state.multiSelect}
-                    mutationData={mutationData}
-                    fileData={files[file]}
-                    mutations={state.mutations}
-                    setState={this._setState}
-                    sort={state.sort}
-                    reverse={state.reverse}
-                    childrenState={state.childrenState}
-                    updateChildState={this._updateChildState}
-                    codeDirUpload={this._codeDirUpload}
-                    commitsBehind={commitsBehind}
-                  />
-                );
-              } if (isDir) {
-                return (
-                  <Folder
-                    ref={file}
-                    filename={file}
-                    key={files[file].edge.node.key}
-                    multiSelect={state.multiSelect}
-                    mutationData={mutationData}
-                    fileData={files[file]}
-                    isLocal={checkLocalIndividual(files[file])}
-                    mutations={state.mutations}
-                    setState={this._setState}
-                    rowStyle={{}}
-                    sort={state.sort}
-                    reverse={state.reverse}
-                    childrenState={state.childrenState}
-                    section={props.section}
-                    updateChildState={this._updateChildState}
-                    parentDownloading={state.downloadingAll}
-                    rootFolder
-                    codeDirUpload={this._codeDirUpload}
-                    checkLocal={checkLocalIndividual}
-                  />
-                );
-              } if (isFile) {
-                return (
-                  <File
-                    ref={file}
-                    filename={file}
-                    key={files[file].edge.node.key}
-                    multiSelect={state.multiSelect}
-                    mutationData={mutationData}
-                    fileData={files[file]}
-                    isLocal={checkLocalIndividual(files[file])}
-                    childrenState={state.childrenState}
-                    mutations={state.mutations}
-                    expanded
-                    section={props.section}
-                    isOverChildFile={state.isOverChildFile}
-                    updateParentDropZone={this._updateDropZone}
-                    parentDownloading={state.downloadingAll}
-                    updateChildState={this._updateChildState}
-                    checkLocal={checkLocalIndividual}
-                  />
-                );
-              }
+            if (isDataset) {
+              const currentDataset = props.linkedDatasets.filter(dataset => dataset.name === file)[0];
+              const commitsBehind = currentDataset && currentDataset.commitsBehind;
               return (
-                <div
-                  key={file}
-                >
-                  Loading
-                </div>
+                <Dataset
+                  ref={file}
+                  filename={file}
+                  section={props.section}
+                  key={files[file].edge.node.key}
+                  multiSelect={state.multiSelect}
+                  isLocal={checkLocalIndividual(files[file])}
+                  mutationData={mutationData}
+                  fileData={files[file]}
+                  mutations={state.mutations}
+                  setState={this._setState}
+                  sort={state.sort}
+                  reverse={state.reverse}
+                  childrenState={state.childrenState}
+                  updateChildState={this._updateChildState}
+                  codeDirUpload={this._codeDirUpload}
+                  commitsBehind={commitsBehind}
+                  checkLocal={checkLocalIndividual}
+                />
               );
-            })
+            } if (isDir) {
+              return (
+                <Folder
+                  ref={file}
+                  filename={file}
+                  key={files[file].edge.node.key}
+                  multiSelect={state.multiSelect}
+                  mutationData={mutationData}
+                  fileData={files[file]}
+                  isLocal={checkLocalIndividual(files[file])}
+                  mutations={state.mutations}
+                  setState={this._setState}
+                  rowStyle={{}}
+                  sort={state.sort}
+                  reverse={state.reverse}
+                  childrenState={state.childrenState}
+                  section={props.section}
+                  updateChildState={this._updateChildState}
+                  parentDownloading={state.downloadingAll}
+                  rootFolder
+                  codeDirUpload={this._codeDirUpload}
+                  checkLocal={checkLocalIndividual}
+                  containerStatus={props.containerStatus}
+                />
+              );
+            } if (isFile) {
+              return (
+                <File
+                  ref={file}
+                  filename={file}
+                  key={files[file].edge.node.key}
+                  multiSelect={state.multiSelect}
+                  mutationData={mutationData}
+                  fileData={files[file]}
+                  isLocal={checkLocalIndividual(files[file])}
+                  childrenState={state.childrenState}
+                  mutations={state.mutations}
+                  expanded
+                  section={props.section}
+                  isOverChildFile={state.isOverChildFile}
+                  updateParentDropZone={this._updateDropZone}
+                  parentDownloading={state.downloadingAll}
+                  updateChildState={this._updateChildState}
+                  checkLocal={checkLocalIndividual}
+                  containerStatus={props.containerStatus}
+                />
+              );
+            }
+            return (
+              <div
+                key={file}
+              >
+                Loading
+              </div>
+            );
+          })
           }
           { (childrenKeys.length === 0)
             && (

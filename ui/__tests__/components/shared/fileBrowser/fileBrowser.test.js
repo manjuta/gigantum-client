@@ -87,7 +87,7 @@ describe('FileBrowser component', () => {
    });
 
    it('Multiselect selects all', () => {
-     component.find('.Btn--multiSelect').simulate('click');
+     component.find('.CheckboxMultiselect').simulate('click');
      expect(component.state('multiSelect')).toEqual('all');
    });
 
