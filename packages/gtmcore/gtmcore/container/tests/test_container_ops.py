@@ -24,6 +24,7 @@ import getpass
 import docker
 import requests
 import shutil
+import tempfile
 from gtmcore.container.jupyter import start_jupyter
 
 from gtmcore.configuration import get_docker_client
@@ -40,6 +41,20 @@ def remove_image_cache_data():
         shutil.rmtree('/mnt/gigantum/.labmanager/image-cache', ignore_errors=True)
     except:
         pass
+
+
+class ContainerFixture(object):
+    """ Convenient namespace object for the unwieldy build_lb_image_for_jupyterlab
+    fixture. """
+    def __init__(self, fixture_data):
+        # yield lb, ib, client, docker_image_id, container_id, None, 'unittester'
+        self.labbook = fixture_data[0]
+        self.imagebuilder = fixture_data[1]
+        self.docker_client = fixture_data[2]
+        self.docker_image_id = fixture_data[3]
+        self.docker_container_id = fixture_data[4]
+        self._ = fixture_data[5]
+        self.username = fixture_data[6]
 
 
 class TestContainerOps(object):
@@ -120,3 +135,22 @@ class TestContainerOps(object):
         with pytest.raises(requests.exceptions.HTTPError):
             # Image not found so container cannot be started
             ContainerOperations.start_container(labbook=my_lb, username="unittester")
+
+
+class TestPutFile(object):
+    def test_put_single_file(self, build_lb_image_for_jupyterlab):
+        fixture = ContainerFixture(build_lb_image_for_jupyterlab)
+
+        dst_dir = "/home/giguser/sample-creds"
+        with tempfile.TemporaryDirectory() as tempdir:
+            with open(os.path.join(tempdir, 'secretfile'), 'w') as sample_secret:
+                sample_secret.write("<<Secret File Content>>")
+            ContainerOperations.put_file(fixture.labbook, fixture.username, src_path=sample_secret.name,
+                                         dst_dir=dst_dir)
+            container = docker.from_env().containers.get(fixture.docker_container_id)
+            container.exec_run(f'sh -c "cat {dst_dir}/secretfile"')
+
+            # The put_file should NOT remove the original file on disk.
+            assert os.path.exists(sample_secret.name)
+
+        assert False

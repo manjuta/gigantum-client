@@ -12,8 +12,9 @@ from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook import SecretStore, SecretStoreException
 from gtmcore.container.utils import infer_docker_image_name, ps_search
 from gtmcore.container.exceptions import ContainerBuildException
-from gtmcore.dataset.cache import get_cache_manager_class
 from gtmcore.container.cuda import should_launch_with_cuda_support
+from gtmcore.dataset.cache import get_cache_manager_class
+
 
 logger = LMLogger.get_logger()
 

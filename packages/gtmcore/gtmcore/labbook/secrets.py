@@ -21,6 +21,9 @@ class SecretStore(object):
 
     @property
     def secret_map(self) -> Dict[str, str]:
+        """Mnemonic to map names of secret directories to the path of
+        where they should be mapped into the filesystem of the running
+        container. """
         if os.path.exists(self.secret_path):
             return json.load(open(self.secret_path))
         else:
@@ -49,6 +52,7 @@ class SecretStore(object):
             os.remove(os.path.join(file_dir, file_path))
 
     def list_files(self, secret_name: str) -> List[str]:
+        """List the files associated with a given secret. """
         if secret_name not in self:
             return []
         secret_file_dir = path_on_disk(self.labbook, self.username, secret_name)
@@ -57,6 +61,7 @@ class SecretStore(object):
         return sorted(os.listdir(secret_file_dir))
 
     def clear_files(self):
+        """Completely delete the secret files from disk. """
         lb_secrets_dir = path_on_disk(self.labbook, self.username)
         shutil.rmtree(lb_secrets_dir)
 

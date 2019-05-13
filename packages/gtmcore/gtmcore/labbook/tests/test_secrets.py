@@ -1,5 +1,6 @@
 import tempfile
 import pytest
+import pprint
 import os
 
 from gtmcore.inventory.inventory import InventoryManager
@@ -34,7 +35,7 @@ class TestLabbookSecret(object):
         for secret_key in secstore:
             mnt_point = secstore[secret_key]
 
-        print(secstore.as_mount_dict)
+        pprint.pprint(secstore.as_mount_dict)
         assert False
 
         del secstore['aws_creds']

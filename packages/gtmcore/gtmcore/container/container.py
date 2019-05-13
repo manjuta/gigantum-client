@@ -19,6 +19,8 @@
 # SOFTWARE.
 import os
 import time
+import tempfile
+import tarfile
 from typing import Optional, Tuple
 
 import docker
@@ -28,14 +30,11 @@ from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import LabBook
-from gtmcore.exceptions import GigantumException
 
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerException
 from gtmcore.container.core import (build_docker_image, stop_labbook_container,
                                      start_labbook_container, get_container_ip)
-from gtmcore.container.jupyter import start_jupyter
-from gtmcore.container.rserver import start_rserver
 
 logger = LMLogger.get_logger()
 
@@ -43,9 +42,8 @@ logger = LMLogger.get_logger()
 class ContainerOperations(object):
 
     @classmethod
-    def build_image(
-            cls, labbook: LabBook, override_image_tag: Optional[str] = None,
-            username: Optional[str] = None, nocache: bool = False) -> Tuple[LabBook, str]:
+    def build_image(cls, labbook: LabBook, override_image_tag: Optional[str] = None,
+                    username: Optional[str] = None, nocache: bool = False) -> Tuple[LabBook, str]:
         """ Build docker image according to the Dockerfile just assembled. Does NOT
             assemble the Dockerfile from environment (See ImageBuilder)
 
@@ -100,9 +98,8 @@ class ContainerOperations(object):
         return labbook, True
 
     @classmethod
-    def run_command(
-            cls, cmd_text: str, labbook: LabBook, username: Optional[str] = None,
-            override_image_tag: Optional[str] = None, fallback_image: str = None) -> bytes:
+    def run_command(cls, cmd_text: str, labbook: LabBook, username: Optional[str] = None,
+                    override_image_tag: Optional[str] = None, fallback_image: str = None) -> bytes:
         """Run a command executed in the context of the LabBook's docker image.
 
         Args:
@@ -222,3 +219,29 @@ class ContainerOperations(object):
                                              owner=owner,
                                              username=username)
         return get_container_ip(docker_key)
+
+    @classmethod
+    def put_file(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
+        docker_key = infer_docker_image_name(labbook_name=labbook.name,
+                                             owner=labbook.owner,
+                                             username=username)
+        lb_container = docker.from_env().containers.get(docker_key)
+        r = lb_container.exec_run(f'sh -c "mkdir -p {dst_dir}"')
+        print('-----', r)
+
+        f = simple_tar(src_path)
+        docker.APIClient().put_archive(docker_key, dst_dir, f)
+
+        f.close()
+
+
+def simple_tar(path):
+    f = tempfile.NamedTemporaryFile()
+    t = tarfile.open(mode='w', fileobj=f)
+
+    abs_path = os.path.abspath(path)
+    t.add(abs_path, arcname=os.path.basename(path), recursive=False)
+
+    t.close()
+    f.seek(0)
+    return f
