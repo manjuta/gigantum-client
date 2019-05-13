@@ -130,18 +130,6 @@ class LabBook(Repository):
     def metadata_path(self) -> str:
         return os.path.join(self.root_dir, '.gigantum')
 
-    def store_secret(self, host_dir_name: str, target_mnt_path: str) -> None:
-        """
-        Set a mount point for a given secret.
-        """
-        workdir = self.client_config.config['git']['working_directory']
-        workdir = os.path.expanduser(workdir)
-
-    def list_secrets(self, username: str):
-        workdir = self.client_config.config['git']['working_directory']
-        workdir = os.path.expanduser(workdir)
-
-
     @property
     def config_path(self) -> str:
         if self._data['schema'] == 2:
