@@ -247,12 +247,15 @@ export default class CollaboratorsModal extends Component {
               } else {
                 completeState[collaboratorName] = 'finished';
               }
-              this.setState({ buttonLoaderRemoveCollaborator: completeState });
+              this.setState({
+                buttonLoaderRemoveCollaborator: completeState,
+                buttonLoaderAddCollaborator: '',
+              });
 
               setTimeout(() => {
                 const postCompleteState = this.state.buttonLoaderRemoveCollaborator;
                 postCompleteState[collaboratorName] = '';
-                this.setState({ buttonLoaderAddCollaborator: postCompleteState });
+                this.setState({ buttonLoaderAddCollaborator: '' });
               }, 2000);
             } else {
               completeState[newCollaborator] = '';
@@ -291,12 +294,12 @@ export default class CollaboratorsModal extends Component {
               } else {
                 completeState[collaboratorName] = 'finished';
               }
-              this.setState({ buttonLoaderRemoveCollaborator: completeState });
+              this.setState({ buttonLoaderRemoveCollaborator: completeState, addCollaboratorButtonDisabled: false, newCollaborator: '' });
 
               setTimeout(() => {
                 const postCompleteState = this.state.buttonLoaderRemoveCollaborator;
                 postCompleteState[collaboratorName] = '';
-                this.setState({ buttonLoaderAddCollaborator: postCompleteState });
+                this.setState({ buttonLoaderAddCollaborator: '' });
               }, 2000);
             } else {
               completeState[newCollaborator] = '';
@@ -314,7 +317,10 @@ export default class CollaboratorsModal extends Component {
               }
 
               setTimeout(() => {
-                this.setState({ buttonLoaderAddCollaborator: '' });
+                this.setState({
+                  buttonLoaderAddCollaborator: '',
+                  addCollaboratorButtonDisabled: false,
+                });
               }, 2000);
             }
           },
@@ -411,7 +417,7 @@ export default class CollaboratorsModal extends Component {
 
   render() {
     const { props, state } = this;
-    const disableAddButton = state.addCollaboratorButtonDisabled || !state.newCollaborator.length;
+    const disableAddButton = state.addCollaboratorButtonDisabled || (state.newCollaborator.length < 3);
 
     // declare css here
     const autoCompleteMenu = classNames({
@@ -523,7 +529,7 @@ export default class CollaboratorsModal extends Component {
 
               <div className="CollaboratorsModal__listContainer">
 
-                {this.props.collaborators
+                { this.props.collaborators
 
                 && (
                 <ul className={collaboratorList}>
