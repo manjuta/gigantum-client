@@ -222,6 +222,8 @@ class ContainerOperations(object):
 
     @classmethod
     def put_file(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
+        if not labbook.owner:
+            raise ContainerException(f"{str(labbook)} has no owner")
         docker_key = infer_docker_image_name(labbook_name=labbook.name,
                                              owner=labbook.owner,
                                              username=username)
