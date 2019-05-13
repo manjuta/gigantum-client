@@ -52,7 +52,7 @@ class SecretStore(object):
             os.remove(os.path.join(file_dir, file_path))
 
     def list_files(self, secret_name: str) -> List[str]:
-        """List the files associated with a given secret. """
+        """List the files (full_path) associated with a given secret. """
         if secret_name not in self:
             return []
         secret_file_dir = path_on_disk(self.labbook, self.username, secret_name)
