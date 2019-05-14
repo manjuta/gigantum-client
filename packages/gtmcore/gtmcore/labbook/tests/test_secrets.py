@@ -35,8 +35,8 @@ class TestLabbookSecret(object):
         for secret_key in secstore:
             mnt_point = secstore[secret_key]
 
-        pprint.pprint(secstore.as_mount_dict)
-        assert False
+        #pprint.pprint(secstore.as_mount_dict)
+        #assert False
 
         del secstore['aws_creds']
         assert len(secstore) == 1

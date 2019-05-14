@@ -1,19 +1,25 @@
 import os
-
 from gtmcore.labbook import LabBook, SecretStore
 from gtmcore.container import ContainerOperations
 
 
-def start_labbook(labbook: LabBook, username: str) -> str:
+class ContainerWorkflows(object):
 
-    _, container_id = ContainerOperations.start_container(labbook, username)
+    @staticmethod
+    def start_labbook(labbook: LabBook, username: str) -> str:
 
-    secret_store = SecretStore(labbook, username)
-    for secrets_name in secret_store:
-        for secrets_file in secret_store.list_files(secrets_name):
-            ContainerOperations.put_file(labbook, username, src_path=secrets_file,
-                                         dst_dir=secret_store[secrets_name])
+        _, container_id = ContainerOperations.start_container(labbook, username)
 
-    # TODO - if putting a secret fails, then stop container and raise exception
+        secret_store = SecretStore(labbook, username)
 
-    return container_id
+        secrets_dir_map = secret_store.as_mount_dict.items()
+        for sec_local_src, sec_container_dst in secrets_dir_map:
+            for secret_obj in os.listdir(sec_local_src):
+                fp = os.path.join(sec_local_src, secret_obj)
+                ContainerOperations.copy_into_container(labbook, username,
+                                                        src_path=fp,
+                                                        dst_dir=sec_container_dst)
+
+        # TODO - if putting a secret fails, then stop container and raise exception
+
+        return container_id

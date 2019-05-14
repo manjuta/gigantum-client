@@ -32,7 +32,7 @@ from gtmcore.configuration import get_docker_client
 from gtmcore.container.container import ContainerOperations
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo
+from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo, ContainerFixture
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
 
 
@@ -41,20 +41,6 @@ def remove_image_cache_data():
         shutil.rmtree('/mnt/gigantum/.labmanager/image-cache', ignore_errors=True)
     except:
         pass
-
-
-class ContainerFixture(object):
-    """ Convenient namespace object for the unwieldy build_lb_image_for_jupyterlab
-    fixture. """
-    def __init__(self, fixture_data):
-        # yield lb, ib, client, docker_image_id, container_id, None, 'unittester'
-        self.labbook = fixture_data[0]
-        self.imagebuilder = fixture_data[1]
-        self.docker_client = fixture_data[2]
-        self.docker_image_id = fixture_data[3]
-        self.docker_container_id = fixture_data[4]
-        self._ = fixture_data[5]
-        self.username = fixture_data[6]
 
 
 class TestContainerOps(object):
@@ -139,18 +125,39 @@ class TestContainerOps(object):
 
 class TestPutFile(object):
     def test_put_single_file(self, build_lb_image_for_jupyterlab):
+        # Note - we are combining multiple tests in one to speed things up
+        # We do not want to build, start, execute, stop, and delete at container for each
+        # of the following test points.
         fixture = ContainerFixture(build_lb_image_for_jupyterlab)
+        container = docker.from_env().containers.get(fixture.docker_container_id)
 
-        dst_dir = "/home/giguser/sample-creds"
+        # Test insert of a single file.
+        dst_dir_1 = "/home/giguser/sample-creds"
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'secretfile'), 'w') as sample_secret:
                 sample_secret.write("<<Secret File Content>>")
-            ContainerOperations.put_file(fixture.labbook, fixture.username, src_path=sample_secret.name,
-                                         dst_dir=dst_dir)
-            container = docker.from_env().containers.get(fixture.docker_container_id)
-            container.exec_run(f'sh -c "cat {dst_dir}/secretfile"')
+            ContainerOperations.copy_into_container(fixture.labbook, fixture.username,
+                                                    src_path=sample_secret.name,
+                                                    dst_dir=dst_dir_1)
+            container.exec_run(f'sh -c "cat {dst_dir_1}/secretfile"')
 
-            # The put_file should NOT remove the original file on disk.
+            # The copy_into_container should NOT remove the original file on disk.
             assert os.path.exists(sample_secret.name)
 
-        assert False
+        # Test insert of a directory loaded with many files.
+        dst_dir_2 = "/home/giguser/many-credentials"
+        fdata = "Sample file Content."
+        with tempfile.TemporaryDirectory() as load_temp_dir:
+            for i in range(10):
+                with open(os.path.join(load_temp_dir, f'file-{i}.temp'), 'w') as f:
+                    f.write(fdata)
+            ContainerOperations.copy_into_container(fixture.labbook, fixture.username,
+                                                    src_path=load_temp_dir,
+                                                    dst_dir=dst_dir_2)
+
+            # Check that all the files and their content went up properly.
+            r = container.exec_run(f'sh -c "cat {dst_dir_2}/{os.path.basename(load_temp_dir)}/*"')
+            assert r.output.decode() == fdata * 10
+
+            # Check that files still exist
+            assert len(os.listdir(load_temp_dir)) == 10

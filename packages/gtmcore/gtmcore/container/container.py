@@ -221,7 +221,7 @@ class ContainerOperations(object):
         return get_container_ip(docker_key)
 
     @classmethod
-    def put_file(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
+    def copy_into_container(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
         if not labbook.owner:
             raise ContainerException(f"{str(labbook)} has no owner")
         docker_key = infer_docker_image_name(labbook_name=labbook.name,
@@ -229,21 +229,17 @@ class ContainerOperations(object):
                                              username=username)
         lb_container = docker.from_env().containers.get(docker_key)
         r = lb_container.exec_run(f'sh -c "mkdir -p {dst_dir}"')
-        print('-----', r)
 
-        f = simple_tar(src_path)
-        docker.APIClient().put_archive(docker_key, dst_dir, f)
+        # Tar up the src file to copy into container
+        tarred_secret_file = tempfile.NamedTemporaryFile()
+        t = tarfile.open(mode='w', fileobj=tarred_secret_file)
+        abs_path = os.path.abspath(src_path)
+        t.add(abs_path, arcname=os.path.basename(src_path), recursive=True)
+        t.close()
+        tarred_secret_file.seek(0)
 
-        f.close()
-
-
-def simple_tar(path):
-    f = tempfile.NamedTemporaryFile()
-    t = tarfile.open(mode='w', fileobj=f)
-
-    abs_path = os.path.abspath(path)
-    t.add(abs_path, arcname=os.path.basename(path), recursive=False)
-
-    t.close()
-    f.seek(0)
-    return f
+        try:
+            docker.APIClient().put_archive(docker_key, dst_dir, tarred_secret_file)
+        finally:
+            # Make sure the temporary Tar archive gets deleted.
+            tarred_secret_file.close()
