@@ -7,6 +7,7 @@ import environment from 'JS/createRelayEnvironment';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
+import FooterCallback from 'Components/common/footer/utils/BuildImage';
 
 
 const mutation = graphql`
@@ -44,8 +45,13 @@ export default function BuildImageMutation(
           console.log(error);
           setErrorMessage('ERROR: Project failed to build:', error);
         }
-
-        FooterUtils.getJobStatus(response, 'buildImage', 'backgroundJobKey');
+        const footerData = {
+          result: response,
+          type: 'buildImage',
+          key: 'backgroundJobKey',
+          FooterCallback,
+        };
+        FooterUtils.getJobStatus(footerData);
         callback(response, error);
       },
       onError: err => console.error(err),

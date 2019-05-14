@@ -49,9 +49,13 @@ export default function ImportDatasetMutation(
         if (error) {
           console.log(error);
         }
-
+        const footerData = {
+          result: response,
+          type: 'importDataset',
+          key: 'importJobKey',
+        };
         if (response.importDataset.importJobKey) {
-          FooterUtils.getJobStatus(response, 'importDataset', 'importJobKey');
+          FooterUtils.getJobStatus(footerData);
         }
 
         callback(response, error);

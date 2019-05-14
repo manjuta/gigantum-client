@@ -5,6 +5,7 @@ import {
 import environment from 'JS/createRelayEnvironment';
 // utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
+import FooterCallback from 'Components/common/footer/utils/DownloadDatasetFiles';
 
 const mutation = graphql`
 mutation DownloadDatasetFilesMutation($input: DownloadDatasetFilesInput!){
@@ -55,7 +56,16 @@ export default function DownloadDatasetFilesMutation(
       if (error) {
         console.log(error);
       }
-      FooterUtils.getJobStatus(response, 'downloadDatasetFiles', 'backgroundJobKey', successCall, failureCall);
+      const footerData = {
+        result: response,
+        type: 'downloadDatasetFiles',
+        key: 'backgroundJobKey',
+        FooterCallback,
+        successCall,
+        failureCall,
+      };
+
+      FooterUtils.getJobStatus(footerData);
 
       callback(error);
     },

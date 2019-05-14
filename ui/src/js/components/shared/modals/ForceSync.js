@@ -22,7 +22,13 @@ export default class ForceSync extends Component {
     const id = uuidv4;
     const { owner, labbookName } = store.getState().routes;
     if (this.props.sectionType === 'labbook') {
-      setMultiInfoMessage(id, 'Syncing Project with Gigantum cloud ...', false, false);
+      const footerMessageData = {
+        id,
+        message: 'Syncing Project with Gigantum cloud ...',
+        isLast: false,
+        error: false,
+      };
+      setMultiInfoMessage(footerMessageData);
 
       SyncLabbookMutation(
         owner,
@@ -33,12 +39,25 @@ export default class ForceSync extends Component {
         () => {},
         (error) => {
           if (error) {
-            setMultiInfoMessage(id, `Could not 'force' sync ${labbookName}`, true, true, error);
+            const messageData = {
+              id,
+              message: `Could not 'force' sync ${labbookName}`,
+              isLast: true,
+              error: true,
+              messageBody: error,
+            };
+            setMultiInfoMessage(messageData);
           }
         },
       );
     } else {
-      setMultiInfoMessage(id, 'Syncing Dataset with Gigantum cloud ...', false, false);
+      const footerMessageData = {
+        id,
+        message: 'Syncing Dataset with Gigantum cloud ...',
+        isLast: false,
+        error: false,
+      };
+      setMultiInfoMessage(footerMessageData);
 
       SyncDatasetMutation(
         owner,
@@ -49,7 +68,14 @@ export default class ForceSync extends Component {
         () => {},
         (error) => {
           if (error) {
-            setMultiInfoMessage(id, `Could not 'force' sync ${labbookName}`, true, true, error);
+            const messageData = {
+              id,
+              message: `Could not 'force' sync ${labbookName}`,
+              isLast: true,
+              error: true,
+              messageBody: error,
+            };
+            setMultiInfoMessage(messageData);
           }
         },
       );

@@ -51,7 +51,12 @@ export default function ImportLabbookMutation(
         }
 
         if (response.importLabbook.importJobKey) {
-          FooterUtils.getJobStatus(response, 'importLabbook', 'importJobKey');
+          const footerData = {
+            result: response,
+            type: 'importLabbook',
+            key: 'importJobKey',
+          };
+          FooterUtils.getJobStatus(footerData);
         }
 
         callback(response, error);

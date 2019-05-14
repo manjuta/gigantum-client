@@ -337,9 +337,8 @@ export default (state = {
         messageListOpen = false;
       }
     } else {
-      messageListOpen = true;
+      messageListOpen = action.payload.messageListOpen === undefined || action.payload.messageListOpen;
     }
-
 
     const message = {
       message: action.payload.message,
@@ -373,7 +372,19 @@ export default (state = {
 
     messageStackHistory = checkHistoryStackLength(messageStackHistory);
     sessionStorage.setItem('messageStackHistory', JSON.stringify(messageStackHistory));
-
+    console.log({
+      ...state,
+      id: action.payload.id,
+      message: action.payload.message,
+      isLast: action.payload.isLast,
+      messageStack,
+      messageStackHistory,
+      open: action.payload.open === undefined ? true : action.payload.open,
+      success: true,
+      error: action.payload.error,
+      messageListOpen,
+      viewHistory: ((doesHistoryMessageExist.length > 0) && doesHistoryMessageExist[0].dismissed && state.viewHistory),
+    })
     return {
       ...state,
       id: action.payload.id,

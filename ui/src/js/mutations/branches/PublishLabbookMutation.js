@@ -18,6 +18,35 @@ const mutation = graphql`
 
 let tempID = 0;
 
+const footerCallback = {
+  finished: (callbackData) => {
+    const { response, successCall, mutations } = callbackData;
+    const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).labbook.split('|');
+    const owner = metaDataArr[1];
+    const labbookName = metaDataArr[2];
+    successCall(owner, labbookName);
+    mutations.FetchLabbookEdgeMutation(
+      owner,
+      labbookName,
+      (error) => {
+        if (error) {
+          console.error(error);
+        }
+      },
+    );
+  },
+  failed: (callbackData) => {
+    const { response, failureCall } = callbackData;
+    const reportedFailureMessage = response.data.jobStatus.failureMessage;
+    const errorMessage = response.data.jobStatus.failureMessage;
+    failureCall(response.data.jobStatus.failureMessage);
+    return {
+      errorMessage,
+      reportedFailureMessage,
+    };
+  },
+};
+
 export default function PublishLabbookMutation(
   owner,
   labbookName,
@@ -37,7 +66,14 @@ export default function PublishLabbookMutation(
   };
   const id = uuidv4();
   const startMessage = 'Preparing to publish Project...';
-  setMultiInfoMessage(id, startMessage, false, false, [{ message: startMessage }]);
+  const messageData = {
+    id,
+    message: startMessage,
+    isLast: false,
+    error: false,
+    messageBody: [{ message: startMessage }],
+  };
+  setMultiInfoMessage(messageData);
   commitMutation(
     environment,
     {
@@ -53,7 +89,16 @@ export default function PublishLabbookMutation(
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
         if (response) {
-          FooterUtils.getJobStatus(response, 'publishLabbook', 'jobKey', successCall, failureCall, id);
+          const footerData = {
+            result: response,
+            type: 'publishLabbook',
+            key: 'jobKey',
+            footerCallback,
+            successCall,
+            failureCall,
+            id,
+          };
+          FooterUtils.getJobStatus(footerData);
         }
       },
     },

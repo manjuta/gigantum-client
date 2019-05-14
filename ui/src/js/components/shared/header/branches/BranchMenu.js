@@ -399,8 +399,14 @@ class BranchMenu extends Component {
               this.state.branchMutations.buildImage((response, error) => {
                 if (error) {
                   console.error(error);
-
-                  setMultiInfoMessage(id, `ERROR: Failed to build ${this.props.section.name}`, null, true, error);
+                  const messageData = {
+                    id,
+                    message: `ERROR: Failed to build ${this.props.section.name}`,
+                    isLast: null,
+                    error: true,
+                    messageBody: error,
+                  };
+                  setMultiInfoMessage(messageData);
                 }
               });
               this.props.setBranchUptodate();

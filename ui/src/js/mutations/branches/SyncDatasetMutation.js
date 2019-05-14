@@ -18,6 +18,35 @@ const mutation = graphql`
 
 let tempID = 0;
 
+const footerCallback = {
+  finished: (callbackData) => {
+    const { response, successCall, mutations } = callbackData;
+    const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).dataset.split('|');
+    const owner = metaDataArr[1];
+    const datasetName = metaDataArr[2];
+    successCall(owner, datasetName);
+    mutations.FetchDatasetEdgeMutation(
+      owner,
+      datasetName,
+      (error) => {
+        if (error) {
+          console.error(error);
+        }
+      },
+    );
+  },
+  failed: (callbackData) => {
+    const { response, failureCall } = callbackData;
+    const reportedFailureMessage = response.data.jobStatus.failureMessage;
+    const errorMessage = response.data.jobStatus.failureMessage;
+    failureCall(response.data.jobStatus.failureMessage);
+    return {
+      errorMessage,
+      reportedFailureMessage,
+    };
+  },
+};
+
 export default function SyncDatasetMutation(
   owner,
   datasetName,
@@ -40,7 +69,14 @@ export default function SyncDatasetMutation(
   };
   const id = uuidv4();
   const startMessage = `Preparing to ${pullOnly ? 'pull' : 'sync'} Dataset...`;
-  setMultiInfoMessage(id, startMessage, false, false, [{ message: startMessage }]);
+  const messageData = {
+    id,
+    message: startMessage,
+    isLast: false,
+    error: false,
+    messageBody: [{ message: startMessage }],
+  };
+  setMultiInfoMessage(messageData);
   if (overrideMethod) {
     variables.input.overrideMethod = overrideMethod;
   }
@@ -59,7 +95,16 @@ export default function SyncDatasetMutation(
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
         if (response) {
-          FooterUtils.getJobStatus(response, 'syncDataset', 'jobKey', successCall, failureCall, id);
+          const footerData = {
+            result: response,
+            type: 'syncDataset',
+            key: 'jobKey',
+            footerCallback,
+            successCall,
+            failureCall,
+            id,
+          };
+          FooterUtils.getJobStatus(footerData);
         }
       },
     },

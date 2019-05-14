@@ -199,8 +199,14 @@ class ActionsMenu extends Component {
                       (response, error) => {
                         if (error) {
                           console.error(error);
-
-                          setMultiInfoMessage(id, `ERROR: Failed to build ${this.state.labookName}`, null, true, error);
+                          const messageData = {
+                            id,
+                            message: `ERROR: Failed to build ${this.state.labookName}`,
+                            isLast: null,
+                            error: true,
+                            messageBody: error,
+                          };
+                          setMultiInfoMessage(messageData);
                         }
                       },
                     );
