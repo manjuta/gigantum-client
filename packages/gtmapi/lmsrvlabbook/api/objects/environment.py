@@ -26,6 +26,7 @@ from docker.errors import ImageNotFound, NotFound
 import requests
 
 from gtmcore.dispatcher import Dispatcher
+from gtmcore.labbook import SecretStore
 from gtmcore.environment.componentmanager import ComponentManager
 from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
@@ -36,8 +37,10 @@ from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 
 from lmsrvlabbook.api.connections.environment import PackageComponentConnection
+from lmsrvlabbook.api.connections.secrets import SecretsVaultConnection
 from lmsrvlabbook.api.objects.basecomponent import BaseComponent
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
+from lmsrvlabbook.api.objects.secrets import SecretsVault
 from lmsrvlabbook.dataloader.package import PackageLatestVersionLoader
 
 logger = LMLogger.get_logger()
@@ -94,6 +97,8 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
 
     # A custom docker snippet to be run after all other dependencies and bases have been added.
     docker_snippet = graphene.String()
+
+    secrets_vault = graphene.ConnectionField(SecretsVaultConnection)
 
     @classmethod
     def get_node(cls, info, id):
@@ -273,3 +278,32 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
         """Method to resolve  the docker snippet for this labbook. Right now only 1 snippet is supported"""
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_docker_snippet(labbook))
+
+    @staticmethod
+    def helper_resolve_secrets_vault(labbook, kwargs):
+        secrets_store = SecretStore(labbook, get_logged_in_username())
+        edges = secrets_store.secret_map.keys()
+
+        if edges:
+            cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
+                       for cnt, x in enumerate(edges)]
+
+            # Process slicing and cursor args
+            lbc = ListBasedConnection(edges, cursors, kwargs)
+            lbc.apply()
+
+            # Get DevEnv instances
+            edge_objs = []
+            for edge, cursor in zip(lbc.edges, lbc.cursors):
+                node_obj = SecretsVault(owner=labbook.owner, name=labbook.name, vault_name=edge)
+                edge_objs.append(SecretsVaultConnection.Edge(node=node_obj, cursor=cursor))
+            return SecretsVaultConnection(edges=edge_objs, page_info=lbc.page_info)
+
+        else:
+            pi = graphene.relay.PageInfo(has_next_page=False, has_previous_page=False)
+            return SecretsVaultConnection(edges=[], page_info=pi)
+
+    def resolve_secrets_vault(self, info, **kwargs):
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: self.helper_resolve_secrets_vault(labbook, kwargs))
+

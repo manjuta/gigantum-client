@@ -6,11 +6,12 @@ from gtmcore.configuration import get_docker_client
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.dispatcher import Dispatcher, jobs
 
+from gtmcore.labbook import SecretStore, LabBook
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.utils import infer_docker_image_name
-from gtmcore.workflows import LabbookWorkflow
+from gtmcore.workflows import LabbookWorkflow, ContainerWorkflows
 from gtmcore.logging import LMLogger
 from gtmcore.activity.services import stop_labbook_monitor
 
@@ -132,8 +133,7 @@ class StartContainer(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
 
         with lb.lock():
-            lb, container_id = ContainerOperations.start_container(
-                labbook=lb, username=username)
+            container_id = ContainerWorkflows.start_labbook(lb, username)
         logger.info(f'Started new {lb} container ({container_id})')
 
         return StartContainer(environment=Environment(owner=owner, name=labbook_name))
@@ -209,3 +209,34 @@ class StopContainer(graphene.relay.ClientIDMutation):
             cls._stop_container(lb, username)
 
         return StopContainer(environment=Environment(owner=owner, name=labbook_name))
+
+
+class CreateSecretVault(graphene.relay.ClientIDMutation):
+
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+        vault_name = graphene.String(required=True)
+        target_dir = graphene.String(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, vault_name, target_dir,
+                               client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name)
+        SecretStore(lb, username)[vault_name] = target_dir
+
+
+class RemoveSecretVault(graphene.relay.ClientIDMutation):
+
+    class Input:
+        owner = graphene.String(required=True)
+        labbook_name = graphene.String(required=True)
+        vault_name = graphene.String(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, vault_name,
+                               client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name)
+        del SecretStore(lb, username)[vault_name]
