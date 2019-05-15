@@ -239,7 +239,7 @@ class ContainerOperations(object):
         tarred_secret_file.seek(0)
 
         try:
-            docker.APIClient().put_archive(docker_key, dst_dir, tarred_secret_file)
+            docker.from_env().api.put_archive(docker_key, dst_dir, tarred_secret_file)
         finally:
             # Make sure the temporary Tar archive gets deleted.
             tarred_secret_file.close()
