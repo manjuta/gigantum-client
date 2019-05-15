@@ -263,7 +263,7 @@ class InsertSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
 
     @classmethod
     def mutate_and_wait_for_chunks(cls, info, **kwargs):
-        return InsertSecretsFile()
+        return InsertSecretsFile(environment=None)
 
     @classmethod
     def mutate_and_process_upload(cls, info, upload_file_path, upload_filename, **kwargs):
