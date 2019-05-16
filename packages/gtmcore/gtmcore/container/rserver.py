@@ -16,8 +16,7 @@ logger = LMLogger.get_logger()
 DEFAULT_RSERVER_PORT = 8787
 
 
-def start_rserver(labbook: LabBook, username: str, tag: Optional[str] = None,
-                  check_reachable: bool = True) -> None:
+def start_rserver(labbook: LabBook, username: str, tag: Optional[str] = None, check_reachable: bool = False) -> None:
     """ Main entrypoint to launch rstudio-server. Note, the caller must
         determine for themselves the host and port.
 
@@ -26,6 +25,9 @@ def start_rserver(labbook: LabBook, username: str, tag: Optional[str] = None,
     Returns:
         Path to rstudio-server 
     """
+    if check_reachable:
+        logger.warning('check_reachable for RStudio not currently supported')
+
     owner = InventoryManager().query_owner(labbook)
     lb_key = tag or infer_docker_image_name(labbook_name=labbook.name,
                                             owner=owner,
@@ -50,13 +52,14 @@ def start_rserver(labbook: LabBook, username: str, tag: Optional[str] = None,
 
 
 def _start_rserver_process(lb_container: Container) -> None:
-    # XXX This custom PYTHONPATH is also specified in the neighboring jupyter.py file.
-    # Should we standardize this somehow at a general dev_tool level? Python should be supported in the R container.
+    # This custom PYTHONPATH is also specified in the neighboring jupyter.py file.
+    # It would be good we standardize this somehow at a general dev_tool level, perhaps in #453?
+    # Python should be supported in the R container.
     cmd = (PYTHON_ENV_CMD +
            " && mkdir -p /home/giguser/.rstudio/monitored/user-settings"
            " && cp /tmp/user-settings /home/giguser/.rstudio/monitored/user-settings/"
            # --www-port is just here to be explicit / document how to change if needed
-           " && /usr/lib/rstudio-server/bin/rserver --www-port=8787")
+           " && exec /usr/lib/rstudio-server/bin/rserver --www-port=8787")
     # USER skips the login screen for rserver, specifying `user` in exec_run is insufficient
     env = {'USER': 'giguser'}
     lb_container.exec_run(f'sh -c "{cmd}"', detach=True, user='giguser', environment=env)
@@ -64,30 +67,9 @@ def _start_rserver_process(lb_container: Container) -> None:
     # Pause briefly to avoid race conditions
     for timeout in range(10):
         time.sleep(1)
+
         if ps_search(lb_container, 'rserver'):
             logger.info(f"RStudio (rserver) started within {timeout + 1} seconds")
             break
     else:
         raise ValueError('RStudio (rserver) failed to start after 10 seconds')
-
-
-# TODO DC: finish this or delete it by end of #283
-#def _check_rserver_reachable(lb_key: str):
-#    for n in range(30):
-#        # Get IP of container on Docker Bridge Network
-#        lb_ip_addr = get_container_ip(lb_key)
-#        test_url = f'http://{lb_ip_addr}:{DEFAULT_RSERVER_PORT}'
-#        logger.debug(f"Attempt {n + 1}: Testing if RStudio is up at {test_url}...")
-#        try:
-#            r = requests.get(test_url, timeout=0.5)
-#            if r.status_code != 200:
-#                time.sleep(0.5)
-#            else:
-#                logger.info(f'Found RStudio-Server up at {test_url} after {n/2.0} seconds')
-#                break
-#        except requests.exceptions.ConnectionError:
-#            # Assume API isn't up at all yet, so no connection can be made
-#            time.sleep(0.5)
-#    else:
-#        raise LabbookException(f'Could not reach RStudio at {test_url} after timeout')
-

@@ -257,7 +257,7 @@ def import_dataset_from_zip(archive_path: str, username: str, owner: str,
             os.remove(archive_path)
 
 
-def build_labbook_image(path: str, username: Optional[str] = None,
+def build_labbook_image(path: str, username: str,
                         tag: Optional[str] = None, nocache: bool = False) -> str:
     """Return a docker image ID of given LabBook.
 
@@ -299,7 +299,7 @@ def build_labbook_image(path: str, username: Optional[str] = None,
         raise
 
 
-def start_labbook_container(root: str, config_path: str, username: Optional[str] = None,
+def start_labbook_container(root: str, config_path: str, username: str,
                             override_image_id: Optional[str] = None) -> str:
     """Return the ID of the LabBook Docker container ID.
 

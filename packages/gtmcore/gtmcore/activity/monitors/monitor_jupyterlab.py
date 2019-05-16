@@ -1,7 +1,7 @@
 import os
 import queue
 import json
-from typing import (Any, Dict, List, Optional)
+from typing import (Any, Dict, List, Optional, Union)
 import time
 
 import jupyter_client
@@ -79,10 +79,10 @@ class JupyterLabMonitor(DevEnvMonitor):
                                              "path": session['path']}
         return data
 
-    def run(self, key: str, database=1) -> None:
+    def run(self, dev_env_monitor_key: str, database: int = 1) -> None:
         """Method called in a periodically scheduled async worker that should check the dev env and manage Activity
         Monitor Instances as needed Args:
-            key(str): The unique string used as the key in redis to track this DevEnvMonitor instance
+            dev_env_monitor_key(str): The unique string used as the dev_env_monitor_key in redis to track this DevEnvMonitor instance
         """
         # Check if the runtime directory exists, and if not create it
         if not os.path.exists(os.environ['JUPYTER_RUNTIME_DIR']):
@@ -91,15 +91,15 @@ class JupyterLabMonitor(DevEnvMonitor):
 
         # Get list of active Activity Monitor Instances from redis
         redis_conn = redis.Redis(db=database)
-        activity_monitors = redis_conn.keys('{}:activity_monitor:*'.format(key))
+        activity_monitors = redis_conn.keys('{}:activity_monitor:*'.format(dev_env_monitor_key))
         activity_monitors = [x.decode('utf-8') for x in activity_monitors]
 
         # Get author info
-        author_name = redis_conn.hget(key, "author_name").decode()
-        author_email = redis_conn.hget(key, "author_email").decode()
+        author_name = redis_conn.hget(dev_env_monitor_key, "author_name").decode()
+        author_email = redis_conn.hget(dev_env_monitor_key, "author_email").decode()
 
         # Get session info from Jupyter API
-        sessions = self.get_sessions(key, redis_conn)
+        sessions = self.get_sessions(dev_env_monitor_key, redis_conn)
 
         # Check for exited kernels
         for am in activity_monitors:
@@ -119,12 +119,12 @@ class JupyterLabMonitor(DevEnvMonitor):
         for s in sessions:
             if sessions[s]['kernel_type'] == 'notebook':
                 # Monitor a notebook
-                activity_monitor_key = '{}:activity_monitor:{}'.format(key, sessions[s]['kernel_id'])
+                activity_monitor_key = '{}:activity_monitor:{}'.format(dev_env_monitor_key, sessions[s]['kernel_id'])
                 if activity_monitor_key not in activity_monitors:
                     logger.info("Detected new JupyterLab kernel. Starting monitoring for kernel id {}".format(sessions[s]['kernel_id']))
 
                     # Start new Activity Monitor
-                    _, user, owner, labbook_name, dev_env_name = key.split(':')
+                    _, user, owner, labbook_name, dev_env_name = dev_env_monitor_key.split(':')
 
                     args = {"module_name": "gtmcore.activity.monitors.monitor_jupyterlab",
                             "class_name": "JupyterLabNotebookMonitor",
@@ -140,7 +140,7 @@ class JupyterLabMonitor(DevEnvMonitor):
                     logger.info("Started Jupyter Notebook Activity Monitor: {}".format(process_id))
 
                     # Update redis
-                    redis_conn.hset(activity_monitor_key, "dev_env_monitor", key)
+                    redis_conn.hset(activity_monitor_key, "dev_env_monitor", dev_env_monitor_key)
                     redis_conn.hset(activity_monitor_key, "process_id", process_id)
                     redis_conn.hset(activity_monitor_key, "path", sessions[s]["path"])
                     redis_conn.hset(activity_monitor_key, "kernel_type", sessions[s]["kernel_type"])
@@ -191,7 +191,9 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
         self.add_processor(ActivityDetailLimitProcessor())
         self.add_processor(ActivityShowBasicProcessor())
 
-    def handle_message(self, msg: Dict[str, Dict]):
+    # We use an underspecified type for msg, as the impedance mismatch between Jupyter IOpub "traitlets" and mypy is
+    # too much! cf. https://github.com/jupyter/jupyter_client/blob/master/jupyter_client/client.py
+    def handle_message(self, msg: Dict[str, Any]):
         """Method to handle processing an IOPub Message from a JupyterLab kernel
 
         Args:
@@ -230,7 +232,7 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
         elif msg['msg_type'] == 'execute_input':
             # A message containing the input to kernel has been received
             self.current_cell.code.append({'code': msg['content']['code']})
-            self.execution_count = msg['content']['execution_count']
+            self.execution_count = int(msg['content']['execution_count'])
             self.current_cell.tags.append(f"ex:{msg['content']['execution_count']}")
 
         elif msg['msg_type'] == 'execute_result':
