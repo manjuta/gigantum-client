@@ -78,7 +78,7 @@ class SecretStore(object):
 
         Args:
             secret_name: Name of the secret vault (key).
-            file_paths:
+            file_paths: List of filenames to remove from host.
 
         Returns:
             None
@@ -90,7 +90,14 @@ class SecretStore(object):
             os.remove(os.path.join(file_dir, file_path))
 
     def list_files(self, secret_name: str) -> List[str]:
-        """List the files (full_path) associated with a given secret. """
+        """List the files (full_path) associated with a given secret.
+
+        Args:
+            secret_name: Name of the "vault"
+
+        Return:
+            List of files for that key.
+        """
         if secret_name not in self:
             return []
         secret_file_dir = path_on_disk(self.labbook, self.username, secret_name)
@@ -98,12 +105,10 @@ class SecretStore(object):
             return []
         return sorted(os.listdir(secret_file_dir))
 
-    def clear_files(self):
+    def clear_files(self) -> None:
         """Completely delete the secret files from disk. """
         lb_secrets_dir = path_on_disk(self.labbook, self.username)
         shutil.rmtree(lb_secrets_dir)
-
-    # TODO(bvb) - Insert bit to delete artifacts here when project deleted locally.
 
     def __len__(self) -> int:
         return len(self.secret_map)
@@ -152,6 +157,7 @@ def valid_token(token: str, extra_allowed_chars: str) -> bool:
 
 
 def path_on_disk(labbook: LabBook, username: str, secret_name: Optional[str] = None) -> str:
+    """Return the path (on host) for the secrets file."""
     tokens = [labbook.client_config.app_workdir, '.labmanager',
               'secrets', username, labbook.owner, labbook.name]
     if secret_name:
