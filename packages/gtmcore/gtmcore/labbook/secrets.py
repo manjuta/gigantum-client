@@ -13,10 +13,22 @@ class SecretStoreException(GigantumException):
 
 
 class SecretStore(object):
+    """ Data structure that contains "secrets" files and a mapping into where
+    they should be placed in the running Project container. Secrets files may
+    be SSH keys, AWS credentials, or anything of the like.
+
+    The *content* of these files must always remain outside of the Project
+    directory at all times.
+
+    However, the mapping that indicates where the given files should go
+    is indeed tracked inside the Project. """
 
     def __init__(self, labbook: LabBook, username: str) -> None:
         self.labbook = labbook
         self.username = username
+
+        # secret_path contains the file defining the mapping between a
+        # mnemonic and where the files for it should go.
         self.secret_path = os.path.join(self.labbook.metadata_path, 'secrets.json')
 
     @property
@@ -31,11 +43,25 @@ class SecretStore(object):
 
     @property
     def as_mount_dict(self) -> Dict[str, str]:
+        """Return the mapping such that:
+        (source-path-on-host-disk -> dest-path-in-container)"""
         return {path_on_disk(self.labbook, self.username, k): v
                 for k, v in self.secret_map.items()}
 
     def insert_file(self, src_path: str, secret_name: str,
                     dst_filename: Optional[str] = None) -> str:
+        """Insert the given file into the given secret name (key).
+        This will *move* the file from its src_path (source location)
+        to relevant location for the key store (secret name).
+
+        Args:
+            src_path: Path of the file containing the key or credentials
+            secret_name: Name of the secret vault (e.g., "aws-credentials")
+            dst_filename: Optional name to force the destination filename.
+
+        Returns:
+            Full path to the secrets file that was just inserted.
+        """
         owner = self.labbook.owner
         if not owner:
             # If we get here, the project is probably not in the appropriate place
@@ -47,7 +73,16 @@ class SecretStore(object):
         final_file_path = shutil.move(src_path, full_path)
         return final_file_path
 
-    def delete_files(self, secret_name: str, file_paths: List[str]):
+    def delete_files(self, secret_name: str, file_paths: List[str]) -> None:
+        """Delete the given files from the host machine.
+
+        Args:
+            secret_name: Name of the secret vault (key).
+            file_paths:
+
+        Returns:
+            None
+        """
         file_dir = path_on_disk(self.labbook, self.username, secret_name)
         for file_path in file_paths:
             # TODO - Make safe path to get rid of all special chars
