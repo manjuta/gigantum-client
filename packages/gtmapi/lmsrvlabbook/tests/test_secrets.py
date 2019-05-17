@@ -24,7 +24,8 @@ def mock_config():
 @pytest.fixture()
 def mock_upload_key():
     with tempfile.TemporaryDirectory() as tempdir:
-        # Make an approx 1MB key file.
+        # Make an approx 10MB key file, in order to test file uploadings
+        # in multiple "chunks"
         with open(os.path.join(tempdir, 'id_rsa'), 'w') as f:
             f.write(f'---BEGIN---\n{"12345ABCDE" * 1000000}\n---END---\n')
         yield f
@@ -202,7 +203,7 @@ class TestSecretsVaultMutations:
         assert secret_info['secretsFiles'] == ['id_rsa']
         assert secret_info['mountPath'] == '/opt/secrets/location/in/container'
 
+        # Test that the uploaded file hash exactly matches that as the one in the "vault"
         d = secret_store.as_mount_dict
-        for k in d.keys():
-            uploaded_hash = hashlib.md5(open(f'{k}/id_rsa', 'rb').read()).hexdigest()
+        uploaded_hash = hashlib.md5(open(f'{list(d.keys())[0]}/id_rsa', 'rb').read()).hexdigest()
         assert initial_hash == uploaded_hash
