@@ -101,8 +101,8 @@ def _remove_docker_image(image_name: str) -> None:
         logger.warning(f"Attempted to delete Docker image {image_name}, but not found")
 
 
-def build_docker_image(root_dir: str, override_image_tag: Optional[str],
-                       nocache: bool = False, username: Optional[str] = None,
+def build_docker_image(root_dir: str, username: str, nocache: bool = False,
+                       override_image_tag: Optional[str] = None,
                        feedback_callback: Optional[Callable] = None) -> str:
     """
     Build a new docker image from the Dockerfile at the given directory, give this image

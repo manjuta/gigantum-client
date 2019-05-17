@@ -86,7 +86,7 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
     # The name of the current branch
     image_status = graphene.Field(ImageStatus)
 
-    # The name of the current branch
+    # Run state
     container_status = graphene.Field(ContainerStatus)
 
     # The LabBook's Base Component

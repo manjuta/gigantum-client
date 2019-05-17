@@ -21,7 +21,7 @@ class DevEnvMonitor(metaclass=abc.ABCMeta):
         Should be the value used in the `name` attribute of the Dev Env Environment Component"""
         raise NotImplemented
 
-    def run(self, key: str) -> None:
+    def run(self, dev_env_monitor_key: str) -> None:
         """Method called in a periodically scheduled async worker that should check the dev env and manage Activity
         Monitor Instances as needed
 

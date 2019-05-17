@@ -21,8 +21,7 @@ from typing import Optional, List
 from docker.models.containers import Container
 
 
-def infer_docker_image_name(labbook_name: str, owner: str,
-                            username: Optional[str] = None) -> str:
+def infer_docker_image_name(labbook_name: str, owner: str, username: str) -> str:
     """
     Produce the suggested name for the Docker image from the given LabBook details
 
@@ -36,7 +35,7 @@ def infer_docker_image_name(labbook_name: str, owner: str,
         If username is not provided, a known string is substituted.
         Note the prefix "gmlb" means "Gigantum-Managed LabBook".
     """
-    return f"gmlb-{username or 'nouser'}-{owner}-{labbook_name}"
+    return f"gmlb-{username}-{owner}-{labbook_name}"
 
 
 def ps_search(lb_container: Container, ps_name: str='jupyter') -> List[str]:

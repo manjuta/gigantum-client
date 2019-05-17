@@ -157,22 +157,19 @@ class StopContainer(graphene.relay.ClientIDMutation):
         and Jupyter. So, for now, if we can't find an mitmproxy endpoint, we assume
         we're dealing with a jupyter container.
         """
-        lb_ip = ContainerOperations.get_labbook_ip(lb, username)
-
-        # stop labbook monitor
-        stop_labbook_monitor(lb, username)
-
-        lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
 
         pr = confhttpproxy.ProxyRouter.get_proxy(lb.client_config.config['proxy'])
 
         # Remove route from proxy
-        if MITMProxyOperations.get_mitmendpoint(f"http://{lb_ip}:8787"):
+        lb_name = ContainerOperations.labbook_image_name(lb, username)
+        if MITMProxyOperations.get_mitmendpoint(lb_name):
             # there is an MITMProxy (currently only used for RStudio)
-            proxy_endpoint = MITMProxyOperations.stop_mitm_proxy(f"http://{lb_ip}:8787")
+            proxy_endpoint = MITMProxyOperations.stop_mitm_proxy(lb_name)
             tool = 'rserver'
         else:
+            lb_ip = ContainerOperations.get_labbook_ip(lb, username)
             # The only alternative to mitmproxy (currently) is jupyter
+            # TODO in #453: Construction of this URL should be encapsulated in Jupyter Dev Tool logic
             proxy_endpoint = f'http://{lb_ip}:8888'
             tool = 'jupyter'
 
@@ -194,6 +191,11 @@ class StopContainer(graphene.relay.ClientIDMutation):
             bind_location = os.path.join(lb.root_dir, 'input', dataset_name)
             if os.path.isdir(bind_location):
                 os.rmdir(bind_location)
+
+        # stop labbook monitor
+        stop_labbook_monitor(lb, username)
+
+        lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
 
         if not stopped:
             # TODO DK: Why would stopped=False? Should this move up??

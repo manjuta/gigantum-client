@@ -255,7 +255,7 @@ def import_dataset_from_zip(archive_path: str, username: str, owner: str,
             os.remove(archive_path)
 
 
-def build_labbook_image(path: str, username: Optional[str] = None,
+def build_labbook_image(path: str, username: str,
                         tag: Optional[str] = None, nocache: bool = False) -> str:
     """Return a docker image ID of given LabBook.
 
