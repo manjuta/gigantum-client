@@ -10,7 +10,14 @@ from werkzeug.datastructures import FileStorage
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import SecretStore
 
-from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
+from lmsrvlabbook.tests.fixtures import (fixture_working_dir_env_repo_scoped, fixture_working_dir,
+                                         _create_temp_work_dir)
+
+
+
+@pytest.fixture()
+def mock_config():
+    pass
 
 
 @pytest.fixture()
@@ -131,6 +138,14 @@ class TestSecretsVaultMutations:
 
     def test_upload_secrets_file(self, fixture_working_dir_env_repo_scoped, mock_upload_key):
         client = fixture_working_dir_env_repo_scoped[2]
+
+        class DummyContext(object):
+            def __init__(self, file_handle):
+                self.labbook_loader = None
+                self.files = {'uploadChunk': file_handle}
+
+        client = Client(mock_create_labbooks[3], middleware=[DataloaderMiddleware()])
+
         im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
         lb = im.create_labbook("default", "default", "unittest-upload-secret")
 
