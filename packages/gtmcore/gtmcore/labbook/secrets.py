@@ -34,13 +34,16 @@ class SecretStore(object):
         return {path_on_disk(self.labbook, self.username, k): v
                 for k, v in self.secret_map.items()}
 
-    def insert_file(self, src_path: str, secret_name: str) -> str:
+    def insert_file(self, src_path: str, secret_name: str,
+                    dst_filename: Optional[str] = None) -> str:
         owner = self.labbook.owner
         if not owner:
             # If we get here, the project is probably not in the appropriate place
             raise SecretStoreException(f'{str(self.labbook)} cannot accept secrets')
         full_path = path_on_disk(self.labbook, self.username, secret_name)
         os.makedirs(full_path, exist_ok=True)
+        if dst_filename:
+            full_path = os.path.join(full_path, dst_filename)
         final_file_path = shutil.move(src_path, full_path)
         return final_file_path
 

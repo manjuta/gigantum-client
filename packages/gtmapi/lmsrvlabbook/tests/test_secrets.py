@@ -3,16 +3,17 @@ import io
 import tempfile
 import pprint
 import math
+import hashlib
 
 import pytest
 from werkzeug.datastructures import FileStorage
+from graphene.test import Client
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import SecretStore
 
-from lmsrvlabbook.tests.fixtures import (fixture_working_dir_env_repo_scoped, fixture_working_dir,
-                                         _create_temp_work_dir)
-
+from lmsrvcore.middleware import DataloaderMiddleware
+from lmsrvlabbook.tests.fixtures import (fixture_working_dir_env_repo_scoped, fixture_working_dir)
 
 
 @pytest.fixture()
@@ -25,7 +26,7 @@ def mock_upload_key():
     with tempfile.TemporaryDirectory() as tempdir:
         # Make an approx 1MB key file.
         with open(os.path.join(tempdir, 'id_rsa'), 'w') as f:
-            f.write(f'---BEGIN---\n{"12345ABCDE" * 1}\n---END---\n')
+            f.write(f'---BEGIN---\n{"12345ABCDE" * 1000000}\n---END---\n')
         yield f
 
 
@@ -136,18 +137,20 @@ class TestSecretsVaultMutations:
         assert 'errors' not in remove_response
         assert not remove_response['data']['removeSecretVault']['environment']['secretsVault']['edges']
 
-    def test_upload_secrets_file(self, fixture_working_dir_env_repo_scoped, mock_upload_key):
-        client = fixture_working_dir_env_repo_scoped[2]
+    def test_upload_secrets_file(self, fixture_working_dir, mock_upload_key):
 
         class DummyContext(object):
             def __init__(self, file_handle):
                 self.labbook_loader = None
                 self.files = {'uploadChunk': file_handle}
 
-        client = Client(mock_create_labbooks[3], middleware=[DataloaderMiddleware()])
+        client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
 
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "unittest-upload-secret")
+        secret_store = SecretStore(lb, "default")
+        secret_store['upload-vault'] = '/opt/secrets/location/in/container'
+        initial_hash = hashlib.md5(open(mock_upload_key.name, 'rb').read()).hexdigest()
 
         new_file_size = os.path.getsize(mock_upload_key.name)
         # Get upload params
@@ -161,7 +164,7 @@ class TestSecretsVaultMutations:
             chunk = io.BytesIO()
             chunk.write(mf.read(chunk_size).encode())
             chunk.seek(0)
-
+            print(f'Uploading chunk {chunk_index+1} / {total_chunks}')
             upload_query = f"""
             mutation upload {{
                 insertSecretsFile(input: {{
@@ -182,6 +185,8 @@ class TestSecretsVaultMutations:
                         secretsVault {{
                             edges {{
                                 node {{
+                                    vaultName
+                                    secretsFiles
                                     mountPath
                                 }}
                             }}
@@ -191,6 +196,13 @@ class TestSecretsVaultMutations:
             }}"""
 
             file = FileStorage(chunk)
-            r = client.execute(upload_query)
-            pprint.pprint(r)
-        assert False
+            r = client.execute(upload_query, context_value=DummyContext(file))
+        secret_info = r['data']['insertSecretsFile']['environment']['secretsVault']['edges'][0]['node']
+        assert secret_info['vaultName'] == 'upload-vault'
+        assert secret_info['secretsFiles'] == ['id_rsa']
+        assert secret_info['mountPath'] == '/opt/secrets/location/in/container'
+
+        d = secret_store.as_mount_dict
+        for k in d.keys():
+            uploaded_hash = hashlib.md5(open(f'{k}/id_rsa', 'rb').read()).hexdigest()
+        assert initial_hash == uploaded_hash

@@ -55,25 +55,24 @@ from gtmcore.dataset import Manifest
 def _create_temp_work_dir(lfs_enabled: bool = True):
     """Helper method to create a temporary working directory and associated config file"""
     # Create a temporary working directory
-    #temp_dir = os.path.join(tempfile.gettempdir(), uuid.uuid4().hex)
-    #os.makedirs(temp_dir)
+    temp_dir = os.path.join(tempfile.gettempdir(), uuid.uuid4().hex)
+    os.makedirs(temp_dir)
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        config = Configuration()
-        # Make sure the "test" environment components are always used
-        config.config["environment"]["repo_url"] = ["https://github.com/gigantum/base-images-testing.git"]
-        config.config["flask"]["DEBUG"] = False
-        # Set the working dir to the new temp dir
-        config.config["git"]["working_directory"] = temp_dir
-        config.config["git"]["lfs_enabled"] = lfs_enabled
-        # Set the auth0 client to the test client (only contains 1 test user and is partitioned from prod)
-        config.config["auth"]["audience"] = "io.gigantum.api.dev"
-        config.config["auth"]["client_id"] = "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
-        config_file = os.path.join(temp_dir, "temp_config.yaml")
-        config.save(config_file)
-        os.environ['HOST_WORK_DIR'] = temp_dir
+    config = Configuration()
+    # Make sure the "test" environment components are always used
+    config.config["environment"]["repo_url"] = ["https://github.com/gigantum/base-images-testing.git"]
+    config.config["flask"]["DEBUG"] = False
+    # Set the working dir to the new temp dir
+    config.config["git"]["working_directory"] = temp_dir
+    config.config["git"]["lfs_enabled"] = lfs_enabled
+    # Set the auth0 client to the test client (only contains 1 test user and is partitioned from prod)
+    config.config["auth"]["audience"] = "io.gigantum.api.dev"
+    config.config["auth"]["client_id"] = "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
+    config_file = os.path.join(temp_dir, "temp_config.yaml")
+    config.save(config_file)
+    os.environ['HOST_WORK_DIR'] = temp_dir
 
-        return config_file, temp_dir
+    return config_file, temp_dir
 
 
 class EnvironMock(object):
