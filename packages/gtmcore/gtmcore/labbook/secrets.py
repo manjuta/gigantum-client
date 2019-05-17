@@ -48,7 +48,7 @@ class SecretStore(object):
         return {path_on_disk(self.labbook, self.username, k): v
                 for k, v in self.secret_map.items()}
 
-    def insert_file(self, src_path: str, secret_name: str,
+    def insert_file(self, src_path: str, target_dir: str,
                     dst_filename: Optional[str] = None) -> str:
         """Insert the given file into the given secret name (key).
         This will *move* the file from its src_path (source location)
@@ -56,7 +56,7 @@ class SecretStore(object):
 
         Args:
             src_path: Path of the file containing the key or credentials
-            secret_name: Name of the secret vault (e.g., "aws-credentials")
+            target_dir: Name of directory INSIDE project container to place this
             dst_filename: Optional name to force the destination filename.
 
         Returns:
@@ -66,14 +66,15 @@ class SecretStore(object):
         if not owner:
             # If we get here, the project is probably not in the appropriate place
             raise SecretStoreException(f'{str(self.labbook)} cannot accept secrets')
-        full_path = path_on_disk(self.labbook, self.username, secret_name)
+        full_path = path_on_disk(self.labbook, self.username)
         os.makedirs(full_path, exist_ok=True)
         if dst_filename:
             full_path = os.path.join(full_path, dst_filename)
         final_file_path = shutil.move(src_path, full_path)
+        self[os.path.basename(final_file_path)] = target_dir
         return final_file_path
 
-    def delete_files(self, secret_name: str, file_paths: List[str]) -> None:
+    def delete_files(self, file_paths: List[str]) -> None:
         """Delete the given files from the host machine.
 
         Args:
@@ -83,24 +84,19 @@ class SecretStore(object):
         Returns:
             None
         """
-        file_dir = path_on_disk(self.labbook, self.username, secret_name)
+        file_dir = path_on_disk(self.labbook, self.username)
         for file_path in file_paths:
             # TODO - Make safe path to get rid of all special chars
             file_path = file_path.replace('..', '')
             os.remove(os.path.join(file_dir, file_path))
 
-    def list_files(self, secret_name: str) -> List[str]:
+    def list_files(self) -> List[str]:
         """List the files (full_path) associated with a given secret.
 
-        Args:
-            secret_name: Name of the "vault"
-
         Return:
-            List of files for that key.
+            List of files for that key (sorted alphabetically).
         """
-        if secret_name not in self:
-            return []
-        secret_file_dir = path_on_disk(self.labbook, self.username, secret_name)
+        secret_file_dir = path_on_disk(self.labbook, self.username)
         if not os.path.exists(secret_file_dir):
             return []
         return sorted(os.listdir(secret_file_dir))
@@ -125,8 +121,8 @@ class SecretStore(object):
     def __setitem__(self, key: str, value: str) -> None:
         if '/mnt/labbook' in value or '/mnt/project' in value:
             raise SecretStoreException('Cannot put secret in Project directory')
-        if not valid_token(key, '_-'):
-            raise SecretStoreException('Key must be alphanumeric with _ or - character only')
+        if not valid_token(key, '._-'):
+            raise SecretStoreException('Key must be alphanumeric with _-. character only')
         if not valid_token(value, './_-'):
             raise SecretStoreException('Value must be a valid directory string')
         if key in self.secret_map.keys():
@@ -156,10 +152,10 @@ def valid_token(token: str, extra_allowed_chars: str) -> bool:
     return token.isalnum()
 
 
-def path_on_disk(labbook: LabBook, username: str, secret_name: Optional[str] = None) -> str:
+def path_on_disk(labbook: LabBook, username: str, key: Optional[str] = None) -> str:
     """Return the path (on host) for the secrets file."""
     tokens = [labbook.client_config.app_workdir, '.labmanager',
               'secrets', username, labbook.owner, labbook.name]
-    if secret_name:
-        tokens.append(secret_name)
+    if key:
+        tokens.append(key)
     return os.path.join(*tokens)

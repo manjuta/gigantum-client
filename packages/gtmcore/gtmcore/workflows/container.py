@@ -14,11 +14,9 @@ class ContainerWorkflows(object):
 
         secrets_dir_map = secret_store.as_mount_dict.items()
         for sec_local_src, sec_container_dst in secrets_dir_map:
-            for secret_obj in os.listdir(sec_local_src):
-                fp = os.path.join(sec_local_src, secret_obj)
-                ContainerOperations.copy_into_container(labbook, username,
-                                                        src_path=fp,
-                                                        dst_dir=sec_container_dst)
+            ContainerOperations.copy_into_container(labbook, username,
+                                                    src_path=sec_local_src,
+                                                    dst_dir=sec_container_dst)
 
         # TODO - if putting a secret fails, then stop container and raise exception
 

@@ -37,10 +37,10 @@ from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 
 from lmsrvlabbook.api.connections.environment import PackageComponentConnection
-from lmsrvlabbook.api.connections.secrets import SecretsVaultConnection
+from lmsrvlabbook.api.connections.secrets import SecretFileMappingConnection
 from lmsrvlabbook.api.objects.basecomponent import BaseComponent
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
-from lmsrvlabbook.api.objects.secrets import SecretsVault
+from lmsrvlabbook.api.objects.secrets import SecretFileMapping
 from lmsrvlabbook.dataloader.package import PackageLatestVersionLoader
 
 logger = LMLogger.get_logger()
@@ -98,7 +98,8 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
     # A custom docker snippet to be run after all other dependencies and bases have been added.
     docker_snippet = graphene.String()
 
-    secrets_vault = graphene.ConnectionField(SecretsVaultConnection)
+    # A mapping that enumerates where secrets files should be mapped into the Project container.
+    secrets_file_mapping = graphene.ConnectionField(SecretFileMappingConnection)
 
     @classmethod
     def get_node(cls, info, id):
@@ -280,7 +281,7 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
             lambda labbook: self.helper_resolve_docker_snippet(labbook))
 
     @staticmethod
-    def helper_resolve_secrets_vault(labbook, kwargs):
+    def helper_resolve_secrets_file_mapping(labbook, kwargs):
         secrets_store = SecretStore(labbook, get_logged_in_username())
         edges = secrets_store.secret_map.keys()
 
@@ -295,15 +296,16 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
             # Get DevEnv instances
             edge_objs = []
             for edge, cursor in zip(lbc.edges, lbc.cursors):
-                node_obj = SecretsVault(owner=labbook.owner, name=labbook.name, vault_name=edge)
-                edge_objs.append(SecretsVaultConnection.Edge(node=node_obj, cursor=cursor))
-            return SecretsVaultConnection(edges=edge_objs, page_info=lbc.page_info)
+                node_obj = SecretFileMapping(owner=labbook.owner, name=labbook.name,
+                                             filename=edge, mount_path=secrets_store[edge])
+                edge_objs.append(SecretFileMappingConnection.Edge(node=node_obj, cursor=cursor))
+            return SecretFileMappingConnection(edges=edge_objs, page_info=lbc.page_info)
 
         else:
             pi = graphene.relay.PageInfo(has_next_page=False, has_previous_page=False)
-            return SecretsVaultConnection(edges=[], page_info=pi)
+            return SecretFileMappingConnection(edges=[], page_info=pi)
 
-    def resolve_secrets_vault(self, info, **kwargs):
+    def resolve_secrets_file_mapping(self, info, **kwargs):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: self.helper_resolve_secrets_vault(labbook, kwargs))
+            lambda labbook: self.helper_resolve_secrets_file_mapping(labbook, kwargs))
 

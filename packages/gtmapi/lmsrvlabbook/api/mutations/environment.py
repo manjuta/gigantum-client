@@ -213,53 +213,11 @@ class StopContainer(graphene.relay.ClientIDMutation):
         return StopContainer(environment=Environment(owner=owner, name=labbook_name))
 
 
-class CreateSecretVault(graphene.relay.ClientIDMutation):
-
-    class Input:
-        owner = graphene.String(required=True)
-        labbook_name = graphene.String(required=True)
-        vault_name = graphene.String(required=True)
-        mount_dir = graphene.String(required=True)
-
-    # Return the Environment instance
-    environment = graphene.Field(lambda: Environment)
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, vault_name, mount_dir,
-                               client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = InventoryManager().load_labbook(username, owner, labbook_name)
-        SecretStore(lb, username)[vault_name] = mount_dir
-
-        return CreateSecretVault(environment=Environment(owner=owner, name=labbook_name))
-
-
-class RemoveSecretVault(graphene.relay.ClientIDMutation):
-
-    class Input:
-        owner = graphene.String(required=True)
-        labbook_name = graphene.String(required=True)
-        vault_name = graphene.String(required=True)
-
-    environment = graphene.Field(lambda: Environment)
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, vault_name,
-                               client_mutation_id=None):
-        username = get_logged_in_username()
-        lb = InventoryManager().load_labbook(username, owner, labbook_name)
-        del SecretStore(lb, username)[vault_name]
-
-        return RemoveSecretVault(environment=Environment(owner=owner, name=labbook_name))
-
-
 class InsertSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
-    # class Input:
-    #     chunk_upload_params = ChunkUploadInput(required=True)
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        vault_name = graphene.String(required=True)
+        mount_path = graphene.String(required=True)
         chunk_upload_params = ChunkUploadInput(required=True)
         transaction_id = graphene.String(required=True)
 
@@ -267,7 +225,6 @@ class InsertSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
 
     @classmethod
     def mutate_and_wait_for_chunks(cls, info, **kwargs):
-        print('CHUNK', info, kwargs)
         return InsertSecretsFile(environment=None)
 
     @classmethod
@@ -279,12 +236,12 @@ class InsertSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         username = get_logged_in_username()
         owner = kwargs.get('owner')
         labbook_name = kwargs.get('labbook_name')
-        vault_name = kwargs.get('vault_name')
+        mount_path = kwargs.get('mount_path')
 
         lb = InventoryManager().load_labbook(username, owner, labbook_name)
         secret_store = SecretStore(lb, username)
 
-        inserted_path = secret_store.insert_file(upload_file_path, vault_name,
+        inserted_path = secret_store.insert_file(upload_file_path, mount_path,
                                                  dst_filename=upload_filename)
         assert os.path.basename(inserted_path) == upload_filename
 

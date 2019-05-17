@@ -209,8 +209,13 @@ class ContainerOperations:
 
     @classmethod
     def copy_into_container(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
+        """Copy the given file in src_path into the project's container. """
         if not labbook.owner:
             raise ContainerException(f"{str(labbook)} has no owner")
+
+        if not os.path.isfile(src_path):
+            raise ContainerException(f"Source file {str(labbook)} is not a file")
+
         docker_key = infer_docker_image_name(labbook_name=labbook.name,
                                              owner=labbook.owner,
                                              username=username)
@@ -226,6 +231,7 @@ class ContainerOperations:
         tarred_secret_file.seek(0)
 
         try:
+            logger.info(f"Copying file {src_path} into {dst_dir} in {str(labbook)}")
             docker.from_env().api.put_archive(docker_key, dst_dir, tarred_secret_file)
         finally:
             # Make sure the temporary Tar archive gets deleted.

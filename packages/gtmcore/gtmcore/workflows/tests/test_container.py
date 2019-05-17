@@ -16,8 +16,7 @@ class TestStartContainer(object):
         fix.docker_client.containers.get(fix.docker_container_id).remove()
 
         sectore = SecretStore(fix.labbook, fix.username)
-        secret_name = 'aws-credentials'
-        sectore[secret_name] = '/root/.aws-sample-creds'
+        target_dir = '/root/.aws-sample-creds'
 
         with tempfile.TemporaryDirectory() as tempdir:
             p1 = open(os.path.join(tempdir, 'private-key.key'), 'wb')
@@ -28,8 +27,8 @@ class TestStartContainer(object):
             p2.close()
 
             # Add the mock AWS keys
-            l1 = sectore.insert_file(p1.name, secret_name)
-            l2 = sectore.insert_file(p2.name, secret_name)
+            l1 = sectore.insert_file(p1.name, target_dir)
+            l2 = sectore.insert_file(p2.name, target_dir)
 
         container_id = ContainerWorkflows.start_labbook(fix.labbook, fix.username)
 
