@@ -66,29 +66,38 @@ class SecretStore(object):
         if not owner:
             # If we get here, the project is probably not in the appropriate place
             raise SecretStoreException(f'{str(self.labbook)} cannot accept secrets')
-        full_path = path_on_disk(self.labbook, self.username)
-        os.makedirs(full_path, exist_ok=True)
+
+        abs_host_dir = path_on_disk(self.labbook, self.username)
         if dst_filename:
-            full_path = os.path.join(full_path, dst_filename)
-        final_file_path = shutil.move(src_path, full_path)
+            host_insert_path = os.path.join(abs_host_dir, dst_filename)
+        else:
+            host_insert_path = os.path.join(abs_host_dir, os.path.basename(src_path))
+
+        if os.path.exists(host_insert_path):
+            raise SecretStoreException(f"Target file {os.path.basename(host_insert_path)} already exists")
+
+        os.makedirs(abs_host_dir, exist_ok=True)
+        final_file_path = shutil.move(src_path, host_insert_path)
         self[os.path.basename(final_file_path)] = target_dir
         return final_file_path
 
-    def delete_files(self, file_paths: List[str]) -> None:
+    def delete_file(self, file_path: str) -> None:
         """Delete the given files from the host machine.
 
         Args:
-            secret_name: Name of the secret vault (key).
-            file_paths: List of filenames to remove from host.
+            file_path: filename to remove from host.
 
         Returns:
             None
         """
         file_dir = path_on_disk(self.labbook, self.username)
-        for file_path in file_paths:
-            # TODO - Make safe path to get rid of all special chars
-            file_path = file_path.replace('..', '')
-            os.remove(os.path.join(file_dir, file_path))
+        # TODO - Make safe path to get rid of all special chars
+        file_path = file_path.replace('..', '')
+        target_path = os.path.join(file_dir, file_path)
+        if not os.path.exists(target_path):
+            raise SecretStoreException(f"No secret file {file_path}")
+        os.remove(target_path)
+        del self[file_path]
 
     def list_files(self) -> List[str]:
         """List the files (full_path) associated with a given secret.

@@ -6,7 +6,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
-                                        AddLabbookCollaborator,
+                                        AddLabbookCollaborator, RemoveSecretsFile,
                                         DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
                                         RemovePackageComponents, InsertSecretsFile,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
@@ -75,6 +75,7 @@ class LabbookEnvironmentMutations(graphene.ObjectType):
     remove_custom_docker = RemoveCustomDocker.Field()
 
     insert_secrets_file = InsertSecretsFile.Field()
+    remove_secrets_file = RemoveSecretsFile.Field()
 
 
 class LabbookSharingMutations(graphene.ObjectType):

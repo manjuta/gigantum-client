@@ -46,9 +46,9 @@ class TestLabbookSecret(object):
         assert secstore.list_files() == ['ID_SSH.KEY', 'ID_SSH.PUB']
 
         # Test that delete removes a file properly by using list_files
-        secstore.delete_files(['ID_SSH.KEY'])
+        secstore.delete_file('ID_SSH.KEY')
         assert secstore.list_files() == ['ID_SSH.PUB']
-        secstore.delete_files(['ID_SSH.PUB'])
+        secstore.delete_file('ID_SSH.PUB')
         assert secstore.list_files() == []
 
         # Test clear_files works by making sure the vault itself doesn't exist
@@ -56,3 +56,35 @@ class TestLabbookSecret(object):
         toks = [secstore.labbook.client_config.app_workdir, '.labmanager', 'secrets',
                 'test', secstore.labbook.owner, secstore.labbook.name]
         assert not os.path.exists(os.path.join(*toks))
+
+    def test_insert_cannot_overwrite(self, mock_config_file):
+        """
+        Confirm that you cannot overwrite a given file.
+        """
+        secstore = init(mock_config_file[0])
+        mnt_target = '/opt/.ssh'
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
+                t1.write('CORRECT_DATA')
+            keyfile_dst_1 = secstore.insert_file(t1.name, mnt_target)
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t2:
+                t2.write('BAD_DATA')
+            with pytest.raises(SecretStoreException):
+                keyfile_dst_2 = secstore.insert_file(t2.name, mnt_target)
+
+        assert secstore.list_files() == ['ID_SSH.KEY']
+        assert open(keyfile_dst_1).read() == 'CORRECT_DATA'
+        assert len(secstore.as_mount_dict) == 1
+
+    def test_remove_keyfile_not_existing(self, mock_config_file):
+        secstore = init(mock_config_file[0])
+        mnt_target = '/opt/.ssh'
+
+        with pytest.raises(SecretStoreException):
+            secstore.delete_file('catfile')
+
+        assert secstore.list_files() == []
+        assert len(secstore.as_mount_dict) == 0
