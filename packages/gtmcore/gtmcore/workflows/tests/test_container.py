@@ -18,6 +18,9 @@ class TestStartContainer(object):
         sectore = SecretStore(fix.labbook, fix.username)
         target_dir = '/root/.aws-sample-creds'
 
+        sectore['private-key.key'] = target_dir
+        sectore['public-key.key'] = target_dir
+
         with tempfile.TemporaryDirectory() as tempdir:
             p1 = open(os.path.join(tempdir, 'private-key.key'), 'wb')
             p1.write(b'AWS-mock-PRIVATE')
