@@ -120,7 +120,8 @@ class LabbookSharingMutations(graphene.ObjectType):
 
 
 class LabbookMutations(BranchMutations, LabbookSharingMutations,
-                       LabbookEnvironmentMutations, graphene.ObjectType):
+                       LabbookEnvironmentMutations, LabbookSecretsMutations,
+                       graphene.ObjectType):
     """Entry point for all graphql mutations"""
 
     # Import a Dataset from the Gitlab repository

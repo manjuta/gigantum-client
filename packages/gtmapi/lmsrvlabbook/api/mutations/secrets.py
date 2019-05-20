@@ -12,33 +12,59 @@ logger = LMLogger.get_logger()
 
 
 class InsertSecretsEntry(graphene.relay.ClientIDMutation):
+    """ Creates an entry in the Project's Secret Store. Note, you will
+    need to use the Upload mutation to actually put the file content in
+    the secret store. """
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         filename = graphene.String(required=True)
         mount_path = graphene.String(required=True)
 
+    environment = graphene.Field(lambda: Environment)
+
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, filename, mount_path, client_mutation_id=None):
-        return InsertSecretsEntry(None)
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, filename,
+                               mount_path, client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            SecretStore(lb, username)[filename] = mount_path
+
+        env = Environment(owner=owner, name=lb.name)
+        return InsertSecretsEntry(environment=env)
 
 
 class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
+    """ Removes the entry from the Project's SecretStore. Will also remove
+    any associated files. This undoes the InsertSecretsEntry mutation. """
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
         filename = graphene.String(required=True)
-        mount_path = graphene.String(required=True)
+
+    environment = graphene.Field(lambda: Environment)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, filename, mount_path, client_mutation_id=None):
-        return RemoveSecretsEntry(None)
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, filename,
+                               client_mutation_id=None):
+        username = get_logged_in_username()
+        lb = InventoryManager().load_labbook(username, owner, labbook_name,
+                                             author=get_logged_in_author())
+        with lb.lock():
+            del SecretStore(lb, username)[filename]
+
+        env = Environment(owner=owner, name=lb.name)
+        return InsertSecretsEntry(environment=env)
+
 
 class UploadSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
+    """Uploades the actual secrets file pertaining to the given filename in the
+    SecretStore registry. The InsertSecretsEntry must be called first. """
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        mount_path = graphene.String(required=True)
         chunk_upload_params = ChunkUploadInput(required=True)
         transaction_id = graphene.String(required=True)
 
@@ -57,7 +83,6 @@ class UploadSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         username = get_logged_in_username()
         owner = kwargs.get('owner')
         labbook_name = kwargs.get('labbook_name')
-        mount_path = kwargs.get('mount_path')
 
         lb = InventoryManager().load_labbook(username, owner, labbook_name)
         with lb.lock():
@@ -65,26 +90,29 @@ class UploadSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
             inserted_path = secret_store.insert_file(upload_file_path,
                                                      dst_filename=upload_filename)
 
-        return UploadSecretsFile(environment=Environment(owner=owner,
-                                                         name=labbook_name))
+        env = Environment(owner=owner, name=lb.name)
+        return UploadSecretsFile(environment=env)
 
 
 class DeleteSecretsFile(graphene.ClientIDMutation):
+    """Delete the secrets file on the host, but without removing the
+    corresponding entry in the registry. """
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        key_filename = graphene.String(required=True)
+        filename = graphene.String(required=True)
 
     environment = graphene.Field(lambda: Environment)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, owner, labbook_name, key_filename, client_mutation_id=None):
+    def mutate_and_get_payload(cls, root, info, owner, labbook_name, filename,
+                               client_mutation_id=None):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
             secstore = SecretStore(lb, username)
-            secstore.delete_file(key_filename)
+            secstore.delete_file(filename)
 
-        return DeleteSecretsFile(environment=Environment(owner=owner,
-                                                         name=lb.name))
+        env = Environment(owner=owner, name=lb.name)
+        return DeleteSecretsFile(environment=env)

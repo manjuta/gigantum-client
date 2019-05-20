@@ -48,10 +48,10 @@ class SecretFileMapping(graphene.ObjectType, interfaces=(graphene.relay.Node, Gi
     def _helper_resolve_is_present(self, labbook):
         secret_store = SecretStore(labbook, get_logged_in_username())
         if self.filename in secret_store:
-            return any([(self.filename, True) in secret_store.list_files()])
+            return (self.filename, True) in secret_store.list_files()
         else:
             return False
 
     def resolve_is_present(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: self._helper_resolve_mount_path(labbook))
+            lambda labbook: self._helper_resolve_is_present(labbook))
