@@ -59,8 +59,8 @@ class TestLabbookSecret(object):
             with open(os.path.join(tempdir, 'ID_SSH.PUB'), 'w') as t2:
                 t2.write('((NOT SO SECRET PUBLIC KEY))')
 
-            keyfile_dst_1 = secstore.insert_file(t1.name, mnt_target)
-            keyfile_dst_2 = secstore.insert_file(t2.name, mnt_target)
+            keyfile_dst_1 = secstore.insert_file(t1.name)
+            keyfile_dst_2 = secstore.insert_file(t2.name)
 
         parts = [secstore.labbook.client_config.app_workdir, '.labmanager',
                  'secrets', 'test', secstore.labbook.owner, secstore.labbook.name,
@@ -85,6 +85,19 @@ class TestLabbookSecret(object):
                 'test', secstore.labbook.owner, secstore.labbook.name]
         assert not os.path.exists(os.path.join(*toks))
 
+    def test_insert_must_be_for_valid_file(self, mock_config_file):
+        secstore = init(mock_config_file[0])
+        mnt_target = '/opt/.ssh'
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
+                t1.write('CORRECT_DATA')
+
+            # Raises this exception because we have not yet made
+            # an entry to account for this file.
+            with pytest.raises(SecretStoreException):
+                secstore.insert_file(t1.name)
+
     def test_insert_cannot_overwrite(self, mock_config_file):
         """
         Confirm that you cannot overwrite a given file.
@@ -97,13 +110,13 @@ class TestLabbookSecret(object):
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
                 t1.write('CORRECT_DATA')
-            keyfile_dst_1 = secstore.insert_file(t1.name, mnt_target)
+            keyfile_dst_1 = secstore.insert_file(t1.name)
 
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t2:
                 t2.write('BAD_DATA')
             with pytest.raises(SecretStoreException):
-                keyfile_dst_2 = secstore.insert_file(t2.name, mnt_target)
+                keyfile_dst_2 = secstore.insert_file(t2.name)
 
         assert secstore.list_files() == [('ID_SSH.KEY', True)]
         assert open(keyfile_dst_1).read() == 'CORRECT_DATA'
@@ -118,3 +131,23 @@ class TestLabbookSecret(object):
 
         assert secstore.list_files() == []
         assert len(secstore.as_mount_dict) == 0
+
+    def test_clean(self, mock_config_file):
+        secstore = init(mock_config_file[0])
+        mnt_target = '/opt/.ssh'
+        secstore['ID_SSH.KEY'] = mnt_target
+        with tempfile.TemporaryDirectory() as tempdir:
+            with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
+                t1.write('CORRECT_DATA')
+            keyfile_dst_1 = secstore.insert_file(t1.name)
+
+        del secstore['ID_SSH.KEY']
+        with open(os.path.join(os.path.dirname(keyfile_dst_1), 'badfile'), 'w') as bf:
+            bf.write('This file must get cleaned.')
+
+        # Even though an incorrect file is in there, it should not be listed.
+        assert len(secstore.list_files()) == 0
+
+        # Assert that _clean removes this extraneous file.
+        secstore2 = SecretStore(secstore.labbook, secstore.username)
+        assert not os.path.exists(bf.name)

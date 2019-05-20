@@ -39,12 +39,14 @@ class TestSecretsQueries:
         sec_store = SecretStore(lb, "default")
         container_dst = '/tmp/secrets1'
 
+        sec_store['data1.key'] = container_dst
+
         with tempfile.TemporaryDirectory() as tdir:
             path = os.path.join(tdir, 'data1.key')
             f1 = open(path, 'w')
             f1.write('<<<keydata>>>')
             f1.close()
-            sec_store.insert_file(f1.name, container_dst)
+            sec_store.insert_file(f1.name)
 
         query = """
         {
@@ -55,6 +57,7 @@ class TestSecretsQueries:
                             node {
                                 filename
                                 mountPath
+                                isPresent
                             }
                         }
                     }
@@ -66,6 +69,7 @@ class TestSecretsQueries:
         pprint.pprint(r)
         assert 'errors' not in r
         assert r['data']['labbook']['environment']['secretsFileMapping']['edges'][0]['node']['filename'] == 'data1.key'
+        assert r['data']['labbook']['environment']['secretsFileMapping']['edges'][0]['node']['isPresent'] == True
         assert r['data']['labbook']['environment']['secretsFileMapping']['edges'][0]['node']['mountPath'] == container_dst
 
 
@@ -191,7 +195,7 @@ class TestSecretsMutations:
             f1 = open(path, 'w')
             f1.write('<<<keydata>>>')
             f1.close()
-            sec_store.insert_file(f1.name, container_dst)
+            sec_store.insert_file(f1.name)
 
         delete_query = """
         mutation removeSec {

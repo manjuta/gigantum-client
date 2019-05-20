@@ -30,6 +30,7 @@ class SecretStore(object):
         # secret_path contains the file defining the mapping between a
         # mnemonic and where the files for it should go.
         self.secret_path = os.path.join(self.labbook.metadata_path, 'secrets.json')
+        self._clean()
 
     @property
     def secret_map(self) -> Dict[str, str]:
@@ -48,15 +49,22 @@ class SecretStore(object):
         return {path_on_disk(self.labbook, self.username, k): v
                 for k, v in self.secret_map.items()}
 
-    def insert_file(self, src_path: str, target_dir: str,
-                    dst_filename: Optional[str] = None) -> str:
+    def _clean(self):
+        p = path_on_disk(self.labbook, self.username)
+        if not os.path.exists(p):
+            return
+        for secrets_file in os.listdir(p):
+            if secrets_file not in self:
+                # Remove any unexpected secrets files.
+                os.remove(os.path.join(p, secrets_file))
+
+    def insert_file(self, src_path: str, dst_filename: Optional[str] = None) -> str:
         """Insert the given file into the given secret name (key).
         This will *move* the file from its src_path (source location)
         to relevant location for the key store (secret name).
 
         Args:
             src_path: Path of the file containing the key or credentials
-            target_dir: Name of directory INSIDE project container to place this
             dst_filename: Optional name to force the destination filename.
 
         Returns:
@@ -72,6 +80,10 @@ class SecretStore(object):
             host_insert_path = os.path.join(abs_host_dir, dst_filename)
         else:
             host_insert_path = os.path.join(abs_host_dir, os.path.basename(src_path))
+
+        final_filename = dst_filename or os.path.basename(src_path)
+        if final_filename not in self:
+            raise SecretStoreException(f"No registry for file {final_filename}")
 
         if os.path.exists(host_insert_path):
             raise SecretStoreException(f"Target file {os.path.basename(host_insert_path)} already exists")

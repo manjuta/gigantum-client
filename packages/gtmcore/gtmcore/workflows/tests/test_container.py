@@ -27,8 +27,8 @@ class TestStartContainer(object):
             p2.close()
 
             # Add the mock AWS keys
-            l1 = sectore.insert_file(p1.name, target_dir)
-            l2 = sectore.insert_file(p2.name, target_dir)
+            l1 = sectore.insert_file(p1.name)
+            l2 = sectore.insert_file(p2.name)
 
         container_id = ContainerWorkflows.start_labbook(fix.labbook, fix.username)
 

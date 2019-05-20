@@ -20,7 +20,7 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, filename, mount_path, client_mutation_id=None):
-        pass
+        return InsertSecretsEntry(None)
 
 
 class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
@@ -30,6 +30,9 @@ class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
         filename = graphene.String(required=True)
         mount_path = graphene.String(required=True)
 
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, owner, filename, mount_path, client_mutation_id=None):
+        return RemoveSecretsEntry(None)
 
 class UploadSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
     class Input:
@@ -59,7 +62,7 @@ class UploadSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name)
         with lb.lock():
             secret_store = SecretStore(lb, username)
-            inserted_path = secret_store.insert_file(upload_file_path, mount_path,
+            inserted_path = secret_store.insert_file(upload_file_path,
                                                      dst_filename=upload_filename)
 
         return UploadSecretsFile(environment=Environment(owner=owner,
