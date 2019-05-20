@@ -18,6 +18,9 @@ class SecretFileMapping(graphene.ObjectType, interfaces=(graphene.relay.Node, Gi
     # Path **inside the running project container**
     mount_path = graphene.String()
 
+    # Determine if an actual file is present in the secret store
+    is_present = graphene.Boolean()
+
     @classmethod
     def get_node(cls, info, id):
         """Method to resolve the object based on its Node ID"""
@@ -41,3 +44,6 @@ class SecretFileMapping(graphene.ObjectType, interfaces=(graphene.relay.Node, Gi
     def resolve_mount_path(self, info):
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self._helper_resolve_mount_path(labbook))
+
+    def resolve_is_present(self, info):
+        pass

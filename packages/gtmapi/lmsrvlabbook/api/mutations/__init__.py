@@ -12,8 +12,7 @@ from lmsrvlabbook.api.mutations.note import CreateUserNote
 from lmsrvlabbook.api.mutations.branching import (CreateExperimentalBranch, DeleteExperimentalBranch,
                                                   MergeFromBranch, WorkonBranch, ResetBranchToRemote)
 
-from lmsrvlabbook.api.mutations.environment import (BuildImage, StartContainer, StopContainer, CancelBuild,
-                                                    InsertSecretsFile, RemoveSecretsFile)
+from lmsrvlabbook.api.mutations.environment import (BuildImage, StartContainer, StopContainer, CancelBuild)
 from lmsrvlabbook.api.mutations.environmentcomponent import (AddPackageComponents,
                                                              RemovePackageComponents,
                                                              AddCustomDocker, RemoveCustomDocker)

@@ -6,9 +6,9 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         ExportLabbook, AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
                                         MakeLabbookDirectory, RemoveUserIdentity,
                                         AddLabbookFavorite, RemoveLabbookFavorite, UpdateLabbookFavorite,
-                                        AddLabbookCollaborator, RemoveSecretsFile,
+                                        AddLabbookCollaborator,
                                         DeleteLabbookCollaborator, SyncLabbook, PublishLabbook, PublishDataset,
-                                        RemovePackageComponents, InsertSecretsFile,
+                                        RemovePackageComponents,
                                         StartDevTool, SetLabbookDescription, CreateExperimentalBranch,
                                         DeleteExperimentalBranch, MigrateLabbookSchema,
                                         MergeFromBranch, WorkonBranch, WriteLabbookReadme, AddCustomDocker, 
@@ -20,6 +20,9 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
                                         ModifyDatasetLink, WriteDatasetReadme, SetDatasetDescription,
                                         ResetBranchToRemote, CancelBuild)
+
+from lmsrvlabbook.api.mutations.secrets import (InsertSecretsEntry, RemoveSecretsEntry,
+                                                UploadSecretsFile, DeleteSecretsFile)
 
 from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
@@ -43,6 +46,13 @@ class BranchMutations(object):
 
     # Work on a given feature branch (perform a git checkout).
     workon_experimental_branch = WorkonBranch.Field()
+
+
+class LabbookSecretsMutations(graphene.ObjectType):
+    insert_secrets_entry = InsertSecretsEntry.Field()
+    remove_secrets_entry = RemoveSecretsEntry.Field()
+    upload_secrets_file = UploadSecretsFile.Field()
+    delete_secrets_file = DeleteSecretsFile.Field()
 
 
 class LabbookEnvironmentMutations(graphene.ObjectType):
@@ -73,9 +83,6 @@ class LabbookEnvironmentMutations(graphene.ObjectType):
 
     # Delete the arbitrary docker snippet.
     remove_custom_docker = RemoveCustomDocker.Field()
-
-    insert_secrets_file = InsertSecretsFile.Field()
-    remove_secrets_file = RemoveSecretsFile.Field()
 
 
 class LabbookSharingMutations(graphene.ObjectType):
