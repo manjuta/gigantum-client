@@ -13,7 +13,7 @@ export default createPaginationContainer(
   {
     dataset: graphql`
         fragment DatasetActivityContainer_dataset on Dataset{
-          activityRecords(first: $first, after: $cursor) @connection(key: "DatasetActivityContainer_activityRecords"){
+          activityRecords(first: $first, after: $cursor) @connection(key: "DatasetActivityContainer_activityRecords") @skip (if: $activitySkip){
             edges{
               node{
                 id
@@ -69,13 +69,14 @@ export default createPaginationContainer(
         cursor,
         name,
         owner,
+        activitySkip: false,
         // in most cases, for variables other than connection filters like
         // `first`, `after`, etc. you may want to use the previous values.
         // orderBy: fragmentVariables.orderBy,
       };
     },
     query: graphql`
-       query DatasetActivityContainerPaginationQuery($name: String!, $owner: String!, $first: Int!, $cursor: String){
+       query DatasetActivityContainerPaginationQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $activitySkip: Boolean!){
          dataset(name: $name, owner: $owner){
            id
            description

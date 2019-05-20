@@ -130,7 +130,8 @@ export default class SectionWrapper extends Component {
       const sectionProps = {
         [section]: innerSection,
       };
-      if (!((section === 'data') || (sectionObject[section]))) {
+
+      if (!((section === 'data' && sectionObject.id) || (sectionObject[section]))) {
         return <Loader />;
       }
 
