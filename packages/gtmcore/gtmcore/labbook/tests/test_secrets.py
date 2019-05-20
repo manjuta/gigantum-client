@@ -23,9 +23,35 @@ class TestLabbookSecret(object):
         assert len(secstore) == 0
         assert [x for x in secstore] == []
 
+    def test_create_registry_void_of_files(self, mock_config_file):
+        secstore = init(mock_config_file[0])
+        mnt_target = '/opt/.ssh'
+
+        secstore['ID_SSH.KEY'] = mnt_target
+        secstore['ID_SSH.PUB'] = mnt_target
+        secstore['PUBKEY.DAT'] = '/var/tmp'
+
+        print('xxxxxxx', [x for x in secstore.list_files()])
+
+        # Assert all files are not found, but exist in registry.
+        assert all([e[1] == False for e in secstore.list_files()])
+        assert len(secstore.list_files()) == 3
+
+        del secstore['PUBKEY.DAT']
+        assert len(secstore.list_files()) == 2
+
+        del secstore['ID_SSH.KEY']
+        assert len(secstore.list_files()) == 1
+
+        del secstore['ID_SSH.PUB']
+        assert len(secstore.list_files()) == 0
+
     def test_insert_file_delete_files_list_files(self, mock_config_file):
         secstore = init(mock_config_file[0])
         mnt_target = '/opt/.ssh'
+
+        secstore['ID_SSH.KEY'] = mnt_target
+        secstore['ID_SSH.PUB'] = mnt_target
 
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
@@ -43,13 +69,15 @@ class TestLabbookSecret(object):
         assert assumed_path == keyfile_dst_1
 
         # But properly return the two inserted files for the correct keys
-        assert secstore.list_files() == ['ID_SSH.KEY', 'ID_SSH.PUB']
+        assert secstore.list_files() == [('ID_SSH.KEY', True), ('ID_SSH.PUB', True)]
 
         # Test that delete removes a file properly by using list_files
         secstore.delete_file('ID_SSH.KEY')
-        assert secstore.list_files() == ['ID_SSH.PUB']
-        secstore.delete_file('ID_SSH.PUB')
-        assert secstore.list_files() == []
+        assert secstore.list_files() == [('ID_SSH.KEY', False), ('ID_SSH.PUB', True)]
+
+        # Deleting from the registry should ALSO delete the actual file.
+        del secstore['ID_SSH.PUB']
+        assert secstore.list_files() == [('ID_SSH.KEY', False)]
 
         # Test clear_files works by making sure the vault itself doesn't exist
         secstore.clear_files()
@@ -64,6 +92,8 @@ class TestLabbookSecret(object):
         secstore = init(mock_config_file[0])
         mnt_target = '/opt/.ssh'
 
+        secstore['ID_SSH.KEY'] = mnt_target
+
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
                 t1.write('CORRECT_DATA')
@@ -75,7 +105,7 @@ class TestLabbookSecret(object):
             with pytest.raises(SecretStoreException):
                 keyfile_dst_2 = secstore.insert_file(t2.name, mnt_target)
 
-        assert secstore.list_files() == ['ID_SSH.KEY']
+        assert secstore.list_files() == [('ID_SSH.KEY', True)]
         assert open(keyfile_dst_1).read() == 'CORRECT_DATA'
         assert len(secstore.as_mount_dict) == 1
 

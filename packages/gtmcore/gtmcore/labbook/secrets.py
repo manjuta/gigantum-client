@@ -2,7 +2,7 @@ import shutil
 import json
 import os
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from gtmcore.exceptions.exceptions import GigantumException
 from gtmcore.labbook import LabBook
@@ -78,7 +78,6 @@ class SecretStore(object):
 
         os.makedirs(abs_host_dir, exist_ok=True)
         final_file_path = shutil.move(src_path, host_insert_path)
-        self[os.path.basename(final_file_path)] = target_dir
         return final_file_path
 
     def delete_file(self, file_path: str) -> None:
@@ -97,9 +96,8 @@ class SecretStore(object):
         if not os.path.exists(target_path):
             raise SecretStoreException(f"No secret file {file_path}")
         os.remove(target_path)
-        del self[file_path]
 
-    def list_files(self) -> List[str]:
+    def list_files(self) -> List[Tuple[str, bool]]:
         """List the files (full_path) associated with a given secret.
 
         Return:
@@ -107,8 +105,11 @@ class SecretStore(object):
         """
         secret_file_dir = path_on_disk(self.labbook, self.username)
         if not os.path.exists(secret_file_dir):
-            return []
-        return sorted(os.listdir(secret_file_dir))
+            local_files = []
+        else:
+            local_files = sorted(os.listdir(secret_file_dir))
+        return [(fname, fname in local_files)
+                for fname in self]
 
     def clear_files(self) -> None:
         """Completely delete the secret files from disk. """
