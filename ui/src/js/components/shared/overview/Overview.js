@@ -270,7 +270,7 @@ export default class Overview extends Component {
       'Btn__loadMore--up': state.readmeExpanded,
     });
 
-    if (sectionProps && !((props.sectionType === 'labbook') && (!sectionProps.overview))) {
+    if (sectionProps && sectionProps.overview) {
       return (
 
         <div className={overviewCSS}>

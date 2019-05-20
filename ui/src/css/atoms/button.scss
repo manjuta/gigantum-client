@@ -27,6 +27,14 @@ button {
   }
 }
 
+.BtnContainer {
+
+  width: 100%;
+  align-items: center;
+  padding: 30px 0 10px;
+  @include flex(flex-end, row);
+}
+
 .Btn {
    background-color: $azure;
    border: 0px;
