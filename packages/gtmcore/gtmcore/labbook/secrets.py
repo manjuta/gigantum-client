@@ -117,7 +117,7 @@ class SecretStore(object):
         """
         secret_file_dir = path_on_disk(self.labbook, self.username)
         if not os.path.exists(secret_file_dir):
-            local_files = []
+            local_files = [] #type: ignore
         else:
             local_files = sorted(os.listdir(secret_file_dir))
         return [(fname, fname in local_files)
