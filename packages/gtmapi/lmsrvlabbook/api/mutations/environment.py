@@ -13,6 +13,7 @@ from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.workflows import LabbookWorkflow, ContainerWorkflows
 from gtmcore.logging import LMLogger
+from gtmcore.activity import ActivityAction, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityStore, ActivityType
 from gtmcore.activity.services import stop_labbook_monitor
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
@@ -227,6 +228,26 @@ class InsertSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
     def mutate_and_wait_for_chunks(cls, info, **kwargs):
         return InsertSecretsFile(environment=None)
 
+    # @staticmethod
+    # def _x(labbook, ):
+    #     labbook.git.add_all()
+    #     commit = labbook.git.commit(f"adding submodule ref to link dataset {dataset_namespace}/{dataset_name}")
+    #     labbook.git.update_submodules(init=True)
+    #
+    #     # Add Activity Record
+    #     adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.CREATE)
+    #     adr.add_value('text/markdown',
+    #                   f"Linked Dataset `{dataset_namespace}/{dataset_name}` to "
+    #                   f"project at revision `{dataset_revision}`")
+    #     ar = ActivityRecord(ActivityType.DATASET,
+    #                         message=f"Linked Dataset {dataset_namespace}/{dataset_name} to project.",
+    #                         linked_commit=commit.hexsha,
+    #                         tags=["dataset"],
+    #                         show=True)
+    #     ar.add_detail_object(adr)
+    #     ars = ActivityStore(labbook)
+    #     ars.create_activity_record(ar)
+
     @classmethod
     def mutate_and_process_upload(cls, info, upload_file_path, upload_filename, **kwargs):
         if not upload_file_path:
@@ -241,10 +262,8 @@ class InsertSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name)
         with lb.lock():
             secret_store = SecretStore(lb, username)
-
             inserted_path = secret_store.insert_file(upload_file_path, mount_path,
                                                      dst_filename=upload_filename)
-            assert os.path.basename(inserted_path) == upload_filename
 
         return InsertSecretsFile(environment=Environment(owner=owner,
                                                          name=labbook_name))

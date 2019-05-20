@@ -143,21 +143,3 @@ class TestPutFile(object):
 
             # The copy_into_container should NOT remove the original file on disk.
             assert os.path.exists(sample_secret.name)
-
-        # Test insert of a directory loaded with many files.
-        dst_dir_2 = "/home/giguser/many-credentials"
-        fdata = "Sample file Content."
-        with tempfile.TemporaryDirectory() as load_temp_dir:
-            for i in range(10):
-                with open(os.path.join(load_temp_dir, f'file-{i}.temp'), 'w') as f:
-                    f.write(fdata)
-            ContainerOperations.copy_into_container(fixture.labbook, fixture.username,
-                                                    src_path=load_temp_dir,
-                                                    dst_dir=dst_dir_2)
-
-            # Check that all the files and their content went up properly.
-            r = container.exec_run(f'sh -c "cat {dst_dir_2}/{os.path.basename(load_temp_dir)}/*"')
-            assert r.output.decode() == fdata * 10
-
-            # Check that files still exist
-            assert len(os.listdir(load_temp_dir)) == 10

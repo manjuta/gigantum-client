@@ -214,7 +214,7 @@ class ContainerOperations:
             raise ContainerException(f"{str(labbook)} has no owner")
 
         if not os.path.isfile(src_path):
-            raise ContainerException(f"Source file {str(labbook)} is not a file")
+            raise ContainerException(f"Source file {src_path} is not a file")
 
         docker_key = infer_docker_image_name(labbook_name=labbook.name,
                                              owner=labbook.owner,
