@@ -49,9 +49,16 @@ class BranchMutations(object):
 
 
 class LabbookSecretsMutations(graphene.ObjectType):
+    # Create an entry for a secrets file, but not actually upload it
     insert_secrets_entry = InsertSecretsEntry.Field()
+
+    # Remove an entry from the secrets registry
     remove_secrets_entry = RemoveSecretsEntry.Field()
+
+    # Actually upload the secret file for the local user
     upload_secrets_file = UploadSecretsFile.Field()
+
+    # Remove a secrets file for the local user.
     delete_secrets_file = DeleteSecretsFile.Field()
 
 
