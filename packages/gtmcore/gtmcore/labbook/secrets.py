@@ -126,7 +126,7 @@ class SecretStore(object):
     def clear_files(self) -> None:
         """Completely delete the secret files from disk. """
         lb_secrets_dir = path_on_disk(self.labbook, self.username)
-        shutil.rmtree(lb_secrets_dir)
+        shutil.rmtree(lb_secrets_dir, ignore_errors=True)
 
     def __len__(self) -> int:
         return len(self.secret_map)
