@@ -8,13 +8,11 @@ from typing import Callable, Optional
 
 from gtmcore.configuration import get_docker_client, Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.inventory.inventory import InventoryManager, InventoryException
-from gtmcore.labbook import SecretStore, SecretStoreException
+from gtmcore.inventory.inventory  import InventoryManager, InventoryException
 from gtmcore.container.utils import infer_docker_image_name, ps_search
 from gtmcore.container.exceptions import ContainerBuildException
-from gtmcore.container.cuda import should_launch_with_cuda_support
 from gtmcore.dataset.cache import get_cache_manager_class
-
+from gtmcore.container.cuda import should_launch_with_cuda_support
 
 logger = LMLogger.get_logger()
 
@@ -101,8 +99,8 @@ def _remove_docker_image(image_name: str) -> None:
         logger.warning(f"Attempted to delete Docker image {image_name}, but not found")
 
 
-def build_docker_image(root_dir: str, username: str, nocache: bool = False,
-                       override_image_tag: Optional[str] = None,
+def build_docker_image(root_dir: str, override_image_tag: Optional[str],
+                       nocache: bool = False, username: Optional[str] = None,
                        feedback_callback: Optional[Callable] = None) -> str:
     """
     Build a new docker image from the Dockerfile at the given directory, give this image
@@ -179,8 +177,9 @@ def build_docker_image(root_dir: str, username: str, nocache: bool = False,
     return image_id
 
 
-def start_labbook_container(labbook_root: str, config_path: str, username: str,
-                            override_image_id: Optional[str] = None) -> str:
+def start_labbook_container(labbook_root: str, config_path: str,
+                            override_image_id: Optional[str] = None,
+                            username: Optional[str] = None) -> str:
     """ Start a Docker container from a given image_name.
 
     Args:
@@ -209,13 +208,6 @@ def start_labbook_container(labbook_root: str, config_path: str, username: str,
         mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
         'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
     }
-
-    secret_store = SecretStore(lb, username)
-    for secret_name in secret_store:
-        pass
-
-    #secret_store.secret_path
-
 
     # Set up additional bind mounts for datasets if needed.
     submodules = lb.git.list_submodules()
