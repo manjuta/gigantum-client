@@ -209,7 +209,14 @@ class ContainerOperations:
 
     @classmethod
     def copy_into_container(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
-        """Copy the given file in src_path into the project's container. """
+        """Copy the given file in src_path into the project's container.
+
+        Args:
+            labbook: Project under consideration.
+            username: Active username
+            src_path: Source path ON THE HOST of the file - callers responsibility to sanitize
+            dst_dir: Destination directory INSIDE THE CONTAINER.
+        """
         if not labbook.owner:
             raise ContainerException(f"{str(labbook)} has no owner")
 

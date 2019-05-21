@@ -169,6 +169,8 @@ class SecretStore(object):
 def valid_token(token: str, extra_allowed_chars: str) -> bool:
     """ Ensure the given token is alphanumeric
     (with the exception of the extra characters)"""
+    if '..' in token:
+        return False
     for echar in extra_allowed_chars:
         token = token.replace(echar, '')
     return token.isalnum()

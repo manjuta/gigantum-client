@@ -25,10 +25,10 @@ class SecretFileMapping(graphene.ObjectType, interfaces=(graphene.relay.Node, Gi
     def get_node(cls, info, id):
         """Method to resolve the object based on its Node ID"""
         # Parse the key
-        owner, name, vault_name = id.split("&")
+        owner, name, filename = id.split("&")
 
-        return SecretFileMapping(id=f"{owner}&{name}&{vault_name}",
-                                 name=name, owner=owner, vault_name=vault_name)
+        return SecretFileMapping(id=f"{owner}&{name}&{filename}",
+                                 name=name, owner=owner, filename=filename)
 
     def resolve_id(self, info):
         """Resolve the unique Node id for this object"""
