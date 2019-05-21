@@ -22,6 +22,7 @@ import os
 import pprint
 import getpass
 import docker
+import time
 import requests
 import shutil
 import tempfile
@@ -136,10 +137,14 @@ class TestPutFile(object):
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'secretfile'), 'w') as sample_secret:
                 sample_secret.write("<<Secret File Content>>")
+            t0 = time.time()
             ContainerOperations.copy_into_container(fixture.labbook, fixture.username,
                                                     src_path=sample_secret.name,
                                                     dst_dir=dst_dir_1)
+            tf = time.time()
             container.exec_run(f'sh -c "cat {dst_dir_1}/secretfile"')
 
             # The copy_into_container should NOT remove the original file on disk.
             assert os.path.exists(sample_secret.name)
+            assert tf - t0 < 1.0, \
+                f"Time to insert small file must be less than 0.25s - took {tf-t0:.2f}s"
