@@ -9,6 +9,7 @@ import pytest
 from werkzeug.datastructures import FileStorage
 from graphene.test import Client
 
+from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import SecretStore
 
@@ -114,6 +115,12 @@ class TestSecretsMutations:
         assert n['filename'] == 'example.key'
         assert n['isPresent'] == False
         assert n['mountPath'] == '/opt/path'
+
+        # Check that secrets.json is tracked.
+        secstore = SecretStore(lb, "default")
+        p = call_subprocess(f"git ls-files {secstore.secret_path}".split(), cwd=lb.root_dir)
+        assert p.strip() == '.gigantum/secrets.json'
+        assert 'Created entry for secrets file' in lb.git.log()[0]['message']
 
     def test_remove_secrets_entry(self, fixture_working_dir_env_repo_scoped):
         client = fixture_working_dir_env_repo_scoped[2]

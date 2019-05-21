@@ -1,8 +1,10 @@
 import graphene
 
-from gtmcore.labbook import SecretStore, LabBook
+from gtmcore.labbook import SecretStore
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
+from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, \
+    ActivityRecord, ActivityType, ActivityAction
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.environment import Environment
@@ -31,9 +33,29 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         with lb.lock():
             SecretStore(lb, username)[filename] = mount_path
+            cls._record_insert_activity(filename, lb, mount_path)
 
         env = Environment(owner=owner, name=lb.name)
         return InsertSecretsEntry(environment=env)
+
+    @classmethod
+    def _record_insert_activity(cls, filename, lb, mount_path):
+        """Make an activity record for the insertion of the secret. """
+        lb.sweep_uncommitted_changes()
+        commit = lb.git.commit_hash
+        adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
+                                   action=ActivityAction.CREATE)
+        adr.add_value('text/markdown',
+                      f"Created new entry for secrets file {filename}"
+                      f"to map to {mount_path}")
+        ar = ActivityRecord(ActivityType.LABBOOK,
+                            message=f"Created entry for secrets file {filename}",
+                            linked_commit=commit,
+                            tags=["labbook", "secrets"],
+                            show=True)
+        ar.add_detail_object(adr)
+        ars = ActivityStore(lb)
+        ars.create_activity_record(ar)
 
 
 class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
@@ -54,9 +76,28 @@ class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
                                              author=get_logged_in_author())
         with lb.lock():
             del SecretStore(lb, username)[filename]
+            cls._record_remove_activity(filename, lb)
 
         env = Environment(owner=owner, name=lb.name)
         return InsertSecretsEntry(environment=env)
+
+    @classmethod
+    def _record_remove_activity(cls, filename, lb):
+        """Make an activity record for the removal of the secret. """
+        lb.sweep_uncommitted_changes()
+        commit = lb.git.commit_hash
+        adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
+                                   action=ActivityAction.DELETE)
+        adr.add_value('text/markdown',
+                      f"Removed entry for secrets file {filename}")
+        ar = ActivityRecord(ActivityType.LABBOOK,
+                            message=f"Removed entry for secrets file {filename}",
+                            linked_commit=commit,
+                            tags=["labbook", "secrets"],
+                            show=True)
+        ar.add_detail_object(adr)
+        ars = ActivityStore(lb)
+        ars.create_activity_record(ar)
 
 
 class UploadSecretsFile(graphene.relay.ClientIDMutation, ChunkUploadMutation):
