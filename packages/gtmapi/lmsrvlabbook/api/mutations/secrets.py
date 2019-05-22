@@ -32,16 +32,18 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
-            SecretStore(lb, username)[filename] = mount_path
-            cls._record_insert_activity(filename, lb, mount_path)
+            secstore = SecretStore(lb, username)
+            secstore[filename] = mount_path
+            cls._record_insert_activity(secstore, filename, lb, mount_path)
 
         env = Environment(owner=owner, name=lb.name)
         return InsertSecretsEntry(environment=env)
 
     @classmethod
-    def _record_insert_activity(cls, filename, lb, mount_path):
+    def _record_insert_activity(cls, secret_store, filename, lb, mount_path):
         """Make an activity record for the insertion of the secret. """
-        lb.sweep_uncommitted_changes()
+        lb.git.add(secret_store.secret_path)
+        lb.git.commit("Updated secrets registry.")
         commit = lb.git.commit_hash
         adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
                                    action=ActivityAction.CREATE)
@@ -75,16 +77,18 @@ class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
         with lb.lock():
-            del SecretStore(lb, username)[filename]
-            cls._record_remove_activity(filename, lb)
+            secret_store = SecretStore(lb, username)
+            del secret_store[filename]
+            cls._record_remove_activity(secret_store, filename, lb)
 
         env = Environment(owner=owner, name=lb.name)
         return InsertSecretsEntry(environment=env)
 
     @classmethod
-    def _record_remove_activity(cls, filename, lb):
+    def _record_remove_activity(cls, secret_store, filename, lb):
         """Make an activity record for the removal of the secret. """
-        lb.sweep_uncommitted_changes()
+        lb.git.add(secret_store.secret_path)
+        lb.git.commit("Removed entry from secrets registry.")
         commit = lb.git.commit_hash
         adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
                                    action=ActivityAction.DELETE)

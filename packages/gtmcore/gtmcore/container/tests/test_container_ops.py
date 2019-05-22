@@ -147,4 +147,4 @@ class TestPutFile(object):
             # The copy_into_container should NOT remove the original file on disk.
             assert os.path.exists(sample_secret.name)
             assert tf - t0 < 1.0, \
-                f"Time to insert small file must be less than 0.25s - took {tf-t0:.2f}s"
+                f"Time to insert small file must be less than 1 sec - took {tf-t0:.2f}s"
