@@ -20,8 +20,8 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        filename = graphene.String(required=True)
-        mount_path = graphene.String(required=True)
+        filename = graphene.String(required=True, description="Filename (not a full path) of the secrets file.")
+        mount_path = graphene.String(required=True, description="Path to directory INSIDE the container")
 
     environment = graphene.Field(lambda: Environment)
 
@@ -66,7 +66,7 @@ class RemoveSecretsEntry(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        filename = graphene.String(required=True)
+        filename = graphene.String(required=True, description="Filename of secret to remove from the registry")
 
     environment = graphene.Field(lambda: Environment)
 
@@ -145,7 +145,8 @@ class DeleteSecretsFile(graphene.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
-        filename = graphene.String(required=True)
+        filename = graphene.String(required=True, description="Filename of secrets file to delete from the host "
+                                                              "- does NOT delete from the registry")
 
     environment = graphene.Field(lambda: Environment)
 
