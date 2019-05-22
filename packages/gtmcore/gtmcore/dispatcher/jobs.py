@@ -24,6 +24,7 @@ import time
 from typing import Callable, Optional, List
 import sys
 import shutil
+import requests
 
 from rq import get_current_job
 
@@ -74,6 +75,26 @@ def publish_repository(repository: Repository, username: str, access_token: str,
                 wf = DatasetWorkflow(repository) # type: ignore
             wf.publish(username=username, access_token=access_token, remote=remote or "origin",
                        public=public, feedback_callback=update_meta, id_token=id_token)
+
+            # update tracking service with new record
+            repo_type = 'project' if isinstance(repository, LabBook) else 'dataset'
+            tracking_service = 'yvnb2ma8id.execute-api.us-east-1.amazonaws.com/api'
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/init/{repo_type}",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/sync",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
+            # update tracking service with repo size for new record
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(repository.root_dir):
+                if '.git' in dirnames:
+                    dirnames.remove('.git')
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/repo_size/{total_size}",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
     except Exception as e:
         logger.exception(f"(Job {p}) Error on publish_repository: {e}")
         raise Exception("Could not publish - try to log out and log in again.")
@@ -108,6 +129,23 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
             cnt = wf.sync(username=username, remote=remote, override=override,
                           feedback_callback=update_meta, access_token=access_token,
                           id_token=id_token, pull_only=pull_only)
+
+            # update tracking service
+            tracking_service = 'yvnb2ma8id.execute-api.us-east-1.amazonaws.com/api'
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/sync",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
+            # update tracking service with repo size for new record
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(repository.root_dir):
+                if '.git' in dirnames:
+                    dirnames.remove('.git')
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/repo_size/{total_size}",
+                          headers={"token": "d43f80mbvdsrju567ubg"})
+
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
     except Exception as e:

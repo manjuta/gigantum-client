@@ -1,5 +1,6 @@
 from typing import Optional, Callable, Any, cast
 import tempfile
+import requests
 import os
 
 from gtmcore.configuration.utils import call_subprocess
@@ -57,5 +58,10 @@ def clone_repo(remote_url: str, username: str, owner: str,
                             cwd=candidate_repo.root_dir)
 
         repository = put_repository(candidate_repo.root_dir, username, owner)
+
+    # update tracking service
+    tracking_service = 'yvnb2ma8id.execute-api.us-east-1.amazonaws.com/api'
+    requests.post(f"https://{tracking_service}/repo/{username}/{repository.name}/clone",
+                  headers={"token": "d43f80mbvdsrju567ubg"})
 
     return repository
