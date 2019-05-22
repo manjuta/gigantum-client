@@ -823,6 +823,7 @@ class Activity extends Component {
                                   toggleSubmenu={toggleSubmenu}
                                   toggleRollbackMenu={this._toggleRollbackMenu}
                                   isLocked={props.isLocked}
+                                  setHoveredRollback={this._setHoveredRollback}
                                 />
                               );
                             }
