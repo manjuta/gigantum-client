@@ -265,9 +265,9 @@ export default class Overview extends Component {
     });
 
     const loadMoreCSS = classNames({
-      'Btn Btn__loadMore': true,
-      'Btn__loadMore--down': !state.readmeExpanded,
-      'Btn__loadMore--up': state.readmeExpanded,
+      'Btn Btn__expandadble': true,
+      'Btn__expandadble--expand': !state.readmeExpanded,
+      'Btn__expandadble--collapse': state.readmeExpanded,
     });
 
     if (sectionProps && sectionProps.overview) {
