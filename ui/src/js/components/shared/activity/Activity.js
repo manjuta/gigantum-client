@@ -341,6 +341,7 @@ class Activity extends Component {
 
     const getNewActivity = () => {
       NewActivity.getNewActivity(labbookName, owner).then((response) => {
+
         const firstRecordCommitId = (props.labbook && props.labbook.activityRecords)
           ? this.props.labbook.activityRecords.edges[0].node.commit
           : null;
@@ -513,9 +514,9 @@ class Activity extends Component {
     if ((distanceY > expandOn) && activityRecords.pageInfo.hasNextPage) {
       this._loadMore(evt);
     }
-
-    if (state.automaticRefetch !== (distanceY < 2000)) {
-      this.setState({ automaticRefetch: (distanceY < 2000) });
+    // has to be 3000 to accomodate for large monitors
+    if (state.automaticRefetch !== (distanceY < 3000)) {
+      this.setState({ automaticRefetch: (distanceY < 3000) });
     }
   }
 
