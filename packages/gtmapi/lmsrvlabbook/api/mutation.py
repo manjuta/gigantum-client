@@ -19,7 +19,7 @@ from lmsrvlabbook.api.mutations import (CreateLabbook, BuildImage, StartContaine
                                         FetchDatasetEdge, SetDatasetVisibility, SyncDataset,
                                         AddDatasetCollaborator, DeleteDatasetCollaborator, DownloadDatasetFiles,
                                         ModifyDatasetLink, WriteDatasetReadme, SetDatasetDescription,
-                                        ResetBranchToRemote, CancelBuild)
+                                        ResetBranchToRemote, CancelBuild, SetBundledApp, RemoveBundledApp)
 
 from lmsrvlabbook.api.mutations import (ImportDataset, ExportDataset)
 
@@ -73,6 +73,12 @@ class LabbookEnvironmentMutations(graphene.ObjectType):
 
     # Delete the arbitrary docker snippet.
     remove_custom_docker = RemoveCustomDocker.Field()
+
+    # Set a bundled app configuration for a Labbook
+    set_bundled_app = SetBundledApp.Field()
+
+    # Delete a bundled app configuration
+    remove_bundled_app = RemoveBundledApp.Field()
 
 
 class LabbookSharingMutations(graphene.ObjectType):
