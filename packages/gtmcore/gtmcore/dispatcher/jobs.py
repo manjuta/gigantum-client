@@ -31,7 +31,8 @@ from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.labbook import LabBook
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
-from gtmcore.inventory import Repository, MergeConflict
+from gtmcore.inventory.branching import MergeConflict
+from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride

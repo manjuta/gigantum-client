@@ -21,6 +21,8 @@
 import os
 import io
 import math
+import time
+import pprint
 import tempfile
 import responses
 from graphene.test import Client
@@ -32,6 +34,7 @@ from werkzeug.wrappers import Request
 from .fixtures import fixture_working_dir, fixture_working_dir_lfs_disabled
 
 from gtmcore.dispatcher.jobs import export_labbook_as_zip
+from gtmcore.inventory.branching import MergeConflict
 
 from lmsrvcore.middleware import error_middleware, DataloaderMiddleware
 from lmsrvlabbook.tests.fixtures import (property_mocks_fixture, docker_socket_fixture,
@@ -48,6 +51,7 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.configuration import Configuration
 from gtmcore.dispatcher import Dispatcher, JobKey
 from gtmcore.files import FileOperations
+from gtmcore.dispatcher import jobs
 
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
@@ -89,6 +93,10 @@ def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
     assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'sillyfile'))
     # name of the config file, temporary working directory, the schema
     yield fixture_working_dir_lfs_disabled
+
+
+def mock_sync(*args, **kwargs):
+    return MergeConflict("Merge conflict pulling upstream", file_conflicts=[])
 
 
 class TestMutationsLabbookSharing(object):
@@ -193,7 +201,6 @@ class TestMutationsLabbookSharing(object):
                             }],
                       status=204)
 
-
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook("default", "default", "new-labbook")
 
@@ -261,7 +268,6 @@ class TestMutationsLabbookSharing(object):
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
         env = builder.get_environ()
         req = Request(environ=env)
-
 
         sally_wf = LabbookWorkflow.import_from_remote(test_user_wf.remote, 'sally', config_file=mock_config_file[0])
         sally_lb = sally_wf.labbook
