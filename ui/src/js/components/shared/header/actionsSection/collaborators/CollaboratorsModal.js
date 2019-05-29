@@ -136,15 +136,16 @@ export default class CollaboratorsModal extends Component {
   *  @return {}
   */
   _togglePermissionsMenu(userExpanded) {
-    if (this.props.canManageCollaborators) {
+    const { props, state } = this;
+    if (props.canManageCollaborators) {
       if (userExpanded) {
-        if (userExpanded !== localStorage.getItem('username')) {
+        if ((userExpanded !== localStorage.getItem('username')) && (userExpanded !== state.owner)) {
           this.setState({
-            userExpanded: (this.state.userExpanded === userExpanded) ? null : userExpanded,
+            userExpanded: (state.userExpanded === userExpanded) ? null : userExpanded,
           });
         }
       } else {
-        this.setState({ permissionMenuOpen: !this.state.permissionMenuOpen });
+        this.setState({ permissionMenuOpen: !state.permissionMenuOpen });
       }
     }
   }
@@ -553,7 +554,7 @@ export default class CollaboratorsModal extends Component {
                           'CollaboratorModal__PermissionsMenu--individual': true,
                           hidden: (state.userExpanded !== collaboratorName),
                         });
-
+                        const disableButtonLoader = collaboratorName === localStorage.getItem('username') || !props.canManageCollaborators || (collaboratorName === state.owner);
                         return (
                           <li
                             key={collaboratorName}
@@ -591,7 +592,7 @@ export default class CollaboratorsModal extends Component {
                               buttonText=""
                               className="ButtonLoader__collaborator Btn__remove Btn--round Btn--small"
                               params={{ collaborator: collaboratorName, button: this }}
-                              buttonDisabled={collaboratorName === localStorage.getItem('username') || !props.canManageCollaborators}
+                              buttonDisabled={disableButtonLoader}
                               clicked={this._removeCollaborator}
                             />
 
