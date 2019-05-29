@@ -11,7 +11,7 @@ chown giguser /mnt/share/mitmproxy
 
 # RUN mitmproxy to log traffic.
 # E.g., for RStudio, LBENDPOINT will be set to labbook_ip:8787
-gosu giguser:root nohup mitmdump --mode reverse:$LBENDPOINT --setheader :~q:Host:localhost:8080 -w /mnt/share/mitmproxy/$PROXYID.rserver.dump < /dev/null >/dev/null 2>&1 &
+gosu giguser:root nohup mitmdump --mode reverse:$LBENDPOINT --setheader :~q:Host:localhost:8080 -w $LOGFILE_NAME < /dev/null >/dev/null 2>&1 &
 
 # This is the nginx proxy by default, which *should* run as root
 # If giguser is desired, specify in the alternative run command.

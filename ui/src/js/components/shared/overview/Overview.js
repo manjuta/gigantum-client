@@ -58,7 +58,9 @@ export default class Overview extends Component {
     runs state check when component mounts
   */
   componentDidMount() {
+    const { props } = this;
     this._setExpand();
+    props.refetch('overview');
   }
 
   /*
@@ -228,7 +230,7 @@ export default class Overview extends Component {
     const showLoadMoreButton = state.overflowExists
       || (state.readmeExpanded && !state.overflowExists);
 
-    const overViewComponent = isLabbook
+    const overViewComponent = (isLabbook && sectionProps.overview)
       ? (
         <RecentActivity
           recentActivity={sectionProps.overview.recentActivity}
@@ -263,12 +265,12 @@ export default class Overview extends Component {
     });
 
     const loadMoreCSS = classNames({
-      'Btn Btn__loadMore': true,
-      'Btn__loadMore--down': !state.readmeExpanded,
-      'Btn__loadMore--up': state.readmeExpanded,
+      'Btn Btn__expandadble': true,
+      'Btn__expandadble--expand': !state.readmeExpanded,
+      'Btn__expandadble--collapse': state.readmeExpanded,
     });
 
-    if (sectionProps) {
+    if (sectionProps && sectionProps.overview) {
       return (
 
         <div className={overviewCSS}>

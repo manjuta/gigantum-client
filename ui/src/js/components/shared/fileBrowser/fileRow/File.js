@@ -110,7 +110,7 @@ class File extends Component {
       setWarningMessage('Could not launch development environment as the project is not ready.');
     } else if (status === 'NOT_RUNNING' && !forceStart) {
       setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
-      updateTransitionState('Starting');
+      updateTransitionState(labbookName, 'Starting');
       setMergeMode(false, false);
       StartContainerMutation(
         owner,
@@ -134,7 +134,7 @@ class File extends Component {
             let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
             if (path.includes(`/lab/tree/${props.section}`)) {
               path = path.replace(`/lab/tree/${props.section}`, `/lab/tree/${props.section}/${props.fileData.edge.node.key}`);
-            } else {
+            } else if (props.fileData.edge.node.key.indexOf('.Rmd') === -1) {
               path = `${path}/lab/tree/${props.section}/${props.fileData.edge.node.key}`;
             }
 

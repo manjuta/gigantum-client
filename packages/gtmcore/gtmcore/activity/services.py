@@ -1,3 +1,4 @@
+from gtmcore.container.container import ContainerOperations
 from gtmcore.labbook import LabBook
 from typing import Optional
 import time
@@ -32,6 +33,8 @@ logger = LMLogger.get_logger()
 #       process_id: <id for the background task>
 #        ... custom fields for the specific activity monitor class
 
+# TODO DC: This is currently tuned to the organization of the Jupyter monitor, and should be made more generic,
+# see issue #453
 def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
                           url: str, database: int = 1,
                           author: Optional[GitAuthor] = None) -> None:
@@ -80,17 +83,15 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
                                                                    labbook.name,
                                                                    dev_tool)
 
-        # Schedule dev env
-        d = Dispatcher()
-        kwargs = {'dev_env_name': dev_tool,
-                  'key': dev_env_monitor_key}
-        job_key = d.schedule_task(run_dev_env_monitor, kwargs=kwargs, repeat=None, interval=3)
+        if redis_conn.exists(dev_env_monitor_key):
+            # Assume already set up properly (it wasn't cleaned up above)
+            logger.info(f'Found existing entry for {dev_env_monitor_key}, skipping setup')
+            return
 
         owner = InventoryManager().query_owner(labbook)
         redis_conn.hset(dev_env_monitor_key, "container_name", infer_docker_image_name(labbook.name,
                                                                                        owner,
                                                                                        username))
-        redis_conn.hset(dev_env_monitor_key, "process_id", job_key.key_str)
         redis_conn.hset(dev_env_monitor_key, "labbook_root", labbook.root_dir)
         redis_conn.hset(dev_env_monitor_key, "url", url)
 
@@ -99,18 +100,27 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
             redis_conn.hset(dev_env_monitor_key, "author_name", author.name)
             redis_conn.hset(dev_env_monitor_key, "author_email", author.email)
 
+        # Schedule dev env
+        d = Dispatcher()
+        kwargs = {'dev_env_name': dev_tool,
+                  'key': dev_env_monitor_key}
+        job_key = d.schedule_task(run_dev_env_monitor, kwargs=kwargs, repeat=None, interval=3)
+        redis_conn.hset(dev_env_monitor_key, "process_id", job_key.key_str)
+
         logger.info("Started `{}` dev env monitor for lab book `{}`".format(dev_tool, labbook.name))
     else:
         raise ValueError(f"{dev_tool} Developer Tool does not support monitoring")
 
 
+# This one function could be tightened up to ensure that everything managed by a dev moniotor is cleaned up: containers, redis, etc.
+# Part of #453
 def stop_dev_env_monitors(dev_env_key: str, redis_conn: redis.Redis, labbook_name: str) -> None:
     """Method to stop a dev env monitor and all related activity monitors
 
     Args:
         dev_env_key(str): Key in redis containing the dev env monitor info
         redis_conn(redis.Redis): The redis instance to the state db
-        labbook_name(str): The name of the related lab book
+        labbook_name(str): The name of the related lab book - used only for logging / user messaging purposes
 
     Returns:
 

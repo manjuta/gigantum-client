@@ -29,10 +29,9 @@ from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.labbook import LabBook
-from gtmcore.configuration import Configuration
-from gtmcore.dataset.cache import get_cache_manager_class
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
+from gtmcore.inventory.branching import MergeConflict
 from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
@@ -110,6 +109,9 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
                           id_token=id_token, pull_only=pull_only)
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
+    except MergeConflict as me:
+        logger.exception(f"(Job {p}) Merge conflict: {me}")
+        raise
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_repository: {e}")
         raise Exception("Could not sync - try to log out and log in again.")
@@ -257,7 +259,7 @@ def import_dataset_from_zip(archive_path: str, username: str, owner: str,
             os.remove(archive_path)
 
 
-def build_labbook_image(path: str, username: Optional[str] = None,
+def build_labbook_image(path: str, username: str,
                         tag: Optional[str] = None, nocache: bool = False) -> str:
     """Return a docker image ID of given LabBook.
 
@@ -299,7 +301,7 @@ def build_labbook_image(path: str, username: Optional[str] = None,
         raise
 
 
-def start_labbook_container(root: str, config_path: str, username: Optional[str] = None,
+def start_labbook_container(root: str, config_path: str, username: str,
                             override_image_id: Optional[str] = None) -> str:
     """Return the ID of the LabBook Docker container ID.
 

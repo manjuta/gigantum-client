@@ -21,15 +21,6 @@ class TestRServerMonitor(object):
         assert len(monitor.get_dev_env_name()) == 1
         assert 'rstudio' in monitor.get_dev_env_name()
 
-    def test_log_file(self, redis_client):
-        """Test open a log and get log ids."""
-        # open logfiles in the test directory
-        monitor = RServerMonitor(os.path.dirname(os.path.realpath(__file__)))
-
-        assert len(monitor.get_log_file_ids()) == 2 
-
-        assert len(monitor.get_activity_monitors("nokey", redis_client)) == 0
-
 
 class TestRStudioServerMonitor(object):
 

@@ -1,22 +1,3 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import os
 import time
 from typing import Optional, Tuple
@@ -40,12 +21,11 @@ from gtmcore.container.rserver import start_rserver
 logger = LMLogger.get_logger()
 
 
-class ContainerOperations(object):
+class ContainerOperations:
 
     @classmethod
-    def build_image(
-            cls, labbook: LabBook, override_image_tag: Optional[str] = None,
-            username: Optional[str] = None, nocache: bool = False) -> Tuple[LabBook, str]:
+    def build_image(cls, labbook: LabBook, username: str, override_image_tag: Optional[str] = None,
+                    nocache: bool = False) -> Tuple[LabBook, str]:
         """ Build docker image according to the Dockerfile just assembled. Does NOT
             assemble the Dockerfile from environment (See ImageBuilder)
 
@@ -70,8 +50,8 @@ class ContainerOperations(object):
         return labbook, docker_img_id
 
     @classmethod
-    def delete_image(cls, labbook: LabBook, override_image_tag: Optional[str] = None,
-                     username: Optional[str] = None) -> Tuple[LabBook, bool]:
+    def delete_image(cls, labbook: LabBook, username: str,
+                     override_image_tag: Optional[str] = None) -> Tuple[LabBook, bool]:
         """ Delete the Docker image for the given LabBook
 
         Args:
@@ -82,10 +62,7 @@ class ContainerOperations(object):
         Returns:
             A tuple containing the labbook, docker image id.
         """
-        owner = InventoryManager().query_owner(labbook)
-        image_name = override_image_tag or infer_docker_image_name(labbook_name=labbook.name,
-                                                                   owner=owner,
-                                                                   username=username)
+        image_name = override_image_tag or cls.labbook_image_name(labbook, username)
         # We need to remove any images pertaining to this labbook before triggering a build.
         logger.info(f"Deleting docker image for {str(labbook)}")
         try:
@@ -101,7 +78,7 @@ class ContainerOperations(object):
 
     @classmethod
     def run_command(
-            cls, cmd_text: str, labbook: LabBook, username: Optional[str] = None,
+            cls, cmd_text: str, labbook: LabBook, username: str,
             override_image_tag: Optional[str] = None, fallback_image: str = None) -> bytes:
         """Run a command executed in the context of the LabBook's docker image.
 
@@ -115,12 +92,7 @@ class ContainerOperations(object):
         Returns:
             A tuple containing the labbook, Docker container id, and port mapping.
         """
-        image_name = override_image_tag
-        if not image_name:
-            owner = InventoryManager().query_owner(labbook)
-            image_name = infer_docker_image_name(labbook_name=labbook.name,
-                                                 owner=owner,
-                                                 username=username)
+        image_name = override_image_tag or cls.labbook_image_name(labbook, username)
         # Get a docker client instance
         client = get_docker_client()
 
@@ -159,7 +131,7 @@ class ContainerOperations(object):
         return result
 
     @classmethod
-    def start_container(cls, labbook: LabBook, username: Optional[str] = None,
+    def start_container(cls, labbook: LabBook, username: str,
                         override_image_tag: Optional[str] = None) -> Tuple[LabBook, str]:
         """ Start a Docker container for a given labbook LabBook. Return the new labbook instances
             and a list of TCP port mappings.
@@ -177,11 +149,12 @@ class ContainerOperations(object):
 
         container_id = start_labbook_container(labbook_root=labbook.root_dir,
                                                config_path=labbook.client_config.config_file,
-                                               override_image_id=override_image_tag, username=username)
+                                               override_image_id=override_image_tag,
+                                               username=username)
         return labbook, container_id
 
     @classmethod
-    def stop_container(cls, labbook: LabBook, username: Optional[str] = None) -> Tuple[LabBook, bool]:
+    def stop_container(cls, labbook: LabBook, username: str) -> Tuple[LabBook, bool]:
         """ Stop the given labbook. Returns True in the second field if stopped,
             otherwise False (False can simply imply no container was running).
 
@@ -192,10 +165,7 @@ class ContainerOperations(object):
         Returns:
             A tuple of (Labbook, boolean indicating whether a container was successfully stopped).
         """
-        owner = InventoryManager().query_owner(labbook)
-        n = infer_docker_image_name(labbook_name=labbook.name,
-                                    owner=owner,
-                                    username=username)
+        n = cls.labbook_image_name(labbook, username)
         logger.info(f"Stopping {str(labbook)} ({n})")
 
         try:
@@ -205,6 +175,22 @@ class ContainerOperations(object):
             labbook.sweep_uncommitted_changes()
 
         return labbook, stopped
+
+    @classmethod
+    def labbook_image_name(cls, labbook: LabBook, username: str) -> str:
+        """Return the image name of the LabBook container
+
+        Args:
+            labbook: Subject LabBook
+            username: Username of active user
+
+        Returns:
+            Externally facing IP
+        """
+        owner = InventoryManager().query_owner(labbook)
+        return infer_docker_image_name(labbook_name=labbook.name,
+                                       owner=owner,
+                                       username=username)
 
     @classmethod
     def get_labbook_ip(cls, labbook: LabBook, username: str) -> str:
@@ -217,8 +203,5 @@ class ContainerOperations(object):
         Returns:
             Externally facing IP
         """
-        owner = InventoryManager().query_owner(labbook)
-        docker_key = infer_docker_image_name(labbook_name=labbook.name,
-                                             owner=owner,
-                                             username=username)
+        docker_key = cls.labbook_image_name(labbook, username)
         return get_container_ip(docker_key)
