@@ -30,7 +30,7 @@ class TestAsyncHTTP(object):
         assert len(result) == 504
 
         print((t_stop - t_start))
-        assert (t_stop - t_start) < 10
+        assert (t_stop - t_start) < 18
 
         for r in result:
             assert r.status_code == 200
