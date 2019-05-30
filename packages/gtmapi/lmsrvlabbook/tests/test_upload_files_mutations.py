@@ -77,33 +77,34 @@ class TestUploadFilesMutations(object):
                 file = FileStorage(chunk)
 
                 query = f"""
-                            mutation addLabbookFile{{
-                              addLabbookFile(input:{{owner:"default",
-                                                      labbookName: "labbook1",
-                                                      section: "code",
-                                                      filePath: "newdir/myValidFile.dat",
-                                                      transactionId: "{txid}",
-                                chunkUploadParams:{{
-                                  uploadId: "fdsfdsfdsfdfs",
-                                  chunkSize: {chunk_size},
-                                  totalChunks: {total_chunks},
-                                  chunkIndex: {chunk_index},
-                                  fileSizeKb: {file_size},
-                                  filename: "{os.path.basename(test_file)}"
-                                }}
-                              }}) {{
-                                      newLabbookFileEdge {{
-                                        node{{
-                                          id
-                                          key
-                                          isDir
-                                          size
-                                          modifiedAt
-                                        }}
-                                      }}
-                                    }}
+                mutation addLabbookFile {{
+                    addLabbookFile(input: {{
+                        owner:"default",
+                        labbookName: "labbook1",
+                        section: "code",
+                        filePath: "newdir/myValidFile.dat",
+                        transactionId: "{txid}",
+                        chunkUploadParams: {{
+                            uploadId: "fdsfdsfdsfdfs",
+                            chunkSize: {chunk_size},
+                            totalChunks: {total_chunks},
+                            chunkIndex: {chunk_index},
+                            fileSizeKb: {file_size},
+                            filename: "{os.path.basename(test_file)}"
+                        }}
+                    }}) {{
+                        newLabbookFileEdge {{
+                            node {{
+                                id
+                                key
+                                isDir
+                                size
+                                modifiedAt
                             }}
-                            """
+                        }}
+                    }}
+                }}
+                """
                 r = client.execute(query, context_value=DummyContext(file))
         assert 'errors' not in r
         # So, these will only be populated once the last chunk is uploaded. Will be None otherwise.

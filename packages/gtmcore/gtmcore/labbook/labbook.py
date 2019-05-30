@@ -54,6 +54,14 @@ class LabBook(Repository):
         raise ValueError("Cannot set name")
 
     @property
+    def owner(self) -> Optional[str]:
+        try:
+            _, owner, _, project_name = self.root_dir.rsplit('/', 3)
+            return owner
+        except Exception as e:
+            return None
+
+    @property
     def creation_date(self) -> Optional[datetime.datetime]:
         """ Return the timestamp of creation of this project """
         date_str = self._data.get('creation_utc') or self._data['created_on']
@@ -101,6 +109,10 @@ class LabBook(Repository):
             base_data = yaml.safe_load(bf)
 
         return base_data.get('cuda_version')
+
+    @property
+    def metadata_path(self) -> str:
+        return os.path.join(self.root_dir, '.gigantum')
 
     @property
     def config_path(self) -> str:

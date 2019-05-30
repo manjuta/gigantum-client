@@ -1,4 +1,6 @@
 import pytest
+import graphene
+import pprint
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
@@ -280,7 +282,6 @@ class TestEnvironmentServiceQueries(object):
                       }
                     }
                 """
-
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
 
     def test_bundle_app_query(self, snapshot, fixture_working_dir_env_repo_scoped):

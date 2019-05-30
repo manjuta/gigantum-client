@@ -22,6 +22,8 @@ from lmsrvlabbook.api.mutations.labbooksharing import (SyncLabbook, PublishLabbo
                                                        ExportLabbook, AddLabbookCollaborator, DeleteLabbookCollaborator,
                                                        DeleteRemoteLabbook)
 
+from lmsrvlabbook.api.mutations.secrets import (InsertSecretsEntry, RemoveSecretsEntry,
+                                                UploadSecretsFile, DeleteSecretsFile)
 from lmsrvlabbook.api.mutations.bundledapp import SetBundledApp, RemoveBundledApp
 
 # Dataset Mutations
@@ -33,7 +35,6 @@ from lmsrvlabbook.api.mutations.datasetfiles import (AddDatasetFile, CompleteDat
 from lmsrvlabbook.api.mutations.datasetsharing import (PublishDataset, SyncDataset, ImportRemoteDataset,
                                                        SetDatasetVisibility, AddDatasetCollaborator,
                                                        DeleteDatasetCollaborator, ImportDataset, ExportDataset)
-
 
 
 class BranchMutations(object):
@@ -52,6 +53,20 @@ class BranchMutations(object):
 
     # Work on a given feature branch (perform a git checkout).
     workon_experimental_branch = WorkonBranch.Field()
+
+
+class LabbookSecretsMutations(graphene.ObjectType):
+    # Create an entry for a secrets file, but not actually upload it
+    insert_secrets_entry = InsertSecretsEntry.Field()
+
+    # Remove an entry from the secrets registry
+    remove_secrets_entry = RemoveSecretsEntry.Field()
+
+    # Actually upload the secret file for the local user
+    upload_secrets_file = UploadSecretsFile.Field()
+
+    # Remove a secrets file for the local user.
+    delete_secrets_file = DeleteSecretsFile.Field()
 
 
 class LabbookEnvironmentMutations(graphene.ObjectType):
@@ -128,7 +143,8 @@ class LabbookSharingMutations(graphene.ObjectType):
 
 
 class LabbookMutations(BranchMutations, LabbookSharingMutations,
-                       LabbookEnvironmentMutations, graphene.ObjectType):
+                       LabbookEnvironmentMutations, LabbookSecretsMutations,
+                       graphene.ObjectType):
     """Entry point for all graphql mutations"""
 
     # Import a Dataset from the Gitlab repository

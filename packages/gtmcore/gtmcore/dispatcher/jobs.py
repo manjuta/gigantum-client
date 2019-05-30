@@ -301,57 +301,6 @@ def build_labbook_image(path: str, username: str,
         raise
 
 
-def start_labbook_container(root: str, config_path: str, username: str,
-                            override_image_id: Optional[str] = None) -> str:
-    """Return the ID of the LabBook Docker container ID.
-
-    Args:
-        root: Root directory of labbook
-        config_path: Path to config file (labbook.client_config.config_file)
-        username: Username of active user
-        override_image_id: Force using this name of docker image (do not infer)
-
-    Returns:
-        Docker container ID
-    """
-
-    logger = LMLogger.get_logger()
-    logger.info(f"Starting start_labbook_container(root={root}, config_path={config_path}, username={username}, "
-                f"override_image_id={override_image_id}) in pid {os.getpid()}")
-
-    try:
-        c_id = start_container(labbook_root=root, config_path=config_path,
-                               override_image_id=override_image_id, username=username)
-        logger.info(f"Completed start_labbook_container in pid {os.getpid()}: {c_id}")
-        return c_id
-    except Exception as e:
-        logger.error("Error on launch_docker_container in pid {}: {}".format(os.getpid(), e))
-        raise
-
-
-def stop_labbook_container(container_id: str) -> int:
-    """Return a dictionary of metadata pertaining to the given task's Redis key.
-
-    TODO - Take labbook as argument rather than image tag.
-
-    Args:
-        container_id(str): Container to stop
-
-    Returns:
-        0 to indicate no failure
-    """
-
-    logger = LMLogger.get_logger()
-    logger.info(f"Starting stop_labbook_container({container_id}) in pid {os.getpid()}")
-
-    try:
-        stop_container(container_id)
-        return 0
-    except Exception as e:
-        logger.error("Error on stop_labbook_container in pid {}: {}".format(os.getpid(), e))
-        raise
-
-
 def run_dev_env_monitor(dev_env_name, key) -> int:
     """Run method to check if new Activity Monitors for a given dev env need to be started/stopped
 

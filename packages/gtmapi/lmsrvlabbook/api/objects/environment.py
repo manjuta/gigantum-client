@@ -26,6 +26,7 @@ from docker.errors import ImageNotFound, NotFound
 import requests
 
 from gtmcore.dispatcher import Dispatcher
+from gtmcore.labbook import SecretStore
 from gtmcore.environment.componentmanager import ComponentManager
 from gtmcore.configuration import get_docker_client
 from gtmcore.logging import LMLogger
@@ -37,10 +38,13 @@ from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 
 from lmsrvlabbook.api.connections.environment import PackageComponentConnection
+from lmsrvlabbook.api.connections.secrets import SecretFileMappingConnection
 from lmsrvlabbook.api.objects.basecomponent import BaseComponent
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
+from lmsrvlabbook.api.objects.secrets import SecretFileMapping
 from lmsrvlabbook.api.objects.bundledapp import BundledApp
 from lmsrvlabbook.dataloader.package import PackageDataloader
+
 
 logger = LMLogger.get_logger()
 
@@ -97,8 +101,12 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
     # A custom docker snippet to be run after all other dependencies and bases have been added.
     docker_snippet = graphene.String()
 
+    # A mapping that enumerates where secrets files should be mapped into the Project container.
+    secrets_file_mapping = graphene.ConnectionField(SecretFileMappingConnection)
+
     # A list of bundled apps
     bundled_apps = graphene.List(BundledApp)
+
 
     @classmethod
     def get_node(cls, info, id):
@@ -278,6 +286,35 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
         """Method to resolve  the docker snippet for this labbook. Right now only 1 snippet is supported"""
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_docker_snippet(labbook))
+
+    @staticmethod
+    def helper_resolve_secrets_file_mapping(labbook, kwargs):
+        secrets_store = SecretStore(labbook, get_logged_in_username())
+        edges = secrets_store.secret_map.keys()
+
+        if edges:
+            cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8")
+                       for cnt, x in enumerate(edges)]
+
+            # Process slicing and cursor args
+            lbc = ListBasedConnection(edges, cursors, kwargs)
+            lbc.apply()
+
+            # Get DevEnv instances
+            edge_objs = []
+            for edge, cursor in zip(lbc.edges, lbc.cursors):
+                node_obj = SecretFileMapping(owner=labbook.owner, name=labbook.name,
+                                             filename=edge, mount_path=secrets_store[edge])
+                edge_objs.append(SecretFileMappingConnection.Edge(node=node_obj, cursor=cursor))
+            return SecretFileMappingConnection(edges=edge_objs, page_info=lbc.page_info)
+
+        else:
+            pi = graphene.relay.PageInfo(has_next_page=False, has_previous_page=False)
+            return SecretFileMappingConnection(edges=[], page_info=pi)
+
+    def resolve_secrets_file_mapping(self, info, **kwargs):
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: self.helper_resolve_secrets_file_mapping(labbook, kwargs))
 
     def helper_resolve_bundled_apps(self, labbook):
         """Helper to get list of BundledApp objects"""

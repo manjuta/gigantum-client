@@ -122,9 +122,9 @@ class TestContainerMutations(object):
     def test_start_jupyterlab(self, build_image_for_jupyterlab):
         """Test listing labbooks"""
         # Start the container
-        _, container_id = ContainerOperations.start_container(build_image_for_jupyterlab[0],
-                                                                          username='default')
 
+        lb, container_id = ContainerOperations.start_container(build_image_for_jupyterlab[0],
+                                                               username='default')
         lb = build_image_for_jupyterlab[0]
 
         docker_client = build_image_for_jupyterlab[2]
