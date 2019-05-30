@@ -49,7 +49,7 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
     @classmethod
     def _is_target_valid(cls, target_path) -> bool:
         """Return False if the given target_path contains invalid sequences. """
-        bad_tokens = ["..", "~"]
+        bad_tokens = ["..", "~", "/mnt", "/etc"]
         return all([b not in target_path for b in bad_tokens])
 
     @classmethod
