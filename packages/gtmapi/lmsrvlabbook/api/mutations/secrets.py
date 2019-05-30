@@ -29,6 +29,9 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, filename,
                                mount_path, client_mutation_id=None):
 
+        if len(mount_path) > 0 and mount_path[0] == '~':
+            mount_path = mount_path.replace('~', '/home/giguser')
+
         if not cls._is_target_valid(mount_path):
             raise ValueError(f"Mount path {mount_path} is not a valid path")
 
