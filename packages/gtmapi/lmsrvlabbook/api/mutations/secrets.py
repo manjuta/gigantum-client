@@ -28,6 +28,10 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, filename,
                                mount_path, client_mutation_id=None):
+
+        if not cls._is_target_valid(mount_path):
+            raise ValueError(f"Mount path {mount_path} is not a valid path")
+
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
@@ -38,6 +42,12 @@ class InsertSecretsEntry(graphene.relay.ClientIDMutation):
 
         env = Environment(owner=owner, name=lb.name)
         return InsertSecretsEntry(environment=env)
+
+    @classmethod
+    def _is_target_valid(cls, target_path) -> bool:
+        """Return False if the given target_path contains invalid sequences. """
+        bad_tokens = ["..", "~"]
+        return all([b not in target_path for b in bad_tokens])
 
     @classmethod
     def _record_insert_activity(cls, secret_store, filename, lb, mount_path):
