@@ -134,7 +134,7 @@
 .CollaboratorsModal__item {
   position: relative;
   @include flex(space-between, row);
-
+  align-items: flex-end;
   width: 100%;
   margin: 18px 25px 13px 0;
   padding: 0 40px 0 10px;

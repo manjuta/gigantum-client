@@ -1,4 +1,5 @@
 from lmsrvlabbook.api.mutations.labbook import (CreateLabbook, DeleteLabbook,
+                                                ChangeLabbookBase,
                                                 SetLabbookDescription,
                                                 MakeLabbookDirectory,
                                                 AddLabbookFile, MoveLabbookFile, DeleteLabbookFiles,
@@ -16,6 +17,7 @@ from lmsrvlabbook.api.mutations.environment import (BuildImage, StartContainer, 
 from lmsrvlabbook.api.mutations.environmentcomponent import (AddPackageComponents,
                                                              RemovePackageComponents,
                                                              AddCustomDocker, RemoveCustomDocker)
+from lmsrvlabbook.api.mutations.bundledapp import SetBundledApp, RemoveBundledApp
 from lmsrvlabbook.api.mutations.user import RemoveUserIdentity
 from lmsrvlabbook.api.mutations.labbooksharing import (SyncLabbook, PublishLabbook, SetVisibility,
                                                        AddLabbookRemote, ImportRemoteLabbook, ImportLabbook,

@@ -252,7 +252,6 @@ class AddLabbookRemote(graphene.relay.ClientIDMutation):
         return AddLabbookRemote(success=True)
 
 
-
 class AddLabbookCollaborator(graphene.relay.ClientIDMutation):
     class Input:
         owner = graphene.String(required=True)
@@ -351,7 +350,6 @@ class DeleteLabbookCollaborator(graphene.relay.ClientIDMutation):
                        "name": labbook_name}
 
         return DeleteLabbookCollaborator(updated_labbook=LabbookObject(**create_data))
-
 
 
 class DeleteRemoteLabbook(graphene.ClientIDMutation):

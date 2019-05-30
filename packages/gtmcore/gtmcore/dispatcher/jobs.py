@@ -31,6 +31,7 @@ from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.labbook import LabBook
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
+from gtmcore.inventory.branching import MergeConflict
 from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
@@ -108,6 +109,9 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
                           id_token=id_token, pull_only=pull_only)
         logger.info(f"(Job {p} Completed sync_repository with cnt={cnt}")
         return cnt
+    except MergeConflict as me:
+        logger.exception(f"(Job {p}) Merge conflict: {me}")
+        raise
     except Exception as e:
         logger.exception(f"(Job {p}) Error on sync_repository: {e}")
         raise Exception("Could not sync - try to log out and log in again.")

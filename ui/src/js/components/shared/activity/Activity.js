@@ -378,7 +378,9 @@ class Activity extends Component {
      relay.refetchConnection(
        5,
        (response, error) => {
-         console.log(response, error);
+         if (error) {
+           console.log(response, error);
+         }
        },
        {
          filters: [],
