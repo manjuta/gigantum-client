@@ -6,11 +6,12 @@ import os
 import pytest
 import yaml
 
-from gtmcore.environment import ComponentManager, RepositoryManager
+from gtmcore.environment import ComponentManager
 from gtmcore.fixtures import mock_config_file, mock_labbook, mock_config_with_repo
-from gtmcore.labbook import LabBook
-from gtmcore.inventory.inventory  import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 import gtmcore.fixtures
+
+from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 
 def create_tmp_labbook(cfg_file):
@@ -20,6 +21,7 @@ def create_tmp_labbook(cfg_file):
     return lb
 
 
+@pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestComponentManager(object):
     def test_initalize_labbook(self, mock_config_with_repo):
         """Test preparing an empty labbook"""

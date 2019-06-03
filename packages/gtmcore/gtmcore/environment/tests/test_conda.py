@@ -4,13 +4,10 @@ import pytest
 from gtmcore.fixtures.container import mock_config_with_repo, build_lb_image_for_env_conda
 from gtmcore.environment.conda import Conda3PackageManager, Conda2PackageManager
 
-
-skip_clause = os.environ.get('CIRCLE_BRANCH') is not None \
-              and os.environ.get('SKIP_CONDA_TESTS') is not None
-skip_msg = "Skip long Conda tests on circleCI when not in `test-long-running-env` job"
+from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 
-@pytest.mark.skipif(skip_clause, reason=skip_msg)
+@pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestConda3PackageManager(object):
     def test_search(self, build_lb_image_for_env_conda):
         """Test search command"""

@@ -5,7 +5,10 @@ from collections import OrderedDict
 from gtmcore.fixtures import mock_labbook
 from gtmcore.environment.bundledapp import BundledAppManager
 
+from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
+
+@pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestBundledApps(object):
     def test_invalid_name(self, mock_labbook):
         """Test creating an app with invalid name"""
