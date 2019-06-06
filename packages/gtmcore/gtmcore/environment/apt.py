@@ -107,7 +107,7 @@ class AptPackageManager(PackageManager):
         """
         result = list()
         for package in package_list:
-            pkg_result = PackageResult(package=package['package'], version=package['version'], error=True)
+            pkg_result = PackageResult(package=package['package'], version=package.get('version'), error=True)
 
             try:
                 version_list = self.list_versions(package['package'], labbook, username)
@@ -119,11 +119,11 @@ class AptPackageManager(PackageManager):
                 # If here, no versions found for the package...so invalid
                 result.append(pkg_result)
             else:
-                if package['version']:
-                    if package['version'] in version_list:
+                if package.get('version'):
+                    if package.get('version') in version_list:
                         # Both package name and version are valid
                         result.append(PackageResult(package=package['package'],
-                                                    version=package['version'],
+                                                    version=package.get('version'),
                                                     error=False))
 
                     else:

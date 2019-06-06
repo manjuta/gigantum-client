@@ -34,7 +34,7 @@ class PackageComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
     package = graphene.String(required=True)
 
     # The current version of the package
-    version = graphene.String(required=True)
+    version = graphene.String()
 
     # The latest available version of the package
     latest_version = graphene.String()
@@ -57,20 +57,32 @@ class PackageComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         # Parse the key
         manager, package, version = id.split("&")
 
+        if version == 'INVALID':
+            version = None
+
         return PackageComponent(id=f"{manager}&{package}&{version}",
                                 manager=manager, package=package, version=version)
 
     def resolve_id(self, info):
         """Resolve the unique Node id for this object"""
-        if not self.manager or not self.package or self.version is None:
-            raise ValueError("Resolving a PackageComponent ID requires manager, package and version to be set")
+        if not self.manager or not self.package:
+            raise ValueError("Resolving a PackageComponent ID requires manager and package to be set")
 
-        return f"{self.manager}&{self.package}&{self.version}"
+        if self.version is None:
+            version_key = 'INVALID'
+        else:
+            version_key = self.version
+
+        return f"{self.manager}&{self.package}&{version_key}"
 
     def resolve_latest_version(self, info):
         """Resolve the latest_version field"""
         if self.latest_version is not None:
             return self.latest_version
+
+        if self.version is None:
+            # Package name is invalid, so can't resolve any further info
+            return None
 
         if not self._dataloader:
             # No dataloader is available
@@ -85,6 +97,10 @@ class PackageComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         if self.description is not None:
             return self.description
 
+        if self.version is None:
+            # Package name is invalid, so can't resolve any further info
+            return None
+
         if not self._dataloader:
             # No dataloader is available
             logger.warning(f"Cannot query for description of {self.package}. A labbook context is required")
@@ -97,6 +113,10 @@ class PackageComponent(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         """Resolve the docs_url field"""
         if self.docs_url is not None:
             return self.docs_url
+
+        if self.version is None:
+            # Package name is invalid, so can't resolve any further info
+            return None
 
         if not self._dataloader:
             # No dataloader is available

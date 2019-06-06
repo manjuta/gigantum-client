@@ -72,44 +72,6 @@ snapshots['TestEnvironmentServiceQueries.test_get_base 2'] = {
     }
 }
 
-snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors 1'] = {
-    'data': {
-        'labbook': {
-            'checkPackages': [
-                {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDEmMC4yLjQ=',
-                    'isValid': True,
-                    'manager': 'pip',
-                    'package': 'gtmunit1',
-                    'version': '0.2.4'
-                },
-                {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDImMTAwLjAw',
-                    'isValid': False,
-                    'manager': 'pip',
-                    'package': 'gtmunit2',
-                    'version': '100.00'
-                },
-                {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDMmNS4w',
-                    'isValid': True,
-                    'manager': 'pip',
-                    'package': 'gtmunit3',
-                    'version': '5.0'
-                },
-                {
-                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmYXNkZmFzZGZhc2RmJg==',
-                    'isValid': False,
-                    'manager': 'pip',
-                    'package': 'asdfasdfasdf',
-                    'version': ''
-                }
-            ],
-            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s1'
-        }
-    }
-}
-
 snapshots['TestEnvironmentServiceQueries.test_package_query 1'] = {
     'data': {
         'labbook': {
@@ -355,6 +317,219 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager_metadata 2'] =
                     }
                 }
             }
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors 1'] = {
+    'data': {
+        'labbook': {
+            'checkPackages': [
+                {
+                    'description': 'Package 1 for Gigantum Client unit testing.',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDEmMC4yLjQ=',
+                    'isValid': True,
+                    'latestVersion': '0.12.4',
+                    'manager': 'pip',
+                    'package': 'gtmunit1',
+                    'version': '0.2.4'
+                },
+                {
+                    'description': 'Package 1 for Gigantum Client unit testing.',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDImMTAwLjAw',
+                    'isValid': False,
+                    'latestVersion': '12.2',
+                    'manager': 'pip',
+                    'package': 'gtmunit2',
+                    'version': '100.00'
+                },
+                {
+                    'description': 'Package 1 for Gigantum Client unit testing.',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDMmNS4w',
+                    'isValid': True,
+                    'latestVersion': '5.0',
+                    'manager': 'pip',
+                    'package': 'gtmunit3',
+                    'version': '5.0'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmYXNkZmFzZGZhc2RmJg==',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'pip',
+                    'package': 'asdfasdfasdf',
+                    'version': ''
+                }
+            ],
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s1'
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors_conda 1'] = {
+    'data': {
+        'labbook': {
+            'checkPackages': [
+                {
+                    'description': 'A set of tools to manipulate climate data',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmY2R1dGlsJjguMQ==',
+                    'isValid': True,
+                    'latestVersion': '8.1',
+                    'manager': 'conda3',
+                    'package': 'cdutil',
+                    'version': '8.1'
+                },
+                {
+                    'description': 'Natural Language Toolkit',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmbmx0ayYxMDAuMDA=',
+                    'isValid': False,
+                    'latestVersion': '3.2.5',
+                    'manager': 'conda3',
+                    'package': 'nltk',
+                    'version': '100.00'
+                },
+                {
+                    'description': 'Python interface to coveralls.io API\\n',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmcHl0aG9uLWNvdmVyYWxscyYyLjkuMQ==',
+                    'isValid': True,
+                    'latestVersion': '2.9.1',
+                    'manager': 'conda3',
+                    'package': 'python-coveralls',
+                    'version': '2.9.1'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmdGhpc3Nob3VsZHRvdGFsbHlmYWlsJjEuMA==',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'conda3',
+                    'package': 'thisshouldtotallyfail',
+                    'version': '1.0'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmbm90YXJlYWxwYWNrYWdlJg==',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'conda3',
+                    'package': 'notarealpackage',
+                    'version': ''
+                }
+            ],
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s1Y29uZGE='
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors_apt 1'] = {
+    'data': {
+        'labbook': {
+            'checkPackages': [
+                {
+                    'description': 'command line tool for transferring data with URL syntax',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmY3VybCY4LjE=',
+                    'isValid': False,
+                    'latestVersion': '7.58.0-2ubuntu3.1',
+                    'manager': 'apt',
+                    'package': 'curl',
+                    'version': '8.1'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmbm90YXJlYWxwYWNrYWdlJg==',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'apt',
+                    'package': 'notarealpackage',
+                    'version': ''
+                }
+            ],
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s1YXB0'
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_package_query_no_version 1'] = {
+    'data': {
+        'labbook': {
+            'checkPackages': [
+                {
+                    'description': 'Package 1 for Gigantum Client unit testing.',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmZ3RtdW5pdDEmMC4xMi40',
+                    'isValid': True,
+                    'latestVersion': '0.12.4',
+                    'manager': 'pip',
+                    'package': 'gtmunit1',
+                    'version': '0.12.4'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpwaXAmbm90YXJlYWxwYWNrYWdlJklOVkFMSUQ=',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'pip',
+                    'package': 'notarealpackage',
+                    'version': None
+                }
+            ],
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s2bm92ZXJzaW9u'
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_package_query_no_version 2'] = {
+    'data': {
+        'labbook': {
+            'checkPackages': [
+                {
+                    'description': 'command line tool for transferring data with URL syntax',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmY3VybCY3LjU4LjAtMnVidW50dTMuMQ==',
+                    'isValid': True,
+                    'latestVersion': '7.58.0-2ubuntu3.1',
+                    'manager': 'apt',
+                    'package': 'curl',
+                    'version': '7.58.0-2ubuntu3.1'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDphcHQmbm90YXJlYWxwYWNrYWdlJklOVkFMSUQ=',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'apt',
+                    'package': 'notarealpackage',
+                    'version': None
+                }
+            ],
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s2bm92ZXJzaW9u'
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_package_query_no_version 3'] = {
+    'data': {
+        'labbook': {
+            'checkPackages': [
+                {
+                    'description': 'Natural Language Toolkit',
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmbmx0ayYzLjIuNQ==',
+                    'isValid': True,
+                    'latestVersion': '3.2.5',
+                    'manager': 'conda3',
+                    'package': 'nltk',
+                    'version': '3.2.5'
+                },
+                {
+                    'description': None,
+                    'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmbm90YXJlYWxwYWNrYWdlJklOVkFMSUQ=',
+                    'isValid': False,
+                    'latestVersion': None,
+                    'manager': 'conda3',
+                    'package': 'notarealpackage',
+                    'version': None
+                }
+            ],
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2s2bm92ZXJzaW9u'
         }
     }
 }

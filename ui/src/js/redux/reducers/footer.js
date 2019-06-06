@@ -337,9 +337,8 @@ export default (state = {
         messageListOpen = false;
       }
     } else {
-      messageListOpen = true;
+      messageListOpen = action.payload.messageListOpen === undefined || action.payload.messageListOpen;
     }
-
 
     const message = {
       message: action.payload.message,

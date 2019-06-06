@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed May 22 2019 13:54:34 GMT-0400 (Eastern Daylight Time)
+# timestamp: Wed May 29 2019 17:21:27 GMT-0400 (Eastern Daylight Time)
 
 schema {
   query: LabbookQuery
@@ -853,7 +853,7 @@ type Labbook implements Node & GitRepository {
   detailRecord(key: String): ActivityDetailObject
   detailRecords(keys: [String]): [ActivityDetailObject]
   backgroundJobs: [JobStatus]
-  packages(packageInput: [PackageComponentInput]): [PackageComponent]
+  checkPackages(packageInput: [PackageComponentInput]): [PackageComponent]
   visibility: String
   linkedDatasets: [Dataset]
 }
@@ -1050,7 +1050,6 @@ type LabbookQuery {
   datasetList: DatasetList
   availableBases(before: String, after: String, first: Int, last: Int): BaseComponentConnection
   availableDatasetTypes: [DatasetType]
-  package(manager: String, package: String, version: String = ""): PackageComponent
 }
 
 """
@@ -1196,6 +1195,8 @@ type PackageComponent implements Node {
   package: String!
   version: String!
   latestVersion: String
+  description: String
+  docsUrl: String
   fromBase: Boolean
   isValid: Boolean
 }

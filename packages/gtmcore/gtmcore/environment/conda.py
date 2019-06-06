@@ -174,18 +174,19 @@ class CondaPackageManagerBase(PackageManager):
 
             if not versions:
                 # Package is not found
-                result.append(PackageResult(package=package['package'], version=package['version'], error=True))
+                result.append(PackageResult(package=package['package'], version=package.get('version'), error=True))
                 continue
 
-            if package['version']:
+            if package.get('version'):
                 # Package has been set, so validate it
-                if package['version'] in versions:
+                if package.get('version') in versions:
                     # Both package name and version are valid
-                    result.append(PackageResult(package=package['package'], version=package['version'], error=False))
+                    result.append(PackageResult(package=package['package'], version=package.get('version'),
+                                                error=False))
 
                 else:
                     # The package version is not in the list, so invalid
-                    result.append(PackageResult(package=package['package'], version=package['version'], error=True))
+                    result.append(PackageResult(package=package['package'], version=package.get('version'), error=True))
 
             else:
                 # You need to look up the latest version since not included

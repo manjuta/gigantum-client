@@ -24,7 +24,7 @@ from gtmcore.labbook import LabBook
 import gtmcore.environment
 
 # A namedtuple for the result of package validation
-PackageResult = NamedTuple('PackageResult', [('package', str), ('version', str), ('error', bool)])
+PackageResult = NamedTuple('PackageResult', [('package', str), ('version', Optional[str]), ('error', bool)])
 
 # A namedtuple for supported package metadata
 PackageMetadata = NamedTuple('PackageMetadata', [('package_manager', str), ('package', str),

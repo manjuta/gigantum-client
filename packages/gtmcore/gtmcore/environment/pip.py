@@ -108,18 +108,19 @@ class PipPackageManager(PackageManager):
 
         for package, response in zip(package_list, responses):
             if response.status_code != 200:
-                result.append(PackageResult(package=package['package'], version=package['version'], error=True))
+                result.append(PackageResult(package=package['package'], version=package.get('version'), error=True))
                 continue
 
-            if package['version']:
+            if package.get('version'):
                 # Package has been set, so validate it
-                if package['version'] in self._extract_versions(response.json):
+                if package.get('version') in self._extract_versions(response.json):
                     # Both package name and version are valid
-                    result.append(PackageResult(package=package['package'], version=package['version'], error=False))
+                    result.append(PackageResult(package=package['package'], version=package.get('version'),
+                                                error=False))
 
                 else:
                     # The package version is not in the list, so invalid
-                    result.append(PackageResult(package=package['package'], version=package['version'], error=True))
+                    result.append(PackageResult(package=package['package'], version=package.get('version'), error=True))
 
             else:
                 # You need to look up the latest version since not included

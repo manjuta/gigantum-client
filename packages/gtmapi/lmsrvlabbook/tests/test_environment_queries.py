@@ -253,6 +253,71 @@ class TestEnvironmentServiceQueries(object):
                           manager 
                           package
                           version
+                          latestVersion
+                          description
+                          isValid     
+                        }
+                      }
+                    }
+                """
+
+        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+
+    def test_package_query_with_errors_conda(self, snapshot, fixture_working_dir_env_repo_scoped):
+        """Test querying for package info"""
+        # Create labbook
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook5conda", description="my first labbook10000")
+
+        query = """
+                    {
+                      labbook(owner: "default", name: "labbook5conda"){
+                        id
+                        checkPackages(packageInput: [
+                          {manager: "conda3", package: "cdutil", version:"8.1"},
+                          {manager: "conda3", package: "nltk", version:"100.00"},
+                          {manager: "conda3", package: "python-coveralls", version:""},
+                          {manager: "conda3", package: "thisshouldtotallyfail", version:"1.0"},
+                          {manager: "conda3", package: "notarealpackage", version:""}]){
+                          id
+                          manager 
+                          package
+                          version
+                          latestVersion
+                          description
+                          isValid     
+                        }
+                      }
+                    }
+                """
+
+        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+
+    def test_package_query_with_errors_apt(self, snapshot, fixture_working_dir_env_repo_scoped):
+        """Test querying for package info"""
+        # Create labbook
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook5apt", description="my first labbook10000")
+
+        # Create Component Manager
+        cm = ComponentManager(lb)
+
+        # Add a component
+        cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+
+        query = """
+                    {
+                      labbook(owner: "default", name: "labbook5apt"){
+                        id
+                        checkPackages(packageInput: [
+                          {manager: "apt", package: "curl", version:"8.1"},
+                          {manager: "apt", package: "notarealpackage", version:""}]){
+                          id
+                          manager 
+                          package
+                          version
+                          latestVersion
+                          description
                           isValid     
                         }
                       }
@@ -277,6 +342,75 @@ class TestEnvironmentServiceQueries(object):
                           manager 
                           package
                           version
+                          isValid     
+                        }
+                      }
+                    }
+                """
+        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+
+    def test_package_query_no_version(self, snapshot, fixture_working_dir_env_repo_scoped):
+        """Test querying for package info"""
+        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        lb = im.create_labbook("default", "default", "labbook6noversion", description="my first labbook10000")
+
+        # Create Component Manager
+        cm = ComponentManager(lb)
+        cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+
+        query = """
+                    {
+                      labbook(owner: "default", name: "labbook6noversion"){
+                        id
+                        checkPackages(packageInput: [
+                          {manager: "pip", package: "gtmunit1"},
+                          {manager: "pip", package: "notarealpackage"}]){
+                          id
+                          manager 
+                          package
+                          version
+                          latestVersion
+                          description
+                          isValid     
+                        }
+                      }
+                    }
+                """
+        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+
+        query = """
+                    {
+                      labbook(owner: "default", name: "labbook6noversion"){
+                        id
+                        checkPackages(packageInput: [                         
+                          {manager: "apt", package: "curl"},
+                          {manager: "apt", package: "notarealpackage"}]){
+                          id
+                          manager 
+                          package
+                          version
+                          latestVersion
+                          description
+                          isValid     
+                        }
+                      }
+                    }
+                """
+        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+
+        query = """
+                    {
+                      labbook(owner: "default", name: "labbook6noversion"){
+                        id
+                        checkPackages(packageInput: [
+                          {manager: "conda3", package: "nltk"},
+                          {manager: "conda3", package: "notarealpackage"}]){
+                          id
+                          manager 
+                          package
+                          version
+                          latestVersion
+                          description
                           isValid     
                         }
                       }

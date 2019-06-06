@@ -27,6 +27,7 @@ from lmsrvlabbook.api.connections.activity import ActivityConnection
 from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityRecordObject
 from lmsrvlabbook.api.objects.packagecomponent import PackageComponent, PackageComponentInput
 from lmsrvlabbook.api.objects.dataset import Dataset
+from lmsrvlabbook.dataloader.package import PackageDataloader
 
 logger = LMLogger.get_logger()
 
@@ -523,8 +524,13 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         # Validate packages
         pkg_result = mgr.validate_packages(package_input, labbook, get_logged_in_username())
 
+        # Create dataloader
+        keys = [f"{manager[0]}&{pkg.package}" for pkg in pkg_result]
+        vd = PackageDataloader(keys, labbook, get_logged_in_username())
+
         # Return object
-        return [PackageComponent(manager=manager[0],
+        return [PackageComponent(_dataloader=vd,
+                                 manager=manager[0],
                                  package=pkg.package,
                                  version=pkg.version,
                                  is_valid=not pkg.error) for pkg in pkg_result]

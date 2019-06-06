@@ -91,8 +91,9 @@ class TestPipPackageManager(object):
         """Test list_versions command"""
         pkgs = [{"manager": "pip", "package": "gtmunit1", "version": '0.2.4'},
                 {"manager": "pip", "package": "gtmunit2", "version": "100.00"},
-                {"manager": "pip", "package": "gtmunit3", "version": ""},
-                {"manager": "pip", "package": "asdfasdfasdf", "version": ""}]
+                {"manager": "pip", "package": "gtmunit3"},
+                {"manager": "pip", "package": "asdfasdfasdf", "version": ""},
+                {"manager": "pip", "package": "notarealpackage"}]
 
         mrg = PipPackageManager()
         lb = build_lb_image_for_env[0]
@@ -114,6 +115,10 @@ class TestPipPackageManager(object):
         assert result[3].package == "asdfasdfasdf"
         assert result[3].version == ""
         assert result[3].error is True
+
+        assert result[4].package == "notarealpackage"
+        assert result[4].version is None
+        assert result[4].error is True
 
     def test_is_valid_good(self, build_lb_image_for_env):
         """Test valid packages command"""
