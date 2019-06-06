@@ -321,6 +321,51 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager_metadata 2'] =
     }
 }
 
+snapshots['TestEnvironmentServiceQueries.test_bundle_app_query 1'] = {
+    'data': {
+        'labbook': {
+            'environment': {
+                'bundledApps': [
+                ]
+            },
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2stYnVuZGxl'
+        }
+    }
+}
+
+snapshots['TestEnvironmentServiceQueries.test_bundle_app_query 2'] = {
+    'data': {
+        'labbook': {
+            'environment': {
+                'bundledApps': [
+                    {
+                        'appName': 'dash 1',
+                        'command': 'python app1.py',
+                        'description': 'a demo dash app 1',
+                        'id': 'QnVuZGxlZEFwcDpkZWZhdWx0JmxhYmJvb2stYnVuZGxlJmRhc2ggMQ==',
+                        'port': 8050
+                    },
+                    {
+                        'appName': 'dash 2',
+                        'command': 'python app2.py',
+                        'description': 'a demo dash app 2',
+                        'id': 'QnVuZGxlZEFwcDpkZWZhdWx0JmxhYmJvb2stYnVuZGxlJmRhc2ggMg==',
+                        'port': 9000
+                    },
+                    {
+                        'appName': 'dash 3',
+                        'command': 'python app3.py',
+                        'description': 'a demo dash app 3',
+                        'id': 'QnVuZGxlZEFwcDpkZWZhdWx0JmxhYmJvb2stYnVuZGxlJmRhc2ggMw==',
+                        'port': 9001
+                    }
+                ]
+            },
+            'id': 'TGFiYm9vazpkZWZhdWx0JmxhYmJvb2stYnVuZGxl'
+        }
+    }
+}
+
 snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors 1'] = {
     'data': {
         'labbook': {

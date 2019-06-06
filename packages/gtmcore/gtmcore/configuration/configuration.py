@@ -53,6 +53,10 @@ class Configuration(object):
         return os.path.expanduser(self.config['git']['working_directory'])
 
     @property
+    def upload_dir(self):
+        return os.path.join(self.app_workdir, '.labmanager', 'upload')
+
+    @property
     def user_config(self) -> Dict[str, Any]:
         """Return the configuration items loaded from the user's config.yaml"""
 

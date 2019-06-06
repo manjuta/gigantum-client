@@ -73,6 +73,10 @@ def _create_temp_work_dir(lfs_enabled: bool = True):
     config.save(config_file)
     os.environ['HOST_WORK_DIR'] = temp_dir
 
+    # Create upload folder
+    if not os.path.exists(config.upload_dir):
+        os.makedirs(config.upload_dir)
+
     return config_file, temp_dir
 
 
