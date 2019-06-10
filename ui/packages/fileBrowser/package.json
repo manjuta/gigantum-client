@@ -1,0 +1,30 @@
+{
+  "name": "@gigantum/filebrowser",
+  "version": "0.0.1",
+  "description": "Gigantum FileBrowser package",
+  "main": "lib/Activity.js",
+  "types": "lib/Activity.js",
+  "scripts": {},
+  "repository": "https://github.com/gigantum/gigantum-client",
+  "keywords": [
+  "file",
+  "filebrowser",
+  "gignatum",
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@nteract/messaging": "^6.0.6",
+    "codemirror": "5.47.0",
+    "lodash": "^4.17.4",
+    "rxjs": "^6.3.3",
+    "styled-components": "^4.1.3"
+  },
+  "peerDependencies": {
+    "react": "^16.8.1",
+    "react-dom": "^16.8.1"
+  },
+  "author": "Calum Butler <calum@gigantum.com>",
+  "license": "MIT",
+}
