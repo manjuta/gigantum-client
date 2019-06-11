@@ -3,8 +3,6 @@ import {
   graphql,
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
-// utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
 
 const mutation = graphql`
   mutation ImportLabbookMutation($input: ImportLabbookInput!){
@@ -18,12 +16,12 @@ const mutation = graphql`
 let tempID = 0;
 
 export default function ImportLabbookMutation(
-  blob,
   chunk,
   accessToken,
+  idToken,
   callback,
 ) {
-  const uploadables = [blob, accessToken];
+  const uploadables = [chunk.blob, accessToken, idToken];
 
   const variables = {
     input: {
@@ -48,15 +46,6 @@ export default function ImportLabbookMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-        }
-
-        if (response.importLabbook.importJobKey) {
-          const footerData = {
-            result: response,
-            type: 'importLabbook',
-            key: 'importJobKey',
-          };
-          FooterUtils.getJobStatus(footerData);
         }
 
         callback(response, error);

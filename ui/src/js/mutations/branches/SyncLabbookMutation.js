@@ -6,7 +6,7 @@ import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 import FooterUtils from 'Components/common/footer/FooterUtils';
-import FooterCallback from 'Components/common/footer/utils/SyncLabbook';
+import footerCallback from 'Components/common/footer/utils/SyncLabbook';
 
 const mutation = graphql`
   mutation SyncLabbookMutation($input: SyncLabbookInput!){
@@ -73,7 +73,7 @@ export default function SyncLabbookMutation(
             result: response,
             type: 'syncLabbook',
             key: 'jobKey',
-            FooterCallback,
+            footerCallback,
             successCall,
             failureCall,
             id,

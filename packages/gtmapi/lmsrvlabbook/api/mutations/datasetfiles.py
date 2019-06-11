@@ -129,7 +129,7 @@ class CompleteDatasetUploadTransaction(graphene.relay.ClientIDMutation):
             metadata = {'dataset': f"{logged_in_username}|{owner}|{dataset_name}",
                         'method': 'complete_dataset_upload_transaction'}
 
-            res = d.dispatch_task(jobs.download_dataset_files, kwargs=job_kwargs, metadata=metadata)
+            res = d.dispatch_task(jobs.complete_dataset_upload_transaction, kwargs=job_kwargs, metadata=metadata)
 
         return CompleteDatasetUploadTransaction(background_job_key=res.key_str)
 

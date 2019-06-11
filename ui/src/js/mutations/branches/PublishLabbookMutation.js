@@ -6,7 +6,7 @@ import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
 import FooterUtils from 'Components/common/footer/FooterUtils';
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/actions/footer';
-import FooterCallback from 'Components/common/footer/utils/PublishLabbook';
+import footerCallback from 'Components/common/footer/utils/PublishLabbook';
 
 const mutation = graphql`
   mutation PublishLabbookMutation($input: PublishLabbookInput!){
@@ -66,7 +66,7 @@ export default function PublishLabbookMutation(
             result: response,
             type: 'publishLabbook',
             key: 'jobKey',
-            FooterCallback,
+            footerCallback,
             successCall,
             failureCall,
             id,

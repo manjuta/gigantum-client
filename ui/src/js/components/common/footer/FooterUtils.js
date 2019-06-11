@@ -2,7 +2,12 @@
 import JobStatus from 'JS/utils/JobStatus';
 import AnsiUp from 'ansi_up';
 // store
-import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/actions/footer';
+import {
+  setMultiInfoMessage,
+  setErrorMessage,
+  setUploadMessageUpdate,
+  setUploadMessageRemove,
+} from 'JS/redux/actions/footer';
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
@@ -14,7 +19,7 @@ const ansiUp = new AnsiUp();
 const hideModal = () => {
   document.getElementById('modal__cover').classList.add('hidden');
   document.getElementById('loader').classList.add('hidden');
-}
+};
 
 const messageParser = (response) => {
   let fullMessage = (response.data.jobStatus.jobMetadata.indexOf('feedback') > -1) ? JSON.parse(response.data.jobStatus.jobMetadata).feedback : '';
@@ -54,6 +59,18 @@ const FooterUtils = {
    *  @return {}
    */
   getJobStatus: (footerData) => {
+
+    const {
+      result,
+      type,
+      key,
+      footerCallback,
+      callback,
+      successCall,
+      failureCall,
+      id,
+      hideFooter,
+    } = footerData;
     /**
       *  @param {}
       *  refetches job status
@@ -71,17 +88,6 @@ const FooterUtils = {
       *  @return {}
       */
     const fetchStatus = () => {
-      const {
-        result,
-        type,
-        key,
-        FooterCallback,
-        successCall,
-        failureCall,
-        id,
-        hideFooter,
-      } = footerData;
-
 
       const resultType = result[type];
       const resultKey = resultType ? resultType[key] : false;
@@ -127,13 +133,15 @@ const FooterUtils = {
               setMultiInfoMessage(messageData);
               hideModal();
 
-              if (FooterCallback.finished) {
+              if (footerCallback && footerCallback.finished) {
                 const callbackData = {
                   response,
                   successCall,
                   mutations,
                 };
-                FooterCallback.finished(callbackData);
+                footerCallback.finished(callbackData);
+              } else if (callback) {
+                callback(response);
               }
             // executes when job status has failed
             } else if (response.data.jobStatus.status === 'failed') {
@@ -141,13 +149,15 @@ const FooterUtils = {
               let errorMessage = response.data.jobStatus.failureMessage;
               hideModal();
 
-              if (FooterCallback.failed) {
+              if (footerCallback && footerCallback.failed) {
                 const callbackData = {
                   response,
                   failureCall,
                   mutations,
                 };
-                ({ errorMessage, reportedFailureMessage } = FooterCallback.failed(callbackData));
+                ({ errorMessage, reportedFailureMessage } = footerCallback.failed(callbackData));
+              } else if (callback) {
+                callback(response);
               }
 
               const errorHTML = `${html}\n<span style="color:rgb(255,85,85)">${reportedFailureMessage}</span>`;
@@ -175,6 +185,63 @@ const FooterUtils = {
 
     // trigger fetch
     fetchStatus();
+  },
+  /**
+    *  @param {object} mutationResponse
+    *  @param {function} refetch
+    *  fetches job status for background message
+    *  updates footer with a message
+    *  @return {}
+    */
+  datasetUploadStatus: (mutationResponse, refetch) => {
+    const {
+      completeDatasetUploadTransaction,
+    } = mutationResponse;
+    /**
+      *  @param {}
+      *  fetches job status for background message
+      *  updates footer with a message
+      *  @return {}
+      */
+    const fetchStatus = (data) => {
+      const {
+        backgroundJobKey,
+      } = data;
+
+      if (backgroundJobKey) {
+        JobStatus.updateFooterStatus(backgroundJobKey).then((response) => {
+          const { jobStatus } = response.data;
+          const metaData = JSON.parse(jobStatus.jobMetadata);
+
+          if (jobStatus.status === 'started') {
+            setTimeout(() => {
+              fetchStatus({ backgroundJobKey });
+              setUploadMessageUpdate(
+                metaData.feedback,
+                1,
+                parseFloat(metaData.percent_complete),
+              );
+            }, 1000);
+          } else if ((jobStatus.status === 'finished') || (jobStatus.status === 'failed')) {
+            setUploadMessageUpdate(
+              metaData.feedback,
+              1,
+              parseFloat(metaData.percent_complete),
+            );
+
+            refetch();
+
+            setTimeout(() => {
+              setUploadMessageRemove(metaData.feedback);
+            }, 2000);
+          }
+        });
+      }
+    };
+
+    const data = { backgroundJobKey: completeDatasetUploadTransaction.backgroundJobKey };
+    // trigger fetch
+    fetchStatus(data);
   },
 };
 

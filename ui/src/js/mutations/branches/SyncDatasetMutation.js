@@ -6,7 +6,7 @@ import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 import FooterUtils from 'Components/common/footer/FooterUtils';
-import FooterCallback from 'Components/common/footer/utils/SyncDataset';
+import footerCallback from 'Components/common/footer/utils/SyncDataset';
 
 const mutation = graphql`
   mutation SyncDatasetMutation($input: SyncDatasetInput!){
@@ -71,7 +71,7 @@ export default function SyncDatasetMutation(
             result: response,
             type: 'syncDataset',
             key: 'jobKey',
-            FooterCallback,
+            footerCallback,
             successCall,
             failureCall,
             id,

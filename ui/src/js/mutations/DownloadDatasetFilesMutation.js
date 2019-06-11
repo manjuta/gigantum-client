@@ -5,7 +5,7 @@ import {
 import environment from 'JS/createRelayEnvironment';
 // utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
-import FooterCallback from 'Components/common/footer/utils/DownloadDatasetFiles';
+import footerCallback from 'Components/common/footer/utils/DownloadDatasetFiles';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 
 const mutation = graphql`
@@ -62,7 +62,7 @@ export default function DownloadDatasetFilesMutation(
         result: response,
         type: 'downloadDatasetFiles',
         key: 'backgroundJobKey',
-        FooterCallback,
+        footerCallback,
         successCall,
         failureCall,
       };

@@ -5,7 +5,7 @@ import {
 import environment from 'JS/createRelayEnvironment';
 // utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
-import FooterCallback from 'Components/common/footer/utils/ImportRemoteLabbook';
+import footerCallback from 'Components/common/footer/utils/ImportRemoteLabbook';
 
 const mutation = graphql`
   mutation ImportRemoteLabbookMutation($input: ImportRemoteLabbookInput!){
@@ -48,7 +48,7 @@ export default function ImportRemoteLabbookMutation(
           result: response,
           type: 'importRemoteLabbook',
           key: 'jobKey',
-          FooterCallback,
+          footerCallback,
           successCall,
           failureCall,
         };

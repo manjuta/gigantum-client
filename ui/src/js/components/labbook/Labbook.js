@@ -201,6 +201,7 @@ class Labbook extends Component {
 
     window.removeEventListener('click', this._branchViewClickedOff);
   }
+
   /**
    @param {}
    refetch packages
@@ -229,7 +230,6 @@ class Labbook extends Component {
       force: true,
     }
     props.relay.refetch(queryVariables, renderVariables, () => {}, options);
-
   }
 
   /**
@@ -547,7 +547,11 @@ class Labbook extends Component {
 
   render() {
     const { props, state } = this;
-    const isLocked = props.isBuilding || props.isSyncing || props.isPublishing || state.isLocked;
+    const isLocked = props.isBuilding
+      || props.isSyncing
+      || props.isPublishing
+      || state.isLocked;
+
     if (props.labbook) {
       const { labbook, branchesOpen } = props;
       const sidePanelVisible = !isLocked && props.sidePanelVisible;
@@ -868,6 +872,7 @@ class Labbook extends Component {
                             isLocked={isLocked}
                             containerStatus={containerStatus}
                             section="code"
+                            lockFileBrowser={props.isUploading}
                           />
 
                         </ErrorBoundary>)}
@@ -886,6 +891,7 @@ class Labbook extends Component {
                             isLocked={isLocked}
                             refetch={this._refetchSection}
                             containerStatus={containerStatus}
+                            lockFileBrowser={props.isUploading}
                             section="input"
                           />
                         </ErrorBoundary>)}
@@ -904,6 +910,7 @@ class Labbook extends Component {
                             isLocked={isLocked}
                             refetch={this._refetchSection}
                             containerStatus={containerStatus}
+                            lockFileBrowser={props.isUploading}
                             section="output"
                           />
                         </ErrorBoundary>)}

@@ -8,7 +8,7 @@ import uuidv4 from 'uuid/v4';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
-import FooterCallback from 'Components/common/footer/utils/BuildImage';
+import footerCallback from 'Components/common/footer/utils/BuildImage';
 
 
 const mutation = graphql`
@@ -52,7 +52,7 @@ export default function BuildImageMutation(
           result: response,
           type: 'buildImage',
           key: 'backgroundJobKey',
-          FooterCallback,
+          footerCallback,
         };
         FooterUtils.getJobStatus(footerData);
         callback(response, error, id);

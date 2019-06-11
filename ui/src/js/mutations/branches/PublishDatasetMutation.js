@@ -6,7 +6,7 @@ import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/actions/footer';
 import FooterUtils from 'Components/common/footer/FooterUtils';
-import FooterCallback from 'Components/common/footer/utils/PublishDataset';
+import footerCallback from 'Components/common/footer/utils/PublishDataset';
 
 const mutation = graphql`
   mutation PublishDatasetMutation($input: PublishDatasetInput!){
@@ -65,7 +65,7 @@ export default function PublishDatasetMutation(
             result: response,
             type: 'publishDataset',
             key: 'jobKey',
-            FooterCallback,
+            footerCallback,
             successCall,
             failureCall,
             id,
