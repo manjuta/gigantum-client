@@ -92,7 +92,7 @@ def ping():
     """Unauthorized endpoint for validating the API is up"""
     app_name, built_on, revision = config.config['build_info'].split(' :: ')
     return jsonify({
-        "application": app_name ,
+        "application": app_name,
         "built_on": built_on,
         "revision": revision
     })

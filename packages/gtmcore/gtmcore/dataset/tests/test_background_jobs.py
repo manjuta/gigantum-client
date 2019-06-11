@@ -7,6 +7,7 @@ from aioresponses import aioresponses
 import snappy
 from mock import patch
 
+import gtmcore.dispatcher.dataset_jobs
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest
@@ -327,6 +328,7 @@ class TestDatasetBackgroundJobs(object):
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt", "moar fake content!")
 
         dl_kwargs = {
+            'dispatcher': Dispatcher,
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
@@ -335,7 +337,7 @@ class TestDatasetBackgroundJobs(object):
         }
 
         assert len(m.manifest) == 0
-        jobs.complete_dataset_upload_transaction(**dl_kwargs)
+        gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction(**dl_kwargs)
 
         m = Manifest(ds, 'default')
 
@@ -374,6 +376,7 @@ class TestDatasetBackgroundJobs(object):
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test8.txt", "fake content")
 
         dl_kwargs = {
+            'dispatcher': Dispatcher,
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
@@ -382,7 +385,7 @@ class TestDatasetBackgroundJobs(object):
         }
 
         assert len(m.manifest) == 0
-        jobs.complete_dataset_upload_transaction(**dl_kwargs)
+        gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction(**dl_kwargs)
 
         m = Manifest(ds, 'default')
 
@@ -423,6 +426,7 @@ class TestDatasetBackgroundJobs(object):
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test3.txt", "fake content 3")
 
         dl_kwargs = {
+            'dispatcher': Dispatcher,
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
@@ -431,7 +435,7 @@ class TestDatasetBackgroundJobs(object):
         }
 
         assert len(m.manifest) == 0
-        jobs.complete_dataset_upload_transaction(**dl_kwargs)
+        gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction(**dl_kwargs)
 
         m = Manifest(ds, 'default')
 
@@ -451,7 +455,7 @@ class TestDatasetBackgroundJobs(object):
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test4.txt", "fake content 4")
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "test3.txt"))
 
-        jobs.complete_dataset_upload_transaction(**dl_kwargs)
+        gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction(**dl_kwargs)
         m = Manifest(ds, 'default')
 
         # make sure manifest got updated
@@ -479,6 +483,7 @@ class TestDatasetBackgroundJobs(object):
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "zztest5.txt", "fake content 5")
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "zztest6.txt", "fake content 6")
         job_kwargs = {
+            'dispatcher': Dispatcher,
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
@@ -490,7 +495,7 @@ class TestDatasetBackgroundJobs(object):
                         'method': 'complete_dataset_upload_transaction'}
         assert len(m.manifest) == 0
 
-        job_key = dispatcher_obj.dispatch_task(jobs.complete_dataset_upload_transaction,
+        job_key = dispatcher_obj.dispatch_task(gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction,
                                                kwargs=job_kwargs,
                                                metadata=job_metadata)
 
@@ -533,6 +538,7 @@ class TestDatasetBackgroundJobs(object):
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "fake content!")
 
         dl_kwargs = {
+            'dispatcher': Dispatcher,
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
@@ -541,7 +547,7 @@ class TestDatasetBackgroundJobs(object):
         }
 
         assert len(m.manifest) == 0
-        jobs.complete_dataset_upload_transaction(**dl_kwargs)
+        gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction(**dl_kwargs)
 
         m = Manifest(ds, 'default')
 
