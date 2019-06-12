@@ -141,16 +141,6 @@ export default class SectionWrapper extends Component {
       return (
 
         <div className="SectionWrapper">
-          {
-            (section !== 'data') && sectionObject[section].isUntracked
-            && (
-            <div className="SectionWrapper__tracked-container">
-              <div className="SectionWrapper__tracked">
-                Version Tracking Disabled
-              </div>
-            </div>
-            )
-          }
           { showFavoritesRecent
             && (
             <div>
