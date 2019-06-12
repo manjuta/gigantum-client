@@ -10,7 +10,6 @@ from rq import get_current_job
 
 import gtmcore
 import gtmcore.dispatcher.dataset_jobs
-
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest

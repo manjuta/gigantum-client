@@ -265,7 +265,7 @@ class ModifyDatasetLink(graphene.relay.ClientIDMutation):
         labbook_name = graphene.String(required=True, description="Name of the labbook")
         dataset_owner = graphene.String(required=True, description="Owner of the dataset to link")
         dataset_name = graphene.String(required=True, description="Name of the dataset to link")
-        action = graphene.String(required=True, description="Action to perform, either `link` or `unlink`")
+        action = graphene.String(required=True, description="Action to perform, either `link`, `unlink`, or `update`")
         dataset_url = graphene.String(description="URL to the Dataset to link. Only required when `action=link`")
 
     new_labbook_edge = graphene.Field(LabbookConnection.Edge)
@@ -329,8 +329,10 @@ class ModifyDatasetLink(graphene.relay.ClientIDMutation):
                 m.link_revision()
             elif action == 'unlink':
                 im.unlink_dataset_from_labbook(dataset_owner, dataset_name, lb)
+            elif action == 'update':
+                im.update_linked_dataset_reference(dataset_owner, dataset_name, lb)
             else:
-                raise ValueError("Unsupported action. Use `link` or `unlink`")
+                raise ValueError("Unsupported action. Use `link`, `unlink`, or `update`")
 
             edge = LabbookConnection.Edge(node=Labbook(owner=labbook_owner, name=labbook_name),
                                           cursor=base64.b64encode(f"{0}".encode('utf-8')))

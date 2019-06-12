@@ -438,6 +438,55 @@ type ConfigureDatasetPayload {
   clientMutationId: String
 }
 
+input ConfigureDatasetInput {
+  """Owner of the dataset to configure"""
+  datasetOwner: String!
+
+  """Name of the dataset to configure"""
+  datasetName: String!
+  parameters: [DatasetConfigurationParameterInput]
+
+  """
+  Set to true so confirm the configuration and continue. False will clear the configuration to start over
+  """
+  confirm: Boolean
+  clientMutationId: String
+}
+
+"""
+Mutation to configure a dataset backend if needed.
+
+Workflow to configure a dataset:
+- TODO
+"""
+type ConfigureDatasetPayload {
+  dataset: Dataset
+
+  """If true, all parameters a set and OK to continue"""
+  isConfigured: Boolean
+
+  """
+  If true, should confirm configuration with the user and resubmit with confirm=True to finalize
+  """
+  shouldConfirm: Boolean
+
+  """Configuration error message to display to the user"""
+  errorMessage: String
+
+  """Confirmation message to display to the user"""
+  confirmMessage: String
+
+  """
+  If true, this backend type requires background work after confirmation. Check
+  complete_background_key for key to provide user feedback.
+  """
+  hasBackgroundJob: Boolean
+
+  """Background job key to query on for feedback if needed"""
+  backgroundJobKey: String
+  clientMutationId: String
+}
+
 """An enumeration for container image status"""
 enum ContainerStatus {
   NOT_RUNNING
@@ -617,7 +666,7 @@ type DatasetList implements Node {
 
 """
 A type representing the overview of a Dataset
-    
+
 """
 type DatasetOverview implements Node & GitRepository {
   """The ID of the object."""
@@ -771,7 +820,7 @@ input DeleteSecretsFileInput {
 
 """
 Delete the secrets file on the host, but without removing the
-corresponding entry in the registry. 
+corresponding entry in the registry.
 """
 type DeleteSecretsFilePayload {
   environment: Environment
@@ -929,7 +978,7 @@ input InsertSecretsEntryInput {
 """
 Creates an entry in the Project's Secret Store. Note, you will
 need to use the Upload mutation to actually put the file content in
-the secret store. 
+the secret store.
 """
 type InsertSecretsEntryPayload {
   environment: Environment
@@ -952,7 +1001,7 @@ type JobStatus implements Node {
 }
 
 """
-A Connection for paging through all background jobs the system is aware of. 
+A Connection for paging through all background jobs the system is aware of.
 """
 type JobStatusConnection {
   pageInfo: PageInfo!
@@ -1211,7 +1260,7 @@ type LabbookQuery {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-    
+
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1261,7 +1310,7 @@ input MergeFromBranchInput {
 }
 
 """
-Merge from another branch into the current active branch. Force if necessary. 
+Merge from another branch into the current active branch. Force if necessary.
 """
 type MergeFromBranchPayload {
   labbook: Labbook
@@ -1573,7 +1622,7 @@ input RemoveSecretsEntryInput {
 
 """
 Removes the entry from the Project's SecretStore. Will also remove
-any associated files. This undoes the InsertSecretsEntry mutation. 
+any associated files. This undoes the InsertSecretsEntry mutation.
 """
 type RemoveSecretsEntryPayload {
   environment: Environment
@@ -1601,7 +1650,7 @@ input ResetBranchToRemoteInput {
 """
 Undo all local history and then set current branch tip to match remote.
 
-Very useful when changes are made to master that cannot be pushed. 
+Very useful when changes are made to master that cannot be pushed.
 """
 type ResetBranchToRemotePayload {
   labbook: Labbook
@@ -1609,7 +1658,7 @@ type ResetBranchToRemotePayload {
 }
 
 """
-Represents a secret vault - i.e., a directory that contains secret key files. 
+Represents a secret vault - i.e., a directory that contains secret key files.
 """
 type SecretFileMapping implements Node & GitRepository {
   """The ID of the object."""
@@ -1658,7 +1707,7 @@ input SetBundledAppInput {
 
 """
 Mutation to add or update a bundled app configuration to a project
-    
+
 """
 type SetBundledAppPayload {
   environment: Environment
@@ -1831,7 +1880,7 @@ input UploadSecretsFileInput {
 
 """
 Uploades the actual secrets file pertaining to the given filename in the
-SecretStore registry. The InsertSecretsEntry must be called first. 
+SecretStore registry. The InsertSecretsEntry must be called first.
 """
 type UploadSecretsFilePayload {
   environment: Environment

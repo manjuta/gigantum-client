@@ -122,7 +122,7 @@ snapshots['TestDatasetMutations.test_modify_dataset_link_errors 1'] = {
                     'line': 4
                 }
             ],
-            'message': 'Unsupported action. Use `link` or `unlink`',
+            'message': 'Unsupported action. Use `link`, `unlink`, or `update`',
             'path': [
                 'modifyDatasetLink'
             ]
@@ -168,6 +168,44 @@ snapshots['TestDatasetMutations.test_configure_local 3'] = {
             'hasBackgroundJob': True,
             'isConfigured': True,
             'shouldConfirm': False
+        }
+    }
+}
+
+snapshots['TestDatasetMutations.test_update_dataset_link 1'] = {
+    'data': {
+        'modifyDatasetLink': {
+            'newLabbookEdge': {
+                'node': {
+                    'description': 'testing dataset links',
+                    'id': 'TGFiYm9vazpkZWZhdWx0JnRlc3QtbGI=',
+                    'linkedDatasets': [
+                        {
+                            'name': 'dataset100'
+                        }
+                    ],
+                    'name': 'test-lb'
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestDatasetMutations.test_update_dataset_link 2'] = {
+    'data': {
+        'modifyDatasetLink': {
+            'newLabbookEdge': {
+                'node': {
+                    'description': 'testing dataset links',
+                    'id': 'TGFiYm9vazpkZWZhdWx0JnRlc3QtbGI=',
+                    'linkedDatasets': [
+                        {
+                            'name': 'dataset100'
+                        }
+                    ],
+                    'name': 'test-lb'
+                }
+            }
         }
     }
 }

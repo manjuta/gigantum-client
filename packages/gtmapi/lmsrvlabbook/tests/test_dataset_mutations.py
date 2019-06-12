@@ -3,11 +3,14 @@ import os
 import responses
 import flask
 from mock import patch
+import shutil
+import tempfile
 
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir, \
     fixture_working_dir_dataset_tests, mock_enable_unmanaged_for_testing
 
+from gtmcore.configuration.utils import call_subprocess
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.inventory import InventoryManager
 
@@ -299,7 +302,7 @@ class TestDatasetMutations(object):
                       updatedDataset {
                           id
                           name
-                          description                        
+                          description
                       }
                   }
                 }
@@ -348,7 +351,7 @@ class TestDatasetMutations(object):
                           name
                           overview {
                             readme
-                        }                        
+                        }
                       }
                   }
                 }
@@ -365,7 +368,7 @@ class TestDatasetMutations(object):
                           name
                           overview {
                             readme
-                        }            
+                        }
                     }
                     }
                 """
@@ -574,7 +577,7 @@ class TestDatasetMutations(object):
 
         query = """
                     mutation myMutation{
-                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset", 
+                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset",
                         parameters: [{parameter: "Data Directory", parameterType: "str", value: "doesnotexist"}]}) {
                           isConfigured
                           shouldConfirm
@@ -594,7 +597,7 @@ class TestDatasetMutations(object):
 
         query = """
                     mutation myMutation{
-                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset", 
+                      configureDataset(input: {datasetOwner: "default", datasetName: "adataset",
                         parameters: [{parameter: "Data Directory", parameterType: "str", value: "test_local_dir"}]}) {
                           isConfigured
                           shouldConfirm
@@ -616,8 +619,8 @@ class TestDatasetMutations(object):
                           shouldConfirm
                           errorMessage
                           confirmMessage
-                          hasBackgroundJob       
-                          backgroundJobKey                   
+                          hasBackgroundJob
+                          backgroundJobKey
                       }
                     }
                 """
@@ -747,3 +750,90 @@ class TestDatasetMutations(object):
         result = fixture_working_dir_dataset_tests[2].execute(query)
         assert "errors" not in result
         assert "rq:job" in result['data']['verifyDataset']['backgroundJobKey']
+
+    def test_update_dataset_link(self, fixture_working_dir, snapshot):
+        im = InventoryManager(fixture_working_dir[0])
+        lb = im.create_labbook('default', 'default', 'test-lb', 'testing dataset links')
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+
+        # Fake publish to a local bare repo
+        _MOCK_create_remote_repo2(ds, 'default', None, None)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
+
+        query = """
+                   mutation myMutation($lo: String!, $ln: String!, $do: String!, $dn: String!,
+                                       $a: String!, $du: String) {
+                     modifyDatasetLink(input: {labbookOwner: $lo, labbookName: $ln, datasetOwner: $do, datasetName: $dn,
+                                               action: $a, datasetUrl: $du}) {
+                         newLabbookEdge {
+                           node {
+                             id
+                             name
+                             description
+                             linkedDatasets {
+                               name
+                             }
+                           }
+                         }
+                     }
+                   }
+                   """
+        variables = {"lo": "default", "ln": "test-lb", "do": "default", "dn": "dataset100", "a": "link", "du": ds.remote}
+        result = fixture_working_dir[2].execute(query, variable_values=variables)
+        assert "errors" not in result
+        snapshot.assert_match(result)
+
+        assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is True
+        dataset_submodule_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'default', 'dataset100')
+        assert os.path.exists(dataset_submodule_dir) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, '.gigantum')) is True
+        assert os.path.exists(os.path.join(dataset_submodule_dir, 'test_file.dat')) is False
+
+        with open(os.path.join(lb.root_dir, '.gitmodules'), 'rt') as mf:
+            data = mf.read()
+        assert len(data) > 0
+
+        # Make change to published dataset
+        git_dir = os.path.join(tempfile.gettempdir(), 'test_update_dataset_link_mutation')
+        try:
+            os.makedirs(git_dir)
+            call_subprocess(['git', 'clone', ds.remote], cwd=git_dir, check=True)
+            with open(os.path.join(git_dir, ds.name, 'test_file.dat'), 'wt') as tf:
+                tf.write("Test File Contents")
+            call_subprocess(['git', 'add', 'test_file.dat'], cwd=os.path.join(git_dir, ds.name), check=True)
+            call_subprocess(['git', 'commit', '-m', 'editing repo'], cwd=os.path.join(git_dir, ds.name), check=True)
+            call_subprocess(['git', 'push'], cwd=os.path.join(git_dir, ds.name), check=True)
+
+            query = """
+                       mutation myMutation($lo: String!, $ln: String!, $do: String!, $dn: String!,
+                                           $a: String!) {
+                         modifyDatasetLink(input: {labbookOwner: $lo, labbookName: $ln, datasetOwner: $do, datasetName: $dn,
+                                                   action: $a}) {
+                             newLabbookEdge {
+                               node {
+                                 id
+                                 name
+                                 description
+                                 linkedDatasets {
+                                   name
+                                 }
+                               }
+                             }
+                         }
+                       }
+                       """
+            variables = {"lo": "default", "ln": "test-lb", "do": "default", "dn": "dataset100", "a": "update"}
+            result = fixture_working_dir[2].execute(query, variable_values=variables)
+            assert "errors" not in result
+            snapshot.assert_match(result)
+
+            # verify change is reflected
+            assert os.path.exists(os.path.join(dataset_submodule_dir, 'test_file.dat')) is True
+
+            # Verify activity record
+            assert "Updated Dataset `default/dataset100` link to version" in lb.git.log()[0]['message']
+
+        finally:
+            if os.path.exists(git_dir):
+                shutil.rmtree(git_dir)
