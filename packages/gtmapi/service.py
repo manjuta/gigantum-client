@@ -222,6 +222,11 @@ if config.config["lock"]["reset_on_start"]:
     logger.info("Resetting ALL distributed locks")
     reset_all_locks(config.config['lock'])
 
+# Create local data (for local dataset types) dir if it doesn't exist
+local_data_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_directory'], 'local_data')
+if os.path.isdir(local_data_dir) is False:
+    os.makedirs(local_data_dir, exist_ok=True)
+
 
 # make sure temporary upload directory exists and is empty
 tempdir = Configuration().upload_dir

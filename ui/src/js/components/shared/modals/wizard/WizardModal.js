@@ -147,9 +147,16 @@ export default class WizardModal extends React.Component {
     gets selected id and triggers continueSave function using refs
   */
   _continueSave = ({ isSkip, text }) => {
-    this.refs[this._getSelectedComponentId()].continueSave(isSkip);
-    this.setState({ continueDisabled: true });
-    if (text === 'Create Labbook') this.setState({ modalBlur: true });
+    const { props } = this;
+    if (props.datasets) {
+      this.refs[this._getSelectedComponentId()].continueSave(isSkip);
+    } else {
+      this.refs[this._getSelectedComponentId()].continueSave(isSkip);
+      this.setState({ continueDisabled: true });
+      if (text === 'Create Labbook') {
+        this.setState({ modalBlur: true });
+      }
+    }
   }
 
   /**
@@ -157,12 +164,20 @@ export default class WizardModal extends React.Component {
     sets name and description to state for create labbook mutation
   */
   _createLabbookCallback(name, description) {
+
+    const { props } = this;
     this.setState({
       name,
       description,
+    }, () => {
+      if (props.datasets) {
+        this._toggleDisabledContinue(true);
+        this._createDatasetMutation();
+      }
     });
-
-    this._setComponent('selectBase');
+    if (!props.datasets) {
+      this._setComponent('selectBase');
+    }
   }
 
   /**
@@ -269,7 +284,7 @@ export default class WizardModal extends React.Component {
     CreateDatasetMutation(
       name,
       description,
-      componentId,
+      'gigantum_object_v1',
       (response, error) => {
         if (error) {
           setErrorMessage(`An error occured while trying to create Dataset '${name}'.`, error);
@@ -447,6 +462,7 @@ function ModalNav({
 
 
   const buttonText = isDataset ? 'Create Dataset' : 'Create Project';
+  const continueText = isDataset ? 'Create Dataset' : 'Continue';
 
   return (
     <div className={wizardModalNav}>
@@ -480,7 +496,7 @@ function ModalNav({
               onClick={() => { continueSave({ isSkip: false, text: 'Continue' }); }}
               disabled={(state.continueDisabled)}
             >
-              Continue
+              {continueText}
             </button>
             )
           }

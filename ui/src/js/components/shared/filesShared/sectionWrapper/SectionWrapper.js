@@ -212,6 +212,7 @@ export default class SectionWrapper extends Component {
                 loadStatus={this._loadStatus}
                 isLocked={props.isLocked}
                 toggleFavoriteRecent={this._toggleFavoriteRecent}
+                isManaged={props.isManaged}
                 {...sectionProps}
                 linkedDatasets={sectionObject.linkedDatasets || null}
                 containerStatus={props.containerStatus}

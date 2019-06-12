@@ -22,7 +22,7 @@ from gtmcore.labbook import SecretStore
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
-from gtmcore.dataset.storage import SUPPORTED_STORAGE_BACKENDS
+from gtmcore.dataset import storage
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
 from gtmcore.dataset import Manifest
@@ -488,7 +488,7 @@ class InventoryManager(object):
         """
         dataset = Dataset(config_file=self.config_file, author=author, namespace=owner)
 
-        if storage_type not in SUPPORTED_STORAGE_BACKENDS:
+        if storage_type not in storage.SUPPORTED_STORAGE_BACKENDS:
             raise ValueError(f"Unsupported Dataset storage type: {storage_type}")
 
         try:
