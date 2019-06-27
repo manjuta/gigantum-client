@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Wed Jun 19 2019 11:41:27 GMT-0400 (Eastern Daylight Time)
+# timestamp: Fri Jun 21 2019 14:30:11 GMT-0400 (Eastern Daylight Time)
 
 schema {
   query: LabbookQuery
@@ -786,6 +786,7 @@ type Environment implements Node & GitRepository {
   imageStatus: ImageStatus
   containerStatus: ContainerStatus
   base: BaseComponent
+  baseLatestRevision: Int
   packageDependencies(before: String, after: String, first: Int, last: Int): PackageComponentConnection
   dockerSnippet: String
   secretsFileMapping(before: String, after: String, first: Int, last: Int): SecretFileMappingConnection

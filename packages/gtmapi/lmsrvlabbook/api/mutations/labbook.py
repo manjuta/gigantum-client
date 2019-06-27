@@ -167,7 +167,7 @@ class ChangeLabbookBase(graphene.relay.ClientIDMutation):
         cm = ComponentManager(lb)
         cm.change_base(repository, base_id, revision)
 
-        return ChangeLabbookBase(labbook=Labbook(owner=username, name=lb.name))
+        return ChangeLabbookBase(labbook=Labbook(owner=owner, name=lb.name))
 
 
 class SetLabbookDescription(graphene.relay.ClientIDMutation):
