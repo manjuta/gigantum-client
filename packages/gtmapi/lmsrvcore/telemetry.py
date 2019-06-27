@@ -1,5 +1,6 @@
 import time
 import glob
+import os
 from typing import Any, Optional, Tuple, Dict
 
 from gtmcore.logging import LMLogger
@@ -53,6 +54,7 @@ def service_telemetry():
     t0 = time.time()
     mem_total, mem_avail = _calc_mem_free()
     disk_total, disk_avail = _calc_disk_free()
+    nvidia_driver = os.environ.get('NVIDIA_DRIVER_VERSION')
     try:
         rq_total, rq_free = _calc_rq_free()
     except:
@@ -75,7 +77,12 @@ def service_telemetry():
             'available': rq_free
         },
         # How long it took to collect stats - round to two decimal places
-        'collectionTimeSec': float(f'{compute_time:.2f}')
+        'collectionTimeSec': float(f'{compute_time:.2f}'),
+        'gpu': {
+            'isAvailable': bool(nvidia_driver),
+            # If None, becomes 'None'
+            'nvidiaVersion': str(nvidia_driver)
+        }
     }
 
 
