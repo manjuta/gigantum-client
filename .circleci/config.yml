@@ -4,6 +4,8 @@ executors:
   gig_client:
     docker:
       - image: gigantum/circleci-client:d60c503bd5-2019-06-14
+  test_harness_exec:
+    machine: true
 
 jobs:
   mypy-gtmcore:
@@ -147,6 +149,42 @@ jobs:
             cd /home/circleci/repo/ui
             jest shared/fileBrowser activity dashboard -u
 
+  test-harness:
+    executor: test_harness_exec
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: 
+          name: Build and start Gigantum client
+          command: |
+            bash testing/circleci/ubuntu1404-install.sh
+            python3.6 -m venv gtm-env
+            source gtm-env/bin/activate
+            cd gtm && pip install -e . && cd ..
+            gtm client build
+            gtm client start
+      - run:
+          name: Set up credentials.txt for test user (circleci)
+          command: |
+            echo $TEST_USERNAME > credentials.txt
+            echo $TEST_PASSWORD >> credentials.txt
+            echo $TEST_USERNAME_2 >> credentials.txt
+            echo $TEST_PASSWORD_2 >> credentials.txt
+      - run:
+          name: Run the setup and preparation script
+          command: |
+            cp credentials.txt testing/credentials.txt
+            cd testing
+            python3.6 -m venv test-env
+            source test-env/bin/activate
+            pip install -r requirements.txt
+      - run:
+          name: Run Tests
+          command: |
+            cd testing
+            source test-env/bin/activate
+            python3 driver.py test_graphql test_delete_project test_branching
+
   fossa:
     executor: gig_client
     working_directory: ~/repo
@@ -190,6 +228,10 @@ workflows:
           requires:
             - mypy-gtmcore
             - mypy-gtmapi
+      #- test-harness:
+      #    requires:
+      #      - mypy-gtmcore
+      #      - mypy-gtmapi
       - test-background-jobs:
           requires:
             - mypy-gtmcore
@@ -197,3 +239,4 @@ workflows:
       - fossa:
           requires:
             - test-confhttpproxy
+
