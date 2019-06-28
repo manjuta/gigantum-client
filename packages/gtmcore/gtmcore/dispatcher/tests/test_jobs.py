@@ -236,7 +236,7 @@ class TestJobs(object):
 
         lb.write_readme("do a commit")
 
-        assert bm.get_commits_ahead('master') == 2
+        assert bm.get_commits_ahead('master') == 1
         assert bm.get_commits_behind('master') == 0
 
         jobs.sync_repository(lb, username=username, override=MergeOverride.OURS,

@@ -1,5 +1,5 @@
 import subprocess
-
+import math
 from gtmcore.labbook import LabBook
 from typing import Optional, List, Tuple
 
@@ -244,14 +244,15 @@ class BranchManager(object):
         git_cmd = f'git rev-list {remote_name}/{bname}..{bname} --count'
         result = call_subprocess(git_cmd.split(), cwd=self.repository.root_dir).strip()
         if result.isdigit():
-            return int(result)
+            return int(math.ceil(float(result)/2.0))
         else:
             raise BranchException(f"Unclear commits_ahead result: {result}")
 
     def get_commits_behind(self, branch_name: Optional[str] = None, remote_name: str = "origin") -> int:
         """Return to number of local commits not present in remote branch.
 
-        Note! It is important to call fetch to ensure correct behavior here."""
+        Note! It is important to call fetch to ensure correct behavior here. This is done via the FetchLoader so
+        one fetch per branch occurs in the API"""
         if not self.repository.remote:
             return 0
 
@@ -262,6 +263,6 @@ class BranchManager(object):
         git_cmd = f'git rev-list {bname}..{remote_name}/{bname} --count'
         result = call_subprocess(git_cmd.split(), cwd=self.repository.root_dir).strip()
         if result.isdigit():
-            return int(result)
+            return int(math.ceil(float(result)/2.0))
         else:
             raise BranchException(f"Unclear commits_behind result: {result}")
