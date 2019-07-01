@@ -422,7 +422,7 @@ export default class MultithreadUploader {
       }
 
       if (error) {
-        setErrorMessage(error);
+        setErrorMessage('Upload failed: ', error);
       }
     };
     if (connection.indexOf('_allFiles') > -1) {
