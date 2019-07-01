@@ -22,19 +22,10 @@ logger = LMLogger.get_logger()
 app = Flask("lmsrvlabbook")
 
 # Load configuration class into the flask application
-user_conf_path = "/mnt/gigantum/.labmanager/config.yaml"
-if os.path.exists(user_conf_path):
-    logger.info(f"Using custom user configuration from {user_conf_path}")
-    try:
-        with open(user_conf_path) as user_file:
-            yaml.safe_load(user_file)
-        shutil.copyfile(user_conf_path, os.path.expanduser("~/user-config.yaml"))
-    except Exception as e:
-        logger.error("Error parsing user config, cannot proceed")
-        raise
+if os.path.exists(Configuration.USER_LOCATION):
+    logger.info(f"Using custom user configuration from {Configuration.USER_LOCATION}")
 else:
     logger.info("No custom user configuration found")
-
 
 random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
@@ -148,13 +139,14 @@ if config.config["lock"]["reset_on_start"]:
 local_data_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_directory'], 'local_data')
 if os.path.isdir(local_data_dir) is False:
     os.makedirs(local_data_dir, exist_ok=True)
+    logger.info(f'Created `local_data` dir for Local Filesystem Dataset Type: {local_data_dir}')
 
 
 # make sure temporary upload directory exists and is empty
 tempdir = Configuration().upload_dir
 if os.path.exists(tempdir):
     shutil.rmtree(tempdir)
-    logger.info(f'removed {tempdir}')
+    logger.info(f'Cleared upload temp dir: {tempdir}')
 os.makedirs(tempdir)
 
 
@@ -171,8 +163,8 @@ def main(debug=False) -> None:
         else:
             # If debug arg is not explicitly given then it is loaded from config
             app.run(host="0.0.0.0", port=10001)
-    except Exception as e:
-        logger.exception(e)
+    except Exception as err:
+        logger.exception(err)
         raise
 
 

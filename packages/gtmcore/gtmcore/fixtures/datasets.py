@@ -2,6 +2,7 @@ import pytest
 import os
 import shutil
 from mock import patch
+import responses
 
 import boto3
 from moto import mock_s3

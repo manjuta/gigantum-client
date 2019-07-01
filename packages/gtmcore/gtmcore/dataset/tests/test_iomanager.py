@@ -4,7 +4,7 @@ import glob
 import uuid
 import shutil
 from aioresponses import aioresponses
-import snappy
+import responses
 
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.io.manager import IOManager
@@ -17,6 +17,15 @@ from gtmcore.dataset.io import PushResult, PushObject
 def chunk_update_callback(completed_chunk: bool):
     """Mock callback for collecting chunk feedback"""
     assert completed_chunk is True
+
+
+@pytest.fixture()
+def mock_dataset_head():
+    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
+    with responses.RequestsMock() as rsps:
+        rsps.add(responses.HEAD, 'https://api.gigantum.com/object-v1/tester/dataset-1',
+                 headers={'x-access-level': 'a'}, status=200)
+        yield
 
 
 class TestIOManager(object):
@@ -115,7 +124,7 @@ class TestIOManager(object):
         assert obj_to_push[0].dataset_path == "test1.txt"
         assert obj_to_push[1].dataset_path == "test2.txt"
 
-    def test_push_objects(self, mock_dataset_with_manifest):
+    def test_push_objects(self, mock_dataset_with_manifest, mock_dataset_head):
         ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
@@ -131,6 +140,15 @@ class TestIOManager(object):
         _, obj2 = obj_to_push[1].object_path.rsplit('/', 1)
 
         with aioresponses() as mocked_responses:
+            mocked_responses.head(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}',
+                                  headers={
+                                         "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
+                                         "namespace": ds.namespace,
+                                         "key_id": "hghghg",
+                                         "obj_id": obj1,
+                                         "dataset": ds.name
+                                  },
+                                  status=200)
             mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
@@ -141,7 +159,7 @@ class TestIOManager(object):
                                  },
                                  status=200)
             mocked_responses.put(f"https://dummyurl.com/{obj1}?params=1",
-                                 payload={},
+                                 headers={'Etag': 'asdfasdf'},
                                  status=200)
 
             mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
@@ -154,7 +172,7 @@ class TestIOManager(object):
                                  },
                                  status=200)
             mocked_responses.put(f"https://dummyurl.com/{obj2}?params=1",
-                                 payload={},
+                                 headers={'Etag': '12341234'},
                                  status=200)
 
             assert len(glob.glob(f'{iom.push_dir}/*')) == 1
@@ -171,7 +189,7 @@ class TestIOManager(object):
             assert result.success[0].object_path in [obj_to_push[0].object_path, obj_to_push[1].object_path]
             assert result.success[1].object_path in [obj_to_push[0].object_path, obj_to_push[1].object_path]
 
-    def test_push_objects_deduplicate(self, mock_dataset_with_manifest):
+    def test_push_objects_deduplicate(self, mock_dataset_with_manifest, mock_dataset_head):
         ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
@@ -201,7 +219,7 @@ class TestIOManager(object):
                                  },
                                  status=200)
             mocked_responses.put(f"https://dummyurl.com/{obj1}?params=1",
-                                 payload={},
+                                 headers={'Etag': 'asdfasdf'},
                                  status=200)
 
             mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
@@ -214,7 +232,7 @@ class TestIOManager(object):
                                  },
                                  status=200)
             mocked_responses.put(f"https://dummyurl.com/{obj2}?params=1",
-                                 payload={},
+                                 headers={'Etag': '12341234'},
                                  status=200)
 
             assert len(glob.glob(f'{iom.push_dir}/*')) == 1
@@ -232,7 +250,7 @@ class TestIOManager(object):
             assert result.success[0].object_path in [obj_to_push[0].object_path, obj_to_push[1].object_path]
             assert result.success[1].object_path in [obj_to_push[0].object_path, obj_to_push[1].object_path]
 
-    def test_push_objects_with_failure(self, mock_dataset_with_manifest):
+    def test_push_objects_with_failure(self, mock_dataset_with_manifest, mock_dataset_head):
         ds, manifest, working_dir = mock_dataset_with_manifest
         iom = IOManager(ds, manifest)
 
@@ -258,7 +276,7 @@ class TestIOManager(object):
                                  },
                                  status=200)
             mocked_responses.put(f"https://dummyurl.com/{obj1}?params=1",
-                                 payload={},
+                                 headers={'Etag': 'asdfasdf'},
                                  status=200)
 
             mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
@@ -272,7 +290,13 @@ class TestIOManager(object):
                                  status=200)
             mocked_responses.put(f"https://dummyurl.com/{obj2}?params=1",
                                  payload={},
-                                 status=400)
+                                 status=500)
+            mocked_responses.put(f"https://dummyurl.com/{obj2}?params=1",
+                                 payload={},
+                                 status=500)
+            mocked_responses.put(f"https://dummyurl.com/{obj2}?params=1",
+                                 payload={},
+                                 status=500)
     
             assert len(glob.glob(f'{iom.push_dir}/*')) == 1
             iom.dataset.backend.set_default_configuration("test-user", "abcd", '1234')
@@ -285,7 +309,7 @@ class TestIOManager(object):
             assert result.success[0].object_path == obj_to_push[0].object_path
             assert result.failure[0].object_path == obj_to_push[1].object_path
 
-    def test_pull_objects(self, mock_dataset_with_manifest):
+    def test_pull_objects(self, mock_dataset_with_manifest, mock_dataset_head):
         def chunk_update_callback(completed_bytes: int):
             """Method to update the job's metadata and provide feedback to the UI"""
             assert type(completed_bytes) == int
