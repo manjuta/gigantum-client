@@ -32,11 +32,20 @@
     @include flex(space-around, row);
     width: 32.5%;
     border-right: 1px solid $azure;
+    progress[value] {
+        &::-webkit-progress-value{
+            &:before {
+                content: '80%';
+                position: absolute;
+                right: 0;
+                top: -125%;
+            }
+        }
+    }
 }
 .Summary__file-type {
     padding: 0 20px;
     width: 32%;
-    border-right: 1px solid $azure;
 }
 .Summary__list{
     white-space: nowrap;

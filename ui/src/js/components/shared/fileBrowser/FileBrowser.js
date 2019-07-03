@@ -466,14 +466,17 @@ class FileBrowser extends Component {
   _checkChildState() {
     const { state } = this;
     let isSelected = false;
+    let selectedCount = 0;
 
     Object.keys(state.childrenState).forEach((key) => {
+      console.log(state.childrenState)
       if (state.childrenState[key].isSelected) {
+        selectedCount += 1;
         isSelected = true;
       }
     });
 
-    return { isSelected };
+    return { isSelected, selectedCount };
   }
 
   /**
@@ -665,7 +668,7 @@ class FileBrowser extends Component {
     const { props, state } = this;
     const { files, mutationData } = state;
     const { isOver } = props;
-    const { isSelected } = this._checkChildState();
+    const { isSelected, selectedCount } = this._checkChildState();
     const allFilesLocal = checkLocalAll(files);
     const uploadPromptText = this._getFilePromptText();
     // TODO move this to a function
@@ -680,7 +683,7 @@ class FileBrowser extends Component {
     const fileBrowserCSS = classNames({
       FileBrowser: true,
       'FileBrowser--linkVisible': state.showLinkModal,
-      'FileBrowser--highlight': isOver,
+      'FileBrowser--highlight': isOver && (childrenKeys.length > 0),
       'FileBrowser--dropzone': fileKeys.length === 0,
     });
     const deleteButtonCSS = classNames({
@@ -715,19 +718,21 @@ class FileBrowser extends Component {
     });
     const multiSelectCSS = classNames({
       'FileBrowser__multiselect flex justify--start': true,
-      'box-shadow-50': isSelected,
     });
     const downloadAllCSS = classNames({
-      'FileBrowser__button Tooltip-data Tooltip-data--small': true,
-      'FileBrowser__button--download-all': !state.downloadingAll && !allFilesLocal,
-      'FileBrowser__button--downloaded': !state.downloadingAll && allFilesLocal,
-      'FileBrowser__button--downloading': state.downloadingAll,
+      'Btn__FileBrowserAction Btn--action': true,
+      'Btn__FileBrowserAction--download': !state.downloadingAll,
+      'Btn__FileBrowserAction--downloading': state.downloadingAll,
+      'Tooltip-data Tooltip-data--small': allFilesLocal,
     });
     const updateCSS = classNames({
       'FileBrowser__update-modal': true,
       hidden: !state.confirmUpdateVisible,
     });
-
+    const dropBoxCSS = classNames({
+      'Dropbox Dropbox--fileBrowser flex flex--column align-items--center': true,
+      'Dropbox--hovered': isOver,
+    });
     return (
       props.connectDropTarget(<div
         ref={ref => ref}
@@ -786,106 +791,6 @@ class FileBrowser extends Component {
              />
              )
          }
-        <div className="FileBrowser__menu">
-          <h5>Files</h5>
-          <div className="FileBrowser__menu-buttons">
-            {
-              !readOnly
-              && (
-                <div className="flex">
-                  <label
-                    htmlFor="browser_upload"
-                    className="FileBrowser__upload-label"
-                  >
-                    <div className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow inline-block Btn" />
-                    <span>Upload Files</span>
-                    <input
-                      id="browser_upload"
-                      className="hidden"
-                      type="file"
-                      multiple
-                      onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
-                    />
-                  </label>
-                  <button
-                    className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
-                    data-click-id="addFolder"
-                    onClick={() => this.setState({ addFolderVisible: !state.addFolderVisible })}
-                    type="button"
-                  >
-                    <div
-                      className="Btn--fileBrowser Btn--round Btn--bordered Btn__addFolder Btn"
-                      data-click-id="addFolder"
-                    />
-                    New Folder
-                  </button>
-                </div>
-              )
-            }
-            {
-              readOnly
-              && (
-              <div className="flex">
-                <button
-                  className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
-                  onClick={() => { this.state.mutations.verifyDataset({}, () => {}) }}
-                  type="button"
-                >
-                  <div
-                    className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
-                  />
-                  Verify Dataset
-                </button>
-                <div>
-                  <button
-                    className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
-                    onClick={() => this.setState({ confirmUpdateVisible: !state.confirmUpdateVisible })}
-                    type="button"
-                  >
-                    <div
-                      className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
-                    />
-                    Update from Remote
-                  </button>
-                  <div className={updateCSS}>
-                    <p>This will update the Dataset with the external source. Do you wish to continue?</p>
-                    <div className="flex">
-                      <button
-                        type="button"
-                        className="Btn--flat"
-                        onClick={() => this.setState({ confirmUpdateVisible: false })}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { this.state.mutations.updateUnmanagedDataset({ fromRemote: true, fromLocal: false }, () => { this.setState({ confirmUpdateVisible: false }) }) }}
-                      >
-                        Confirm
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              )
-            }
-            {
-              (props.section === 'input')
-              && (
-                <button
-                  className="Btn Btn__menuButton Btn--noShadow FileBrowser__addDataset"
-                  onClick={() => this.setState({ showLinkModal: true })}
-                  data-tooltip="Link Dataset"
-                  type="button"
-                  disabled={props.isLocked}
-                >
-                  <div className="Btn--fileBrowser Btn--round Btn--bordered Btn__addDataset Btn" />
-                  Link Dataset
-                </button>
-              )
-            }
-          </div>
-        </div>
         <div className="FileBrowser__tools flex justify--space-between">
 
           <div className="FileBrowser__search flex-1">
@@ -897,7 +802,161 @@ class FileBrowser extends Component {
               onKeyUp={(evt) => { this._updateSearchState(evt); }}
             />
           </div>
+          {
+            !readOnly
+            && (
+              <div className="flex">
+                <button
+                  className="Btn Btn--action Btn__FileBrowserAction Btn__FileBrowserAction--newFolder"
+                  data-click-id="addFolder"
+                  onClick={() => this.setState({ addFolderVisible: !state.addFolderVisible })}
+                  type="button"
+                >
+                  New Folder
+                </button>
+                <label
+                  htmlFor="browser_upload"
+                  className="FileBrowser__upload-label"
+                >
+                  <div className="Btn__FileBrowserAction Btn__FileBrowserAction--upload inline-block Btn">
+                    Add Files
+                  </div>
+                  <input
+                    id="browser_upload"
+                    className="hidden"
+                    type="file"
+                    multiple
+                    onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
+                  />
+                </label>
+                { (props.section === 'data')
+                  && (
+                  <button
+                    className={downloadAllCSS}
+                    disabled={allFilesLocal}
+                    onClick={() => this._handleDownloadAll(allFilesLocal)}
+                    data-tooltip="No files to download"
+                    type="button"
+                  >
+                    Download All
+                  </button>
+                  )
+                }
+              </div>
+            )
+          }
+          {
+            readOnly
+            && (
+            <div className="flex">
+              <button
+                className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
+                onClick={() => { this.state.mutations.verifyDataset({}, () => {}) }}
+                type="button"
+              >
+                <div
+                  className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
+                />
+                Verify Dataset
+              </button>
+              <div>
+                <button
+                  className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
+                  onClick={() => this.setState({ confirmUpdateVisible: !state.confirmUpdateVisible })}
+                  type="button"
+                >
+                  <div
+                    className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
+                  />
+                  Update from Remote
+                </button>
+                <div className={updateCSS}>
+                  <p>This will update the Dataset with the external source. Do you wish to continue?</p>
+                  <div className="flex">
+                    <button
+                      type="button"
+                      className="Btn--flat"
+                      onClick={() => this.setState({ confirmUpdateVisible: false })}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { this.state.mutations.updateUnmanagedDataset({ fromRemote: true, fromLocal: false }, () => { this.setState({ confirmUpdateVisible: false }) }) }}
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            )
+          }
+          {
+            (props.section === 'input')
+            && (
+              <button
+                className="Btn Btn__menuButton Btn--noShadow FileBrowser__addDataset"
+                onClick={() => this.setState({ showLinkModal: true })}
+                data-tooltip="Link Dataset"
+                type="button"
+                disabled={props.isLocked}
+              >
+                <div className="Btn--fileBrowser Btn--round Btn--bordered Btn__addDataset Btn" />
+                Link Dataset
+              </button>
+            )
+          }
         </div>
+        {
+          isSelected
+          && (
+        <div className="FileBrowser__toolbar flex align-items--center justify--space-between">
+          <div className="FileBrowser__toolbar-text">
+            {`${selectedCount} files selected`}
+          </div>
+          <div>
+            {
+              isSelected
+              && (
+              <button
+                className="Btn align-self--end Btn__upArrow-white Btn--background-left Btn--action Btn--padding-left"
+                type="button"
+                disabled={props.isLocked}
+                // onClick={() => this._updatePackages(updateablePackages)}
+              >
+                Download
+              </button>
+              )
+            }
+            <button
+              type="button"
+              className="Btn align-self--end Btn__delete-white Btn--background-left Btn--action Btn--padding-left"
+              onClick={() => this._togglePopup(true)}
+              disabled={props.isLocked}
+            >
+              Delete
+            </button>
+            <div className={popupCSS}>
+              <div className="Tooltip__pointer" />
+              <p>Are you sure?</p>
+              <div className="flex justify--space-around">
+                <button
+                  className="File__btn--round File__btn--cancel File__btn--delete"
+                  onClick={() => { this._togglePopup(false); }}
+                  type="button"
+                />
+                <button
+                  className="File__btn--round File__btn--add File__btn--delete-files"
+                  onClick={() => { this._deleteSelectedFiles(); }}
+                  type="button"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+          )
+        }
         <div className="FileBrowser__header">
           {
             !readOnly
@@ -908,28 +967,11 @@ class FileBrowser extends Component {
                   onClick={() => { this._selectFiles(); }}
                   type="button"
                 />
-                <button
+                {/* <button
                   className={deleteButtonCSS}
                   onClick={() => { this._togglePopup(true); }}
                   type="button"
-                />
-
-                <div className={popupCSS}>
-                  <div className="Tooltip__pointer" />
-                  <p>Are you sure?</p>
-                  <div className="flex justify--space-around">
-                    <button
-                      className="File__btn--round File__btn--cancel File__btn--delete"
-                      onClick={() => { this._togglePopup(false); }}
-                      type="button"
-                    />
-                    <button
-                      className="File__btn--round File__btn--add File__btn--delete-files"
-                      onClick={() => { this._deleteSelectedFiles(); }}
-                      type="button"
-                    />
-                  </div>
-                </div>
+                /> */}
               </div>
             )
           }
@@ -956,23 +998,9 @@ class FileBrowser extends Component {
           >
             Modified
           </button>
-
           <div className="FileBrowser__header--menu flex flex--row justify--right">
-            { (props.section === 'data')
-               && (
-               <button
-                 className={downloadAllCSS}
-                 onClick={() => this._handleDownloadAll(allFilesLocal)}
-                 data-tooltip={allFilesLocal ? 'Downloaded' : 'Download All'}
-                 type="button"
-               >
-                 { state.downloadingAll
-                    && <div />
-                 }
-              </button>
-              )
-           }
-         </div>
+            Actions
+          </div>
         </div>
         <div className="FileBrowser__body">
           <AddSubfolder
@@ -1075,13 +1103,37 @@ class FileBrowser extends Component {
             );
           })
           }
-          { (childrenKeys.length === 0)
+          { (childrenKeys.length === 0) && (state.search !== '')
             && (
             <div className="FileBrowser__empty">
-              { (state.search !== '')
-                ? <h5>No files match your search.</h5>
-                : <h5>Upload Files by Dragging & Dropping Here</h5>
-               }
+              <h5>No files match your search.</h5>
+            </div>
+            )
+          }
+          { (childrenKeys.length === 0) && (state.search === '')
+            && (
+            <div className={dropBoxCSS}>
+              <div className="Dropbox--menu">
+                Drag and drop files here
+                <br />
+                <span>or</span>
+              </div>
+              <label
+                htmlFor="add_file"
+                className="flex justify--center"
+              >
+                <div
+                  className="Btn Btn--allStyling"
+                >
+                  Choose Files...
+                </div>
+                <input
+                  id="add_file"
+                  className="hidden"
+                  type="file"
+                  onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
+                />
+              </label>
             </div>
             )
           }

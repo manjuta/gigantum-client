@@ -115,9 +115,14 @@ class Folder extends Component {
 
           if (folder._setSelected) {
             folder._setSelected(evt, isSelected);
+            console.log('ran1')
           } else if (folder.getDecoratedComponentInstance && folder.getDecoratedComponentInstance().getDecoratedComponentInstance) {
+            console.log('ran2')
+
             folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(evt, isSelected);
           } else {
+            console.log('ran3')
+
             folder.getDecoratedComponentInstance()._setSelected(evt, isSelected);
           }
         });
