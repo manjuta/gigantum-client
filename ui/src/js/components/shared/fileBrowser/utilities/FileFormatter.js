@@ -117,8 +117,6 @@ export const fileHandler = () => {
           })
 
         }
-        console.log(edgesToSort)
-        console.log(linkedDatasets)
         sortEdges(edgesToSort)
 
         const hash = btoa(unescape(encodeURIComponent(JSON.stringify(fileObject) + search)));

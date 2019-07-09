@@ -15,38 +15,11 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 export default class DatasetActionsMenu extends Component {
   constructor(props) {
   	super(props);
-  	this._closePopup = this._closePopup.bind(this);
     this._setWrapperRef = this._setWrapperRef.bind(this);
   }
 
   state = {
-    popupVisible: false,
     showSessionValidMessage: false,
-  }
-
-  /**
-  *  LIFECYCLE MEHTODS START
-  */
-  componentDidMount() {
-    window.addEventListener('click', this._closePopup);
-  }
-
-  componentWillMount() {
-    window.removeEventListener('click', this._closePopup);
-  }
-  /**
-  *  LIFECYCLE MEHTODS END
-  */
-
-  /**
-  *  @param {Object} event
-  *  closes popup when clicking
-  *  @return {}
-  */
-  _closePopup(evt) {
-    if (this.state.popupVisible && this[this.props.edge.node.id] && !this[this.props.edge.node.id].contains(evt.target)) {
-      this.setState({ popupVisible: false });
-    }
   }
 
   /**
@@ -73,19 +46,6 @@ export default class DatasetActionsMenu extends Component {
         }
       },
     );
-  }
-
-  /**
-  *  @param {Obect} evt
-  *  @param {boolean} popupVisible - boolean value for hiding and showing popup state
-  *  triggers favoirte unfavorite mutation
-  *  @return {}
-  */
-  _togglePopup(evt, popupVisible) {
-    if (!popupVisible) {
-      evt.stopPropagation(); // only stop propagation when closing popup, other menus won't close on click if propagation is stopped
-    }
-    this.setState({ popupVisible });
   }
 
   /**
@@ -212,50 +172,17 @@ export default class DatasetActionsMenu extends Component {
     });
   }
 
-  /**
-  *  @param {boolean} isLocal
-  *  set wrapper ref
-  *  @return {}
-  */
-  _getTooltipText(isLocal) {
-    const { props, state } = this;
-    let downloadText = isLocal ? 'Downloaded' : 'Download';
-    downloadText = props.folder && !isLocal ? 'Download Directory' : downloadText;
-    downloadText = props.isParent ? 'Download All' : downloadText;
-    downloadText = state.showSessionValidMessage ? 'A valid session is required to download a dataset file.' : downloadText;
-    downloadText = props.isDragging && !isLocal ? 'File is not downloaded. Download file to move it.' : downloadText;
-
-    return downloadText;
-  }
-
   render() {
     const { props, state } = this;
     const { isLocal } = props;
-    const fileIsNotLocal = ((!props.edge.node.isLocal || (props.folder)) && !isLocal);
-    const fileIsLocal = (props.edge.node.isLocal && isLocal) || (props.isParent && isLocal);
-    const blockDownload = props.folder ? false : props.edge.node.isLocal || isLocal;
-    const downloadText = this._getTooltipText(fileIsLocal);
-    const isLoading = state.fileDownloading || ((props.parentDownloading || props.isDownloading) && !fileIsLocal);
-    const showDownloadIcon = (props.section !== 'data') && !state.fileDownloading && !isLoading;
-    const popupCSS = classNames({
-      DatasetActionsMenu__popup: true,
-      hidden: !state.popupVisible,
-      Tooltip__message: true,
-    });
+    const downloadText = isLocal ? 'Downloaded' : 'Download';
+    const isLoading = state.fileDownloading || ((props.parentDownloading || props.isDownloading) && !isLocal);
+
     const downloadCSS = classNames({
-      'DatasetActionsMenu__item Btn--round': true,
-      'Tooltip-data Tooltip-data--small': !isLoading,
-      'Tooltip-data--visible': state.showSessionValidMessage || (!props.isLocal && props.isDragging),
-      'DatasetActionsMenu__item--download': fileIsNotLocal && showDownloadIcon,
-      'DatasetActionsMenu__item--downloaded': fileIsLocal && showDownloadIcon,
-      Btn__download: (fileIsNotLocal) && (props.section === 'data') && !state.fileDownloading && !isLoading,
-      Btn__downloaded: fileIsLocal && (props.section === 'data') && !state.fileDownloading && !isLoading,
-      'DatasetActionsMenu__item--loading': isLoading,
-    });
-    const unlinkCSS = classNames({
-      'DatasetActionsMenu__item DatasetActionsMenu__item--unlink': true,
-      'DatasetActionsMenu__popup-visible': state.popupVisible,
-      'Tooltip-data Tooltip-data--small': !state.popupVisible,
+      'Btn Btn__FileBrowserAction DatasetActionsMenu__item': true,
+      'Btn__FileBrowserAction--download': !isLocal,
+      'Btn__FileBrowserAction--downloaded': isLocal,
+      'Btn__FileBrowserAction--loading': isLoading,
     });
 
     return (
@@ -265,37 +192,14 @@ export default class DatasetActionsMenu extends Component {
         key={`${props.edge.node.id}-action-menu}`}
         ref={this._setWrapperRef}
       >
-        {
-            this.props.isParent
-              && (
-              <div
-                className={unlinkCSS}
-                data-tooltip="Unlink Dataset"
-                onClick={(evt) => { this._togglePopup(evt, true); }}
-              >
-
-                <div className={popupCSS}>
-                  <div className="Tooltip__pointer" />
-                  <p>Are you sure?</p>
-                  <div className="flex justify--space-around">
-                    <button
-                      className="File__btn--round File__btn--cancel"
-                      onClick={(evt) => { this._togglePopup(evt, false); }}
-                    />
-                    <button
-                      className="File__btn--round File__btn--add"
-                      onClick={(evt) => { this._unlinkDataset(); }}
-                    />
-                  </div>
-                </div>
-              </div>
-              )
-          }
         <button
-          onClick={() => this._downloadFile(fileIsLocal)}
+          onClick={() => this._downloadFile(isLocal)}
           className={downloadCSS}
-          data-tooltip={downloadText}
-        />
+          disabled={isLocal || isLoading}
+          type="button"
+        >
+          {downloadText}
+        </button>
       </div>
     );
   }

@@ -14,53 +14,6 @@ import ActionsMenu from './DatasetActionsMenu';
 import './DatasetFile.scss';
 
 class File extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isSelected: (props.isSelected || this.props.childrenState[this.props.fileData.edge.node.key].isSelected) || false,
-      stateSwitch: false,
-    };
-    this._setSelected = this._setSelected.bind(this);
-  }
-
-  static getDerivedStateFromProps(nextProps, state) {
-    const isSelected = (nextProps.multiSelect === 'all')
-      ? true
-      : (nextProps.multiSelect === 'none')
-        ? false
-        : state.isSelected;
-
-    if ((nextProps.isOverCurrent !== nextProps.isOverChildFile) && !nextProps.isDragging && state.hover) {
-      nextProps.updateParentDropZone(nextProps.isOverCurrent);
-    }
-    return {
-      ...state,
-      isSelected,
-    };
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.renameEditMode) {
-      this.reanmeInput.focus();
-    }
-  }
-
-  /**
-  *  @param {boolean} isSelected - sets if file has been selected
-  *  sets elements to be selected and parent
-  */
-  _setSelected(isSelected) {
-    this.props.updateChildState(this.props.fileData.edge.node.key, isSelected, false);
-    this.setState({ isSelected }, () => {
-      Object.keys(this.refs).forEach((ref) => {
-        this.refs[ref]._setSelected();
-      });
-      if (this.props.checkParent) {
-        this.props.checkParent();
-      }
-    });
-  }
 
   render() {
     const { props, state } = this;
@@ -69,23 +22,11 @@ class File extends Component {
     const fileName = props.filename;
     const fileRowCSS = classNames({
       File__row: true,
-      'File__row--hover': state.hover,
-      'File__row--background': props.isDragging,
     });
-
-
-    const buttonCSS = classNames({
-      CheckboxMultiselect: true,
-      CheckboxMultiselect__uncheck: !state.isSelected,
-      CheckboxMultiselect__check: state.isSelected,
-    });
-
 
     const textIconsCSS = classNames({
       'File__cell File__cell--name': true,
-      hidden: state.renameEditMode,
     });
-
 
     const paddingLeft = 40 * index;
 

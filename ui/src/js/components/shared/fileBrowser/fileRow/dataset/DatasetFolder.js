@@ -14,35 +14,12 @@ class Folder extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      expanded: this.props.childrenState[this.props.fileData.edge.node.key].isExpanded || false,
-      isSelected: (props.isSelected || this.props.childrenState[this.props.fileData.edge.node.key].isSelected) || false,
-      isIncomplete: this.props.childrenState[this.props.fileData.edge.node.key].isIncomplete || false,
-      addFolderVisible: this.props.childrenState[this.props.fileData.edge.node.key].isAddingFolder || false,
+      expanded: false,
       isDownloading: false,
     };
 
-    this._setSelected = this._setSelected.bind(this);
-    this._setIncomplete = this._setIncomplete.bind(this);
-    this._checkParent = this._checkParent.bind(this);
-    this._checkRefs = this._checkRefs.bind(this);
     this._setState = this._setState.bind(this);
-    this._addFolderVisible = this._addFolderVisible.bind(this);
     this._setFolderIsDownloading = this._setFolderIsDownloading.bind(this);
-  }
-
-
-  static getDerivedStateFromProps(nextProps, state) {
-    const isSelected = (nextProps.multiSelect === 'all')
-      ? true
-      : (nextProps.multiSelect === 'none')
-        ? false
-        : state.isSelected;
-    const isIncomplete = (nextProps.multiSelect === 'none') ? false : state.isIncomplete;
-    return {
-      ...state,
-      isSelected,
-      isIncomplete,
-    };
   }
 
   /**
@@ -65,109 +42,6 @@ class Folder extends Component {
   }
 
   /**
-    *  @param {boolean} isSelected
-    *  sets child elements to be selected and current folder item
-    *  @return {}
-    */
-  _setSelected(isSelected) {
-    this.props.updateChildState(this.props.fileData.edge.node.key, isSelected, false, this.state.expanded, this.state.addFolderVisible);
-    this.setState(
-      {
-        isSelected,
-        isIncomplete: false,
-      },
-      () => {
-        Object.keys(this.refs).forEach((ref) => {
-          const folder = this.refs[ref];
-
-          if (folder._setSelected) {
-            folder._setSelected(isSelected);
-          } else if (folder.getDecoratedComponentInstance && folder.getDecoratedComponentInstance().getDecoratedComponentInstance) {
-            folder.getDecoratedComponentInstance().getDecoratedComponentInstance()._setSelected(isSelected);
-          } else {
-            folder.getDecoratedComponentInstance()._setSelected(isSelected);
-          }
-        });
-        if (this.props.checkParent) {
-          this.props.checkParent();
-        }
-      },
-    );
-  }
-
-  /**
-    *  @param {}
-    *  sets parents element to selected if count matches child length
-    *  @return {}
-    */
-  _setIncomplete() {
-    this.setState({
-      isIncomplete: true,
-      isSelected: false,
-    });
-  }
-
-  /**
-    *  @param {}
-    *  checks parent item
-    *  @return {}
-    */
-  _checkParent() {
-    let checkCount = 0;
-    let incompleteCount = 0;
-    Object.keys(this.refs).forEach((ref) => {
-      const state = (this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance) ? this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state : this.refs[ref].getDecoratedComponentInstance().state;
-      if (state.isSelected) {
-        checkCount += 1;
-      }
-      if (state.isIncomplete) {
-        incompleteCount += 1;
-      }
-    });
-
-    if (checkCount === 0 && incompleteCount === 0) {
-      this.props.updateChildState(this.props.fileData.edge.node.key, false, false, this.state.expanded, this.state.addFolderVisible);
-      this.setState(
-        {
-          isIncomplete: false,
-          isSelected: false,
-        },
-        () => {
-          if (this.props.checkParent) {
-            this.props.checkParent();
-          }
-        },
-      );
-    } else if (checkCount === Object.keys(this.refs).length && this.state.isSelected) {
-      this.props.updateChildState(this.props.fileData.edge.node.key, true, false, this.state.expanded, this.state.addFolderVisible);
-      this.setState(
-        {
-          isIncomplete: false,
-          isSelected: true,
-        },
-        () => {
-          if (this.props.checkParent) {
-            this.props.checkParent();
-          }
-        },
-      );
-    } else {
-      this.props.updateChildState(this.props.fileData.edge.node.key, false, true, this.state.expanded, this.state.addFolderVisible);
-      this.setState(
-        {
-          isIncomplete: true,
-          isSelected: false,
-        },
-        () => {
-          if (this.props.setIncomplete) {
-            this.props.setIncomplete();
-          }
-        },
-      );
-    }
-  }
-
-  /**
     *  @param {Object} evt
     *  sets item to expanded
     *  @return {}
@@ -180,47 +54,6 @@ class Folder extends Component {
     if (evt.target.classList.contains('ActionsMenu__item--AddSubfolder')) {
       this.setState({ expanded: true });
     }
-  }
-
-  /**
-      *  @param {}
-      *  sets addFolderVisible state
-      *  @return {}
-    */
-  _addFolderVisible(reverse) {
-    if (reverse) {
-      this.props.updateChildState(this.props.fileData.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, !this.state.addFolderVisible);
-
-      this.setState({ addFolderVisible: !this.state.addFolderVisible });
-    } else {
-      this.props.updateChildState(this.props.fileData.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, false);
-      this.setState({ addFolderVisible: false });
-    }
-  }
-
-  /**
-    *  @param {}
-    *  checks if folder refs has props.isOver === true
-    *  @return {boolean}
-    */
-  _checkRefs() {
-    let isOver = this.props.isOverCurrent || this.props.isOver;
-    // this.state.isOverChildFile,
-
-    const { refs } = this;
-
-    Object.keys(refs).forEach((childname) => {
-      if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
-        const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
-        if (child.props.fileData && !child.props.fileData.edge.node.isDir) {
-          if (child.props.isOverCurrent) {
-            isOver = true;
-          }
-        }
-      }
-    });
-
-    return (isOver);
   }
 
   /**
