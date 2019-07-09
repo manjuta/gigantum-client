@@ -1,7 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 // components
-import Dataset1 from './Dataset1';
+import DatasetCard from './DatasetCard';
 // assets
 import './Datasets.scss';
 
@@ -12,7 +12,7 @@ export default class Datasets extends Component {
 
   render() {
     const { props } = this;
-    console.log(props.linkedDatasets);
+
     return (
       <div className="Datasets">
         <div className="Datasets__header flex justify--space-between">
@@ -21,7 +21,6 @@ export default class Datasets extends Component {
             className="Btn Btn__FileBrowserAction Btn__FileBrowserAction--link"
             type="button"
             onClick={() => props.showLinkModal(true)}
-            data-tooltip="Link Dataset"
             disabled={props.isLocked}
           >
             Link Dataset
@@ -37,9 +36,17 @@ export default class Datasets extends Component {
         }
         {
           props.linkedDatasets.map(dataset => (
-            <Dataset1
+            <DatasetCard
+              formattedFiles={props.files[dataset.name]}
+              isLocal={props.checkLocal(props.files[dataset.name])}
+              checkLocal={props.checkLocal}
               key={dataset.name}
               dataset={dataset}
+              isLocked={props.isLocked}
+              owner={props.owner}
+              name={props.name}
+              mutationData={props.mutationData}
+              mutations={props.mutations}
             />
           ))
         }

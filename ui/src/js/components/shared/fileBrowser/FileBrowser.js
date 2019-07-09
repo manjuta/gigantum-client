@@ -40,27 +40,30 @@ const checkLocalAll = (files) => {
 
 
 const checkLocalIndividual = (files) => {
-  let isLocal = true;
-  const searchChildren = (parent) => {
-    if (parent.children) {
-      Object.keys(parent.children).forEach((childKey) => {
-        if (parent.children[childKey].edge) {
-          if (parent.children[childKey].edge.node.isLocal === false) {
-            isLocal = false;
+  if (files) {
+    let isLocal = true;
+    const searchChildren = (parent) => {
+      if (parent.children) {
+        Object.keys(parent.children).forEach((childKey) => {
+          if (parent.children[childKey].edge) {
+            if (parent.children[childKey].edge.node.isLocal === false) {
+              isLocal = false;
+            }
+            searchChildren(parent.children[childKey]);
           }
-          searchChildren(parent.children[childKey]);
-        }
-      });
+        });
+      }
+    };
+
+    if (files.children) {
+      searchChildren(files);
+    } else {
+      isLocal = files.edge.node.isLocal;
     }
-  };
 
-  if (files.children) {
-    searchChildren(files);
-  } else {
-    isLocal = files.edge.node.isLocal;
+    return isLocal;
   }
-
-  return isLocal;
+  return true;
 };
 
 class FileBrowser extends Component {
@@ -727,7 +730,6 @@ class FileBrowser extends Component {
     fileKeys = this._childSort(fileKeys, state.sort, state.reverse, files, 'files');
     const childrenKeys = folderKeys.concat(fileKeys);
     const readOnly = props.section === 'data' && !props.isManaged;
-    console.log(childrenKeys)
     // declare css here
     const fileBrowserCSS = classNames({
       FileBrowser: true,
@@ -795,8 +797,14 @@ class FileBrowser extends Component {
           && (
             <Datasets
               linkedDatasets={props.linkedDatasets}
+              files={state.files}
               showLinkModal={this._showLinkModal}
               isLocked={props.isLocked}
+              checkLocal={checkLocalIndividual}
+              owner={props.owner}
+              name={props.name}
+              mutationData={mutationData}
+              mutations={state.mutations}
             />
           )
         }
@@ -1026,11 +1034,6 @@ class FileBrowser extends Component {
                   onClick={() => { this._selectFiles(); }}
                   type="button"
                 />
-                {/* <button
-                  className={deleteButtonCSS}
-                  onClick={() => { this._togglePopup(true); }}
-                  type="button"
-                /> */}
               </div>
             )
           }
@@ -1077,29 +1080,9 @@ class FileBrowser extends Component {
             const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
 
             if (isDataset) {
-              const currentDataset = props.linkedDatasets.filter(dataset => dataset.name === file)[0];
-              const commitsBehind = currentDataset && currentDataset.commitsBehind;
-
-
               return (
-                <Dataset
-                  ref={file}
-                  filename={file}
-                  section={props.section}
+                <div
                   key={files[file].edge.node.key}
-                  multiSelect={state.multiSelect}
-                  isLocal={checkLocalIndividual(files[file])}
-                  mutationData={mutationData}
-                  fileData={files[file]}
-                  mutations={state.mutations}
-                  setState={this._setState}
-                  sort={state.sort}
-                  reverse={state.reverse}
-                  childrenState={state.childrenState}
-                  updateChildState={this._updateChildState}
-                  fileSizePrompt={this._fileSizePrompt}
-                  commitsBehind={commitsBehind}
-                  checkLocal={checkLocalIndividual}
                 />
               );
             } if (isDir) {
