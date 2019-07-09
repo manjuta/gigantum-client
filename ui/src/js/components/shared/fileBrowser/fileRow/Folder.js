@@ -537,6 +537,8 @@ class Folder extends Component {
       hidden: !state.renameEditMode,
     });
 
+    console.log(props)
+
     const folder = (
       <div
         onMouseOver={(evt) => { this._setHoverState(evt, true); }}
@@ -555,6 +557,7 @@ class Folder extends Component {
             !props.readOnly
             && (
             <button
+              disabled={node.key === 'untracked/'}
               type="button"
               className={buttonCSS}
               onClick={evt => this._setSelected(evt, !state.isSelected)}
