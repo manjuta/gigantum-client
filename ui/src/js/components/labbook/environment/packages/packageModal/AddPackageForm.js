@@ -263,7 +263,7 @@ export default class AddPackageForm extends Component {
               Clear
             </button>
             <button
-              className="Btn"
+              className="Btn Btn__add"
               disabled={state.packageName.length === 0}
               type="button"
               onClick={() => this._sendQueuePackage()}

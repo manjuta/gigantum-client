@@ -29,6 +29,7 @@ class Secrets extends Component {
         </div>
         <div className="Secrets__sub-header">
           Add a secret file here, more copy here explaining what this is and that data is secure. To learn more
+          {' '}
           <a
             href="https://docs.gigantum.com/docs/"
             rel="noopener noreferrer"
@@ -37,11 +38,13 @@ class Secrets extends Component {
             link to docs with examples/templates.
           </a>
         </div>
-        <SecretsCard
-          relay={props.relay}
-          secrets={props.environment.secretsFileMapping}
-          secretsMutations={state.secretsMutations}
-        />
+        <div className="grid">
+          <SecretsCard
+            relay={props.relay}
+            secrets={props.environment.secretsFileMapping}
+            secretsMutations={state.secretsMutations}
+          />
+        </div>
       </div>
     );
   }

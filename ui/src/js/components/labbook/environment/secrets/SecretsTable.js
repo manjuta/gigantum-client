@@ -155,6 +155,10 @@ export default class SecretsTable extends Component {
                 </div>
               );
             })
+
+          }
+          { (secrets.length === 0)
+            && <p className="text-center">No secrets have been added to this project</p>
           }
         </div>
       </div>
