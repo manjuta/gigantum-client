@@ -319,6 +319,7 @@ class DatasetWorkflow(GitWorkflow):
                     job_metadata = {'dataset': f"{logged_in_username}|{self.dataset.namespace}|{self.dataset.name}",
                                     'method': 'pull_objects'}
 
+                    feedback_callback(f"Preparing to upload {num_files} files. Please wait...")
                     job_key = dispatcher_obj.dispatch_task(method_reference=gtmcore.dispatcher.dataset_jobs.push_dataset_objects,
                                                            kwargs=job_kwargs,
                                                            metadata=job_metadata,
@@ -328,18 +329,15 @@ class DatasetWorkflow(GitWorkflow):
                                 f" {logged_in_username}/{self.dataset.namespace}/{self.dataset.name} with"
                                 f" {len(objs)} objects to upload")
 
-                feedback_callback(f"Please wait - Downloading {num_files} files ({format_size(0)} "
-                                  f"of {format_size(total_bytes)}) - 0% complete",
-                                  percent_complete=0)
-
                 while sum([(x.is_complete or x.is_failed) for x in bg_jobs]) != len(bg_jobs):
                     # Refresh all job statuses and update status feedback
                     [j.refresh_status() for j in bg_jobs]
                     total_completed_bytes = sum([j.completed_bytes for j in bg_jobs])
-                    pc = (float(total_completed_bytes) / float(total_bytes)) * 100
-                    feedback_callback(f"Please wait - Uploading {num_files} files ({format_size(total_completed_bytes)}"
-                                      f" of {format_size(total_bytes)}) - {round(pc)}% complete",
-                                      percent_complete=pc)
+                    if total_completed_bytes > 0:
+                        pc = (float(total_completed_bytes) / float(total_bytes)) * 100
+                        feedback_callback(f"Please wait - Uploading {num_files} files ({format_size(total_completed_bytes)}"
+                                          f" of {format_size(total_bytes)}) - {round(pc)}% complete",
+                                          percent_complete=pc)
                     time.sleep(1)
 
                 # if you get here, all jobs are done or failed.

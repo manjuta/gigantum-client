@@ -1,0 +1,29 @@
+@import '~Styles/_imports.scss';
+
+.Dataset {
+  margin: 7px 0;
+  padding: 20px 30px;
+}
+.Dataset__summary {
+  height: 60px;
+}
+
+.Dataset__icon {
+  width: 25px;
+  height: 25px;
+  background: url('~Images/icons/datasets-jet.svg') no-repeat 50%;
+  background-size: 25px;
+  margin-right: 20px;
+  margin-top: 6px;
+}
+
+.Dataset__name {
+  color: $azure;
+  font-size: 19px;
+}
+
+.Dataset__details {
+  font-size: 12px;
+  color: $romanSilver;
+  min-width: 100px;
+}

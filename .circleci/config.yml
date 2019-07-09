@@ -3,7 +3,7 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:d60c503bd5-2019-06-14
+      - image: gigantum/circleci-client:616cd769fd-2019-06-28
   test_harness_exec:
     machine: true
 
@@ -154,7 +154,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: 
+      - run:
           name: Build and start Gigantum client
           command: |
             bash testing/circleci/ubuntu1404-install.sh

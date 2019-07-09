@@ -7,6 +7,7 @@ from aioresponses import aioresponses
 import snappy
 from mock import patch
 from collections import namedtuple
+import responses
 
 import gtmcore
 import gtmcore.dispatcher.dataset_jobs
@@ -26,9 +27,18 @@ from gtmcore.dispatcher.dispatcher import Dispatcher
 from gtmcore.dispatcher.tests import BG_SKIP_MSG, BG_SKIP_TEST
 
 
+@pytest.fixture()
+def mock_dataset_head():
+    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
+    with responses.RequestsMock() as rsps:
+        rsps.add(responses.HEAD, 'https://api.gigantum.com/object-v1/default/dataset100',
+                 headers={'x-access-level': 'a'}, status=200)
+        yield
+
+
 @pytest.mark.skipif(BG_SKIP_TEST, reason=BG_SKIP_MSG)
 class TestDatasetBackgroundJobs(object):
-    def test_pull_objects(self, mock_config_file):
+    def test_pull_objects(self, mock_config_file, mock_dataset_head):
         im = InventoryManager(mock_config_file[0])
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
@@ -105,7 +115,6 @@ class TestDatasetBackgroundJobs(object):
 
                 gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
 
-
                 # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
                 # in parallel and you only want to link once.
                 m.link_revision()
@@ -135,7 +144,6 @@ class TestDatasetBackgroundJobs(object):
 
                 gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
 
-
                 # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
                 # in parallel and you only want to link once.
                 m.link_revision()
@@ -157,7 +165,7 @@ class TestDatasetBackgroundJobs(object):
                     dest1 = dd.read()
                 assert source1.decode("utf-8") == dest1
 
-    def test_pull_objects_error(self, mock_config_file):
+    def test_pull_objects_error(self, mock_config_file, mock_dataset_head):
         im = InventoryManager(mock_config_file[0])
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
@@ -701,7 +709,7 @@ class TestDatasetBackgroundJobs(object):
         assert ds.name == 'dataset100'
         assert ds.namespace == 'default'
 
-    def test_download_dataset_files(self, mock_config_file_background_tests):
+    def test_download_dataset_files(self, mock_config_file_background_tests, mock_dataset_head):
         def dispatch_query_mock(self, job_key):
             JobStatus = namedtuple("JobStatus", ['status', 'meta'])
             return JobStatus(status='finished', meta={'completed_bytes': '500'})
@@ -878,7 +886,7 @@ class TestDatasetBackgroundJobs(object):
                         gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
                     assert os.path.isfile(obj1_target) is False
 
-    def test_push_objects(self, mock_config_file):
+    def test_push_objects(self, mock_config_file, mock_dataset_head):
         im = InventoryManager(mock_config_file[0])
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         manifest = Manifest(ds, 'default')

@@ -110,7 +110,7 @@ class CompleteDatasetUploadTransaction(graphene.relay.ClientIDMutation):
                                              author=logged_in_author)
         if cancel and rollback:
             # TODO: Add ability to reset
-            raise ValueError("Currently cannot rollback a cancled upload.")
+            raise ValueError("Currently cannot rollback a canceled upload.")
             # logger.warning(f"Cancelled tx {transaction_id}, doing git reset")
         else:
             logger.info(f"Done batch upload {transaction_id}, cancelled={cancel}")
