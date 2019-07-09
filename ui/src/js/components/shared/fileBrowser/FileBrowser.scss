@@ -327,9 +327,14 @@
 
   &:hover {
     .Btn__addFolder {
-      background: $azure url(~Images/icons/folder-add-new-hover.svg) no-repeat left 4px top 2px;
+      background: $azure url(~Images/icons/folder-add-new-hover.svg) no-repeat 4px top 2px;
       background-size: 18px;
     }
+  }
+
+  .Btn__addFolder:disabled {
+    background: url(~Images/icons/folder-add-new-silver.svg) no-repeat no-repeat 1px top -1px;
+    background-size: 18px;
   }
 }
 .FileBrowser__addDataset{
