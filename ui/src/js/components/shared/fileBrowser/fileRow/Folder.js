@@ -537,8 +537,6 @@ class Folder extends Component {
       hidden: !state.renameEditMode,
     });
 
-    console.log(props)
-
     const folder = (
       <div
         onMouseOver={(evt) => { this._setHoverState(evt, true); }}
