@@ -83,13 +83,12 @@
 
     &--name {
         flex: 1;
-
         margin: 0 60px;
     }
 
     &--size {
         position: relative;
-
+        text-align: left;
         width: 100px;
         &:before {
           left: 75px !important;
@@ -98,7 +97,7 @@
 
     &--date {
         position: relative;
-
+        text-align: left;
         width: 140px;
         &:before {
           left: 120px !important;
