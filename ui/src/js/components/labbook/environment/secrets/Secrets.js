@@ -24,18 +24,18 @@ class Secrets extends Component {
       <div className="Secrets">
         <div className="Environment__headerContainer">
           <h4>
-            Secrets
+            Sensitive Files
           </h4>
         </div>
         <div className="Secrets__sub-header">
-          Add a secret file here, more copy here explaining what this is and that data is secure. To learn more
+          Sensitive Files are stored locally and copied into your Project container at runtime. They are not uploaded when syncing.
           {' '}
           <a
             href="https://docs.gigantum.com/docs/"
             rel="noopener noreferrer"
             target="_blank"
           >
-            link to docs with examples/templates.
+             Learn more here.
           </a>
         </div>
         <div className="grid">
