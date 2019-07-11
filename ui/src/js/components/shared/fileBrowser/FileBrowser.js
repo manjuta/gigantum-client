@@ -812,7 +812,7 @@ class FileBrowser extends Component {
     });
     const downloadAllCSS = classNames({
       'Btn__FileBrowserAction Btn--action': true,
-      'Btn__FileBrowserAction--download': !state.downloadingAll,
+      'Btn__FileBrowserAction--download Btn__FileBrowserAction--download--data ': !state.downloadingAll,
       'Btn__FileBrowserAction--loading Btn__FileBrowserAction--downloading': state.downloadingAll,
       'Tooltip-data Tooltip-data--small': allFilesLocal,
     });
@@ -834,18 +834,20 @@ class FileBrowser extends Component {
         {
           (props.section === 'input')
           && (
-            <Datasets
-              linkedDatasets={props.linkedDatasets}
-              files={state.files}
-              showLinkModal={this._showLinkModal}
-              isLocked={props.isLocked}
-              checkLocal={checkLocalIndividual}
-              owner={props.owner}
-              name={props.name}
-              mutationData={mutationData}
-              mutations={state.mutations}
-              section={props.section}
-            />
+            <div>
+              <Datasets
+                linkedDatasets={props.linkedDatasets}
+                files={state.files}
+                showLinkModal={this._showLinkModal}
+                isLocked={props.isLocked}
+                checkLocal={checkLocalIndividual}
+                owner={props.owner}
+                name={props.name}
+                mutationData={mutationData}
+                mutations={state.mutations}
+                section={props.section}
+              />
+            </div>
           )
         }
         { state.showLinkModal
@@ -900,7 +902,7 @@ class FileBrowser extends Component {
              />
              )
          }
-        <h4 className="margin--0">Files</h4>
+        <h4 className="margin--0 regular">Files</h4>
         <div className="FileBrowser__tools flex justify--space-between">
 
           <div className="FileBrowser__search flex-1">
@@ -915,7 +917,7 @@ class FileBrowser extends Component {
           {
             !readOnly
             && (
-              <div className="flex">
+              <div className="flex justify--right FileBrowser__Primary-actions">
                 <button
                   className="Btn Btn--action Btn__FileBrowserAction Btn__FileBrowserAction--newFolder"
                   data-click-id="addFolder"
