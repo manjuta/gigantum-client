@@ -244,6 +244,7 @@ export default class DatasetCard extends Component {
             checkLocal={props.checkLocal}
             downloadPending={state.downloadPending}
             mutations={props.mutations}
+            section={props.section}
           />
           )
         }

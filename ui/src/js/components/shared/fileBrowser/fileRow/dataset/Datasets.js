@@ -43,6 +43,7 @@ export default class Datasets extends PureComponent {
               name={props.name}
               mutationData={props.mutationData}
               mutations={props.mutations}
+              section={props.section}
             />
           ))
         }
