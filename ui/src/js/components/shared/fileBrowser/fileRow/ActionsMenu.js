@@ -30,26 +30,6 @@ export default class ActionsMenu extends Component {
   */
 
   /**
-  *  @param {}
-  *  triggers favoirte unfavorite mutation
-  *  @return{ }
-  */
-  _triggerFavoriteMutation() {
-    const data = {
-      key: this.props.edge.node.key,
-      edge: this.props.edge,
-    };
-
-    if (this.props.edge.node.isFavorite) {
-      this.props.mutations.removeFavorite(data, (response) => {
-      });
-    } else {
-      this.props.mutations.addFavorite(data, (response) => {
-      });
-    }
-  }
-
-  /**
   *  @param {Object} event
   *  closes popup when clicking
   *  @return {}
@@ -128,23 +108,18 @@ export default class ActionsMenu extends Component {
     const renameTooltip = disableButtons ? 'Must download before renaming' : 'Rename';
     const isUntrackedDirectory = (props.edge.node.key === 'untracked/') && props.folder && (props.section === 'output');
 
-    const favoriteCSS = classNames({
-      'ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn--bordered': true,
-      'Btn__Favorite-on': props.edge.node.isFavorite,
-      'Btn__Favorite-off': !props.edge.node.isFavorite,
-    });
     const popupCSS = classNames({
       ActionsMenu__popup: true,
       hidden: !state.popupVisible,
       Tooltip__message: true,
     });
     const deleteCSS = classNames({
-      'ActionsMenu__item Btn Btn--fileBrowser Btn__delete Btn--round Btn--bordered': true,
+      'ActionsMenu__item Btn Btn--fileBrowser Btn__delete-secondary Btn--round': true,
       'Tooltip-data Tooltip-data--small': !state.popupVisible,
       'ActionsMenu__popup-visible': state.popupVisible,
     });
     const folderCSS = classNames({
-      'ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn--bordered': true,
+      'ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round': true,
       Btn__addFolder: true,
       'visibility-hidden': !props.folder,
     });
@@ -156,6 +131,7 @@ export default class ActionsMenu extends Component {
         ref={this._setWrapperRef}
       >
         <button
+          disabled={props.edge.node.key === 'untracked/'}
           onClick={() => { props.folder && props.addFolderVisible(true); }}
           className={folderCSS}
           data-click-id="addFolder"
@@ -194,21 +170,10 @@ export default class ActionsMenu extends Component {
               <button
                 disabled={disableButtons}
                 onClick={() => { props.renameEditMode(true); }}
-                className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--bordered Btn--round"
+                className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--round"
                 data-tooltip={renameTooltip}
                 type="button"
               />
-              {
-                props.section !== 'data'
-                && (
-                <button
-                  onClick={() => { this._triggerFavoriteMutation(); }}
-                  className={favoriteCSS}
-                  data-tooltip="Favorite"
-                  type="button"
-                />
-                )
-              }
             </Fragment>
             )
           }

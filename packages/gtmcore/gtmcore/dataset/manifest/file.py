@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, NamedTuple
+from typing import List, Dict, Optional, NamedTuple, TYPE_CHECKING
 import pickle
 import os
 from enum import Enum
@@ -7,9 +7,11 @@ import json
 import redis
 import glob
 import copy
-
-from gtmcore.dataset.dataset import Dataset
 from gtmcore.logging import LMLogger
+
+if TYPE_CHECKING:
+    from gtmcore.dataset.dataset import Dataset
+
 
 logger = LMLogger.get_logger()
 
@@ -40,10 +42,10 @@ class ManifestFileCache(object):
     """Class to provide a caching layer on top of a collection of Dataset manifest files
 
     Note: The checkout context of the underlying dataset CANNOT change while this class is instantiated. If it does,
-    you need to reload the Dataset instance and reload the Manifest instance.
+    you need to reload the Dataset instance and reload the Manifest instance, or run Manifest.force_reload().
 
     """
-    def __init__(self, dataset: Dataset, logged_in_username: Optional[str] = None) -> None:
+    def __init__(self, dataset: 'Dataset', logged_in_username: Optional[str] = None) -> None:
         self.dataset = dataset
         self.logged_in_username = logged_in_username
 
@@ -77,7 +79,12 @@ class ManifestFileCache(object):
         Returns:
             redis.StrictRedis
         """
-        return f"DATASET-MANIFEST-CACHE|{self._current_checkout_id}"
+        key = f"DATASET-MANIFEST-CACHE|{self._current_checkout_id}"
+
+        if self.dataset.linked_to():
+            key = f"{key}|{self.dataset.linked_to()}"
+
+        return key
 
     def _load_legacy_manifest(self) -> OrderedDict:
         """Method to load the manifest file
@@ -166,6 +173,19 @@ class ManifestFileCache(object):
                 self.redis_client.expire(self.manifest_cache_key, 3600)
 
         return manifest_data
+
+    def evict(self) -> None:
+        """Method to remove an entry from the manifest data cache (stored in redis db 1)
+        (used when needing to reload files that may still be under the same checkout context, e.g. a local
+        linked dataset)
+
+        Returns:
+            None
+        """
+        if self.redis_client.exists(self.manifest_cache_key):
+            self.redis_client.delete(self.manifest_cache_key)
+
+        self._manifest = OrderedDict()
 
     def persist(self) -> None:
         """Method to persist changes to the manifest to the cache and any associated manifest file

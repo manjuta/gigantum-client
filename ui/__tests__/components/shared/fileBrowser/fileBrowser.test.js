@@ -18,8 +18,6 @@ import codeDataFavorites from 'Tests/components/labbook/code/__relaydata__/CodeF
 import DeleteLabbookFilesMutation from 'Mutations/fileBrowser/DeleteLabbookFilesMutation';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';
 import MoveLabbookFileMutation from 'Mutations/fileBrowser/MoveLabbookFileMutation';
-import AddFavoriteMutation from 'Mutations/fileBrowser/AddFavoriteMutation';
-import RemoveFavoriteMutation from 'Mutations/fileBrowser/RemoveFavoriteMutation';
 import DownloadDatasetFilesMutation from 'Mutations/DownloadDatasetFilesMutation';
 import CompleteBatchUploadTransactionMutation from 'Mutations/fileBrowser/CompleteBatchUploadTransactionMutation';
 
@@ -55,8 +53,6 @@ const fixtures = {
 jest.mock('Mutations/fileBrowser/DeleteLabbookFilesMutation', () => jest.fn());
 jest.mock('Mutations/fileBrowser/MakeLabbookDirectoryMutation', () => jest.fn());
 jest.mock('Mutations/fileBrowser/MoveLabbookFileMutation', () => jest.fn());
-jest.mock('Mutations/fileBrowser/AddFavoriteMutation', () => jest.fn());
-jest.mock('Mutations/fileBrowser/RemoveFavoriteMutation', () => jest.fn());
 jest.mock('Mutations/DownloadDatasetFilesMutation', () => jest.fn());
 jest.mock('Mutations/fileBrowser/CompleteBatchUploadTransactionMutation', () => jest.fn());
 
@@ -91,20 +87,8 @@ describe('FileBrowser component', () => {
      expect(component.state('multiSelect')).toEqual('all');
    });
 
-
-   it('Shows delete popup', () => {
-     component.find('.Btn__delete').simulate('click');
-     expect(component.state('popupVisible')).toEqual(true);
-   });
-
    it('Cancel delete popup', () => {
      component.find('.File__btn--delete').simulate('click');
-     expect(component.state('popupVisible')).toEqual(false);
-   });
-
-   it('Delete Files', () => {
-     component.find('.Btn__delete').simulate('click');
-     component.find('.File__btn--delete-files').simulate('click');
      expect(component.state('popupVisible')).toEqual(false);
    });
 

@@ -1,0 +1,91 @@
+@import '~Styles/_imports.scss';
+
+
+
+.PackageHeader__name,
+.PackageRow__name {
+  margin: 0 12.5px;
+  min-width: 235px;
+  text-align: left;
+  flex: 1;
+
+
+  button {
+    min-width: 80px;
+    padding: 0px;
+    margin: 0px;
+  }
+}
+
+.PackageHeader__manager,
+.PackageRow__manager {
+  margin: 0 12.5px;
+  min-width: 100px;
+  max-width: 140px;
+  flex: 1;
+
+  button {
+    min-width: 80px;
+    padding: 0px;
+    margin: 0px;
+  }
+}
+
+.PackageHeader__version,
+.PackageRow__version-container,
+.PackageHeader__actions,
+.PackageRow__actions {
+  width: 100px;
+  margin: 0 12.5px;
+}
+
+.PackageRow__manager {
+  text-align: left;
+  line-height: 2rem;
+}
+.PackageRow__name {
+  margin: 0 12.5px;
+  flex: 1;
+}
+
+.PackageRow__description{
+  margin: 10px 0 5px 0;
+  font-size: 13px;
+  // TODO remove webkit references, we have a polyfill in webpack for targetting specific browsers
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+}
+
+
+.PackageRow__version {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.PackageRow__external {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  border-radius: 0;
+  background: url('~Images/icons/offsite-azure.svg') no-repeat center bottom;
+  background-size: 12px;
+}
+
+.PackageRow.Table__Row:last-child {
+  .Tooltip-data {
+    &:before {
+      top: calc(50% - 7px);
+      left: -8px;
+
+      @include triangle('right', 7px, $slateBlue);
+    }
+    &:after {
+      top: calc(50% - 17px);
+      left: -168px;
+    }
+  }
+}

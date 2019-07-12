@@ -71,11 +71,22 @@ export default class RemoteLabbookPanel extends Component {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
             this._importingState();
-            setMultiInfoMessage(id, 'Importing Project please wait', false, false);
+            const messageData = {
+              id,
+              message: 'Importing Project please wait',
+              isLast: false,
+              error: false,
+            };
+            setMultiInfoMessage(messageData);
             const successCall = () => {
               this._clearState();
-
-              setMultiInfoMessage(id, `Successfully imported remote Project ${labbookName}`, true, false);
+              const messageData = {
+                id,
+                message: `Successfully imported remote Project ${labbookName}`,
+                isLast: true,
+                error: false,
+              };
+              setMultiInfoMessage(messageData);
 
 
               BuildImageMutation(
@@ -85,7 +96,14 @@ export default class RemoteLabbookPanel extends Component {
                 (response, error) => {
                   if (error) {
                     console.error(error);
-                    setMultiInfoMessage(id, `ERROR: Failed to build ${labbookName}`, null, true, error);
+                    const messageData = {
+                      id,
+                      message: `ERROR: Failed to build ${labbookName}`,
+                      isLast: null,
+                      error: true,
+                      messageBody: error,
+                    };
+                    setMultiInfoMessage(messageData);
                   }
                 },
               );
@@ -94,7 +112,14 @@ export default class RemoteLabbookPanel extends Component {
             };
             const failureCall = (error) => {
               this._clearState();
-              setMultiInfoMessage(id, 'ERROR: Could not import remote Project', null, true, error);
+              const messageData = {
+                id,
+                message: 'ERROR: Could not import remote Project',
+                isLast: null,
+                error: true,
+                messageBody: error,
+              };
+              setMultiInfoMessage(messageData);
             };
             self.setState({ isImporting: true });
 
@@ -192,24 +217,33 @@ export default class RemoteLabbookPanel extends Component {
      blur: state.isImporting,
    });
    const deleteCSS = classNames({
-     Button__icon: true,
+     'Btn__dashboard Btn--action': true,
      'Tooltip-data Tooltip-data--wide': localStorage.getItem('username') !== edge.node.owner,
-     'Button__icon--delete': localStorage.getItem('username') === edge.node.owner,
-     'Button__icon--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
+     'Btn__dashboard--delete': localStorage.getItem('username') === edge.node.owner,
+     'Btn__dashboard--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
    });
 
    return (
      <div
        key={edge.node.name}
-       className="Card Card--300 column-4-span-3 flex flex--column justify--space-between"
+       className="Card Card--225 column-4-span-3 flex flex--column justify--space-between"
      >
        <div className="RemoteLabbooks__row RemoteLabbooks__row--icon">
+         {
+        !(edge.node.visibility === 'local')
+          && (
+          <div
+            data-tooltip={`${edge.node.visibility}`}
+            className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
+          />
+          )
+         }
          {
           props.existsLocally
             ? (
               <button
                 type="button"
-                className="Button__icon Button__icon--cloud Tooltip-data"
+                className="Btn__dashboard Btn--action Btn__dashboard--cloud Btn__Tooltip-data"
                 data-tooltip="This Project has already been imported"
                 disabled
               >
@@ -220,7 +254,7 @@ export default class RemoteLabbookPanel extends Component {
               <button
                 type="button"
                 disabled={state.isImporting}
-                className="Button__icon Button__icon--cloud-download"
+                className="Btn__dashboard Btn--action Btn__dashboard--cloud-download"
                 onClick={() => this._importLabbook(edge.node.owner, edge.node.name)}
               >
               Import
@@ -255,8 +289,16 @@ export default class RemoteLabbookPanel extends Component {
          </div>
 
          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Created on ${Moment(edge.node.creationDateUtc).format('MM/DD/YY')}`}</p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{`Modified ${Moment(edge.node.modifiedDateUtc).fromNow()}`}</p>
+         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
+           <span className="bold">Created:</span>
+           {' '}
+           {Moment(edge.node.creationDateUtc).format('MM/DD/YY')}
+         </p>
+         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
+           <span className="bold">Modified:</span>
+           {' '}
+           {Moment(edge.node.modifiedDateUtc).fromNow()}
+         </p>
 
          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description">
            {
@@ -274,15 +316,6 @@ export default class RemoteLabbookPanel extends Component {
            }
          </p>
        </div>
-
-       { !(edge.node.visibility === 'local')
-          && (
-          <div
-            data-tooltip={`${edge.node.visibility}`}
-            className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
-          />
-          )
-       }
 
        { state.isImporting
           && (

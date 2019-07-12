@@ -13,6 +13,11 @@ const mutation = graphql`
                 id
                 name
                 linkedDatasets {
+                  overview{
+                    numFiles
+                    localBytes
+                    totalBytes
+                  }
                   name
                   owner
                   commitsBehind
@@ -24,7 +29,6 @@ const mutation = graphql`
                         name
                         key
                         isDir
-                        isFavorite
                         isLocal
                         modifiedAt
                         size

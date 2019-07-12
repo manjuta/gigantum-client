@@ -43,10 +43,6 @@
             background: url('~Images/icons/folder-add-dark.svg') no-repeat 50% 50%;
             background-size: 20px;
           }
-        &--favorite-off {
-            background: url('~Images/icons/star__off-dark.svg') no-repeat 50% 50%;
-            background-size: 20px;
-        }
       }
     }
 
@@ -67,7 +63,7 @@
 
       padding: 0 0 0 35px;
       line-height: 26px;
-
+      min-height: 20px;
       background: url(~Images/icons/folder-white.svg) no-repeat 0% 50%;
       background-size: 20px;
   }
@@ -89,6 +85,19 @@
     width: 180px;
   }
 
+}
+
+.Dataset {
+  .Folder__cell--menu,
+  .FileBrowser__header--menu,
+  .File__cell--menu {
+    width: 260px;
+  }
+
+  .ActionsMenu {
+    width: auto;
+    padding: 2px 0;
+  }
 }
 
 

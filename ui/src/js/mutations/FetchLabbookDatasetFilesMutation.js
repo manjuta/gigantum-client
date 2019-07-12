@@ -3,7 +3,7 @@ import {
   graphql,
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
-
+import { setErrorMessage } from 'JS/redux/actions/footer';
 
 const mutation = graphql`
 mutation FetchLabbookDatasetFilesMutation($input: FetchLabbookEdgeInput!){
@@ -11,6 +11,11 @@ mutation FetchLabbookDatasetFilesMutation($input: FetchLabbookEdgeInput!){
     newLabbookEdge{
       node {
         linkedDatasets{
+          overview{
+            numFiles
+            localBytes
+            totalBytes
+          }
           commitsBehind
           allFiles{
             edges{
@@ -47,6 +52,7 @@ export default function FetchLabbookDatasetFilesMutation(
     onCompleted: (response, error) => {
       if (error) {
         console.log(error);
+        setErrorMessage('An error occurred while refetching data', error);
       }
       callback(error);
     },

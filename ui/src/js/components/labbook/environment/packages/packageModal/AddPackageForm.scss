@@ -1,0 +1,41 @@
+@import '~Styles/_imports.scss';
+
+.AddPackageForm {
+  height: 325px;
+  &__container {
+    width: 431px;
+    height: 225px;
+  }
+}
+
+.AddPackageForm__label {
+  width: 140px;
+}
+
+.AddPackageForm__name {
+  div {
+    white-space: nowrap;
+  }
+  input {
+    background: $white;
+    width: 290px;
+    padding: 0 10px !important;
+  }
+}
+
+.AddPackageForm__version {
+  &-title {
+    margin-right: 20px;
+    margin-left: 69px;
+  }
+  &--active {
+    input {
+      background: $white;
+      padding: 0 10px !important;
+    }
+  }
+}
+
+.AddPackageForm__entry-buttons{
+  margin-top: 50px;
+}
