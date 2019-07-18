@@ -2,18 +2,37 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import Moment from 'moment';
+import PropTypes from 'prop-types';
 // components
 import BuildModal from 'Components/shared/modals/BuildModal';
 // store
 import store from 'JS/redux/store';
-import { setUpdateHistoryView, setToggleMessageList } from 'JS/redux/actions/footer';
+import { setUpdateHistoryView } from 'JS/redux/actions/footer';
 // assets
 import './FooterNotificationList.scss';
 
-export default class FooterNotificationList extends Component {
-  state = {
-    selectedBuildId: null,
-  }
+type Props = {
+  toggleMessageList: PropTypes.func,
+  parentState: PropTypes.object,
+}
+
+/**
+*  @param {Array} messageList
+*  @param {Array} messageListOpenItems
+*  sets selectedBuildId in state
+*/
+const getHeight = (messageList, messageListOpenItems) => {
+  let height = messageList.length > 6 ? 260 : messageList.length * 60;
+  height = messageListOpenItems.length > 0 ? 'auto' : height;
+  height = height === 'auto' ? 'auto' : `${height}px`;
+
+  return height;
+};
+
+export default class FooterNotificationList extends Component<Props> {
+  props: Props;
+
+  state = { selectedBuildId: null }
 
   /**
   *  @param {Boolean} selectedBuildId
@@ -26,35 +45,33 @@ export default class FooterNotificationList extends Component {
 
   render() {
     const { props, state } = this;
-    const messageList = props.parentState.viewHistory ? props.parentState.messageStackHistory : props.parentState.messageStack;
+    const { parentState } = this.props;
+    const messageList = parentState.viewHistory
+      ? parentState.messageStackHistory
+      : parentState.messageStack;
     // no other reference to owner and labbookname
     const { owner, labbookName } = store.getState().routes;
     const messageListOpenItems = messageList.filter(message => message.messageBodyOpen);
-
+    const height = getHeight(messageList, messageListOpenItems);
+    // declare css here
     const footerMessageSectionClass = classNames({
       Footer__messageContainer: true,
-      'Footer__messageContainer--collapsed': !props.parentState.messageListOpen,
-      'Footer__messageContainer--helper-open': props.parentState.helperVisible,
+      'Footer__messageContainer--collapsed': !parentState.messageListOpen,
+      'Footer__messageContainer--helper-open': parentState.helperVisible,
     });
-
     const footerMessageListClass = classNames({
       Footer__messageList: true,
-      'Footer__messageList--collapsed': !props.parentState.messageListOpen,
+      'Footer__messageList--collapsed': !parentState.messageListOpen,
     });
-
     const viewAllButtonClass = classNames({
       'Btn Btn--feature Btn--feature--expanded Btn--feature--noPadding': true,
-      hidden: (props.parentState.viewHistory || !props.parentState.messageListOpen),
+      hidden: (parentState.viewHistory || !parentState.messageListOpen),
     });
-
-    let height = messageList.length > 6 ? 260 : messageList.length * 60;
-    height = messageListOpenItems.length > 0 ? 'auto' : height;
-
-    height = height === 'auto' ? 'auto' : `${height}px`;
 
     return (
       <div className={footerMessageSectionClass}>
         <button
+          type="button"
           className={viewAllButtonClass}
           onClick={() => setUpdateHistoryView()}
         >
@@ -71,7 +88,7 @@ export default class FooterNotificationList extends Component {
                 });
 
                 const toggleButton = classNames({
-                  'Btn Btn__toggle': true,
+                  'Btn Btn__toggle Btn--flat': true,
                   'Btn__toggle--open': messageItem.messageBodyOpen,
                   hidden: messageItem.buildProgress,
                 });
@@ -87,7 +104,7 @@ export default class FooterNotificationList extends Component {
 
                 return (
                   <li
-                    key={messageItem.id + index}
+                    key={messageItem.id}
                     className={bodyCSS}
                   >
                     <div className="Footer__message-body">
@@ -102,7 +119,8 @@ export default class FooterNotificationList extends Component {
                         { (messageItem.messageBody.length > 0)
                           && (
                           <div className="Footer__message-expand">
-                            <div
+                            <button
+                              type="button"
                               className={toggleButton}
                               onClick={() => { props.showMessageBody(index); }}
                             />
@@ -139,8 +157,8 @@ export default class FooterNotificationList extends Component {
 
                         <ul>
                           {
-                            messageItem.messageBody && messageItem.messageBody.map((item, index) => (
-                              <li key={messageItem.id + index}>
+                            messageItem.messageBody && messageItem.messageBody.map(item => (
+                              <li key={messageItem.id}>
                                 <div
                                   className="Footer__message-body-content--text"
                                   dangerouslySetInnerHTML={{ __html: item.message }}
@@ -152,9 +170,10 @@ export default class FooterNotificationList extends Component {
                       </div>
                     </div>
 
-                  </li>);
+                  </li>
+                );
               })
-              }
+            }
 
             { (messageList.length === 0)
               && (
@@ -169,7 +188,6 @@ export default class FooterNotificationList extends Component {
               </li>
               )
             }
-
           </ul>
         </div>
       </div>
