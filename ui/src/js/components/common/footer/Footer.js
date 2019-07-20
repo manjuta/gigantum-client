@@ -14,7 +14,6 @@ import './Footer.scss';
 
 
 type Props = {
-  messageStack: PropTypes.array,
   viewHistory: PropTypes.bool.isRequired,
   history: PropTypes.object,
   labbookName: PropTypes.string,
@@ -28,24 +27,6 @@ class Footer extends Component<Props> {
   */
   componentDidMount() {
     window.addEventListener('resize', this._resize);
-  }
-
-  /**
-   hides messages in stack after 15 seconds
-  */
-  componentDidUpdate() {
-    const { messageStack } = this.props;
-
-    messageStack.forEach((messageItem) => {
-      const timeInSeconds = 15 * 1000;
-      if (!messageItem.error) {
-        if (!messageItem.isMultiPart || (messageItem.isMultiPart && messageItem.isLast)) {
-          setTimeout(() => {
-            this._removeMessage(messageItem);
-          }, timeInSeconds);
-        }
-      }
-    });
   }
 
   /**

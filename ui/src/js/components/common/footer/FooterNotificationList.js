@@ -77,7 +77,10 @@ export default class FooterNotificationList extends Component<Props> {
         >
           View All
         </button>
-        <div className={footerMessageListClass} style={{ height }}>
+        <div
+          className={footerMessageListClass}
+          style={{ height }}
+        >
 
           <ul>
             {
@@ -88,7 +91,7 @@ export default class FooterNotificationList extends Component<Props> {
                 });
 
                 const toggleButton = classNames({
-                  'Btn Btn__toggle Btn--flat': true,
+                  'Btn Btn__toggle': true,
                   'Btn__toggle--open': messageItem.messageBodyOpen,
                   hidden: messageItem.buildProgress,
                 });
@@ -104,7 +107,7 @@ export default class FooterNotificationList extends Component<Props> {
 
                 return (
                   <li
-                    key={messageItem.id}
+                    key={messageItem.id + index}
                     className={bodyCSS}
                   >
                     <div className="Footer__message-body">
@@ -157,8 +160,8 @@ export default class FooterNotificationList extends Component<Props> {
 
                         <ul>
                           {
-                            messageItem.messageBody && messageItem.messageBody.map(item => (
-                              <li key={messageItem.id}>
+                            messageItem.messageBody && messageItem.messageBody.map((item, index) => (
+                              <li key={`${messageItem.id}${index}`}>
                                 <div
                                   className="Footer__message-body-content--text"
                                   dangerouslySetInnerHTML={{ __html: item.message }}

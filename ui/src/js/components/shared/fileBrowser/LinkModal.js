@@ -207,6 +207,7 @@ export default class LinkModal extends Component {
                     const existingDatasets = this.props.linkedDatasets.map(dataset => dataset.name);
                     const filteredDatasets = props.datasetList.localDatasets.edges.filter(dataset => existingDatasets.indexOf(dataset.node.name) === -1 && dataset.node.backendIsConfigured);
                     const localDatasetEdges = this._filterDatasets(filteredDatasets);
+                    const colloboratorMessage = localDatasetEdges.length ? 'For collaborators to access a linked Dataset, the Dataset must be public or they must be added as a collaborator to the Dataset itself.' : 'You do not have any Local Datasets available to link to this project. To link a dataset you must first create or import a dataset.'
                     const filterCategories = this._createFilters(localDatasetEdges);
                     const messageCSS = classNames({
                       LinkModal__message: true,
@@ -222,18 +223,14 @@ export default class LinkModal extends Component {
                           showButton
                         />
                         <div className="LinkModal__dataset-container">
-                          {/* TODO Temporarily removed - unsure if we want this text here after redesign, also pull text out to a variable */}
-                          {/* <p className={messageCSS}>
+                          <p className={messageCSS}>
                             <b>
-                              {
-                                localDatasetEdges.length ? 'For collaborators to access a linked Dataset, the Dataset must be public or they must be added as a collaborator to the Dataset itself.' : 'You do not have any Local Datasets available to link to this project. To link a dataset you must first create or import a dataset.'
-                              }
+                              { colloboratorMessage }
                             </b>
-                          </p> */}
+                          </p>
                           {
                             localDatasetEdges.map((edge) => {
                               const node = edge.node;
-
                               return (
                                 <div
                                   key={node.id}
