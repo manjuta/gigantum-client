@@ -24,6 +24,7 @@ export default class Modal extends Component {
       Modal__content: true,
       'Modal__content--noPadding': props.noPaddingModal,
       [`Modal__content--${props.size}`]: props.size, // large, medium, small
+      'Modal__content--noIcon': !props.icon,
       [props.icon]: !!props.icon,
     });
     const modalContainerCSS = classNames({
@@ -58,7 +59,12 @@ export default class Modal extends Component {
                 && (
                 <Fragment>
                   <h1 className="Modal__header">
-                    <div className={`Icon Icon--${props.icon}`} />
+                    {
+                      props.icon
+                      && (
+                      <div className={`Icon Icon--${props.icon}`} />
+                      )
+                    }
                     {props.header}
                   </h1>
                   <hr />

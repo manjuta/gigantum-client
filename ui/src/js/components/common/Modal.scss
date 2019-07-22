@@ -64,6 +64,11 @@
       padding: 0;
     }
   }
+  &--noIcon {
+    .Modal__header {
+      padding: 40px 0 5px 0px !important;
+    }
+  }
   &--large{
     padding: 0 60px 20px 60px;
     @include modal(500px, 960px);

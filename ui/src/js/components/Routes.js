@@ -17,6 +17,7 @@ import history from 'JS/history';
 import SideBar from 'Components/common/SideBar';
 import Footer from 'Components/common/footer/Footer';
 import Prompt from 'Components/common/Prompt';
+import Modal from 'Components/common/Modal';
 import DiskHeader from 'Components/common/DiskHeader';
 import Helper from 'Components/common/Helper';
 import Loader from 'Components/common/Loader';
@@ -58,6 +59,8 @@ class Routes extends Component {
       showDefaultMessage: true,
       diskLow: false,
       available: 0,
+      timesUp: false,
+      downloadClicked: false,
     };
 
     this._setForceLoginScreen = this._setForceLoginScreen.bind(this);
@@ -202,6 +205,9 @@ class Routes extends Component {
   render() {
     const { props, state } = this;
     const showDiskLow = state.diskLow && !window.sessionStorage.getItem('hideDiskWarning');
+    setTimeout(() => {
+      this.setState({ timesUp: true });
+    }, 3 * 60 * 1000);
     if (!state.hasError) {
       // declare variables
       const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
@@ -281,6 +287,46 @@ class Routes extends Component {
                         />
                       </div>
                       )
+                  }
+                  {
+                    state.timesUp
+                    && (
+                    <Modal
+                      size="large"
+                      header="Time's Up"
+                      renderContent={() => (
+                        <div className="flex">
+                          <div className="Modal__timesUpText flex flex--column flex-1">
+                            <h4 className="text-center">Your 5 hours of free cloud computing are up.</h4>
+                            <p>
+                              <b>Download Gigantum</b>
+                              {' '}
+                              to keep working locally or with another cloud provider
+                            </p>
+                            <div className="text-center">OR</div>
+                            <p>Come back in 7 days for 5 more hours</p>
+                          </div>
+                          <div className="flex flex--column flex-1 text-center align-items--center justify--space-between">
+                            <div className="TimesUp-download-icon" />
+                            <button
+                              onClick={() => this.setState({ downloadClicked: true })}
+                              type="button"
+                            >
+                              Download Gigantum
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    />
+                    )
+                  }
+                  {
+                    state.downloadClicked
+                    && (
+                      <div className="Download__fake">
+                        <a href="https://xd.adobe.com/view/1afced13-8b6a-4e4b-7ba1-99d304f8727d-6ccd/?fullscreen&hints=off" className="Download__fake-link" />
+                      </div>
+                    )
                   }
                   <div className={headerCSS} />
                   <SideBar

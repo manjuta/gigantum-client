@@ -907,7 +907,8 @@ class Labbook extends Component {
           </div>
           <div className="Labbook__veil" />
 
-        </div>);
+        </div>
+      );
     }
 
     if (state.authenticated) {
