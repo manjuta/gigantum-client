@@ -32,10 +32,9 @@
 }
 
 .CustomDockerfile__content {
-  padding: 10px !important;
+  padding: 30px 15px 30px 47px;
   color: $jet;
   white-space: pre-wrap;
-  padding: 0;
   word-wrap: break-word;
   justify-content: space-between;
   flex-wrap: nowrap;
@@ -123,4 +122,17 @@
     padding: 0;
   }
 
+}
+
+.CustomDockerfile__block {
+  border-top: 28px solid $backgroundGrey;
+  width: calc(100% - 106px);
+  pre {
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+
+.CustomDockerfile__draggables {
+  margin: 0 18px;
 }

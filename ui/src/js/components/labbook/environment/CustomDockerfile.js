@@ -127,7 +127,7 @@ export default class CustomDockerfile extends Component {
 
 
     const dockerfileCSS = classNames({
-      'column-1-span-11': true,
+      CustomDockerfile__block: true,
       empty: !this.state.dockerfileContent,
     });
 
@@ -213,7 +213,7 @@ export default class CustomDockerfile extends Component {
                 )
 
                 : (
-                  <Fragment>
+                  <div className="flex">
 
                     <div className={dockerfileCSS}>
 
@@ -224,8 +224,15 @@ export default class CustomDockerfile extends Component {
                       />
 
                     </div>
-
-                  </Fragment>
+                    <div className="flex flex--column CustomDockerfile__draggables">
+                      <div>
+                        Add File
+                      </div>
+                      <div>
+                        Custom Application
+                      </div>
+                    </div>
+                  </div>
                 )
             }
 
