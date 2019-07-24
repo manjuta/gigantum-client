@@ -25,12 +25,23 @@ class CodeBlock extends React.PureComponent {
   render() {
     const code = this.props.value;
     const language = this.props.language ? this.props.language : 'python';
-    const style = customizedStyling;
-    console.log(style)
-    console.log(language)
+    const style = language === 'dockerfile' ? githubGist : customizedStyling;
     const codeCSS = classNames({
-      CodeBlock: true,
+      CodeBlock: language !== 'dockerfile',
+      'CodeBlock--docker': language === 'dockerfile',
     });
+    if (language === 'dockerfile') {
+      return (
+        <SyntaxHighlighterHLJS
+          className={codeCSS}
+          language={language}
+          style={style}
+          showLineNumbers
+        >
+          {code}
+        </SyntaxHighlighterHLJS>
+      );
+    }
     return (
       <SyntaxHighlighter
         className={codeCSS}

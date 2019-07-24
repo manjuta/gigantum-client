@@ -51,29 +51,17 @@
     margin: 0
   }
 
-  div:first-child {
-
-    /*
-      have to use extend as ReactMarkDown does not inherit classNames
-    */
-
-    margin-bottom: 0;
-    p {
-      font-family: monospace !important;
-      font-size: 1em !important;
-    }
-  }
   .column-1-span-2 {
     align-self: flex-end;
 
     @include flex(space-between, row);
   }
 
-  .empty {
-    color: $mineShaft;
-    opacity: 0.5;
-    font-style: oblique;
-  }
+  // .empty {
+  //   color: $mineShaft;
+  //   opacity: 0.5;
+  //   font-style: oblique;
+  // }
 
   code{
     text-align: left;
@@ -95,7 +83,7 @@
 }
 
 .CustomDockerfile__buttonContainer{
-  margin: 0 20px 20px;
+  margin: 25px 0 0 0;
   @include flex(flex-end, row);
 }
 
@@ -127,12 +115,38 @@
 .CustomDockerfile__block {
   border-top: 28px solid $backgroundGrey;
   width: calc(100% - 106px);
-  pre {
-    margin: 0 !important;
-    border-radius: 0 !important;
-  }
 }
 
 .CustomDockerfile__draggables {
-  margin: 0 18px;
+  margin: 28px 18px;
+}
+
+.CustomDockerfile__draggable {
+  width: 70px;
+  height: 70px;
+  color: $azure;
+  border: 1px solid $azure;
+  border-radius: 5px;
+  text-align: center;
+  @include flex(flex-end, column);
+  font-size: 12px;
+  cursor: pointer;
+
+  &--custom{
+    background: $lightGrey url('~Images/icons/cogwheel.svg') no-repeat center top 8px;
+    background-size: 24px;
+  }
+}
+
+
+.CustomDockerfileEditor__blockMessage{
+  background: $jet;
+  color: $white;
+  padding: 2em;
+}
+
+.CustomDockerfileEditor__message{
+  border: 1px dashed $white;
+  text-align: center;
+  padding: 35px;
 }

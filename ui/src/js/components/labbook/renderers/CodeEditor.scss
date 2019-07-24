@@ -1,0 +1,28 @@
+@import '~Styles/_imports.scss';
+
+.CodeEditor__lineNumbers {
+  display: inline-block;
+  width: 2em;
+  user-select: none;
+  opacity: 0.3;
+}
+
+.CodeEditor {
+  * {
+    font-family: monospace;
+  }
+  pre {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    div {
+      padding-left: 2em;
+      text-indent: -2em;
+      vertical-align: top;
+    }
+  }
+  textarea{
+    border-left: 2em solid transparent !important;
+    border-bottom: none !important;
+    outline: none;
+  }
+}

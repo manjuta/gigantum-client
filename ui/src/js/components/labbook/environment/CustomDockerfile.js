@@ -1,10 +1,7 @@
 // vendor
 import React, { Component, Fragment } from 'react';
-import ReactMarkdown from 'react-markdown';
 import classNames from 'classnames';
-// Components
-import CodeBlock from 'Components/labbook/renderers/CodeBlock';
-import Tooltip from 'Components/common/Tooltip';
+import { DragSource, DropTarget } from 'react-dnd';
 // mutations
 import AddCustomDockerMutation from 'Mutations/AddCustomDockerMutation';
 // store
@@ -13,6 +10,10 @@ import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environ
 // config
 import { setErrorMessage, setWarningMessage } from 'JS/redux/actions/footer';
 import config from 'JS/config';
+// Components
+import Tooltip from 'Components/common/Tooltip';
+import CustomDockerfileEditor from './CustomDockerfileEditor';
+import CustomApplicationButton from './CustomApplicationButton';
 // assets
 import './CustomDockerfile.scss';
 
@@ -121,16 +122,14 @@ export default class CustomDockerfile extends Component {
     }
   }
 
-
   render() {
     const { props, state } = this;
-
 
     const dockerfileCSS = classNames({
       CustomDockerfile__block: true,
       empty: !this.state.dockerfileContent,
     });
-
+    const dockerFileNotChanged = state.dockerfileContent === state.lastSavedDockerfileContent;
 
     const editDockerfileButtonCSS = classNames({
       'Btn Btn--feature Btn--feature Btn__edit Btn__edit--featurePosition absolute--important': true,
@@ -165,77 +164,37 @@ export default class CustomDockerfile extends Component {
         </div>
         <div className="grid">
           <div className="CustomDockerfile__content Card Card--auto Card--no-hover column-1-span-12">
-            <button
-              className={editDockerfileButtonCSS}
-              data-tooltip="Container must be turned off to edit docker snippets"
-              onClick={() => this._editDockerfile()}
-            >
-              <span>Edit Dockerfile</span>
-            </button>
-            {
-              this.state.editingDockerfile
+            <div className="flex">
 
-                ? (
-                  <Fragment>
-
-                    <textarea
-                      className="CustomDockerfile__textarea"
-                      type="text"
-                      onChange={(evt) => { this.setState({ dockerfileContent: evt.target.value }); }}
-                      placeholder="Enter dockerfile commands here"
-                      defaultValue={state.dockerfileContent ? state.dockerfileContent : ''}
-                    />
-
-                    <div className="CustomDockerfile__buttonContainer">
-
-                      <div className="column-1-span-2">
-
-                        <button
-                          onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
-                          className="CustomDockerfile__content-cancel-button Btn--flat"
-                        >
-                      Cancel
-                        </button>
-
-                        <button
-                          disabled={state.savingDockerfile}
-                          onClick={() => this._saveDockerfile()}
-                          className="CustomDockerfile__content-save-button"
-                        >
-                      Save
-                        </button>
-
-                      </div>
-
-                    </div>
-
-                  </Fragment>
-                )
-
-                : (
-                  <div className="flex">
-
-                    <div className={dockerfileCSS}>
-
-                      <ReactMarkdown
-                        renderers={{ code: props => <CodeBlock {...props} language="dockerfile" /> }}
-                        className="ReactMarkdown"
-                        source={renderedContent}
-                      />
-
-                    </div>
-                    <div className="flex flex--column CustomDockerfile__draggables">
-                      <div>
-                        Add File
-                      </div>
-                      <div>
-                        Custom Application
-                      </div>
-                    </div>
-                  </div>
-                )
-            }
-
+              <div className={dockerfileCSS}>
+                <CustomDockerfileEditor
+                  dockerfileContent={state.dockerfileContent}
+                  lastSavedDockerfileContent={state.lastSavedDockerfileContent}
+                  handleChange={(code) => { this.setState({ dockerfileContent: code }); }}
+                />
+              </div>
+              <div className="flex flex--column CustomDockerfile__draggables">
+                <CustomApplicationButton />
+              </div>
+            </div>
+            <div className="CustomDockerfile__buttonContainer">
+              <button
+                onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
+                className="CustomDockerfile__content-cancel-button Btn--flat"
+                type="button"
+                disabled={dockerFileNotChanged}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={state.savingDockerfile || dockerFileNotChanged}
+                onClick={() => this._saveDockerfile()}
+                className="CustomDockerfile__content-save-button Btn--last"
+                type="button"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       </div>
