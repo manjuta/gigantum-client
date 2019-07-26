@@ -1,8 +1,25 @@
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // assets
 import './PackageStatus.scss';
+
+
+/**
+*  @param {newPackageVersion} string
+*  @param {version} string
+*  gets new package version for rendering
+*  @return {}
+*/
+const getVersionObject = (newPackageVersion, version) => {
+  let versionObject = {};
+
+  if (newPackageVersion || version) {
+    const newVersion = (newPackageVersion !== undefined) ? newPackageVersion : version;
+    versionObject = { version: newVersion };
+  }
+
+  return versionObject;
+};
 
 export default class PackageStatus extends Component {
   state = {
@@ -16,8 +33,7 @@ export default class PackageStatus extends Component {
   *  sets statusModalVisible in state
   *  @return {}
   */
-  @boundMethod
-  _setStatusModalVisible(evt, statusModalVisible) {
+  _setStatusModalVisible = (evt, statusModalVisible) => {
     const { target } = evt;
     const rect = target.getBoundingClientRect();
     const modalXPosition = (rect.top - 150) > 347 ? 347 : (rect.top - 150);
@@ -30,8 +46,7 @@ export default class PackageStatus extends Component {
   *  calls queue package and sets edit state
   *  @return {}
   */
-  @boundMethod
-  _handleEditPackage(packageName, packageManager) {
+  _handleEditPackage = (packageName, packageManager) => {
     const { props } = this;
     this.setState({ statusModalVisible: false, modalXPosition: 0 });
     props.setEditedPackageRows(packageName, packageManager);
@@ -45,8 +60,7 @@ export default class PackageStatus extends Component {
   *  calls edit package and closes modal
   *  @return {}
   */
-  @boundMethod
-  _handleQueuePackage(packageData, index, packageName, packageManager) {
+  _handleQueuePackage = (packageData, index, packageName, packageManager) => {
     const { props } = this;
     props.queuePackage(packageData, index);
     props.removeEditedPackageRows(packageName, packageManager);
@@ -61,6 +75,7 @@ export default class PackageStatus extends Component {
       packageName,
       packageManager,
       index,
+      pkg,
       isEdited,
       newPackageName,
       newPackageVersion,
@@ -69,19 +84,28 @@ export default class PackageStatus extends Component {
       top: `${state.modalXPosition}px`,
       left: '644px',
     };
-    const versionObject = (newPackageVersion || version) ? { version: newPackageVersion !== undefined ? newPackageVersion : version } : {};
+    const versionObject = getVersionObject(newPackageVersion, version);
     const packageData = {
       package: newPackageName || packageName,
       manager: packageManager,
       ...versionObject,
     };
+
+    const popupText = pkg.duplicate
+      ? `${packageName} has already been installed at version ${version}. Edit or remove the package and try again.`
+      : 'The package name or version is invalid. Edit or remove the package and try again.';
     if (isEdited) {
       return (
         <div className="flex">
           <button
             type="button"
             className="Btn Btn--small Btn--round Btn--smallMargin Btn__check"
-            onClick={() => this._handleQueuePackage(packageData, index, packageName, packageManager)}
+            onClick={() => this._handleQueuePackage(
+              packageData,
+              index,
+              packageName,
+              packageManager,
+            )}
           />
           <button
             type="button"
@@ -108,7 +132,7 @@ export default class PackageStatus extends Component {
               >
                 <p className="Popup__header">Package Invalid</p>
                 <p className="Popup__small-text">
-                  The package name or version is invalid. Edit or remove the pacakge and try again.
+                  {popupText}
                 </p>
                 <div className="flex">
                   <button
