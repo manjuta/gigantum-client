@@ -1,9 +1,11 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
-import { DragSource, DropTarget } from 'react-dnd';
+import uuidv4 from 'uuid/v4';
 // mutations
 import AddCustomDockerMutation from 'Mutations/AddCustomDockerMutation';
+import SetBundledAppMutation from 'Mutations/environment/SetBundledAppMutation';
+import RemoveBundledAppMutation from 'Mutations/environment/RemoveBundledAppMutation';
 // store
 import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
@@ -24,8 +26,8 @@ export default class CustomDockerfile extends Component {
       originalDockerfile: this.props.dockerfile,
       dockerfileContent: this.props.dockerfile,
       lastSavedDockerfileContent: this.props.dockerfile,
-      editingDockerfile: false,
       savingDockerfile: false,
+      customAppFormList: [],
     };
   }
 
@@ -39,6 +41,87 @@ export default class CustomDockerfile extends Component {
       };
     }
     return state;
+  }
+
+  /**
+  *  @param {}
+  *  appds to customAppFormList in state
+  *  @return {}
+  */
+  _addCustomAppForm = () => {
+    const { state } = this;
+    const newCustomAppFormList = state.customAppFormList.slice();
+    const key = uuidv4();
+    newCustomAppFormList.push({
+      key,
+      portNumber: '',
+      command: '',
+      name: '',
+      description: '',
+    });
+    this.setState({ customAppFormList: newCustomAppFormList });
+  }
+
+  /**
+  *  @param {Integer} index
+  *  @param {String} fieldName
+  *  @param {Event} evt
+  *  showCustomAppForm set to true in state
+  *  @return {}
+  */
+  _modifyCustomApp = (index, fieldName, evt) => {
+    const { state } = this;
+    const newCustomAppFormList = state.customAppFormList.slice();
+    if (fieldName === 'remove') {
+      newCustomAppFormList.splice(index, 1);
+    } else {
+      newCustomAppFormList[index][fieldName] = evt.target.value;
+    }
+    this.setState({ customAppFormList: newCustomAppFormList });
+  }
+
+  /**
+  *  @param {String} owner
+  *  @param {String} labbookName
+  *  @param {Object} formData
+  *  @param {Boolean} isLast
+  *  fires SetBundledAppMutation
+  *  @return {}
+  */
+  _setBundledApp = (owner, labbookName, formData, isLast) => {
+    const { props, state } = this;
+    SetBundledAppMutation(
+      owner,
+      labbookName,
+      formData.portNumber,
+      formData.name,
+      formData.description,
+      formData.command,
+      (response, error) => {
+        console.log(response, error);
+        if (isLast) {
+          props.buildCallback();
+          this.setState({ customAppFormList: [], lastSavedDockerfileContent: state.dockerfileContent, savingDockerfile: false });
+        }
+      },
+    );
+  }
+
+  /**
+  *  @param {appName} string
+  *  fires RemoveBundledAppMutation
+  *  @return {}
+  */
+  _removeBundledApp = (appName) => {
+    const { props } = this;
+    RemoveBundledAppMutation(
+      props.owner,
+      props.name,
+      appName,
+      (response, error) => {
+        console.log(response, error);
+      },
+    );
   }
 
   /**
@@ -91,8 +174,10 @@ export default class CustomDockerfile extends Component {
                 setErrorMessage('Dockerfile was not set: ', error);
                 this.setState({ savingDockerfile: false });
               } else {
-                props.buildCallback();
-                this.setState({ editingDockerfile: false, lastSavedDockerfileContent: this.state.dockerfileContent, savingDockerfile: false });
+                state.customAppFormList.forEach((data, index) => {
+                  const isLast = index === (state.customAppFormList.length - 1);
+                  this._setBundledApp(owner, labbookName, data, isLast);
+                });
               }
             },
           );
@@ -107,38 +192,14 @@ export default class CustomDockerfile extends Component {
     }
   }
 
-  /**
-  *  @param {}
-  *  sets constainer to edit mode if user can edit environment.
-  *  @return {}
-  */
-  _editDockerfile() {
-    const { status } = store.getState().containerStatus;
-    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !this.props.isLocked;
-    if (canEditEnvironment) {
-      this.setState({ editingDockerfile: true });
-    } else {
-      setContainerMenuWarningMessage('Stop Project before editing the environment. \n Be sure to save your changes.');
-    }
-  }
-
   render() {
     const { props, state } = this;
-
     const dockerfileCSS = classNames({
       CustomDockerfile__block: true,
       empty: !this.state.dockerfileContent,
     });
-    const dockerFileNotChanged = state.dockerfileContent === state.lastSavedDockerfileContent;
-
-    const editDockerfileButtonCSS = classNames({
-      'Btn Btn--feature Btn--feature Btn__edit Btn__edit--featurePosition absolute--important': true,
-      hidden: state.editingDockerfile,
-      'Tooltip-data': props.isLocked,
-    });
-
-
-    const renderedContent = state.dockerfileContent ? `\`\`\`\n${state.dockerfileContent}\n\`\`\`` : 'No commands provided.';
+    let dockerFileNotChanged = state.dockerfileContent === state.lastSavedDockerfileContent;
+    state.customAppFormList.forEach((appForm) => { dockerFileNotChanged = !(appForm.portNumber !== '' && appForm.name !== ''); });
 
     return (
       <div className="CustomDockerfile">
@@ -169,7 +230,12 @@ export default class CustomDockerfile extends Component {
               <div className={dockerfileCSS}>
                 <CustomDockerfileEditor
                   dockerfileContent={state.dockerfileContent}
+                  addCustomAppForm={this._addCustomAppForm}
+                  customAppFormList={state.customAppFormList}
                   lastSavedDockerfileContent={state.lastSavedDockerfileContent}
+                  modifyCustomApp={this._modifyCustomApp}
+                  bundledApps={props.bundledApps}
+                  removeBundledApp={this._removeBundledApp}
                   handleChange={(code) => { this.setState({ dockerfileContent: code }); }}
                 />
               </div>
@@ -179,7 +245,7 @@ export default class CustomDockerfile extends Component {
             </div>
             <div className="CustomDockerfile__buttonContainer">
               <button
-                onClick={() => this.setState({ editingDockerfile: false, dockerfileContent: state.lastSavedDockerfileContent })}
+                onClick={() => this.setState({ customAppFormList: [], dockerfileContent: state.lastSavedDockerfileContent })}
                 className="CustomDockerfile__content-cancel-button Btn--flat"
                 type="button"
                 disabled={dockerFileNotChanged}

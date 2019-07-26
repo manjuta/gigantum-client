@@ -944,6 +944,15 @@ const LabbookFragmentContainer = createRefetchContainer(
             base{
               developmentTools
             }
+            bundledApps {
+              id
+              owner
+              name
+              appName
+              description
+              command
+              port
+            }
           }
 
          branches {

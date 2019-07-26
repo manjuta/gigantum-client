@@ -1,0 +1,37 @@
+@import '~Styles/_imports.scss';
+
+.AddBundle {
+  background: $jet;
+  color: $white;
+  padding: 1em 2em;
+}
+
+.AddBundle__container{
+  background: $lightGrey url('~Images/icons/cogwheel.svg') no-repeat center left 13px;
+  border-left: 7px solid $turquise;
+  color: $mineShaft;
+  padding: 20px 50px;
+}
+
+.AddBundle__port{
+  margin-right: 25px;
+  width: 100px;
+}
+
+.AddBundle__name{
+  margin-right: 25px;
+  width: 150px;
+}
+
+.AddBundle__description {
+  margin-right: 25px;
+}
+
+.AddBundle__close{
+  @include close();
+
+  &:hover {
+    background-size: 32px;
+    padding: 7px 20px;
+  }
+}

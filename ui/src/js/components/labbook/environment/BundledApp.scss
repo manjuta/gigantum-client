@@ -1,0 +1,37 @@
+@import '~Styles/_imports.scss';
+
+.BundledApp {
+  background: $jet;
+  color: $white;
+  padding: 1em 2em;
+}
+
+.BundledApp__sidePanel{
+  background: $lightGrey url('~Images/icons/cogwheel.svg') no-repeat bottom 10px left 10px;
+  border-left: 7px solid $turquise;
+  color: $mineShaft;
+  width: 65px;
+}
+
+.BundledApp__command {
+  margin-right: auto;
+  margin-left: 20px;
+  font-family: monospace;
+  span {
+    color: $turquise;
+  }
+}
+
+.BundledApp__container{
+  border: 1px solid $lightGrey;
+  height: 100px;
+}
+
+.BundledApp__close{
+  @include close();
+
+  &:hover {
+    background-size: 32px;
+    padding: 7px 20px;
+  }
+}

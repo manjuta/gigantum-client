@@ -186,7 +186,11 @@ class DevTools extends Component {
   render() {
     const { props, state } = this;
     const devTools = props.labbook.environment.base
-      ? props.labbook.environment.base.developmentTools : [];
+      ? props.labbook.environment.base.developmentTools.slice() : [];
+
+    props.labbook.environment.bundledApps.forEach((app) => {
+      devTools.push(app.appName);
+    });
 
     const devtToolMenuCSS = classNames({
       'DevTools__dropdown-menu': true,

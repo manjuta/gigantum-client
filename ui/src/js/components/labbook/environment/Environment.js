@@ -184,8 +184,11 @@ class Environment extends Component {
               <div>
                 <CustomDockerfile
                   dockerfile={props.labbook.environment.dockerSnippet}
+                  bundledApps={props.labbook.environment.bundledApps}
                   buildCallback={this._buildCallback}
                   isLocked={props.isLocked}
+                  owner={props.owner}
+                  name={props.name}
                 />
                 <Secrets
                   environment={props.labbook.environment}
@@ -225,6 +228,15 @@ export default createFragmentContainer(
       }
       dockerSnippet
       baseLatestRevision
+      bundledApps {
+        id
+        owner
+        name
+        appName
+        description
+        command
+        port
+      }
 
       ...Base_environment
       ...Packages_environment
