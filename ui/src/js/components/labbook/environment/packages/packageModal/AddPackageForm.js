@@ -270,7 +270,7 @@ export default class AddPackageForm extends Component {
             className="AddPackageForm__entry-buttons align-self--end"
           >
             <button
-              className="Btn Btn--flat"
+              className="Btn Btn--flat Btn--width-80"
               disabled={buttonsDisabled}
               type="button"
               onClick={() => this._clearPackageName()}

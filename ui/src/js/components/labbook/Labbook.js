@@ -128,7 +128,6 @@ class Labbook extends Component {
       || nextProps.isSynching
       || nextProps.isPublishing;
 
-    console.log(nextProps.isBuilding, isLocked);
     return {
       ...state,
       deletedBranches: newDeletedBranches,
@@ -344,6 +343,7 @@ class Labbook extends Component {
         LabbookContainerStatusMutation(owner, name, (error, response) => {
           if (response && response.fetchLabbookEdge && response.fetchLabbookEdge.newLabbookEdge) {
             const { environment } = response.fetchLabbookEdge.newLabbookEdge.node;
+            console.log(environment)
             if ((environment.imageStatus !== 'BUILD_IN_PROGRESS') && isBuilding) {
               setBuildingState(false);
             }
@@ -556,6 +556,7 @@ class Labbook extends Component {
         'Labbook--deprecated': state.isDeprecated,
         'Labbook--demo-deprecated': state.isDeprecated && isDemo,
         'Labbook--sidePanelVisible': sidePanelVisible,
+        'Labbook--locked': state.isLocked,
       });
       const deprecatedCSS = classNames({
         Labbook__deprecated: true,
@@ -916,8 +917,8 @@ class Labbook extends Component {
 
           </div>
           <div className="Labbook__veil" />
-
-        </div>);
+        </div>
+      );
     }
 
     if (state.authenticated) {

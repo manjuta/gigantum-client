@@ -1,14 +1,17 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+// store
+import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
 // components
 import AddPackageForm from './AddPackageForm';
 import Requirements from './Requirements';
 import PackageQueue from './PackageQueue';
-// assets
-import './AddPackages.scss';
 // util
 import PackageLookup from '../utils/PackageLookup';
+// assets
+import './AddPackages.scss';
+
 
 /**
 *  @param {object} state
@@ -57,9 +60,11 @@ export default class AddPackages extends Component {
         packages: seperatedNewPackages[manager],
         duplicates: duplicates[manager] || [],
       };
-      if (isLast) {
-        props.setBuildingState(true);
-      }
+      // if (isLast) {
+      //   props.setBuildingState(true);
+      // }
+
+      setBuildingState(true);
       const callback = (response) => {
         if (response && isLast) {
           props.buildCallback(buildCb);
