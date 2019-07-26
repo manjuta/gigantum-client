@@ -94,7 +94,10 @@ class Labbook extends Component {
 
   static getDerivedStateFromProps(nextProps, state) {
     setCallbackRoute(nextProps.location.pathname);
-    const propBranches = nextProps.labbook && nextProps.labbook.branches ? nextProps.labbook.branches : [];
+
+    const propBranches = nextProps.labbook && nextProps.labbook.branches
+      ? nextProps.labbook.branches
+      : [];
     const stateBranches = state.branches;
     const branchMap = new Map();
     const mergedBranches = [];
@@ -117,8 +120,15 @@ class Labbook extends Component {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-    const isLocked = (nextProps.labbook && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING') || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS') || (nextProps.labbook.environment.imageStatus === 'BUILD_QUEUED') || nextProps.isBuilding || nextProps.isSynching || nextProps.isPublishing;
+    const isLocked = (nextProps.labbook
+      && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING')
+      || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
+      || (nextProps.labbook.environment.imageStatus === 'BUILD_QUEUED')
+      || nextProps.isBuilding
+      || nextProps.isSynching
+      || nextProps.isPublishing;
 
+    console.log(nextProps.isBuilding, isLocked);
     return {
       ...state,
       deletedBranches: newDeletedBranches,

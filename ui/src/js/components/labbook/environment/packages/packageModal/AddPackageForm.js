@@ -13,7 +13,7 @@ export default class AddPackageForm extends Component {
     selectedManager: this.props.defaultManager,
     packageName: '',
     checkedValue: 'latest',
-    version: null,
+    version: '',
     aptTooltipVisible: false,
     managerDropdownVisible: false,
   }
@@ -38,7 +38,7 @@ export default class AddPackageForm extends Component {
   */
   _setChecked = (checkedValue) => {
     this.setState((state) => {
-      const version = (checkedValue === 'latest') ? null : state.value;
+      const version = (checkedValue === 'latest') ? '' : state.value;
 
       return { checkedValue, version };
     });
@@ -74,7 +74,7 @@ export default class AddPackageForm extends Component {
     this.setState({ selectedManager, managerDropdownVisible: false });
 
     if (selectedManager === 'apt') {
-      this.setState({ version: null });
+      this.setState({ version: '' });
     }
   }
 
@@ -127,7 +127,7 @@ export default class AddPackageForm extends Component {
     // evt.stopPropagation();
 
     if (evt.target.id === 'latest_version') {
-      this.setState({ version: null });
+      this.setState({ version: '' });
     } else if (evt.target.id === 'specific_version') {
       if ((state.selectedManager === 'apt') && !state.aptTooltipVisible) {
         this.setState({ aptTooltipVisible: true });
@@ -148,7 +148,7 @@ export default class AddPackageForm extends Component {
   *  @return {}
   */
   _clearPackageVersion = () => {
-    this.setState({ version: null });
+    this.setState({ version: '' });
     if (this.packageVersionInput) {
       this.packageVersionInput.value = '';
     }
@@ -178,7 +178,7 @@ export default class AddPackageForm extends Component {
     // declare css here
     const specificVersionCSS = classNames({
       'Radio flex relative': true,
-      'AddPackageForm__version--active': (state.version !== null),
+      'AddPackageForm__version--active': (state.version !== ''),
       'Radio--disabled': (state.selectedManager === 'apt'),
     });
 
