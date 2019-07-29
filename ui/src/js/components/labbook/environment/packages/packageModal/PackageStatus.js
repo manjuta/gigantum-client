@@ -27,6 +27,40 @@ export default class PackageStatus extends Component {
     modalXPosition: 0,
   }
 
+  static getDerivedStateFromProps(props, state) {
+    const statusModalVisible = !props.removePopups ? state.statusModalVisible : false;
+
+    return {
+      ...state,
+      statusModalVisible,
+    };
+  }
+
+  componentDidMount() {
+    window.addEventListener('click', this._closePopup);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._closePopup);
+  }
+
+  /**
+  *  @param {Event} evt
+  *  sets statusModalVisible in state
+  *  @return {}
+  */
+  _closePopup = (evt) => {
+    const {
+      packageName,
+      packageManager,
+    } = this.props;
+    const dataId = evt.target.getAttribute('data-id');
+    const statusId = `${packageName}-${packageManager}-status`;
+    if (dataId !== statusId) {
+      this.setState({ statusModalVisible: false });
+    }
+  }
+
   /**
   *  @param {Event} evt
   *  @param {Boolean} statusModalVisible
@@ -36,7 +70,10 @@ export default class PackageStatus extends Component {
   _setStatusModalVisible = (evt, statusModalVisible) => {
     const { target } = evt;
     const rect = target.getBoundingClientRect();
-    const modalXPosition = (rect.top - 150) > 347 ? 347 : (rect.top - 150);
+    const modalXPosition = ((rect.top - 210) > 347)
+      ? 347
+      : (rect.top - 210);
+
     this.setState({ statusModalVisible, modalXPosition });
   }
 
@@ -79,10 +116,11 @@ export default class PackageStatus extends Component {
       isEdited,
       newPackageName,
       newPackageVersion,
+      packageCount,
     } = props;
     const styleObject = {
       top: `${state.modalXPosition}px`,
-      left: '644px',
+      left: (packageCount > 3) ? '637px' : '649px',
     };
     const versionObject = getVersionObject(newPackageVersion, version);
     const packageData = {
@@ -117,8 +155,9 @@ export default class PackageStatus extends Component {
     }
     if (verified && error) {
       return (
-        <div>
+        <div className="relative">
           <button
+            data-id={`${packageName}-${packageManager}-status`}
             type="button"
             className="Btn Btn--small Btn--round Btn__warning"
             onClick={evt => this._setStatusModalVisible(evt, !state.statusModalVisible)}
@@ -137,7 +176,7 @@ export default class PackageStatus extends Component {
                 <div className="flex">
                   <button
                     type="button"
-                    className="Btn Btn--flat Btn-width-80"
+                    className="Btn Btn--flat Btn--width-80"
                     onClick={() => { props.removePackageFromQueue(index); }}
                   >
                   Remove

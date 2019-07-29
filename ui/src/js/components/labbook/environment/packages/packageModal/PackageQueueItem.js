@@ -27,12 +27,46 @@ const getRenderingData = (props, pkg) => {
 };
 
 class PackageQueueItem extends Component {
+  state = {
+    removePopups: false,
+  }
   /**
   *  @param {Object} evt
   *  @param {Object} pkg
   *  @param {Number} index
   *  @param {String} type
   *  sets which packages are being edited
+  *  @return {}
+  */
+
+  componentDidMount() {
+    this.rowContainer.addEventListener('scroll', this._handleScroll);
+  }
+
+  componentWillUnmount() {
+    this.rowContainer.removeEventListener('scroll', this._handleScroll);
+  }
+
+  /**
+  *  @param {} -
+  *  sets which packages are being edited
+  *  @return {}
+  */
+  _handleScroll = () => {
+    this.setState({ removePopups: true });
+
+    setTimeout(() => {
+      this.setState({ removePopups: false });
+    }, 250);
+  }
+
+  /**
+  *  @param {Object} evt
+  *  @param {Object} pkg
+  *  @param {Number} index
+  *  @param {String} type
+  *  updates package
+  *  @calls {updatePackage}
   *  @return {}
   */
   _updatePackage(evt, pkg, index, type) {
@@ -42,9 +76,12 @@ class PackageQueueItem extends Component {
   }
 
   render() {
-    const { props } = this;
+    const { props, state } = this;
     return (
-      <div className="PackageQueue__row-container">
+      <div
+        className="PackageQueue__row-container"
+        ref={(rowContainer) => { this.rowContainer = rowContainer; }}
+      >
         {
           props.packageQueue.map((pkg, index) => {
             const {
@@ -111,6 +148,8 @@ class PackageQueueItem extends Component {
                     removePackageFromQueue={props.removePackageFromQueue}
                     isEdited={isEdited}
                     removeEditedPackageRows={props.removeEditedPackageRows}
+                    removePopups={state.removePopups}
+                    packageCount={props.packageQueue.length}
                   />
                 </div>
               </div>

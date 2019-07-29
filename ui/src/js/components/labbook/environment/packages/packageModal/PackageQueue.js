@@ -1,6 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // components
 import PackageQueueItem from './PackageQueueItem';
 // assets

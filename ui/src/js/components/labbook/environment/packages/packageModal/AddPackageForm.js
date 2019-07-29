@@ -70,7 +70,7 @@ export default class AddPackageForm extends Component {
   *  sets selected package manager
   */
   _setselectedPackageManager = (selectedManager) => {
-    document.getElementById('packageNameInput').focus();
+    this.packageNameInput.focus();
     this.setState({ selectedManager, managerDropdownVisible: false });
 
     if (selectedManager === 'apt') {
@@ -123,8 +123,6 @@ export default class AddPackageForm extends Component {
   */
   _updatePackageVersion = (evt) => {
     const { state } = this;
-
-    // evt.stopPropagation();
 
     if (evt.target.id === 'latest_version') {
       this.setState({ version: '' });
