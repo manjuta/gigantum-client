@@ -17,8 +17,9 @@ class DevTools extends Component {
   state = {
     isMouseOver: false,
     selectedDevTool: (() => {
-      const { owner, name } = this.props.labbook;
-      const defaultFromApi = this.props.labbook.environment.base ? this.props.labbook.environment.base.developmentTools[0] : 'jupyterlab';
+      const { props } = this;
+      const { owner, name } = props.labbook;
+      const defaultFromApi = props.labbook.environment.base ? props.labbook.environment.base.developmentTools[0] : 'jupyterlab';
       const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};
       if (devToolConfig._timestamps && devToolConfig._timestamps[0]) {
         const oldestConfig = devToolConfig._timestamps[0].time;
@@ -35,7 +36,17 @@ class DevTools extends Component {
         }
       }
       if (devToolConfig[owner] && devToolConfig[owner][name]) {
-        return devToolConfig[owner][name];
+        let devToolExists = false;
+        props.labbook.environment.bundledApps.forEach((app) => {
+          if (devToolConfig[owner][name] === app.appName) {
+            devToolExists = true;
+          }
+        });
+        devToolExists = props.labbook.environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1 ? true : devToolExists;
+
+        if (devToolExists) {
+          return devToolConfig[owner][name];
+        }
       }
       return defaultFromApi;
     })(),
