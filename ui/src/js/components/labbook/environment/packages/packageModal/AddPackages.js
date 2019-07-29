@@ -60,11 +60,9 @@ export default class AddPackages extends Component {
         packages: seperatedNewPackages[manager],
         duplicates: duplicates[manager] || [],
       };
-      // if (isLast) {
-      //   props.setBuildingState(true);
-      // }
 
       setBuildingState(true);
+
       const callback = (response) => {
         if (response && isLast) {
           props.buildCallback(buildCb);
