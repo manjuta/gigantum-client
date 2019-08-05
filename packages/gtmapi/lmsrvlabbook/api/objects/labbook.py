@@ -1,4 +1,5 @@
 import graphene
+import time
 import os
 
 from gtmcore.logging import LMLogger
@@ -12,6 +13,7 @@ from gtmcore.workflows import LabbookWorkflow
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
 
+from lmsrvcore.caching import RepoCacheController
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.api.interfaces import GitRepository
 from lmsrvcore.auth.identity import parse_token
@@ -132,13 +134,9 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         return self.id
 
     def resolve_description(self, info):
-        """Get number of commits the active_branch is behind its remote counterpart.
-        Returns 0 if up-to-date or if local only."""
-        if not self.description:
-            return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-                lambda labbook: labbook.description)
-
-        return self.description
+        """Return the description. """
+        r = RepoCacheController()
+        return r.cached_description((get_logged_in_username(), self.owner, self.name))
 
     def resolve_environment(self, info):
         """"""
@@ -235,9 +233,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        # Note! creation_date might be None!!
-        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: labbook.creation_date)
+        r = RepoCacheController()
+        return r.cached_created_time((get_logged_in_username(), self.owner, self.name))
 
     def resolve_modified_on_utc(self, info):
         """Return the modified on timestamp
@@ -250,8 +247,8 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda labbook: labbook.modified_on)
+        r = RepoCacheController()
+        return r.cached_modified_on((get_logged_in_username(), self.owner, self.name))
 
     @staticmethod
     def helper_resolve_default_remote(labbook):

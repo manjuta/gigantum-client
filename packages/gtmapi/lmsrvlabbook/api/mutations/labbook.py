@@ -19,14 +19,10 @@
 # SOFTWARE.
 import base64
 import os
-import shutil
-
-import flask
 import graphene
 
 from gtmcore.container.container import ContainerOperations
 from gtmcore.dispatcher import (Dispatcher, jobs)
-from gtmcore.dataset.manifest import Manifest
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger

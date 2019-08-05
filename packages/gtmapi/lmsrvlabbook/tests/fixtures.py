@@ -25,8 +25,8 @@ import shutil
 import graphene
 from flask import Flask
 import flask
-import json
 import time
+import redis
 from mock import patch
 import responses
 from graphene.test import Client
@@ -37,7 +37,7 @@ from gtmcore.auth.identity import get_identity_manager
 from gtmcore.environment.bundledapp import BundledAppManager
 
 from gtmcore.inventory.inventory import InventoryManager
-from lmsrvcore.middleware import DataloaderMiddleware, error_middleware
+from lmsrvcore.middleware import DataloaderMiddleware, error_middleware, RepositoryCacheMiddleware
 from lmsrvcore.tests.fixtures import insert_cached_identity
 
 from gtmcore.fixtures import (ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, ENV_UNIT_TEST_BASE)
@@ -137,7 +137,7 @@ def fixture_working_dir():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
             # name of the config file, temporary working directory, the schema
             yield config_file, temp_dir, client, schema
 
@@ -177,7 +177,7 @@ def fixture_working_dir_lfs_disabled():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema  # name of the config file, temporary working directory, the schema
 
@@ -216,7 +216,7 @@ def fixture_working_dir_env_repo_scoped():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
 
             # name of the config file, temporary working directory, the schema
             yield config_file, temp_dir, client, schema
@@ -231,6 +231,10 @@ def fixture_working_dir_populated_scoped():
     and populates the environment component repository.
     Class scope modifier attached
     """
+
+    # Flush here to clean out the Repository cache (used to store create/modify dates).
+    redis.Redis(db=7).flushdb()
+
     # Create temp dir
     config_file, temp_dir = _create_temp_work_dir()
 
@@ -283,7 +287,7 @@ def fixture_working_dir_populated_scoped():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema
 
@@ -352,7 +356,7 @@ def fixture_working_dir_dataset_populated_scoped():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema
 
@@ -403,7 +407,7 @@ def fixture_single_dataset():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, ds, cache_mgr
 
@@ -438,7 +442,7 @@ def build_image_for_jupyterlab():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
 
             # Create a labook
             im = InventoryManager(config_file)
