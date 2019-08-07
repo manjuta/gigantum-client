@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 
 import selenium
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 import testutils
 from testutils import graphql_helpers
@@ -69,11 +70,9 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
 
     # Assert project does not exist in cloud tab
     first_cloud_project = cloud_project_elts.first_cloud_project.find().text
-
     assert project_title != first_cloud_project, \
         f"Expected {project_title} to not be the first cloud project in {username}'s Cloud tab, " \
         f"but instead got {first_cloud_project}"
-
 
 def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
     """

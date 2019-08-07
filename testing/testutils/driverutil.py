@@ -132,7 +132,6 @@ class TestRunner:
         delete_project_images()
         delete_projects_on_disk()
 
-        # Delete remote projects
         remote_projects = list_remote_projects()
         for owner, project_name in remote_projects:
             if 'selenium-project-' in project_name:
@@ -141,7 +140,14 @@ class TestRunner:
         remote_datasets = list_remote_datasets()
         for owner, dataset_name in remote_datasets:
             if 'selenium-dataset-' in dataset_name:
-                delete_dataset(owner, dataset_name)
+                # deleting remote datasets is in a try catch block so that the clean
+                # up process will not halt whenthe remote dataset being deleted has
+                # no local copy, which causes the graph ql query to return an error
+                try:
+                    delete_dataset(owner, dataset_name)
+                except Exception as e:
+                    logging.warning(e)
+
         delete_local_datasets()
 
     def _upload_to_s3(self):

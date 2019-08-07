@@ -510,9 +510,10 @@ class DatasetElements(UiComponent):
         """
         logging.info("Publish dataset to cloud")
         self.publish_dataset_button.wait().click()
-        time.sleep(1)
+        # TODO: figure out why this breaks if time.sleep is lowered
+        time.sleep(5)
         self.publish_confirm_button.wait().click()
-        time.sleep(2)
+        time.sleep(10)
         self.sync_button.wait()
         dss = list_remote_datasets()
         owner, name = self.title().text.split('/')
@@ -678,7 +679,7 @@ class CloudProjectElements(UiComponent):
 
     @property
     def first_cloud_project(self):
-        return CssElement(self.driver, ".RemoteLabbooks__panel-title span span")
+        return CssElement(self.driver, ".RemoteLabbooks__panel-title > span > span")
 
     @property
     def import_first_cloud_project_button(self):

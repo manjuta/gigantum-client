@@ -29,6 +29,7 @@ def test_linked_published_dataset_then_publish(driver: selenium.webdriver, *args
     cloud_project_elts = testutils.CloudProjectElements(driver)
     cloud_project_elts.publish_private_project(project_title)
     time.sleep(4)
+    graphql_helpers.delete_dataset(user,ds_name)
 
     # TODO - Use query to affirm that dataset linked properly
 
