@@ -34,7 +34,7 @@ def prep_base(driver, base_button_check, skip_login=False):
     else:
         time.sleep(2)
     proj_name = create_project_without_base(driver)
-    time.sleep(2)
+    time.sleep(5)
     select_project_base(driver, base_button_check())
 
     # assert container status is stopped

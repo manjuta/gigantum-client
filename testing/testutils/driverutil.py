@@ -97,8 +97,9 @@ class TestRunner:
             self._save_screenshot(driver, 'FAIL', e, test_method)
         finally:
             try:
+
                 driver.get(f"{os.environ['GIGANTUM_HOST']}/api/ping")
-                driver.execute_script(f'alert("{test_method.__name__} -- cleaning up");')
+
                 self._cleanup(driver)
             except Exception as e:
                 logging.error(f"Error cleaning up: {e}")

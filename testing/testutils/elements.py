@@ -220,7 +220,7 @@ class EnvironmentElements(UiComponent):
 
     @property
     def package_name_input(self):
-        return CssElement(self.driver, "#packageNameInput")
+        return CssElement(self.driver, "input:nth-child(2)")
 
     @property
     def version_name_input(self):
@@ -228,11 +228,11 @@ class EnvironmentElements(UiComponent):
 
     @property
     def add_button(self):
-        return CssElement(self.driver,".AddPackageForm__entry-buttons")
+        return CssElement(self.driver, ".Btn__add")
 
     @property
     def install_packages_button(self):
-        return CssElement(self.driver, ".PackageQueue__buttons")
+        return CssElement(self.driver, ".PackageQueue__buttons > .Btn:nth-child(2)")
 
     @property
     def package_info_table_version_one(self):
@@ -275,75 +275,63 @@ class EnvironmentElements(UiComponent):
         return CssElement(self.driver, ".align-self--end:nth-child(3)")
 
     @property
+    def specify_version_button(self):
+        return CssElement(self.driver, ".align-self--center")
+
+    @property
+    def specify_version_textbox(self):
+        return CssElement(self.driver, "input:nth-child(3)")
+
+    @property
     def advanced_configuration_button(self):
         return CssElement(self.driver, ".Btn__advanced")
 
-    def get_all_versions(self):
-        versions=[]
-        versions.append(self.package_info_table_version_one.wait().text)
-        versions.append(self.package_info_table_version_two.wait().text)
-        versions.append(self.package_info_table_version_three.wait().text)
-        versions.reverse()
-        return versions
+    def specify_package_version(self, version):
+        self.specify_version_textbox.click()
+        self.specify_version_textbox.find().send_keys(version)
 
-    def add_pip_packages(self, *pip_packages):
-        logging.info("Adding pip packages")
+    def open_add_packages_window(self):
         self.environment_tab_button.wait().click()
         self.driver.execute_script("window.scrollBy(0, -400);")
         self.driver.execute_script("window.scrollBy(0, 400);")
         self.add_packages_button.wait().click()
-        for pip_pack in pip_packages:
-            logging.info(f"Adding pip package {pip_pack}")
-            self.package_name_input.find().send_keys(pip_pack)
-            self.add_button.wait().click()
-        # Added sleep to wait for packages to finish validating
-        time.sleep(6)
-        self.install_packages_button.wait(10).click()
-        self.close_install_window.wait().click()
-        time.sleep(1)
-        project_control = ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(120)
 
-    def add_conda_packages(self, *conda_packages):
-        logging.info("Adding conda packages")
-        self.environment_tab_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, -400);")
-        self.driver.execute_script("window.scrollBy(0, 400);")
-        self.add_packages_button.wait().click()
+    def add_pip_package(self, pip_package, version):
+        logging.info(f"Adding pip package {pip_package}")
+        self.package_name_input.find().send_keys(pip_package)
+        self.specify_package_version(version)
+        self.add_button.wait().click()
+
+    def add_conda_package(self, conda_package, version):
         self.package_manager_dropdown.wait().click()
         self.conda_package_manager_dropdown.wait().click()
-        for con_pack in conda_packages:
-            logging.info(f"Adding conda package {con_pack}")
-            self.package_name_input.find().send_keys(con_pack)
-            self.add_button.wait().click()
-        # conda packages tend to take longer to validate than pip
-        time.sleep(10)
-        self.install_packages_button.wait(10).click()
-        self.close_install_window.wait().click()
-        time.sleep(1)
-        project_control = ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(240)
+        logging.info(f"Adding conda package {conda_package}")
+        self.package_name_input.find().send_keys(conda_package)
+        self.specify_package_version(version)
+        self.add_button.wait().click()
 
-    '''Timing should be adjusted before use
-     should be reintroduced when apt functions properly
-    def add_apt_packages(self, *apt_packages):
-        logging.info("Adding conda packages")
-        self.environment_tab_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, -400);")
-        self.driver.execute_script("window.scrollBy(0, 400);")
-        self.add_packages_button.wait().click()
+    def add_apt_package(self, apt_package):
         self.package_manager_dropdown.wait().click()
-        self.conda_package_manager_dropdown.wait().click()
-        for con_pack in con_packages:
-            logging.info(f"Adding conda package {con_pack}")
-            self.package_name_input.find().send_keys(con_pack)
-            self.add_button.wait().click()
-        time.sleep(10)
-        self.install_packages_button.wait(10).click()
+        self.apt_package_manager_dropdown.wait().click()
+        logging.info(f"Adding apt package {apt_package}")
+        self.package_name_input.find().send_keys(apt_package)
+        self.add_button.wait().click()
+
+    def install_queued_packages(self, timeout_sec):
+        logging.info('Waiting for packages to validate')
+        for i in range(timeout_sec):
+            time.sleep(1)
+            content = self.driver.find_element_by_css_selector('.PackageQueue__buttons > .Btn:nth-child(2)')
+            if content.is_enabled():
+                break
+        else:
+            logging.error('Packages took too long to validate')
+            raise NoSuchElementException('Packages took too long to validate')
+        logging.info('Installing packages')
+        self.install_packages_button.click()
         self.close_install_window.wait().click()
-        container_elts = ContainerElements(self.driver)
-        container_elts.container_status_stopped.wait(60)
-    '''
+        project_control = ProjectControlElements(self.driver)
+        project_control.container_status_stopped.wait(timeout_sec)
 
     def add_custom_docker_instructions(self, docker_instruction):
         logging.info("Adding custom Docker instruction")
@@ -510,7 +498,7 @@ class DatasetElements(UiComponent):
 
     @property
     def sync_button(self):
-        return CssElement(self.driver, 'button[data-tooltip="Sync"]')
+        return CssElement(self.driver, 'button[data-tooltip="Sync changes to Gigantum Hub"]')
 
     @property
     def publish_confirm_button(self):
@@ -670,7 +658,7 @@ class CloudProjectElements(UiComponent):
 
     @property
     def sync_cloud_project_message(self):
-        return CssElement(self.driver, ".Footer__message-item>p")
+        return CssElement(self.driver, ".FooterMessage:nth-child(2) .FooterMessage__title")
 
     @property
     def delete_cloud_project_button(self):

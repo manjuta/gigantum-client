@@ -47,7 +47,7 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     file_browser_elts = testutils.FileBrowserElements(driver)
     file_browser_elts.drag_drop_file_in_drop_zone()
     cloud_project_elts.sync_cloud_project(project_title)
-
+    time.sleep(2)
     assert "Sync complete" in cloud_project_elts.sync_cloud_project_message.find().text, \
         "Expected 'Sync complete' in footer"
 
