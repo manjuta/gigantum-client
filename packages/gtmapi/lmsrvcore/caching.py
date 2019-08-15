@@ -1,5 +1,6 @@
 import redis
 import datetime
+from abc import ABC, abstractmethod
 from typing import Tuple, Optional
 
 from gtmcore.logging import LMLogger
@@ -8,55 +9,9 @@ from gtmcore.inventory.inventory import InventoryManager
 logger = LMLogger.get_logger()
 
 
-class RepoCacheController:
-    """
-    This class represents an interface to the cache that stores specific
-    repository fields (modified time, created time, description). The
-    `cached_*` methods retrieve the given fields, and insert it into the cache
-    if needed to be re-fetched.
-    """
-    def __init__(self):
-        self.db = redis.StrictRedis(db=7)
-
-    @staticmethod
-    def _make_key(id_tuple: Tuple[str, str, str]) -> str:
-        return '&'.join(['MODIFY_CACHE', *id_tuple])
-
-    def cached_modified_on(self, id_tuple: Tuple[str, str, str]) -> datetime.datetime:
-        """ Retrieves the "modified_on" field of the given repository identified by `id_tuple`
-        Args:
-            id_tuple: Fields needed to uniqely identify this repository
-        Returns:
-            modified_on field, from cache if possible
-        """
-        return RepoCacheEntry(self.db, self._make_key(id_tuple)).modified_on
-
-    def cached_created_time(self, id_tuple: Tuple[str, str, str]) -> datetime.datetime:
-        """ Retrieves the "created_time" field of the given repository identified by `id_tuple`
-        Args:
-            id_tuple: Fields needed to uniqely identify this repository
-        Returns:
-            modified_on field, from cache if possible
-        """
-        return RepoCacheEntry(self.db, self._make_key(id_tuple)).created_time
-
-    def cached_description(self, id_tuple: Tuple[str, str, str]) -> str:
-        """ Retrieves the description field of the given repository identified by `id_tuple`
-        Args:
-            id_tuple: Fields needed to uniqely identify this repository
-        Returns:
-            description field, from cache if possible
-        """
-        return RepoCacheEntry(self.db, self._make_key(id_tuple)).description
-
-    def clear_entry(self, id_tuple: Tuple[str, str, str]) -> None:
-        """ Flush this entry from the cache - ie indicate it is stale """
-        RepoCacheEntry(self.db, self._make_key(id_tuple)).clear()
-
-
-class RepoCacheEntry:
+class RepoCacheEntry(ABC):
     """ Represents a specific entry in the cache for a specific Repository """
-    
+
     # Entries become stale after 24 hours
     REFRESH_PERIOD_SEC = 60 * 60 * 24
 
@@ -70,16 +25,17 @@ class RepoCacheEntry:
     @staticmethod
     def _extract_id(key_value: str) -> Tuple[str, str, str]:
         token, user, owner, name = key_value.rsplit('&', 3)
-        assert token == 'MODIFY_CACHE'
         return user, owner, name
+
+    @abstractmethod
+    def _load_repo(self) -> Tuple[datetime.datetime, datetime.datetime, str]:
+        """This contains methods for retrieving description, modified time, and created time."""
+        raise NotImplemented
 
     def fetch_cachable_fields(self) -> Tuple[datetime.datetime, datetime.datetime, str]:
         logger.debug(f"Fetching {self.key} fields from disk.")
         self.clear()
-        lb = InventoryManager().load_labbook(*self._extract_id(self.key))
-        create_ts = lb.creation_date
-        modify_ts = lb.modified_on
-        description = lb.description
+        create_ts, modify_ts, description = self._load_repo()
         self.db.hset(self.key, 'description', description)
         self.db.hset(self.key, 'creation_date', modify_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
         self.db.hset(self.key, 'modified_on', modify_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
@@ -131,3 +87,78 @@ class RepoCacheEntry:
         """Remove this entry from the Redis cache. """
         logger.warning(f"Flushing cache entry for {self}")
         self.db.hdel(self.key, 'creation_date', 'modified_on', 'last_cache_update', 'description')
+
+
+class LabbookCacheEntry(RepoCacheEntry):
+    def _load_repo(self) -> Tuple[datetime.datetime, datetime.datetime, str]:
+        lb = InventoryManager().load_labbook(*self._extract_id(self.key))
+        return lb.creation_date, lb.modified_on, lb.description
+
+
+class DatasetCacheEntry(RepoCacheEntry):
+    def _load_repo(self) -> Tuple[datetime.datetime, datetime.datetime, str]:
+        ds = InventoryManager().load_dataset(*self._extract_id(self.key))
+        return ds.creation_date, ds.modified_on, ds.description
+
+
+class RepoCacheController(ABC):
+    """
+    This class represents an interface to the cache that stores specific
+    repository fields (modified time, created time, description). The
+    `cached_*` methods retrieve the given fields, and insert it into the cache
+    if needed to be re-fetched.
+    """
+    def __init__(self, cache_token: str, cache_entry_type):
+        """ Note: Intended to be a PRIVATE constructor"""
+        self.db = redis.StrictRedis(db=7)
+        self.cache_token = cache_token
+        self.cache_entry_type = cache_entry_type
+
+    def _make_key(self, id_tuple: Tuple[str, str, str]) -> str:
+        return '&'.join([self.cache_token, *id_tuple])
+
+    def cached_modified_on(self, id_tuple: Tuple[str, str, str]) -> datetime.datetime:
+        """ Retrieves the "modified_on" field of the given repository identified by `id_tuple`
+        Args:
+            id_tuple: Fields needed to uniqely identify this repository
+        Returns:
+            modified_on field, from cache if possible
+        """
+        return self.cache_entry_type(self.db, self._make_key(id_tuple)).modified_on
+
+    def cached_created_time(self, id_tuple: Tuple[str, str, str]) -> datetime.datetime:
+        """ Retrieves the "created_time" field of the given repository identified by `id_tuple`
+        Args:
+            id_tuple: Fields needed to uniqely identify this repository
+        Returns:
+            modified_on field, from cache if possible
+        """
+        return self.cache_entry_type(self.db, self._make_key(id_tuple)).created_time
+
+    def cached_description(self, id_tuple: Tuple[str, str, str]) -> str:
+        """ Retrieves the description field of the given repository identified by `id_tuple`
+        Args:
+            id_tuple: Fields needed to uniqely identify this repository
+        Returns:
+            description field, from cache if possible
+        """
+        return self.cache_entry_type(self.db, self._make_key(id_tuple)).description
+
+    def clear_entry(self, id_tuple: Tuple[str, str, str]) -> None:
+        """ Flush this entry from the cache - ie indicate it is stale """
+        self.cache_entry_type(self.db, self._make_key(id_tuple)).clear()
+
+    def clear_all(self):
+        self.db.flushdb()
+
+
+class LabbookCacheController(RepoCacheController):
+    """Cache-manager for Labbooks"""
+    def __init__(self):
+        super().__init__('LABBOOK_CACHE', LabbookCacheEntry)
+
+
+class DatasetCacheController(RepoCacheController):
+    """Cache-manager for Datasets"""
+    def __init__(self):
+        super().__init__('DATASET_CACHE', DatasetCacheEntry)

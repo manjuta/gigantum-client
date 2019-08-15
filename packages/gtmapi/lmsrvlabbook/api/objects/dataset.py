@@ -4,6 +4,7 @@ import math
 import flask
 from gtmcore.activity import ActivityStore
 
+from lmsrvcore.caching import DatasetCacheController
 from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitRepository
@@ -11,6 +12,7 @@ from lmsrvcore.api.interfaces import GitRepository
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions, GitLabException
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.logging import LMLogger
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.branching import BranchManager
 
@@ -21,7 +23,6 @@ from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityReco
 from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 from lmsrvlabbook.api.objects.overview import DatasetOverview
 
-from gtmcore.logging import LMLogger
 logger = LMLogger.get_logger()
 
 
@@ -128,11 +129,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     def resolve_description(self, info):
         """Get number of commits the active_branch is behind its remote counterpart.
         Returns 0 if up-to-date or if local only."""
-        if not self.description:
-            return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-                lambda dataset: dataset.description)
-
-        return self.description
+        r = DatasetCacheController()
+        return r.cached_description((get_logged_in_username(), self.owner, self.name))
 
     def resolve_schema_version(self, info):
         """Get number of commits the active_branch is behind its remote counterpart.
@@ -149,8 +147,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda dataset: dataset.creation_date)
+        r = DatasetCacheController()
+        return r.cached_created_time((get_logged_in_username(), self.owner, self.name))
 
     def _fetch_collaborators(self, dataset, info):
         """Helper method to fetch this dataset's collaborators
@@ -257,8 +255,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda dataset: dataset.modified_on)
+        r = DatasetCacheController()
+        return r.cached_modified_on((get_logged_in_username(), self.owner, self.name))
 
     def helper_resolve_activity_records(self, dataset, kwargs):
         """Helper method to generate ActivityRecord objects and populate the connection"""
