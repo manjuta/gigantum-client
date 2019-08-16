@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { boundMethod } from 'autobind-decorator';
 import isEqual from 'react-fast-compare';
 // mutations
 import FileBrowser from 'Components/shared/fileBrowser/FileBrowser';
@@ -64,14 +63,13 @@ class SectionBrowser extends Component {
   }
 
 
-  /*
+  /**
     @param {}
     triggers relay pagination function loadMore
     increments by 100
     logs callback
   */
-  @boundMethod
-  _loadMore() {
+  _loadMore = () => {
     const { props } = this;
     const self = this;
     this.setState({ moreLoading: true });

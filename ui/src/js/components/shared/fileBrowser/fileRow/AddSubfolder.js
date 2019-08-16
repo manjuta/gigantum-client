@@ -1,40 +1,33 @@
+// @flow
+// vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { DragSource, DropTarget } from 'react-dnd';
-import { NativeTypes } from 'react-dnd-html5-backend';
-// components
-import Connectors from '../utilities/Connectors';
 // assets
 import './AddSubfolder.scss';
 
 
 class AddSubfolder extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      editMode: false,
-      folderName: '',
-    };
-
-    this._clickedOffInput = this._clickedOffInput.bind(this);
+  state = {
+    editMode: false,
+    folderName: '',
   }
 
   componentDidMount() {
     window.addEventListener('click', this._clickedOffInput);
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('click', this._clickedOffInput);
-  }
-
   /*
     sets auto focus on visibility change
   */
   componentDidUpdate() {
-    if (this.props.addFolderVisible) {
+    const { props } = this;
+    if (props.addFolderVisible) {
       this.subfolderInput.focus();
     }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._clickedOffInput);
   }
 
   /**
@@ -42,12 +35,14 @@ class AddSubfolder extends Component {
   *  clears state on click other subfolders
   *  @return {}
   */
-  _clickedOffInput(evt) {
-    if (evt.target.getAttribute('data-click-id') !== 'addFolder'
-      && (this.props.addFolderVisible || this.props.addFolderVisible === undefined)) {
+  _clickedOffInput = (evt) => {
+    const { props } = this;
+    if ((evt.target.getAttribute('data-click-id') !== 'addFolder')
+      && (props.addFolderVisible || (props.addFolderVisible === undefined))) {
       this._clearState();
-      if (this.props.setAddFolderVisible) {
-        this.props.setAddFolderVisible(false);
+
+      if (props.setAddFolderVisible) {
+        props.setAddFolderVisible(false);
       }
     }
   }
@@ -58,7 +53,7 @@ class AddSubfolder extends Component {
   *  sets state on a boolean value
   *  @return {}
   */
-  _updateStateBoolean(key, value) {
+  _updateStateBoolean = (key, value) => {
     this.setState({
       [key]: value,
     }, () => {
@@ -73,7 +68,7 @@ class AddSubfolder extends Component {
   *  triggers clear on escape
   *  @return {}
   */
-  _updateFolderName(evt) {
+  _updateFolderName = (evt) => {
     this.setState({
       folderName: evt.target.value,
     });
@@ -92,7 +87,7 @@ class AddSubfolder extends Component {
   *  sets state on a boolean value
   *  @return {}
   */
-  _clearState() {
+  _clearState = () => {
     this.setState({
       folderName: '',
       editMode: false,
@@ -108,7 +103,7 @@ class AddSubfolder extends Component {
   *  sets state on a boolean value
   *  @return {}
   */
-  _clearInput() {
+  _clearInput = () => {
     this.setState({
       folderName: '',
     });
@@ -121,41 +116,41 @@ class AddSubfolder extends Component {
   *  trigger MakeLabbookDirectoryMutation
   *  @return {}
   */
-  _triggerMutation() {
+  _triggerMutation = () => {
+    const { props, state } = this;
     const data = {
-      key: this.props.folderKey + this.state.folderName,
+      key: props.folderKey + state.folderName,
     };
 
-    this.props.mutations.makeLabbookDirectory(data, (response) => {
+    props.mutations.makeLabbookDirectory(data, () => {
       this._clearState();
-      if (this.props.setAddFolderVisible) {
-        this.props.setAddFolderVisible(false);
+      if (props.setAddFolderVisible) {
+        props.setAddFolderVisible(false);
       }
     });
   }
 
   render() {
+    const { props, state } = this;
+
+    // decalre css here
     const subfolderInputCSS = classNames({
       'AddSubfolder__edit Input--clear': true,
-      hidden: !this.state.editMode && !this.props.addFolderVisible,
+      hidden: !state.editMode && !props.addFolderVisible,
     });
-
-
     const addFolderCSS = classNames({
       AddSubfolder: true,
-      hidden: !this.props.addFolderVisible,
+      hidden: !props.addFolderVisible,
     });
-
-
     const subfolderTextCSS = classNames({
       AddSubfolder__text: true,
-      hidden: (this.state.editMode) || this.props.addFolderVisible,
+      hidden: (state.editMode) || props.addFolderVisible,
     });
 
     return (
       <div
         onClick={() => { this._updateStateBoolean('editMode', true); }}
-        style={this.props.rowStyle}
+        style={props.rowStyle}
         className={addFolderCSS}
       >
         <div className={subfolderTextCSS}>
@@ -170,25 +165,28 @@ class AddSubfolder extends Component {
               className="AddSubfolder__input"
               onKeyUp={(evt) => { this._updateFolderName(evt); }}
             />
-            { (this.state.folderName.length > 0)
-                   && (
-                   <button
-                     className="Btn--noShadow Btn Btn--flat"
-                     onClick={() => { this._clearInput(); }}
-                   >
-                     Clear
-                   </button>
-                   )
-                 }
+            { (state.folderName.length > 0)
+              && (
+                <button
+                  type="button"
+                  className="Btn--noShadow Btn Btn--flat"
+                  onClick={() => { this._clearInput(); }}
+                >
+                  Clear
+                </button>
+              )
+            }
           </div>
           <div className="flex justify--space-around">
             <button
+              type="button"
               className="File__btn--round File__btn--cancel"
-              onClick={(evt) => { this._clearInput(); }}
+              onClick={() => { this._clearInput(); }}
             />
             <button
+              type="button"
               className="File__btn--round File__btn--add"
-              onClick={(evt) => { this._triggerMutation(); }}
+              onClick={() => { this._triggerMutation(); }}
             />
           </div>
         </div>

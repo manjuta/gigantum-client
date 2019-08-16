@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
-import Auth from 'JS/Auth/Auth';
-import { boundMethod } from 'autobind-decorator';
 import {
   BrowserRouter as Router,
   Route,
@@ -24,6 +22,7 @@ import Loader from 'Components/common/Loader';
 import config from 'JS/config';
 // auth
 import UserIdentity from 'JS/Auth/UserIdentity';
+import Auth from 'JS/Auth/Auth';
 // assets
 import './Routes.scss';
 
@@ -47,22 +46,16 @@ const DatasetQueryContainer = Loadable({
 
 
 class Routes extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hasError: false,
-      forceLoginScreen: null,
-      loadingRenew: true,
-      userIdentityReturned: false,
-      showYT: false,
-      showDefaultMessage: true,
-      diskLow: false,
-      available: 0,
-    };
-
-    this._setForceLoginScreen = this._setForceLoginScreen.bind(this);
-    this._flipDemoHeaderText = this._flipDemoHeaderText.bind(this);
-  }
+  state = {
+    hasError: false,
+    forceLoginScreen: null,
+    loadingRenew: true,
+    userIdentityReturned: false,
+    showYT: false,
+    showDefaultMessage: true,
+    diskLow: false,
+    available: 0,
+  };
 
   /**
     @param {}
@@ -128,7 +121,7 @@ class Routes extends Component {
     @param {}
     changes text of demo header message
   */
-  _flipDemoHeaderText() {
+  _flipDemoHeaderText = () => {
     const { state } = this;
     const self = this;
     setTimeout(() => {
@@ -141,8 +134,7 @@ class Routes extends Component {
     @param{}
     logs user out in using auth0
   */
-  login() {
-    const { props } = this;
+  login = () => {
     auth.login();
   }
 
@@ -150,8 +142,7 @@ class Routes extends Component {
     @param{}
     logs user out using auth0
   */
-  logout() {
-    const { props } = this;
+  logout = () => {
     auth.logout();
   }
 
@@ -159,7 +150,7 @@ class Routes extends Component {
     @param {boolean} forceLoginScreen
     sets state of forceloginscreen
   */
-  _setForceLoginScreen(forceLoginScreen) {
+  _setForceLoginScreen = (forceLoginScreen) => {
     const { state } = this;
     if (forceLoginScreen !== state.forceLoginScreen) {
       this.setState({ forceLoginScreen });
@@ -169,8 +160,7 @@ class Routes extends Component {
   /**
     hides disk warning
   */
-  @boundMethod
-  _hideDiskWarning() {
+  _hideDiskWarning = () => {
     window.sessionStorage.setItem('hideDiskWarning', true);
     this.forceUpdate();
   }
@@ -178,16 +168,20 @@ class Routes extends Component {
   /**
     shows sysinfo header if available size is too small
   */
-  _checkSysinfo() {
-    const apiHost = process.env.NODE_ENV === 'development' ? 'localhost:10000' : window.location.host;
+  _checkSysinfo = () => {
+    // TODO move to utils file
+
+    const apiHost = (process.env.NODE_ENV === 'development')
+      ? 'localhost:10000'
+      : window.location.host;
     const self = this;
     const url = `${window.location.protocol}//${apiHost}${process.env.SYSINFO_API}`;
     setTimeout(self._checkSysinfo.bind(this), 60 * 1000);
     return fetch(url, {
       method: 'GET',
       headers: {
-          'Content-Type': 'application/json',
-          accept: '*/*',
+        'Content-Type': 'application/json',
+        accept: '*/*',
       },
     }).then((response) => {
       if (response.status === 200 && (response.headers.get('content-type') === 'application/json')) {

@@ -5,23 +5,28 @@ import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import isEqual from 'react-fast-compare';
-import { boundMethod } from 'autobind-decorator';
 // assets
 import './FileBrowser.scss';
 // components
-import Modal from 'Components/common/Modal';
 import LinkModal from './LinkModal';
+import AddSubfolder from './fileRow/AddSubfolder';
+import FileSizePromptModal from './FileSizePromptModal';
+import FileBrowserToolbar from './FileBrowserToolbar';
+import FileBrowserTools from './FileBrowserTools';
 import File from './fileRow/File';
 import Folder from './fileRow/Folder';
 import Datasets from './fileRow/dataset/Datasets';
-import AddSubfolder from './fileRow/AddSubfolder';
 // util
 import prepareUpload from './utilities/PrepareUpload';
 import FileBrowserMutations from './utilities/FileBrowserMutations';
 import Connectors from './utilities/Connectors';
 import FileFormatter, { fileHandler } from './utilities/FileFormatter';
 
-
+/**
+  *  @param {Array} files
+  *  checks if all files are local
+  *  @return {Boolean}
+  */
 const checkLocalAll = (files) => {
   let isLocal = true;
   Object.keys(files).forEach((fileKey) => {
@@ -37,7 +42,11 @@ const checkLocalAll = (files) => {
   return isLocal;
 };
 
-
+/**
+  *  @param {Array} files
+  *  checks if a file object is local and it's children
+  *  @return {Boolean}
+  */
 const checkLocalIndividual = (files) => {
   if (files) {
     let isLocal = true;
@@ -65,10 +74,28 @@ const checkLocalIndividual = (files) => {
   return true;
 };
 
+/**
+  *  @param {Object} props
+  *  @param {Object} state
+  *  gets a download list of files from linked dataset
+  *  @return {Array}
+  */
+const getDownloadList = (props, state) => {
+  const downloadList = [];
+  if (props.section === 'data') {
+    Object.keys(state.childrenState).forEach((key) => {
+      if (state.childrenState[key].isSelected && !state.childrenState[key].edge.node.isLocal) {
+        downloadList.push(state.childrenState[key].edge.node.key);
+      }
+    });
+  }
+
+  return downloadList;
+};
+
 class FileBrowser extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       mutations: new FileBrowserMutations(this._getMutationData()),
       mutationData: this._getMutationData(),
@@ -235,6 +262,7 @@ class FileBrowser extends Component {
     }
     const files = this.props.files.edges;
     const { linkedDatasets } = this.props;
+
     this.fileHandler.postMessage({
       files,
       linkedDatasets,
@@ -266,19 +294,17 @@ class FileBrowser extends Component {
     *  refetches relay connection
     *  @return {}
     */
-  @boundMethod
-  _refetch() {
-    const { relay } = this.props;
-    this.setState({ isRefetching: true })
+  _refetch = () => {
+    const { relay, loadMore } = this.props;
+    this.setState({ isRefetching: true });
+
     relay.refetchConnection(
       100,
       (response, error) => {
-
         if (error) {
           console.log(error);
         }
-
-        this.props.loadMore();
+        loadMore();
       },
     );
   }
@@ -288,8 +314,11 @@ class FileBrowser extends Component {
     *  handles downloading all files in data-filebrowser
     *  @return {}
     */
-  _handleDownloadAll(allFilesLocal) {
-    if (!this.state.downloadingAll && !allFilesLocal) {
+  _handleDownloadAll = (allFilesLocal) => {
+    const { state } = this;
+    const { downloadDatasetFiles } = state.mutations;
+
+    if (!state.downloadingAll && !allFilesLocal) {
       const { owner, labbookName } = store.getState().routes;
       const data = {
         owner,
@@ -309,7 +338,8 @@ class FileBrowser extends Component {
         }
       };
       this.setState({ downloadingAll: true });
-      this.state.mutations.downloadDatasetFiles(data, callback);
+
+      downloadDatasetFiles(data, callback);
     }
   }
 
@@ -321,24 +351,33 @@ class FileBrowser extends Component {
     *  @param {boolean} isAddingFolder - update if the value is incomplete
     *  @return {}
     */
-  _updateChildState = (key, isSelected, isIncomplete, isExpanded, isAddingFolder) => {
-    let multiCount = 0;
-    let multiSelect;
+  _updateChildState = (
+    key,
+    isSelected,
+    isIncomplete,
+    isExpanded,
+    isAddingFolder,
+  ) => {
     const { state, props } = this;
     const { childrenState } = state;
+    const childrenStateKeys = Object.keys(childrenState);
+    let multiCount = 0;
+    let multiSelect;
+
+
     childrenState[key].isSelected = isSelected;
     childrenState[key].isIncomplete = isIncomplete;
     childrenState[key].isExpanded = isExpanded;
     childrenState[key].isAddingFolder = isAddingFolder;
 
-    Object.keys(childrenState).forEach((childKey) => {
+    childrenStateKeys.forEach((childKey) => {
       if (childrenState[childKey].isSelected) {
         multiCount += 1;
       }
     });
 
     multiSelect = (multiCount >= props.files.edges.length) ? 'all' : 'partial';
-    multiSelect = multiCount === 0 ? 'none' : multiSelect;
+    multiSelect = (multiCount === 0) ? 'none' : multiSelect;
 
     this.setState({ childrenState, multiSelect });
   }
@@ -349,8 +388,7 @@ class FileBrowser extends Component {
     *  update state of component for a given key value pair
     *  @return {}
     */
-  @boundMethod
-  _setState(key, value) {
+  _setState = (key, value) => {
     this.setState({ [key]: value });
   }
 
@@ -359,7 +397,7 @@ class FileBrowser extends Component {
   *  sorts files into an object for rendering
   *  @return {object}
   */
-  _getMutationData() {
+  _getMutationData = () => {
     const {
       parentId,
       connection,
@@ -381,7 +419,7 @@ class FileBrowser extends Component {
   *  triggers favoirte unfavorite mutation
   *  @return {}
   */
-  _togglePopup(popupVisible) {
+  _togglePopup = (popupVisible) => {
     this.setState({ popupVisible });
   }
 
@@ -401,7 +439,7 @@ class FileBrowser extends Component {
     Object.keys(state.childrenState).forEach((key) => {
 
       if (state.childrenState[key].isSelected) {
-        const { edge } = this.state.childrenState[key];
+        const { edge } = state.childrenState[key];
         delete this.state.childrenState[key];
         if (edge.node.isDir) {
           deletedKeys.push(key);
@@ -415,7 +453,7 @@ class FileBrowser extends Component {
       }
     });
 
-    Object.keys(this.state.childrenState).forEach((key) => {
+    Object.keys(state.childrenState).forEach((key) => {
       deletedKeys.forEach((deletedKey) => {
         if (key.startsWith(deletedKey) && this.state.childrenState[key]) {
           const { edge } = this.state.childrenState[key];
@@ -440,18 +478,18 @@ class FileBrowser extends Component {
   }
 
   /**
-  *  @param {Array} toDownload
+  *  @param {Array} downloadList
   *  loops through selcted files and downloads them
   *  @return {}
   */
-  _downloadSelectedFiles = (toDownload) => {
+  _downloadSelectedFiles = (downloadList) => {
     const { state, props } = this;
-    const { owner } = props;
-    const datasetName = props.name;
+    const { downloadDatasetFiles } = state.mutations;
+    const { owner, name } = props;
     const data = {
       owner,
-      datasetName,
-      keys: toDownload,
+      datasetName: name,
+      keys: downloadList,
     };
 
     data.successCall = () => {
@@ -467,8 +505,8 @@ class FileBrowser extends Component {
       }
     };
 
-    this.setState({ downloadingEdges: new Set(toDownload) });
-    state.mutations.downloadDatasetFiles(data, callback);
+    this.setState({ downloadingEdges: new Set(downloadList) });
+    downloadDatasetFiles(data, callback);
   }
 
   /**
@@ -476,14 +514,16 @@ class FileBrowser extends Component {
   *  selects all or unselects files
   *  @return {}
   */
-  _selectFiles() {
+  _selectFiles = () => {
     const { state } = this;
+    const { childrenState } = state;
     const count = Object.keys(state.childrenState).length;
+    const childrenStateKeys = Object.keys(state.childrenState);
 
     let multiSelect = (count === state.selectedCount) ? 'none' : 'all';
-    const { childrenState } = this.state;
     let isSelectedCount = 0;
-    Object.keys(state.childrenState).forEach((key) => {
+
+    childrenStateKeys.forEach((key) => {
       if (childrenState[key]) {
         const isSelected = (childrenState[key].edge.node.key !== 'untracked/') && (multiSelect === 'all');
         childrenState[key].isSelected = isSelected;
@@ -495,6 +535,7 @@ class FileBrowser extends Component {
     });
 
     multiSelect = (isSelectedCount > 0) ? multiSelect : 'none';
+
     this.setState({ multiSelect, childrenState });
   }
 
@@ -504,7 +545,7 @@ class FileBrowser extends Component {
   *  triggers delete muatation
   *  @return {}
   */
-  _deleteMutation(filePaths, edges) {
+  _deleteMutation = (filePaths, edges) => {
     const { state } = this;
     const data = {
       filePaths,
@@ -529,7 +570,7 @@ class FileBrowser extends Component {
   *  updates boolean state of a given key
   *  @return {}
   */
-  _updateStateBoolean(key, value) {
+  _updateStateBoolean = (key, value) => {
     this.setState({ [key]: value });
   }
 
@@ -538,12 +579,12 @@ class FileBrowser extends Component {
   *  checks if folder refs has props.isOver === true
   *  @return {boolean} isSelected - returns true if a child has been selected
   */
-  @boundMethod
-  _checkChildState() {
+  _checkChildState = () => {
     const { state } = this;
+    const childrenStateKeys = Object.keys(state.childrenState);
     let isSelected = false;
 
-    Object.keys(state.childrenState).forEach((key) => {
+    childrenStateKeys.forEach((key) => {
       if (state.childrenState[key].isSelected) {
         isSelected = true;
       }
@@ -557,7 +598,7 @@ class FileBrowser extends Component {
   *  update state
   *  @return {}
   */
-  _updateSearchState(evt) {
+  _updateSearchState = (evt) => {
     this.setState({ search: evt.target.value });
   }
 
@@ -566,8 +607,7 @@ class FileBrowser extends Component {
   *  update state to update drop zone
   *  @return {}
   */
-  @boundMethod
-  _updateDropZone(isOverChildFile) {
+  _updateDropZone = (isOverChildFile) => {
     this.setState({ isOverChildFile });
   }
 
@@ -580,14 +620,14 @@ class FileBrowser extends Component {
   *  returns sorted children
   *  @return {}
   */
-  _childSort(array, type, reverse, children, section) {
+  _childSort = (array, type, reverse, children, section) => {
+    const { props } = this;
     array.sort((a, b) => {
-      const isAUntracked = (a === 'untracked') && (section === 'folder') && (this.props.section === 'output');
-      const isBUntracked = (b === 'untracked') && (section === 'folder') && (this.props.section === 'output');
+      const isAUntracked = (a === 'untracked') && (section === 'folder') && (props.section === 'output');
+      const isBUntracked = (b === 'untracked') && (section === 'folder') && (props.section === 'output');
       let lowerA;
-
-
       let lowerB;
+
       if ((type === 'az') || ((type === 'size') && (section === 'folder'))) {
         lowerA = a.toLowerCase();
         lowerB = b.toLowerCase();
@@ -614,8 +654,8 @@ class FileBrowser extends Component {
   *  handles state changes for type
   *  @return {}
   */
-  _handleSort(type) {
-    const { state } = this
+  _handleSort = (type) => {
+    const { state } = this;
     if (type === state.sort) {
       this.setState({ reverse: !state.reverse });
     } else {
@@ -628,8 +668,7 @@ class FileBrowser extends Component {
   *  show modal to prompt user to continue upload or not
   *  @return {}
   */
-  @boundMethod
-  _promptUserToAcceptUpload() {
+  _promptUserToAcceptUpload = () => {
     this.setState({ fileSizePromptVisible: true });
   }
 
@@ -649,8 +688,7 @@ class FileBrowser extends Component {
   *                                 10MB and 100MB and require the user to confirm
   *  @return {}
   */
-  @boundMethod
-  _fileSizePrompt(fileSizeData, uploadCallback) {
+  _fileSizePrompt = (fileSizeData, uploadCallback) => {
     this.setState({
       uploadData: {
         uploadCallback,
@@ -666,13 +704,13 @@ class FileBrowser extends Component {
   *  creates a file using AddLabbookFileMutation by passing a blob
   *  set state of user prompt modal
   */
-  @boundMethod
-  _userAcceptsUpload() {
+  _userAcceptsUpload = () => {
     const {
       fileSizeData,
       uploadCallback,
     } = this.state.uploadData;
     const files = fileSizeData.filesAllowed.concat(fileSizeData.fileSizePrompt);
+
     fileSizeData.filesAllowed = files;
     fileSizeData.fileSizePrompt = [];
 
@@ -682,17 +720,17 @@ class FileBrowser extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {} -
   *  creates a file using AddLabbookFileMutation by passing a blob
   *  set state of user prompt modal
   */
-  @boundMethod
-  _userRejectsUpload() {
+  _userRejectsUpload = () => {
     const {
       fileSizeData,
       uploadCallback,
     } = this.state.uploadData;
     const fileSizeNotAllowed = fileSizeData.fileSizeNotAllowed.concat(fileSizeData.fileSizePrompt);
+
     fileSizeData.fileSizePrompt = [];
     fileSizeData.fileSizeNotAllowed = fileSizeNotAllowed;
 
@@ -702,19 +740,19 @@ class FileBrowser extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {} -
   *  user cancels upload
   */
-  _cancelUpload() {
+  _cancelUpload = () => {
     this.setState({ fileSizePromptVisible: false });
   }
 
   /**
-  *  @param {}
+  *  @param {} -
   *  gets file prompt text individual sections
   *  @return {string}
   */
-  _getFilePromptText() {
+  _getFilePromptText = () => {
     const { props } = this;
     const firstChar = props.section.charAt(0).toUpperCase();
     const allOtherChars = props.section.substr(1, props.section.length - 1);
@@ -731,7 +769,7 @@ class FileBrowser extends Component {
   *  sends file selection upload to be prepared for upload
   *  @return {string}
   */
-  _uploadFiles(files) {
+  _uploadFiles = (files) => {
     const { props, state } = this;
     prepareUpload(
       files,
@@ -747,10 +785,11 @@ class FileBrowser extends Component {
   *  fires updateUnmanagedDataset mutation
   *  @return {}
   */
-  _updateUnmanagedDatasetMutation() {
+  _updateUnmanagedDatasetMutation = () => {
     const { state } = this;
+    const { updateUnmanagedDataset } = state.mutations;
 
-    state.mutations.updateUnmanagedDataset(
+    updateUnmanagedDataset(
       {
         fromRemote: true,
         fromLocal: false,
@@ -761,6 +800,62 @@ class FileBrowser extends Component {
     );
   }
 
+  /**
+  *  @param {Array} files
+  *  @param {String} type
+  *  fires updateUnmanagedDataset mutation
+  *  @return {}
+  */
+  _getKeys = (files, type) => {
+    const { state } = this;
+    const isDir = (type === 'folder');
+    let keys = [];
+
+    if (files) {
+      keys = Object.keys(files).filter((child) => {
+        const hasEdge = files[child].edge;
+        return (hasEdge && (files[child].edge.node.isDir === isDir));
+      });
+    }
+
+    return this._childSort(keys, state.sort, state.reverse, files, type);
+  }
+
+  /**
+  *  @param {Array} files
+  *  @param {String} type
+  *  fires updateUnmanagedDataset mutation
+  *  @return {}
+  */
+  _updateVisibleFolder = () => {
+    this.setState((state) => {
+      const addFolderVisible = !state.addFolderVisible;
+      return {
+        ...state,
+        addFolderVisible,
+      };
+    });
+  }
+
+
+  /**
+  *  @param {Array} files
+  *  @param {String} type
+  *  fires updateUnmanagedDataset mutation
+  *  @return {}
+  */
+  _updateConfirmVisible = (value) => {
+    this.setState((state) => {
+      const confirmUpdateVisible = (value !== undefined)
+        ? value
+        : !state.confirmUpdateVisible;
+      return {
+        ...state,
+        confirmUpdateVisible,
+      };
+    });
+  }
+
   render() {
     const { props, state } = this;
     const { files, mutationData } = state;
@@ -769,27 +864,12 @@ class FileBrowser extends Component {
     const allFilesLocal = checkLocalAll(files);
     const uploadPromptText = this._getFilePromptText();
     // TODO move this to a function
-    let folderKeys = files && Object.keys(files).filter(child => files[child].edge && files[child].edge.node.isDir) || [];
-    folderKeys = this._childSort(folderKeys, state.sort, state.reverse, files, 'folder');
-    let fileKeys = files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir) || [];
-    fileKeys = this._childSort(fileKeys, state.sort, state.reverse, files, 'files');
+    const folderKeys = this._getKeys(files, 'folder');
+    const fileKeys = this._getKeys(files, 'files');
     const childrenKeys = folderKeys.concat(fileKeys);
     const readOnly = props.section === 'data' && !props.isManaged;
-    const toDownload = [];
-    const folderPlural = state.selectedFolderCount > 1 ? 's' : '';
-    const filePlural = state.selectedFileCount > 1 ? 's' : '';
-    const folderToolbarText = `${state.selectedFolderCount} folder${folderPlural}`;
-    const fileToolbarText = `${state.selectedFileCount} file${filePlural}`;
-    let toolbarText = `${folderToolbarText} and ${fileToolbarText} selected`;
-    toolbarText = !state.selectedFolderCount ? `${fileToolbarText} selected` : toolbarText;
-    toolbarText = !state.selectedFileCount ? `${folderToolbarText} selected` : toolbarText;
-    if (props.section === 'data') {
-      Object.keys(state.childrenState).forEach((key) => {
-        if (state.childrenState[key].isSelected && !state.childrenState[key].edge.node.isLocal) {
-          toDownload.push(state.childrenState[key].edge.node.key);
-        }
-      });
-    }
+    const downloadList = getDownloadList(props, state);
+    const downloadDisabled = props.isLocked || state.downloadingEdges || state.downloadingAll;
     // declare css here
     const fileBrowserCSS = classNames({
       FileBrowser: true,
@@ -820,436 +900,265 @@ class FileBrowser extends Component {
       'FileBroser__sort--asc': state.sort === 'modified' && !state.reverse,
       'FileBroser__sort--desc': state.sort === 'modified' && state.reverse,
     });
-    const popupCSS = classNames({
-      FileBrowser__popup: true,
-      hidden: !state.popupVisible,
-      Tooltip__message: true,
-    });
+
     const multiSelectCSS = classNames({
       'FileBrowser__multiselect flex justify--start': true,
-    });
-    const downloadAllCSS = classNames({
-      'Btn__FileBrowserAction Btn--action': true,
-      'Btn__FileBrowserAction--download Btn__FileBrowserAction--download--data ': !state.downloadingAll,
-      'Btn__FileBrowserAction--loading Btn__FileBrowserAction--downloading': state.downloadingAll,
-      'Tooltip-data Tooltip-data--small': allFilesLocal,
-    });
-    const updateCSS = classNames({
-      'FileBrowser__update-modal': true,
-      hidden: !state.confirmUpdateVisible,
     });
     const dropBoxCSS = classNames({
       'Dropbox Dropbox--fileBrowser flex flex--column align-items--center': true,
       'Dropbox--hovered': isOver,
     });
-    const downloadDisabled = props.isLocked || state.downloadingEdges || state.downloadingAll;
     return (
-      props.connectDropTarget(<div
-        ref={ref => ref}
-        className={fileBrowserCSS}
-        style={{ zIndex: state.fileSizePromptVisible ? 13 : 0 }}
-      >
-        {
-          (props.section === 'input')
-          && (
-            <div>
-              <Datasets
-                linkedDatasets={props.linkedDatasets}
-                files={state.files}
-                showLinkModal={this._showLinkModal}
-                isLocked={props.isLocked}
-                checkLocal={checkLocalIndividual}
-                owner={props.owner}
-                name={props.name}
-                mutationData={mutationData}
-                mutations={state.mutations}
-                section={props.section}
-              />
-            </div>
-          )
-        }
-        { state.showLinkModal
-          && (
-          <LinkModal
-            closeLinkModal={() => this._showLinkModal(false)}
-            linkedDatasets={props.linkedDatasets || []}
-          />
-          )
-        }
-        { state.fileSizePromptVisible
-             && (
-             <Modal
-               header="Large File Warning"
-               handleClose={() => this._cancelUpload()}
-               size="medium"
-               renderContent={() => (
-                 <div className="FileBrowser__modal-body flex justify--space-between flex--column">
-
-                   <p>{ uploadPromptText }</p>
-
-                   <div className="FileBrowser__button-container flex justify--space-around">
-
-                     <button
-                       className="Btn--flat"
-                       onClick={() => this._cancelUpload()}
-                       type="button"
-                     >
-                     Cancel Upload
-                     </button>
-
-                     <button
-                       onClick={() => this._userRejectsUpload()}
-                       type="button"
-                     >
-                      Skip Large Files
-                     </button>
-
-                     <button
-                       onClick={() => this._userAcceptsUpload()}
-                       type="button"
-                     >
-                      Continue Upload
-                     </button>
-
-                   </div>
-
-                 </div>
-               )
-
-             }
-             />
-             )
-         }
-        <h4 className="margin--0 regular">Files</h4>
-        <div className="FileBrowser__tools flex justify--space-between">
-
-          <div className="FileBrowser__search flex-1">
-            <input
-              className="FileBrowser__input search"
-              type="text"
-              placeholder="Search Files Here"
-              onChange={(evt) => { this._updateSearchState(evt); }}
-              onKeyUp={(evt) => { this._updateSearchState(evt); }}
-            />
-          </div>
+      props.connectDropTarget(
+        <div
+          ref={ref => ref}
+          className={fileBrowserCSS}
+          style={{ zIndex: state.fileSizePromptVisible ? 13 : 0 }}
+        >
           {
-            !readOnly
+            (props.section === 'input')
             && (
-              <div className="flex justify--right FileBrowser__Primary-actions">
-                <button
-                  className="Btn Btn--action Btn__FileBrowserAction Btn__FileBrowserAction--newFolder"
-                  data-click-id="addFolder"
-                  onClick={() => this.setState({ addFolderVisible: !state.addFolderVisible })}
-                  type="button"
-                >
-                  New Folder
-                </button>
-                <label
-                  htmlFor="browser_upload"
-                  className="FileBrowser__upload-label"
-                >
-                  <div className="Btn__FileBrowserAction Btn__FileBrowserAction--upload inline-block Btn">
-                    Add Files
-                  </div>
-                  <input
-                    id="browser_upload"
-                    className="hidden"
-                    type="file"
-                    multiple
-                    onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
-                  />
-                </label>
-                { (props.section === 'data')
-                  && (
-                  <button
-                    className={downloadAllCSS}
-                    disabled={allFilesLocal || state.downloadingAll}
-                    onClick={() => this._handleDownloadAll(allFilesLocal)}
-                    data-tooltip="No files to download"
-                    type="button"
-                  >
-                    Download All
-                  </button>
-                  )
-                }
-              </div>
-            )
-          }
-          {
-            readOnly
-            && (
-            <div className="flex">
-              <button
-                className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
-                onClick={() => { this.state.mutations.verifyDataset({}, () => {}) }}
-                type="button"
-              >
-                <div
-                  className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
-                />
-                Verify Dataset
-              </button>
               <div>
-                <button
-                  className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
-                  onClick={() => { state.mutations.verifyDataset({}, () => {}) }}
-                  type="button"
-                >
-                  <div
-                    className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
-                  />
-                  Update from Remote
-                </button>
-                <div>
-                  <button
-                    className="Btn Btn__menuButton Btn--noShadow FileBrowser__newFolder"
-                    onClick={() => this.setState({ confirmUpdateVisible: !state.confirmUpdateVisible })}
-                    type="button"
-                  >
-                    <div
-                      className="Btn--fileBrowser Btn--round Btn--bordered Btn__upArrow Btn"
-                    />
-                    Update from Remote
-                  </button>
-                  <div className={updateCSS}>
-                    <p>This will update the Dataset with the external source. Do you wish to continue?</p>
-                    <div className="flex">
-                      <button
-                        type="button"
-                        className="Btn--flat"
-                        onClick={() => this.setState({ confirmUpdateVisible: false })}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => this._updateUnmanagedDatasetMutation}
-                      >
-                        Confirm
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <Datasets
+                  linkedDatasets={props.linkedDatasets}
+                  files={state.files}
+                  showLinkModal={this._showLinkModal}
+                  isLocked={props.isLocked}
+                  checkLocal={checkLocalIndividual}
+                  owner={props.owner}
+                  name={props.name}
+                  mutationData={mutationData}
+                  mutations={state.mutations}
+                  section={props.section}
+                />
               </div>
-            </div>
             )
           }
-        </div>
-        {
-          isSelected
-          && (
-        <div className="FileBrowser__toolbar flex align-items--center justify--space-between">
-          <div className="FileBrowser__toolbar-text">
-            {toolbarText}
-          </div>
-          <div>
+          { state.showLinkModal
+            && (
+              <LinkModal
+                closeLinkModal={() => this._showLinkModal(false)}
+                linkedDatasets={props.linkedDatasets || []}
+              />
+            )
+          }
+          { state.fileSizePromptVisible
+             && (
+               <FileSizePromptModal
+                 cancelUpload={this._cancelUpload}
+                 userRejectsUpload={this._userRejectsUpload}
+                 userAcceptsUpload={this._userRejectsUpload}
+                 uploadPromptText={uploadPromptText}
+               />
+             )
+           }
+
+          <h4 className="margin--0 regular">Files</h4>
+
+          <FileBrowserTools
+            updateVisibleFolder={this._updateVisibleFolder}
+            updateSearchState={this._updateSearchState}
+            uploadFiles={this._uploadFiles}
+            handleDownloadAll={this._handleDownloadAll}
+            updateUnmanagedDatasetMutation={this._updateUnmanagedDatasetMutation}
+            updateConfirmVisible={this._updateConfirmVisible}
+            confirmUpdateVisible={state.confirmUpdateVisible}
+            downloadingAll={state.downloadingAll}
+            readOnly={readOnly}
+            allFilesLocal={allFilesLocal}
+            section={props.section}
+            mutations={state.mutations}
+          />
+
+          {
+            isSelected
+            && (
+              <FileBrowserToolbar
+                deleteSelectedFiles={this._deleteSelectedFiles}
+                downloadSelectedFiles={this._downloadSelectedFiles}
+                togglePopup={this._togglePopup}
+                isLocked={props.isLocked}
+                downloadList={downloadList}
+                downloadDisabled={downloadDisabled}
+                section={props.section}
+                selectedCount={state.selectedCount}
+                popupVisible={state.popupVisible}
+              />
+            )
+          }
+          <div className="FileBrowser__header">
             {
-              ((props.section === 'data') && toDownload.length > 0)
+              !readOnly
               && (
-              <button
-                className="Btn align-self--end Btn__download-white Btn--background-left Btn--action Btn--padding-left"
-                type="button"
-                disabled={downloadDisabled}
-                onClick={() => this._downloadSelectedFiles(toDownload)}
-              >
-                Download
-              </button>
+                <div className={multiSelectCSS}>
+                  <button
+                    className={multiSelectButtonCSS}
+                    onClick={() => { this._selectFiles(); }}
+                    type="button"
+                  />
+                </div>
               )
             }
             <button
+              className={nameHeaderCSS}
+              onClick={() => this._handleSort('az')}
               type="button"
-              className="Btn align-self--end Btn__delete-white Btn--background-left Btn--action Btn--padding-left"
-              onClick={() => this._togglePopup(true)}
-              disabled={props.isLocked}
             >
-              Delete
+              File
             </button>
-            <div className={popupCSS}>
-              <div className="Tooltip__pointer" />
-              <p>Are you sure?</p>
-              <div className="flex justify--space-around">
-                <button
-                  className="File__btn--round File__btn--cancel File__btn--delete"
-                  onClick={() => { this._togglePopup(false); }}
-                  type="button"
-                />
-                <button
-                  className="File__btn--round File__btn--add File__btn--delete-files"
-                  onClick={() => { this._deleteSelectedFiles(); }}
-                  type="button"
-                />
-              </div>
+
+            <button
+              className={sizeHeaderCSS}
+              onClick={() => this._handleSort('size')}
+              type="button"
+            >
+              Size
+            </button>
+
+            <button
+              className={modifiedHeaderCSS}
+              onClick={() => this._handleSort('modified')}
+              type="button"
+            >
+              Modified
+            </button>
+            <div className="FileBrowser__header--menu flex flex--row justify--left">
+              Actions
             </div>
           </div>
-        </div>
-          )
-        }
-        <div className="FileBrowser__header">
-          {
-            !readOnly
-            && (
-              <div className={multiSelectCSS}>
-                <button
-                  className={multiSelectButtonCSS}
-                  onClick={() => { this._selectFiles(); }}
-                  type="button"
-                />
-              </div>
-            )
-          }
-          <button
-            className={nameHeaderCSS}
-            onClick={() => this._handleSort('az')}
-            type="button"
-          >
-            File
-          </button>
+          <div className="FileBrowser__body">
 
-          <button
-            className={sizeHeaderCSS}
-            onClick={() => this._handleSort('size')}
-            type="button"
-          >
-            Size
-          </button>
+            <AddSubfolder
+              key="rootAddSubfolder"
+              folderKey=""
+              mutationData={mutationData}
+              mutations={state.mutations}
+              setAddFolderVisible={visibility => this.setState({ addFolderVisible: visibility })}
+              addFolderVisible={state.addFolderVisible}
+            />
 
-          <button
-            className={modifiedHeaderCSS}
-            onClick={() => this._handleSort('modified')}
-            type="button"
-          >
-            Modified
-          </button>
-          <div className="FileBrowser__header--menu flex flex--row justify--left">
-            Actions
-          </div>
-        </div>
-        <div className="FileBrowser__body">
-          <AddSubfolder
-            key="rootAddSubfolder"
-            folderKey=""
-            mutationData={mutationData}
-            mutations={state.mutations}
-            setAddFolderVisible={visibility => this.setState({ addFolderVisible: visibility })}
-            addFolderVisible={state.addFolderVisible}
-          />
+            { childrenKeys.map((file) => {
+              const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
+              const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
+              const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
+              const parentDownloading = state.downloadingAll
+                || (state.downloadingEdges
+                && state.downloadingEdges.has(files[file].edge.node.key));
 
-          { childrenKeys.map((file) => {
-            const isDir = files[file] && files[file].edge && files[file].edge.node.isDir;
-            const isFile = files[file] && files[file].edge && !files[file].edge.node.isDir;
-            const isDataset = files[file] && files[file].edge && files[file].edge.node.isDataset;
-            const parentDownloading = state.downloadingAll || (state.downloadingEdges && state.downloadingEdges.has(files[file].edge.node.key))
+              if (isDataset) {
+                return (
+                  <div
+                    key={files[file].edge.node.key}
+                  />
+                );
+              } if (isDir) {
+                return (
+                  <Folder
+                    ref={file}
+                    filename={file}
+                    readOnly={readOnly}
+                    key={files[file].edge.node.key}
+                    multiSelect={state.multiSelect}
+                    mutationData={mutationData}
+                    fileData={files[file]}
+                    isLocal={checkLocalIndividual(files[file])}
+                    mutations={state.mutations}
+                    setState={this._setState}
+                    rowStyle={{}}
+                    sort={state.sort}
+                    reverse={state.reverse}
+                    childrenState={state.childrenState}
+                    section={props.section}
+                    updateChildState={this._updateChildState}
+                    parentDownloading={parentDownloading}
+                    rootFolder
+                    relay={props.relay}
+                    fileSizePrompt={this._fileSizePrompt}
+                    checkLocal={checkLocalIndividual}
+                    containerStatus={props.containerStatus}
+                    refetch={this._refetch}
+                  />
+                );
+              } if (isFile) {
+                return (
+                  <File
+                    ref={file}
+                    filename={file}
+                    readOnly={readOnly}
+                    key={files[file].edge.node.key}
+                    multiSelect={state.multiSelect}
+                    mutationData={mutationData}
+                    fileData={files[file]}
+                    isLocal={checkLocalIndividual(files[file])}
+                    childrenState={state.childrenState}
+                    mutations={state.mutations}
+                    expanded
+                    section={props.section}
+                    isOverChildFile={state.isOverChildFile}
+                    updateParentDropZone={this._updateDropZone}
+                    parentDownloading={parentDownloading}
+                    updateChildState={this._updateChildState}
+                    checkLocal={checkLocalIndividual}
+                    containerStatus={props.containerStatus}
+                  />
+                );
+              }
 
-            if (isDataset) {
               return (
                 <div
-                  key={files[file].edge.node.key}
-                />
-              );
-            } if (isDir) {
-              return (
-                <Folder
-                  ref={file}
-                  filename={file}
-                  readOnly={readOnly}
-                  key={files[file].edge.node.key}
-                  multiSelect={state.multiSelect}
-                  mutationData={mutationData}
-                  fileData={files[file]}
-                  isLocal={checkLocalIndividual(files[file])}
-                  mutations={state.mutations}
-                  setState={this._setState}
-                  rowStyle={{}}
-                  sort={state.sort}
-                  reverse={state.reverse}
-                  childrenState={state.childrenState}
-                  section={props.section}
-                  updateChildState={this._updateChildState}
-                  parentDownloading={parentDownloading}
-                  rootFolder
-                  relay={props.relay}
-                  fileSizePrompt={this._fileSizePrompt}
-                  checkLocal={checkLocalIndividual}
-                  containerStatus={props.containerStatus}
-                  refetch={this._refetch}
-                />
-              );
-            } if (isFile) {
-              return (
-                <File
-                  ref={file}
-                  filename={file}
-                  readOnly={readOnly}
-                  key={files[file].edge.node.key}
-                  multiSelect={state.multiSelect}
-                  mutationData={mutationData}
-                  fileData={files[file]}
-                  isLocal={checkLocalIndividual(files[file])}
-                  childrenState={state.childrenState}
-                  mutations={state.mutations}
-                  expanded
-                  section={props.section}
-                  isOverChildFile={state.isOverChildFile}
-                  updateParentDropZone={this._updateDropZone}
-                  parentDownloading={parentDownloading}
-                  updateChildState={this._updateChildState}
-                  checkLocal={checkLocalIndividual}
-                  containerStatus={props.containerStatus}
-                />
-              );
-            }
-            return (
-              <div
-                key={file}
-              >
-                Loading
-              </div>
-            );
-          })
-          }
-          { (childrenKeys.length === 0) && (state.search !== '')
-            && (
-            <div className="FileBrowser__empty">
-              <h5>No files match your search.</h5>
-            </div>
-            )
-          }
-          { (childrenKeys.length === 0) && (state.search === '')
-            && (
-            <div className={dropBoxCSS}>
-              <div className="Dropbox--menu">
-                Drag and drop files here
-                <br />
-                <span>or</span>
-              </div>
-              <label
-                htmlFor="add_file"
-                className="flex justify--center"
-              >
-                <div
-                  className="Btn Btn--allStyling"
+                  key={file}
                 >
-                  Choose Files...
+                  Loading
                 </div>
-                <input
-                  id="add_file"
-                  className="hidden"
-                  type="file"
-                  onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
-                />
-              </label>
-            </div>
-            )
-          }
-          { (props.isProcessing || props.lockFileBrowser)
-            && (
-            <div className="FileBrowser__lock">
-              <span />
-            </div>
-            )
-          }
-        </div>
-      </div>)
+              );
+            })}
+
+            { (childrenKeys.length === 0) && (state.search !== '')
+                && (
+                <div className="FileBrowser__empty">
+                  <h5>No files match your search.</h5>
+                </div>
+                )
+            }
+
+            { (childrenKeys.length === 0) && (state.search === '')
+                && (
+                  <div className={dropBoxCSS}>
+                    <div className="Dropbox--menu">
+                      Drag and drop files here
+                      <br />
+                      <span>or</span>
+                    </div>
+                    <label
+                      htmlFor="add_file"
+                      className="flex justify--center"
+                    >
+                      <div
+                        className="Btn Btn--allStyling"
+                      >
+                        Choose Files...
+                      </div>
+                      <input
+                        id="add_file"
+                        className="hidden"
+                        type="file"
+                        onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
+                      />
+                    </label>
+                  </div>
+                )
+            }
+
+            { (props.isProcessing || props.lockFileBrowser)
+              && (
+                <div className="FileBrowser__lock">
+                  <span />
+                </div>
+              )
+            }
+          </div>
+        </div>,
+      )
     );
   }
 }

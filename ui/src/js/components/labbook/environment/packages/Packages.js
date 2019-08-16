@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import { createPaginationContainer, graphql } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
 // store
 import store from 'JS/redux/store';
 import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
@@ -30,9 +29,8 @@ class Packages extends Component {
   *  @param{}
   *  triggers relay pagination function loadMore
   */
-  @boundMethod
-  _loadMore() {
-    const { props, state } = this;
+  _loadMore = () => {
+    const { props } = this;
     const self = this;
 
     props.relay.loadMore(
@@ -59,8 +57,7 @@ class Packages extends Component {
   *  @param {Boolean} packageModalVisible
   *  toggles package modal visibility
   */
-  @boundMethod
-  _togglePackageModalVisibility(packageModalVisible) {
+  _togglePackageModalVisibility = (packageModalVisible) => {
     this.setState({ packageModalVisible });
   }
 

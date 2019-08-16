@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { graphql, QueryRenderer } from 'react-relay';
 import queryString from 'querystring';
-import { boundMethod } from 'autobind-decorator'
 // redux
 import { setCallbackRoute } from 'JS/redux/actions/routes';
 // components
@@ -63,8 +62,7 @@ export default class DashboardContainer extends Component {
     * @param {string, string} orderBy, sort
     * sets state of orderBy and sort, passed to child components
   */
-  @boundMethod
-  _refetchSort(orderBy, sort) {
+  _refetchSort = (orderBy, sort) => {
     const { state } = this;
     if (state.orderBy !== orderBy || state.sort !== sort) {
       this.setState({ orderBy, sort });
@@ -77,17 +75,15 @@ export default class DashboardContainer extends Component {
   *  returns jsx of selected component
   *  @return {jsx}
   */
-  _displaySelectedComponent() {
+  _displaySelectedComponent = () => {
     const { props, state } = this;
     const paths = props.history.location.pathname.split('/');
     const sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    let query;
 
     if (paths[2] !== 'cloud' && paths[2] !== 'local') {
       props.history.replace('../../../../projects/local');
     }
-
-
-    let query;
     if (state.selectedComponent === '/datasets/:labbookSection') {
       query = sectionRoute === 'cloud' ? RemoteDatasetListingQuery : LocalDatasetListingQuery;
     } else if (sectionRoute === 'cloud') {

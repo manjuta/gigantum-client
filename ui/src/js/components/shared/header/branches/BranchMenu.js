@@ -655,7 +655,9 @@ class BranchMenu extends Component {
    const allowSync = !((activeBranch.branchName !== 'master') && !props.defaultRemote) && !props.isLocked && hasWriteAccess;
    const allowSyncPull = !((activeBranch.branchName !== 'master') && !props.defaultRemote) && !props.isLocked && props.defaultRemote;
    const allowReset = !props.isLocked && !upToDate && activeBranch.isRemote && (activeBranch.commitsAhead !== undefined);
-   const statusText = activeBranch.isRemote ? 'Local & Remote' : 'Local only';
+   const statusText = activeBranch.isRemote
+    ? 'Local & Remote'
+    : 'Local only';
    const showPullOnly = props.defaultRemote && !hasWriteAccess && !waitingOnCollabs;
    const disableDropdown = !allowSyncPull || !props.defaultRemote || showPullOnly;
    const syncButtonDisabled = (showPullOnly && !allowSyncPull)
@@ -669,7 +671,11 @@ class BranchMenu extends Component {
      switchTooltip,
      commitTooltip,
    } = this._getTooltipText(activeBranch, hasWriteAccess, upToDate);
-   const syncButtonText = props.defaultRemote ? showPullOnly ? 'Pull' : 'Sync' : 'Publish';
+   const syncButtonText = props.defaultRemote
+    ? showPullOnly
+    ? 'Pull'
+    : 'Sync'
+    : 'Publish';
 
    // declare css here
    const switchDropdownCSS = classNames({
@@ -956,7 +962,7 @@ class BranchMenu extends Component {
          switchBranch={this._switchBranch}
          toggleCover={this._toggleCover}
          isDeprecated={props.isDeprecated}
-         setBranchUptodate={this.props.setBranchUptodate}
+         setBranchUptodate={props.setBranchUptodate}
          showPullOnly={showPullOnly}
          labbookName={props.section.name}
        />
@@ -981,7 +987,7 @@ class BranchMenu extends Component {
             setRemoteSession={this._setRemoteSession}
           />
         )
-      }
+       }
       { state.publishDatasetsModalVisible
         && (
           <PublishDatasetsModal

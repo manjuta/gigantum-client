@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import { NativeTypes } from 'react-dnd-html5-backend';
-import { boundMethod } from 'autobind-decorator';
 import { DropTarget } from 'react-dnd';
 import classNames from 'classnames';
 // store
@@ -10,7 +9,6 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 import './Requirements.scss';
 
 class Requirements extends Component {
-
   state = {
     rejectedPackages: [],
     droppedFile: null,
@@ -22,8 +20,7 @@ class Requirements extends Component {
   *  parses requirements file
   *  @return {}
   */
-  @boundMethod
-  _parseFile(file) {
+  _parseFile = (file) => {
     const { props, state } = this;
     const self = this;
     const reader = new FileReader();
@@ -57,6 +54,8 @@ class Requirements extends Component {
 
   render() {
     const { props, state } = this;
+    const subText = props.isOver ? '' : 'or';
+    // declare css here
     const dropBoxCSS = classNames({
       'Dropbox flex flex--column align-items--center': true,
       'Dropbox--hovered': props.isOver,
@@ -64,8 +63,7 @@ class Requirements extends Component {
     const fileDroppedCSS = classNames({
       'Requirements__dropped-file Card Card--no-hover Card--requirements': true,
       'Requirements__dropped-file--loading': state.fileParsing,
-    })
-    const subText = props.isOver ? '' : 'or';
+    });
     return props.connectDropTarget(
       <div className="Requirements__file flex justify--center">
         {

@@ -368,8 +368,10 @@
     color: $mineShaft;
   }
   .Overview__empty-action{
+
+    width: 120px;
     color: $azure;
-    text-decoration: underline;
+    align-self: center;
     cursor: pointer;
   }
 

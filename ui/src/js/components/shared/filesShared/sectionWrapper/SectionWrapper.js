@@ -1,7 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // components
 import Loader from 'Components/common/Loader';
 // assets
@@ -35,8 +33,7 @@ export default class SectionWrapper extends Component {
   *  set state with selected filter
   *  @return {}
   */
-  @boundMethod
-  _setSelectedFiles(evt) {
+  _setSelectedFiles = (evt) => {
     const files = [...evt.target.files];
     this.setState({ selectedFiles: files });
   }
@@ -46,8 +43,7 @@ export default class SectionWrapper extends Component {
   *  clear selected files
   *  @return {}
   */
-  @boundMethod
-  _clearSelectedFiles() {
+  _clearSelectedFiles = () => {
     this.setState({ selectedFiles: [] });
   }
 
@@ -56,8 +52,7 @@ export default class SectionWrapper extends Component {
   *  udate loading status if state is not the same as result
   *  @return {}
   */
-  @boundMethod
-  _loadStatus(result) {
+  _loadStatus = (result) => {
     const { state } = this;
     if (result !== state.loadingStatus) {
       this.setState({ loadingStatus: result });

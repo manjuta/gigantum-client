@@ -8,13 +8,9 @@ import Category from './Category';
 import './AdvancedSearch.scss';
 
 export default class AdvancedSearch extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expandedIndex: null,
-      tooltipShown: false,
-    };
-    this._resetSelectedFilter = this._resetSelectedFilter.bind(this);
+  state = {
+    expandedIndex: null,
+    tooltipShown: false,
   }
 
   /**
@@ -188,7 +184,7 @@ export default class AdvancedSearch extends Component {
               index={index}
               key={category}
               setExpandedIndex={this._setExpandedIndex}
-              toggleTooltip={this.toggleTooltip}
+              toggleTooltip={this._toggleTooltip}
               tooltipShown={state.tooltipShown}
             />
           ))}

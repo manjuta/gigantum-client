@@ -4,7 +4,6 @@ import uuidv4 from 'uuid/v4';
 import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
 import Moment from 'moment';
-import { boundMethod } from 'autobind-decorator';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
@@ -31,8 +30,7 @@ export default class RemoteLabbookPanel extends Component {
     *  @param {}
     *  changes state of isImporting to false
   */
-  @boundMethod
-  _clearState() {
+  _clearState = () => {
     if (document.getElementById('dashboard__cover')) {
       document.getElementById('dashboard__cover').classList.add('hidden');
     }
@@ -45,8 +43,7 @@ export default class RemoteLabbookPanel extends Component {
     *  @param {}
     *  changes state of isImporting to true
   */
-  @boundMethod
-  _importingState() {
+  _importingState = () => {
     document.getElementById('modal__cover').classList.remove('hidden');
     document.getElementById('loader').classList.remove('hidden');
     this.setState({
@@ -59,8 +56,8 @@ export default class RemoteLabbookPanel extends Component {
     *  imports labbook from remote url, builds the image, and redirects to imported labbook
     *  @return {}
   */
-  @boundMethod
-  _importLabbook(owner, labbookName) {
+  _importLabbook = (owner, labbookName) => {
+    // TODO break up this function
     const { props } = this;
     const self = this;
     const id = uuidv4();
@@ -155,20 +152,19 @@ export default class RemoteLabbookPanel extends Component {
    * fires when user identity returns invalid session
    * prompts user to revalidate their session
    */
-  @boundMethod
-  _closeLoginPromptModal() {
+  _closeLoginPromptModal = () => {
     this.setState({
       showLoginPrompt: false,
     });
   }
 
- /**
+  /**
    * @param {object} edge
    * validates user's session and then triggers toggleDeleteModal
    * which passes parameters to the DeleteLabbook component
- */
- @boundMethod
-  _handleDelete(edge) {
+  */
+  _handleDelete = (edge) => {
+    // TODO: move toggleDeleteModal
     const { props } = this;
     if (localStorage.getItem('username') !== edge.node.owner) {
       setWarningMessage('You can only delete remote Projects that you have created.');

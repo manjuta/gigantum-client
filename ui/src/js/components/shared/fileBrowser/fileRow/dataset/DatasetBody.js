@@ -43,7 +43,7 @@ const childSort = (array, type, reverse, children, section) => {
     return 0;
   });
   return array;
-}
+};
 
 export default class Datasets extends Component {
   state = {
@@ -56,7 +56,7 @@ export default class Datasets extends Component {
   *  handles state changes for type
   *  @return {}
   */
-  _handleSort(type) {
+  _handleSort = (type) => {
     const { state } = this;
     if (type === state.sort) {
       this.setState({ reverse: !state.reverse });
@@ -73,7 +73,7 @@ export default class Datasets extends Component {
     let fileKeys = (files && Object.keys(files).filter(child => files[child].edge && !files[child].edge.node.isDir)) || [];
     fileKeys = childSort(fileKeys, state.sort, state.reverse, files, 'files');
     const childrenKeys = folderKeys.concat(fileKeys);
-
+    // declare css here
     const nameHeaderCSS = classNames({
       'FileBrowser__name-text FileBrowser__header--name flex justify--start Btn--noStyle': true,
       'FileBroser__sort--asc': state.sort === 'az' && !state.reverse,

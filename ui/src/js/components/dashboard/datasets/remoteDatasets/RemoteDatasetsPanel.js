@@ -4,7 +4,6 @@ import uuidv4 from 'uuid/v4';
 import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
 import Moment from 'moment';
-import { boundMethod } from 'autobind-decorator';
 // muations
 import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
 // store
@@ -32,8 +31,7 @@ export default class RemoteDatasetPanel extends Component {
     *  @param {String} remote
     *  handles importing dataset mutation
   */
-  @boundMethod
-  _handleImportDataset(owner, datasetName, remote) {
+  _handleImportDataset = (owner, datasetName, remote) => {
     const { props } = this;
     const id = uuidv4();
     ImportRemoteDatasetMutation(
@@ -75,8 +73,7 @@ export default class RemoteDatasetPanel extends Component {
     *  imports dataset from remote url, builds the image, and redirects to imported dataset
     *  @return {}
   */
-  @boundMethod
-  _importDataset(owner, datasetName) {
+  _importDataset = (owner, datasetName) => {
     const { props } = this;
     const id = uuidv4();
     const remote = `https://repo.${config.domain}/${owner}/${datasetName}`;
@@ -112,8 +109,7 @@ export default class RemoteDatasetPanel extends Component {
    *  @param {}
    *  changes state of isImporting to false
    */
-  @boundMethod
-  _clearState() {
+  _clearState = () => {
     if (document.getElementById('dashboard__cover')) {
       document.getElementById('dashboard__cover').classList.add('hidden');
     }
@@ -127,8 +123,7 @@ export default class RemoteDatasetPanel extends Component {
      * fires when user identity returns invalid session
      * prompts user to revalidate their session
   */
-  @boundMethod
-  _closeLoginPromptModal() {
+  _closeLoginPromptModal = () => {
     this.setState({ showLoginPrompt: false });
   }
 
@@ -136,8 +131,7 @@ export default class RemoteDatasetPanel extends Component {
     *  @param {}
     *  changes state of isImporting to true
    */
-  @boundMethod
-  _importingState() {
+  _importingState = () => {
     if (document.getElementById('dashboard__cover')) {
       document.getElementById('dashboard__cover').classList.remove('hidden');
     }
@@ -149,8 +143,7 @@ export default class RemoteDatasetPanel extends Component {
   * validates user's session and then triggers toggleDeleteModal
   * which passes parameters to the DeleteDataset component
   */
-  @boundMethod
-  _handleDelete(edge) {
+  _handleDelete = (edge) => {
     const { props } = this;
     if (localStorage.getItem('username') !== edge.node.owner) {
       setWarningMessage('You can only delete remote Datasets that you have created.');

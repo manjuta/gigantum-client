@@ -4,7 +4,6 @@ import {
   createPaginationContainer,
   graphql,
 } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // store
@@ -66,8 +65,7 @@ class RemoteDatasets extends Component {
     *  @param {}
     *  loads more datasets using the relay pagination container
   */
-  @boundMethod
-  _loadMore() {
+  _loadMore = () => {
     const self = this;
     const { props } = this;
     UserIdentity.getUserIdentity().then((response) => {
@@ -106,8 +104,7 @@ class RemoteDatasets extends Component {
     *  @param {object} deleteData
     *  changes the delete modal's visibility and changes the data passed to it
   */
-  @boundMethod
-  _toggleDeleteModal(deleteData) {
+  _toggleDeleteModal = (deleteData) => {
     if (deleteData) {
       this.setState({
         deleteData,

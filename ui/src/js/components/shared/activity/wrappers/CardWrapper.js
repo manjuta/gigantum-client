@@ -13,7 +13,7 @@ export default class CardWrapper extends PureComponent {
     const { props } = this;
     const { record } = props;
 
-    const rollbackableDetails = record.edge.node.detailObjects.filter(detailObjs => detailObjs.type !== 'RESULT' && detailObjs.type !== 'CODE_EXECUTED');
+    const rollbackableDetails = record.edge.node.detailObjects.filter(detailObjs => (detailObjs.type !== 'RESULT') && (detailObjs.type !== 'CODE_EXECUTED'));
     const isLabbook = (props.sectionType === 'labbook');
     const hasRollbackDetails = !!rollbackableDetails.length;
     const isNotFirstIndex = (props.indexItem.i !== 0) || (props.indexItem.timestampIndex !== 0);
@@ -21,7 +21,7 @@ export default class CardWrapper extends PureComponent {
             && (hasRollbackDetails && isLabbook)
             && !props.isBaseRecord;
 
-
+    // declare css here
     const activityCardWrapperCSS = classNames({
       CardWrapper: true,
       'CardWrapper--rollback': hasRollback,
@@ -32,7 +32,7 @@ export default class CardWrapper extends PureComponent {
         <div className={activityCardWrapperCSS}>
 
           { hasRollback
-              && (
+            && (
               <Rollback
                 setHoveredRollback={props.setHoveredRollback}
                 hoveredRollback={props.hoveredRollback}
@@ -41,7 +41,7 @@ export default class CardWrapper extends PureComponent {
                 sectionType={props.sectionType}
                 isLocked={props.isLocked}
               />
-              )
+            )
           }
 
           <ErrorBoundary
@@ -58,7 +58,6 @@ export default class CardWrapper extends PureComponent {
               isLocked={props.isLocked}
             />
           </ErrorBoundary>
-
 
         </div>
 

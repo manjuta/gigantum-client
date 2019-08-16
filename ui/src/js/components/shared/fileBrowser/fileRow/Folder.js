@@ -35,19 +35,6 @@ class Folder extends Component {
       isDownloading: false,
       forceUpdate: false,
     };
-
-    this._setSelected = this._setSelected.bind(this);
-    this._setIncomplete = this._setIncomplete.bind(this);
-    this._checkParent = this._checkParent.bind(this);
-    this._checkRefs = this._checkRefs.bind(this);
-    this._setState = this._setState.bind(this);
-    this._setHoverState = this._setHoverState.bind(this);
-    this._addFolderVisible = this._addFolderVisible.bind(this);
-    this._mouseLeave = this._mouseLeave.bind(this);
-    this._checkHover = this._checkHover.bind(this);
-    this._renameEditMode = this._renameEditMode.bind(this);
-    this._updateDropZone = this._updateDropZone.bind(this);
-    this._setFolderIsDownloading = this._setFolderIsDownloading.bind(this);
   }
 
 
@@ -81,7 +68,7 @@ class Folder extends Component {
     *  update state of component for a given key value pair
     *  @return {}
     */
-  _setState(key, value) {
+  _setState = (key, value) => {
     this.setState({ [key]: value });
   }
 
@@ -90,8 +77,7 @@ class Folder extends Component {
     *  calls parent refetch method
     *  @return {boolean}
     */
-  @boundMethod
-  _refetch() {
+  _refetch = () => {
     const { props } = this;
     props.refetch();
   }
@@ -101,11 +87,18 @@ class Folder extends Component {
     *  sets child elements to be selected and current folder item
     *  @return {}
     */
-  _setSelected(evt, isSelected) {
+  _setSelected = (evt, isSelected) => {
     // evt.preventDefault();
     evt.stopPropagation();
     const { props, state } = this;
-    props.updateChildState(props.fileData.edge.node.key, isSelected, false, state.expanded, state.addFolderVisible);
+    props.updateChildState(
+      props.fileData.edge.node.key,
+      isSelected,
+      false,
+      state.expanded,
+      state.addFolderVisible,
+    );
+
     this.setState(
       {
         isSelected,
@@ -136,7 +129,7 @@ class Folder extends Component {
     *  sets parents element's isdownloading state
     *  @return {}
     */
-  _setFolderIsDownloading(isDownloading) {
+  _setFolderIsDownloading = (isDownloading) => {
     this.setState({ isDownloading });
   }
 
@@ -145,7 +138,7 @@ class Folder extends Component {
     *  sets parents element to selected if count matches child length
     *  @return {}
     */
-  _setIncomplete() {
+  _setIncomplete = () => {
     this.setState({
       isIncomplete: true,
       isSelected: false,
@@ -157,56 +150,69 @@ class Folder extends Component {
     *  checks parent item
     *  @return {}
     */
-  _checkParent() {
+  _checkParent = () => {
+    const { props, state } = this;
+    const { key } = props.fileData.edge.node;
+    const {
+      expanded,
+      addFolderVisible,
+      isSelected,
+      isIncomplete,
+    } = state;
     let checkCount = 0;
     let incompleteCount = 0;
+    // TODO remove refs, this has been deprecated
+    const refs = Object.keys(this.refs);
 
-    Object.keys(this.refs).forEach((ref) => {
-      const state = (this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance) ? this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state : this.refs[ref].getDecoratedComponentInstance().state;
-      if (state.isSelected) {
+    refs.forEach((ref) => {
+      const parentState = (this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance)
+      ? this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state : this.refs[ref].getDecoratedComponentInstance().state;
+
+      if (parentState.isSelected) {
         checkCount += 1;
       }
-      if (state.isIncomplete) {
+      if (parentState.isIncomplete) {
         incompleteCount += 1;
       }
     });
 
-    if (checkCount === 0 && incompleteCount === 0) {
-      this.props.updateChildState(this.props.fileData.edge.node.key, false, false, this.state.expanded, this.state.addFolderVisible);
+    if ((checkCount === 0) && (incompleteCount === 0)) {
+      props.updateChildState(key, false, false, expanded, addFolderVisible);
       this.setState(
         {
           isIncomplete: false,
           isSelected: false,
         },
         () => {
-          if (this.props.checkParent) {
-            this.props.checkParent();
+          if (props.checkParent) {
+            props.checkParent();
           }
         },
       );
-    } else if (checkCount === Object.keys(this.refs).length && this.state.isSelected) {
-      this.props.updateChildState(this.props.fileData.edge.node.key, true, false, this.state.expanded, this.state.addFolderVisible);
+    } else if (checkCount === Object.keys(this.refs).length && isSelected) {
+      props.updateChildState(key, true, false, expanded, addFolderVisible);
       this.setState(
         {
           isIncomplete: false,
           isSelected: true,
         },
         () => {
-          if (this.props.checkParent) {
-            this.props.checkParent();
+          if (props.checkParent) {
+            props.checkParent();
           }
         },
       );
     } else {
-      this.props.updateChildState(this.props.fileData.edge.node.key, false, true, this.state.expanded, this.state.addFolderVisible);
+      props.updateChildState(key, false, true, expanded, addFolderVisible);
+
       this.setState(
         {
           isIncomplete: true,
           isSelected: false,
         },
         () => {
-          if (this.props.setIncomplete) {
-            this.props.setIncomplete();
+          if (props.setIncomplete) {
+            props.setIncomplete();
           }
         },
       );
@@ -218,17 +224,29 @@ class Folder extends Component {
     *  sets item to expanded
     *  @return {}
     */
-  _expandSection(evt) {
+  _expandSection = (evt) => {
     const { props, state } = this;
-    if (!evt.target.classList.contains('Folder__btn') && !evt.target.classList.contains('ActionsMenu__item') && !evt.target.classList.contains('Btn--round') && !evt.target.classList.contains('DatasetActionsMenu__item')
-      && !evt.target.classList.contains('File__btn--round')) {
+    const { classList } = evt.target;
+    const { key } = props.fileData.edge.node;
+    const {
+      addFolderVisible,
+      expanded,
+      isIncomplete,
+      isSelected,
+    } = state;
+
+    if (!classList.contains('Folder__btn') &&
+      !classList.contains('ActionsMenu__item') &&
+      !classList.contains('Btn--round') &&
+      !classList.contains('DatasetActionsMenu__item') &&
+      !classList.contains('File__btn--round')) {
       this.setState({ expanded: !state.expanded }, () => {
-        props.updateChildState(props.fileData.edge.node.key, state.isSelected, state.isIncomplete, state.expanded, state.addFolderVisible);
+        props.updateChildState(key, isSelected, isIncomplete, expanded, addFolderVisible);
       });
     }
     if (evt.target.classList.contains('Btn__addFolder')) {
       this.setState({ expanded: true }, () => {
-        props.updateChildState(props.fileData.edge.node.key, state.isSelected, state.isIncomplete, state.expanded, state.addFolderVisible);
+        props.updateChildState(key, isSelected, isIncomplete, expanded, addFolderVisible);
       });
     }
   }
@@ -237,9 +255,10 @@ class Folder extends Component {
     *  @param {jsx} render
     *  sets elements to be selected and parent
     */
-  connectDND(render) {
-    let renderType;
+  connectDND = (render) => {
     const { props, state } = this;
+    let renderType;
+
     if ((state.isDragging || props.parentIsDragged) && !props.readOnly) {
       renderType = props.connectDragSource(render);
     } else {
@@ -253,9 +272,10 @@ class Folder extends Component {
     *  @param {}
     *  sets dragging state
     */
-  _mouseEnter() {
-    if (this.props.setParentDragFalse) {
-      this.props.setParentDragFalse();
+  _mouseEnter = () => {
+    const { props } = this;
+    if (props.setParentDragFalse) {
+      props.setParentDragFalse();
     }
     this.setState({ isDragging: true, isHovered: true });
   }
@@ -265,9 +285,10 @@ class Folder extends Component {
     *  sets dragging state
     *  @return {}
     */
-  _mouseLeave() {
-    if (this.props.setParentDragTrue) {
-      this.props.setParentDragTrue();
+  _mouseLeave = () => {
+    const { props } = this;
+    if (props.setParentDragTrue) {
+      props.setParentDragTrue();
     }
     this.setState({ isDragging: false, isHovered: false });
   }
@@ -277,8 +298,9 @@ class Folder extends Component {
     *  sets dragging state to true
     *  @return {}
     */
-  _checkHover() {
-    if (this.state.isHovered && !this.state.isDragging) {
+  _checkHover = () => {
+    const { state } = this;
+    if (state.isHovered && !state.isDragging) {
       this.setState({ isDragging: true });
     }
   }
@@ -288,13 +310,33 @@ class Folder extends Component {
       *  sets addFolderVisible state
       *  @return {}
     */
-  _addFolderVisible(reverse) {
+  _addFolderVisible = (reverse) => {
+    const { props, state } = this;
+    const {
+      isSelected,
+      isIncomplete,
+      expanded,
+      addFolderVisible,
+    } = state;
+    const { updateChildState, fileData } = props;
     if (reverse) {
-      this.props.updateChildState(this.props.fileData.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, !this.state.addFolderVisible);
+      updateChildState(
+        fileData.edge.node.key,
+        isSelected,
+        isIncomplete,
+        expanded,
+        !addFolderVisible,
+      );
 
-      this.setState({ addFolderVisible: !this.state.addFolderVisible });
+      this.setState({ addFolderVisible: !addFolderVisible });
     } else {
-      this.props.updateChildState(this.props.fileData.edge.node.key, this.state.isSelected, this.state.isIncomplete, this.state.expanded, false);
+      updateChildState(
+        fileData.edge.node.key,
+        isSelected,
+        isIncomplete,
+        expanded,
+        false,
+      );
       this.setState({ addFolderVisible: false });
     }
   }
@@ -304,14 +346,17 @@ class Folder extends Component {
     *  checks if folder refs has props.isOver === true
     *  @return {boolean}
     */
-  _checkRefs() {
+  _checkRefs = () => {
     let isOver = this.props.isOverCurrent || this.props.isOver;
     // this.state.isOverChildFile,
 
     const { refs } = this;
 
     Object.keys(refs).forEach((childname) => {
-      if (refs[childname].getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance() && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+      if (refs[childname].getDecoratedComponentInstance &&
+        refs[childname].getDecoratedComponentInstance() &&
+        refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance &&
+        refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
         const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
         if (child.props.fileData && !child.props.fileData.edge.node.isDir) {
           if (child.props.isOverCurrent) {
@@ -330,17 +375,18 @@ class Folder extends Component {
     *  sets hover state
     *  @return {}
     */
-  _setHoverState(evt, hover) {
+  _setHoverState = (evt, hover) => {
+    const { props } = this;
     evt.preventDefault();
     evt.stopPropagation();
     this.setState({ hover });
 
-    if (this.props.setParentHoverState && hover) {
+    if (props.setParentHoverState && hover) {
       const fakeEvent = {
         preventDefault: () => {},
         stopPropagation: () => {},
       };
-      this.props.setParentHoverState(fakeEvent, false);
+      props.setParentHoverState(fakeEvent, false);
     }
   }
 
@@ -349,10 +395,8 @@ class Folder extends Component {
     *  sets dragging state
     *  @return {}
     */
-  _updateFileName(evt) {
-    this.setState({
-      renameValue: evt.target.value,
-    });
+  _updateFileName = (evt) => {
+    this.setState({ renameValue: evt.target.value });
   }
 
   /**
@@ -360,9 +404,9 @@ class Folder extends Component {
     *  sumbit or clear
     *  @return {}
     */
-  _submitCancel(evt, folderName) {
+  _submitCancel = (evt, folderName) => {
     const { state } = this;
-    if (evt.key === 'Enter' && state.renameValue !== folderName) {
+    if ((evt.key === 'Enter') && (state.renameValue !== folderName)) {
       this._triggerMutation();
     }
 
@@ -376,9 +420,10 @@ class Folder extends Component {
     *  sets state on a boolean value
     *  @return {}
     */
-  _clearState() {
+  _clearState = () => {
+    const { filename } = this.props;
     this.setState({
-      renameValue: this.props.filename,
+      renameValue: filename,
       renameEditMode: false,
     });
   }
@@ -388,15 +433,16 @@ class Folder extends Component {
     *  sets state on a boolean value
     *  @return {}
     */
-  _triggerMutation() {
-    const fileKeyArray = this.props.fileData.edge.node.key.split('/');
+  _triggerMutation = () => {
+    const { props, state } = this;
+    const { fileData } = props;
+    const fileKeyArray = fileData.edge.node.key.split('/');
     fileKeyArray.pop();
     fileKeyArray.pop();
     const folderKeyArray = fileKeyArray;
     const folderKey = folderKeyArray.join('/');
-
-    const removeIds = [this.props.fileData.edge.node.id];
-    const currentHead = this.props.fileData;
+    const removeIds = [fileData.edge.node.id];
+    const currentHead = fileData;
 
     const searchChildren = (parent) => {
       if (parent.children) {
@@ -412,16 +458,16 @@ class Folder extends Component {
     searchChildren(currentHead);
 
     const data = {
-      newKey: folderKey === '' ? `${this.state.renameValue}/` : `${folderKey}/${this.state.renameValue}/`,
-      edge: this.props.fileData.edge,
+      newKey: (folderKey === '') ? `${state.renameValue}/` : `${folderKey}/${state.renameValue}/`,
+      edge: fileData.edge,
       removeIds,
     };
-    if (this.props.section !== 'data') {
-      this.props.mutations.moveLabbookFile(data, (response) => {
+    if (props.section !== 'data') {
+      props.mutations.moveLabbookFile(data, () => {
         this._clearState();
       });
     } else {
-      this.props.mutations.moveDatasetFile(data, (response) => {
+      props.mutations.moveDatasetFile(data, () => {
         this._clearState();
       });
     }
@@ -432,7 +478,7 @@ class Folder extends Component {
     *  sets hover state
     *  @return {}
     */
-  _renameEditMode(renameEditMode) {
+  _renameEditMode = (renameEditMode) => {
     this.setState({ renameEditMode });
   }
 
@@ -441,7 +487,7 @@ class Folder extends Component {
     *  update state to update drop zone
     *  @return {}
     */
-  _updateDropZone(isOverChildFile) {
+  _updateDropZone = (isOverChildFile) => {
     this.setState({ isOverChildFile });
   }
 
@@ -454,13 +500,13 @@ class Folder extends Component {
     *  returns sorted children
     *  @return {}
     */
-  _childSort(array, type, reverse, children, section) {
+  _childSort = (array, type, reverse, children, section) => {
     array.sort((a, b) => {
       let lowerA;
 
 
       let lowerB;
-      if (type === 'az' || type === 'size' && section === 'folder') {
+      if ((type === 'az') || (type === 'size') && (section === 'folder')) {
         lowerA = a.toLowerCase();
         lowerB = b.toLowerCase();
         if (type === 'size' || !reverse) {
@@ -661,7 +707,10 @@ class Folder extends Component {
           }
           { state.expanded
             && childrenKeys.map((file, index) => {
-              if ((children && children[file] && children[file].edge && children[file].edge.node.isDir)) {
+              if ((children
+                && children[file]
+                && children[file].edge
+                && children[file].edge.node.isDir)) {
                 return (
                   <FolderDND
                     filename={file}
@@ -696,7 +745,10 @@ class Folder extends Component {
                     refetch={props.refetch}
                   />
                 );
-              } if ((children && children[file] && children[file].edge && !children[file].edge.node.isDir)) {
+              } if ((children
+                  && children[file]
+                  && children[file].edge
+                  && !children[file].edge.node.isDir)) {
                 return (
                   <File
                     filename={file}

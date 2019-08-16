@@ -4,7 +4,6 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // muations
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StopContainerMutation from 'Mutations/container/StopContainerMutation';
@@ -61,8 +60,7 @@ export default class LocalLabbookPanel extends Component {
   * fires when a componet mounts
   * adds a scoll listener to trigger pagination
   */
-  @boundMethod
-  _stopStartContainer(evt, status) {
+  _stopStartContainer = (evt, status) => {
     evt.preventDefault();
     evt.stopPropagation();
     evt.nativeEvent.stopImmediatePropagation();
@@ -83,8 +81,7 @@ export default class LocalLabbookPanel extends Component {
   * @param {string} status
   * starts labbook conatainer
   */
-  @boundMethod
-  _startContainerMutation() {
+  _startContainerMutation = () => {
     const self = this;
 
     const { owner, labbookName } = this.state;
@@ -108,8 +105,7 @@ export default class LocalLabbookPanel extends Component {
   * @param {string} status
   * stops labbbok conatainer
   */
-  @boundMethod
-  _stopContainerMutation() {
+  _stopContainerMutation = () => {
     const { owner, labbookName } = this.state;
 
     const self = this;
@@ -135,9 +131,7 @@ export default class LocalLabbookPanel extends Component {
   * @param {object,string} evt,status
   * stops labbbok conatainer
   ** */
-  @boundMethod
-  _updateTextStatusOver(evt, isOver, status) {
-    const newStatus = status;
+  _updateTextStatusOver = (evt, isOver, status) => {
     if (isOver) {
       if (status === 'Running') {
         this.setState({ textStatus: 'Stop' });
@@ -153,8 +147,7 @@ export default class LocalLabbookPanel extends Component {
   * @param {objectstring} evt,status
   * stops labbbok conatainer
   ** */
-  @boundMethod
-  _updateTextStatusOut(evt, status) {
+  _updateTextStatusOut = (evt, status) => {
     if (status !== 'loading') {
       this.setState({ textStatus: status });
     }

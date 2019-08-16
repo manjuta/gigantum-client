@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
-import { boundMethod } from 'autobind-decorator';
 // mutations
 import SetVisibilityMutation from 'Mutations/SetVisibilityMutation';
 import SetDatasetVisibilityMutation from 'Mutations/SetDatasetVisibilityMutation';
@@ -26,7 +25,7 @@ export default class PublishModal extends Component {
   *  sets public state
   *  @return {string}
   */
-  _setPublic(isPublic) {
+  _setPublic = (isPublic) => {
     this.setState({
       isPublic,
     });
@@ -37,8 +36,7 @@ export default class PublishModal extends Component {
   *  adds remote url to labbook
   *  @return {string}
   */
-  @boundMethod
-  _changeVisibility() {
+  _changeVisibility = () => {
     const { props, state } = this;
     const self = this;
     const visibility = state.isPublic ? 'public' : 'private';
@@ -104,8 +102,7 @@ export default class PublishModal extends Component {
   *  adds remote url to labbook
   *  @return {string}
   */
-  @boundMethod
-  _publishLabbook() {
+  _publishLabbook = () => {
     const { props, state } = this;
     const id = uuidv4();
     const self = this;
@@ -196,7 +193,7 @@ export default class PublishModal extends Component {
   *  triggers publish or change visibility
   *  @return {}
   */
-  _modifyVisibility() {
+  _modifyVisibility = () => {
     const { props } = this;
     if (props.header === 'Publish') {
       this._publishLabbook();

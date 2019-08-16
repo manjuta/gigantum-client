@@ -60,7 +60,7 @@ class CreateNav extends PureComponent<Props> {
     // declare css here
     const backButton = classNames({
       'CreateModal__progress-button': true,
-      'Btn--flat Btn--width-80': true,
+      'Btn--flat': true,
       hidden: (selectedComponentId === 'createLabbook'),
     });
     const createModalNav = classNames({
@@ -81,7 +81,7 @@ class CreateNav extends PureComponent<Props> {
           <button
             type="button"
             onClick={() => { hideModal(); }}
-            className="Btn--flat Btn--width-80"
+            className="Btn--flat"
           >
             Cancel
           </button>

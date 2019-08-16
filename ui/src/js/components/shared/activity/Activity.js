@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
-import { boundMethod } from 'autobind-decorator';
 import shallowCompare from 'react-addons-shallow-compare';
 // store
 import store from 'JS/redux/store';
@@ -267,8 +266,7 @@ class Activity extends Component {
    * removes scroll listener
    * @return {}
    */
-  @boundMethod
-  _scrollTo(evt) {
+  _scrollTo = (evt) => {
     if (document.documentElement.scrollTop === 0) {
       const { props } = this;
       const { relay } = props;
@@ -290,8 +288,7 @@ class Activity extends Component {
    * handles refiring new activity query if visibility changes back to visible
    * @return {}
    */
-  @boundMethod
-  _handleVisibilityChange() {
+  _handleVisibilityChange = () => {
     if (document.hasFocus()) {
       this._pollForActivity();
     }
@@ -303,8 +300,7 @@ class Activity extends Component {
    * kicks off scroll to top
    * @return {}
    */
-  @boundMethod
-  _getNewActivities() {
+  _getNewActivities = () => {
     window.addEventListener('scroll', this._scrollTo);
 
     this.setState({ newActivityAvailable: false });
@@ -320,8 +316,7 @@ class Activity extends Component {
    * sets hovered rollback position
    * @return {}
    */
-  @boundMethod
-  _setHoveredRollback(position) {
+  _setHoveredRollback = (position) => {
     const { props } = this;
     if (!props.isLocked) {
       this.setState({ hoveredRollback: position });
@@ -333,8 +328,7 @@ class Activity extends Component {
    * stops refetch from firing
    * @return {}
    */
-   @boundMethod
-  _pollForActivity() {
+  _pollForActivity = () => {
     const self = this;
     const { props } = this;
 
@@ -373,8 +367,7 @@ class Activity extends Component {
   * refetches component looking for new edges to insert at the top of the activity feed
   * @return {}
   */
-  @boundMethod
-   _refetch() {
+   _refetch = () => {
      const { props } = this;
      const { relay } = props;
 
@@ -395,8 +388,7 @@ class Activity extends Component {
   *  @param {}
   *  pagination container loads more items
   */
-  @boundMethod
-  _loadMore() {
+  _loadMore = () => {
     const { props } = this;
     const section = props[props.sectionType];
     const { activityRecords } = section;
@@ -429,8 +421,7 @@ class Activity extends Component {
   *  @param {}
   *  counts visible non clustered activity records
   */
-  @boundMethod
-  _countExpandedRecords() {
+  _countExpandedRecords = () => {
     const { props } = this;
     const section = props[props.sectionType];
     const records = (section.activityRecords !== undefined) ? section.activityRecords.edges : [];
@@ -463,8 +454,7 @@ class Activity extends Component {
     *   determines value of stickyDate by checking vertical offset and assigning it to the state
     *
   */
-  @boundMethod
-  _setStickyDate() {
+  _setStickyDate = () => {
     const { props, state } = this;
     let offsetAmount = ((window.location.hostname === config.demoHostName) || props.diskLow)
       ? 50 : 0;
@@ -505,8 +495,7 @@ class Activity extends Component {
   *   handles scolls and passes off loading to pagination container
   *
   */
-  @boundMethod
-  _handleScroll(evt) {
+  _handleScroll = (evt) => {
     const { props, state } = this;
     const section = props[props.sectionType];
     const { activityRecords } = section;
@@ -530,8 +519,7 @@ class Activity extends Component {
   *   toggles activity visibility
   *   @return {}
   */
-  @boundMethod
-  _toggleActivity() {
+  _toggleActivity = () => {
     const { modalVisible } = this.state;
     this.setState({
       modalVisible: !modalVisible,
@@ -543,8 +531,7 @@ class Activity extends Component {
   *   hides add activity
   *   @return {}
   */
-  @boundMethod
-  _hideAddActivity() {
+  _hideAddActivity = () => {
     this.setState({
       modalVisible: false,
     });
@@ -555,8 +542,7 @@ class Activity extends Component {
   *   hides add activity
   *   @return {}
   */
-  @boundMethod
-  _toggleRollbackMenu(node) {
+  _toggleRollbackMenu = (node) => {
     const { status } = store.getState().containerStatus;
     const { props } = this;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status);
@@ -577,8 +563,7 @@ class Activity extends Component {
   *   toggle create branch modal visibility
   *   @return {}
   */
-  @boundMethod
-  _toggleCreateModal() {
+  _toggleCreateModal = () => {
     const { createBranchVisible } = this.state;
     this.setState({ createBranchVisible: !createBranchVisible });
   }
@@ -588,8 +573,7 @@ class Activity extends Component {
   *   opens create branch modal and also sets selectedNode to null
   *   @return {}
   */
-  @boundMethod
-  _createBranch() {
+  _createBranch = () => {
     const { status } = store.getState().containerStatus;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status);
     if (canEditEnvironment) {
@@ -605,8 +589,7 @@ class Activity extends Component {
   *   isFullscreen is true, else it swaps existing state
   *   @return {}
   */
-  @boundMethod
-  _changeFullscreenState(isFullscreen) {
+  _changeFullscreenState = (isFullscreen) => {
     if (isFullscreen) {
       this.setState({ editorFullscreen: isFullscreen });
     } else {
@@ -620,8 +603,7 @@ class Activity extends Component {
   *   modifies expandedClusterObject from state
   *   @return {}
   */
-  @boundMethod
-  _expandCluster(indexItem) {
+  _expandCluster = (indexItem) => {
     const { state } = this;
     const { activityRecords } = state;
     activityRecords[indexItem.timestamp][indexItem.j].cluster = true;
@@ -634,8 +616,7 @@ class Activity extends Component {
     *   modifies expandedClusterObject from state
     *   @return {}
   */
-  @boundMethod
-  _addCluster(clusterElements) {
+  _addCluster = (clusterElements) => {
     const { props, state } = this;
     const section = props[props.sectionType];
     const newExpandedClusterObject = new Map(state.expandedClusterObject);
@@ -658,8 +639,7 @@ class Activity extends Component {
   *   adds or removes elements to cluster on expand and collapse
   *   @return {}
   */
-  @boundMethod
-  _compressExpanded(clusterElements, remove) {
+  _compressExpanded = (clusterElements, remove) => {
     const { compressedElements } = this.state;
     const newCompressedElements = new Set(compressedElements);
 

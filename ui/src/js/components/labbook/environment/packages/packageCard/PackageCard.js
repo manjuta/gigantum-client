@@ -1,6 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // components
 import AdvancedSearch from 'Components/common/advancedSearch/AdvancedSearch';
 import PackageHeader from './PackageHeader';
@@ -94,8 +93,7 @@ export default class PackageCard extends Component {
     @param {Array} tags
     sets component tags from child
   */
-  @boundMethod
-  _setTags(tags) {
+  _setTags = (tags) => {
     this.setState({ tags });
   }
 
@@ -103,8 +101,7 @@ export default class PackageCard extends Component {
   *  @param {String} sort
   *  sets sort state
   */
-  @boundMethod
-  _handleSort(sort) {
+  _handleSort = (sort) => {
     const { state } = this;
 
     if (sort === state.sort) {
@@ -118,8 +115,7 @@ export default class PackageCard extends Component {
   *  @param {Boolean} forceClear
   *  toggles selectedPackages
   */
-  @boundMethod
-  _selectPackages(forceClear) {
+  _selectPackages = (forceClear) => {
     const { props, state } = this;
     const packageEdges = props.packages;
     if (state.selectedPackages.size === packageEdges.length || forceClear) {
@@ -139,8 +135,7 @@ export default class PackageCard extends Component {
   *  @param {Object} pkg
   *  adds or removes package from selectedPackages
   */
-  @boundMethod
-  _selectSinglePackage(pkg) {
+  _selectSinglePackage = (pkg) => {
     const { state } = this;
     const hasPackage = state.selectedPackages.has(pkg.id);
     const newSelectedPackages = new Map(state.selectedPackages);

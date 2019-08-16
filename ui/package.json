@@ -83,6 +83,7 @@
     "create-object-url": "^1.0.2",
     "dateformat": "^3.0.3",
     "detect-browser": "^4.1.0",
+    "dockerode": "^2.5.8",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.11.1",
@@ -137,8 +138,8 @@
   "scripts": {
     "start": "node scripts/start.js NODE_ENV='development'",
     "build": "node scripts/build.js",
-    "test": "TZ='Europe/London' jest shared/fileBrowser activity dashboard",
-    "test-update": "TZ='Europe/London' jest shared/fileBrowser activity dashboard -u",
+    "test": "TZ='Europe/London' jest --env=jsdom shared/fileBrowser activity dashboard",
+    "test-update": "TZ='Europe/London' jest --env=jsdom shared/fileBrowser activity dashboard -u",
     "test-proxy": "USE_PROXY=true jest",
     "relay": "relay-compiler --watchman false --src ./src --schema ./schema.graphql",
     "relay-test": "relay-compiler --src ./__tests__ --schema ./schema.graphql",

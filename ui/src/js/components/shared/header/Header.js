@@ -71,7 +71,8 @@ class Header extends Component {
     updates html element classlist and labbook state
   */
   _showLabbookModal = () => {
-    if (!this.props.modalVisible) {
+    const { props } = this;
+    if (!props.modalVisible) {
       setModalVisible(true);
     }
   }
@@ -103,10 +104,6 @@ class Header extends Component {
   */
  _setPublishingState = (isPublishing) => {
    const { props } = this;
-
-   if (this.refs.ContainerStatus) {
-     this.refs.ContainerStatus.setState({ isPublishing });
-   }
 
    if ((props.isPublishing !== isPublishing)) {
      setPublishingState(isPublishing);
@@ -150,10 +147,6 @@ class Header extends Component {
   */
   _setSyncingState = (isSyncing) => {
     const { props } = this;
-
-    if (this.refs.ContainerStatus) {
-      this.refs.ContainerStatus.setState({ isSyncing });
-    }
 
     if (props.isSyncing !== isSyncing) {
       setSyncingState(isSyncing);

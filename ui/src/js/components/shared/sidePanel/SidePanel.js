@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import ReactDom from 'react-dom';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // config
 import config from 'JS/config';
 // assets
@@ -18,8 +17,7 @@ class SidePanel extends Component {
     updates panelState
     @return {}
   */
-  @boundMethod
-  _togglePanel() {
+  _togglePanel = () => {
     this.setState((state) => {
       const isPanelOpen = !state.isPanelOpen;
       return { isPanelOpen };

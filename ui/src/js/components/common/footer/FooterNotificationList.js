@@ -22,16 +22,33 @@ type Props = {
 */
 const getHeight = (messageList, messageListOpenItems) => {
   let height = (messageList.length > 6) ? 260 : messageList.length * 60;
-  height = (messageListOpenItems.length > 0) ? 'auto' : height;
+  height = (messageListOpenItems > 0) ? 'auto' : height;
   height = (height === 'auto') ? 'auto' : `${height}px`;
-
   return height;
 };
 
 export default class FooterNotificationList extends Component<Props> {
   props: Props;
 
-  state = { selectedBuildId: '' }
+  state = {
+    selectedBuildId: '',
+    messageBodyOpenCount: 0,
+  }
+
+  /**
+  *  @param {Boolean} messageBodyVisible
+  *  updates count of open items in the menu
+  */
+  _updateOpenCount = (messageBodyVisible) => {
+    this.setState((state) => {
+      const value = messageBodyVisible ? 1 : -1;
+      const messageBodyOpenCount = state.messageBodyOpenCount + value;
+      return {
+        ...state,
+        messageBodyOpenCount,
+      };
+    });
+  }
 
   /**
   *  @param {Boolean} selectedBuildId
@@ -48,8 +65,7 @@ export default class FooterNotificationList extends Component<Props> {
     const messageList = parentState.viewHistory
       ? parentState.messageStackHistory
       : parentState.messageStack;
-    const messageListOpenItems = messageList.filter(message => message.messageBodyOpen);
-    const height = getHeight(messageList, messageListOpenItems);
+    const height = getHeight(messageList, state.messageBodyOpenCount);
     // declare css here
     const footerMessageSectionClass = classNames({
       Footer__messageContainer: true,
@@ -86,6 +102,7 @@ export default class FooterNotificationList extends Component<Props> {
                   messageItem={messageItem}
                   selectedBuildId={state.selectedBuildId}
                   setBuildId={this._setBuildId}
+                  updateOpenCount={this._updateOpenCount}
                 />
               ))
             }

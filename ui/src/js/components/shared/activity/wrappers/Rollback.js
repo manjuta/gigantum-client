@@ -1,5 +1,5 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 // components
 import Tooltip from 'Components/common/Tooltip';
@@ -7,33 +7,21 @@ import Tooltip from 'Components/common/Tooltip';
 import './Rollback.scss';
 
 export default class Rollback extends Component {
-  state = {
-    isOver: false,
-  }
-
   /**
-    @param {Object} evt
+    @param {} -
     shows rollback modal, and passes record node to the modal
     @return {}
   */
-  _toggleRollback(evt) {
+  _toggleRollback = () => {
     const { props } = this;
     props.toggleRollbackMenu(props.record.edge.node);
   }
 
   render() {
-    const { props, state } = this;
+    const { props } = this;
+    const { record } = props;
 
-
-    const section = props.section;
-
-
-    const record = props.record;
-
-
-    const showTooltip = state.isOver && props.isLocked;
-
-
+    // declare css here
     const rollbackCSS = classNames({
       Rollback: true,
       'Rollback--locked': props.isLocked,
@@ -47,14 +35,16 @@ export default class Rollback extends Component {
       >
         <Tooltip section="activitySubmenu" />
         <button
+          type="button"
           disabled={props.isLocked}
           onMouseEnter={() => props.setHoveredRollback(record.flatIndex)}
           onMouseLeave={() => props.setHoveredRollback(null)}
           className="Rollback__button"
-          onClick={evt => this._toggleRollback(evt)}
+          onClick={() => this._toggleRollback()}
         >
               Rollback
         </button>
-      </div>);
+      </div>
+    );
   }
 }

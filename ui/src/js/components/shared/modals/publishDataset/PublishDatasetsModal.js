@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // store
 import { setErrorMessage, setMultiInfoMessage } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
@@ -58,8 +57,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {}
   */
-  @boundMethod
-  _passedSuccessCall() {
+  _passedSuccessCall = () => {
     const { props, state } = this;
     const successProgress = Object.assign({}, state.progress);
 
@@ -74,8 +72,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {}
   */
-  @boundMethod
-  _successCall() {
+  _successCall = () => {
     const { props, state } = this;
     const { owner, labbookName } = props;
     const isPublishing = props.header === 'Publish';
@@ -109,8 +106,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {}
   */
-  @boundMethod
-  _failureCall(errorMessage) {
+  _failureCall = (errorMessage) => {
     const { props } = this;
     const isPublishing = props.header === 'Publish';
 
@@ -132,8 +128,7 @@ export default class PublishDatasetsModal extends Component {
   *  triggers publish labbook mutation
   *  @return {}
   */
-  @boundMethod
-  _publishLabbookMutation() {
+  _publishLabbookMutation = () => {
     const { state } = this;
     const data = {
       setPublic: state.visibilityStatus.project,
@@ -157,7 +152,7 @@ export default class PublishDatasetsModal extends Component {
   *  loops through local datasets and triggers mutatiob to relink and publish
   *  @return {}
   */
-  _relinkDataset(datasetOwner, datasetName) {
+  _relinkDataset = (datasetOwner, datasetName) => {
     const { props, state } = this;
     const isPublishing = props.header === 'Publish';
 
@@ -210,8 +205,7 @@ export default class PublishDatasetsModal extends Component {
   *  gets a list of local datasets to publish
   *  @return {}
   */
-  @boundMethod
-  _unlinkDataset(datasetOwner, datasetName) {
+  _unlinkDataset = (datasetOwner, datasetName) => {
     const { state } = this;
     const newProgress = Object.assign({}, state.progress);
 
@@ -249,8 +243,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {string}
   */
-  @boundMethod
-  _setPublic(name, isPublic) {
+  _setPublic = (name, isPublic) => {
     const { state } = this;
     const NewVisibilityStatus = Object.assign({}, state.visibilityStatus);
 
@@ -264,8 +257,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {string}
   */
-  @boundMethod
-  _publishDataset(owner, name) {
+  _publishDataset = (owner, name) => {
     const { state } = this;
     const data = {
       datasetName: name,
@@ -289,8 +281,7 @@ export default class PublishDatasetsModal extends Component {
   *  adds remote url to labbook
   *  @return {string}
   */
-  @boundMethod
-  _publishLabbook() {
+  _publishLabbook = () => {
     const { props, state } = this;
     const self = this;
     const conatinerStatus = store.getState().containerStatus.status;
@@ -346,8 +337,7 @@ export default class PublishDatasetsModal extends Component {
   *  updates sync state
   *  @return {}
   */
-  @boundMethod
-  _buildImage(id) {
+  _buildImage = (id) => {
     const { props, state } = this;
     const { labbookName } = props;
     const data = { noCache: false };
@@ -374,7 +364,7 @@ export default class PublishDatasetsModal extends Component {
   *  set visibility
   *  @return {string}
   */
-  _modifyVisibility() {
+  _modifyVisibility = () => {
     const { props } = this;
     if (props.header === 'Publish') {
       this._publishLabbook();
@@ -388,8 +378,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets prompt state to false
   *  @return {}
   */
-  @boundMethod
-  _hidePrompt() {
+  _hidePrompt = () => {
     this.setState({ showPrompt: false });
   }
 

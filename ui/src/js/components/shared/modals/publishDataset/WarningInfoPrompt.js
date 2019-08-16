@@ -1,6 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // component
 import MoreInfo from './MoreInfo';
 
@@ -14,8 +13,7 @@ class WarningInfoPrompt extends Component {
   *  toggles moreInfo menu
   *  @return {}
   */
-  @boundMethod
-  _toggleMoreInfo() {
+  _toggleMoreInfo = () => {
     this.setState((prevState) => {
       return ({ moreInfo: !prevState.moreInfo });
     });

@@ -1,20 +1,23 @@
 // vendor
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
-export default class PaginationLoader extends Component {
+class PaginationLoader extends PureComponent {
   render() {
+    const { props } = this;
     const PaginationLoaderCSS = classNames({
-      [`ActivityCard ActivityCard__loader ActivityCard__loader--${this.props.index} card`]: this.props.isLoadingMore,
-      'ActivityCard ActivityCard__loader-hidden': !this.props.isLoadingMore,
+      [`ActivityCard ActivityCard__loader ActivityCard__loader--${props.index} card`]: props.isLoadingMore,
+      'ActivityCard ActivityCard__loader-hidden': !props.isLoadingMore,
       'column-1-span-9': true,
     });
 
     return (
       <div
-        key={`Activity-loader-card-${this.props.index}`}
+        key={`Activity-loader-card-${props.index}`}
         className={PaginationLoaderCSS}
       />
     );
   }
 }
+
+export default PaginationLoader;

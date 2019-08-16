@@ -71,7 +71,10 @@ export default class AddPackageForm extends Component {
   */
   _setselectedPackageManager = (selectedManager) => {
     this.packageNameInput.focus();
-    this.setState({ selectedManager, managerDropdownVisible: false });
+    this.setState({
+      selectedManager,
+      managerDropdownVisible: false,
+    });
 
     if (selectedManager === 'apt') {
       this.setState({ version: '' });
@@ -268,7 +271,7 @@ export default class AddPackageForm extends Component {
             className="AddPackageForm__entry-buttons align-self--end"
           >
             <button
-              className="Btn Btn--flat Btn--width-80"
+              className="Btn Btn--flat"
               disabled={buttonsDisabled}
               type="button"
               onClick={() => this._clearPackageName()}

@@ -14,7 +14,10 @@ import './BaseCard.scss';
 */
 const getLanguages = (node) => {
   let languages = node.languages.length > 1 ? 'Languages:' : 'Language:';
-  node.languages.forEach((language, index) => languages += ` ${language}${index === node.languages.length - 1 ? '' : ','}`);
+  node.languages.forEach((language, index) => {
+    const separator = (index === (node.languages.length - 1)) ? '' : ',';
+    languages += ` ${language}${separator}`;
+  });
 
   return languages;
 };
@@ -27,7 +30,10 @@ const getLanguages = (node) => {
 */
 const getEnvironments = (node) => {
   let environments = node.developmentTools.length > 1 ? 'Environments:' : 'Environment:';
-  node.developmentTools.forEach((environment, index) => environments += ` ${environment}${index === node.developmentTools.length - 1 ? '' : ','}`);
+  node.developmentTools.forEach((environment, index) => {
+    const separator = (index === (node.developmentTools.length - 1)) ? '' : ',';
+    environments += ` ${environment}${separator}`;
+  });
 
   return environments;
 };
@@ -45,7 +51,12 @@ const getInstallDictionary = (node) => {
     const pkgManager = pkg[0];
     const pkgName = pkg[1];
     const pkgVersion = pkg[2];
-    installedPackagesDictionary[pkgManager] ? installedPackagesDictionary[pkgManager].push({ pkgName, pkgVersion }) : installedPackagesDictionary[pkgManager] = [{ pkgName, pkgVersion }];
+
+    if (installedPackagesDictionary[pkgManager]) {
+      installedPackagesDictionary[pkgManager].push({ pkgName, pkgVersion });
+    } else {
+      installedPackagesDictionary[pkgManager] = [{ pkgName, pkgVersion }];
+    }
   });
 
   return installedPackagesDictionary;
@@ -62,11 +73,13 @@ export default class BaseCard extends Component {
   * return {}
   */
   _setBooleanState(evt, type) {
-    const { state } = this;
     evt.preventDefault();
     evt.stopPropagation();
 
-    this.setState({ [type]: !state[type] });
+    this.setState((state) => {
+      const boolValue = !state[type];
+      return { [type]: boolValue };
+    });
   }
 
   render() {
@@ -135,17 +148,16 @@ export default class BaseCard extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {
-                        Object.keys(installedPackagesDictionary).map((manager, index) => installedPackagesDictionary[manager].map(pkg => (
-                          <tr
-                            key={manager + pkg.pkgName + pkg.pgkVersion}
-                            className="BaseDetails__table-row"
-                          >
-                            <td>{manager}</td>
-                            <td>{pkg.pkgName}</td>
-                            <td>{pkg.pkgVersion}</td>
-                          </tr>
-                        )))
+                    { Object.keys(installedPackagesDictionary).map(manager => installedPackagesDictionary[manager].map(pkg => (
+                        <tr
+                          key={manager + pkg.pkgName + pkg.pgkVersion}
+                          className="BaseDetails__table-row"
+                        >
+                          <td>{manager}</td>
+                          <td>{pkg.pkgName}</td>
+                          <td>{pkg.pkgVersion}</td>
+                        </tr>
+                      )))
                       }
                   </tbody>
                 </table>
@@ -157,8 +169,9 @@ export default class BaseCard extends Component {
           </div>
           <div className={actionCSS}>
             <button
+              type="button"
               onClick={(evt) => { this._setBooleanState(evt, 'expanded'); }}
-              className="Btn Btn__dropdown Btn--flat"
+              className="Btn Btn__dropdown Btn--flat-icon"
             />
           </div>
         </div>

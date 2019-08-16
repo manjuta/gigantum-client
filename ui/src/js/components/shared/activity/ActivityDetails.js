@@ -4,16 +4,10 @@ import ActivityDetailList from './ActivityDetailList';
 
 
 export default class ActivityCard extends Component {
-  constructor(props) {
-  	super(props);
-    this.state = {
-      showExtraInfo: props.node.show,
-      showEllispsis: !props.node.show,
-    };
-
-    this._toggleExtraInfo = this._toggleExtraInfo.bind(this);
-    this._hideElipsis = this._hideElipsis.bind(this);
-  }
+  state = {
+    showExtraInfo: this.props.node.show,
+    showEllispsis: !this.props.node.show,
+  };
 
   /**
   *  @param {} -
@@ -21,7 +15,10 @@ export default class ActivityCard extends Component {
   *  @param {}
   */
   _toggleExtraInfo = () => {
-    this.setState({ showExtraInfo: !this.state.showExtraInfo });
+    this.setState((state) => {
+      const showExtraInfo = !state.showExtraInfo;
+      return { showExtraInfo };
+    });
   }
 
   /**
@@ -30,7 +27,7 @@ export default class ActivityCard extends Component {
     inputs a time stamp and return the time of day HH:MM am/pm
     @return {string}
   */
-  _getTimeOfDay(timestamp) {
+  _getTimeOfDay = (timestamp) => {
     const time = (timestamp !== undefined) ? new Date(timestamp) : new Date();
     const hour = (time.getHours() % 12 === 0) ? 12 : time.getHours() % 12;
     const unformatedMinutes = time.getMinutes();
@@ -44,7 +41,7 @@ export default class ActivityCard extends Component {
     loobest through detailObjects array to get format an object of details
     @return {Object} categories
   */
-  _catagorizeDetails(node) {
+  _catagorizeDetails = (node) => {
     const categories = {
       detailObjects: {},
       detailKeys: {},
@@ -68,15 +65,14 @@ export default class ActivityCard extends Component {
     sets state to hide ellipsis for shortening
     @return {}
   */
-  _hideElipsis() {
+  _hideElipsis = () => {
     this.setState({ showEllispsis: false });
   }
 
   render() {
     const { props, state } = this;
-
-
     const categorizedDetails = this._catagorizeDetails(props.node);
+
     return (
       <div className="ActivityDetail">
         {

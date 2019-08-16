@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // store
 import { setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/actions/footer';
@@ -10,7 +9,6 @@ import './DevTools.scss';
 
 class DevTools extends Component {
   state = {
-    isMouseOver: false,
     selectedDevTool: (() => {
       const { owner, name } = this.props.labbook;
       const defaultFromApi = this.props.labbook.environment.base ? this.props.labbook.environment.base.developmentTools[0] : 'jupyterlab';
@@ -50,8 +48,7 @@ class DevTools extends Component {
   *  closes dev tool
   *  @return {}
   */
-  @boundMethod
-  _closeDevtoolMenu(evt) {
+  _closeDevtoolMenu = (evt) => {
     if (evt.target.className.indexOf('DevTool') < 0) {
       this.setState({ showDevList: false });
     }
@@ -62,8 +59,7 @@ class DevTools extends Component {
   *  upodates state if the conditions are met
   *  @return {}
   */
-  @boundMethod
-  _toggleDevtoolMenu(evt) {
+  _toggleDevtoolMenu = (evt) => {
     const { state } = this;
     this.setState({ showDevList: !state.showDevList });
   }
@@ -74,8 +70,7 @@ class DevTools extends Component {
   *  mutation to trigger opening of development tool
   *  @return {}
   */
-  @boundMethod
-  _openDevToolMuation(developmentTool) {
+  _openDevToolMuation = (developmentTool) => {
     const { props } = this;
     const { containerStatus, imageStatus } = props;
     const { owner, name } = props.labbook;
@@ -154,8 +149,7 @@ class DevTools extends Component {
   *  mutation to trigger opening of development tool
   *  @return {}
   */
-  @boundMethod
-  _selectDevTool(developmentTool) {
+  _selectDevTool = (developmentTool) => {
     const { props } = this;
     const { owner, name } = props.labbook;
     const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};

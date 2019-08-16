@@ -386,8 +386,9 @@ class Labbook extends Component {
             containerStatusList.push(environment.imageStatus);
             const containerStatusLength = containerStatusList.length;
             const previousImageStatus = containerStatusList[containerStatusLength - 2];
-            if ((previousImageStatus !== 'BUILD_IN_PROGRESS')
-              && (environment.imageStatus === 'EXISTS')
+
+            if (((previousImageStatus !== 'BUILD_IN_PROGRESS') || (previousImageStatus !== 'BUILD_FAILED'))
+              && ((environment.imageStatus === 'EXISTS') || (environment.imageStatus === 'BUILD_FAILED'))
               && isBuilding) {
               setBuildingState(owner, name, false);
             }

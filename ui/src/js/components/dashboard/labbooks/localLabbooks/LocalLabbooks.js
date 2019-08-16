@@ -4,7 +4,6 @@ import {
   createPaginationContainer,
   graphql,
 } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
 // components
 import LocalLabbookPanel from 'Components/dashboard/labbooks/localLabbooks/LocalLabbookPanel';
 import CardLoader from 'Components/dashboard/shared/loaders/CardLoader';
@@ -61,8 +60,7 @@ export class LocalLabbooks extends Component {
     *  @param {}
     *  loads more labbooks using the relay pagination container
   */
-  @boundMethod
-  _loadMore() {
+  _loadMore = () => {
     const { props } = this;
     this.setState({
       isPaginating: true,
@@ -87,8 +85,7 @@ export class LocalLabbooks extends Component {
     *  fires when user scrolls
     *  if nextPage exists and user is scrolled down, it will cause loadmore to fire
   */
-  @boundMethod
-  _captureScroll() {
+  _captureScroll = () => {
     const { props, state } = this;
     const root = document.getElementById('root');
     const distanceY = window.innerHeight + document.documentElement.scrollTop + 200;
@@ -106,8 +103,7 @@ export class LocalLabbooks extends Component {
   * @param {}
   * calls ContainerLookup query and attaches the returned data to the state
   */
-  @boundMethod
-  _containerLookup() {
+  _containerLookup = () => {
     const { props, state } = this;
     const self = this;
 
@@ -136,8 +132,7 @@ export class LocalLabbooks extends Component {
     * @param {integer} count
     * attempts to fetch a demo if no labbooks are present, 3 times
   */
-  @boundMethod
-  _fetchDemo(count = 0) {
+  _fetchDemo = (count = 0) => {
     const { props } = this;
     if (count < 3) {
       const self = this;
@@ -156,11 +151,10 @@ export class LocalLabbooks extends Component {
   }
 
   /** *
-  * @param {}
+  * @param {} -
   * calls VisibilityLookup query and attaches the returned data to the state
   */
-  @boundMethod
-  _visibilityLookup() {
+  _visibilityLookup = () => {
     const { props } = this;
     const self = this;
     const idArr = props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id);

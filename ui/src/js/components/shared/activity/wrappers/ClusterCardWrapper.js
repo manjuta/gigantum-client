@@ -1,30 +1,24 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 // components
-import ErrorBoundary from 'Components/common/ErrorBoundary';
 import Tooltip from 'Components/common/Tooltip';
-import ActivityCard from '../ActivityCard';
 import CardWrapper from './CardWrapper';
 // Styles
 import './ClusterCardWrapper.scss';
 
-export default class ClusterCardWrapper extends Component {
-  constructor(props) {
-  	super(props);
-  	this.state = {
-      expanded: props.record.cluster.expanded,
-      shrink: false,
-      mousePoint: null,
-    };
-  }
+class ClusterCardWrapper extends Component {
+  state = {
+    expanded: this.props.record.cluster.expanded,
+    shrink: false,
+  };
 
   /**
     @param {Object} evt
     toggles submenu
     @return {}
   */
-  _toggleSubmenu(evt) {
+  _toggleSubmenu = (evt) => {
     const { props } = this;
     props.toggleSubmenu(evt);
   }
@@ -34,7 +28,7 @@ export default class ClusterCardWrapper extends Component {
     sets state of cluster to expand or collapse
     @return {}
   */
-  _toggleCluster(expanded) {
+  _toggleCluster = (expanded) => {
     this.setState({ expanded });
   }
 
@@ -44,28 +38,21 @@ export default class ClusterCardWrapper extends Component {
     shrinks cards on mouseover to indicate collapse
     @return {}
   */
-  _toggleShrink(evt, shrink) {
-    const { state } = this;
+  _toggleShrink = (evt, shrink) => {
     this.setState({ shrink });
   }
 
   render() {
     const { props, state } = this;
-
-
     const { record } = props;
+    const shouldBeFaded = props.hoveredRollback > record.flatIndex;
 
-
-    const shouldBeFaded = props.hoveredRollback > props.record.flatIndex;
-
-
+    // declare css here
     const clusterCSS = classNames({
       'ActivityCard--cluster': true,
       'column-1-span-9': true,
       faded: shouldBeFaded,
     });
-
-
     const clusterWrapperCSS = classNames({
       'ClusterCardWrapper flex justify--space-between flex--column': true,
       'ClusterCardWrapper--shrink': state.shrink,
@@ -91,6 +78,7 @@ export default class ClusterCardWrapper extends Component {
         </div>
       );
     }
+
     return (
       <div className={clusterWrapperCSS}>
 
@@ -119,3 +107,5 @@ export default class ClusterCardWrapper extends Component {
     );
   }
 }
+
+export default ClusterCardWrapper;

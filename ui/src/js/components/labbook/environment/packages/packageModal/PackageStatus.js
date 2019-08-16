@@ -176,7 +176,7 @@ export default class PackageStatus extends Component {
                 <div className="flex">
                   <button
                     type="button"
-                    className="Btn Btn--flat Btn--width-80"
+                    className="Btn Btn--flat"
                     onClick={() => { props.removePackageFromQueue(index); }}
                   >
                   Remove

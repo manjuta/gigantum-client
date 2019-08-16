@@ -13,7 +13,8 @@ import './FooterMessage.scss';
 type Props = {
   messageItem: PropTypes.object.isRequired,
   selectedBuildId: PropTypes.string,
-  setBuildId: PropTypes.func
+  setBuildId: PropTypes.func,
+  updateOpenCount: PropTypes.func,
 };
 
 
@@ -28,9 +29,11 @@ class FooterMessage extends PureComponent<Props> {
   *  @param {} -
   *  sets state to expand body of extra message content
   */
-  _showMessageBody() {
+  _showMessageBody = () => {
+    const { props } = this;
     this.setState((state) => {
       const messageBodyVisible = !state.messageBodyVisible;
+      props.updateOpenCount(messageBodyVisible);
 
       return { messageBodyVisible };
     });

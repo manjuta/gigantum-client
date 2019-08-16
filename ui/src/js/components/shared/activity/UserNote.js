@@ -11,22 +11,13 @@ import './UserNote.scss';
 
 let simple;
 
-export default class UserNote extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      tags: [],
-      userSummaryText: '',
-      addNoteDisabled: true,
-      unsubmittedTag: '',
-    };
-
-    this._addNote = this._addNote.bind(this);
-    this._handleDelete = this._handleDelete.bind(this);
-    this._handleAddition = this._handleAddition.bind(this);
-    this._handleDrag = this._handleDrag.bind(this);
-  }
+class UserNote extends Component {
+  state = {
+    tags: [],
+    userSummaryText: '',
+    addNoteDisabled: true,
+    unsubmittedTag: '',
+  };
 
   /**
     @param {}
@@ -98,19 +89,19 @@ export default class UserNote extends Component {
   }
 
   /**
-    @param {number} i
+    @param {number} index
     removes tag from list
   */
-   _handleDelete = (i) => {
+   _handleDelete = (index) => {
      const { tags } = this.state;
 
-     tags.splice(i, 1);
+     tags.splice(index, 1);
 
      this.setState({ tags });
    }
 
    /**
-     @param {number} i
+     @param {String} tag
      add tag to list
    */
    _handleAddition = (tag) => {
@@ -120,7 +111,9 @@ export default class UserNote extends Component {
    }
 
    /**
-     @param {number} i
+     @param {String} tag
+     @param {Number} curPos
+     @param {Number} newPos
      drags tag to new position.
    */
    _handleDrag = (tag, currPos, newPos) => {
@@ -144,11 +137,11 @@ export default class UserNote extends Component {
    }
 
    /**
-     @param {object} event
+     @param {Object} event
      calls updates state for summary text
      and enables addNote button if > 0
    */
-   _setUserSummaryText(evt) {
+   _setUserSummaryText = (evt) => {
      const summaryText = evt.target.value;
      this.setState({
        userSummaryText: summaryText,
@@ -158,7 +151,7 @@ export default class UserNote extends Component {
 
 
    render() {
-     const { state } = this;
+     const { props, state } = this;
      const { tags } = state;
 
      return (
@@ -166,7 +159,7 @@ export default class UserNote extends Component {
 
          <div
            className="UserNote__close close"
-           onClick={() => this.props.toggleUserNote(false)}
+           onClick={() => props.toggleUserNote(false)}
          />
 
          <input
@@ -194,7 +187,7 @@ export default class UserNote extends Component {
            <button
              type="submit"
              className="Btn Btn--flat"
-             onClick={() => this.props.toggleUserNote(false)}
+             onClick={() => props.toggleUserNote(false)}
            >
              Cancel
            </button>
@@ -211,3 +204,5 @@ export default class UserNote extends Component {
      );
    }
 }
+
+export default UserNote;

@@ -11,6 +11,8 @@ import store from 'JS/redux/store';
 // assets
 import './DetailRecords.scss';
 
+const { owner, labbookName } = store.getState().routes;
+
 const DetailRecordsQuery = graphql`
 query DetailRecordsQuery($name: String!, $owner: String!, $keys: [String]){
   labbook(name: $name, owner: $owner){
@@ -48,17 +50,10 @@ query DetailRecordsDatasetsQuery($name: String!, $owner: String!, $keys: [String
 
 
 export default class UserNote extends Component {
-  constructor(props) {
-  	super(props);
-
-    const { owner, labbookName } = store.getState().routes;
-
-    this.state = {
-      owner,
-      labbookName,
-    };
-    this._setLinks = this._setLinks.bind(this);
-  }
+  state = {
+    owner,
+    labbookName,
+  };
 
   /**
    * Lifecycle methods start
@@ -85,12 +80,16 @@ export default class UserNote extends Component {
   /**
    * Lifecycle methods end
    */
-  _setLinks() {
+  _setLinks = () => {
     const elements = Array.prototype.slice.call(document.getElementsByClassName('ReactMarkdown'));
     const moreObj = {};
     elements.forEach((elOuter, index) => {
-      if (this._checkOverflow(elOuter) === true) moreObj[index] = true;
-      if (this._checkOverflow(elOuter.childNodes[elOuter.childNodes.length - 1]) === true) moreObj[index] = true;
+      if (this._checkOverflow(elOuter) === true) {
+        moreObj[index] = true;
+      }
+      if (this._checkOverflow(elOuter.childNodes[elOuter.childNodes.length - 1]) === true) {
+        moreObj[index] = true;
+      }
     });
     const pElements = Array.prototype.slice.call(document.getElementsByClassName('DetailsRecords__link'));
 
@@ -116,10 +115,13 @@ export default class UserNote extends Component {
     checks if elements scrollheight is greater than it's client height
     @return {boolean} isOverflowing
   */
-  _checkOverflow(element) {
+  _checkOverflow = (element) => {
     if (element) {
       const curOverflow = element.style.overflow;
-      if (!curOverflow || curOverflow === 'visible') { element.style.overflow = 'hidden'; }
+      if (!curOverflow || (curOverflow === 'visible')) {
+        element.style.overflow = 'hidden';
+      }
+
       const isOverflowing = element.clientHeight + 3 < element.scrollHeight;
       return isOverflowing;
     }
@@ -130,7 +132,7 @@ export default class UserNote extends Component {
     returns tag to render if item matches a case
     @return {JSX}
   */
-  _renderDetail(item) {
+  _renderDetail = (item) => {
     switch (item[0]) {
       case 'text/plain':
         return (<div className="ReactMarkdown"><p>{item[1]}</p></div>);
@@ -162,7 +164,7 @@ export default class UserNote extends Component {
     toggles content in a record when it has more to show
     @return {}
   */
-  _moreClicked(target) {
+  _moreClicked = (target) => {
     // TODO remove setting classNames in react, using state is preffered
     if (target.className !== 'DetailsRecords__link-clicked') {
       const elements = Array.prototype.slice.call(document.getElementsByClassName('ReactMarkdown'));
@@ -188,8 +190,9 @@ export default class UserNote extends Component {
       owner: state.owner,
       name: state.labbookName,
     };
-
-    const query = props.sectionType === 'labbook' ? DetailRecordsQuery : DetailRecordsDatasetsQuery;
+    const query = (props.sectionType === 'labbook')
+      ? DetailRecordsQuery
+      : DetailRecordsDatasetsQuery;
 
     return (
       <QueryRenderer
@@ -219,9 +222,14 @@ export default class UserNote extends Component {
                                 >
                                   {this._renderDetail(item)}
                                   <div className="DetailsRecords hidden" />
-                                  <p className="DetailsRecords__link hidden" onClick={e => this._moreClicked(e.target)}>More...</p>
+                                  <p
+                                    className="DetailsRecords__link hidden"
+                                    onClick={e => this._moreClicked(e.target)}>
+                                      More...
+                                  </p>
                                   {this._setLinks()}
-                                </li>))
+                                </li>
+                              ))
                             }
                           </div>
                         );
