@@ -222,7 +222,8 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
 
 
 def check_and_import_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str, remote_url: str,
-                             access_token: Optional[str] = None, config_file: Optional[str] = None) -> None:
+                             access_token: Optional[str] = None, id_token: Optional[str] = None,
+                             config_file: Optional[str] = None) -> None:
     """Job to check if a dataset exists in the user's working directory, and if not import it. This is primarily used
     when importing, syncing, or switching branches on a project with linked datasets
 
@@ -232,6 +233,7 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
         dataset_name: Name of the labbook if this dataset is linked
         remote_url: URL of the dataset to import if needed
         access_token: The current user's access token, needed to initialize git credentials in certain situations
+        id_token: The current user's id token, needed to initialize git credentials in certain situations
         config_file: config file (used for test mocking)
 
     Returns:
@@ -258,6 +260,9 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
             config_obj = Configuration(config_file=config_file)
 
             if access_token:
+                if not id_token:
+                    raise ValueError("Access and ID tokens are required to initialize git credentials")
+
                 # If the access token is set, git creds should be configured
                 remote_parts = urlsplit(remote_url)
                 if remote_parts.netloc:
@@ -274,7 +279,8 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
                 if not admin_service:
                     raise ValueError(f"Failed to configure admin service URL based on target remote: {remote_target}")
 
-                gl_mgr = GitLabManager(remote_target, admin_service=admin_service, access_token=access_token)
+                gl_mgr = GitLabManager(remote_target, admin_service=admin_service,
+                                       access_token=access_token, id_token=id_token)
                 gl_mgr.configure_git_credentials(remote_target, logged_in_username)
 
             gitworkflows_utils.clone_repo(remote_url=remote_url, username=logged_in_username, owner=dataset_owner,

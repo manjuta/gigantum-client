@@ -124,7 +124,7 @@ class LocalIdentityManager(IdentityManager):
             self._safe_cached_id_access(id_token)
 
             # Check if it's the first time this user has logged into this instance
-            self._check_first_login(self.user.username, access_token)
+            self._check_first_login(self.user.username, access_token, id_token)
 
             return self._user
 

@@ -1,6 +1,7 @@
 from typing import Optional
 import pytest
 import mock
+import responses
 import tempfile
 import shutil
 import subprocess
@@ -14,6 +15,7 @@ from collections import namedtuple
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeError, MergeOverride
+from gtmcore.workflows.gitworkflows_utils import create_remote_gitlab_repo
 from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
 from gtmcore.inventory.branching import BranchManager, MergeConflict
@@ -23,6 +25,11 @@ import gtmcore.dispatcher.dataset_jobs
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.fixtures.datasets import helper_append_file
 from gtmcore.dataset.io.manager import IOManager
+
+
+def _mock_fetch(self, remote):
+    assert isinstance(remote, str)
+    pass
 
 
 class TestGitWorkflowsMethods(object):
@@ -679,3 +686,26 @@ class TestGitWorkflowsMethods(object):
                 wf.sync(username=username, feedback_callback=update_feedback)
                 assert os.path.exists(wf.remote)
                 assert len(glob.glob(f'{iom.push_dir}/*')) == 0
+
+    @responses.activate
+    @mock.patch('gtmcore.gitlib.git_fs_shim.GitFilesystemShimmed.fetch', new=_mock_fetch)
+    def test_create_remote_gitlab_repo(self, mock_config_file):
+        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
+                      json={'key': 'afaketoken'}, status=200)
+
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/test%2Flabbook-1',
+                      status=404)
+        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects', status=201)
+        responses.add(responses.POST, 'https://usersrv.gigantum.io/webhook/test/labbook-1', status=201)
+
+        username = 'test'
+        im = InventoryManager(mock_config_file[0])
+        lb = im.create_labbook(username, username, 'labbook-1')
+
+        with pytest.raises(ValueError):
+            create_remote_gitlab_repo(lb, username, 'private', 'afakeaccesstoken', None)
+
+        create_remote_gitlab_repo(lb, username, 'private', 'afakeaccesstoken', "afakeidtoken")
+
+        assert lb.remote == 'https://repo.gigantum.io/test/labbook-1.git'
+

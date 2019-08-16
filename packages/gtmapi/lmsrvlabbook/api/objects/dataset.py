@@ -3,6 +3,7 @@ import base64
 import math
 import flask
 from gtmcore.activity import ActivityStore
+from gtmcore.configuration import Configuration
 
 from lmsrvcore.caching import DatasetCacheController
 from lmsrvcore.auth.identity import parse_token
@@ -157,22 +158,20 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             info: The graphene info object for this requests
 
         """
-        # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = dataset.client_config.config['git']['default_remote']
-        admin_service = None
-        for remote in dataset.client_config.config['git']['remotes']:
-            if default_remote == remote:
-                admin_service = dataset.client_config.config['git']['remotes'][remote]['admin_service']
-                break
+        # Get remote server configuration
+        config = Configuration()
+        remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer token
-        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        else:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+        # Extract valid Bearer and ID tokens
+        access_token = flask.g.get('access_token', None)
+        id_token = flask.g.get('id_token', None)
+        if not access_token or not id_token:
+            raise ValueError("Deleting a remote Dataset requires a valid session.")
 
         # Get collaborators from remote service
-        mgr = GitLabManager(default_remote, admin_service, token)
+        mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'],
+                            access_token=access_token,
+                            id_token=id_token)
         try:
             self._collaborators = [Collaborator(owner=self.owner, name=self.name,
                                                 collaborator_username=c[1],
@@ -411,22 +410,20 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     @staticmethod
     def helper_resolve_visibility(dataset, info):
-        # TODO: Future work will look up remote in Dataset data, allowing user to select remote.
-        default_remote = dataset.client_config.config['git']['default_remote']
-        admin_service = None
-        for remote in dataset.client_config.config['git']['remotes']:
-            if default_remote == remote:
-                admin_service = dataset.client_config.config['git']['remotes'][remote]['admin_service']
-                break
+        # Get remote server configuration
+        config = Configuration()
+        remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer token
-        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        else:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+        # Extract valid Bearer and ID tokens
+        access_token = flask.g.get('access_token', None)
+        id_token = flask.g.get('id_token', None)
+        if not access_token or not id_token:
+            raise ValueError("Deleting a remote Dataset requires a valid session.")
 
-        # Get collaborators from remote service
-        mgr = GitLabManager(default_remote, admin_service, token)
+        mgr = GitLabManager(remote_config['git_remote'],
+                            remote_config['admin_service'],
+                            access_token=access_token,
+                            id_token=id_token)
         try:
             owner = InventoryManager().query_owner(dataset)
             d = mgr.repo_details(namespace=owner, repository_name=dataset.name)

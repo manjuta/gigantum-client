@@ -445,9 +445,6 @@ class TestDatasetMutations(object):
                       json=[{'status': 'queueing for delete'}],
                       status=200)
 
-        flask.g.access_token = "asdfasdfasdfasdf"
-        flask.g.id_token = "ghjfghjfghjfghj"
-
         im = InventoryManager(fixture_working_dir[0])
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
@@ -471,9 +468,6 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset_not_local(self, fixture_working_dir):
-        flask.g.access_token = "asdfasdfasdfasdf"
-        flask.g.id_token = "ghjfghjfghjfghj"
-
         query = """
                 mutation myMutation($owner: String!, $datasetName: String!) {
                   deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: false, remote: true}) {
@@ -493,6 +487,9 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
+
+        flask.g.access_token = None
+        flask.g.id_token = None
 
         query = """
                 mutation myMutation($owner: String!, $datasetName: String!) {
@@ -528,9 +525,6 @@ class TestDatasetMutations(object):
                             },
                       status=400)
 
-        flask.g.access_token = "asdfasdfasdfasdf"
-        flask.g.id_token = "ghjfghjfghjfghj"
-
         im = InventoryManager(fixture_working_dir[0])
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
@@ -556,8 +550,6 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
-        flask.g.access_token = "asdf"
-        flask.g.id_token = "1234"
 
         query = """
                    {
@@ -635,8 +627,6 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
-        flask.g.access_token = "asdf"
-        flask.g.id_token = "1234"
 
         query = """
                     mutation myMutation{
@@ -665,8 +655,6 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
-        flask.g.access_token = "asdf"
-        flask.g.id_token = "1234"
 
         # configure backend and local dir
         working_dir = fixture_working_dir_dataset_tests[1]
@@ -696,8 +684,6 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
-        flask.g.access_token = "asdf"
-        flask.g.id_token = "1234"
 
         # configure backend and local dir
         working_dir = fixture_working_dir_dataset_tests[1]
@@ -727,8 +713,6 @@ class TestDatasetMutations(object):
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
-        flask.g.access_token = "asdf"
-        flask.g.id_token = "1234"
 
         # configure backend and local dir
         working_dir = fixture_working_dir_dataset_tests[1]

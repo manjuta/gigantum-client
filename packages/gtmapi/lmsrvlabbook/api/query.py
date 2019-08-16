@@ -259,7 +259,7 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
             remote = remote_config.get('git_remote')
 
         # Get collaborators from remote service
-        mgr = GitLabManager(remote, auth_service, flask.g.access_token)
+        mgr = GitLabManager(remote, auth_service, flask.g.access_token, flask.g.id_token)
         if mgr.repository_exists(logged_in_username, name):
             return False
 

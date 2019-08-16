@@ -136,6 +136,8 @@ def fixture_working_dir():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
             client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
@@ -174,8 +176,10 @@ def fixture_working_dir_lfs_disabled():
         app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
 
         with app.app_context():
-            # within this block, current_app points to app. Set current usert explicitly(this is done in the middleware)
+            # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
             client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
@@ -216,6 +220,8 @@ def fixture_working_dir_env_repo_scoped():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
             client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
@@ -287,6 +293,8 @@ def fixture_working_dir_populated_scoped():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
             client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
@@ -359,6 +367,8 @@ def fixture_working_dir_dataset_populated_scoped():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
             client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
@@ -411,6 +421,8 @@ def fixture_single_dataset():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
             client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())

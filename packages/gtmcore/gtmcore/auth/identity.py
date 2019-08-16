@@ -79,7 +79,8 @@ class IdentityManager(metaclass=abc.ABCMeta):
     def user(self, value: User) -> None:
         self._user = value
 
-    def _check_first_login(self, username: Optional[str], access_token: Optional[str]) -> None:
+    def _check_first_login(self, username: Optional[str],
+                           access_token: Optional[str], id_token: Optional[str]) -> None:
         """Method to check if this is the first time a user has logged in. If so, import the demo labbook
 
         All child classes should place this method at the end of their `get_user_profile()` implementation
@@ -95,6 +96,9 @@ class IdentityManager(metaclass=abc.ABCMeta):
 
         if not access_token:
             raise ValueError("Cannot check first login without a valid access_token")
+
+        if not id_token:
+            raise ValueError("Cannot check first login without a valid id_token")
 
         if self.config.config['core']['import_demo_on_first_login']:
             user_dir = os.path.join(working_directory, username)
@@ -138,7 +142,9 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 if not admin_service:
                     raise ValueError('admin_service could not be found')
 
-                check_and_add_user(admin_service=admin_service, access_token=access_token, username=username)
+                check_and_add_user(admin_service=admin_service,
+                                   access_token=access_token, id_token=id_token,
+                                   username=username)
 
     def _get_jwt_public_key(self, id_token: str) -> Optional[Dict[str, str]]:
         """Method to get the public key for JWT signing

@@ -1,22 +1,3 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import graphene
 import base64
 import os
@@ -28,10 +9,9 @@ from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.exceptions import GigantumException
-from gtmcore.dispatcher import (Dispatcher, jobs)
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
-from lmsrvcore.auth.identity import parse_token
+from lmsrvcore.utilities import configure_git_credentials
 from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType, ActivityRecord, \
     ActivityDetailRecord
 
@@ -297,20 +277,9 @@ class ModifyDatasetLink(graphene.relay.ClientIDMutation):
                 if dataset_url:
                     remote_domain = cls._get_remote_domain(dataset_url, dataset_owner, dataset_name)
 
+                    # Make sure git creds are configured for the remote
                     if remote_domain:
-                        # Make sure git creds are configured for the remote
-                        admin_service = None
-                        for remote in lb.client_config.config['git']['remotes']:
-                            if remote_domain == remote:
-                                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
-                                break
-                        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-                            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-                        else:
-                            raise ValueError("Authorization header not provided."
-                                             " Must have a valid session to query for collaborators")
-                        mgr = GitLabManager(remote_domain, admin_service, token)
-                        mgr.configure_git_credentials(remote_domain, logged_in_username)
+                        configure_git_credentials()
                 else:
                     # Link to local dataset
                     ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
@@ -367,7 +336,7 @@ class DeleteDataset(graphene.ClientIDMutation):
         if remote:
             logger.info(f"Deleting remote Dataset {owner}/{dataset_name}")
 
-            # Extract valid Bearer token
+            # Extract valid Bearer and ID tokens
             access_token = flask.g.get('access_token', None)
             id_token = flask.g.get('id_token', None)
             if not access_token or not id_token:
@@ -389,7 +358,8 @@ class DeleteDataset(graphene.ClientIDMutation):
             remote_config = config.get_remote_configuration()
 
             # Delete the repository
-            mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'], access_token=access_token)
+            mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'], access_token=access_token,
+                                id_token=id_token)
             mgr.remove_repository(owner, dataset_name)
             logger.info(f"Deleted {owner}/{dataset_name} repository from the"
                         f" remote repository {remote_config['git_remote']}")

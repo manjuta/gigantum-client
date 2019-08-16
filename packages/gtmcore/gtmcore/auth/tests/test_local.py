@@ -360,13 +360,16 @@ class TestIdentityLocal(object):
         mgr = get_identity_manager(config)
 
         with pytest.raises(ValueError):
-            mgr._check_first_login("", "")
+            mgr._check_first_login("", "", "")
 
         with pytest.raises(ValueError):
-            mgr._check_first_login("johndoe", "")
+            mgr._check_first_login("johndoe", "", "")
 
         with pytest.raises(ValueError):
-            mgr._check_first_login("", "asdf")
+            mgr._check_first_login("", "asdf", "")
+
+        with pytest.raises(ValueError):
+            mgr._check_first_login("", mock_config_file_with_auth_first_login[2]['access_token'], "")
 
     def test_check_first_login_user_locally(self, mock_config_file_with_auth_first_login,
                                             cleanup_auto_import):
@@ -378,7 +381,8 @@ class TestIdentityLocal(object):
         config = Configuration(mock_config_file_with_auth_first_login[0])
         mgr = get_identity_manager(config)
 
-        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'])
+        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
+                               id_token=mock_config_file_with_auth_first_login[2]['id_token'])
 
         # Should not import labbook - note we aren't mocking all the way to the workers
         time.sleep(5)
@@ -399,7 +403,8 @@ class TestIdentityLocal(object):
         # Don't check at_hash claim due to password grant not setting it in the token
         mgr.validate_at_hash_claim = False
 
-        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'])
+        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
+                               id_token=mock_config_file_with_auth_first_login[2]['id_token'])
 
         # Should import labbook - note we aren't mocking all the way to the workers
         time.sleep(5)
@@ -423,7 +428,8 @@ class TestIdentityLocal(object):
         # Don't check at_hash claim due to password grant not setting it in the token
         mgr.validate_at_hash_claim = False
 
-        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'])
+        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
+                               id_token=mock_config_file_with_auth_first_login[2]['id_token'])
 
         # Should import labbook - note we aren't mocking all the way to the workers
         time.sleep(5)
