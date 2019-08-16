@@ -7,6 +7,7 @@ from pkg_resources import resource_filename
 import pathlib
 import subprocess
 import glob
+
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
 
 from gtmcore.exceptions import GigantumException
@@ -424,6 +425,7 @@ class InventoryManager(object):
 
         """
         lb = self.load_labbook(username, owner, labbook_name)
+        target_dir = lb.root_dir
 
         # Get list of datasets and cache roots to schedule for cleanup
         datasets = self.get_linked_datasets(lb)
@@ -444,8 +446,13 @@ class InventoryManager(object):
         # Delete all secrets pertaining to this project.
         SecretStore(lb, username).clear_files()
 
+        if 'WINDOWS_HOST' in os.environ:
+            # Windows host. Remove all git clients so no file handles prevent deletion
+            lb.git.repo.__del__()
+            lb = None  # type: ignore
+
         # Remove labbook contents
-        shutil.rmtree(lb.root_dir, ignore_errors=True)
+        shutil.rmtree(target_dir, ignore_errors=True)
 
         return datasets_to_schedule
 
@@ -582,16 +589,24 @@ class InventoryManager(object):
 
         """
         ds = self.load_dataset(username, owner, dataset_name)
+        target_dir = ds.root_dir
 
         # Delete dataset contents from file cache
         m = Manifest(ds, username)
+        cache_root = m.cache_mgr.cache_root
+        m = None  # type: ignore
+
+        if 'WINDOWS_HOST' in os.environ:
+            # Windows host. Remove all git clients so no file handles prevent deletion
+            ds.git.repo.__del__()
+            ds = None  # type: ignore
 
         # Delete dataset repository from working dir
-        shutil.rmtree(ds.root_dir, ignore_errors=True)
+        shutil.rmtree(target_dir, ignore_errors=True)
 
         return DatasetCleanupJob(namespace=owner,
                                  name=dataset_name,
-                                 cache_root=m.cache_mgr.cache_root)
+                                 cache_root=cache_root)
 
     def put_dataset(self, path: str, username: str, owner: str) -> Dataset:
         try:

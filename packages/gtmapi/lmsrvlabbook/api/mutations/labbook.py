@@ -112,6 +112,11 @@ class DeleteLabbook(graphene.ClientIDMutation):
             if not docker_removed:
                 raise ValueError(f'Cannot delete docker image for {str(lb)} - unable to delete Project from disk')
 
+            # Remove git references so delete works on a windows host
+            target_dir = lb.root_dir
+            lb.git.repo.__del__()
+            lb = None  # type: ignore
+
             datasets_to_schedule = InventoryManager().delete_labbook(username, owner, labbook_name)
 
             # Schedule jobs to clean the file cache for any linked datasets (if no other references exist)
@@ -131,13 +136,13 @@ class DeleteLabbook(graphene.ClientIDMutation):
                             f" to Job {job_key}")
 
             # Verify Delete worked
-            if os.path.exists(lb.root_dir):
-                logger.error(f'Deleted {str(lb)} but root directory {lb.root_dir} still exists!')
+            if os.path.exists(target_dir):
+                logger.error(f'Deleted {owner}/{labbook_name} but root directory {target_dir} still exists!')
                 return DeleteLabbook(success=False)
             else:
                 return DeleteLabbook(success=True)
         else:
-            logger.info(f"Dry run in deleting {str(lb)} -- not deleted.")
+            logger.info(f"Dry run in deleting {owner}/{labbook_name} -- not deleted.")
             return DeleteLabbook(success=False)
 
 
