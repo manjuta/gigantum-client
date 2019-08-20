@@ -276,7 +276,7 @@ class EnvironmentElements(UiComponent):
 
     @property
     def specify_version_button(self):
-        return CssElement(self.driver, ".align-self--center")
+        return CssElement(self.driver, ".Radio.flex.relative .align-self--center")
 
     @property
     def specify_version_textbox(self):
@@ -287,7 +287,7 @@ class EnvironmentElements(UiComponent):
         return CssElement(self.driver, ".Btn__advanced")
 
     def specify_package_version(self, version):
-        self.specify_version_textbox.click()
+        self.specify_version_button.click()
         self.specify_version_textbox.find().send_keys(version)
 
     def open_add_packages_window(self):
@@ -498,7 +498,7 @@ class DatasetElements(UiComponent):
 
     @property
     def sync_button(self):
-        return CssElement(self.driver, 'button[data-tooltip="Sync changes to Gigantum Hub"]')
+        return CssElement(self.driver, 'button[data-tooltip="Sync"]')
 
     @property
     def publish_confirm_button(self):
@@ -513,8 +513,7 @@ class DatasetElements(UiComponent):
         # TODO: figure out why this breaks if time.sleep is lowered
         time.sleep(5)
         self.publish_confirm_button.wait().click()
-        time.sleep(10)
-        self.sync_button.wait()
+        self.sync_button.wait(30)
         dss = list_remote_datasets()
         owner, name = self.title().text.split('/')
         owner = owner.strip()
@@ -607,6 +606,8 @@ class BranchElements(UiComponent):
     def merge_alternate_branch(self):
         """ Merge the alternate branch into the current branch """
         logging.info("Merging alternate branch into current branch")
+        project_control= ProjectControlElements(self.driver)
+        project_control.container_status_stopped.wait(30)
         self.manage_branches_button.wait().click()
         branch_container_hover = ActionChains(self.driver).move_to_element(self.manage_branches_branch_container.find())
         branch_container_hover.perform()
@@ -659,7 +660,7 @@ class CloudProjectElements(UiComponent):
 
     @property
     def sync_cloud_project_message(self):
-        return CssElement(self.driver, ".FooterMessage:nth-child(2) .FooterMessage__title")
+        return CssElement(self.driver, ".Footer__messageList")
 
     @property
     def delete_cloud_project_button(self):
@@ -851,7 +852,10 @@ class FileBrowserElements(UiComponent):
         logging.info("Dragging and dropping a file into the drop zone")
         with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
             js_script = js_file.read()
-        file_path = "/tmp/sample-upload.txt"
+        if os.name == 'nt':
+            file_path = "C:\\tmp\\sample-upload.txt"
+        else:
+            file_path = "/tmp/sample-upload.txt"
         with open(file_path, "w") as example_file:
             example_file.write(file_content)
         file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)

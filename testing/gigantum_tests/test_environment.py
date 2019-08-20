@@ -106,5 +106,6 @@ def test_invalid_custom_docker(driver: selenium.webdriver, *args, **kwargs):
     container_status = driver.find_element_by_css_selector(".flex>.Rebuild").is_displayed()
     assert container_status, "Expected rebuild container status"
 
-    footer_message_text = driver.find_element_by_css_selector(".FooterMessage__title").text
+    cloud_elts = testutils.CloudProjectElements(driver)
+    footer_message_text = cloud_elts.sync_cloud_project_message.find().text
     assert "Project failed to build" in footer_message_text, "Expected 'Project failed to build' in footer message"

@@ -48,7 +48,11 @@ def test_import_zip_projects(driver: selenium.webdriver, *args, **kwargs):
     Tests that projects can be imported via zip file
     """
     project_name = 'sample-prj'
-    filepath = f"{os.environ['HOME']}/gigantum-client/resources/sample-prj-93f4b4.zip"
+
+    if os.name == 'nt':
+        filepath = f"{os.environ['USERPROFILE']}/gigantum-client/resources/sample-prj-93f4b4.zip"
+    else:
+        filepath = f"{os.environ['HOME']}/gigantum-client/resources/sample-prj-93f4b4.zip"
 
     # Login and remove guide
     user = testutils.log_in(driver)

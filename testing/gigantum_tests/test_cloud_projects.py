@@ -48,7 +48,6 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     file_browser_elts = testutils.FileBrowserElements(driver)
     file_browser_elts.drag_drop_file_in_drop_zone()
     cloud_project_elts.sync_cloud_project(project_title)
-    time.sleep(2)
     assert "Sync complete" in cloud_project_elts.sync_cloud_project_message.find().text, \
         "Expected 'Sync complete' in footer"
 
@@ -73,6 +72,7 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     assert project_title != first_cloud_project, \
         f"Expected {project_title} to not be the first cloud project in {username}'s Cloud tab, " \
         f"but instead got {first_cloud_project}"
+
 
 def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
     """

@@ -94,7 +94,10 @@ class TestRunner:
             logging.exception(e)
             result = TestResult(test_method.__name__, 'FAIL', None, time.time()-t0,
                                 fail_message=str(e))
-            self._save_screenshot(driver, 'FAIL', e, test_method)
+            try:
+                self._save_screenshot(driver, 'FAIL', e, test_method)
+            except Exception as e:
+                logging.error(f'Error saving screenshot: {e}')
         finally:
             try:
 
@@ -140,6 +143,7 @@ class TestRunner:
         remote_datasets = list_remote_datasets()
         for owner, dataset_name in remote_datasets:
             if 'selenium-dataset-' in dataset_name:
+
                 # deleting remote datasets is in a try catch block so that the clean
                 # up process will not halt whenthe remote dataset being deleted has
                 # no local copy, which causes the graph ql query to return an error
@@ -166,6 +170,7 @@ class TestRunner:
         driver.save_screenshot(screenshot_fname)
 
         img = Image.open(screenshot_fname)
+
         draw = ImageDraw.Draw(img)
         font = ImageFont.truetype('Arial.ttf', 30)
         draw.text((100, 400), f'{fail_type}: {message}', font=font, fill=(255, 0, 0, 200))
