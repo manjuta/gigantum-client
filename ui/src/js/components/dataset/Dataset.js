@@ -208,7 +208,6 @@ class Dataset extends Component {
     if (props.dataset) {
       const { dataset } = props;
       const isLocked = getIsLocked(props);
-
       // declare css here
       const datasetCSS = classNames({
         Dataset: true,
@@ -369,13 +368,14 @@ const DatasetFragmentContainer = createRefetchContainer(
           defaultRemote
           visibility @skip(if: $datasetSkip)
           backendIsConfigured
+          commitsBehind
+          commitsAhead
           backendConfiguration{
             parameter
             description
             parameterType
             value
           }
-          commitsBehind
           datasetType {
               name
               storageType

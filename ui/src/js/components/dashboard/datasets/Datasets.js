@@ -254,7 +254,9 @@ class Datasets extends Component {
     if (isLoading) {
       return [];
     }
-    const datasets = state.selectedSection === 'local' ? datasetList.localDatasets.edges : datasetList.remoteDatasets.edges;
+    const datasets = (state.selectedSection === 'local')
+      ? datasetList.localDatasets.edges
+      : datasetList.remoteDatasets.edges;
     const username = localStorage.getItem('username');
     const self = this;
     let filteredDatasets = [];

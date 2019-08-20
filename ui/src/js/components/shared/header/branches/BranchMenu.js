@@ -414,8 +414,8 @@ class BranchMenu extends Component {
       || (props.collaborators && !props.collaborators[props.section.name])) {
       return false;
     }
-
-    const filteredArr = props.collaborators[props.section.name].filter(collaborator => collaborator.collaboratorUsername === username);
+    const collaborators = props.collaborators[props.section.name];
+    const filteredArr = collaborators.filter(collaborator => collaborator.collaboratorUsername === username);
 
     if (filteredArr.length === 0) {
       return false;
@@ -860,11 +860,11 @@ class BranchMenu extends Component {
                     Cancel
                    </button>
                    <button
-                    type="button"
+                     type="button"
                      className="BranchMenu__reset-confirm"
                      onClick={() => this._resetBranch()}
                    >
-                   Confirm
+                    Confirm
                    </button>
                  </div>
                </div>
@@ -879,60 +879,58 @@ class BranchMenu extends Component {
                >
                  { !upToDate && allowSync && (activeBranch.commitsAhead !== undefined)
                   && (
-                  <div
-                    className="BranchMenu__sync-status Tooltip-data Tooltip-data--small"
-                    data-tooltip={commitTooltip}
-                    onMouseEnter={() => this._hovercommits(true)}
-                    onMouseLeave={() => this._hovercommits(false)}
-                  >
-                    {
-                      (activeBranch.commitsBehind !== 0)
-                      && <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
-                    }
-                    {
-                      activeBranch.commitsAhead !== 0
-                      && <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
-                    }
-                  </div>
+                    <div
+                      className="BranchMenu__sync-status Tooltip-data Tooltip-data--small"
+                      data-tooltip={commitTooltip}
+                      onMouseEnter={() => this._hovercommits(true)}
+                      onMouseLeave={() => this._hovercommits(false)}
+                    >
+                      {
+                        (activeBranch.commitsBehind !== 0)
+                        && <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
+                      }
+                      {
+                        activeBranch.commitsAhead !== 0
+                        && <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
+                      }
+                    </div>
                   )
-                }
-                <div className="Btn--branch--text">{syncButtonText}</div>
-             </button>
+                 }
+                 <div className="Btn--branch--text">{syncButtonText}</div>
+               </button>
 
-             <button
-               className={syncMenuDropdownButtonCSS}
-               disabled={disableDropdown}
-               onClick={() => { this._toggleSyncDropdown(); }}
-               type="Submit"
-             />
+               <button
+                 className={syncMenuDropdownButtonCSS}
+                 disabled={disableDropdown}
+                 onClick={() => { this._toggleSyncDropdown(); }}
+                 type="submit"
+               />
 
-                <div className={syncMenuDropdownCSS}>
-                  <h5 className="BranchMenu__h5">Remote Action</h5>
-                  <ul className="BranchMenu__ul">
-                    {
-                  allowSync
-                  && (
-                  <li
-                    className="BranchMenu__list-item"
-                    onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull)}
-                  >
-                    Sync (Pull then Push)
-                  </li>
-                  )
-                }
-                <li
-                  className="BranchMenu__list-item"
-                  onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}
-                >
-                  Pull (Pull-only)
-                </li>
-              </ul>
-            </div>
-
-          </div>
-        </div>
-        )
-        : <div className="BranchMenu__action">{state.action}</div>
+               <div className={syncMenuDropdownCSS}>
+                 <h5 className="BranchMenu__h5">Remote Action</h5>
+                 <ul className="BranchMenu__ul">
+                   { allowSync
+                      && (
+                      <li
+                        className="BranchMenu__list-item"
+                        onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull)}
+                      >
+                        Sync (Pull then Push)
+                      </li>
+                      )
+                   }
+                   <li
+                     className="BranchMenu__list-item"
+                     onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}
+                   >
+                    Pull (Pull-only)
+                   </li>
+                 </ul>
+               </div>
+             </div>
+           </div>
+         )
+         : <div className="BranchMenu__action">{state.action}</div>
        }
 
        <CreateBranch
@@ -988,7 +986,7 @@ class BranchMenu extends Component {
           />
         )
        }
-      { state.publishDatasetsModalVisible
+       { state.publishDatasetsModalVisible
         && (
           <PublishDatasetsModal
             owner={props.section.owner}
@@ -1013,9 +1011,9 @@ class BranchMenu extends Component {
             localDatasets={state.localDatasets || []}
           />
         )
-      }
+       }
 
-      { state.forceSyncModalVisible
+       { state.forceSyncModalVisible
         && (
           <ForceSync
             toggleSyncModal={this._toggleSyncModal}
@@ -1023,16 +1021,15 @@ class BranchMenu extends Component {
             pullOnly={state.pullOnly}
           />
         )
-      }
+       }
 
-      { state.showLoginPrompt
+       { state.showLoginPrompt
         && <LoginPrompt closeModal={this._closeLoginPromptModal} />
-      }
+       }
      </div>
    );
  }
 }
-
 
 const mapStateToProps = (state, ownProps) => ({
   collaborators: state.collaborators.collaborators,

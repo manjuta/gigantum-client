@@ -1,5 +1,5 @@
 # source: http://localhost:10000/api/labbook/
-# timestamp: Sat Jul 20 2019 12:36:29 GMT-0400 (Eastern Daylight Time)
+# timestamp: Mon Aug 19 2019 13:48:20 GMT-0400 (Eastern Daylight Time)
 
 schema {
   query: LabbookQuery
@@ -136,6 +136,8 @@ type AddDatasetFilePayload {
 input AddLabbookCollaboratorInput {
   owner: String!
   labbookName: String!
+
+  """The collaborator username to add"""
   username: String!
   permissions: String!
   clientMutationId: String
@@ -539,6 +541,7 @@ type Dataset implements Node & GitRepository {
   backendConfiguration: [DatasetConfigurationParameter]
   contentHashMismatches: [String]
   commitsBehind: Int
+  commitsAhead: Int
 }
 
 """
@@ -711,6 +714,8 @@ type DeleteExperimentalBranchPayload {
 input DeleteLabbookCollaboratorInput {
   owner: String!
   labbookName: String!
+
+  """Collaborator username to remove."""
   username: String!
   clientMutationId: String
 }

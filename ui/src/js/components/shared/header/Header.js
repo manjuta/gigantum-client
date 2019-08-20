@@ -27,15 +27,20 @@ import './Header.scss';
 */
 const getBranches = (props) => {
   let branches = [];
-
   if (props.branches) {
     branches = props.branches;
   } else {
+    const commitsBehind = (props.dataset && props.dataset.commitsBehind)
+      ? props.dataset.commitsBehind
+      : 0;
+    const commitsAhead = (props.dataset && props.dataset.commitsAhead)
+      ? props.dataset.commitsAhead
+      : 0;
     branches = [{
       branchName: 'master',
       isActive: true,
-      commitsBehind: 0,
-      commitsAhead: 0,
+      commitsBehind,
+      commitsAhead,
     }];
   }
 

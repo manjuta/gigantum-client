@@ -344,7 +344,8 @@ class Activity extends Component {
           : null;
         const newRecordCommitId = response.data.labbook.activityRecords.edges[0].node.commit;
 
-        if ((firstRecordCommitId !== newRecordCommitId) && (firstRecordCommitId !== null)) {
+        if ((firstRecordCommitId !== newRecordCommitId)
+          && (firstRecordCommitId !== null)) {
           const { automaticRefetch } = self.state;
           if (automaticRefetch) {
             this._refetch();

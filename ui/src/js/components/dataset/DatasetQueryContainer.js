@@ -50,7 +50,6 @@ class DatasetQueryContainer extends Component {
             if (props.errors) {
               return (<div>{props.errors[0].message}</div>);
             }
-
             return (
               <Dataset
                 key={parentProps.datasetName}

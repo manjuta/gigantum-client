@@ -95,7 +95,7 @@ class Labbooks extends Component {
     const paths = props.history.location.pathname.split('/');
     let sectionRoute = paths.length > 2 ? paths[2] : 'local';
 
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
+    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
       sectionRoute = 'local';
     }
 
@@ -109,9 +109,11 @@ class Labbooks extends Component {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const paths = nextProps.history.location.pathname.split('/');
-    const sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    const sectionRoute = (paths.length > 2)
+      ? paths[2]
+      : 'local';
 
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
+    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
       nextProps.props.history.replace('../../../../projects/local');
     }
     this.setState({ selectedSection: sectionRoute });

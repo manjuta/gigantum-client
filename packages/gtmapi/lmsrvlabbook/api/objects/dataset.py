@@ -1,3 +1,4 @@
+from typing import List, Optional
 import graphene
 import base64
 import math
@@ -6,9 +7,9 @@ from gtmcore.activity import ActivityStore
 from gtmcore.configuration import Configuration
 
 from lmsrvcore.caching import DatasetCacheController
-from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitRepository
+from lmsrvcore.utilities import configure_git_credentials
 
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions, GitLabException
@@ -102,8 +103,9 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # must be "updated" to include the new hashes as a new version
     content_hash_mismatches = graphene.List(graphene.String)
 
-    # Temporary commits behind field before full branching is supported to indicate if a dataset is out of date
+    # Temporary commits ahead/behind fields before full branching is supported to indicate if a dataset is out of date
     commits_behind = graphene.Int()
+    commits_ahead = graphene.Int()
 
     @classmethod
     def get_node(cls, info, id):
@@ -501,33 +503,57 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: dataset.backend.verify_contents(dataset, logger.info))
 
-    def helper_resolve_commits_behind(self, dataset) -> int:
-        """Helper to get the commits behind for a dataset. Used for linked datasets to see if
-        they are out of date"""
-        bm = BranchManager(dataset)
-        bm.fetch()
+    def helper_resolve_commits_ahead_behind(self, dataset) -> None:
+        """Helper to get the commits ahead and behind for a dataset. This is done together so only 1 fetch will
+        occur. In the future when branches are enabled, the fetch dataloader can be used to manage this more
+        gracefully"""
+        behind_commit_output = str()
+        ahead_commit_output = str()
 
         current_hash = call_subprocess(['git', 'rev-list', 'HEAD', '--max-count=1'],
                                        cwd=dataset.root_dir, check=True)
 
-        commit_list = call_subprocess(['git', 'log', f'{current_hash.strip()}..origin/master', '--pretty=oneline'],
-                                      cwd=dataset.root_dir, check=True)
-        if not commit_list:
-            commits_behind = 0
-        else:
-            commit_list = [x for x in commit_list.split('\n') if x != ""]
-            commits_behind = len(commit_list)
-            commits_behind = int(math.ceil(float(commits_behind) / 2.0))
+        if dataset.has_remote:
+            # Make sure remote git credentials are configured if the remote is a server that requires authentication
+            if "http" == dataset.remote[0:4]:
+                configure_git_credentials()
 
-        return commits_behind
+            # Dataset has been published, so look up changes
+            bm = BranchManager(dataset)
+            bm.fetch()
+            behind_commit_output = call_subprocess(['git', 'log', f'{current_hash.strip()}..origin/master',
+                                                    '--pretty=oneline'],
+                                                   cwd=dataset.root_dir, check=True)
+
+            ahead_commit_output = call_subprocess(['git', 'log', f'origin/master..{current_hash.strip()}',
+                                                   '--pretty=oneline'],
+                                                  cwd=dataset.root_dir, check=True)
+
+        if not behind_commit_output:
+            self.commits_behind = 0
+        else:
+            behind_commit_list = [x for x in behind_commit_output.split('\n') if x != ""]
+            commits_behind = len(behind_commit_list)
+            self.commits_behind = int(math.ceil(float(commits_behind) / 2.0))
+
+        if not ahead_commit_output:
+            self.commits_ahead = 0
+        else:
+            ahead_commit_list = [x for x in ahead_commit_output.split('\n') if x != ""]
+            commits_ahead = len(ahead_commit_list)
+            self.commits_ahead = int(math.ceil(float(commits_ahead) / 2.0))
+
+    def helper_resolve_commits_behind(self, dataset) -> Optional[int]:
+        """Helper to get the commits behind for a dataset."""
+        if self.commits_behind is None:
+            self.helper_resolve_commits_ahead_behind(dataset)
+
+        return self.commits_behind
 
     def resolve_commits_behind(self, info):
-        """Method to get the commits behind for a dataset. Used for linked datasets to see if
-        they are out of date
+        """Method to get the commits behind for a dataset.
 
         Args:
-            args:
-            context:
             info:
 
         Returns:
@@ -535,3 +561,22 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_commits_behind(dataset))
+
+    def helper_resolve_commits_ahead(self, dataset) -> Optional[int]:
+        """Helper to get the commits ahead for a dataset."""
+        if self.commits_ahead is None:
+            self.helper_resolve_commits_ahead_behind(dataset)
+
+        return self.commits_ahead
+
+    def resolve_commits_ahead(self, info):
+        """Method to get the commits ahead for a dataset.
+
+        Args:
+            info:
+
+        Returns:
+
+        """
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_commits_ahead(dataset))
