@@ -28,7 +28,7 @@ def test_featured_public_projects(driver: selenium.webdriver, *args, **kwargs):
             import_project_elts = testutils.ImportProjectElements(driver)
             import_project_elts.import_project_via_url(project)
             project_control = testutils.ProjectControlElements(driver)
-            project_control.container_status_stopped.wait(90)
+            project_control.container_status_stopped.wait(180)
             assert project_control.container_status_stopped.find().is_displayed(), "Expected stopped container status"
             logging.info(f"Featured public project {project} was imported successfully")
             side_bar_elts = testutils.SideBarElements(driver)

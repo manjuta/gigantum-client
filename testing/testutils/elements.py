@@ -329,6 +329,7 @@ class EnvironmentElements(UiComponent):
             raise NoSuchElementException('Packages took too long to validate')
         logging.info('Installing packages')
         self.install_packages_button.click()
+        time.sleep(5)
         self.close_install_window.wait().click()
         project_control = ProjectControlElements(self.driver)
         project_control.container_status_stopped.wait(timeout_sec)
@@ -431,6 +432,11 @@ class ImportProjectElements(UiComponent):
     def import_project_via_url(self, project_url):
         self.import_existing_button.wait().click()
         self.project_url_input.find().send_keys(project_url)
+        try:
+            file_browser_elts = FileBrowserElements(self.driver)
+            file_browser_elts.close_notification_menu_button.click()
+        except e as exception:
+            logging.warning(f'Could not close notification window: {e}')
         self.import_button.wait().click()
         self.overview_tab.wait(90)
         # Wait to ensure that the container changes from stopped to building
@@ -498,7 +504,7 @@ class DatasetElements(UiComponent):
 
     @property
     def sync_button(self):
-        return CssElement(self.driver, 'button[data-tooltip="Sync"]')
+        return CssElement(self.driver, 'button[data-tooltip="Sync changes to Gigantum Hub"]')
 
     @property
     def publish_confirm_button(self):
@@ -746,7 +752,7 @@ class CloudProjectElements(UiComponent):
         side_bar_elts = SideBarElements(self.driver)
         side_bar_elts.projects_icon.find().click()
         self.cloud_tab.wait().click()
-        self.first_cloud_project.wait()
+        self.first_cloud_project.wait(20)
         self.delete_cloud_project_button.find().click()
         self.delete_cloud_project_input.wait().send_keys(project_title)
         self.delete_cloud_project_confirm_button.wait().click()

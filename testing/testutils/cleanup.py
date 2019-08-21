@@ -39,7 +39,6 @@ def delete_projects_on_disk():
             shutil.rmtree(user_project_path, ignore_errors=True)
 
 
-
 def delete_local_datasets():
     root_dir = os.path.expanduser(os.environ['GIGANTUM_HOME'])
     if os.name == 'nt':

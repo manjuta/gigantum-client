@@ -34,7 +34,7 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
                                                f"but got {cloud_project_stdout}"
 
     logging.info(f"Checking if project {project_title} appears in {username}'s Cloud tab")
-    cloud_project_elts.first_cloud_project.wait()
+    cloud_project_elts.first_cloud_project.wait(20)
     first_cloud_project = cloud_project_elts.first_cloud_project.find().text
     logging.info(f"Found first cloud project {first_cloud_project}")
 
@@ -99,7 +99,7 @@ def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
     time.sleep(2)
     logging.info(f"Navigating to {collaborator}'s Cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
-    cloud_project_elts.first_cloud_project.wait()
+    cloud_project_elts.first_cloud_project.wait(20)
     first_cloud_project = cloud_project_elts.first_cloud_project.find().text
 
     assert project_title == first_cloud_project, \
