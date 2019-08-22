@@ -1,10 +1,7 @@
-// vendor
-import uuidv4 from 'uuid/v4';
 // store
 import {
   setUploadMessageUpdate,
   setUploadMessageRemove,
-  setWarningMessage,
 } from 'JS/redux/actions/footer';
 import {
   setFileBrowserLock,

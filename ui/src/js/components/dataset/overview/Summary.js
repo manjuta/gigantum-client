@@ -7,7 +7,6 @@ import './Summary.scss';
 import config from 'JS/config';
 
 export default class Summary extends PureComponent {
-
   render() {
     const { props } = this;
     const onDiskBytes = props.localBytes;

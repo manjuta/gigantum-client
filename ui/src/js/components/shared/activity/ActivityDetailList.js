@@ -91,6 +91,8 @@ export default class ActivityDefaultList extends Component {
               <DetailRecords
                 keys={keys}
                 sectionType={props.sectionType}
+                owner={props.owner}
+                name={props.name}
               />
             </div>
           )

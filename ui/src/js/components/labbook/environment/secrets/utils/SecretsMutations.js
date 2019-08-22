@@ -3,7 +3,7 @@ import DeleteSecretsFileMutation from 'Mutations/environment/DeleteSecretsFileMu
 import RemoveSecretsEntryMutation from 'Mutations/environment/RemoveSecretsEntryMutation';
 import InsertSecretsEntryMutation from 'Mutations/environment/InsertSecretsEntryMutation';
 // utils
-import prepareUpload from './PrepareUpload'
+import prepareUpload from './PrepareUpload';
 
 class PackageMutations {
   /**

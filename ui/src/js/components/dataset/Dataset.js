@@ -204,7 +204,7 @@ class Dataset extends Component {
 
   render() {
     const { props, state } = this;
-
+    const { owner, name } = props.dataset;
     if (props.dataset) {
       const { dataset } = props;
       const isLocked = getIsLocked(props);
@@ -311,8 +311,8 @@ class Dataset extends Component {
 
                           <Data
                             dataset={dataset}
-                            owner={dataset.owner}
-                            name={dataset.name}
+                            owner={owner}
+                            name={name}
                             datasetId={dataset.id}
                             isManaged={dataset.datasetType.isManaged}
                             type="dataset"

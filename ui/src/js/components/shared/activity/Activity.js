@@ -461,9 +461,7 @@ class Activity extends Component {
       ? 50 : 0;
     offsetAmount = props.isDeprecated ? offsetAmount + 70 : offsetAmount;
     const upperBound = offsetAmount + 120;
-
     let stickyDate = null;
-
 
     this.offsetDistance = window.pageYOffset;
 
@@ -660,6 +658,7 @@ class Activity extends Component {
     const { props, state } = this;
     const section = props[props.sectionType];
 
+    // declare css here
     const activityCSS = classNames({
       Activity: true,
       fullscreen: state.editorFullscreen,
@@ -814,6 +813,8 @@ class Activity extends Component {
                                   toggleRollbackMenu={this._toggleRollbackMenu}
                                   isLocked={props.isLocked}
                                   setHoveredRollback={this._setHoveredRollback}
+                                  owner={props.owner}
+                                  name={props.name}
                                 />
                               );
                             }
@@ -838,6 +839,8 @@ class Activity extends Component {
                                 toggleRollbackMenu={this._toggleRollbackMenu}
                                 isLocked={props.isLocked}
                                 setHoveredRollback={this._setHoveredRollback}
+                                owner={props.owner}
+                                name={props.name}
                               />
                             );
                           })

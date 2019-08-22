@@ -44,7 +44,11 @@ export default class SecretsAction extends Component {
   */
   _togglePopup(evt, popupVisible) {
     if (!popupVisible) {
-      evt.stopPropagation(); // only stop propagation when closing popup, other menus won't close on click if propagation is stopped
+      /**
+       * only stop propagation when closing popup,
+       * other menus won't close on click if propagation is stopped
+       */
+      evt.stopPropagation();
     }
     this.setState({ popupVisible });
   }

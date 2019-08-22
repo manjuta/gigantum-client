@@ -56,6 +56,8 @@ export default class CardWrapper extends PureComponent {
               key={`${record.edge.node.id}_activity-card`}
               edge={record.edge}
               isLocked={props.isLocked}
+              owner={props.owner}
+              name={props.name}
             />
           </ErrorBoundary>
 

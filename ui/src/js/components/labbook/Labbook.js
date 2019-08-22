@@ -858,6 +858,8 @@ class Labbook extends Component {
                             sectionType="labbook"
                             isLocked={isLocked}
                             isDeprecated={state.isDeprecated}
+                            owner={labbook.owner}
+                            name={labbook.name}
                             {...props}
                           />
                         </ErrorBoundary>
@@ -878,7 +880,6 @@ class Labbook extends Component {
                             name={labbook.name}
                             labbookId={labbook.id}
                             refetch={this._refetchSection}
-                            containerStatus={this.refs.ContainerStatus}
                             overview={labbook.overview}
                             isLocked={isLocked}
                             packageLatestVersions={state.packageLatestVersions}
@@ -905,6 +906,8 @@ class Labbook extends Component {
                             containerStatus={containerStatus}
                             section="code"
                             lockFileBrowser={state.lockFileBrowser}
+                            owner={labbook.owner}
+                            name={labbook.name}
                           />
 
                         </ErrorBoundary>
@@ -947,6 +950,8 @@ class Labbook extends Component {
                             refetch={this._refetchSection}
                             containerStatus={containerStatus}
                             lockFileBrowser={state.lockFileBrowser}
+                            owner={labbook.owner}
+                            name={labbook.name}
                             section="output"
                           />
                         </ErrorBoundary>

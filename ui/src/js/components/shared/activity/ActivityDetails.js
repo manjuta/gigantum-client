@@ -87,6 +87,8 @@ export default class ActivityCard extends Component {
               siblingCount={props.node.detailObjects.length}
               show={props.show}
               showEllispsis={state.showEllispsis}
+              owner={props.owner}
+              name={props.name}
             />
           ))
         }

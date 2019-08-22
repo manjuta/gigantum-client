@@ -357,8 +357,7 @@ class Routes extends Component {
                           diskLow={showDiskLow}
                           {...parentProps}
                         />
-                      )
-                      }
+                      )}
                     />
 
                     <Route
@@ -380,9 +379,7 @@ class Routes extends Component {
                             {...parentProps}
                           />
                         );
-                      }
-
-                      }
+                      }}
                     />
 
                     <Route

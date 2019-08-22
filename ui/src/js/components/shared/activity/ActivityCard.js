@@ -83,6 +83,17 @@ export default class ActivityCard extends Component {
     this.setState({ isOver });
   }
 
+  /**
+    @param {} isOver
+    toggles show and showExtraInfo
+  */
+  _toggleDetails = () => {
+    this.setState((state) => {
+      const show = !state.show;
+      const showExtraInfo = !state.showExtraInfo;
+      return { show, showExtraInfo };
+    });
+  }
 
   render() {
     const { props, state } = this;
@@ -135,7 +146,7 @@ export default class ActivityCard extends Component {
 
             <div
               className={titleCSS}
-              onClick={() => this.setState({ show: !state.show, showExtraInfo: !state.showExtraInfo })}
+              onClick={() => this._toggleDetails()}
             >
               <div className="ActivityCard__stack">
 
@@ -160,6 +171,8 @@ export default class ActivityCard extends Component {
                     show={state.showExtraInfo}
                     key={`${node.id}_activity-details`}
                     node={node}
+                    owner={props.owner}
+                    name={props.name}
                   />
                 )
             }

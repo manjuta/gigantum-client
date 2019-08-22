@@ -1,6 +1,6 @@
 // vendor
 import React, { Component } from 'react';
-import classNames from 'classnames'
+import classNames from 'classnames';
 import { createFragmentContainer, graphql } from 'react-relay';
 // mutations
 import ChangeLabbookBaseMutation from 'Mutations/ChangeLabbookBaseMutation';
@@ -10,7 +10,6 @@ import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
 // components
 import PackageCount from 'Components/labbook/overview/PackageCount';
 import Loader from 'Components/common/Loader';
-import ButtonLoader from 'Components/common/ButtonLoader';
 import SelectBaseModal from 'Components/shared/modals/SelectBaseModal';
 // assets
 import './Base.scss';
@@ -27,8 +26,8 @@ const getTooltip = (isLocked, upToDate) => {
   return {
     upToDateTooltip,
     defaultTooltip,
-  }
-}
+  };
+};
 
 /**
     @param {name, owner}
@@ -46,14 +45,13 @@ const buildImage = (name, owner) => {
       }
     },
   );
-}
+};
 
 
 class Base extends Component {
   state = {
     baseModalVisible: false,
     forceUpdateDisabled: false,
-    updateBaseButtonState: '',
   }
 
   /**
@@ -72,10 +70,7 @@ class Base extends Component {
     } = props.environment.base;
     const revision = props.baseLatestRevision;
 
-    this.setState({
-      forceUpdateDisabled: true,
-      updateBaseButtonState: 'loading',
-    });
+    this.setState({ forceUpdateDisabled: true });
 
     ChangeLabbookBaseMutation(
       owner,
@@ -84,27 +79,11 @@ class Base extends Component {
       componentId,
       revision,
       (response, error) => {
-        this.setState({ forceUpdateDisabled: false })
+        this.setState({ forceUpdateDisabled: false });
         if (error) {
           setErrorMessage('An error occured while trying to change bases.', error);
-          this.setState({
-            updateBaseButtonState: 'error',
-          });
-          setTimeout(() => {
-            this.setState({
-              updateBaseButtonState: '',
-            });
-          }, 2000);
         } else {
           setInfoMessage('Updated Base successfully. Rebuilding environment. Pleae wait...');
-          this.setState({
-            updateBaseButtonState: 'finished',
-          });
-          setTimeout(() => {
-            this.setState({
-              updateBaseButtonState: '',
-            });
-          }, 2000);
           buildImage(name, owner);
         }
       },
@@ -124,7 +103,8 @@ class Base extends Component {
     const { props, state } = this;
     const { base } = props.environment;
     const isUpToDate = props.baseLatestRevision === base.revision;
-    const { defaultTooltip, upToDateTooltip } = getTooltip(props.isLocked, isUpToDate)
+    const { defaultTooltip, upToDateTooltip } = getTooltip(props.isLocked, isUpToDate);
+    // declare css here
     const changeButtonCSS = classNames({
       'Btn Btn__base Btn__base--change Btn--action': true,
       'Tooltip-data Tooltip-data--auto': props.isLocked,
@@ -144,10 +124,8 @@ class Base extends Component {
               <div className="Base__imageContainer">
                 <img
                   className="Base__image"
-                  height="35
-                  "
-                  width="35
-                  "
+                  height="35"
+                  width="35"
                   src={base.icon}
                   alt={base.name}
                 />
@@ -164,7 +142,9 @@ class Base extends Component {
                 <h6 className="bold">Languages</h6>
                 <ul>
                   {
-                    base.languages.map((language, index) => (<li key={language + index}>{language}</li>))
+                    base.languages.map(language => (
+                      <li key={`${language}_language`}>{language}</li>
+                    ))
                   }
                 </ul>
               </div>
@@ -173,7 +153,9 @@ class Base extends Component {
                 <h6 className="bold">Tools</h6>
                 <ul>
                   {
-                    base.developmentTools && base.developmentTools.map((tool, index) => (<li key={tool + index}>{tool}</li>))
+                    base.developmentTools && base.developmentTools.map(tool => (
+                      <li key={`${tool}_tool`}>{tool}</li>
+                    ))
                   }
                 </ul>
               </div>
