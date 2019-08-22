@@ -54,7 +54,7 @@ class UserConfig(object):
 
         """
         print("{} [{}]: ".format(question, default), end="")
-        choice = input().lower().strip()
+        choice = input().strip()
 
         if not choice:
             choice = default
