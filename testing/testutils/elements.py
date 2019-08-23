@@ -781,7 +781,7 @@ class ProjectControlElements(UiComponent):
         self.devtool_launch_button.wait().click()
         self.open_devtool_tab(tool_name)
 
-    def open_devtool_tab(self, tool_name='dev tool') -> None:
+    def open_devtool_tab(self, tool_name) -> None:
         """Wait for a new tab, then switch to it
         tool_name:
             Name of the dev tool, used only in Exception message
