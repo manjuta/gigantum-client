@@ -186,7 +186,7 @@ class Routes extends Component {
     }).then((response) => {
       if (response.status === 200 && (response.headers.get('content-type') === 'application/json')) {
         response.json().then((res) => {
-          const { available, lowDiskWarning } = res.disk;
+          const { available, lowDiskWarning } = res.diskGb;
           self.setState({ diskLow: lowDiskWarning, available });
         });
       }
@@ -408,10 +408,9 @@ class Routes extends Component {
 
                     <Helper auth={auth} />
 
-                    <Prompt ref="prompt" />
+                    <Prompt />
 
                     <Footer
-                      ref="footer"
                       history={history}
                     />
 
