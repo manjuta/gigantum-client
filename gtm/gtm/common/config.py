@@ -94,21 +94,25 @@ class UserConfig(object):
         with open(template_file, 'rt') as template:
             data = template.read()
 
-        # Replace values
-        # Note that different templates (chosen above) have a different number of variables. This is reflected in the
-        # logic below.
-        if is_windows:
-            data = data.replace('{% WORKING_DIR %}', dockerize_windows_path(working_dir))
-            if not use_pycharm:
-                data = data.replace('{% GTM_DIR %}', dockerize_windows_path(self.user_config['root_dir']))
-        else:
-            data = data.replace('{% WORKING_DIR %}', working_dir)
-            data = data.replace('{% USER_ID %}', str(uid))
-            if not use_pycharm:
-                data = data.replace('{% GTM_DIR %}', self.user_config['root_dir'])
+        # gtm_dir will NOT get used if we're using PyCharm
+        gtm_dir = self.user_config['root_dir']
 
-        data = data.replace('{% HELPER_SCRIPT %}',
-                            os.path.join(self.gigantum_client_root, 'build', 'developer', 'setup.sh'))
+        helper_script = os.path.join(self.gigantum_client_root, 'build', 'developer', 'setup.sh')
+        # Replace values
+        if is_windows:
+            working_dir = dockerize_windows_path(working_dir)
+            gtm_dir = dockerize_windows_path(gtm_dir)
+            helper_script = dockerize_windows_path(helper_script)
+        else:
+            # USER_ID only exists in the 'nix' templates - there's currently no comparable approach in Windows
+            data = data.replace('{% USER_ID %}', str(uid))
+
+        data = data.replace('{% WORKING_DIR %}', working_dir)
+        if not use_pycharm:
+            # GTM_DIR is only specified in the 'shell' templates.
+            # PyCharm will inject the relevant dirs via it's excellent docker-compose support.
+            data = data.replace('{% GTM_DIR %}', gtm_dir)
+        data = data.replace('{% HELPER_SCRIPT %}', helper_script)
 
         return data
 
