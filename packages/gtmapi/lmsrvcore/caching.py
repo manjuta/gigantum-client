@@ -37,7 +37,7 @@ class RepoCacheEntry(ABC):
         self.clear()
         create_ts, modify_ts, description = self._load_repo()
         self.db.hset(self.key, 'description', description)
-        self.db.hset(self.key, 'creation_date', modify_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
+        self.db.hset(self.key, 'creation_date', create_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
         self.db.hset(self.key, 'modified_on', modify_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
         self.db.hset(self.key, 'last_cache_update', datetime.datetime.utcnow().isoformat())
         return create_ts, modify_ts, description
