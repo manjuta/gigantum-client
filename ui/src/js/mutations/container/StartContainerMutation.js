@@ -6,8 +6,7 @@ import {
 import uuidv4 from 'uuid/v4';
 // environment
 import environment from 'JS/createRelayEnvironment';
-// redux
-import { updateTransitionState } from 'JS/redux/actions/labbook/labbook';
+
 
 const mutation = graphql`
   mutation StartContainerMutation($input: StartContainerInput!){
@@ -38,7 +37,6 @@ export default function StartContainerMutation(
         if (error) {
           console.log(error);
         }
-        updateTransitionState(owner, labbookName, '');
         callback(response, error);
       },
       onError: err => console.error(err),

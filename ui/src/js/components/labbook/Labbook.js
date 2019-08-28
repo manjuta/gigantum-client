@@ -12,7 +12,12 @@ import { connect } from 'react-redux';
 // store
 import store from 'JS/redux/store';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
-import { setMergeMode, setBuildingState, setStickyDate } from 'JS/redux/actions/labbook/labbook';
+import {
+  setMergeMode,
+  setBuildingState,
+  setStickyDate,
+  updateTransitionState,
+} from 'JS/redux/actions/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/actions/routes';
 import { setInfoMessage } from 'JS/redux/actions/footer';
 // utils
@@ -116,7 +121,7 @@ class Labbook extends Component {
     const branchMap = new Map();
     const mergedBranches = [];
     const newDeletedBranches = state.deletedBranches.slice();
-    const { isPublishing, isUploading } = nextProps;
+    const { isPublishing, isUploading, transitionState } = nextProps;
 
     propBranches.forEach((branch) => {
       if (newDeletedBranches.indexOf(branch.id) === -1) {
@@ -137,7 +142,6 @@ class Labbook extends Component {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-
     const isLocked = (nextProps.labbook
       && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING')
       || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
@@ -145,7 +149,8 @@ class Labbook extends Component {
       || nextProps.isBuilding
       || nextProps.isSyncing
       || isPublishing
-      || isUploading;
+      || isUploading
+      || (transitionState === 'Starting');
 
     const canManageCollaborators = nextProps.labbook
       ? nextProps.labbook.canManageCollaborators
@@ -378,11 +383,14 @@ class Labbook extends Component {
             containerStatusList.push(environment.imageStatus);
             const containerStatusLength = containerStatusList.length;
             const previousImageStatus = containerStatusList[containerStatusLength - 2];
-
             if (((previousImageStatus !== 'BUILD_IN_PROGRESS') || (previousImageStatus !== 'BUILD_FAILED'))
               && ((environment.imageStatus === 'EXISTS') || (environment.imageStatus === 'BUILD_FAILED'))
               && isBuilding) {
               setBuildingState(owner, name, false);
+            }
+            if ((previousImageStatus !== 'NOT_RUNNING')
+              && (environment.containerStatus === 'RUNNING')) {
+              updateTransitionState(owner, name, '');
             }
           }
           setTimeout(() => {
