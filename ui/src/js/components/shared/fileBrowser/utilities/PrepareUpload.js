@@ -168,13 +168,17 @@ const uploadDirContent = (dndItem, props, monitor, callback) => {
 * @param {Array:[Object]} files
 * @param {String} path
 * @param {Object} mutationData
-* @param {JSX} component
+* @param {React.Node} component
 *
 * @return {number} totalFiles
 */
 const handleCallback = (filesTemp, path, mutationData, component) => {
   if (filesTemp.length > 0) {
     const fileSizeData = checkFileSize(filesTemp, mutationData.connection);
+    const {
+      labbookName,
+      owner,
+    } = mutationData;
 
     const uploadCallback = (fileData) => {
       if (fileSizeData.fileSizeNotAllowed.length > 0) {
@@ -190,7 +194,7 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
 
         const finishedCallback = () => {
           window.removeEventListener('beforeunload', navigateConfirm);
-          setFileBrowserLock(false);
+          setFileBrowserLock(owner, labbookName, false);
         };
 
         const uploadInstance = new MutlithreadUploader({
@@ -203,7 +207,7 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
 
         window.addEventListener('beforeunload', navigateConfirm);
         uploadInstance.startUpload(finishedCallback);
-        setFileBrowserLock(true);
+        setFileBrowserLock(owner, labbookName, true);
         setUploadMessageUpdate(`Uploading ${fileData.filesAllowed.length} files, 0% complete`);
       }
     };

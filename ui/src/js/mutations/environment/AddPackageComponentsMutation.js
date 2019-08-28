@@ -1,3 +1,4 @@
+// vendor
 import {
   commitMutation,
   graphql,
@@ -63,21 +64,20 @@ function sharedDeleteUpdater(store, parentID, deletedId) {
   }
 }
 
-function sharedDeleter(store, parentID, deletedIdArr, connectionKey) {
+function sharedDeleter(store, parentID, duplicates, connectionKey) {
   const environmentProxy = store.get(parentID);
   if (environmentProxy) {
-    deletedIdArr.forEach((deleteId) => {
+    duplicates.forEach((duplicatePackage) => {
       const conn = RelayRuntime.ConnectionHandler.getConnection(
         environmentProxy,
         connectionKey,
       );
-
       if (conn) {
         RelayRuntime.ConnectionHandler.deleteNode(
           conn,
-          deleteId,
+          duplicatePackage.id,
         );
-        store.delete(deleteId);
+        store.delete(duplicatePackage.id);
       }
     });
   }
@@ -116,10 +116,13 @@ export default function AddPackageComponentsMutation(
       },
       onError: err => console.error(err),
       updater: (store, response) => {
-        if (response.addPackageComponents && response.addPackageComponents.newPackageComponentEdges && response.addPackageComponents.newPackageComponentEdges.length && clientMutationId) {
+        if (response.addPackageComponents && response.addPackageComponents.newPackageComponentEdges
+          && response.addPackageComponents.newPackageComponentEdges.length && clientMutationId) {
           const deletedId = `client:newPackageManager:${tempID}`;
-          sharedDeleteUpdater(store, environmentId, deletedId);
           const newEdges = response.addPackageComponents.newPackageComponentEdges;
+
+          sharedDeleteUpdater(store, environmentId, deletedId);
+
           newEdges.forEach((edge) => {
             const {
               fromBase, id, manager, schema, version,
@@ -137,13 +140,14 @@ export default function AddPackageComponentsMutation(
               node.setValue(latestVersion, 'latestVersion');
               node.setValue(description, 'description');
               node.setValue(id, 'id');
-              tempID++;
+              tempID += 1;
               const newEdge = store.create(
                 `client:newEdge:${tempID}`,
                 'PackageComponentEdge',
               );
 
               newEdge.setLinkedRecord(node, 'node');
+
               sharedDeleter(store, environmentId, duplicates, 'Packages_packageDependencies');
               sharedUpdater(store, environmentId, newEdge);
             }
@@ -152,15 +156,15 @@ export default function AddPackageComponentsMutation(
       },
       optimisticUpdater: (store) => {
         if (clientMutationId) {
-          tempID++;
+          tempID += 1;
           const id = `client:newPackageManager:${tempID}`;
           const node = store.create(id, 'PackageManager');
           packages.forEach((item) => {
             const { manager, version } = item;
             const pkg = item.package;
-
             const { description, latestVersion } = addPackageObject[manager][pkg];
             const tempId = uuidv4();
+
             node.setValue(manager, 'manager');
             node.setValue(pkg, 'package');
             node.setValue(tempId, 'id');

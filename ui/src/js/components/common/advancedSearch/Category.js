@@ -16,7 +16,6 @@ type Props = {
 
 
 class Category extends PureComponent<Props> {
-  props: Props;
 
   render() {
     const {

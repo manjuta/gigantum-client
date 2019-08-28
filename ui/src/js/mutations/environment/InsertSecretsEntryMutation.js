@@ -1,9 +1,13 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import RelayRuntime from 'relay-runtime';
+import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
+
 
 const mutation = graphql`
   mutation InsertSecretsEntryMutation($input: InsertSecretsEntryInput!){
@@ -25,8 +29,6 @@ const mutation = graphql`
     }
   }
 `;
-
-let tempID = 0;
 
 /**
   @param {object, string, object} store,id,newEdge
@@ -61,14 +63,13 @@ export default function InsertSecretsEntryMutation(
   mountPath,
   callback,
 ) {
-  tempID++;
   const variables = {
     input: {
       owner,
       labbookName,
       filename,
       mountPath,
-      clientMutationId: `${tempID}`,
+      clientMutationId: uuidv4(),
     },
   };
 
@@ -95,7 +96,6 @@ export default function InsertSecretsEntryMutation(
           node.setValue(edge.node.filename, 'filename');
           node.setValue(edge.node.mountPath, 'mountPath');
           node.setValue(edge.node.isPresent, 'isPresent');
-          tempID += 1;
           sharedUpdater(store, environmentId, node);
         }
       },

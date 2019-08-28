@@ -53,19 +53,6 @@ const scrollToTop = () => {
 };
 
 /**
-   @param {Object} labbook
-   @param {Object} isBuildingObject
-   determines if project is building
-   @return {Boolean}
-  */
-const determineIsBuilding = (labbook, isBuildingObject) => {
-  const { owner, name } = labbook;
-  return (isBuildingObject[`${owner}_${name}`]
-    ? isBuildingObject[`${owner}_${name}`]
-    : false);
-};
-
-/**
    @param {Object} props
    determines if project is locked
    @return {Boolean}
@@ -73,17 +60,20 @@ const determineIsBuilding = (labbook, isBuildingObject) => {
 const determineIsLocked = (props) => {
   const {
     labbook,
-    isBuildingObject,
-    isSynching,
+    isBuilding,
+    isSyncing,
     isPublishing,
+    isUploading,
   } = props;
+
   return (
     (labbook.environment.containerStatus !== 'NOT_RUNNING')
     || (labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
     || (labbook.environment.imageStatus === 'BUILD_QUEUED')
-    || determineIsBuilding(labbook, isBuildingObject)
-    || isSynching
+    || isBuilding
+    || isSyncing
     || isPublishing
+    || isUploading
   );
 };
 
@@ -119,7 +109,6 @@ class Labbook extends Component {
 
   static getDerivedStateFromProps(nextProps, state) {
     setCallbackRoute(nextProps.location.pathname);
-
     const propBranches = nextProps.labbook && nextProps.labbook.branches
       ? nextProps.labbook.branches
       : [];
@@ -127,6 +116,7 @@ class Labbook extends Component {
     const branchMap = new Map();
     const mergedBranches = [];
     const newDeletedBranches = state.deletedBranches.slice();
+    const { isPublishing, isUploading } = nextProps;
 
     propBranches.forEach((branch) => {
       if (newDeletedBranches.indexOf(branch.id) === -1) {
@@ -153,8 +143,9 @@ class Labbook extends Component {
       || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
       || (nextProps.labbook.environment.imageStatus === 'BUILD_QUEUED')
       || nextProps.isBuilding
-      || nextProps.isSynching
-      || nextProps.isPublishing;
+      || nextProps.isSyncing
+      || isPublishing
+      || isUploading;
 
     const canManageCollaborators = nextProps.labbook
       ? nextProps.labbook.canManageCollaborators
@@ -163,7 +154,8 @@ class Labbook extends Component {
       ? nextProps.labbook.collaborators
       : [];
 
-    const lockFileBrowser = nextProps.isSyncing || nextProps.isUploading || nextProps.isPublishing;
+    const lockFileBrowser = nextProps.isSyncing || nextProps.globalIsUploading || isPublishing;
+
     return {
       ...state,
       deletedBranches: newDeletedBranches,
@@ -375,7 +367,7 @@ class Labbook extends Component {
     const { props } = this;
     const { owner, name } = props.labbook;
     const self = this;
-    const isBuilding = determineIsBuilding(props.labbook, props.isBuildingObject);
+    const { isBuilding } = props;
 
 
     if (this.mounted) {
@@ -504,15 +496,18 @@ class Labbook extends Component {
     dispatches sticky state to redux to update state
   */
   _setStickHeader = () => {
-    this.offsetDistance = window.pageYOffset;
+    const { props } = this;
+    const { owner, name } = props[props.sectionType];
     const sticky = 50;
     const isSticky = window.pageYOffset >= sticky;
-    if (store.getState().labbook.isSticky !== isSticky) {
-      setStickyDate(isSticky);
+
+    this.offsetDistance = window.pageYOffset;
+    if (props.isSticky !== isSticky) {
+      setStickyDate(owner, name, isSticky);
     }
 
     if (isSticky) {
-      setMergeMode(false, false);
+      setMergeMode(owner, name, false, false);
     }
   }
 
@@ -522,8 +517,9 @@ class Labbook extends Component {
     updates branchOpen state
   */
   _toggleBranchesView = (branchesOpen, mergeFilter) => {
+    const { owner, name } = props[props.sectionType];
     if (store.getState().containerStatus.status !== 'Running') {
-      setMergeMode(branchesOpen, mergeFilter);
+      setMergeMode(owner, name, branchesOpen, mergeFilter);
     } else {
       setContainerMenuWarningMessage('Stop Project before switching branches. \n Be sure to save your changes.');
     }
@@ -573,10 +569,11 @@ class Labbook extends Component {
   // TODO move migration code into it's own component
   render() {
     const { props, state } = this;
-    const isBuilding = determineIsBuilding(props.labbook, props.isBuildingObject);
+    const { isBuilding, isPublishing, isSyncing } = props;
+    const { owner, name } = props.labbook;
     const isLocked = isBuilding
-      || props.isSyncing
-      || props.isPublishing
+      || isSyncing
+      || isPublishing
       || state.isLocked;
 
     if (props.labbook) {
@@ -795,15 +792,14 @@ class Labbook extends Component {
                   render={() => (
                     <ErrorBoundary type="labbookSectionError">
                       <Overview
+                        {...props}
                         key={`${props.labbookName}_overview`}
                         labbook={labbook}
                         labbookId={labbook.id}
                         refetch={this._refetchSection}
-                        isSyncing={props.isSyncing}
-                        isPublishing={props.isPublishing}
+                        isPublishing={isPublishing}
                         scrollToTop={scrollToTop}
                         sectionType="labbook"
-                        history={props.history}
                       />
                     </ErrorBoundary>
                   )}
@@ -822,16 +818,15 @@ class Labbook extends Component {
                           key="overview"
                         >
                           <Overview
+                            {...props}
                             key={`${props.labbookName}_overview`}
                             labbook={labbook}
                             description={labbook.description}
                             labbookId={labbook.id}
                             refetch={this._refetchSection}
-                            isSyncing={props.isSyncing}
-                            isPublishing={props.isPublishing}
+                            isPublishing={isPublishing}
                             scrollToTop={scrollToTop}
                             sectionType="labbook"
-                            history={props.history}
                           />
                         </ErrorBoundary>
                       )}
@@ -980,7 +975,19 @@ class Labbook extends Component {
   }
 }
 
-const mapStateToProps = state => state.labbook;
+const mapStateToProps = (state, props) => {
+  const { owner, name } = props.labbook;
+  const namespace = `${owner}_${name}`;
+  const namespaceState = state.labbook[namespace]
+    ? state.labbook[namespace]
+    : state.labbook;
+
+  const { isUploading } = state.labbook;
+  return {
+    ...namespaceState,
+    globalIsUploading: isUploading,
+  };
+};
 
 const mapDispatchToProps = () => ({ setBuildingState });
 

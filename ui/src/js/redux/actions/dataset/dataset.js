@@ -4,16 +4,25 @@ import * as types from 'JS/redux/constants/constants';
  * actions
  */
 
-export const setStickyState = isSticky => dispatcher(
+export const setStickyState = (owner, name, isSticky) => dispatcher(
   types.UPDATE_STICKY_STATE,
-  { isSticky },
+  {
+    namespace: `${owner}_${name}`,
+    isSticky,
+  },
 );
-export const setIsProcessing = isProcessing => dispatcher(
+export const setIsProcessing = (owner, name, isProcessing) => dispatcher(
   types.SET_IS_PROCESSING,
-  { isProcessing },
+  {
+    namespace: `${owner}_${name}`,
+    isProcessing,
+  },
 );
 
-export const setIsSynching = (owner, name, isSynching) => dispatcher(
+export const setIsSyncing = (owner, name, isSyncing) => dispatcher(
   types.SET_IS_SYNCHING,
-  { owner, name, isSynching },
+  {
+    namespace: `${owner}_${name}`,
+    isSyncing,
+  },
 );

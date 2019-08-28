@@ -112,7 +112,7 @@ export default createPaginationContainer(
     environment: graphql`fragment Packages_environment on Environment {
     packageDependencies(first: $first, after: $cursor) @connection(key: "Packages_packageDependencies", filters: []){
         edges{
-          node{
+          node {
             id
             schema
             manager

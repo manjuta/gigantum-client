@@ -1,8 +1,10 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
 import uuidV4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
@@ -59,10 +61,6 @@ export default function DeleteExperimentalBranchMutation(
         callback(response, error);
       },
       onError: (err) => { console.error(err); },
-      optimisticUpdater(store) {
-      },
-      updater: (store, response) => {
-      },
     },
   );
 }

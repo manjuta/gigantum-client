@@ -24,10 +24,11 @@ class ContainerStatus extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, state) {
-    const displayTransitionState = nextProps.transitionState[nextProps.labbookName]
-      && nextProps.transitionState[nextProps.labbookName].length;
+    const { name } = nextProps.labbook;
+    const displayTransitionState = nextProps.transitionState
+      && nextProps.transitionState.length;
     const status = displayTransitionState
-      ? nextProps.transitionState[nextProps.labbookName]
+      ? nextProps.transitionState
       : state.status;
     return ({
       ...state,
@@ -240,16 +241,17 @@ class ContainerStatus extends Component {
    */
   _containerAction = (status, cssStatus, evt) => {
     const { props } = this;
+    const { owner, name } = props.labbook;
 
     if (!store.getState().labbook.isBuilding && !props.isLookingUpPackages) {
       if (status === 'Stop') {
-        updateTransitionState(props.labbookName, 'Stopping');
+        updateTransitionState(owner, name, 'Stopping');
         this.setState({ contanerMenuRunning: false });
         this._stopContainerMutation();
       } else if ((status === 'Start') && (cssStatus !== 'Rebuild')) {
-        updateTransitionState(props.labbookName, 'Starting');
+        updateTransitionState(owner, name, 'Starting');
         this.setState({ contanerMenuRunning: false });
-        props.setMergeMode(false, false);
+        props.setMergeMode(owner, name, false, false);
         this._startContainerMutation();
       } else if ((status === 'Start') || (status === 'Rebuild')) {
         this.setState({

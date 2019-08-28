@@ -1,13 +1,15 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import RelayRuntime from 'relay-runtime';
+import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
 // redux store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 
-let tempID = 0;
 const mutation = graphql`
   mutation RemovePackageComponentsMutation($input: RemovePackageComponentsInput!){
     removePackageComponents(input: $input){
@@ -58,7 +60,7 @@ export default function RemovePackageComponentsMutation(
       owner,
       manager,
       packages,
-      clientMutationId: tempID++,
+      clientMutationId: uuidv4(),
     },
   };
   commitMutation(
@@ -74,7 +76,7 @@ export default function RemovePackageComponentsMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
-      updater: (store, response) => {
+      updater: (store) => {
         sharedUpdater(store, environmentId, packageIDArr, 'Packages_packageDependencies');
       },
       optimisticUpdater: (store) => {

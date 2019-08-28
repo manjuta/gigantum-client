@@ -56,10 +56,7 @@ const scrollToTop = () => {
 *  gets value of isLocked to lock out functionality while the backend is synching
 */
 const getIsLocked = (props) => {
-  const { owner, name } = props.dataset;
-  const isLocked = props.isSynchingObject[`${owner}_${name}`]
-    ? props.isSynchingObject[`${owner}_${name}`]
-    : false;
+  const isLocked = props.isSyncing || props.isUploading;
   return isLocked;
 };
 
@@ -126,6 +123,7 @@ class Dataset extends Component {
     dispatches sticky state to redux to update state
   */
   _setStickHeader = () => {
+    const { owner, name } = this.props.dataset;
     const isExpanded = (window.pageYOffset < this.offsetDistance)
       && (window.pageYOffset > 120);
     const sticky = 50;
@@ -135,7 +133,7 @@ class Dataset extends Component {
 
     if ((store.getState().dataset.isSticky !== isSticky)
       || (store.getState().dataset.isExpanded !== isExpanded)) {
-      setStickyState(isSticky, isExpanded);
+      setStickyState(owner, name, isSticky);
     }
   }
 
@@ -318,7 +316,7 @@ class Dataset extends Component {
                             type="dataset"
                             section="data"
                             refetch={this._refetchDataset}
-                            lockFileBrowser={props.isUploading || isLocked}
+                            lockFileBrowser={props.globalIsUploading || isLocked}
                           />
 
                         </ErrorBoundary>
@@ -349,7 +347,19 @@ class Dataset extends Component {
   }
 }
 
-const mapStateToProps = state => state.dataset;
+const mapStateToProps = (state, props) => {
+  const { owner, name } = props.dataset;
+  const namespace = `${owner}_${name}`;
+  const namespaceState = state.dataset[namespace]
+    ? state.dataset[namespace]
+    : state.dataset;
+
+  const { isUploading } = state.dataset;
+  return {
+    ...namespaceState,
+    globalIsUploading: isUploading,
+  };
+};
 
 const mapDispatchToProps = () => ({});
 

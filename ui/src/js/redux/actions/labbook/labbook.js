@@ -1,61 +1,86 @@
 import dispatcher from 'JS/redux/dispatcher';
 import * as types from 'JS/redux/constants/constants';
 
-
 /**
  * actions
  */
-
 export const setBuildingState = (owner, name, isBuilding) => dispatcher(
   types.IS_BUILDING,
-  { owner, name, isBuilding },
+  {
+    namespace: `${owner}_${name}`,
+    isBuilding,
+  },
 );
 
-export const setMergeMode = (branchesOpen, mergeFilter) => dispatcher(
+export const setMergeMode = (owner, name, branchesOpen, mergeFilter) => dispatcher(
   types.MERGE_MODE,
   {
+    namespace: `${owner}_${name}`,
     branchesOpen,
     mergeFilter,
   },
 );
 
-export const setSyncingState = isSyncing => dispatcher(
+export const setSyncingState = (owner, name, isSyncing) => dispatcher(
   types.IS_SYNCING,
-  { isSyncing },
+  {
+    namespace: `${owner}_${name}`,
+    isSyncing,
+  },
 );
 
 export const setPublishingState = (owner, name, isPublishing) => dispatcher(
   types.IS_PUBLISHING,
-  { owner, name, isPublishing },
+  {
+    namespace: `${owner}_${name}`,
+    isPublishing,
+  },
 );
 
-export const setExportingState = isExporting => dispatcher(
+export const setExportingState = (owner, name, isExporting) => dispatcher(
   types.IS_EXPORTING,
-  { isExporting },
+  {
+    namespace: `${owner}_${name}`,
+    isExporting,
+  },
 );
 
-export const setModalVisible = modalVisible => dispatcher(
+export const setModalVisible = (owner, name, modalVisible) => dispatcher(
   types.MODAL_VISIBLE,
-  { modalVisible },
+  {
+    namespace: `${owner}_${name}`,
+    modalVisible,
+  },
 );
 
-export const setStickyDate = isSticky => dispatcher(
+export const setStickyDate = (owner, name, isSticky) => dispatcher(
   types.UPDATE_STICKY_STATE,
-  { isSticky },
+  {
+    namespace: `${owner}_${name}`,
+    isSticky,
+  },
 );
 
-export const setSidepanelVisible = sidePanelVisible => dispatcher(
+export const setSidepanelVisible = (owner, name, sidePanelVisible) => dispatcher(
   types.UPDATE_SIDEPANEL_VISIBLE,
-  { sidePanelVisible },
+  {
+    namespace: `${owner}_${name}`,
+    sidePanelVisible,
+  },
 );
 
-export const updateTransitionState = (transitioningLabbook, newState) => dispatcher(
+export const updateTransitionState = (owner, name, transitionState) => dispatcher(
   types.UPDATE_TRANSITION_STATE,
-  { transitionState: { [transitioningLabbook]: newState } },
+  {
+    namespace: `${owner}_${name}`,
+    transitionState,
+  },
 );
 
-
-export const setFileBrowserLock = isUploading => dispatcher(
+export const setFileBrowserLock = (owner, name, isUploading) => dispatcher(
   types.IS_UPLOADING,
-  { isUploading },
+  {
+    namespace: `${owner}_${name}`,
+    isUploading,
+  },
 );

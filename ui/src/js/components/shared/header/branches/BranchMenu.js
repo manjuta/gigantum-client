@@ -61,7 +61,7 @@ const getSyncTooltip = (props, data) => {
   } = data;
   let syncTooltip = !hasWriteAccess ? 'Pull changes from Gignatum Hub' : 'Sync changes to Gigantum Hub';
   syncTooltip = props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : syncTooltip;
-  syncTooltip = !props.defaultRemote ? 'Click Publish to push branch to remote server' : syncTooltip;
+  syncTooltip = !props.defaultRemote ? 'Click Publish to push branch to Gigantum Hub' : syncTooltip;
   syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : syncTooltip;
   syncTooltip = props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : syncTooltip;
 
@@ -336,12 +336,14 @@ class BranchMenu extends Component {
     @return {}
   */
   _toggleSidePanel = (sidePanelVisible) => {
-    const { isLocked } = this.props;
+    const { props } = this;
+    const { isLocked } = props;
+    const { owner, name } = props[props.sectionType];
     const { isDataset } = this.state;
 
     if (!isLocked && !isDataset) {
       this.setState({ switchMenuVisible: false });
-      setSidepanelVisible(sidePanelVisible);
+      setSidepanelVisible(owner, name, sidePanelVisible);
     }
   }
 
@@ -735,6 +737,7 @@ class BranchMenu extends Component {
            onClick={() => this._toggleBranchSwitch()}
            data-tooltip={switchTooltip}
            className={drodownButtonCSS}
+           role="presentation"
          >
            <div className={branchNameCSS}>
              <div className="BranchMenu__dropdown-label">Branch:</div>
@@ -781,6 +784,7 @@ class BranchMenu extends Component {
                    onClick={() => this._switchBranch(branch)}
                    key={branch.branchName}
                    className="BranchMenu__list-item"
+                   role="presentation"
                  >
                    <div className="BranchMenu__text">{branch.branchName}</div>
                    <div className="BranchMenu__icons">
@@ -801,7 +805,8 @@ class BranchMenu extends Component {
                   <li
                     className="BranchMenu__list-item BranchMenu__list-item--create"
                     onClick={() => this._setModalState('createBranchVisible')}
-                    >
+                    role="presentation"
+                  >
                     No other branches.
                     <button
                       type="button"
@@ -890,7 +895,7 @@ class BranchMenu extends Component {
                         && <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
                       }
                       {
-                        activeBranch.commitsAhead !== 0
+                        (activeBranch.commitsAhead !== 0)
                         && <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
                       }
                     </div>

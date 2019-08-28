@@ -8,7 +8,7 @@ import {
   setExportingState,
   setModalVisible,
 } from 'JS/redux/actions/labbook/labbook';
-import { setIsSynching } from 'JS/redux/actions/dataset/dataset';
+import { setIsSyncing } from 'JS/redux/actions/dataset/dataset';
 // config
 import Config from 'JS/config';
 // components
@@ -62,12 +62,10 @@ class Header extends Component {
   */
   _setExportingState = (isExporting) => {
     const { props } = this;
+    const { owner, name } = props[props.sectionType];
 
-    if (this.refs.ContainerStatus) {
-      this.refs.ContainerStatus.setState({ isExporting });
-    }
     if (props.isExporting !== isExporting) {
-      setExportingState(isExporting);
+      setExportingState(owner, name, isExporting);
     }
   }
 
@@ -77,8 +75,10 @@ class Header extends Component {
   */
   _showLabbookModal = () => {
     const { props } = this;
+    const { owner, name } = props[props.sectionType];
+
     if (!props.modalVisible) {
-      setModalVisible(true);
+      setModalVisible(owner, name, true);
     }
   }
 
@@ -88,6 +88,7 @@ class Header extends Component {
   */
   _hideLabbookModal = () => {
     const { props } = this;
+    const { owner, name } = props[props.sectionType];
     // TODO remove document to add classname, should use react state and classnames
     if (document.getElementById('labbookModal')) {
       document.getElementById('labbookModal').classList.add('hidden');
@@ -98,7 +99,7 @@ class Header extends Component {
     }
 
     if (props.modalVisible) {
-      setModalVisible(false);
+      setModalVisible(owner, name, false);
     }
   }
 
@@ -107,16 +108,15 @@ class Header extends Component {
     updates container status state
     updates labbook state
   */
- _setPublishingState = (isPublishing) => {
+ _setPublishingState = (owner, name, isPublishing) => {
    const { props } = this;
 
    if ((props.isPublishing !== isPublishing)) {
-     setPublishingState(isPublishing);
+     setPublishingState(owner, name, isPublishing);
    }
 
    if (props.sectionType === 'dataset') {
-     const { owner, name } = props.dataset;
-     setIsSynching(owner, name, isPublishing);
+     setIsSyncing(owner, name, isPublishing);
    }
  }
 
@@ -152,13 +152,12 @@ class Header extends Component {
   */
   _setSyncingState = (isSyncing) => {
     const { props } = this;
-
+    const { owner, name } = props[props.sectionType];
     if (props.isSyncing !== isSyncing) {
-      setSyncingState(isSyncing);
+      setSyncingState(owner, name, isSyncing);
     }
     if (props.sectionType === 'dataset') {
-      const { owner, name } = props.dataset;
-      setIsSynching(owner, name, isSyncing);
+      setIsSyncing(owner, name, isSyncing);
     }
   }
 

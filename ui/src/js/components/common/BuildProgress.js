@@ -123,7 +123,7 @@ class BuildProgress extends Component {
       isComplete,
       error,
     } = this._getPercentageComplete();
-    const buildButtonText = state.showBuild ? 'Back' : 'View Build Ouput';
+    const buildButtonText = state.showBuild ? 'Back' : 'View Build Output';
     const subText = getSubText(isComplete, error, state.cancelingBuild);
     let { headerText } = props;
     headerText = ((isComplete || state.cancelingBuild || error) && state.showBuild)

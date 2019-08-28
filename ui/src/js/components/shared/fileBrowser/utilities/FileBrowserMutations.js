@@ -89,7 +89,7 @@ class FileBrowserMutations {
         },
       );
     } else {
-      setIsProcessing(true);
+      setIsProcessing(owner, labbookName, true);
       MakeDatasetDirectoryMutation(
         connection,
         owner,
@@ -101,7 +101,7 @@ class FileBrowserMutations {
             console.error(error);
             setErrorMessage(`ERROR: could not create ${key}`, error);
           }
-          setTimeout(() => setIsProcessing(false), 1100);
+          setTimeout(() => setIsProcessing(owner, labbookName, false), 1100);
           callback(response, error);
         },
       );
@@ -133,7 +133,7 @@ class FileBrowserMutations {
 
     const { key } = edge.node;
 
-    setIsProcessing(true);
+    setIsProcessing(owner, labbookName, true);
     MoveDatasetFileMutation(
       connection,
       owner,
@@ -145,7 +145,7 @@ class FileBrowserMutations {
       section,
       removeIds,
       (response, error) => {
-        setTimeout(() => setIsProcessing(false), 1100);
+        setTimeout(() => setIsProcessing(owner, labbookName, false), 1100);
         callback(response, error);
       },
     );
@@ -230,7 +230,7 @@ class FileBrowserMutations {
         },
       );
     } else {
-      setIsProcessing(true);
+      setIsProcessing(owner, labbookName, true);
 
       DeleteDatasetFilesMutation(
         connection,
@@ -246,7 +246,7 @@ class FileBrowserMutations {
             const keys = filePaths.join(' ');
             setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
           }
-          setTimeout(() => setIsProcessing(false), 1100);
+          setTimeout(() => setIsProcessing(owner, labbookName, false), 1100);
         },
       );
     }
@@ -262,7 +262,6 @@ class FileBrowserMutations {
       connection,
       owner,
       labbookName,
-      section,
     } = this.state;
     const { transactionId } = store.getState().fileBrowser;
 
@@ -273,9 +272,7 @@ class FileBrowserMutations {
       true,
       false,
       transactionId,
-      (response, error) => {
-
-      },
+      () => {},
     );
   }
 
@@ -316,17 +313,10 @@ class FileBrowserMutations {
       labbookName,
     } = this.state;
 
-    const {
-      fromLocal,
-      fromRemote,
-    } = data;
-
     VerifyDatasetMutation(
       owner,
       labbookName,
-      (response, error) => {
-
-      },
+      (response, error) => {},
     );
   }
 }

@@ -37,7 +37,7 @@ export default class AddPackages extends Component {
   _installPackages = () => {
     const { props, state } = this;
     const newPackages = state.packageQueue.slice();
-    const duplicates = {};
+    const duplicates = {}
     const seperatedNewPackages = {};
     const { owner, name } = props;
     const buildCb = (response, error, id) => {
@@ -53,15 +53,24 @@ export default class AddPackages extends Component {
     });
 
     const managers = Object.keys(seperatedNewPackages);
-
+    managers.forEach((manager) => {
+      duplicates[manager] = [];
+    });
+    props.packages.forEach((pkg) => {
+      newPackages.forEach((newPkg) => {
+        if ((pkg.manager === newPkg.manager)
+          && (pkg.package === newPkg.package)) {
+          duplicates[pkg.manager].push(pkg);
+        }
+      });
+    });
     managers.forEach((manager, index) => {
       const isLast = (managers.length - 1) === index;
 
       const data = {
         packages: seperatedNewPackages[manager],
-        duplicates: duplicates[manager] || [],
+        duplicates: duplicates[manager],
       };
-
       setBuildingState(owner, name, true);
 
       const callback = (response) => {
@@ -133,9 +142,17 @@ export default class AddPackages extends Component {
     });
 
     if ((index !== undefined) || overWriteExisiting) {
-      newPackageQueue[currentPosition] = Object.assign({}, newPackageData[0], { verified: false, error: false });
+      newPackageQueue[currentPosition] = Object.assign(
+        {},
+        newPackageData[0],
+        { verified: false, error: false },
+      );
     } else {
-      newPackageQueue.push(Object.assign({}, newPackageData[0], { verified: false }));
+      newPackageQueue.push(Object.assign(
+        {},
+        newPackageData[0],
+        { verified: false },
+      ));
     }
     this.setState({ packageQueue: newPackageQueue });
 
@@ -207,12 +224,14 @@ export default class AddPackages extends Component {
               <h5
                 className={manualEntryCSS}
                 onClick={() => this._setSelectedEntryMethod('manual')}
+                role="presentation"
               >
                 Enter Packages
               </h5>
               <h5
                 className={fileEntryCSS}
                 onClick={() => this._setSelectedEntryMethod('file')}
+                role="presentation"
               >
                 Add Requirements File
               </h5>
@@ -243,6 +262,7 @@ export default class AddPackages extends Component {
             installPackages={this._installPackages}
             removePackageFromQueue={this._removePackageFromQueue}
             buildCallback={props.buildCallback}
+            existingPackages={props.packages}
           />
         </div>
       </div>

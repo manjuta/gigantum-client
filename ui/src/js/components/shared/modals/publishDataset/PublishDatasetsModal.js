@@ -85,7 +85,7 @@ export default class PublishDatasetsModal extends Component {
     setTimeout(() => props.toggleModal(false, true), 2000);
 
     if (isPublishing) {
-      props.setPublishingState(false);
+      props.setPublishingState(owner, labbookName, false);
       props.resetPublishState(false);
       const messageData = {
         id,
@@ -108,12 +108,13 @@ export default class PublishDatasetsModal extends Component {
   */
   _failureCall = (errorMessage) => {
     const { props } = this;
+    const { owner, labbookName } = props;
     const isPublishing = props.header === 'Publish';
 
     setTimeout(() => props.toggleModal(false, true), 2000);
 
     if (isPublishing) {
-      props.setPublishingState(false);
+      props.setPublishingState(owner, labbookName, false);
       props.resetPublishState(false);
     } else {
       props.setSyncingState(false);
@@ -295,7 +296,8 @@ export default class PublishDatasetsModal extends Component {
               props.resetPublishState(true);
 
               if (isPublishing) {
-                props.setPublishingState(true);
+                const { owner, labbookName } = props;
+                props.setPublishingState(owner, labbookName, true);
               } else {
                 props.setSyncingState(true);
               }

@@ -1,10 +1,11 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
-import RelayRuntime from 'relay-runtime';
 import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
 
 
 const mutation = graphql`

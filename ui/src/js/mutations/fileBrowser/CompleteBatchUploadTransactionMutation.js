@@ -1,10 +1,11 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
-
+// environment
+import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
   mutation CompleteBatchUploadTransactionMutation($input: CompleteBatchUploadTransactionInput!){
@@ -36,7 +37,6 @@ export default function AddLabbookFileMutation(
     },
   };
 
-
   commitMutation(
     environment,
     {
@@ -49,12 +49,6 @@ export default function AddLabbookFileMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
-      optimisticUpdater: (store) => {
-
-      },
-      updater: (store, response) => {
-
-      },
     },
   );
 }

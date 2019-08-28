@@ -139,8 +139,9 @@ class File extends Component {
       setWarningMessage('Could not launch development environment as the project is not ready.');
     } else if (status === 'NOT_RUNNING' && !forceStart) {
       setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
-      updateTransitionState(labbookName, 'Starting');
-      setMergeMode(false, false);
+      updateTransitionState(owner, labbookName, 'Starting');
+      setMergeMode(owner, labbookName, false, false);
+
       StartContainerMutation(
         owner,
         labbookName,

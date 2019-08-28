@@ -9,7 +9,13 @@ import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 // component
 import Modal from 'Components/common/Modal';
 // store
-import { setErrorMessage, setInfoMessage, setMultiInfoMessage } from 'JS/redux/actions/footer';
+import {
+  setErrorMessage,
+  setInfoMessage,
+  setMultiInfoMessage,
+} from 'JS/redux/actions/footer';
+import { setPublishingState } from 'JS/redux/actions/labbook/labbook';
+
 import store from 'JS/redux/store';
 // assets
 import './VisibilityModal.scss';
@@ -122,15 +128,16 @@ export default class PublishModal extends Component {
               props.resetPublishState(true);
 
               if (!props.remoteUrl) {
-                props.setPublishingState(true);
+                props.setPublishingState(owner, labbookName, true);
 
                 const failureCall = () => {
-                  props.setPublishingState(false);
+                  props.setPublishingState(owner, labbookName, false);
                   props.resetPublishState(false);
+                  setPublishingState(owner, labbookName, false);
                 };
 
                 const successCall = () => {
-                  props.setPublishingState(false);
+                  props.setPublishingState(owner, labbookName, false);
                   props.resetPublishState(false);
                   // self.props.remountCollab();
                   const messageData = {
@@ -205,9 +212,7 @@ export default class PublishModal extends Component {
 
   render() {
     const { props, state } = this;
-
     return (
-
       <Modal
         header={props.header}
         handleClose={() => props.toggleModal(props.modalStateValue)}

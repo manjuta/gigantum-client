@@ -42,10 +42,6 @@ export default class AddPackageForm extends Component {
 
       return { checkedValue, version };
     });
-
-    if (checkedValue === 'latest') {
-      this.packageVersionInput.value = '';
-    }
   }
 
   /**

@@ -74,12 +74,11 @@ class DevTools extends Component {
     const { props } = this;
     const { containerStatus, imageStatus } = props;
     const { owner, name } = props.labbook;
-    let tabName = `${developmentTool}-${owner}-${name}`;
     const labbookCreationDate = Date.parse(`${this.props.creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
-
     const timeDifferenceMS = timeNow - labbookCreationDate;
 
+    let tabName = `${developmentTool}-${owner}-${name}`;
     let status = (containerStatus === 'RUNNING') ? 'Running' : containerStatus;
     status = (containerStatus === 'NOT_RUNNING') ? 'Stopped' : status;
     status = (imageStatus === 'BUILD_IN_PROGRESS' || imageStatus === 'BUILD_QUEUED') ? 'Building' : status;
@@ -91,8 +90,8 @@ class DevTools extends Component {
       setWarningMessage('Could not launch development environment as the project is not ready.');
     } else if (status === 'Stopped') {
       setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
-      setMergeMode(false, false);
-      updateTransitionState(name, 'Starting');
+      setMergeMode(owner, name, false, false);
+      updateTransitionState(owner, name, 'Starting');
 
       props.containerMutations.startContainer({ devTool: developmentTool }, (response, error) => {
         if (error) {
