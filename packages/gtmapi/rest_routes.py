@@ -70,7 +70,10 @@ def version():
 
 
 @rest_routes.route(f'/savehook/<username>/<owner>/<labbook_name>')
-def savehook(username, owner, labbook_name):
+def savehook(username: str, owner: str, labbook_name: str):
+    """Save hook called by Jupyter
+
+    Note that this is handled directly in monitor_rserver.py"""
     try:
         changed_file = request.args.get('file')
         jupyter_token = request.args.get('jupyter_token')

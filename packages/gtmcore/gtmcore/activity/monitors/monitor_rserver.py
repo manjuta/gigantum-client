@@ -515,7 +515,7 @@ class RStudioServerMonitor(ActivityMonitor):
         else:
             logger.error(f'Got image from unknown path {exchange.path}')
 
-    def _update_doc_names(self, exchange: RserverExchange) -> None:
+    def _update_doc_status(self, exchange: RserverExchange) -> None:
         """Parse the JSON response information from RStudio - keeping track of code, output, and metadata
 
         Note that there are two different document types! "Notebooks" and an older "Document" type"""
@@ -534,6 +534,9 @@ class RStudioServerMonitor(ActivityMonitor):
             fname = params[1]
             if fname:
                 doc_id = params[0]
+            # copied from the save hook REST endpoint in rest_routes.py
+            with self.labbook.lock():
+                self.labbook.sweep_uncommitted_changes()
         # Or, we can open an existing file
         elif exchange.path == '/rpc/open_document':
             result = exchange.response['result']
@@ -552,7 +555,7 @@ class RStudioServerMonitor(ActivityMonitor):
         Returns:
             ar(): activity record
         """
-        # get an fstream generator object
+        # get a generator object so we can handle exceptions in our loop
         fstream = iter(mitmio.FlowReader(mitmlog).stream())
 
         while True:
@@ -589,8 +592,9 @@ class RStudioServerMonitor(ActivityMonitor):
                         self._parse_backend_events(rserver_exchange.response)
                 elif rserver_exchange.path in ['/rpc/console_input', '/rpc/execute_notebook_chunks']:
                     self._new_execution(rserver_exchange)
-                else:
-                    self._update_doc_names(rserver_exchange)
+                elif rserver_exchange.path in ['/rpc/modify_document_properties', '/rpc/save_document_diff',
+                                               '/rpc/open_document']:
+                    self._update_doc_status(rserver_exchange)
 
         # This logic isn't air-tight, but should at worst simply split what should've been in one execution
         #  across two ActivityRecords.
