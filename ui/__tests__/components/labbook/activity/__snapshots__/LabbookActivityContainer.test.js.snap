@@ -3,6 +3,7 @@
 exports[`LabbookActivityContainer Renders a snapshot 1`] = `
 <div
   className="Activity"
+  data-selenium-id="Activity"
 >
   <div
     className="Activity__inner-container flex flex--row flex--wrap justify--flex-start"
@@ -12,6 +13,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
     >
       <div
         className="hidden userNote"
+        data-selenium-id="Tooltip"
       >
         <div
           className="Tooltip__toggle userNote"
@@ -39,7 +41,9 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
  The note editor supports markdown.
         </div>
       </div>
-      <div />
+      <div
+        data-selenium-id="CreateBranch"
+      />
       <div
         className="Activity__date-section Activity__date-section--0"
       >
@@ -68,6 +72,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
         </div>
         <div
           className="UserNote__container"
+          data-selenium-id="UserNoteWrapper"
         >
           <button
             className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
@@ -85,9 +90,11 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
         >
           <div
             className="CardWrapper"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -110,7 +117,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:59pm
+                        9:59am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -131,13 +138,16 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="CardWrapper CardWrapper--rollback"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
                   className="Tooltip__toggle activitySubmenu"
@@ -171,12 +181,14 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
+                type="button"
               >
                 Rollback
               </button>
             </div>
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -199,7 +211,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:57pm
+                        9:57am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -220,13 +232,16 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="CardWrapper CardWrapper--rollback"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
                   className="Tooltip__toggle activitySubmenu"
@@ -260,12 +275,14 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
+                type="button"
               >
                 Rollback
               </button>
             </div>
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -288,7 +305,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:56pm
+                        9:56am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -309,13 +326,16 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="CardWrapper CardWrapper--rollback"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
                   className="Tooltip__toggle activitySubmenu"
@@ -349,12 +369,14 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
+                type="button"
               >
                 Rollback
               </button>
             </div>
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -377,7 +399,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:55pm
+                        9:55am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -398,13 +420,16 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="CardWrapper CardWrapper--rollback"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
                   className="Tooltip__toggle activitySubmenu"
@@ -438,12 +463,14 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
+                type="button"
               >
                 Rollback
               </button>
             </div>
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -466,7 +493,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -487,13 +514,16 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="CardWrapper CardWrapper--rollback"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
                   className="Tooltip__toggle activitySubmenu"
@@ -527,12 +557,14 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
+                type="button"
               >
                 Rollback
               </button>
             </div>
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -555,7 +587,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -576,13 +608,16 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
           <div
             className="CardWrapper CardWrapper--rollback"
+            data-selenium-id="CardWrapper"
           >
             <div
               className="Rollback"
+              data-selenium-id="Rollback"
               data-tooltip="Can't rollback when the container is running."
             >
               <div
                 className="hidden activitySubmenu"
+                data-selenium-id="Tooltip"
               >
                 <div
                   className="Tooltip__toggle activitySubmenu"
@@ -616,12 +651,14 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
+                type="button"
               >
                 Rollback
               </button>
             </div>
             <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -644,7 +681,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -664,53 +701,12 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
             </div>
           </div>
           <div
-            className="CardWrapper CardWrapper--rollback"
+            className="CardWrapper"
+            data-selenium-id="CardWrapper"
           >
             <div
-              className="Rollback"
-              data-tooltip="Can't rollback when the container is running."
-            >
-              <div
-                className="hidden activitySubmenu"
-              >
-                <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
-                >
-                  <div
-                    className="Tooltip__glow-container"
-                  >
-                    <div
-                      className="Tooltip__glow-ring-outer"
-                    >
-                      <div
-                        className="Tooltip__glow-ring-inner"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
-                >
-                  A dot between two activity records indicates the availability of the rollback menu. 
- This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
- When choosing to rollback a new branch is created at the specified point.
-                </div>
-              </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-              >
-                Rollback
-              </button>
-            </div>
-            <div
               className="ActivityCard__container column-1-span-9"
+              data-selenium-id="ActivityCard"
             >
               <div
                 className="ActivityCard ActivityCard--collapsed card"
@@ -733,7 +729,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                       <p
                         className="ActivityCard__time"
                       >
-                        2:54pm
+                        9:54am
                       </p>
                       <div
                         className="ActivityCard__user"
@@ -756,18 +752,23 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
       </div>
       <div
         className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
         className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
         className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
         className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
       <div
         className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
+        data-selenium-id="PaginationLoader"
       />
     </div>
   </div>

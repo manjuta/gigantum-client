@@ -39,7 +39,6 @@ export default function StopContainerMutation(
         if (error) {
           console.log(error);
         }
-        updateTransitionState(owner, labbookName, '');
         callback(response, error);
       },
       onError: err => console.error(err),

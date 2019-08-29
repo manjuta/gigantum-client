@@ -3,12 +3,14 @@
 exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
 <div
   className="Labbooks__listing"
+  data-selenium-id="LocalLabbooks"
 >
   <div
     className="grid"
   >
     <div
       className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
+      data-selenium-id="ImportModule"
     >
       <div
         className="Import__main"
@@ -49,6 +51,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
       </button>
       <div
         className="hidden createLabbook"
+        data-selenium-id="Tooltip"
       >
         <div
           className="Tooltip__toggle createLabbook"
@@ -86,7 +89,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     >
       <div
         className="LocalLabbooks__row--icons"
+        data-selenium-id="LocalLabbookPanel"
       >
+        <div
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
+          data-tooltip="loading"
+        />
         <div
           className="LocalLabbooks__containerStatus"
         >
@@ -157,16 +165,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           Fri Jan 18 2019
         </p>
         <p
-          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
-        >
-          <span
-            className="bold"
-          >
-            Current Branch:
-          </span>
-           
-        </p>
-        <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
           <span>
@@ -174,10 +172,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           </span>
         </p>
       </div>
-      <div
-        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
-        data-tooltip="loading"
-      />
     </a>
     <a
       className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
@@ -186,7 +180,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     >
       <div
         className="LocalLabbooks__row--icons"
+        data-selenium-id="LocalLabbookPanel"
       >
+        <div
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
+          data-tooltip="loading"
+        />
         <div
           className="LocalLabbooks__containerStatus"
         >
@@ -257,16 +256,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           Fri Jan 18 2019
         </p>
         <p
-          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
-        >
-          <span
-            className="bold"
-          >
-            Current Branch:
-          </span>
-           
-        </p>
-        <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
           <span>
@@ -279,10 +268,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           </span>
         </p>
       </div>
-      <div
-        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
-        data-tooltip="loading"
-      />
     </a>
     <a
       className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
@@ -291,7 +276,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     >
       <div
         className="LocalLabbooks__row--icons"
+        data-selenium-id="LocalLabbookPanel"
       >
+        <div
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
+          data-tooltip="loading"
+        />
         <div
           className="LocalLabbooks__containerStatus"
         >
@@ -362,16 +352,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           Fri Jan 11 2019
         </p>
         <p
-          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
-        >
-          <span
-            className="bold"
-          >
-            Current Branch:
-          </span>
-           
-        </p>
-        <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
           <span>
@@ -379,10 +359,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           </span>
         </p>
       </div>
-      <div
-        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
-        data-tooltip="loading"
-      />
     </a>
     <a
       className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
@@ -391,7 +367,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     >
       <div
         className="LocalLabbooks__row--icons"
+        data-selenium-id="LocalLabbookPanel"
       >
+        <div
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
+          data-tooltip="loading"
+        />
         <div
           className="LocalLabbooks__containerStatus"
         >
@@ -462,16 +443,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           Thu Jan 24 2019
         </p>
         <p
-          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
-        >
-          <span
-            className="bold"
-          >
-            Current Branch:
-          </span>
-           
-        </p>
-        <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
           <span>
@@ -479,10 +450,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           </span>
         </p>
       </div>
-      <div
-        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
-        data-tooltip="loading"
-      />
     </a>
     <a
       className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
@@ -491,7 +458,12 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     >
       <div
         className="LocalLabbooks__row--icons"
+        data-selenium-id="LocalLabbookPanel"
       >
+        <div
+          className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
+          data-tooltip="loading"
+        />
         <div
           className="LocalLabbooks__containerStatus"
         >
@@ -562,16 +534,6 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           Fri Jan 11 2019
         </p>
         <p
-          className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
-        >
-          <span
-            className="bold"
-          >
-            Current Branch:
-          </span>
-           
-        </p>
-        <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
         >
           <span>
@@ -583,33 +545,34 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           </span>
         </p>
       </div>
-      <div
-        className="Tooltip-Listing LocalLabbookPanel__loading Tooltip-data Tooltip-data--small"
-        data-tooltip="loading"
-      />
     </a>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>

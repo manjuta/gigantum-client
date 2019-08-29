@@ -8,7 +8,12 @@ exports[`Test LocalLabbooks rendering 1`] = `
 >
   <div
     className="LocalLabbooks__row--icons"
+    data-selenium-id="LocalLabbookPanel"
   >
+    <div
+      className="Tooltip-Listing LocalLabbookPanel__undefined Tooltip-data Tooltip-data--small"
+      data-tooltip="undefined"
+    />
     <div
       className="LocalLabbooks__containerStatus"
     >
@@ -79,16 +84,6 @@ exports[`Test LocalLabbooks rendering 1`] = `
       Fri Jan 18 2019
     </p>
     <p
-      className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
-    >
-      <span
-        className="bold"
-      >
-        Current Branch:
-      </span>
-       
-    </p>
-    <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
     >
       <span>
@@ -96,9 +91,5 @@ exports[`Test LocalLabbooks rendering 1`] = `
       </span>
     </p>
   </div>
-  <div
-    className="Tooltip-Listing LocalLabbookPanel__undefined Tooltip-data Tooltip-data--small"
-    data-tooltip="undefined"
-  />
 </a>
 `;

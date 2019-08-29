@@ -226,10 +226,8 @@ class Activity extends Component {
     window.addEventListener('scroll', this._handleScroll);
     window.addEventListener('visibilitychange', this._handleVisibilityChange);
 
-    if (props.sectionType === 'labbook') {
-      window.addEventListener('focus', this._pollForActivity);
-      this._pollForActivity();
-    }
+    window.addEventListener('focus', this._pollForActivity);
+    this._pollForActivity();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -251,10 +249,7 @@ class Activity extends Component {
 
     window.removeEventListener('visibilitychange', this._handleVisibilityChange);
     window.removeEventListener('scroll', this._handleScroll);
-
-    if (props.sectionType === 'labbook') {
-      window.removeEventListener('focus', this._pollForActivity);
-    }
+    window.removeEventListener('focus', this._pollForActivity);
   }
 
   /**
@@ -331,18 +326,17 @@ class Activity extends Component {
   _pollForActivity = () => {
     const self = this;
     const { props } = this;
+    const { sectionType } = props;
 
     this.setState({ newActivityAvailable: false });
-
-    const { labbookName, owner } = store.getState().routes;
-
+    const { name, owner } = props;
     const getNewActivity = () => {
-      NewActivity.getNewActivity(labbookName, owner).then((response) => {
-
-        const firstRecordCommitId = (props.labbook && props.labbook.activityRecords)
-          ? this.props.labbook.activityRecords.edges[0].node.commit
+      NewActivity.getNewActivity(name, owner, sectionType).then((response) => {
+        const section = props[sectionType];
+        const firstRecordCommitId = (section && section.activityRecords)
+          ? section.activityRecords.edges[0].node.commit
           : null;
-        const newRecordCommitId = response.data.labbook.activityRecords.edges[0].node.commit;
+        const newRecordCommitId = response.data[sectionType].activityRecords.edges[0].node.commit;
 
         if ((firstRecordCommitId !== newRecordCommitId)
           && (firstRecordCommitId !== null)) {
@@ -390,14 +384,14 @@ class Activity extends Component {
   *  pagination container loads more items
   */
   _loadMore = () => {
-    const { props } = this;
+    const { props, state } = this;
     const section = props[props.sectionType];
     const { activityRecords } = section;
     const cursor = activityRecords && activityRecords.pageInfo
       ? activityRecords.pageInfo.endCursor
       : null;
 
-    if (props.relay.isLoading()) {
+    if (props.relay.isLoading() || state.loadingMore) {
       return;
     }
 

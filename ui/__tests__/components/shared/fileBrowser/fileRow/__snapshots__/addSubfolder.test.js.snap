@@ -3,6 +3,7 @@
 exports[`AddSubFolder Component Renders a Snapshot 1`] = `
 <div
   className="AddSubfolder"
+  data-selenium-id="AddSubfolder"
   onClick={[Function]}
   style={Object {}}
 >
@@ -30,10 +31,12 @@ exports[`AddSubFolder Component Renders a Snapshot 1`] = `
       <button
         className="File__btn--round File__btn--cancel"
         onClick={[Function]}
+        type="button"
       />
       <button
         className="File__btn--round File__btn--add"
         onClick={[Function]}
+        type="button"
       />
     </div>
   </div>

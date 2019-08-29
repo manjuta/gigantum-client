@@ -63,13 +63,12 @@ const getIsLocked = (props) => {
 class Dataset extends Component {
   constructor(props) {
     super(props);
-    const { labbookName, owner } = store.getState().routes;
-
+    const { name, owner } = props.dataset;
     localStorage.setItem('owner', store.getState().routes.owner);
 
     setCallbackRoute(props.location.pathname);
 
-    document.title = `${owner}/${labbookName}`;
+    document.title = `${owner}/${name}`;
   }
 
   state = {
@@ -245,6 +244,8 @@ class Dataset extends Component {
                         sectionType="dataset"
                         datasetType={dataset.datasetType}
                         refetch={this._refetchDataset}
+                        owner={owner}
+                        name={name}
                       />
                     </ErrorBoundary>
                   )}
@@ -271,6 +272,8 @@ class Dataset extends Component {
                             sectionType="dataset"
                             datasetType={dataset.datasetType}
                             refetch={this._refetchDataset}
+                            owner={owner}
+                            name={name}
                           />
 
                         </ErrorBoundary>
@@ -293,6 +296,8 @@ class Dataset extends Component {
                             activeBranch={dataset.activeBranch}
                             sectionType="dataset"
                             refetch={this._refetchDataset}
+                            owner={owner}
+                            name={name}
                             {...props}
                           />
                         </ErrorBoundary>

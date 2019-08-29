@@ -3,6 +3,7 @@
 exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
 <div
   className="FileBrowser FileBrowser--dropzone"
+  data-selenium-id="FileBrowser"
   style={
     Object {
       "zIndex": 0,
@@ -10,12 +11,13 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
   }
 >
   <h4
-    className="margin--0"
+    className="margin--0 regular"
   >
     Files
   </h4>
   <div
     className="FileBrowser__tools flex justify--space-between"
+    data-selenium-id="FileBrowserTools"
   >
     <div
       className="FileBrowser__search flex-1"
@@ -29,7 +31,7 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
       />
     </div>
     <div
-      className="flex"
+      className="flex justify--right FileBrowser__Primary-actions"
     >
       <button
         className="Btn Btn--action Btn__FileBrowserAction Btn__FileBrowserAction--newFolder"
@@ -92,7 +94,7 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
       Modified
     </button>
     <div
-      className="FileBrowser__header--menu flex flex--row justify--right"
+      className="FileBrowser__header--menu flex flex--row justify--left"
     >
       Actions
     </div>
@@ -102,6 +104,7 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
   >
     <div
       className="AddSubfolder hidden"
+      data-selenium-id="AddSubfolder"
       onClick={[Function]}
     >
       <div
@@ -128,10 +131,12 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
           <button
             className="File__btn--round File__btn--cancel"
             onClick={[Function]}
+            type="button"
           />
           <button
             className="File__btn--round File__btn--add"
             onClick={[Function]}
+            type="button"
           />
         </div>
       </div>

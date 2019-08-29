@@ -3,13 +3,14 @@
 exports[`Test LinkModal 1`] = `
 <div
   className="Modal"
+  data-selenium-id="Modal"
 >
   <div
     className="Modal__cover"
     onClick={[Function]}
   />
   <div
-    className="Modal__content Modal__content--large-long dataset"
+    className="Modal__content Modal__content--noPadding Modal__content--large-long"
     style={
       Object {
         "overflow": "hidden",
@@ -24,28 +25,69 @@ exports[`Test LinkModal 1`] = `
     <div
       className="Modal__container"
     >
-      <h1
-        className="Modal__header"
-      >
-        <div
-          className="Icon Icon--dataset"
-        />
-        Link Dataset
-      </h1>
-      <hr />
       <div
         className="Modal__sub-container Modal__sub-container--nopadding"
       >
         <div
           className="LinkModal"
+          data-selenium-id="LinkModal"
         >
+          <div
+            className="LinkModal__header"
+          >
+            <div
+              className="Icon--add--green"
+            />
+            <h4
+              className="LinkModal__header-text"
+            >
+              Link Dataset
+            </h4>
+          </div>
+          <div
+            className="LinkModal__subheader"
+          >
+            <h3
+              className="LinkModal__subheader-text"
+            >
+              Select Dataset to Link
+            </h3>
+          </div>
           <div
             className="LinkModal__info Tooltip-data"
             data-tooltip="Linking a dataset will allow you to reference its files within the Project"
           />
           <div
-            className="Loader"
-          />
+            className="LinkModal__flex flex flex--column justify--space-between"
+          >
+            <div
+              className="Loader"
+              data-selenium-id="Loader"
+            />
+          </div>
+          <div
+            className="Link__buttonContainer"
+          >
+            <button
+              className="Btn--flat"
+              onClick={[Function]}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="Btn ButtonLoader Btn Btn--last"
+              data-selenium-id="ButtonLoader"
+              disabled={true}
+              onClick={[Function]}
+              type="submit"
+            >
+              <div
+                className="ButtonLoader__icon hidden"
+              />
+              Link Dataset
+            </button>
+          </div>
         </div>
       </div>
     </div>
