@@ -33,5 +33,9 @@ class TestRepoCacheMiddleware:
         r.cached_description((username, lb.owner, lb.name))
         r.cached_created_time((username, lb.owner, lb.name))
         r.cached_modified_on((username, lb.owner, lb.name))
+
+        assert r.db.exists(r._make_key((username, lb.owner, lb.name))) == 1
+
         r.clear_entry((username, lb.owner, lb.name))
         assert not r.db.hgetall(r._make_key((username, lb.owner, lb.name)))
+        assert r.db.exists(r._make_key((username, lb.owner, lb.name))) == 0

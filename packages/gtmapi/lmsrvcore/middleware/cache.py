@@ -45,11 +45,9 @@ class RepositoryCacheMiddleware:
                 logger.warning(f'Mutation {info.operation.name} not associated with a repo: {e}')
             except SkipRepo:
                 logger.debug(f'Skip {info.operation.name}')
-            finally:
-                info.context.repo_cache_middleware_complete = True
 
-        return_value = next(root, info, **args)
-        return return_value
+        info.context.repo_cache_middleware_complete = True
+        return next(root, info, **args)
 
     def flush_repo_cache(self, operation_obj, variable_values: Dict) -> None:
         """ Clears the cache for ANY labbook or dataset that has attributes matching

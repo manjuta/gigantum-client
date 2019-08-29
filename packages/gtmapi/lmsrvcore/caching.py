@@ -11,10 +11,6 @@ logger = LMLogger.get_logger()
 
 class RepoCacheEntry(ABC):
     """ Represents a specific entry in the cache for a specific Repository """
-
-    # Entries become stale after 24 hours
-    REFRESH_PERIOD_SEC = 60 * 60 * 24
-
     def __init__(self, redis_conn: redis.StrictRedis, key: str):
         self.db = redis_conn
         self.key = key
@@ -39,7 +35,6 @@ class RepoCacheEntry(ABC):
         self.db.hset(self.key, 'description', description)
         self.db.hset(self.key, 'creation_date', create_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
         self.db.hset(self.key, 'modified_on', modify_ts.strftime("%Y-%m-%dT%H:%M:%S.%f"))
-        self.db.hset(self.key, 'last_cache_update', datetime.datetime.utcnow().isoformat())
         return create_ts, modify_ts, description
 
     @staticmethod
@@ -52,16 +47,12 @@ class RepoCacheEntry(ABC):
 
     def _fetch_property(self, hash_field: str) -> bytes:
         """Retrieve all cache-able fields from the given repo"""
-        last_update = self._date(self.db.hget(self.key, 'last_cache_update'))
-        if last_update is None:
+        val = self.db.hget(self.key, hash_field)
+        if val is None:
             self.fetch_cachable_fields()
-            last_update = self._date(self.db.hget(self.key, 'last_cache_update'))
-        if last_update is None:
-            raise ValueError("Cannot retrieve last_cache_update_field")
-        delay_secs = (datetime.datetime.now(tz=datetime.timezone.utc) - last_update).total_seconds()
-        if delay_secs > self.REFRESH_PERIOD_SEC:
-            self.fetch_cachable_fields()
-        return self.db.hget(self.key, hash_field)
+            val = self.db.hget(self.key, hash_field)
+
+        return val
 
     @property
     def modified_on(self) -> datetime.datetime:
@@ -85,8 +76,8 @@ class RepoCacheEntry(ABC):
 
     def clear(self):
         """Remove this entry from the Redis cache. """
-        logger.warning(f"Flushing cache entry for {self}")
-        self.db.hdel(self.key, 'creation_date', 'modified_on', 'last_cache_update', 'description')
+        logger.debug(f"Flushing cache entry for {self}")
+        self.db.delete(self.key)
 
 
 class LabbookCacheEntry(RepoCacheEntry):
