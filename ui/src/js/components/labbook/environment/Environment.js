@@ -143,6 +143,7 @@ class Environment extends Component {
               isLocked={props.isLocked}
               packageLatestVersions={props.packageLatestVersions}
               packageLatestRefetch={props.packageLatestRefetch}
+              cancelRefetch={props.cancelRefetch}
             />
           </ErrorBoundary>
           <div className="flex justify--center align-items--center relative column-1-span-12">

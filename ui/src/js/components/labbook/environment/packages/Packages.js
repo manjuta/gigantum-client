@@ -25,6 +25,11 @@ class Packages extends Component {
     this._loadMore();
   }
 
+  componentWillUnmount = () => {
+    const { props } = this;
+    props.cancelRefetch();
+  }
+
   /**
   *  @param{}
   *  triggers relay pagination function loadMore
@@ -32,24 +37,28 @@ class Packages extends Component {
   _loadMore = () => {
     const { props } = this;
     const self = this;
-
-    props.relay.loadMore(
-      10, // Fetch the next 10 items
-      (response, error) => {
-        if (error) {
-          console.error(error);
-        }
-        if (props.environment.packageDependencies
-          && props.environment.packageDependencies.pageInfo.hasNextPage) {
-          self._loadMore();
-        } else {
-          props.packageLatestRefetch();
-        }
-      },
-      {
-        cursor: props.environment.packageDependencies.pageInfo.endCursor,
-      },
-    );
+    if (props.environment.packageDependencies
+      && props.environment.packageDependencies.pageInfo.hasNextPage) {
+      props.relay.loadMore(
+        10, // Fetch the next 10 items
+        (response, error) => {
+          if (error) {
+            console.error(error);
+          }
+          if (props.environment.packageDependencies
+            && props.environment.packageDependencies.pageInfo.hasNextPage) {
+            self._loadMore();
+          } else {
+            props.packageLatestRefetch();
+          }
+        },
+        {
+          cursor: props.environment.packageDependencies.pageInfo.endCursor,
+        },
+      );
+    } else {
+      props.packageLatestRefetch();
+    }
   }
 
 

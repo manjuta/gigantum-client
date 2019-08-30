@@ -225,6 +225,8 @@ class Dataset extends Component {
               sectionType="dataset"
               isLocked={isLocked}
               {...props}
+              owner={owner}
+              name={name}
             />
 
             <div className="Dataset__routes flex flex-1-0-auto">

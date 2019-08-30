@@ -28,11 +28,32 @@ class DevTools extends Component {
         }
       }
       if (devToolConfig[owner] && devToolConfig[owner][name]) {
-        return devToolConfig[owner][name];
+        const devToolExists = this.props.labbook.environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1;
+        if (devToolExists) {
+          return devToolConfig[owner][name];
+        }
+        delete devToolConfig[owner][name];
+        localStorage.setItem('devToolConfig', JSON.stringify(devToolConfig));
       }
       return defaultFromApi;
     })(),
     showDevList: false,
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const { owner, name, environment } = props.labbook;
+    const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};
+    if (devToolConfig[owner] && devToolConfig[owner][name]) {
+      const selectedDevTool = (environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1) ? devToolConfig[owner][name] : environment.base.developmentTools[0];
+      return {
+        ...state,
+        selectedDevTool,
+      }
+    }
+
+    return {
+      ...state,
+    };
   }
 
   componentDidMount() {

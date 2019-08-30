@@ -110,6 +110,7 @@ class Labbook extends Component {
     inputSkip: true,
     outputSkip: true,
     lockFileBrowser: false,
+    packageRefetchRan: false,
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -226,12 +227,22 @@ class Labbook extends Component {
     window.removeEventListener('click', this._branchViewClickedOff);
   }
 
+/**
+  @param {}
+  cancels refetch packages
+  */
+  _cancelRefetch = () => {
+    if (this.refetch && this.refetch.dispose) {
+      this.refetch.dispose();
+    }
+  }
+
   /**
    @param {}
    refetch packages
    */
   _packageLatestRefetch = () => {
-    const { props } = this;
+    const { props, state } = this;
     const queryVariables = {
       labbookID: props.labbook.id,
       skipPackages: false,
@@ -252,7 +263,11 @@ class Labbook extends Component {
     const options = {
       force: true,
     };
-    props.relay.refetch(queryVariables, renderVariables, () => {}, options);
+    if (!state.packageRefetchRan) {
+      this.refetch = props.relay.refetch(queryVariables, renderVariables, () => {
+        this.setState({ packageRefetchRan: true });
+      }, options);
+    }
   }
 
   /**
@@ -774,6 +789,8 @@ class Labbook extends Component {
             }
             <Header
               {...props}
+              owner={owner}
+              name={name}
               ref={header => header}
               description={labbook.description}
               toggleBranchesView={this._toggleBranchesView}
@@ -887,6 +904,7 @@ class Labbook extends Component {
                             isLocked={isLocked}
                             packageLatestVersions={state.packageLatestVersions}
                             packageLatestRefetch={this._packageLatestRefetch}
+                            cancelRefetch={this._cancelRefetch}
                             {...props}
                           />
                         </ErrorBoundary>
