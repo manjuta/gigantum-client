@@ -182,7 +182,7 @@ class StopContainer(graphene.relay.ClientIDMutation):
         # Clean up empty bind mount dirs from datasets if needed
         submodules = lb.git.list_submodules()
         for submodule in submodules:
-            namespace, dataset_name = submodule['name'].split("&")
+            namespace, dataset_name = submodule.split("&")
             bind_location = os.path.join(lb.root_dir, 'input', dataset_name)
             if os.path.isdir(bind_location):
                 os.rmdir(bind_location)

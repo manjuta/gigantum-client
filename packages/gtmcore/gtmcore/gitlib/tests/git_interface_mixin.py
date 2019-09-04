@@ -1441,9 +1441,7 @@ class GitInterfaceMixin(object):
         # List submodules
         assert len(git.list_submodules()) == 1
         sm = git.list_submodules()[0]
-        assert sm["name"] == "test_sub"
-        assert sm["url"] == remote_working_dir
-        assert sm["branch"] == "master"
+        assert sm == "test_sub"
 
         # Should be clean
         status = git.status()
@@ -1476,9 +1474,7 @@ class GitInterfaceMixin(object):
         # List submodules
         assert len(git.list_submodules()) == 1
         sm = git.list_submodules()[0]
-        assert sm["name"] == "test_sub"
-        assert sm["url"] == remote_working_dir
-        assert sm["branch"] == "master"
+        assert sm == "test_sub"
 
         # Should be clean
         status = git.status()

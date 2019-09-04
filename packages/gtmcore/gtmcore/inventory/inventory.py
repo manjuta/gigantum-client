@@ -778,7 +778,7 @@ class InventoryManager(object):
 
         labbook.git.add_all()
         commit = labbook.git.commit(f"adding submodule ref to link dataset {dataset_namespace}/{dataset_name}")
-        labbook.git.update_submodules(init=True)
+        call_subprocess(['git', 'submodule', 'update', '--init', '--', relative_submodule_dir], cwd=labbook.root_dir)
 
         ds = self.load_dataset_from_directory(absolute_submodule_dir)
         dataset_revision = ds.git.repo.head.commit.hexsha
@@ -850,40 +850,39 @@ class InventoryManager(object):
         Returns:
             None
         """
-        # List all existing linked datasets IN this repository
-        existing_dataset_abs_paths = glob.glob(os.path.join(labbook.root_dir, '.gigantum', 'datasets', "*/*"))
+        submodules = labbook.git.list_submodules()
+        for submodule in submodules:
+            try:
+                namespace, dataset_name = submodule.split("&")
+                rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
+                submodule_dir = os.path.join(labbook.root_dir, rel_submodule_dir)
 
-        if len(labbook.git.repo.submodules) > 0:
-            call_subprocess(['git', 'submodule', 'sync', '--recursive'],
-                            cwd=labbook.root_dir, check=True)
+                call_subprocess(['git', 'submodule', 'update', '--init', '--', rel_submodule_dir],
+                                cwd=labbook.root_dir, check=True)
 
-            call_subprocess(['git', 'submodule', 'update', '--init', '--recursive'],
-                            cwd=labbook.root_dir, check=True)
+                ds = InventoryManager().load_dataset_from_directory(submodule_dir)
+                ds.namespace = namespace
+                manifest = Manifest(ds, username)
+                manifest.force_reload()
+                manifest.link_revision()
 
-            for submodule in labbook.git.list_submodules():
-                try:
-                    namespace, dataset_name = submodule['name'].split("&")
-                    rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
-                    submodule_dir = os.path.join(labbook.root_dir, rel_submodule_dir)
-
-                    # If submodule is currently present, init/update it, don't remove it!
-                    if submodule_dir in existing_dataset_abs_paths:
-                        existing_dataset_abs_paths.remove(submodule_dir)
-
-                    ds = InventoryManager().load_dataset_from_directory(submodule_dir)
-                    ds.namespace = namespace
-                    manifest = Manifest(ds, username)
-                    manifest.force_reload()
-                    manifest.link_revision()
-
-                except Exception as err:
-                    logger.error(f"Failed to initialize linked Dataset (submodule reference): {submodule['name']}. "
-                                 f"This may be an actual error or simply due to repository permissions")
-                    logger.exception(err)
+            except Exception as err:
+                logger.warning(f"Failed to initialize linked Dataset (submodule reference): {submodule}. "
+                               f"This may be an actual error or simply due to repository permissions",
+                               exc_info=True)
+                logger.warning(err)
 
         # Clean out lingering dataset files if you previously had a dataset linked, but now don't
-        for submodule_dir in existing_dataset_abs_paths:
-            shutil.rmtree(submodule_dir)
+        current_dataset_set = set([os.path.join(labbook.root_dir,
+                                                '.gigantum',
+                                                'datasets',
+                                                x.replace("&", "/")) for x in submodules])
+        dataset_directory_set = set(glob.glob(os.path.join(labbook.root_dir, '.gigantum', 'datasets', "*/*")))
+        defunct_dataset_dirs = dataset_directory_set.difference(current_dataset_set)
+        for submodule_dir_to_clean in defunct_dataset_dirs:
+            if os.path.isdir(submodule_dir_to_clean):
+                logger.info(f"Detected un-used dataset submodule dir. Removing: {submodule_dir_to_clean}")
+                shutil.rmtree(submodule_dir_to_clean)
 
     def update_linked_dataset_reference(self, dataset_namespace: str, dataset_name: str, labbook: LabBook) -> Dataset:
         """Method to update a linked dataset reference to the latest revision
@@ -946,7 +945,7 @@ class InventoryManager(object):
         datasets = list()
         for submodule in submodules:
             try:
-                namespace, dataset_name = submodule['name'].split("&")
+                namespace, dataset_name = submodule.split("&")
                 submodule_dir = os.path.join(labbook.root_dir, '.gigantum', 'datasets', namespace, dataset_name)
                 ds = self.load_dataset_from_directory(submodule_dir, author=labbook.author)
                 ds.namespace = namespace

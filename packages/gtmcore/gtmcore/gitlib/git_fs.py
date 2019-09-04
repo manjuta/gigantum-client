@@ -4,6 +4,7 @@ from git import InvalidGitRepositoryError, BadName
 import os
 import re
 import shutil
+import subprocess
 
 from typing import Dict, List, Optional, Tuple
 
@@ -847,26 +848,32 @@ class GitFilesystem(GitRepoInterface):
         self.repo.index.commit("Added submodule: {}".format(name))
 
     def list_submodules(self):
-        """Method to list submodules
+        """Method to list the name of configured submodules
 
             Should return a list of dicts with the format:
 
-                {
-                    "name": <name of the submodule>,
-                    "url": <url of repo>,
-                    "branch": <name of the branch>
-                }
-
         Returns:
-            list(dict)
+            list(str)
         """
-        result = []
-        for sub in self.repo.submodules:
-            result.append({"name": sub.name,
-                           "url": sub.url,
-                           "branch": sub.branch_name})
+        # Git-python is broken when not all submodules have been initialized and you try to do remote git ops.
+        # So instead of listing with self.repo.submodules, we just look at the .gitmodule file
+        submodule_list = list()
+        gitmodules_file = os.path.join(self.working_directory, '.gitmodules')
+        if os.path.exists(gitmodules_file):
+            if os.stat(gitmodules_file).st_size > 0:
+                r = subprocess.run(['git', 'config', '--file', '.gitmodules', '--name-only', '--get-regexp', 'path'],
+                                   cwd=self.working_directory, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   check=True)
+                result = r.stdout
+                if result:
+                    lines = result.decode().split('\n')
+                    for line in lines:
+                        if line:
+                            _, part = line.split('submodule.')
+                            name, _ = part.split('.path')
+                            submodule_list.append(name)
 
-        return result
+        return submodule_list
 
     def update_submodules(self, init=True):
         """Method to update submodules and optionally init if needed
