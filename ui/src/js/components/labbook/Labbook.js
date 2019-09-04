@@ -161,7 +161,6 @@ class Labbook extends Component {
       : [];
 
     const lockFileBrowser = nextProps.isSyncing || nextProps.globalIsUploading || isPublishing;
-
     return {
       ...state,
       deletedBranches: newDeletedBranches,
@@ -182,7 +181,7 @@ class Labbook extends Component {
     const { props, state } = this;
     const { name, owner } = props.labbook;
 
-    localStorage.setItem('owner', store.getState().routes.owner);
+    localStorage.setItem('owner', owner);
     setCallbackRoute(props.location.pathname);
 
     this.mounted = true;
@@ -378,7 +377,7 @@ class Labbook extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {} -
   *  fetches status of labbook container and image
   *  sets state of labbook using redux and containerStatus using setState
   *  @return {}
@@ -878,8 +877,8 @@ class Labbook extends Component {
                             sectionType="labbook"
                             isLocked={isLocked}
                             isDeprecated={state.isDeprecated}
-                            owner={labbook.owner}
-                            name={labbook.name}
+                            owner={owner}
+                            name={name}
                             {...props}
                           />
                         </ErrorBoundary>
@@ -896,8 +895,8 @@ class Labbook extends Component {
                           <Environment
                             key={`${props.labbookName}_environment`}
                             labbook={labbook}
-                            owner={labbook.owner}
-                            name={labbook.name}
+                            owner={owner}
+                            name={name}
                             labbookId={labbook.id}
                             refetch={this._refetchSection}
                             overview={labbook.overview}
@@ -1012,6 +1011,8 @@ const mapStateToProps = (state, props) => {
   return {
     ...namespaceState,
     globalIsUploading: isUploading,
+    owner,
+    name,
   };
 };
 
@@ -1083,8 +1084,6 @@ const LabbookFragmentContainer = createRefetchContainer(
 
 const backend = (manager) => {
   const backend = HTML5Backend(manager);
-
-
   const orgTopDropCapture = backend.handleTopDropCapture;
 
   backend.handleTopDropCapture = (e) => {

@@ -76,7 +76,7 @@
 }
 
 .DatasetCard__summary {
-  height: 70px;
+  min-height: 70px;
   padding: 0 30px;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .DatasetCard__icon {
-  width: 25px;
+  min-width: 25px;
   height: 25px;
   background: url('~Images/icons/datasets-jet.svg') no-repeat 50%;
   background-size: 25px;

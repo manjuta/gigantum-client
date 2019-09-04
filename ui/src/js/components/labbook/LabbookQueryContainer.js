@@ -26,6 +26,7 @@ class LabbookQueryContainer extends Component {
 
   render() {
     const parentProps = this.props;
+
     return (
       <QueryRenderer
         environment={environment}
@@ -56,15 +57,14 @@ class LabbookQueryContainer extends Component {
             if (props.errors) {
               return (<div>{props.errors[0].message}</div>);
             }
-
             return (
               <Labbook
                 key={parentProps.labbookName}
                 auth={parentProps.auth}
-                labbookName={parentProps.labbookName}
+                labbookName={props.labbook.name}
                 query={props.query}
                 labbook={props.labbook}
-                owner={parentProps.owner}
+                owner={props.labbook.owner}
                 history={parentProps.history}
                 diskLow={props.diskLow}
                 sectionType="labbook"

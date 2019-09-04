@@ -9,10 +9,11 @@ const ProjectPublish = (props) => {
     progress,
     header,
     owner,
-    labbookName,
+    name,
   } = props;
   const action = (header === 'Publish') ? 'Publishing' : 'Syncing';
   const currentStep = progress.project ? progress.project.step : 1;
+  // decalre css here
   const firstProjectStepCSS = classNames({
     'is-active': currentStep === 1,
     'is-completed': currentStep > 1,
@@ -36,7 +37,7 @@ const ProjectPublish = (props) => {
 
       <h5 className="PublishDatasetsModal__Label">Project</h5>
       <div className="PublishDatasetsModal__radio-container">
-        {`${owner}/${labbookName}`}
+        {`${owner}/${name}`}
 
         <div className="PublishDatasetsModal__radio-subcontainer">
           { !isProcessing
@@ -97,7 +98,8 @@ ProjectPublish.propTypes = {
   progress: PropTypes.isRequired,
   header: PropTypes.isRequired,
   owner: PropTypes.isRequired,
-  labbookName: PropTypes.isRequired,
+  name: PropTypes.isRequired,
+  setPublic: PropTypes.isRequired,
 };
 
 export default ProjectPublish;

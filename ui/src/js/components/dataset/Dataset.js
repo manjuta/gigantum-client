@@ -365,6 +365,8 @@ const mapStateToProps = (state, props) => {
   return {
     ...namespaceState,
     globalIsUploading: isUploading,
+    owner,
+    name,
   };
 };
 

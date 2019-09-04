@@ -150,7 +150,6 @@ class Activity extends Component {
   constructor(props) {
     super(props);
     const section = props[props.sectionType];
-
     this.state = {
       loadingMore: false,
       modalVisible: false,
@@ -244,7 +243,6 @@ class Activity extends Component {
   }
 
   componentWillUnmount() {
-    const { props } = this;
     this._isMounted = false;
 
     window.removeEventListener('visibilitychange', this._handleVisibilityChange);

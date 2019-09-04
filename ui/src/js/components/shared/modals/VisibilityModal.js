@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
@@ -14,14 +15,16 @@ import {
   setInfoMessage,
   setMultiInfoMessage,
 } from 'JS/redux/actions/footer';
-import { setPublishingState } from 'JS/redux/actions/labbook/labbook';
 
 import store from 'JS/redux/store';
 // assets
 import './VisibilityModal.scss';
 
+type Props = {
+  visibility: bool,
+}
 
-export default class PublishModal extends Component {
+export default class PublishModal extends Component<Props> {
   state = {
     isPublic: (this.props.visibility === 'public'),
   }
@@ -48,7 +51,7 @@ export default class PublishModal extends Component {
     const visibility = state.isPublic ? 'public' : 'private';
     const {
       owner,
-      labbookName,
+      name,
     } = props;
 
     props.toggleModal(props.modalStateValue);
@@ -62,7 +65,7 @@ export default class PublishModal extends Component {
               if (props.sectionType === 'labbook') {
                 SetVisibilityMutation(
                   owner,
-                  labbookName,
+                  name,
                   visibility,
                   (visibilityResponse, error) => {
                     if (error) {
@@ -76,7 +79,7 @@ export default class PublishModal extends Component {
               } else {
                 SetDatasetVisibilityMutation(
                   owner,
-                  labbookName,
+                  name,
                   visibility,
                   (visibilityResponse, error) => {
                     if (error) {
@@ -114,7 +117,7 @@ export default class PublishModal extends Component {
     const self = this;
     const {
       owner,
-      labbookName,
+      name,
       labbookId,
     } = props;
 
@@ -128,21 +131,20 @@ export default class PublishModal extends Component {
               props.resetPublishState(true);
 
               if (!props.remoteUrl) {
-                props.setPublishingState(owner, labbookName, true);
+                props.setPublishingState(owner, name, true);
 
                 const failureCall = () => {
-                  props.setPublishingState(owner, labbookName, false);
+                  props.setPublishingState(false);
                   props.resetPublishState(false);
-                  setPublishingState(owner, labbookName, false);
                 };
 
                 const successCall = () => {
-                  props.setPublishingState(owner, labbookName, false);
+                  props.setPublishingState(false);
                   props.resetPublishState(false);
                   // self.props.remountCollab();
                   const messageData = {
                     id,
-                    message: `Added remote https://gigantum.com/${props.owner}/${props.labbookName}`,
+                    message: `Added remote https://gigantum.com/${props.owner}/${props.name}`,
                     isLast: true,
                     error: false,
                   };
@@ -154,7 +156,7 @@ export default class PublishModal extends Component {
                 if (props.sectionType === 'labbook') {
                   PublishLabbookMutation(
                     owner,
-                    labbookName,
+                    name,
                     labbookId,
                     state.isPublic,
                     successCall,
@@ -168,7 +170,7 @@ export default class PublishModal extends Component {
                 } else {
                   PublishDatasetMutation(
                     owner,
-                    labbookName,
+                    name,
                     state.isPublic,
                     successCall,
                     failureCall,

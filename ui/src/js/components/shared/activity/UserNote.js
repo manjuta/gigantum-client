@@ -55,7 +55,7 @@ class UserNote extends Component {
     const { props, state } = this;
     const self = this;
     const tags = state.tags.map(tag => (tag.text));
-    const { labbookName, owner } = store.getState().routes;
+    const { name, owner } = props;
     const { labbookId } = props;
 
     if (state.unsubmittedTag.length) {
@@ -67,7 +67,7 @@ class UserNote extends Component {
 
     CreateUserNoteMutation(
       props.sectionType,
-      labbookName,
+      name,
       state.userSummaryText,
       simple.value(),
       owner,

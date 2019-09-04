@@ -59,8 +59,7 @@ export default createPaginationContainer(
       };
     },
     getVariables(props, { count, cursor }, fragmentVariables) {
-      const { owner } = props.match.params;
-      const name = props.match.params.labbookName;
+      const { owner, name } = props;
       return {
         ...fragmentVariables,
         first: count,

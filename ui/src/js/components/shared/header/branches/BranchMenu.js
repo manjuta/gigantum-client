@@ -890,13 +890,19 @@ class BranchMenu extends Component {
                       onMouseEnter={() => this._hovercommits(true)}
                       onMouseLeave={() => this._hovercommits(false)}
                     >
-                      {
-                        (activeBranch.commitsBehind !== 0)
-                        && <div className="BranchMenu__sync-status--commits-behind">{ activeBranch.commitsBehind }</div>
+                      { (activeBranch.commitsBehind !== 0)
+                        && (
+                          <div className="BranchMenu__sync-status--commits-behind">
+                            { activeBranch.commitsBehind }
+                          </div>
+                        )
                       }
-                      {
-                        (activeBranch.commitsAhead !== 0)
-                        && <div className="BranchMenu__sync-status--commits-ahead">{ activeBranch.commitsAhead }</div>
+                      { (activeBranch.commitsAhead !== 0)
+                        && (
+                          <div className="BranchMenu__sync-status--commits-ahead">
+                            { activeBranch.commitsAhead }
+                          </div>
+                        )
                       }
                     </div>
                   )
@@ -919,6 +925,7 @@ class BranchMenu extends Component {
                       <li
                         className="BranchMenu__list-item"
                         onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull)}
+                        role="presentation"
                       >
                         Sync (Pull then Push)
                       </li>
@@ -927,6 +934,7 @@ class BranchMenu extends Component {
                    <li
                      className="BranchMenu__list-item"
                      onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}
+                     role="presentation"
                    >
                     Pull (Pull-only)
                    </li>
@@ -974,7 +982,7 @@ class BranchMenu extends Component {
         && (
           <VisibilityModal
             owner={props.section.owner}
-            labbookName={props.section.name}
+            name={props.section.name}
             labbookId={props.sectionId}
             remoteUrl={props.defaultRemote}
             auth={props.auth}
@@ -982,7 +990,7 @@ class BranchMenu extends Component {
             header="Publish"
             modalStateValue="visibilityModalVisible"
             sectionType={props.sectionType}
-            setPublishingState={props.setPublishingState}
+            setPublishingState={props.setSyncingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
             resetState={this._resetState}
@@ -995,7 +1003,7 @@ class BranchMenu extends Component {
         && (
           <PublishDatasetsModal
             owner={props.section.owner}
-            labbookName={props.section.name}
+            name={props.section.name}
             labbookId={props.sectionId}
             remoteUrl={props.remoteUrl}
             auth={props.auth}
@@ -1036,11 +1044,11 @@ class BranchMenu extends Component {
  }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   collaborators: state.collaborators.collaborators,
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = () => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BranchMenu);

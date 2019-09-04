@@ -947,7 +947,7 @@ class FileBrowser extends Component {
                <FileSizePromptModal
                  cancelUpload={this._cancelUpload}
                  userRejectsUpload={this._userRejectsUpload}
-                 userAcceptsUpload={this._userRejectsUpload}
+                 userAcceptsUpload={this._userAcceptsUpload}
                  uploadPromptText={uploadPromptText}
                />
              )
