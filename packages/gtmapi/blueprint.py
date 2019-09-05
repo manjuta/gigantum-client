@@ -47,10 +47,9 @@ complete_labbook_service.add_url_rule(f'{config.config["proxy"]["labmanager_api_
                                       view_func=GraphQLView.as_view('graphql', schema=full_schema,
                                                                     graphiql=config.config["flask"]["DEBUG"],
                                                                     middleware=[error_middleware,
-                                                                                #time_all_resolvers_middleware,
-                                                                                AuthorizationMiddleware(),
+                                                                                RepositoryCacheMiddleware(),
                                                                                 DataloaderMiddleware(),
-                                                                                RepositoryCacheMiddleware()]),
+                                                                                AuthorizationMiddleware()]),
                                       methods=['GET', 'POST', 'OPTION'])
 
 
