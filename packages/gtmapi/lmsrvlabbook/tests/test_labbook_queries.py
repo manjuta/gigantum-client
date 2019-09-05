@@ -7,7 +7,7 @@ from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, fixture_working_dir_populated_scoped, fixture_test_file
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, property_mocks_fixture
 from gtmcore.files import FileOperations
-from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
+from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV, flush_redis_repo_cache
 import datetime
 import pprint
 import aniso8601
@@ -143,6 +143,7 @@ class TestLabBookServiceQueries(object):
         lb.git.commit("Changing the repo")
 
         # Run query again
+        flush_redis_repo_cache()
         snapshot.assert_match(fixture_working_dir_populated_scoped[2].execute(query))
 
     def test_pagination_first_only(self, fixture_working_dir_populated_scoped, snapshot):
@@ -386,6 +387,7 @@ class TestLabBookServiceQueries(object):
 
     def test_get_labbook(self, fixture_working_dir):
         """Test listing labbooks"""
+        flush_redis_repo_cache()
         im = InventoryManager(fixture_working_dir[0])
         lb = im.create_labbook('default', 'default', 'labbook1', description="my test description",
                                author=GitAuthor(name="tester", email="tester@test.com"))
@@ -414,9 +416,9 @@ class TestLabBookServiceQueries(object):
         assert r['data']['labbook']['name'] == 'labbook1'
         d = r['data']['labbook']['creationDateUtc']
         n = aniso8601.parse_datetime(d)
-        assert (datetime.datetime.now(datetime.timezone.utc) - n).total_seconds() < 5
+        assert (datetime.datetime.now(tz=datetime.timezone.utc) - n).total_seconds() < 5
         assert n.microsecond == 0
-        assert n.tzname() == "+00:00"
+        assert n.tzname() in ["+00:00"]
 
     def test_get_labbook_size_rediculously_huge(self, monkeypatch, fixture_working_dir):
         """Test listing labbooks"""
@@ -446,6 +448,7 @@ class TestLabBookServiceQueries(object):
         im.create_labbook('default', 'default', 'labbook2', description="my first labbook2")
         im.create_labbook('test3', 'test3', 'labbook2', description="my first labbook3")
 
+        flush_redis_repo_cache()
         # Get LabBooks for the "logged in user" - Currently just "default"
         query = """
         {
@@ -1401,7 +1404,7 @@ class TestLabBookServiceQueries(object):
         # using aniso8601 to parse because built-in datetime doesn't parse the UTC offset properly (configured for js)
         create_on = aniso8601.parse_datetime(d)
         assert create_on.microsecond == 0
-        assert create_on.tzname() == "+00:00"
+        assert create_on.tzname() in ["+00:00"]
 
         # wait, add another commit, and remove the buildinfo file to test the fallback method for getting create date
         time.sleep(4)
@@ -1412,7 +1415,7 @@ class TestLabBookServiceQueries(object):
         d = r['data']['labbook']['creationDateUtc']
         create_on_fallback = aniso8601.parse_datetime(d)
         assert create_on_fallback.microsecond == 0
-        assert create_on_fallback.tzname() == "+00:00"
+        assert create_on_fallback.tzname() in ["+00:00"]
 
         # Because there can be 1 second of drift between normal and fallback methods, be safe and check they are not 2
         # seconds apart.
@@ -1437,18 +1440,19 @@ class TestLabBookServiceQueries(object):
         # using aniso8601 to parse because built-in datetime doesn't parse the UTC offset properly (configured for js)
         modified_on_1 = aniso8601.parse_datetime(d)
         assert modified_on_1.microsecond == 0
-        assert modified_on_1.tzname() == "+00:00"
+        assert modified_on_1.tzname() in ["+00:00"]
 
         time.sleep(2)
         lb.write_readme("##Summary\nThis is my readme!!")
 
+        flush_redis_repo_cache()
         r = fixture_working_dir[2].execute(modified_query)
         assert 'errors' not in r
         d = r['data']['labbook']['modifiedOnUtc']
         modified_on_2 = aniso8601.parse_datetime(d)
 
-        assert (datetime.datetime.now(datetime.timezone.utc) - modified_on_1).total_seconds() < 30
-        assert (datetime.datetime.now(datetime.timezone.utc) - modified_on_2).total_seconds() < 30
+        assert (datetime.datetime.now(tz=datetime.timezone.utc) - modified_on_1).total_seconds() < 30
+        assert (datetime.datetime.now(tz=datetime.timezone.utc) - modified_on_2).total_seconds() < 30
         assert modified_on_2 > modified_on_1
 
     @responses.activate

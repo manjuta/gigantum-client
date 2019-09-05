@@ -40,7 +40,6 @@ def test_rstudio_session(driver: selenium.webdriver, *args, **kwargs):
     time.sleep(5)
 
     project_elements.launch_devtool('RStudio')
-
     logging.info("Using R console")
     rstudio_elements = RStudioElements(driver)
     rstudio_elements.some_selected_tab.wait()

@@ -39,18 +39,21 @@ default port (2375).
 5. Select the docker-compose.yml file that was generated after running `gtm dev setup` for the configuration file 
 (if you haven't run that yet, go do it). It is located in `build/developer/docker-compose.yml`.
 
-6. Explicitly set the python interpreter to python3
+6. If you have GPU support configured, set `NVIDIA_DRIVER_VERSION` environment variable to that as shown in 
+`nvidia-smi`.
+
+7. Explicitly set the python interpreter to python3
 
     ![pycharm menu](img/remote_interpreter2.png)
 
-7. Apply changes and exit preferences
+8. Apply changes and exit preferences
     
-8. In the Project's file dropdown, several directories need to be marked as a "Sources Root", by right-clicking, then 
+9. In the Project's file dropdown, several directories need to be marked as a "Sources Root", by right-clicking, then 
    selecting *Mark Directory as > Sources Root*:
    - `packages/gtmcore`
    - `packages/gtmapi`
  
-9. Also in the Project's file dropdown, mark the `ui` directory as "Excluded" by right-clicking and selecting *Mark 
+10. Also in the Project's file dropdown, mark the `ui` directory as "Excluded" by right-clicking and selecting *Mark 
    Directory as > Excluded*
 
 ### Using Run Configurations

@@ -53,6 +53,10 @@ const removeExcludedFiles = (files) => {
   * @return {array}
 */
 const prepareUpload = (file, typeOfUpload, buildImage, state, history) => {
+  const {
+    name,
+    owner,
+  } = state.ready;
   const newFileArray = removeExcludedFiles([
     {
       file,
@@ -95,13 +99,9 @@ const prepareUpload = (file, typeOfUpload, buildImage, state, history) => {
     * @return {array}
   */
   const finishedCallback = (response) => {
-    const {
-      name,
-      owner,
-    } = state.ready;
 
     window.removeEventListener('beforeunload', navigateConfirm);
-    setFileBrowserLock(false);
+    setFileBrowserLock(owner, name, false);
     setUploadMessageRemove('Completed Import');
 
     if (response.data.jobStatus.status === 'finished') {
@@ -120,7 +120,7 @@ const prepareUpload = (file, typeOfUpload, buildImage, state, history) => {
   window.addEventListener('beforeunload', navigateConfirm);
   uploadInstance.startUpload(finishedCallback);
 
-  setFileBrowserLock(true);
+  setFileBrowserLock(owner, name, true);
   setUploadMessageUpdate('Uploading import file, 0% complete');
 };
 

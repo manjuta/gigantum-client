@@ -65,30 +65,27 @@ def git_garbage_collect(repository: Repository) -> None:
 
 
 def create_remote_gitlab_repo(repository: Repository, username: str, visibility: str,
-                              access_token: Optional[str] = None) -> None:
+                              access_token: Optional[str] = None, id_token: Optional[str] = None) -> None:
     """Create a new repository in GitLab,
 
     Note: It may make more sense to factor this out later on. """
+    config = Configuration()
+    remote_config = config.get_remote_configuration()
 
-    default_remote = repository.client_config.config['git']['default_remote']
-    admin_service = None
-    for remote in repository.client_config.config['git']['remotes']:
-        if default_remote == remote:
-            admin_service = repository.client_config.config['git']['remotes'][remote]['admin_service']
-            break
-
-    if not admin_service:
-        raise ValueError('admin_service could not be found')
+    if not access_token or not id_token:
+        raise ValueError("Creating a remote repository requires a valid session")
 
     try:
         # Add collaborator to remote service
-        mgr = GitLabManager(default_remote, admin_service,
-                            access_token=access_token or 'invalid')
-        mgr.configure_git_credentials(default_remote, username)
+        mgr = GitLabManager(remote_config['git_remote'],
+                            remote_config['admin_service'],
+                            access_token=access_token,
+                            id_token=id_token)
+        mgr.configure_git_credentials(remote_config['git_remote'], username)
         mgr.create_labbook(namespace=InventoryManager().query_owner(repository),
                            labbook_name=repository.name,
                            visibility=visibility)
-        repository.add_remote("origin", f"https://{default_remote}/{username}/{repository.name}.git")
+        repository.add_remote("origin", f"https://{remote_config['git_remote']}/{username}/{repository.name}.git")
     except Exception as e:
         raise GitLabRemoteError(e)
 
@@ -315,7 +312,7 @@ def process_linked_datasets(labbook: LabBook, logged_in_username: str) -> None:
     im = InventoryManager(config_file=labbook.client_config.config_file)
 
     # Update linked datasets inside the Project or clean them out if needed
-    im.update_linked_datasets(labbook, logged_in_username, init=True)
+    im.update_linked_datasets(labbook, logged_in_username)
 
     # Check for linked datasets, and schedule auto-imports
     d = Dispatcher()

@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // store
 import { setErrorMessage, setMultiInfoMessage } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
@@ -58,8 +57,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {}
   */
-  @boundMethod
-  _passedSuccessCall() {
+  _passedSuccessCall = () => {
     const { props, state } = this;
     const successProgress = Object.assign({}, state.progress);
 
@@ -74,10 +72,9 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {}
   */
-  @boundMethod
-  _successCall() {
+  _successCall = () => {
     const { props, state } = this;
-    const { owner, labbookName } = props;
+    const { owner, name } = props;
     const isPublishing = props.header === 'Publish';
     const id = uuidv4();
     const successProgress = Object.assign({}, state.progress);
@@ -88,11 +85,11 @@ export default class PublishDatasetsModal extends Component {
     setTimeout(() => props.toggleModal(false, true), 2000);
 
     if (isPublishing) {
-      props.setPublishingState(false);
+      props.setPublishingState(owner, name, false);
       props.resetPublishState(false);
       const messageData = {
         id,
-        message: `Added remote https://gigantum.com/${owner}/${labbookName}`,
+        message: `Added remote https://gigantum.com/${owner}/${name}`,
         isLast: true,
         error: false,
       };
@@ -109,19 +106,19 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {}
   */
-  @boundMethod
-  _failureCall(errorMessage) {
+  _failureCall = (errorMessage) => {
     const { props } = this;
+    const { owner, name } = props;
     const isPublishing = props.header === 'Publish';
 
     setTimeout(() => props.toggleModal(false, true), 2000);
 
     if (isPublishing) {
-      props.setPublishingState(false);
+      props.setPublishingState(owner, name, false);
       props.resetPublishState(false);
     } else {
       props.setSyncingState(false);
-      if (errorMessage.indexOf('Merge conflict') > -1) {
+      if (errorMessage && errorMessage.indexOf('Merge conflict') > -1) {
         props.toggleSyncModal();
       }
     }
@@ -132,8 +129,7 @@ export default class PublishDatasetsModal extends Component {
   *  triggers publish labbook mutation
   *  @return {}
   */
-  @boundMethod
-  _publishLabbookMutation() {
+  _publishLabbookMutation = () => {
     const { state } = this;
     const data = {
       setPublic: state.visibilityStatus.project,
@@ -157,7 +153,7 @@ export default class PublishDatasetsModal extends Component {
   *  loops through local datasets and triggers mutatiob to relink and publish
   *  @return {}
   */
-  _relinkDataset(datasetOwner, datasetName) {
+  _relinkDataset = (datasetOwner, datasetName) => {
     const { props, state } = this;
     const isPublishing = props.header === 'Publish';
 
@@ -206,15 +202,14 @@ export default class PublishDatasetsModal extends Component {
   }
 
   /**
-  *  @param {} -
+  *  @param {string} datasetOwner
+  *  @param {string} datasetName
   *  gets a list of local datasets to publish
   *  @return {}
   */
-  @boundMethod
-  _unlinkDataset(datasetOwner, datasetName) {
+  _unlinkDataset = (datasetOwner, datasetName) => {
     const { state } = this;
     const newProgress = Object.assign({}, state.progress);
-
     newProgress[`${datasetOwner}/${datasetName}`] = { step: 2 };
 
     this.setState({ progress: newProgress });
@@ -249,8 +244,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets public state
   *  @return {string}
   */
-  @boundMethod
-  _setPublic(name, isPublic) {
+  _setPublic = (name, isPublic) => {
     const { state } = this;
     const NewVisibilityStatus = Object.assign({}, state.visibilityStatus);
 
@@ -259,17 +253,17 @@ export default class PublishDatasetsModal extends Component {
   }
 
   /**
-  *  @param {string} name
-  *  @param {string} owner
+  *  @param {string} datasetOwner
+  *  @param {string} datasetName
   *  sets public state
   *  @return {string}
   */
-  @boundMethod
-  _publishDataset(owner, name) {
+  _publishDataset = (datasetOwner, datasetName) => {
     const { state } = this;
     const data = {
-      datasetName: name,
-      setPublic: state.visibilityStatus[`${owner}/${name}`],
+      datasetName,
+      datasetOwner,
+      setPublic: state.visibilityStatus[`${datasetOwner}/${datasetName}`],
       successCall: this._unlinkDataset,
       failureCall: this._failureCall,
     };
@@ -289,8 +283,7 @@ export default class PublishDatasetsModal extends Component {
   *  adds remote url to labbook
   *  @return {string}
   */
-  @boundMethod
-  _publishLabbook() {
+  _publishLabbook = () => {
     const { props, state } = this;
     const self = this;
     const conatinerStatus = store.getState().containerStatus.status;
@@ -304,7 +297,8 @@ export default class PublishDatasetsModal extends Component {
               props.resetPublishState(true);
 
               if (isPublishing) {
-                props.setPublishingState(true);
+                const { owner, name } = props;
+                props.setPublishingState(owner, name, true);
               } else {
                 props.setSyncingState(true);
               }
@@ -317,13 +311,17 @@ export default class PublishDatasetsModal extends Component {
                 initialProgress.project = { step: 1 };
                 this.setState({ progress: initialProgress });
 
-                LocalDatasetsQuery.getLocalDatasets({ owner, name }).then((res) => {
-                  if (res.data.dataset.defaultRemote) {
-                    this._unlinkDataset(owner, name);
-                  } else {
-                    this._publishDataset(owner, name);
-                  }
-                });
+                LocalDatasetsQuery.getLocalDatasets({ owner, name }).then(
+                  (datasetQueryResponse) => {
+                    const datasetOwner = datasetQueryResponse.data.dataset.owner;
+                    const datasetName = datasetQueryResponse.data.dataset.name;
+                    if (datasetQueryResponse.data.dataset.defaultRemote) {
+                      this._unlinkDataset(datasetOwner, datasetName);
+                    } else {
+                      this._publishDataset(datasetOwner, datasetName);
+                    }
+                  },
+                );
               });
             }
           } else {
@@ -346,10 +344,9 @@ export default class PublishDatasetsModal extends Component {
   *  updates sync state
   *  @return {}
   */
-  @boundMethod
-  _buildImage(id) {
+  _buildImage = (id) => {
     const { props, state } = this;
-    const { labbookName } = props;
+    const { name } = props;
     const data = { noCache: false };
 
     state.mutations._buildImage(data, (response, error) => {
@@ -357,7 +354,7 @@ export default class PublishDatasetsModal extends Component {
         console.error(error);
         const messageData = {
           id,
-          message: `ERROR: Failed to build ${labbookName}`,
+          message: `ERROR: Failed to build ${name}`,
           isLast: null,
           error: true,
           messageBody: error,
@@ -374,7 +371,7 @@ export default class PublishDatasetsModal extends Component {
   *  set visibility
   *  @return {string}
   */
-  _modifyVisibility() {
+  _modifyVisibility = () => {
     const { props } = this;
     if (props.header === 'Publish') {
       this._publishLabbook();
@@ -388,8 +385,7 @@ export default class PublishDatasetsModal extends Component {
   *  sets prompt state to false
   *  @return {}
   */
-  @boundMethod
-  _hidePrompt() {
+  _hidePrompt = () => {
     this.setState({ showPrompt: false });
   }
 
@@ -429,7 +425,7 @@ export default class PublishDatasetsModal extends Component {
                         <ProjectPublish
                           isProcessing={state.isProcessing}
                           owner={props.owner}
-                          labbookName={props.labbookName}
+                          name={props.name}
                           setPublic={this._setPublic}
                           header={props.header}
                           progress={state.progress}

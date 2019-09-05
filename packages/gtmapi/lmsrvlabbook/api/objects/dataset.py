@@ -1,19 +1,22 @@
+from typing import List, Optional
 import graphene
 import base64
+import math
 import flask
 from gtmcore.activity import ActivityStore
+from gtmcore.configuration import Configuration
 
-from lmsrvcore.auth.identity import parse_token
+from lmsrvcore.caching import DatasetCacheController
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitRepository
+from lmsrvcore.utilities import configure_git_credentials
 
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions, GitLabException
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
-
+from gtmcore.configuration.utils import call_subprocess
 from gtmcore.inventory.branching import BranchManager
-
 
 from lmsrvlabbook.api.objects.datasettype import DatasetType
 from lmsrvlabbook.api.objects.collaborator import Collaborator
@@ -21,10 +24,6 @@ from lmsrvlabbook.api.connections.activity import ActivityConnection
 from lmsrvlabbook.api.objects.activity import ActivityDetailObject, ActivityRecordObject
 from lmsrvlabbook.api.connections.datasetfile import DatasetFileConnection, DatasetFile
 from lmsrvlabbook.api.objects.overview import DatasetOverview
-
-from gtmcore.logging import LMLogger
-logger = LMLogger.get_logger()
-
 
 logger = LMLogger.get_logger()
 
@@ -104,8 +103,9 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     # must be "updated" to include the new hashes as a new version
     content_hash_mismatches = graphene.List(graphene.String)
 
-    # Temporary commits behind field before full branching is supported to indicate if a dataset is out of date
+    # Temporary commits ahead/behind fields before full branching is supported to indicate if a dataset is out of date
     commits_behind = graphene.Int()
+    commits_ahead = graphene.Int()
 
     @classmethod
     def get_node(cls, info, id):
@@ -132,11 +132,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     def resolve_description(self, info):
         """Get number of commits the active_branch is behind its remote counterpart.
         Returns 0 if up-to-date or if local only."""
-        if not self.description:
-            return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-                lambda dataset: dataset.description)
-
-        return self.description
+        r = DatasetCacheController()
+        return r.cached_description((get_logged_in_username(), self.owner, self.name))
 
     def resolve_schema_version(self, info):
         """Get number of commits the active_branch is behind its remote counterpart.
@@ -153,8 +150,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda dataset: dataset.creation_date)
+        r = DatasetCacheController()
+        return r.cached_created_time((get_logged_in_username(), self.owner, self.name))
 
     def _fetch_collaborators(self, dataset, info):
         """Helper method to fetch this dataset's collaborators
@@ -163,22 +160,20 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             info: The graphene info object for this requests
 
         """
-        # TODO: Future work will look up remote in LabBook data, allowing user to select remote.
-        default_remote = dataset.client_config.config['git']['default_remote']
-        admin_service = None
-        for remote in dataset.client_config.config['git']['remotes']:
-            if default_remote == remote:
-                admin_service = dataset.client_config.config['git']['remotes'][remote]['admin_service']
-                break
+        # Get remote server configuration
+        config = Configuration()
+        remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer token
-        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        else:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+        # Extract valid Bearer and ID tokens
+        access_token = flask.g.get('access_token', None)
+        id_token = flask.g.get('id_token', None)
+        if not access_token or not id_token:
+            raise ValueError("Deleting a remote Dataset requires a valid session.")
 
         # Get collaborators from remote service
-        mgr = GitLabManager(default_remote, admin_service, token)
+        mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'],
+                            access_token=access_token,
+                            id_token=id_token)
         try:
             self._collaborators = [Collaborator(owner=self.owner, name=self.name,
                                                 collaborator_username=c[1],
@@ -261,8 +256,8 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         Returns:
 
         """
-        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda dataset: dataset.modified_on)
+        r = DatasetCacheController()
+        return r.cached_modified_on((get_logged_in_username(), self.owner, self.name))
 
     def helper_resolve_activity_records(self, dataset, kwargs):
         """Helper method to generate ActivityRecord objects and populate the connection"""
@@ -417,22 +412,20 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
     @staticmethod
     def helper_resolve_visibility(dataset, info):
-        # TODO: Future work will look up remote in Dataset data, allowing user to select remote.
-        default_remote = dataset.client_config.config['git']['default_remote']
-        admin_service = None
-        for remote in dataset.client_config.config['git']['remotes']:
-            if default_remote == remote:
-                admin_service = dataset.client_config.config['git']['remotes'][remote]['admin_service']
-                break
+        # Get remote server configuration
+        config = Configuration()
+        remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer token
-        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        else:
-            raise ValueError("Authorization header not provided. Must have a valid session to query for collaborators")
+        # Extract valid Bearer and ID tokens
+        access_token = flask.g.get('access_token', None)
+        id_token = flask.g.get('id_token', None)
+        if not access_token or not id_token:
+            raise ValueError("Deleting a remote Dataset requires a valid session.")
 
-        # Get collaborators from remote service
-        mgr = GitLabManager(default_remote, admin_service, token)
+        mgr = GitLabManager(remote_config['git_remote'],
+                            remote_config['admin_service'],
+                            access_token=access_token,
+                            id_token=id_token)
         try:
             owner = InventoryManager().query_owner(dataset)
             d = mgr.repo_details(namespace=owner, repository_name=dataset.name)
@@ -510,20 +503,57 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: dataset.backend.verify_contents(dataset, logger.info))
 
-    def helper_resolve_commits_behind(self, dataset):
-        """Helper to get the commits behind for a dataset. Used for linked datasets to see if
-        they are out of date"""
-        bm = BranchManager(dataset)
-        bm.fetch()
-        return bm.get_commits_behind(branch_name='master')
+    def helper_resolve_commits_ahead_behind(self, dataset) -> None:
+        """Helper to get the commits ahead and behind for a dataset. This is done together so only 1 fetch will
+        occur. In the future when branches are enabled, the fetch dataloader can be used to manage this more
+        gracefully"""
+        behind_commit_output = str()
+        ahead_commit_output = str()
+
+        current_hash = call_subprocess(['git', 'rev-list', 'HEAD', '--max-count=1'],
+                                       cwd=dataset.root_dir, check=True)
+
+        if dataset.has_remote:
+            # Make sure remote git credentials are configured if the remote is a server that requires authentication
+            if "http" == dataset.remote[0:4]:
+                configure_git_credentials()
+
+            # Dataset has been published, so look up changes
+            bm = BranchManager(dataset)
+            bm.fetch()
+            behind_commit_output = call_subprocess(['git', 'log', f'{current_hash.strip()}..origin/master',
+                                                    '--pretty=oneline'],
+                                                   cwd=dataset.root_dir, check=True)
+
+            ahead_commit_output = call_subprocess(['git', 'log', f'origin/master..{current_hash.strip()}',
+                                                   '--pretty=oneline'],
+                                                  cwd=dataset.root_dir, check=True)
+
+        if not behind_commit_output:
+            self.commits_behind = 0
+        else:
+            behind_commit_list = [x for x in behind_commit_output.split('\n') if x != ""]
+            commits_behind = len(behind_commit_list)
+            self.commits_behind = int(math.ceil(float(commits_behind) / 2.0))
+
+        if not ahead_commit_output:
+            self.commits_ahead = 0
+        else:
+            ahead_commit_list = [x for x in ahead_commit_output.split('\n') if x != ""]
+            commits_ahead = len(ahead_commit_list)
+            self.commits_ahead = int(math.ceil(float(commits_ahead) / 2.0))
+
+    def helper_resolve_commits_behind(self, dataset) -> Optional[int]:
+        """Helper to get the commits behind for a dataset."""
+        if self.commits_behind is None:
+            self.helper_resolve_commits_ahead_behind(dataset)
+
+        return self.commits_behind
 
     def resolve_commits_behind(self, info):
-        """Method to get the commits behind for a dataset. Used for linked datasets to see if
-        they are out of date
+        """Method to get the commits behind for a dataset.
 
         Args:
-            args:
-            context:
             info:
 
         Returns:
@@ -531,3 +561,22 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         """
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda dataset: self.helper_resolve_commits_behind(dataset))
+
+    def helper_resolve_commits_ahead(self, dataset) -> Optional[int]:
+        """Helper to get the commits ahead for a dataset."""
+        if self.commits_ahead is None:
+            self.helper_resolve_commits_ahead_behind(dataset)
+
+        return self.commits_ahead
+
+    def resolve_commits_ahead(self, info):
+        """Method to get the commits ahead for a dataset.
+
+        Args:
+            info:
+
+        Returns:
+
+        """
+        return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda dataset: self.helper_resolve_commits_ahead(dataset))

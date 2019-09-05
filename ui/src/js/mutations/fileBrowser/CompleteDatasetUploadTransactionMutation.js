@@ -1,10 +1,11 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
-
+// environment
+import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
   mutation CompleteDatasetUploadTransactionMutation($input: CompleteDatasetUploadTransactionInput!){
@@ -25,7 +26,6 @@ export default function CompleteDatasetUploadTransactionMutation(
   callback,
 ) {
   const id = uuidv4();
-
   const variables = {
     input: {
       owner,
@@ -36,7 +36,6 @@ export default function CompleteDatasetUploadTransactionMutation(
       clientMutationId: id,
     },
   };
-
 
   commitMutation(
     environment,

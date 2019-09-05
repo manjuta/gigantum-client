@@ -1,8 +1,12 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
+// redux
 import { updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 
 
@@ -14,8 +18,6 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
-
 export default function StopContainerMutation(
   owner,
   labbookName,
@@ -25,7 +27,7 @@ export default function StopContainerMutation(
     input: {
       labbookName,
       owner,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: uuidv4(),
     },
   };
   commitMutation(
@@ -37,7 +39,6 @@ export default function StopContainerMutation(
         if (error) {
           console.log(error);
         }
-        updateTransitionState(labbookName, '');
         callback(response, error);
       },
       onError: err => console.error(err),

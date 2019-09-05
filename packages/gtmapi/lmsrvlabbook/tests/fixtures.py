@@ -25,8 +25,8 @@ import shutil
 import graphene
 from flask import Flask
 import flask
-import json
 import time
+import redis
 from mock import patch
 import responses
 from graphene.test import Client
@@ -37,7 +37,8 @@ from gtmcore.auth.identity import get_identity_manager
 from gtmcore.environment.bundledapp import BundledAppManager
 
 from gtmcore.inventory.inventory import InventoryManager
-from lmsrvcore.middleware import DataloaderMiddleware, error_middleware
+from lmsrvcore.middleware import DataloaderMiddleware, error_middleware, RepositoryCacheMiddleware
+from lmsrvcore.caching import LabbookCacheController, DatasetCacheController
 from lmsrvcore.tests.fixtures import insert_cached_identity
 
 from gtmcore.fixtures import (ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, ENV_UNIT_TEST_BASE)
@@ -135,9 +136,11 @@ def fixture_working_dir():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
             # name of the config file, temporary working directory, the schema
             yield config_file, temp_dir, client, schema
 
@@ -173,11 +176,14 @@ def fixture_working_dir_lfs_disabled():
         app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
 
         with app.app_context():
-            # within this block, current_app points to app. Set current usert explicitly(this is done in the middleware)
+            # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
+                            context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema  # name of the config file, temporary working directory, the schema
 
@@ -214,9 +220,11 @@ def fixture_working_dir_env_repo_scoped():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
 
             # name of the config file, temporary working directory, the schema
             yield config_file, temp_dir, client, schema
@@ -231,6 +239,10 @@ def fixture_working_dir_populated_scoped():
     and populates the environment component repository.
     Class scope modifier attached
     """
+
+    # Flush here to clean out the Repository cache (used to store create/modify dates).
+    redis.Redis(db=7).flushdb()
+
     # Create temp dir
     config_file, temp_dir = _create_temp_work_dir()
 
@@ -281,9 +293,11 @@ def fixture_working_dir_populated_scoped():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema
 
@@ -341,6 +355,9 @@ def fixture_working_dir_dataset_populated_scoped():
     im.create_dataset('default', 'default', "dataset1", storage_type="gigantum_object_v1", description="Cats 1")
     time.sleep(1.1)
 
+    # Flush Redis cache for Repo info
+    DatasetCacheController().clear_all()
+
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
@@ -350,9 +367,12 @@ def fixture_working_dir_dataset_populated_scoped():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
+                            context_value=ContextMock())
 
             yield config_file, temp_dir, client, schema
 
@@ -401,9 +421,11 @@ def fixture_single_dataset():
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+            flask.g.access_token = "afakeaccesstoken"
+            flask.g.id_token = "afakeidtoken"
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
             yield config_file, temp_dir, client, ds, cache_mgr
 
@@ -438,7 +460,7 @@ def build_image_for_jupyterlab():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
 
             # Create a labook
             im = InventoryManager(config_file)

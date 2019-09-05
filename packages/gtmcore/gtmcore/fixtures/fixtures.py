@@ -20,6 +20,7 @@
 import json
 import os
 import shutil
+import redis
 import tempfile
 import requests
 import collections
@@ -42,6 +43,11 @@ from gtmcore.inventory.branching import BranchManager
 ENV_UNIT_TEST_REPO = 'gigantum_base-images-testing'
 ENV_UNIT_TEST_BASE = 'quickstart-jupyterlab'
 ENV_UNIT_TEST_REV = 2
+
+
+def flush_redis_repo_cache():
+    r = redis.Redis(db=7)
+    r.flushdb()
 
 
 def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
@@ -102,7 +108,7 @@ def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
     return config_file, unit_test_working_dir
 
 
-def _MOCK_create_remote_repo2(repository, username: str, visibility, access_token = None) -> None:
+def _MOCK_create_remote_repo2(repository, username: str, visibility, access_token = None, id_token = None) -> None:
     """ Used to mock out creating a Labbook remote Gitlab repo. This is not a fixture per se,
 
     Usage:

@@ -3,12 +3,14 @@
 exports[`LocalDatasets Renders a snapshot 1`] = `
 <div
   className="Datasets__listing"
+  data-selenium-id="LocalDatasets"
 >
   <div
     className="grid"
   >
     <div
       className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
+      data-selenium-id="ImportModule"
     >
       <div
         className="Import__main"
@@ -49,6 +51,7 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
       </button>
       <div
         className="hidden createLabbook"
+        data-selenium-id="Tooltip"
       >
         <div
           className="Tooltip__toggle createLabbook"
@@ -81,26 +84,31 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>

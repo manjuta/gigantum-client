@@ -1,0 +1,1 @@
+from lmsrvcore.utilities.git import configure_git_credentials

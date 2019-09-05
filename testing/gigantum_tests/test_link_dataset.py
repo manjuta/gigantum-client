@@ -5,6 +5,7 @@ import selenium
 from selenium.webdriver.common.by import By
 
 import testutils
+from testutils import graphql_helpers
 
 
 def test_linked_published_dataset_then_publish(driver: selenium.webdriver, *args, **kwargs):
@@ -12,11 +13,11 @@ def test_linked_published_dataset_then_publish(driver: selenium.webdriver, *args
     Test that a dataset can be created, published,
     linked to a project and published with the project.
     """
-    testutils.log_in(driver)
+    user = testutils.log_in(driver)
     testutils.GuideElements(driver).remove_guide()
     ds_elts = testutils.DatasetElements(driver)
     # Create and publish dataset
-    ds_elts.create_dataset(testutils.unique_dataset_name())
+    ds_name=ds_elts.create_dataset(testutils.unique_dataset_name())
     ds_elts.publish_dataset()
     # Create a project, link dataset, and publish project
     driver.get(os.environ['GIGANTUM_HOST'])
@@ -28,6 +29,7 @@ def test_linked_published_dataset_then_publish(driver: selenium.webdriver, *args
     cloud_project_elts = testutils.CloudProjectElements(driver)
     cloud_project_elts.publish_private_project(project_title)
     time.sleep(4)
+    graphql_helpers.delete_dataset(user,ds_name)
 
     # TODO - Use query to affirm that dataset linked properly
 

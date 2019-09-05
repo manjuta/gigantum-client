@@ -1,10 +1,12 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import RelayRuntime from 'relay-runtime';
 import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
   mutation MakeLabbookDirectoryMutation($input: MakeLabbookDirectoryInput!){
@@ -52,27 +54,6 @@ function sharedUpdater(store, labbookId, connectionKey, node) {
   }
 }
 
-function deleteOptimisticEdge(store, labbookID, deletedID, connectionKey) {
-  const labbookProxy = store.get(labbookID);
-
-  if (labbookProxy) {
-    const conn = RelayRuntime.ConnectionHandler.getConnection(
-      labbookProxy,
-      connectionKey,
-    );
-
-    if (conn) {
-      RelayRuntime.ConnectionHandler.deleteNode(
-        conn,
-        deletedID,
-      );
-    }
-  }
-}
-
-let tempID = 0;
-
-
 export default function MakeLabbookDirectoryMutation(
   connectionKey,
   owner,
@@ -88,7 +69,7 @@ export default function MakeLabbookDirectoryMutation(
       labbookName,
       directory,
       section,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: uuidv4(),
     },
   };
 
@@ -124,22 +105,6 @@ export default function MakeLabbookDirectoryMutation(
         node.setValue(100, 'size');
 
         sharedUpdater(store, labbookId, connectionKey, node);
-      },
-      updater: (store, response) => {
-        // const id = `client:newCodeFile:${tempID++}`;
-        //
-        // deleteOptimisticEdge(store, labbookId, optimisticId, connectionKey);
-        // store.delete(optimisticId)
-        // if (response.makeLabbookDirectory && response.makeLabbookDirectory.newLabbookFileEdge) {
-        //   const node = store.create(id, 'CodeFile');
-        //   node.setValue(id, 'id');
-        //   node.setValue(true, 'isDir');
-        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.key, 'key');
-        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.modifiedAt, 'modifiedAt');
-        //   node.setValue(response.makeLabbookDirectory.newLabbookFileEdge.node.size, 'size');
-        //
-        //   sharedUpdater(store, labbookId, connectionKey, node)
-        // }
       },
     },
   );

@@ -13,12 +13,13 @@ logger = LMLogger.get_logger()
 REQUEST_TIMEOUT = 30
 
 
-def check_and_add_user(admin_service: str, access_token: str, username: str) -> None:
+def check_and_add_user(admin_service: str, access_token: str, id_token: str, username: str) -> None:
     """Method to check if a user exists in GitLab and if not, create it
 
     Args:
         admin_service(str): URL of the GitLab Auth service
         access_token(str): The logged in user's access token
+        id_token(str): The logged in user's id token
         username(str): The logged in user's username
 
     Returns:
@@ -26,7 +27,8 @@ def check_and_add_user(admin_service: str, access_token: str, username: str) -> 
     """
     # Check for user
     response = requests.get(f"https://{admin_service}/user",
-                            headers={"Authorization": f"Bearer {access_token}"}, timeout=REQUEST_TIMEOUT)
+                            headers={"Authorization": f"Bearer {access_token}",
+                                     "Identity": id_token}, timeout=REQUEST_TIMEOUT)
     if response.status_code == 200:
         # User exists, do nothing
         pass
@@ -35,7 +37,8 @@ def check_and_add_user(admin_service: str, access_token: str, username: str) -> 
 
         # user does not exist, add!
         response = requests.post(f"https://{admin_service}/user",
-                                 headers={"Authorization": f"Bearer {access_token}"}, timeout=REQUEST_TIMEOUT)
+                                 headers={"Authorization": f"Bearer {access_token}",
+                                          "Identity": id_token}, timeout=REQUEST_TIMEOUT)
         if response.status_code != 201:
             logger.error("Failed to create new user in GitLab")
             logger.error(response.json())
@@ -82,7 +85,15 @@ class ProjectPermissions(Enum):
 
 class GitLabManager(object):
     """Class to manage administrative operations to a remote GitLab server"""
-    def __init__(self, remote_host: str, admin_service: str, access_token: str) -> None:
+    def __init__(self, remote_host: str, admin_service: str, access_token: str, id_token: str) -> None:
+        """
+
+        Args:
+            remote_host: the domain of the remote git host
+            admin_service: the domain of the admin service
+            access_token(str): The logged in user's access token
+            id_token(str): The logged in user's id token
+        """
         # GitLab Server URL
         self.remote_host = remote_host
         # Admin Service URL
@@ -90,6 +101,8 @@ class GitLabManager(object):
 
         # Current user's bearer token
         self.access_token = access_token
+        self.id_token = id_token
+
         # Current user's GitLab impersonation token
         self._gitlab_token: Optional[str] = None
 
@@ -106,6 +119,15 @@ class GitLabManager(object):
         """
         return quote_plus(f"{namespace}/{repository_name}")
 
+    def _admin_service_headers(self) -> Dict[str, str]:
+        """Method to get the authorization and id headers for calling the admin service
+
+        Returns:
+            dict
+        """
+        return {"Authorization": f"Bearer {self.access_token}",
+                "Identity": self.id_token}
+
     @property
     def user_token(self) -> Optional[str]:
         """Method to get the user's API token from the auth microservice"""
@@ -113,14 +135,14 @@ class GitLabManager(object):
         if self._gitlab_token is None:
             # Get the token
             response = requests.get(f"https://{self.admin_service}/key",
-                                    headers={"Authorization": f"Bearer {self.access_token}"},
+                                    headers=self._admin_service_headers(),
                                     timeout=REQUEST_TIMEOUT)
             if response.status_code == 200:
                 self._gitlab_token = response.json()['key']
             elif response.status_code == 404:
                 # User not found so create it!
                 response = requests.post(f"https://{self.admin_service}/user",
-                                         headers={"Authorization": f"Bearer {self.access_token}"},
+                                         headers=self._admin_service_headers(),
                                          timeout=REQUEST_TIMEOUT)
                 if response.status_code != 201:
                     logger.error("Failed to create new user in GitLab")
@@ -131,7 +153,7 @@ class GitLabManager(object):
 
                 # New get the key so the current request that triggered this still succeeds
                 response = requests.get(f"https://{self.admin_service}/key",
-                                        headers={"Authorization": f"Bearer {self.access_token}"},
+                                        headers=self._admin_service_headers(),
                                         timeout=REQUEST_TIMEOUT)
                 if response.status_code == 200:
                     self._gitlab_token = response.json()['key']
@@ -318,7 +340,7 @@ class GitLabManager(object):
         # Add project to quota service
         try:
             response = requests.post(f"https://{self.admin_service}/webhook/{namespace}/{labbook_name}",
-                                     headers={"Authorization": f"Bearer {self.access_token}"}, timeout=REQUEST_TIMEOUT)
+                                     headers=self._admin_service_headers(), timeout=REQUEST_TIMEOUT)
             if response.status_code != 201:
                 logger.error(f"Failed to configure quota webhook: {response.status_code}")
                 logger.error(response.json)
@@ -345,7 +367,7 @@ class GitLabManager(object):
         # Remove project from quota service
         try:
             response = requests.delete(f"https://{self.admin_service}/webhook/{namespace}/{repository_name}",
-                                       headers={"Authorization": f"Bearer {self.access_token}"},
+                                       headers=self._admin_service_headers(),
                                        timeout=REQUEST_TIMEOUT)
             if response.status_code != 204:
                 logger.error(f"Failed to remove quota webhook: {response.status_code}")

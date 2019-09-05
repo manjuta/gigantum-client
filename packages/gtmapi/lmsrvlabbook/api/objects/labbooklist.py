@@ -17,20 +17,25 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import time
 import base64
 import graphene
 import requests
 import flask
 
-from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
-from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
-
+from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.configuration import Configuration
 
+from lmsrvcore.caching import LabbookCacheController
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
 from lmsrvcore.auth.identity import parse_token
+
+from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
+from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
+
+logger = LMLogger.get_logger()
 
 
 class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
@@ -90,6 +95,7 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         Returns:
             list(Labbook)
         """
+        t0 = time.time()
         username = get_logged_in_username()
 
         if sort == "desc":
@@ -101,18 +107,34 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
 
         # Collect all labbooks for all owners
         inv_manager = InventoryManager()
-        local_lbs = inv_manager.list_labbooks(username=username, sort_mode=order_by)
+        cache_controller = LabbookCacheController()
+        ids = inv_manager.list_repository_ids(username, 'labbook')
+
+        safe_ids = []
+        for (uname, owner, project_name) in ids:
+            try:
+                cache_controller.cached_modified_on((username, owner, project_name))
+                cache_controller.cached_created_time((username, owner, project_name))
+                safe_ids.append((uname, owner, project_name))
+            except Exception as e:
+                logger.warning(f"Error loading LabBook {uname, owner, project_name}: {e}")
+
+        if order_by == 'modified_on':
+            sort_key = lambda tup: cache_controller.cached_modified_on(tup)
+        elif order_by == 'created_on':
+            sort_key = lambda tup: cache_controller.cached_created_time(tup)
+        else:
+            sort_key = lambda tup: tup[2]
+
+        sorted_ids = sorted(safe_ids, key=sort_key)
         if reverse:
-            local_lbs.reverse()
+            sorted_ids.reverse()
 
-        edges = [(inv_manager.query_owner(lb), lb.name) for lb in local_lbs]
+        edges = [(tup[1], tup[2]) for tup in sorted_ids]
         cursors = [base64.b64encode("{}".format(cnt).encode("UTF-8")).decode("UTF-8") for cnt, x in enumerate(edges)]
-
-        # Process slicing and cursor args
         lbc = ListBasedConnection(edges, cursors, kwargs)
         lbc.apply()
 
-        # Get Labbook instances
         edge_objs = []
         for edge, cursor in zip(lbc.edges, lbc.cursors):
             create_data = {"id": "{}&{}".format(edge[0], edge[1]),
@@ -122,6 +144,7 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
             edge_objs.append(LabbookConnection.Edge(node=Labbook(**create_data),
                                                     cursor=cursor))
 
+        logger.info(f"Listed all projects in {time.time()-t0:.2f}sec")
         return LabbookConnection(edges=edge_objs, page_info=lbc.page_info)
 
     def resolve_remote_labbooks(self, info, order_by: str, sort: str, **kwargs):

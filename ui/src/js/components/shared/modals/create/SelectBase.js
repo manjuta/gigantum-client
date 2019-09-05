@@ -2,12 +2,11 @@
 import React, { Component } from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // environment
 import environment from 'JS/createRelayEnvironment';
 // components
 import Loader from 'Components/common/Loader';
-import AdvancedSearch from 'Components/common/AdvancedSearch';
+import AdvancedSearch from 'Components/common/advancedSearch/AdvancedSearch';
 import BaseCard from './BaseCard';
 import BaseDatasetCard from './BaseDatasetCard';
 // utilities
@@ -88,8 +87,7 @@ export default class SelectBase extends Component {
     takes a base image edge
     sets componest state for selectedBaseId and selectedBase
   */
-  @boundMethod
-  _selectBase(node) {
+  _selectBase = (node) => {
     const { props } = this;
 
     this.setState({ selectedBase: node });
@@ -104,7 +102,7 @@ export default class SelectBase extends Component {
     callback triggers and modal state is changed to  next window
     DO NOT REMOVE
   */
-  continueSave() {
+  continueSave = () => {
     const { props } = this;
     props.toggleDisabledContinue(true);
     if (!props.datasets) {
@@ -118,8 +116,7 @@ export default class SelectBase extends Component {
     @param {Array} tags
     sets component tags from child
   */
-  @boundMethod
-  _setTags(tags) {
+  _setTags = (tags) => {
     this.setState({ tags });
   }
 

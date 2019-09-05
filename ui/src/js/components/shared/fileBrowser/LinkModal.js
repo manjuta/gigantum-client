@@ -12,7 +12,7 @@ import ModifyDatasetLinkMutation from 'Mutations/ModifyDatasetLinkMutation';
 import Modal from 'Components/common/Modal';
 import Loader from 'Components/common/Loader';
 import ButtonLoader from 'Components/common/ButtonLoader';
-import AdvancedSearch from 'Components/common/AdvancedSearch';
+import AdvancedSearch from 'Components/common/advancedSearch/AdvancedSearch';
 import LinkCard from './LinkCard';
 // assets
 import './LinkModal.scss';
@@ -56,22 +56,17 @@ export const LinkModalQuery = graphql`
   }`;
 
 export default class LinkModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedDataset: null,
-      buttonState: '',
-      tags: [],
-    };
-    this._linkDataset = this._linkDataset.bind(this);
-    this._setTags = this._setTags.bind(this);
+  state = {
+    selectedDataset: null,
+    buttonState: '',
+    tags: [],
   }
 
   /**
     @param {Array} tags
     sets component tags from child
     */
-  _setTags(tags) {
+  _setTags = (tags) => {
     this.setState({ tags });
   }
 
@@ -80,7 +75,7 @@ export default class LinkModal extends Component {
         determines filter criteria for dataset types
         @return {object} filters
     */
-  _createFilters(datasets) {
+  _createFilters = (datasets) => {
     const filters = {
       'Dataset Type': [],
     };
@@ -99,16 +94,17 @@ export default class LinkModal extends Component {
     * @param {}
     * triggers link datraset mutation
   */
-  _linkDataset() {
+  _linkDataset = () => {
+    const { props, state } = this;
     const { owner, labbookName } = store.getState().routes;
     this.setState({ buttonState: 'loading' });
     ModifyDatasetLinkMutation(
       owner,
       labbookName,
-      this.state.selectedDataset.owner,
-      this.state.selectedDataset.name,
+      state.selectedDataset.owner,
+      state.selectedDataset.name,
       'link',
-      this.state.selectedUrl || null,
+      state.selectedUrl || null,
       (response, error) => {
         if (error) {
           setErrorMessage('Unable to link dataset', error);
@@ -119,7 +115,7 @@ export default class LinkModal extends Component {
         } else {
           this.setState({ buttonState: 'finished' });
           setTimeout(() => {
-            this.props.closeLinkModal();
+            props.closeLinkModal();
           }, 2000);
         }
       },
@@ -130,7 +126,7 @@ export default class LinkModal extends Component {
     * @param {object} edge
     * sets update selected state
   */
-  _updateSelected(edge) {
+  _updateSelected = (edge) => {
     this.setState({
       selectedDataset: {
         owner: edge.node.owner,
@@ -144,8 +140,8 @@ export default class LinkModal extends Component {
     @param {Array} datasets
     filters datasets based on selected filters
   */
-  _filterDatasets(datasets) {
-    const tags = this.state.tags;
+  _filterDatasets = (datasets) => {
+    const { tags } = this.state;
     return datasets.filter(({ node }) => {
       const lowercaseDescription = node.description.toLowerCase();
       const lowercaseName = node.name.toLowerCase();
@@ -160,7 +156,8 @@ export default class LinkModal extends Component {
           if (node.datasetType.name !== text) {
             isReturned = false;
           }
-        } else if ((lowercaseDescription.indexOf(text.toLowerCase()) === -1) && (lowercaseName.indexOf(text.toLowerCase()) === -1)) {
+        } else if ((lowercaseDescription.indexOf(text.toLowerCase()) === -1)
+          && (lowercaseName.indexOf(text.toLowerCase()) === -1)) {
           isReturned = false;
         }
       });
@@ -169,9 +166,9 @@ export default class LinkModal extends Component {
   }
 
   render() {
-    const { props } = this;
+    const { props, state } = this;
+    const { linkedDatasets } = props;
     return (
-
       <Modal
         handleClose={() => props.closeLinkModal()}
         size="large-long"
@@ -204,11 +201,12 @@ export default class LinkModal extends Component {
                   if (error) {
                     console.log(error);
                   } else if (props) {
-                    const existingDatasets = this.props.linkedDatasets.map(dataset => dataset.name);
-                    const filteredDatasets = props.datasetList.localDatasets.edges.filter(dataset => existingDatasets.indexOf(dataset.node.name) === -1 && dataset.node.backendIsConfigured);
+                    const existingDatasets = linkedDatasets.map(dataset => dataset.name);
+                    const filteredDatasets = props.datasetList.localDatasets.edges.filter(dataset => (existingDatasets.indexOf(dataset.node.name) === -1) && dataset.node.backendIsConfigured);
                     const localDatasetEdges = this._filterDatasets(filteredDatasets);
                     const colloboratorMessage = localDatasetEdges.length ? 'For collaborators to access a linked Dataset, the Dataset must be public or they must be added as a collaborator to the Dataset itself.' : 'You do not have any Local Datasets available to link to this project. To link a dataset you must first create or import a dataset.'
                     const filterCategories = this._createFilters(localDatasetEdges);
+                    // decare css here
                     const messageCSS = classNames({
                       LinkModal__message: true,
                       'LinkModal__message--padded': localDatasetEdges.length === 0,
@@ -216,7 +214,7 @@ export default class LinkModal extends Component {
                     return (
                       <div className="LinkModal__container">
                         <AdvancedSearch
-                          tags={this.state.tags}
+                          tags={state.tags}
                           setTags={this._setTags}
                           filterCategories={filterCategories}
                           withoutContext
@@ -230,7 +228,7 @@ export default class LinkModal extends Component {
                           </p>
                           {
                             localDatasetEdges.map((edge) => {
-                              const node = edge.node;
+                              const { node } = edge;
                               return (
                                 <div
                                   key={node.id}
@@ -239,7 +237,7 @@ export default class LinkModal extends Component {
                                 >
                                   <LinkCard
                                     node={node}
-                                    selectedDataset={this.state.selectedDataset}
+                                    selectedDataset={state.selectedDataset}
                                   />
                                 </div>
                               );
@@ -256,17 +254,17 @@ export default class LinkModal extends Component {
             <div className="Link__buttonContainer">
               <button
                 className="Btn--flat"
-                onClick={() => this.props.closeLinkModal()}
+                onClick={() => props.closeLinkModal()}
                 type="button"
               >
                 Cancel
               </button>
               <ButtonLoader
-                buttonState={this.state.buttonState}
+                buttonState={state.buttonState}
                 buttonText="Link Dataset"
                 className="Btn Btn--last"
                 params={{}}
-                buttonDisabled={!this.state.selectedDataset}
+                buttonDisabled={!state.selectedDataset}
                 clicked={this._linkDataset}
               />
             </div>

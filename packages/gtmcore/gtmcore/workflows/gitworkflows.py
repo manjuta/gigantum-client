@@ -63,11 +63,11 @@ class GitWorkflow(ABC):
 
         Args:
             username: Subject username
-            access_token: Temp token/password to gain permissions on GitLab instance
+            access_token: bearer token for currently logged in user
             remote: Name of Git remote (always "origin" for now).
             public: Allow public read access
             feedback_callback: Callback to give user-facing realtime feedback
-            id_token: Dataset credentials
+            id_token: id token for currently logged in user
         Returns:
             None
         """
@@ -84,7 +84,8 @@ class GitWorkflow(ABC):
             self.repository.sweep_uncommitted_changes()
             vis = "public" if public is True else "private"
             gitworkflows_utils.create_remote_gitlab_repo(repository=self.repository, username=username,
-                                                         access_token=access_token, visibility=vis)
+                                                         access_token=access_token, id_token=id_token,
+                                                         visibility=vis)
             gitworkflows_utils.publish_to_remote(repository=self.repository, username=username,
                                                  remote=remote, feedback_callback=feedback_callback)
         except Exception as e:
@@ -391,4 +392,8 @@ class DatasetWorkflow(GitWorkflow):
         v = super().sync(username, remote, override, feedback_callback, pull_only,
                          access_token, id_token)
         self._push_dataset_objects(username, feedback_callback, access_token, id_token)
+
+        # Invalidate manifest cached data because the manifest can change on sync
+        manifest = Manifest(self.dataset, username)
+        manifest.force_reload()
         return v

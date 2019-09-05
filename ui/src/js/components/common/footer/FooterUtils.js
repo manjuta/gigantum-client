@@ -13,6 +13,8 @@ import FetchLabbookEdgeMutation from 'Mutations/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/FetchDatasetEdgeMutation';
 import FetchDatasetFilesMutation from 'Mutations/FetchDatasetFilesMutation';
 import FetchLabbookDatasetFilesMutation from 'Mutations/FetchLabbookDatasetFilesMutation';
+// Queries
+import UpdateDasetCommits from 'Components/shared/header/branches/UpdateDatasetCommits';
 
 const ansiUp = new AnsiUp();
 
@@ -107,7 +109,8 @@ const FooterUtils = {
             const responseId = id || response.data.jobStatus.id;
             const { html, message } = messageParser(response);
             // executes while job status is still running, refetches until status is finished or failed
-            if (response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'queued') {
+            if ((response.data.jobStatus.status === 'started')
+              || (response.data.jobStatus.status === 'queued')) {
               if (html.length) {
                 const messageData = {
                   id: responseId,
@@ -197,7 +200,7 @@ const FooterUtils = {
     *  updates footer with a message
     *  @return {}
     */
-  datasetUploadStatus: (mutationResponse, finishedCallback) => {
+  datasetUploadStatus: (mutationResponse, finishedCallback, variables) => {
     const {
       completeDatasetUploadTransaction,
     } = mutationResponse;
@@ -217,7 +220,8 @@ const FooterUtils = {
           const { jobStatus } = response.data;
           const metaData = JSON.parse(jobStatus.jobMetadata);
 
-          if (jobStatus.status === 'started' || jobStatus.status === 'queued') {
+          if ((jobStatus.status === 'started')
+            || (jobStatus.status === 'queued')) {
             setTimeout(() => {
               fetchStatus({ backgroundJobKey });
 
@@ -235,7 +239,8 @@ const FooterUtils = {
                 );
               }
             }, 1000);
-          } else if ((jobStatus.status === 'finished') || (jobStatus.status === 'failed')) {
+          } else if ((jobStatus.status === 'finished')
+            || (jobStatus.status === 'failed')) {
             finishedCallback();
 
             setUploadMessageUpdate(
@@ -243,6 +248,8 @@ const FooterUtils = {
               1,
               parseFloat(metaData.percent_complete),
             );
+
+            UpdateDasetCommits.getDatasetCommits(variables);
 
             setTimeout(() => {
               setUploadMessageRemove(metaData.feedback);

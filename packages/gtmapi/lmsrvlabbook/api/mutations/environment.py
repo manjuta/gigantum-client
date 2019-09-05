@@ -6,19 +6,17 @@ from gtmcore.configuration import get_docker_client
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.dispatcher import Dispatcher, jobs
 
-from gtmcore.labbook import SecretStore, LabBook
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.container.container import ContainerOperations
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.workflows import LabbookWorkflow, ContainerWorkflows
 from gtmcore.logging import LMLogger
-from gtmcore.activity import ActivityAction, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityStore, ActivityType
 from gtmcore.activity.services import stop_labbook_monitor
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvlabbook.api.objects.environment import Environment
-from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
+
 
 logger = LMLogger.get_logger()
 
@@ -124,7 +122,6 @@ class StartContainer(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
 
-    # Return the Environment instance
     environment = graphene.Field(lambda: Environment)
 
     @classmethod
@@ -132,11 +129,9 @@ class StartContainer(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-
         with lb.lock():
             container_id = ContainerWorkflows.start_labbook(lb, username)
         logger.info(f'Started new {lb} container ({container_id})')
-
         return StartContainer(environment=Environment(owner=owner, name=labbook_name))
 
 
@@ -147,7 +142,6 @@ class StopContainer(graphene.relay.ClientIDMutation):
         owner = graphene.String(required=True)
         labbook_name = graphene.String(required=True)
 
-    # Return the Environment instance
     environment = graphene.Field(lambda: Environment)
 
     @classmethod
@@ -188,13 +182,16 @@ class StopContainer(graphene.relay.ClientIDMutation):
         # Clean up empty bind mount dirs from datasets if needed
         submodules = lb.git.list_submodules()
         for submodule in submodules:
-            namespace, dataset_name = submodule['name'].split("&")
+            namespace, dataset_name = submodule.split("&")
             bind_location = os.path.join(lb.root_dir, 'input', dataset_name)
             if os.path.isdir(bind_location):
                 os.rmdir(bind_location)
 
-        # stop labbook monitor
-        stop_labbook_monitor(lb, username)
+        # stop labbook monitor - but do not prevent stopping the Docker container if it fails.
+        try:
+            stop_labbook_monitor(lb, username)
+        except Exception as e:
+            logger.error(f"Cannot stop monitor for {str(lb)}: {e}")
 
         lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
 

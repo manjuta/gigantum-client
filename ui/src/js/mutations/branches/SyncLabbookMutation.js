@@ -1,10 +1,14 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
+// environment
 import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
+// redux
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
+// Utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
 import footerCallback from 'Components/common/footer/utils/SyncLabbook';
 
@@ -17,7 +21,6 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
 
 export default function SyncLabbookMutation(
   owner,
@@ -33,7 +36,7 @@ export default function SyncLabbookMutation(
       owner,
       labbookName,
       pullOnly,
-      clientMutationId: tempID++,
+      clientMutationId: uuidv4(),
     },
     first: 10,
     cursor: null,

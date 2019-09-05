@@ -2,17 +2,16 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 // store
-import store from 'JS/redux/store';
 import {
   setSyncingState,
   setPublishingState,
   setExportingState,
   setModalVisible,
 } from 'JS/redux/actions/labbook/labbook';
+import { setIsSyncing } from 'JS/redux/actions/dataset/dataset';
 // config
 import Config from 'JS/config';
 // components
-import Tooltip from 'Components/common/Tooltip';
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';
 import ActionsSection from './actionsSection/ActionsSection';
@@ -22,32 +21,36 @@ import Navigation from './navigation/Navigation';
 // assets
 import './Header.scss';
 
+/**
+  @param {Object} branches
+  @return {Array}
+*/
+const getBranches = (props) => {
+  let branches = [];
+  if (props.branches) {
+    branches = props.branches;
+  } else {
+    const commitsBehind = (props.dataset && props.dataset.commitsBehind)
+      ? props.dataset.commitsBehind
+      : 0;
+    const commitsAhead = (props.dataset && props.dataset.commitsAhead)
+      ? props.dataset.commitsAhead
+      : 0;
+    branches = [{
+      branchName: 'master',
+      isActive: true,
+      commitsBehind,
+      commitsAhead,
+    }];
+  }
+
+  if (props.showMigrationButton) {
+    branches = branches.filter(({ branchName }) => branchName !== 'master');
+  }
+  return branches;
+};
+
 class Header extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hovered: false,
-    };
-    // bind functions here
-    this._showLabbookModal = this._showLabbookModal.bind(this);
-    this._hideLabbookModal = this._hideLabbookModal.bind(this);
-    this._setHoverState = this._setHoverState.bind(this);
-    this._checkOverflow = this._checkOverflow.bind(this);
-  }
-
-  /**
-    @param {object} item
-    returns nav jsx
-  */
-  _getSelectedIndex() {
-    const pathArray = this.props.location.pathname.split('/');
-    const defaultOrder = Config[`${this.props.sectionType}DefaultNavOrder`];
-    const selectedPath = (pathArray.length > 4) ? pathArray[pathArray.length - 1] : defaultOrder[0];
-    const selectedIndex = defaultOrder.indexOf(selectedPath);
-
-    return selectedIndex;
-  }
-
   /** *******************
    * child functions
    *
@@ -58,10 +61,11 @@ class Header extends Component {
    updates labbook state
   */
   _setExportingState = (isExporting) => {
-    this.refs.ContainerStatus && this.refs.ContainerStatus.setState({ isExporting });
+    const { props } = this;
+    const { owner, name } = props[props.sectionType];
 
-    if (this.props.isExporting !== isExporting) {
-      setExportingState(isExporting);
+    if (props.isExporting !== isExporting) {
+      setExportingState(owner, name, isExporting);
     }
   }
 
@@ -70,8 +74,11 @@ class Header extends Component {
     updates html element classlist and labbook state
   */
   _showLabbookModal = () => {
-    if (!this.props.modalVisible) {
-      setModalVisible(true);
+    const { props } = this;
+    const { owner, name } = props[props.sectionType];
+
+    if (!props.modalVisible) {
+      setModalVisible(owner, name, true);
     }
   }
 
@@ -80,6 +87,9 @@ class Header extends Component {
     updates html element classlist and labbook state
   */
   _hideLabbookModal = () => {
+    const { props } = this;
+    const { owner, name } = props[props.sectionType];
+    // TODO remove document to add classname, should use react state and classnames
     if (document.getElementById('labbookModal')) {
       document.getElementById('labbookModal').classList.add('hidden');
     }
@@ -88,8 +98,8 @@ class Header extends Component {
       document.getElementById('modal__cover').classList.add('hidden');
     }
 
-    if (this.props.modalVisible) {
-      setModalVisible(false);
+    if (props.modalVisible) {
+      setModalVisible(owner, name, false);
     }
   }
 
@@ -98,31 +108,40 @@ class Header extends Component {
     updates container status state
     updates labbook state
   */
- _setPublishingState = (isPublishing) => {
-   this.refs.ContainerStatus && this.refs.ContainerStatus.setState({ isPublishing });
+ _setPublishingState = (owner, name, isPublishing) => {
+   const { props } = this;
 
-   if (this.props.isPublishing !== isPublishing) {
-     setPublishingState(isPublishing);
+   if ((props.isPublishing !== isPublishing)) {
+     setPublishingState(owner, name, isPublishing);
+   }
+
+   if (props.sectionType === 'dataset') {
+     setIsSyncing(owner, name, isPublishing);
    }
  }
 
  /** *
-    @param {object} element
+    @param {Node} element
     checks if element is too large for card area
     @return {boolean}
-  */
- _checkOverflow(element) {
+ */
+ _checkOverflow = (element) => {
    if (element) {
      const curOverflow = element.style.overflow;
 
-     if (!curOverflow || curOverflow === 'visible') { element.style.overflow = 'hidden'; }
+     if (!curOverflow || curOverflow === 'visible') {
+       element.style.overflow = 'hidden';
+     }
 
-     const isOverflowing = element.clientWidth < element.scrollWidth || element.clientHeight < element.scrollHeight;
+     const isOverflowing = (element.clientWidth < element.scrollWidth)
+      || (element.clientHeight < element.scrollHeight);
 
      element.style.overflow = curOverflow;
 
      return isOverflowing;
    }
+
+   return null;
  }
 
   /** ***
@@ -132,30 +151,20 @@ class Header extends Component {
   *  @return {}
   */
   _setSyncingState = (isSyncing) => {
-    this.refs.ContainerStatus && this.refs.ContainerStatus.setState({ isSyncing });
-
-    if (this.props.isSyncing !== isSyncing) {
-      setSyncingState(isSyncing);
+    const { props } = this;
+    const { owner, name } = props[props.sectionType];
+    if (props.isSyncing !== isSyncing) {
+      setSyncingState(owner, name, isSyncing);
     }
-  }
-
-  /** ***
-  *  @param {boolean, event} hovered, evt
-  *  sets hover state
-  *  @return {}
-  */
-  _setHoverState(hovered, evt) {
-    if (this._checkOverflow(evt.target) || !hovered) {
-      this.setState({ hovered });
+    if (props.sectionType === 'dataset') {
+      setIsSyncing(owner, name, isSyncing);
     }
   }
 
   render() {
-    const { props, state } = this;
+    const { props } = this;
     const {
-      labbookName,
       labbook,
-      branchesOpen,
       branchName,
       dataset,
     } = props;
@@ -167,17 +176,10 @@ class Header extends Component {
       id,
     } = labbook || dataset;
     const section = labbook || dataset;
-    const selectedIndex = this._getSelectedIndex();
     const isLabbookSection = props.sectionType === 'labbook';
+    const branches = getBranches(props);
 
-    let branches = props.branches || [{
-      branchName: 'master',
-      isActive: true,
-      commitsBehind: 0,
-      commitsAhead: 0,
-    }];
-    branches = props.showMigrationButton ? branches.filter(({ branchName }) => branchName !== 'master') : branches;
-
+    // declare css here
     const headerCSS = classNames({
       Header: true,
       'Header--sticky': props.isSticky,
@@ -215,7 +217,7 @@ class Header extends Component {
                   branches={branches}
                   sectionId={section.id}
                   activeBranch={section.activeBranchName || 'master'}
-                  toggleBranchesView={this.props.toggleBranchesView}
+                  toggleBranchesView={props.toggleBranchesView}
                   mergeFilter={props.mergeFilter}
                   isSticky={props.isSticky}
                   visibility={props.visibility}
@@ -245,7 +247,10 @@ class Header extends Component {
                 isSticky={props.isSticky}
                 {...props}
               />
-              { isLabbookSection && <Container {...props} /> }
+
+              { isLabbookSection
+                && <Container {...props} />
+              }
             </div>
           </div>
 

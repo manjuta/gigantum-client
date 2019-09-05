@@ -558,7 +558,7 @@ class ActionsMenu extends Component {
           <VisibilityModal
             sectionType={this.props.sectionType}
             owner={this.state.owner}
-            labbookName={this.state.labbookName}
+            name={this.state.labbookName}
             auth={this.props.auth}
             toggleModal={this._toggleModal}
             buttonText="Save"

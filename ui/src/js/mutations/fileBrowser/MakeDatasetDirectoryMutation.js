@@ -1,10 +1,12 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import RelayRuntime from 'relay-runtime';
 import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
   mutation MakeDatasetDirectoryMutation($input: MakeDatasetDirectoryInput!){
@@ -53,26 +55,6 @@ function sharedUpdater(store, labbookId, connectionKey, node) {
   }
 }
 
-function deleteOptimisticEdge(store, labbookID, deletedID, connectionKey) {
-  const labbookProxy = store.get(labbookID);
-
-  if (labbookProxy) {
-    const conn = RelayRuntime.ConnectionHandler.getConnection(
-      labbookProxy,
-      connectionKey,
-    );
-
-    if (conn) {
-      RelayRuntime.ConnectionHandler.deleteNode(
-        conn,
-        deletedID,
-      );
-    }
-  }
-}
-
-let tempID = 0;
-
 
 export default function MakeDatasetDirectoryMutation(
   connectionKey,
@@ -87,7 +69,7 @@ export default function MakeDatasetDirectoryMutation(
       datasetOwner,
       datasetName,
       key,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: uuidv4(),
     },
   };
 
@@ -124,9 +106,6 @@ export default function MakeDatasetDirectoryMutation(
         node.setValue(true, 'isLocal');
 
         sharedUpdater(store, labbookId, connectionKey, node);
-      },
-      updater: (store, response) => {
-
       },
     },
   );

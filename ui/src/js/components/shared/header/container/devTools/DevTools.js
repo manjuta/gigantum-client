@@ -1,21 +1,14 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // store
-import store from 'JS/redux/store';
-import { setContainerState } from 'JS/redux/actions/labbook/overview/overview';
-import { setContainerStatus, setContainerMenuVisibility } from 'JS/redux/actions/labbook/containerStatus';
-import { setContainerMenuWarningMessage, setCloseEnvironmentMenus } from 'JS/redux/actions/labbook/environment/environment';
-import { setPackageMenuVisible } from 'JS/redux/actions/labbook/environment/packageDependencies';
-import { setBuildingState, setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
+import { setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/actions/footer';
 // assets
 import './DevTools.scss';
 
 class DevTools extends Component {
   state = {
-    isMouseOver: false,
     selectedDevTool: (() => {
       const { owner, name } = this.props.labbook;
       const defaultFromApi = this.props.labbook.environment.base ? this.props.labbook.environment.base.developmentTools[0] : 'jupyterlab';
@@ -35,11 +28,32 @@ class DevTools extends Component {
         }
       }
       if (devToolConfig[owner] && devToolConfig[owner][name]) {
-        return devToolConfig[owner][name];
+        const devToolExists = this.props.labbook.environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1;
+        if (devToolExists) {
+          return devToolConfig[owner][name];
+        }
+        delete devToolConfig[owner][name];
+        localStorage.setItem('devToolConfig', JSON.stringify(devToolConfig));
       }
       return defaultFromApi;
     })(),
     showDevList: false,
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const { owner, name, environment } = props.labbook;
+    const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};
+    if (devToolConfig[owner] && devToolConfig[owner][name]) {
+      const selectedDevTool = (environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1) ? devToolConfig[owner][name] : environment.base.developmentTools[0];
+      return {
+        ...state,
+        selectedDevTool,
+      }
+    }
+
+    return {
+      ...state,
+    };
   }
 
   componentDidMount() {
@@ -55,8 +69,7 @@ class DevTools extends Component {
   *  closes dev tool
   *  @return {}
   */
-  @boundMethod
-  _closeDevtoolMenu(evt) {
+  _closeDevtoolMenu = (evt) => {
     if (evt.target.className.indexOf('DevTool') < 0) {
       this.setState({ showDevList: false });
     }
@@ -67,8 +80,7 @@ class DevTools extends Component {
   *  upodates state if the conditions are met
   *  @return {}
   */
-  @boundMethod
-  _toggleDevtoolMenu(evt) {
+  _toggleDevtoolMenu = (evt) => {
     const { state } = this;
     this.setState({ showDevList: !state.showDevList });
   }
@@ -79,17 +91,15 @@ class DevTools extends Component {
   *  mutation to trigger opening of development tool
   *  @return {}
   */
-  @boundMethod
-  _openDevToolMuation(developmentTool) {
+  _openDevToolMuation = (developmentTool) => {
     const { props } = this;
     const { containerStatus, imageStatus } = props;
     const { owner, name } = props.labbook;
-    let tabName = `${developmentTool}-${owner}-${name}`;
     const labbookCreationDate = Date.parse(`${this.props.creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
-
     const timeDifferenceMS = timeNow - labbookCreationDate;
 
+    let tabName = `${developmentTool}-${owner}-${name}`;
     let status = (containerStatus === 'RUNNING') ? 'Running' : containerStatus;
     status = (containerStatus === 'NOT_RUNNING') ? 'Stopped' : status;
     status = (imageStatus === 'BUILD_IN_PROGRESS' || imageStatus === 'BUILD_QUEUED') ? 'Building' : status;
@@ -101,8 +111,8 @@ class DevTools extends Component {
       setWarningMessage('Could not launch development environment as the project is not ready.');
     } else if (status === 'Stopped') {
       setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
-      setMergeMode(false, false);
-      updateTransitionState(name, 'Starting');
+      setMergeMode(owner, name, false, false);
+      updateTransitionState(owner, name, 'Starting');
 
       props.containerMutations.startContainer({ devTool: developmentTool }, (response, error) => {
         if (error) {
@@ -159,8 +169,7 @@ class DevTools extends Component {
   *  mutation to trigger opening of development tool
   *  @return {}
   */
-  @boundMethod
-  _selectDevTool(developmentTool) {
+  _selectDevTool = (developmentTool) => {
     const { props } = this;
     const { owner, name } = props.labbook;
     const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};

@@ -69,8 +69,7 @@ class RemoteLabbooks extends Component {
     *  @param {}
     *  loads more labbooks using the relay pagination container
   */
-  @boundMethod
-  _loadMore() {
+  _loadMore = () => {
     const { props } = this;
     const self = this;
 
@@ -110,8 +109,7 @@ class RemoteLabbooks extends Component {
     *  @param {object} deleteData
     *  changes the delete modal's visibility and changes the data passed to it
   */
-  @boundMethod
-  _toggleDeleteModal(deleteData) {
+  _toggleDeleteModal = (deleteData) => {
     if (deleteData) {
       this.setState({
         deleteData,

@@ -12,9 +12,9 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
-from .cleanup import delete_datasets, delete_projects_on_disk, delete_project_images, stop_project_containers
+from .cleanup import delete_local_datasets, delete_projects_on_disk, delete_project_images, stop_project_containers
 from .actions import list_remote_projects
-from .graphql_helpers import delete_remote_project, list_remote_datasets
+from .graphql_helpers import delete_remote_project, list_remote_datasets, delete_dataset
 
 
 class TestResult(object):
@@ -94,11 +94,15 @@ class TestRunner:
             logging.exception(e)
             result = TestResult(test_method.__name__, 'FAIL', None, time.time()-t0,
                                 fail_message=str(e))
-            self._save_screenshot(driver, 'FAIL', e, test_method)
+            try:
+                self._save_screenshot(driver, 'FAIL', e, test_method)
+            except Exception as e:
+                logging.error(f'Error saving screenshot: {e}')
         finally:
             try:
+
                 driver.get(f"{os.environ['GIGANTUM_HOST']}/api/ping")
-                driver.execute_script(f'alert("{test_method.__name__} -- cleaning up");')
+
                 self._cleanup(driver)
             except Exception as e:
                 logging.error(f"Error cleaning up: {e}")
@@ -130,18 +134,25 @@ class TestRunner:
         stop_project_containers()
         delete_project_images()
         delete_projects_on_disk()
-        delete_datasets()
 
-        # Delete remote projects
         remote_projects = list_remote_projects()
         for owner, project_name in remote_projects:
             if 'selenium-project-' in project_name:
                 delete_remote_project(owner, project_name)
 
         remote_datasets = list_remote_datasets()
-        for owner, dataset_name in remote_projects:
-            if 'selenium-project-' in dataset_name:
-                delete_remote_project(owner, dataset_name)
+        for owner, dataset_name in remote_datasets:
+            if 'selenium-dataset-' in dataset_name:
+
+                # deleting remote datasets is in a try catch block so that the clean
+                # up process will not halt whenthe remote dataset being deleted has
+                # no local copy, which causes the graph ql query to return an error
+                try:
+                    delete_dataset(owner, dataset_name)
+                except Exception as e:
+                    logging.warning(e)
+
+        delete_local_datasets()
 
     def _upload_to_s3(self):
         s3client = boto3.resource('s3')
@@ -159,6 +170,7 @@ class TestRunner:
         driver.save_screenshot(screenshot_fname)
 
         img = Image.open(screenshot_fname)
+
         draw = ImageDraw.Draw(img)
         font = ImageFont.truetype('Arial.ttf', 30)
         draw.text((100, 400), f'{fail_type}: {message}', font=font, fill=(255, 0, 0, 200))

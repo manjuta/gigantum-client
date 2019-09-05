@@ -1,7 +1,10 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
@@ -25,9 +28,6 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
-
-
 export default function UploadSecretsFileMutation(
   owner,
   labbookName,
@@ -40,10 +40,7 @@ export default function UploadSecretsFileMutation(
   transactionId,
   callback,
 ) {
-  tempID++;
-
   const uploadables = [chunk.blob, accessToken, idToken];
-
   const variables = {
     input: {
       owner,
@@ -57,7 +54,7 @@ export default function UploadSecretsFileMutation(
         uploadId: chunk.uploadId,
       },
       transactionId,
-      clientMutationId: `${tempID}`,
+      clientMutationId: uuidv4(),
     },
   };
 

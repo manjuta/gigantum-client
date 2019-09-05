@@ -1,7 +1,6 @@
 // vendor
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 import shallowCompare from 'react-addons-shallow-compare';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
@@ -32,13 +31,14 @@ class Branches extends Component {
     });
   }
 
+  componentDidMount() {
+    window.addEventListener('click', this._closePopups);
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
 
-  componentDidMount() {
-    window.addEventListener('click', this._closePopups);
-  }
 
   componentWillUnmount() {
     window.removeEventListener('click', this._closePopups);
@@ -49,8 +49,7 @@ class Branches extends Component {
     sets state to toggle the switch dropdown
     @return {}
   */
-  @boundMethod
-  _closePopups(evt) {
+  _closePopups = (evt) => {
     const { state } = this;
     if (evt.target.className.indexOf('Branches__btn--sync-dropdown') < 0) {
       this.setState({
@@ -64,15 +63,26 @@ class Branches extends Component {
     reverts state of passed in modalname
     @return {}
   */
-  _toggleModal(modalName, branch) {
-    if ((modalName === 'mergeModal') && (this.props.activeBranch.branchName !== branch)) {
-      this.setState({ mergeModalVisible: branch || !this.state.mergeModalVisible });
-    } else if ((modalName === 'deleteModal') && (this.props.activeBranch.branchName !== branch) && (branch !== 'master')) {
-      this.setState({ deleteModalVisible: branch || !this.state.deleteModalVisible, localSelected: false, remoteSelected: false });
-    } else if ((modalName === 'resetModal') && (!branch || (this.props.activeBranch.branchName === branch))) {
-      const upToDate = (this.props.activeBranch.commitsAhead === 0) && (this.props.activeBranch.commitsBehind === 0);
-      if (this.props.activeBranch.isRemote && !upToDate) {
-        this.setState({ resetModalVisible: branch || !this.state.resetModalVisible });
+  _toggleModal = (modalName, branch) => {
+    // TODO: rewrite/cleanup this function
+    const { props, state } = this;
+    if ((modalName === 'mergeModal') && (props.activeBranch.branchName !== branch)) {
+      this.setState({ mergeModalVisible: branch || !state.mergeModalVisible });
+    } else if ((modalName === 'deleteModal')
+        && (props.activeBranch.branchName !== branch)
+        && (branch !== 'master')) {
+      this.setState({
+        deleteModalVisible: branch || !state.deleteModalVisible,
+        localSelected: false,
+        remoteSelected: false,
+      });
+    } else if ((modalName === 'resetModal')
+      && (!branch || (props.activeBranch.branchName === branch))) {
+      const upToDate = (props.activeBranch.commitsAhead === 0)
+        && (props.activeBranch.commitsBehind === 0);
+
+      if (props.activeBranch.isRemote && !upToDate) {
+        this.setState({ resetModalVisible: branch || !state.resetModalVisible });
       }
     }
   }
@@ -83,7 +93,7 @@ class Branches extends Component {
     Handles confirm button by doing appropriate action
     @return {}
   */
-  _handleConfirm(branch, action) {
+  _handleConfirm = (branch, action) => {
     if (action === 'merge') {
       this._mergeBranch(branch.branchName);
     } else if (action === 'delete') {
@@ -99,8 +109,9 @@ class Branches extends Component {
     sets selected branch in state
     @return {}
   */
-  _selectBranchname(evt, selectedBranchname) {
-    if (this.state.selectedBranchname !== selectedBranchname) {
+  _selectBranchname = (evt, selectedBranchname) => {
+    const { state } = this;
+    if (state.selectedBranchname !== selectedBranchname) {
       this.setState({ selectedBranchname });
     }
   }
@@ -109,14 +120,19 @@ class Branches extends Component {
     @param {Boolean} - isDown
     sets current index for viewing branches
   */
-  _setIndex(isDown) {
-    const branchCount = this.props.branches.length - 1;
-    const currentIndex = this.state.currentIndex;
+  _setIndex = (isDown) => {
+    const { props, state } = this;
+    const branchCount = props.branches.length - 1;
+    const { currentIndex } = state;
     if (isDown) {
-      const newIndex = ((currentIndex + 5) > branchCount - 5) ? branchCount - 5 : currentIndex + 5;
+      const newIndex = ((currentIndex + 5) > branchCount - 5)
+        ? branchCount - 5
+        : currentIndex + 5;
       this.setState({ currentIndex: newIndex });
     } else {
-      const newIndex = ((currentIndex - 5) < 0) ? 0 : (currentIndex - 5);
+      const newIndex = ((currentIndex - 5) < 0)
+        ? 0
+        : (currentIndex - 5);
       this.setState({ currentIndex: newIndex });
     }
   }
@@ -126,11 +142,13 @@ class Branches extends Component {
     sets state to toggle the switch dropdown
     @return {}
   */
-  @boundMethod
-  _toggleSyncDropdown() {
-    if (!this.props.disableDropdown) {
-      const { state } = this;
-      this.setState({ syncMenuVisible: !state.syncMenuVisible });
+  _toggleSyncDropdown = () => {
+    const { props } = this;
+    if (!props.disableDropdown) {
+      this.setState((state) => {
+        const syncMenuVisible = !state.syncMenuVisible;
+        return { syncMenuVisible };
+      });
     }
   }
 
@@ -139,18 +157,14 @@ class Branches extends Component {
     @param {String} overrideMethod
     filters array branhces and return the active branch node
   */
-  @boundMethod
-  _mergeBranch(branchName, overrideMethod) {
+  _mergeBranch = (branchName, overrideMethod) => {
     const { props } = this;
-
-
     const self = this;
-
-
     const data = {
       branchName,
       overrideMethod,
     };
+
     props.toggleCover('Merging Branches');
     props.branchMutations.mergeBranch(data, (response, error) => {
       if (error) {
@@ -176,25 +190,27 @@ class Branches extends Component {
     *  toggles merge modal
     *  @return {string}
     */
-   @boundMethod
-  _toggleMergeModal() {
-    this.setState({ forceMergeModalVisible: !this.state.forceMergeModalVisible });
+  _toggleMergeModal = () => {
+    this.setState((state) => {
+      const forceMergeModalVisible = !state.forceMergeModalVisible;
+      return { forceMergeModalVisible };
+    });
   }
 
   /**
     calls reset branch mutation
   */
-  @boundMethod
-   _resetBranch() {
+   _resetBranch = () => {
+     const { props } = this;
      const self = this;
-     this.props.toggleCover('Resetting Branch');
-     this.props.branchMutations.resetBranch((response, error) => {
+     props.toggleCover('Resetting Branch');
+     props.branchMutations.resetBranch((response, error) => {
        if (error) {
          setErrorMessage('Failed to reset branch', error);
        }
-       this.props.setBranchUptodate();
+       props.setBranchUptodate();
        self.setState({ resetModalVisible: null });
-       this.props.toggleCover(null);
+       props.toggleCover(null);
      });
    }
 
@@ -202,21 +218,21 @@ class Branches extends Component {
     @param {Object} branch
     calls delete branch mutation
   */
-  @boundMethod
-  _deleteBranch(branch) {
+  _deleteBranch = (branch) => {
+    const { props } = this;
     const self = this;
-    this.props.toggleCover('Deleting Branch');
     const data = {
       branchName: branch.branchName,
       deleteLocal: this.state.localSelected,
       deleteRemote: this.state.remoteSelected,
     };
-    this.props.branchMutations.deleteBranch(data, (response, error) => {
+    props.toggleCover('Deleting Branch');
+    props.branchMutations.deleteBranch(data, (response, error) => {
       if (error) {
         setErrorMessage('Failed to delete branch', error);
       }
       self.setState({ deleteModalVisible: null });
-      this.props.toggleCover(null);
+      props.toggleCover(null);
     });
   }
 
@@ -250,7 +266,8 @@ class Branches extends Component {
     renders JSX for modal
     @return {JSX}
   */
-  _renderModal(branch, action) {
+  _renderModal = (branch, action) => {
+    // TODO remove nested ternary statement, make this a component
     const headerText = action === 'merge' ? 'Merge Branches' : action === 'delete' ? 'Delete Branch' : action === 'reset' ? 'Reset Branch' : '';
     const disableSubmit = action === 'delete' && !this.state.localSelected && !this.state.remoteSelected;
 
@@ -369,7 +386,8 @@ class Branches extends Component {
     renders JSX for actions section
     @return {JSX}
   */
-  _renderActions(branch) {
+  _renderActions = (branch) => {
+    // TODO make this a component
     const { props, state } = this;
     const mergeModalVisible = state.mergeModalVisible === branch.branchName;
     const deleteModalVisible = state.deleteModalVisible === branch.branchName;
@@ -573,7 +591,7 @@ class Branches extends Component {
                          !activeUpToDate && (props.activeBranch.commitsAhead !== undefined) && (props.activeBranch.commitsAhead !== null)
                         && (
                         <div
-                          className="Branches__commits Tooltip-data"
+                          className="Branches__commits Tooltip-data Tooltip-data--left"
                           data-tooltip={activeCommitsText}
                         >
                           { (props.activeBranch.commitsBehind !== 0)

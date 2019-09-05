@@ -67,8 +67,8 @@ def test_use_theirs_merge_conflict_project(driver: selenium.webdriver, *args, **
         resolve_merge_conflict_file = resolve_merge_conflict_file.read()
 
     assert resolve_merge_conflict_file == "Collaborator", \
-            f"Merge did not resolve to 'Use Theirs' expected to see 'Collaborator' in file, " \
-            f"but instead got {resolve_merge_conflict_file}"
+        f"Merge did not resolve to 'Use Theirs' expected to see 'Collaborator' in file, " \
+        f"but instead got {resolve_merge_conflict_file}"
 
 
 def test_abort_merge_conflict_project(driver: selenium.webdriver, *args, **kwargs):

@@ -9,6 +9,15 @@ import { setUpdateAll } from 'JS/redux/actions/routes';
 import Loader from 'Components/common/Loader';
 import Labbook from './Labbook';
 
+// labbook query with notes fragment
+export const labbookQuery = graphql`
+  query LabbookQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $skipPackages: Boolean!, $environmentSkip: Boolean!, $overviewSkip: Boolean!, $activitySkip: Boolean!, $codeSkip: Boolean!, $inputSkip: Boolean!, $outputSkip: Boolean!, $labbookSkip: Boolean!){
+    labbook(name: $name, owner: $owner){
+      id
+      description
+      ...Labbook_labbook
+    }
+  }`;
 
 class LabbookQueryContainer extends Component {
   componentDidMount() {
@@ -17,10 +26,11 @@ class LabbookQueryContainer extends Component {
 
   render() {
     const parentProps = this.props;
+
     return (
       <QueryRenderer
         environment={environment}
-        query={LabbookQuery}
+        query={labbookQuery}
         variables={
           {
             name: parentProps.labbookName,
@@ -47,19 +57,20 @@ class LabbookQueryContainer extends Component {
             if (props.errors) {
               return (<div>{props.errors[0].message}</div>);
             }
-
             return (
               <Labbook
                 key={parentProps.labbookName}
                 auth={parentProps.auth}
-                labbookName={parentProps.labbookName}
+                labbookName={props.labbook.name}
                 query={props.query}
                 labbook={props.labbook}
-                owner={parentProps.owner}
+                owner={props.labbook.owner}
                 history={parentProps.history}
                 diskLow={props.diskLow}
+                sectionType="labbook"
                 {...parentProps}
-              />);
+              />
+            );
           }
 
           return (<Loader />);
@@ -69,16 +80,5 @@ class LabbookQueryContainer extends Component {
     );
   }
 }
-
-
-// labbook query with notes fragment
-export const LabbookQuery = graphql`
-  query LabbookQueryContainerQuery($name: String!, $owner: String!, $first: Int!, $cursor: String, $skipPackages: Boolean!, $environmentSkip: Boolean!, $overviewSkip: Boolean!, $activitySkip: Boolean!, $codeSkip: Boolean!, $inputSkip: Boolean!, $outputSkip: Boolean!, $labbookSkip: Boolean!){
-    labbook(name: $name, owner: $owner){
-      id
-      description
-      ...Labbook_labbook
-    }
-  }`;
 
 export default LabbookQueryContainer;

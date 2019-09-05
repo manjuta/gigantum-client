@@ -1,10 +1,13 @@
+// vendor
+import uuidv4 from 'uuid/v4';
+// constants
 import * as types from 'JS/redux/constants/constants';
 
 export default (
   state = {
     selectedComponent: '',
     containerState: '',
-    transitionState: {},
+    transitionState: '',
     transitioningLabbook: '',
     imageStatus: '',
     isBuilding: false,
@@ -23,100 +26,180 @@ export default (
   },
   action,
 ) => {
+  if (action.payload && action.payload.labbookName) {
+    const { owner, labbookName } = action.payload;
+    const namespace = `${owner}_${labbookName}`;
+    const namespaceExist = state[namespace];
+
+    if (namespaceExist === undefined) {
+      // preventing detail mode from opening until feature has been fully implemented
+      return {
+        [namespace]: {
+          ...state,
+        },
+        ...state,
+        labbookName,
+        owner,
+        forceUpdate: uuidv4(),
+      };
+    }
+  }
+
   if (action.type === types.UPDATE_STICKY_STATE) {
     // preventing detail mode from opening until feature has been fully implemented
+    const { namespace, isSticky } = action.payload;
     return {
       ...state,
-      isSticky: action.payload.isSticky,
+      [namespace]: {
+        ...state[namespace],
+        isSticky,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.MERGE_MODE) {
+    const {
+      namespace,
+      mergeFilter,
+      branchesOpen,
+    } = action.payload;
     return {
       ...state,
-      mergeFilter: action.payload.mergeFilter,
-      branchesOpen: action.payload.branchesOpen,
+      [namespace]: {
+        ...state[namespace],
+        mergeFilter,
+        branchesOpen,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.INITIALIZE) {
+    const {
+      namespace,
+      selectedComponent,
+      containerState,
+      imageStatus,
+    } = action.payload;
+
     return {
       ...state,
-      selectedComponent: action.payload.selectedComponent,
-      containerState: action.payload.containerState,
-      imageStatus: action.payload.imageStatus,
+      [namespace]: {
+        ...state[namespace],
+        namespace,
+        selectedComponent,
+        containerState,
+        imageStatus,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.IS_BUILDING) {
+    const { namespace, isBuilding } = action.payload;
     return {
       ...state,
-      isBuilding: action.payload.isBuilding,
+      [namespace]: {
+        ...state[namespace],
+        isBuilding,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.IS_SYNCING) {
+    const { namespace, isSyncing } = action.payload;
     return {
       ...state,
-      isSyncing: action.payload.isSyncing,
+      [namespace]: {
+        ...state[namespace],
+        isSyncing,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.IS_EXPORTING) {
+    const { namespace, isExporting } = action.payload;
     return {
       ...state,
-      isExporting: action.payload.isExporting,
+      [namespace]: {
+        ...state[namespace],
+        isExporting,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.IS_PUBLISHING) {
+    const { namespace, isPublishing } = action.payload;
     return {
       ...state,
-      isPublishing: action.payload.isPublishing,
+      [namespace]: {
+        ...state[namespace],
+        isPublishing,
+        forceUpdate: uuidv4(),
+      },
+
     };
   } if (action.type === types.IS_UPLOADING) {
+    const { namespace, isUploading } = action.payload;
     return {
       ...state,
-      isUploading: action.payload.isUploading,
+      isUploading,
+      [namespace]: {
+         ...state[namespace],
+        isUploading,
+        forceUpdate: uuidv4(),
+      },
     };
   } if (action.type === types.SELECTED_COMPONENT) {
+    const { namespace, selectedComponent } = action.payload;
     return {
       ...state,
-      selectedComponent: action.payload.selectedComponent,
+      [namespace]: {
+        ...state[namespace],
+        selectedComponent,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.MODAL_VISIBLE) {
+    const { namespace, modalVisible } = action.payload;
     return {
       ...state,
-      modalVisible: action.payload.modalVisible,
+      [namespace]: {
+        ...state[namespace],
+        modalVisible,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.UPDATE_BRANCHES_VIEW) {
+    const { namespace, branchesOpen } = action.payload;
     return {
       ...state,
-      branchesOpen: action.payload.branchesOpen,
-    };
-  } if (action.type === types.RESET_LABBOOK_STORE) {
-    return {
-      ...state,
-      selectedComponent: '',
-      containerState: '',
-      transitionState: '',
-      imageStatus: '',
-      isBuilding: false,
-      isPublushing: false,
-      isSyncing: false,
-      isExporting: false,
-      containerStatus: '',
-      modalVisible: '',
-      detailMode: false,
-      previousDetailMode: false,
+      [namespace]: {
+        ...state[namespace],
+        branchesOpen,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.UPDATE_ALL) {
     return {
       ...state,
       labbookName: action.payload.labbookName,
       owner: action.payload.owner,
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.UPDATE_SIDEPANEL_VISIBLE) {
+    const { namespace, sidePanelVisible } = action.payload;
     return {
       ...state,
-      sidePanelVisible: action.payload.sidePanelVisible,
+      [namespace]: {
+        ...state[namespace],
+        sidePanelVisible,
+      },
+      forceUpdate: uuidv4(),
     };
   } if (action.type === types.UPDATE_TRANSITION_STATE) {
-    const newTransitionState = {
-      ...state.transitionState,
-      ...action.payload.transitionState,
-    };
+    const { namespace } = action.payload;
+    const { transitionState } = action.payload;
+
     return {
       ...state,
-      transitionState: newTransitionState,
+      [namespace]: {
+        ...state[namespace],
+        transitionState,
+      },
+      forceUpdate: uuidv4(),
     };
   }
 

@@ -1,9 +1,8 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import ReactMarkdown from 'react-markdown';
 import SimpleMDE from 'simplemde';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 // mutations
 import WriteLabbookReadmeMutation from 'Mutations/WriteLabbookReadmeMutation';
 import WriteDatasetReadmeMutation from 'Mutations/WriteDatasetReadmeMutation';
@@ -83,10 +82,14 @@ export default class Overview extends Component {
 
         const fullscreenButton = document.getElementsByClassName('fa-arrows-alt')[0];
         const sideBySideButton = document.getElementsByClassName('fa-columns')[0];
+        // TODO move set state to functions
+        if (fullscreenButton) {
+          fullscreenButton.addEventListener('click', () => this.setState({ editorFullscreen: !state.editorFullscreen }));
+        }
 
-        fullscreenButton && fullscreenButton.addEventListener('click', () => this.setState({ editorFullscreen: !state.editorFullscreen }));
-
-        sideBySideButton && sideBySideButton.addEventListener('click', () => this.setState({ editorFullscreen: true }));
+        if (sideBySideButton) {
+          sideBySideButton.addEventListener('click', () => this.setState({ editorFullscreen: true }));
+        }
       }
     }
   }
@@ -95,8 +98,7 @@ export default class Overview extends Component {
    @param {}
    sets element to expand
    */
-  @boundMethod
-  _openJupyter() {
+  _openJupyter = () => {
     window.open('http://localhost:8888', '_blank');
   }
 
@@ -104,8 +106,7 @@ export default class Overview extends Component {
    @param {}
    sets element to expand
    */
-  @boundMethod
-  _setExpand() {
+  _setExpand = () => {
     const { state } = this;
     const element = Array.prototype.slice.call(document.getElementsByClassName('ReadmeMarkdown'))[0];
     if (element && checkOverflow(element) && !state.overflowExists) {
@@ -120,8 +121,7 @@ export default class Overview extends Component {
    reverts readme to have a max size
    resets vertical scroll
    */
-  @boundMethod
-  _toggleReadme(readmeExpanded) {
+  _toggleReadme = (readmeExpanded) => {
     if (!readmeExpanded) {
       if (window.pageYOffset > 345) {
         window.scrollTo(0, 345);
@@ -136,8 +136,7 @@ export default class Overview extends Component {
    @param {Boolean} editingReadme
    sets state for editing readme
    */
-  @boundMethod
-  _setEditingReadme(editingReadme) {
+  _setEditingReadme = (editingReadme) => {
     this.setState({ editingReadme });
   }
 
@@ -145,8 +144,7 @@ export default class Overview extends Component {
    @param {}
    sets readme state to false
    */
-  @boundMethod
-  _closeReadme() {
+  _closeReadme = () => {
     this.setState({ editingReadme: false, simpleExists: false });
   }
 
@@ -155,8 +153,7 @@ export default class Overview extends Component {
    @param {String} labbookName
    calls mutation to save labbook readme
    */
-  @boundMethod
-  _saveLabbookReadme(owner, labbookName) {
+  _saveLabbookReadme = (owner, labbookName) => {
     WriteLabbookReadmeMutation(
       owner,
       labbookName,
@@ -177,8 +174,7 @@ export default class Overview extends Component {
    @param {String} labbookName
    calls mutation to save dataset readme
    */
-  @boundMethod
-  _saveDatasetReadme(owner, labbookName) {
+  _saveDatasetReadme = (owner, labbookName) => {
     WriteDatasetReadmeMutation(
       owner,
       labbookName,
@@ -198,8 +194,7 @@ export default class Overview extends Component {
    @param {}
    handles calling mutation functions to save readme
    */
-  @boundMethod
-  _saveReadme() {
+  _saveReadme = () => {
     const { props } = this;
     const { owner, labbookName } = store.getState().routes;
     if (props.sectionType === 'labbook') {
@@ -213,8 +208,7 @@ export default class Overview extends Component {
     @param {String} section
     handles redirect and scrolling to top
   */
-  @boundMethod
-  _handleRedirect(section) {
+  _handleRedirect = (section) => {
     const { owner, labbookName } = store.getState().routes;
     const { props } = this;
     props.scrollToTop();

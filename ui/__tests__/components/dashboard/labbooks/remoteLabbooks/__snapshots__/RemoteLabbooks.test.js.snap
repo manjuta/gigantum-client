@@ -3,18 +3,24 @@
 exports[`Test RemoteLabbooks rendering 1`] = `
 <div
   className="Labbooks__listing"
+  data-selenium-id="RemoteLabbooks"
 >
   <div
     className="grid"
   >
     <div
       className="Card Card--225 column-4-span-3 flex flex--column justify--space-between"
+      data-selenium-id="RemoteLabbookPanel"
     >
       <div
         className="RemoteLabbooks__row RemoteLabbooks__row--icon"
       >
+        <div
+          className="Tooltip-Listing RemoteLabbooks__private Tooltip-data Tooltip-data--small"
+          data-tooltip="private"
+        />
         <button
-          className="Button__icon Button__icon--cloud Tooltip-data"
+          className="Btn__dashboard Btn--action Btn__dashboard--cloud Btn__Tooltip-data"
           data-tooltip="This Project has already been imported"
           disabled={true}
           type="button"
@@ -22,7 +28,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           Imported
         </button>
         <button
-          className="Button__icon Button__icon--delete"
+          className="Btn__dashboard Btn--action Btn__dashboard--delete"
           data-tooltip=""
           disabled={false}
           onClick={[Function]}
@@ -55,14 +61,26 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           uitest
         </p>
         <p
-          className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
         >
-          Created on Fri Jan 18 2019
+          <span
+            className="bold"
+          >
+            Created:
+          </span>
+           
+          Fri Jan 18 2019
         </p>
         <p
-          className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
+          className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
         >
-          Modified Fri Jan 18 2019
+          <span
+            className="bold"
+          >
+            Modified:
+          </span>
+           
+          Fri Jan 18 2019
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -76,33 +94,34 @@ exports[`Test RemoteLabbooks rendering 1`] = `
           </span>
         </p>
       </div>
-      <div
-        className="Tooltip-Listing RemoteLabbooks__private Tooltip-data Tooltip-data--small"
-        data-tooltip="private"
-      />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
       className="CardLoader--hidden"
+      data-selenium-id="CardLoader"
     >
       <div />
     </div>

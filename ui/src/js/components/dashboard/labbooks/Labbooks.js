@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import queryString from 'querystring';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { boundMethod } from 'autobind-decorator';
 // components
 import CreateModal from 'Components/shared/modals/create/CreateModal';
 import Loader from 'Components/common/Loader';
@@ -96,7 +95,7 @@ class Labbooks extends Component {
     const paths = props.history.location.pathname.split('/');
     let sectionRoute = paths.length > 2 ? paths[2] : 'local';
 
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
+    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
       sectionRoute = 'local';
     }
 
@@ -110,9 +109,11 @@ class Labbooks extends Component {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const paths = nextProps.history.location.pathname.split('/');
-    const sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    const sectionRoute = (paths.length > 2)
+      ? paths[2]
+      : 'local';
 
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
+    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
       nextProps.props.history.replace('../../../../projects/local');
     }
     this.setState({ selectedSection: sectionRoute });
@@ -123,8 +124,7 @@ class Labbooks extends Component {
     * fires when user identity returns invalid session
     * prompts user to revalidate their session
   */
-  @boundMethod
-  _closeLoginPromptModal() {
+  _closeLoginPromptModal = () => {
     this.setState({
       showLoginPrompt: false,
     });
@@ -135,8 +135,7 @@ class Labbooks extends Component {
     * fires when sort menu is open and the user clicks elsewhere
     * hides the sort menu dropdown from the view
   */
-  @boundMethod
-  _closeSortMenu(evt) {
+  _closeSortMenu = (evt) => {
     const { state } = this;
     const isSortMenu = evt && evt.target
       && evt.target.className
@@ -152,8 +151,7 @@ class Labbooks extends Component {
     * fires when filter menu is open and the user clicks elsewhere
     * hides the filter menu dropdown from the view
   */
-  @boundMethod
-  _closeFilterMenu(evt) {
+  _closeFilterMenu = (evt) => {
     const { state } = this;
     const isFilterMenu = evt.target.className.indexOf('Dropdown__filter-selector') > -1;
 
@@ -167,8 +165,7 @@ class Labbooks extends Component {
     * fires on window clock
     * hides search cancel button when clicked off
   */
-  @boundMethod
-  _hideSearchClear(evt) {
+  _hideSearchClear = (evt) => {
     const { state } = this;
     if (state.showSearchCancel
       && (evt.target.className !== 'Labbooks__search-cancel')
@@ -181,8 +178,7 @@ class Labbooks extends Component {
     *  @param {string} labbookName - inputs a labbook name
     *  routes to that labbook
   */
-  @boundMethod
-  _goToLabbook(labbookName, owner) {
+  _goToLabbook = (labbookName, owner) => {
     this.setState({ labbookName, owner });
   }
 
@@ -190,8 +186,7 @@ class Labbooks extends Component {
     *  @param {string} labbookName
     *  closes labbook modal and resets state to initial state
   */
-  @boundMethod
-  _closeLabbook(labbookName) {
+  _closeLabbook = (labbookName) => {
     this.setState({
       labbookModalVisible: false,
       oldLabbookName: '',
@@ -204,8 +199,7 @@ class Labbooks extends Component {
     *  @param {event} evt
     *  sets new labbook title to state
   */
-  @boundMethod
-  _setLabbookTitle(evt) {
+  _setLabbookTitle = (evt) => {
     const isValid = Validation.labbookName(evt.target.value);
     if (isValid) {
       this.setState({
@@ -221,8 +215,7 @@ class Labbooks extends Component {
    * @param {string} filter
    sets state updates filter
   */
-  @boundMethod
-  _setFilter(filter) {
+  _setFilter = (filter) => {
     this.setState({ filterMenuOpen: false, filter });
     this._changeSearchParam({ filter });
   }
@@ -230,8 +223,7 @@ class Labbooks extends Component {
   /**
    sets state for filter menu
   */
-  @boundMethod
-  _toggleFilterMenu() {
+  _toggleFilterMenu = () => {
     const { state } = this;
     this.setState({ filterMenuOpen: !state.filterMenuOpen });
   }
@@ -239,8 +231,7 @@ class Labbooks extends Component {
   /**
    sets state for sort menu
   */
-  @boundMethod
-  _toggleSortMenu() {
+  _toggleSortMenu = () => {
     const { state } = this;
     this.setState({ sortMenuOpen: !state.sortMenuOpen });
   }
@@ -249,8 +240,7 @@ class Labbooks extends Component {
    * @param {string} section
    replaces history and checks session
   */
-  @boundMethod
-  _setSection(section) {
+  _setSection = (section) => {
     const { props } = this;
     if (section === 'cloud') {
       this._viewRemote();
@@ -263,8 +253,7 @@ class Labbooks extends Component {
    * @param {object} labbook
    * returns true if labbook's name or description exists in filtervalue, else returns false
   */
-  @boundMethod
-  _filterSearch(labbook) {
+  _filterSearch = (labbook) => {
     const { props } = this;
     const hasNoFileText = (props.filterText === '');
     const nameMatches = labbook.node
@@ -286,8 +275,7 @@ class Labbooks extends Component {
    * @param {array, string} localLabbooks.edges,filter
    * @return {array} filteredLabbooks
   */
-  @boundMethod
-  _filterLabbooks(labbooks, filter) {
+  _filterLabbooks = (labbooks, filter) => {
     const username = localStorage.getItem('username');
     const self = this;
     let filteredLabbooks = [];
@@ -315,8 +303,7 @@ class Labbooks extends Component {
     * fires when handleSortFilter triggers refetch
     * references child components and triggers their refetch functions
   */
-  @boundMethod
-  _showModal() {
+  _showModal = () => {
     // TODO remove refs this is deprecated
     this.createModal._showModal();
   }
@@ -326,8 +313,7 @@ class Labbooks extends Component {
     * fires when setSortFilter validates user can sort
     * triggers a refetch with new sort parameters
   */
-  @boundMethod
-  _handleSortFilter(orderBy, sort) {
+  _handleSortFilter = (orderBy, sort) => {
     const { props } = this;
     this.setState({ sortMenuOpen: false, orderBy, sort });
     this._changeSearchParam({ orderBy, sort });
@@ -339,8 +325,7 @@ class Labbooks extends Component {
     * fires when user selects a sort option
     * checks session and selectedSection state before handing off to handleSortFilter
   */
-  @boundMethod
-  _setSortFilter(orderBy, sort) {
+  _setSortFilter = (orderBy, sort) => {
     const { props, state } = this;
     if (state.selectedSection === 'remoteLabbooks') {
       UserIdentity.getUserIdentity().then((response) => {
@@ -372,8 +357,7 @@ class Labbooks extends Component {
     * fires when user selects remote labbook view
     * checks user auth before changing selectedSection state
   */
-  @boundMethod
-  _viewRemote() {
+  _viewRemote = () => {
     const { props, state } = this;
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
@@ -400,8 +384,7 @@ class Labbooks extends Component {
   *  @param {evt}
   *  sets the filterValue in state
   */
-  @boundMethod
-  _setFilterValue(evt) {
+  _setFilterValue = (evt) => {
     setFilterText(evt.target.value);
     // TODO remove refs
     if (this.labbookSearch.value !== evt.target.value) {
@@ -413,8 +396,7 @@ class Labbooks extends Component {
     *  @param {object} newValues
     *  changes the query params to new sort and filter values
   */
-  @boundMethod
-  _changeSearchParam(newValues) {
+  _changeSearchParam = (newValues) => {
     const { props } = this;
     const searchObj = Object.assign(
       {},
@@ -430,8 +412,7 @@ class Labbooks extends Component {
     *  @param {} -
     *  forces state update ad sets to local view
   */
-  @boundMethod
-  _forceLocalView() {
+  _forceLocalView = () => {
     this.setState({
       selectedSection: 'local',
       showLoginPrompt: true,

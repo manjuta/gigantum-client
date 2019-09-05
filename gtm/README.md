@@ -24,7 +24,14 @@ recommended that you create a virtualenv to install `gtm`.
    The `gtm` tool requires Docker on your host machine to build and launch
    images. Follow Docker's instructions for your OS.
 
-2. Install Python 3
+2. Install Git LFS
+   
+   Git LFS is required when running the client in development mode. Since the repository will get mounted into the 
+   client container for debugging, `git-lfs` gets initialized. Even though there are no files in this repository 
+   currently using Git LFS, if you try to push from your host after this without `git-lfs` installed you will get an 
+   error. Follow the [instructions](https://help.github.com/en/articles/installing-git-large-file-storage) for your OS.
+
+3. Install Python 3
 
    If your OS does not already have Python3 installed, you'll have to install
    it. For example:
@@ -39,7 +46,7 @@ recommended that you create a virtualenv to install `gtm`.
    PS> choco install python3
    ```
 
-3. Create a virtualenv (strongly recommended)
+4. Create a virtualenv (strongly recommended)
 
    Using [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/):
 
@@ -53,7 +60,7 @@ recommended that you create a virtualenv to install `gtm`.
    $ conda create -n gtm python=3
    ```
 
-4. Install `gtm` package from the `gigantum-client` repository
+5. Install `gtm` package from the `gigantum-client` repository
     
    `gigantum-client` is a monorepo, containing all of the code, packages, data, and tooling required to build the
    Gigantum Client container. 

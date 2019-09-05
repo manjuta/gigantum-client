@@ -23,24 +23,26 @@ import CustomDockerfile from './CustomDockerfile';
 import './Environment.scss';
 
 
+const buildImage = (owner, name, buildData, callback) => {
+  BuildImageMutation(
+    owner,
+    name,
+    buildData,
+    (response, error, id) => {
+      if (error) {
+        setErrorMessage(`${name} failed to build`, error);
+      }
+      if (callback) {
+        callback(response, error, id);
+      }
+
+      return 'finished';
+    },
+  );
+};
+
+
 class Environment extends Component {
-  constructor(props) {
-  	super(props);
-    const { owner, labbookName } = store.getState().routes;
-
-    this.state = {
-      modal_visible: false,
-      readyToBuild: false,
-      show: false,
-      message: '',
-      owner,
-      labbookName,
-    };
-
-    this._buildCallback = this._buildCallback.bind(this);
-    this._setBase = this._setBase.bind(this);
-  }
-
   componentDidMount() {
     const { props } = this;
     props.refetch('environment');
@@ -51,69 +53,47 @@ class Environment extends Component {
   *  callback that triggers buildImage mutation
   */
   _buildCallback = (callback) => {
-    const { labbookName, owner } = this.state;
+    const { name, owner } = this.props;
     let buildData = false;
     if (callback) {
       buildData = {
         hideFooter: true,
       };
     }
-    setBuildingState(true);
+
+    setBuildingState(owner, name, true);
+
     if (store.getState().containerStatus.status === 'Running') {
       StopContainerMutation(
         owner,
-        labbookName,
+        name,
         (response, error) => {
           if (error) {
             console.log(error);
-            setErrorMessage(`Problem stopping ${labbookName}`, error);
+            setErrorMessage(`Problem stopping ${name}`, error);
           } else {
-            BuildImageMutation(
+            buildImage(
               owner,
-              labbookName,
+              name,
               buildData,
-              (response, error, id) => {
-                if (error) {
-                  setErrorMessage(`${labbookName} failed to build`, error);
-                }
-                if (callback) {
-                  callback(response, error, id);
-                }
-
-                return 'finished';
-              },
+              callback,
             );
           }
         },
       );
     } else {
-      BuildImageMutation(
+      buildImage(
         owner,
-        labbookName,
+        name,
         buildData,
-        (response, error, id) => {
-          if (error) {
-            setErrorMessage(`${labbookName} failed to build`, error);
-          }
-          if (callback) {
-            callback(response, error, id);
-          }
-          return 'finished';
-        },
+        callback,
       );
     }
   }
 
-  /**
-  *  @param {Obect}
-  *  sets readyToBuild state to true
-  */
-  _setBase(base) {
-    this.setState({ readyToBuild: true });
-  }
-
   render() {
     const { props } = this;
+    // declare css here
     const advancedCSS = classNames({
       'Btn Btn__advanced Btn--action Btn--noShadow': true,
       'Btn__advanced--expanded': props.advancedVisible,
@@ -133,14 +113,12 @@ class Environment extends Component {
           </div>
           <ErrorBoundary type="baseError" key="base">
             <Base
-              ref="base"
               environment={environment}
               baseLatestRevision={environment.baseLatestRevision}
               environmentId={environment.id}
               editVisible
               containerStatus={props.containerStatus}
               setComponent={this._setComponent}
-              setBase={this._setBase}
               buildCallback={this._buildCallback}
               blockClass="Environment"
               base={base}
@@ -158,7 +136,6 @@ class Environment extends Component {
               environmentId={props.labbook.environment.id}
               labbookId={props.labbook.id}
               containerStatus={props.containerStatus}
-              setBase={this._setBase}
               setComponent={this._setComponent}
               buildCallback={this._buildCallback}
               overview={props.overview}
@@ -166,6 +143,7 @@ class Environment extends Component {
               isLocked={props.isLocked}
               packageLatestVersions={props.packageLatestVersions}
               packageLatestRefetch={props.packageLatestRefetch}
+              cancelRefetch={props.cancelRefetch}
             />
           </ErrorBoundary>
           <div className="flex justify--center align-items--center relative column-1-span-12">

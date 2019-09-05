@@ -18,7 +18,6 @@ export default class DatasetCard extends Component {
   state = {
     expanded: false,
     unlinkPopupVisible: false,
-    commitsPopupVisible: false,
     unlinkPending: false,
     commitsPending: false,
     downloadPending: false,
@@ -49,9 +48,10 @@ export default class DatasetCard extends Component {
     const datasetOwner = props.dataset.owner;
     const datasetName = props.dataset.name;
     const popupReference = action === 'unlink' ? action : 'commits';
-    const footerReference = action === 'unlink' ? action : 'updat';
+    const footerReference = action === 'unlink' ? action : 'update';
     this.setState({ [`${popupReference}Pending`]: true });
     this._togglePopup(evt, false, popupReference);
+
     ModifyDatasetLinkMutation(
       labbookOwner,
       labbookName,
@@ -120,6 +120,7 @@ export default class DatasetCard extends Component {
 
   render() {
     const { props, state } = this;
+    const { commitsBehind } = props.dataset;
     const numFilesText = `${props.dataset.overview.numFiles} file${(props.dataset.overview.numFiles === 1) ? '' : 's'}`;
     const sizeText = config.humanFileSize(props.dataset.overview.totalBytes);
     const unlinkDisabled = props.isLocked || state.unlinkPending;
@@ -129,6 +130,8 @@ export default class DatasetCard extends Component {
     const toDownloadBytes = props.dataset.overview.totalBytes - props.dataset.overview.localBytes;
     const toDownloadFormatted = config.humanFileSize(toDownloadBytes);
     const downloadAllText = props.isLocal ? 'Downloaded' : 'Download All';
+    const showCommits = (commitsBehind > 0) || ((commitsBehind === null) && window.navigator.onLine);
+    // declare css here
     const chevronCSS = classNames({
       DatasetCard__chevron: true,
       'DatasetCard__chevron--expanded': state.expanded,
@@ -138,15 +141,6 @@ export default class DatasetCard extends Component {
       DatasetCard__popup: true,
       hidden: !state.unlinkPopupVisible || props.isLocked,
       Tooltip__message: true,
-    });
-    const commitsPopupCSS = classNames({
-      DatasetCard__popup: true,
-      hidden: !state.commitsPopupVisible || props.isLocked,
-      Tooltip__message: true,
-    });
-    const commitsCSS = classNames({
-      DatasetCard__commits: true,
-      'DatasetCard__commits--loading': state.commitsPending,
     });
     const unlinkCSS = classNames({
       'Btn Btn__FileBrowserAction Btn__FileBrowserAction--unlink': true,
@@ -197,8 +191,7 @@ export default class DatasetCard extends Component {
                 <div className="DatasetCard__onDisk--primary">{onDiskFormatted}</div>
                 <div className="DatasetCard__onDisk--secondary">on disk</div>
               </div>
-              {
-                (toDownloadBytes !== 0)
+              { (toDownloadBytes !== 0)
                 && (
                   <div className="DatasetCard__toDownload flex flex--column">
                     <div className="DatasetCard__toDownload--primary">{toDownloadFormatted}</div>
@@ -246,32 +239,26 @@ export default class DatasetCard extends Component {
             </button>
           </div>
         </div>
-        {
-          state.expanded
+        { state.expanded
           && (
-          <DatasetBody
-            files={props.formattedFiles.children}
-            mutationData={props.mutationData}
-            checkLocal={props.checkLocal}
-            downloadPending={state.downloadPending}
-            mutations={props.mutations}
-            section={props.section}
-          />
+            <DatasetBody
+              files={props.formattedFiles.children}
+              mutationData={props.mutationData}
+              checkLocal={props.checkLocal}
+              downloadPending={state.downloadPending}
+              mutations={props.mutations}
+              section={props.section}
+            />
           )
         }
-        {
-          (props.dataset.commitsBehind > 0)
+        { showCommits
           && (
-          <DatasetsCommits
-            commitsCSS={commitsCSS}
-            commitsPending={state.commitsPending}
-            commitsBehind={props.dataset.commitsBehind}
-            togglePopup={this._togglePopup}
-            commitsPopupCSS={commitsPopupCSS}
-            modifiyDatasetLink={this._modifyDatasetLink}
-            tooltipShown={state.tooltipShown}
-            toggleTooltip={() => this.setState({ tooltipShown: !state.tooltipShown })}
-          />
+            <DatasetsCommits
+              commitsPending={state.commitsPending}
+              commitsBehind={props.dataset.commitsBehind}
+              isLocked={props.isLocked}
+              modifiyDatasetLink={this._modifyDatasetLink}
+            />
           )
         }
       </div>

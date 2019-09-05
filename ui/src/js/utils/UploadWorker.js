@@ -44,13 +44,11 @@ const addFileUpload = (data) => {
   const callback = (response, error) => {
     if(response) {
       const data = { response, chunkId };
-
       postMessage(data);
     } else {
       postMessage(error);
     }
   };
-
 
   if((connection === "CodeBrowser_allFiles")
     || (connection === "InputBrowser_allFiles")

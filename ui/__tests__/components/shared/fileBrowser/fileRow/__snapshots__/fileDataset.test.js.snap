@@ -3,6 +3,7 @@
 exports[`Dataset File component File Snapshot 1`] = `
 <div
   className="File"
+  data-selenium-id="File"
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
   onMouseOut={[Function]}
@@ -79,6 +80,7 @@ exports[`Dataset File component File Snapshot 1`] = `
     >
       <div
         className="ActionsMenu"
+        data-selenium-id="ActionsMenu"
       >
         <button
           className="ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn__addFolder visibility-hidden"
@@ -133,6 +135,7 @@ exports[`Dataset File component File Snapshot 1`] = `
       </div>
       <div
         className="DatasetActionsMenu"
+        data-selenium-id="DatasetActionsMenu"
       >
         <button
           className="Btn Btn__FileBrowserAction DatasetActionsMenu__item Btn__FileBrowserAction--download"

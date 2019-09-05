@@ -27,20 +27,38 @@ def delete_project_images():
 
 def delete_projects_on_disk():
     root_dir = os.path.expanduser(os.environ['GIGANTUM_HOME'])
-    user_projects = glob.glob(f'{root_dir}/*/*/labbooks/selenium-project-*')
+    if os.name == 'nt':
+        user_projects = glob.glob(f'{root_dir}\*\*\labbooks\selenium-project-*')
+    else:
+        user_projects = glob.glob(f'{root_dir}/*/*/labbooks/selenium-project-*')
     for user_project_path in user_projects:
         logging.info(f"Deleting directory: {user_project_path}")
-        shutil.rmtree(user_project_path, ignore_errors=True)
+        if os.name == 'nt':
+            os.system('rmdir /S /Q "{}"'.format(user_project_path))
+        else:
+            shutil.rmtree(user_project_path, ignore_errors=True)
 
 
-def delete_datasets():
+def delete_local_datasets():
     root_dir = os.path.expanduser(os.environ['GIGANTUM_HOME'])
-    user_datasets = glob.glob(f'{root_dir}/*/*/datasets/selenium-dataset-*')
+    if os.name == 'nt':
+        user_datasets = glob.glob(f'{root_dir}\*\*\datasets\selenium-dataset-*')
+        cache_datasets = glob.glob(f'{root_dir}\.labmanager\*\*\selenium-dataset-*')
+    else:
+        user_datasets = glob.glob(f'{root_dir}/*/*/datasets/selenium-dataset-*')
+        cache_datasets = glob.glob(f'{root_dir}/.labmanager/*/*/selenium-dataset-*')
+
     for user_dataset_path in user_datasets:
         logging.info(f"Deleting directory: {user_dataset_path}")
-        shutil.rmtree(user_dataset_path, ignore_errors=True)
+        if os.name == 'nt':
+            os.system('rmdir /S /Q "{}"'.format(user_dataset_path))
+        else:
+            shutil.rmtree(user_dataset_path, ignore_errors=False)
 
-    cache_datasets = glob.glob(f'{root_dir}/.labmanager/*/*/selenium-dataset-*')
     for cache_ds in cache_datasets:
         logging.info(f"Delete directory: {cache_ds}")
-        shutil.rmtree(cache_ds, ignore_errors=True)
+
+        if os.name == 'nt':
+            os.system('rmdir /S /Q "{}"'.format(cache_ds))
+        else:
+            shutil.rmtree(cache_ds, ignore_errors=False)

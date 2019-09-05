@@ -1,9 +1,13 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import RelayRuntime from 'relay-runtime';
+import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
+
 
 const mutation = graphql`
   mutation RemoveSecretsEntryMutation($input: RemoveSecretsEntryInput!){
@@ -46,8 +50,6 @@ function sharedUpdater(store, parentID, deleteId) {
   }
 }
 
-let tempID = 0;
-
 export default function RemoveSecretsEntryMutation(
   owner,
   labbookName,
@@ -56,13 +58,12 @@ export default function RemoveSecretsEntryMutation(
   filename,
   callback,
 ) {
-  tempID++;
   const variables = {
     input: {
       owner,
       labbookName,
       filename,
-      clientMutationId: `${tempID}`,
+      clientMutationId: uuidv4(),
     },
   };
   commitMutation(

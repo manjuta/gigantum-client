@@ -1,9 +1,8 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import queryString from 'querystring';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { boundMethod } from 'autobind-decorator';
 // components
 import CreateModal from 'Components/shared/modals/create/CreateModal';
 import Loader from 'Components/common/Loader';
@@ -99,8 +98,7 @@ class Datasets extends Component {
     * fires when user identity returns invalid session
     * prompts user to revalidate their session
   */
-  @boundMethod
-  _closeLoginPromptModal() {
+  _closeLoginPromptModal = () => {
     this.setState({
       showLoginPrompt: false,
     });
@@ -111,8 +109,7 @@ class Datasets extends Component {
     * fires when sort menu is open and the user clicks elsewhere
     * hides the sort menu dropdown from the view
   */
-  @boundMethod
-  _closeSortMenu(evt) {
+  _closeSortMenu = (evt) => {
     const { state } = this;
     const isSortMenu = evt && evt.target && evt.target.className && (evt.target.className.indexOf('Dropdown__sort-selector') > -1);
 
@@ -126,8 +123,7 @@ class Datasets extends Component {
     * fires when filter menu is open and the user clicks elsewhere
     * hides the filter menu dropdown from the view
   */
-  @boundMethod
-  _closeFilterMenu(evt) {
+  _closeFilterMenu = (evt) => {
     const { state } = this;
     const isFilterMenu = evt.target.className.indexOf('Dropdown__filter-selector') > -1;
 
@@ -141,8 +137,7 @@ class Datasets extends Component {
     * fires on window clock
     * hides search cancel button when clicked off
   */
-  @boundMethod
-  _hideSearchClear(evt) {
+  _hideSearchClear = (evt) => {
     const { state } = this;
     if (state.showSearchCancel
       && (evt.target.className !== 'Datasets__search-cancel')
@@ -155,8 +150,7 @@ class Datasets extends Component {
     *  @param {string} datasetName - inputs a dataset name
     *  routes to that dataset
   */
-  @boundMethod
-  _goToDataset(datasetName, owner) {
+  _goToDataset = (datasetName, owner) => {
     this.setState({ datasetName, owner });
   }
 
@@ -164,8 +158,7 @@ class Datasets extends Component {
     *  @param {string} datasetName
     *  closes dataset modal and resets state to initial state
     */
-  @boundMethod
-  _closeDataset(datasetName) {
+  _closeDataset = (datasetName) => {
     this.setState({
       datasetModalVisible: false,
       oldDatasetName: '',
@@ -178,8 +171,7 @@ class Datasets extends Component {
   *  @param {event} evt
   *  sets new dataset title to state
   */
-  @boundMethod
-  _setDatasetTitle(evt) {
+  _setDatasetTitle = (evt) => {
     const isValid = Validation.datasetName(evt.target.value);
     if (isValid) {
       this.setState({
@@ -195,8 +187,7 @@ class Datasets extends Component {
   * @param {string} filter
   sets state updates filter
   */
-  @boundMethod
-  _setFilter(filter) {
+  _setFilter = (filter) => {
     this.setState({ filterMenuOpen: false, filter });
     this._changeSearchParam({ filter });
   }
@@ -204,8 +195,7 @@ class Datasets extends Component {
   /**
    sets state for filter menu
    */
-  @boundMethod
-  _toggleFilterMenu() {
+  _toggleFilterMenu = () => {
     const { state } = this;
     this.setState({ filterMenuOpen: !state.filterMenuOpen });
   }
@@ -213,8 +203,7 @@ class Datasets extends Component {
   /**
   sets state for sort menu
   */
-  @boundMethod
-  _toggleSortMenu() {
+  _toggleSortMenu = () => {
     const { state } = this;
     this.setState({ sortMenuOpen: !state.sortMenuOpen });
   }
@@ -223,8 +212,7 @@ class Datasets extends Component {
   * @param {string} section
   replaces history and checks session
   */
-  @boundMethod
-  _setSection(section) {
+  _setSection = (section) => {
     const { props } = this;
     if (section === 'cloud') {
       this._viewRemote();
@@ -237,8 +225,7 @@ class Datasets extends Component {
   * @param {object} dataset
   * returns true if dataset's name or description exists in filtervalue, else returns false
   */
-  @boundMethod
-  _filterSearch(dataset) {
+  _filterSearch = (dataset) => {
     const { props } = this;
     const hasNoFileText = (props.filterText === '');
     const nameMatches = dataset.node
@@ -262,13 +249,14 @@ class Datasets extends Component {
    * @param {Boolean} isLoading
    * @return {array} filteredDatasets
   */
-  @boundMethod
-  _filterDatasets(datasetList, filter, isLoading) {
+  _filterDatasets = (datasetList, filter, isLoading) => {
     const { state } = this;
     if (isLoading) {
       return [];
     }
-    const datasets = state.selectedSection === 'local' ? datasetList.localDatasets.edges : datasetList.remoteDatasets.edges;
+    const datasets = (state.selectedSection === 'local')
+      ? datasetList.localDatasets.edges
+      : datasetList.remoteDatasets.edges;
     const username = localStorage.getItem('username');
     const self = this;
     let filteredDatasets = [];
@@ -305,8 +293,7 @@ class Datasets extends Component {
     * fires when setSortFilter validates user can sort
     * triggers a refetch with new sort parameters
   */
-  @boundMethod
-  _handleSortFilter(orderBy, sort) {
+  _handleSortFilter = (orderBy, sort) => {
     const { props } = this;
     this.setState({ sortMenuOpen: false, orderBy, sort });
     this._changeSearchParam({ orderBy, sort });
@@ -318,8 +305,7 @@ class Datasets extends Component {
     * fires when user selects a sort option
     * checks session and selectedSection state before handing off to handleSortFilter
   */
-  @boundMethod
-  _setSortFilter(orderBy, sort) {
+  _setSortFilter = (orderBy, sort) => {
     const { props, state } = this;
     if (state.selectedSection === 'remoteDatasets') {
       UserIdentity.getUserIdentity().then((response) => {
@@ -351,8 +337,7 @@ class Datasets extends Component {
     * fires when user selects remote dataset view
     * checks user auth before changing selectedSection state
   */
-  @boundMethod
-  _viewRemote() {
+  _viewRemote = () => {
     const { props, state } = this;
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
@@ -379,8 +364,7 @@ class Datasets extends Component {
   *  @param {evt}
   *  sets the filterValue in state
   */
-  @boundMethod
-  _setFilterValue(evt) {
+  _setFilterValue = (evt) => {
     setFilterText(evt.target.value);
     // TODO remove refs this is deprecated
     if (this.datasetSearch.value !== evt.target.value) {
@@ -392,8 +376,7 @@ class Datasets extends Component {
     *  @param {object} newValues
     *  changes the query params to new sort and filter values
   */
-  @boundMethod
-  _changeSearchParam(newValues) {
+  _changeSearchParam = (newValues) => {
     const { props } = this;
     const searchObj = Object.assign(
       {},
@@ -407,8 +390,7 @@ class Datasets extends Component {
     *  @param {} -
     *  forces state update ad sets to local view
   */
-  @boundMethod
-  _forceLocalView() {
+  _forceLocalView = () => {
     this.setState({
       selectedSection: 'local',
       showLoginPrompt: true,

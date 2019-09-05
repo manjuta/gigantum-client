@@ -1,10 +1,7 @@
-// vendor
-import uuidv4 from 'uuid/v4';
 // store
 import {
   setUploadMessageUpdate,
   setUploadMessageRemove,
-  setWarningMessage,
 } from 'JS/redux/actions/footer';
 import {
   setFileBrowserLock,
@@ -81,14 +78,14 @@ const prepareUpload = (mutationData, component) => {
   */
   const finishedCallback = (response) => {
     window.removeEventListener('beforeunload', navigateConfirm);
-    setFileBrowserLock(false);
+    setFileBrowserLock(owner, name, false);
     setUploadMessageRemove('Completed Upload');
   };
 
   window.addEventListener('beforeunload', navigateConfirm);
   uploadInstance.startUpload(finishedCallback);
 
-  setFileBrowserLock(true);
+  setFileBrowserLock(owner, name, true);
   setUploadMessageUpdate('Storing secret file, 0% complete');
 };
 

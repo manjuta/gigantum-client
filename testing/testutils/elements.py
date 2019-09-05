@@ -77,6 +77,7 @@ class Auth0LoginElements(UiComponent):
     @property
     def auth0_lock_widget(self):
         return CssElement(self.driver, "form.auth0-lock-widget")
+
     @property
     def auth0_lock_button(self):
         return CssElement(self.driver, ".auth0-lock-social-button")
@@ -219,7 +220,7 @@ class EnvironmentElements(UiComponent):
 
     @property
     def package_name_input(self):
-        return CssElement(self.driver, "#packageNameInput")
+        return CssElement(self.driver, "input:nth-child(2)")
 
     @property
     def version_name_input(self):
@@ -227,11 +228,11 @@ class EnvironmentElements(UiComponent):
 
     @property
     def add_button(self):
-        return CssElement(self.driver,".AddPackageForm__entry-buttons")
+        return CssElement(self.driver, ".Btn__add")
 
     @property
     def install_packages_button(self):
-        return CssElement(self.driver, ".PackageQueue__buttons")
+        return CssElement(self.driver, ".PackageQueue__buttons > .Btn:nth-child(2)")
 
     @property
     def package_info_table_version_one(self):
@@ -259,94 +260,86 @@ class EnvironmentElements(UiComponent):
 
     @property
     def package_manager_dropdown(self):
-        return CssElement(self.driver,".Dropdown")
+        return CssElement(self.driver, ".Dropdown")
 
     @property
     def conda_package_manager_dropdown(self):
-        return CssElement(self.driver,".Dropdown__item:nth-child(2)")
+        return CssElement(self.driver, ".Dropdown__item:nth-child(2)")
 
     @property
     def apt_package_manager_dropdown(self):
-        return CssElement(self.driver,".Dropdown__item:nth-child(3)")
+        return CssElement(self.driver, ".Dropdown__item:nth-child(3)")
 
     @property
     def close_install_window(self):
-        return CssElement(self.driver,".align-self--end:nth-child(3)")
+        return CssElement(self.driver, ".align-self--end:nth-child(3)")
 
-    def get_all_versions(self):
-        versions=[]
-        versions.append(self.package_info_table_version_one.wait().text)
-        versions.append(self.package_info_table_version_two.wait().text)
-        versions.append(self.package_info_table_version_three.wait().text)
-        versions.reverse()
-        return versions
+    @property
+    def specify_version_button(self):
+        return CssElement(self.driver, ".Radio.flex.relative .align-self--center")
 
+    @property
+    def specify_version_textbox(self):
+        return CssElement(self.driver, "input:nth-child(3)")
 
-    def add_pip_packages(self, *pip_packages):
-        logging.info("Adding pip packages")
+    @property
+    def advanced_configuration_button(self):
+        return CssElement(self.driver, ".Btn__advanced")
+
+    def specify_package_version(self, version):
+        self.specify_version_button.click()
+        self.specify_version_textbox.find().send_keys(version)
+
+    def open_add_packages_window(self):
         self.environment_tab_button.wait().click()
         self.driver.execute_script("window.scrollBy(0, -400);")
         self.driver.execute_script("window.scrollBy(0, 400);")
         self.add_packages_button.wait().click()
-        for pip_pack in pip_packages:
-            logging.info(f"Adding pip package {pip_pack}")
-            self.package_name_input.find().send_keys(pip_pack)
-            self.add_button.wait().click()
-        # Added sleep to wait for packages to finish validating
-        time.sleep(6)
-        self.install_packages_button.wait(10).click()
-        self.close_install_window.wait().click()
-        time.sleep(1)
-        project_control = ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(120)
 
-    def add_conda_packages(self, *conda_packages):
-        logging.info("Adding conda packages")
-        self.environment_tab_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, -400);")
-        self.driver.execute_script("window.scrollBy(0, 400);")
-        self.add_packages_button.wait().click()
+    def add_pip_package(self, pip_package, version):
+        logging.info(f"Adding pip package {pip_package}")
+        self.package_name_input.find().send_keys(pip_package)
+        self.specify_package_version(version)
+        self.add_button.wait().click()
+
+    def add_conda_package(self, conda_package, version):
         self.package_manager_dropdown.wait().click()
         self.conda_package_manager_dropdown.wait().click()
-        for con_pack in conda_packages:
-            logging.info(f"Adding conda package {con_pack}")
-            self.package_name_input.find().send_keys(con_pack)
-            self.add_button.wait().click()
-        # conda packages tend to take longer to validate than pip
-        time.sleep(10)
-        self.install_packages_button.wait(10).click()
-        self.close_install_window.wait().click()
-        time.sleep(1)
-        project_control = ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(240)
+        logging.info(f"Adding conda package {conda_package}")
+        self.package_name_input.find().send_keys(conda_package)
+        self.specify_package_version(version)
+        self.add_button.wait().click()
 
-
-    '''Timing should be adjusted before use
-     should be reintroduced when apt functions properly
-    def add_apt_packages(self, *apt_packages):
-        logging.info("Adding conda packages")
-        self.environment_tab_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, -400);")
-        self.driver.execute_script("window.scrollBy(0, 400);")
-        self.add_packages_button.wait().click()
+    def add_apt_package(self, apt_package):
         self.package_manager_dropdown.wait().click()
-        self.conda_package_manager_dropdown.wait().click()
-        for con_pack in con_packages:
-            logging.info(f"Adding conda package {con_pack}")
-            self.package_name_input.find().send_keys(con_pack)
-            self.add_button.wait().click()
-        time.sleep(10)
-        self.install_packages_button.wait(10).click()
+        self.apt_package_manager_dropdown.wait().click()
+        logging.info(f"Adding apt package {apt_package}")
+        self.package_name_input.find().send_keys(apt_package)
+        self.add_button.wait().click()
+
+    def install_queued_packages(self, timeout_sec):
+        logging.info('Waiting for packages to validate')
+        for i in range(timeout_sec):
+            time.sleep(1)
+            content = self.driver.find_element_by_css_selector('.PackageQueue__buttons > .Btn:nth-child(2)')
+            if content.is_enabled():
+                break
+        else:
+            logging.error('Packages took too long to validate')
+            raise NoSuchElementException('Packages took too long to validate')
+        logging.info('Installing packages')
+        self.install_packages_button.click()
+        time.sleep(5)
         self.close_install_window.wait().click()
-        container_elts = ContainerElements(self.driver)
-        container_elts.container_status_stopped.wait(60)
-    '''
+        project_control = ProjectControlElements(self.driver)
+        project_control.container_status_stopped.wait(timeout_sec)
 
     def add_custom_docker_instructions(self, docker_instruction):
         logging.info("Adding custom Docker instruction")
         self.environment_tab_button.wait().click()
         time.sleep(2)
         self.driver.execute_script("window.scrollBy(0, 600);")
+        self.advanced_configuration_button.wait().click()
         self.custom_docker_edit_button.find().click()
         time.sleep(2)
         self.custom_docker_text_input.find().send_keys(docker_instruction)
@@ -371,8 +364,6 @@ class JupyterLabElements(UiComponent):
     @property
     def code_output(self):
         return CssElement(self.driver, ".jp-OutputArea-output>pre")
-
-
 
 
 class RStudioElements(UiComponent):
@@ -430,13 +421,35 @@ class ImportProjectElements(UiComponent):
     def overview_tab(self):
         return CssElement(self.driver, "#overview")
 
+    @property
+    def import_project_drop_box(self):
+        return CssElement(self.driver,'.DropZone')
+
+    @property
+    def first_project_card_title(self):
+        return self.driver.find_element_by_css_selector('.LocalLabbooks__panel-title')
+
     def import_project_via_url(self, project_url):
         self.import_existing_button.wait().click()
         self.project_url_input.find().send_keys(project_url)
+        try:
+            file_browser_elts = FileBrowserElements(self.driver)
+            file_browser_elts.close_notification_menu_button.click()
+        except e as exception:
+            logging.warning(f'Could not close notification window: {e}')
         self.import_button.wait().click()
         self.overview_tab.wait(90)
         # Wait to ensure that the container changes from stopped to building
         time.sleep(5)
+
+    def import_project_drag_and_drop(self,filepath):
+        logging.info("Dragging and dropping a file into the drop zone")
+        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
+            js_script = js_file.read()
+        file_input = self.driver.execute_script(js_script, self.import_project_drop_box.find(), 0, 0)
+        file_input.send_keys(filepath)
+        self.import_button.wait().click()
+        self.overview_tab.wait(90)
 
 
 class DatasetElements(UiComponent):
@@ -458,7 +471,7 @@ class DatasetElements(UiComponent):
 
     @property
     def dataset_continue_button(self):
-        return CssElement(self.driver, ".WizardModal__buttons .Btn--last")
+        return CssElement(self.driver, ".ButtonLoader")
 
     @property
     def gigantum_cloud_button(self):
@@ -491,7 +504,7 @@ class DatasetElements(UiComponent):
 
     @property
     def sync_button(self):
-        return CssElement(self.driver, 'button[data-tooltip="Sync"]')
+        return CssElement(self.driver, 'button[data-tooltip="Sync changes to Gigantum Hub"]')
 
     @property
     def publish_confirm_button(self):
@@ -503,10 +516,10 @@ class DatasetElements(UiComponent):
         """
         logging.info("Publish dataset to cloud")
         self.publish_dataset_button.wait().click()
-        time.sleep(1)
+        # TODO: figure out why this breaks if time.sleep is lowered
+        time.sleep(5)
         self.publish_confirm_button.wait().click()
-        time.sleep(2)
-        self.sync_button.wait()
+        self.sync_button.wait(30)
         dss = list_remote_datasets()
         owner, name = self.title().text.split('/')
         owner = owner.strip()
@@ -599,6 +612,8 @@ class BranchElements(UiComponent):
     def merge_alternate_branch(self):
         """ Merge the alternate branch into the current branch """
         logging.info("Merging alternate branch into current branch")
+        project_control= ProjectControlElements(self.driver)
+        project_control.container_status_stopped.wait(30)
         self.manage_branches_button.wait().click()
         branch_container_hover = ActionChains(self.driver).move_to_element(self.manage_branches_branch_container.find())
         branch_container_hover.perform()
@@ -651,11 +666,11 @@ class CloudProjectElements(UiComponent):
 
     @property
     def sync_cloud_project_message(self):
-        return CssElement(self.driver, ".Footer__message-item>p")
+        return CssElement(self.driver, ".Footer__messageList")
 
     @property
     def delete_cloud_project_button(self):
-        return CssElement(self.driver, ".Button__icon--delete")
+        return CssElement(self.driver,".Card:nth-child(1) .Btn__dashboard--delete")
 
     @property
     def delete_cloud_project_input(self):
@@ -671,11 +686,11 @@ class CloudProjectElements(UiComponent):
 
     @property
     def first_cloud_project(self):
-        return CssElement(self.driver, ".RemoteLabbooks__panel-title span span")
+        return CssElement(self.driver, ".RemoteLabbooks__panel-title > span > span")
 
     @property
     def import_first_cloud_project_button(self):
-        return CssElement(self.driver, ".Button__icon--cloud-download")
+        return CssElement(self.driver,".Card:nth-child(1) .Btn__dashboard--cloud-download")
 
     @property
     def project_overview_project_title(self):
@@ -737,7 +752,7 @@ class CloudProjectElements(UiComponent):
         side_bar_elts = SideBarElements(self.driver)
         side_bar_elts.projects_icon.find().click()
         self.cloud_tab.wait().click()
-        self.first_cloud_project.wait()
+        self.first_cloud_project.wait(20)
         self.delete_cloud_project_button.find().click()
         self.delete_cloud_project_input.wait().send_keys(project_title)
         self.delete_cloud_project_confirm_button.wait().click()
@@ -766,7 +781,7 @@ class ProjectControlElements(UiComponent):
         self.devtool_launch_button.wait().click()
         self.open_devtool_tab(tool_name)
 
-    def open_devtool_tab(self, tool_name='dev tool') -> None:
+    def open_devtool_tab(self, tool_name) -> None:
         """Wait for a new tab, then switch to it
         tool_name:
             Name of the dev tool, used only in Exception message
@@ -801,10 +816,6 @@ class FileBrowserElements(UiComponent):
         return CssElement(self.driver, "#data")
 
     @property
-    def file_browser_empty(self):
-        return CssElement(self.driver, ".FileBrowser__empty")
-
-    @property
     def file_browser_area(self):
         return CssElement(self.driver, ".FileBrowser")
 
@@ -818,7 +829,7 @@ class FileBrowserElements(UiComponent):
 
     @property
     def delete_file_button(self):
-        return CssElement(self.driver, ".FileBrowser__multiselect>.Btn__delete")
+        return CssElement(self.driver, ".Btn__delete-white")
 
     @property
     def confirm_delete_file_button(self):
@@ -834,13 +845,23 @@ class FileBrowserElements(UiComponent):
 
     @property
     def link_dataset_button(self):
-        return CssElement(self.driver, 'button[data-tooltip="Link Dataset"]')
+        return CssElement(self.driver, ".Btn__FileBrowserAction--link")
+
+    def is_file_browser_empty(self):
+        return CssElement(self.driver, ".Dropbox--menu").contains_text('Drag and drop files here')
+
+    @property
+    def close_notification_menu_button(self):
+        return CssElement(self.driver, ".Footer__disc-button")
 
     def drag_drop_file_in_drop_zone(self, file_content="Sample Text"):
         logging.info("Dragging and dropping a file into the drop zone")
         with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
             js_script = js_file.read()
-        file_path = "/tmp/sample-upload.txt"
+        if os.name == 'nt':
+            file_path = "C:\\tmp\\sample-upload.txt"
+        else:
+            file_path = "/tmp/sample-upload.txt"
         with open(file_path, "w") as example_file:
             example_file.write(file_content)
         file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
@@ -851,12 +872,14 @@ class FileBrowserElements(UiComponent):
         logging.info("Linking the dataset to project")
         self.input_data_tab.wait().click()
         project_control = ProjectControlElements(self.driver)
+        time.sleep(5)
         project_control.container_status_stopped.wait(120)
         self.link_dataset_button.wait().click()
         time.sleep(4)
         self.driver.find_element_by_css_selector(".LinkCard__details").click()
         time.sleep(4)
         wait = WebDriverWait(self.driver, 200)
+        self.close_notification_menu_button.wait().click()
         wait.until(expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, ".Footer__message-title")))
         self.driver.find_element_by_css_selector(".ButtonLoader ").click()
         # wait the linking window to disappear

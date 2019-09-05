@@ -26,7 +26,7 @@ class PublishMutations {
   _publishLabbook(data, callback) {
     const {
       owner,
-      labbookName,
+      name,
       labbookId,
     } = this.state;
     const {
@@ -37,7 +37,7 @@ class PublishMutations {
 
     PublishLabbookMutation(
       owner,
-      labbookName,
+      name,
       labbookId,
       setPublic,
       successCall,
@@ -52,8 +52,8 @@ class PublishMutations {
     * pass above props to state
     */
   _publishDataset(data, callback) {
-    const { owner } = this.state;
     const {
+      datasetOwner,
       datasetName,
       setPublic,
       successCall,
@@ -61,7 +61,7 @@ class PublishMutations {
     } = data;
 
     PublishDatasetMutation(
-      owner,
+      datasetOwner,
       datasetName,
       setPublic,
       successCall,
@@ -81,7 +81,7 @@ class PublishMutations {
   _modifyDatasetLink(data, callback) {
     const {
       owner,
-      labbookName,
+      name,
     } = this.state;
     const {
       datasetOwner,
@@ -92,7 +92,7 @@ class PublishMutations {
 
     ModifyDatasetLinkMutation(
       owner,
-      labbookName,
+      name,
       datasetOwner,
       datasetName,
       linkType,
@@ -109,7 +109,7 @@ class PublishMutations {
   _buildImage(data, callback) {
     const {
       owner,
-      labbookName,
+      name,
     } = this.state;
     const {
       noCache,
@@ -117,7 +117,7 @@ class PublishMutations {
 
     BuildImageMutation(
       owner,
-      labbookName,
+      name,
       noCache,
       callback,
     );

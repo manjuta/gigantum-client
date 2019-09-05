@@ -1,7 +1,10 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
 // redux store
 import { setErrorMessage } from 'JS/redux/actions/footer';
@@ -15,8 +18,6 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
-
 export default function CancelBuildMutation(
   owner,
   labbookName,
@@ -26,10 +27,9 @@ export default function CancelBuildMutation(
     input: {
       labbookName,
       owner,
-      clientMutationId: tempID,
+      clientMutationId: uuidv4(),
     },
   };
-  tempID += 1;
   commitMutation(
     environment,
     {
@@ -44,11 +44,6 @@ export default function CancelBuildMutation(
         callback(response, error);
       },
       onError: err => console.error(err),
-
-      updater: (store) => {
-
-
-      },
     },
   );
 }

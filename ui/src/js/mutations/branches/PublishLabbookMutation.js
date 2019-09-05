@@ -1,11 +1,15 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
-import FooterUtils from 'Components/common/footer/FooterUtils';
+// environment
+import environment from 'JS/createRelayEnvironment';
+// redux
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/actions/footer';
+// utils
+import FooterUtils from 'Components/common/footer/FooterUtils';
 import footerCallback from 'Components/common/footer/utils/PublishLabbook';
 
 const mutation = graphql`
@@ -16,8 +20,6 @@ const mutation = graphql`
     }
   }
 `;
-
-let tempID = 0;
 
 export default function PublishLabbookMutation(
   owner,
@@ -33,7 +35,7 @@ export default function PublishLabbookMutation(
       setPublic,
       owner,
       labbookName,
-      clientMutationId: tempID++,
+      clientMutationId: uuidv4(),
     },
   };
   const id = uuidv4();

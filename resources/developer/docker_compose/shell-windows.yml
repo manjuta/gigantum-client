@@ -9,9 +9,9 @@ services:
       - "10001:10001"
       - "10002:10002"
     volumes:
-      - {% WORKING_DIR %}:/mnt/gigantum:cached
-      - //var/run/docker.sock:/var/run/docker.sock
-      - {% GTM_DIR %}:/opt/project/:cached
+      - {% WORKING_DIR %}:/mnt/gigantum
+      - /var/run/docker.sock:/var/run/docker.sock
+      - {% GTM_DIR %}:/opt/project
       - labmanager_share_vol:/mnt/share
       - {% HELPER_SCRIPT %}:/opt/setup.sh
     environment:

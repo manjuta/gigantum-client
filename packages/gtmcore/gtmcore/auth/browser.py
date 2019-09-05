@@ -88,7 +88,7 @@ class BrowserIdentityManager(IdentityManager):
         self.user.family_name = self._get_profile_attribute(token_payload, "family_name", required=False)
 
         # Check if it's the first time this user has logged into this instance
-        self._check_first_login(self.user.username, access_token)
+        self._check_first_login(self.user.username, access_token, id_token)
 
         return self.user
 

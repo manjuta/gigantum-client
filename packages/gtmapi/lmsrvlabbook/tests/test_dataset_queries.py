@@ -1,14 +1,16 @@
-import pytest
 import os
 import aniso8601
 import time
 import datetime
-
 from snapshottest import snapshot
+import shutil
+
+from lmsrvcore.caching import DatasetCacheController
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_dataset_populated_scoped, fixture_working_dir
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
+from gtmcore.fixtures import _MOCK_create_remote_repo2
 
 
 class TestDatasetQueries(object):
@@ -217,6 +219,8 @@ class TestDatasetQueries(object):
         ds.git.add_all()
         ds.git.commit("Changing the repo")
 
+        DatasetCacheController().clear_all()
+
         # Run query again
         snapshot.assert_match(fixture_working_dir_dataset_populated_scoped[2].execute(query))
 
@@ -360,6 +364,8 @@ class TestDatasetQueries(object):
         ds.git.add_all()
         ds.git.commit("testing")
 
+        DatasetCacheController().clear_all()
+
         r = fixture_working_dir_dataset_populated_scoped[2].execute(modified_query)
         assert 'errors' not in r
         d = r['data']['dataset']['modifiedOnUtc']
@@ -372,7 +378,7 @@ class TestDatasetQueries(object):
         assert modified_on_2 > modified_on_1
 
     def test_get_commits_behind(self, fixture_working_dir):
-        """Test temporar field commitsBehind on dataset objects"""
+        """Test temporary field commitsBehind on dataset objects"""
         im = InventoryManager(fixture_working_dir[0])
         ds = im.create_dataset("default", "default", "test-ds", "gigantum_object_v1",
                                description="my first dataset",
@@ -405,3 +411,88 @@ class TestDatasetQueries(object):
         assert 'errors' not in r
         assert r['data']['labbook']['linkedDatasets'][0]['name'] == 'test-ds'
         assert r['data']['labbook']['linkedDatasets'][0]['commitsBehind'] == 1
+
+    def test_get_commits_ahead(self, fixture_working_dir, snapshot):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+
+        query = """
+                {
+                  dataset(owner: "default", name:"dataset100") {
+                      name
+                      commitsBehind
+                      commitsAhead                    
+                  }
+                }
+                """
+
+        # Should be 0 as its unpublished
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['dataset']['name'] == 'dataset100'
+        assert r['data']['dataset']['commitsBehind'] == 0
+        assert r['data']['dataset']['commitsAhead'] == 0
+
+        # Fake publish to a local bare repo
+        _MOCK_create_remote_repo2(ds, 'default', None, None)
+
+        query = """
+                {
+                  dataset(owner: "default", name:"dataset100") {
+                      name
+                      commitsBehind
+                      commitsAhead                    
+                  }
+                }
+                """
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['dataset']['name'] == 'dataset100'
+        assert r['data']['dataset']['commitsBehind'] == 0
+        assert r['data']['dataset']['commitsAhead'] == 0
+
+        ds.write_readme("make an edit")
+
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['dataset']['name'] == 'dataset100'
+        assert r['data']['dataset']['commitsBehind'] == 0
+        assert r['data']['dataset']['commitsAhead'] == 1
+
+    def test_get_commits_ahead_null_after_deleted_remote(self, fixture_working_dir, snapshot):
+        im = InventoryManager(fixture_working_dir[0])
+        ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
+
+        # Fake publish to a local bare repo
+        _MOCK_create_remote_repo2(ds, 'default', None, None)
+
+        query = """
+                {
+                  dataset(owner: "default", name:"dataset100") {
+                      name
+                      commitsBehind
+                      commitsAhead                    
+                  }
+                }
+                """
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['dataset']['name'] == 'dataset100'
+        assert r['data']['dataset']['commitsBehind'] == 0
+        assert r['data']['dataset']['commitsAhead'] == 0
+
+        ds.write_readme("make an edit")
+
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['dataset']['name'] == 'dataset100'
+        assert r['data']['dataset']['commitsBehind'] == 0
+        assert r['data']['dataset']['commitsAhead'] == 1
+
+        shutil.rmtree(ds.remote)
+
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' in r
+        assert r['data']['dataset']['name'] == 'dataset100'
+        assert r['data']['dataset']['commitsBehind'] is None
+        assert r['data']['dataset']['commitsAhead'] is None

@@ -5,23 +5,26 @@ import classNames from 'classnames';
 import DetailRecords from './DetailRecords';
 
 
-export default class ActivityDefaultList extends Component {
-  constructor(props) {
-    super(props);
+const showDetail = (props) => {
+  const { categorizedDetails, itemKey } = props;
+  return (categorizedDetails.detailObjects[itemKey][0].show);
+};
 
-    this.state = {
-      show: props.categorizedDetails.detailObjects[props.itemKey][0].show,
-      showDetails: props.show,
-    };
-    this._toggleDetailsList = this._toggleDetailsList.bind(this);
-  }
+export default class ActivityDefaultList extends Component {
+  state = {
+    show: showDetail(this.props),
+    showDetails: this.props.show,
+  };
 
   /**
   *   @param {}
   *  reverse state of showExtraInfo
   */
   _toggleDetailsList = () => {
-    this.setState({ show: !this.state.show });
+    this.setState((state) => {
+      const show = !state.show;
+      return { show };
+    });
   }
 
   /**
@@ -40,7 +43,7 @@ export default class ActivityDefaultList extends Component {
     formats key into a title
     @return {string}
   */
-  _formatTitle(key) {
+  _formatTitle = (key) => {
     const { props } = this;
     const tempTitle = key.split('_').join(' ') && key.split('_').join(' ').toLowerCase();
     let title = tempTitle.charAt(0) && tempTitle.charAt(0).toUpperCase() + tempTitle.slice(1);
@@ -52,6 +55,7 @@ export default class ActivityDefaultList extends Component {
     const { props, state } = this;
     const keys = props.categorizedDetails.detailKeys[props.itemKey];
     const type = props.categorizedDetails.detailObjects[props.itemKey][0].type.toLowerCase();
+    // decalre css here
     const activityDetailsCSS = classNames({
       ActivityDetail__details: true,
       note: type === 'note',
@@ -87,6 +91,8 @@ export default class ActivityDefaultList extends Component {
               <DetailRecords
                 keys={keys}
                 sectionType={props.sectionType}
+                owner={props.owner}
+                name={props.name}
               />
             </div>
           )

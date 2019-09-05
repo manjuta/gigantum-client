@@ -1,8 +1,10 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
 import uuidV4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
@@ -53,8 +55,6 @@ export default function ResetBranchToRemoteMutation(
         callback(response, error);
       },
       onError: (err) => { console.error(err); },
-      updater: (store, response) => {
-      },
     },
   );
 }

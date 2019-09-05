@@ -1,8 +1,11 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
 import RelayRuntime from 'relay-runtime';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
 
 
@@ -15,7 +18,26 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
+
+function sharedUpdater(store, datasetID, deletedID, connectionKey) {
+  const userProxy = store.get(datasetID);
+
+  const conn = RelayRuntime.ConnectionHandler.getConnection(
+    userProxy,
+    connectionKey,
+  );
+
+  if (conn) {
+    RelayRuntime.ConnectionHandler.deleteNode(
+      conn,
+      deletedID,
+    );
+  }
+
+  if (store.get(deletedID)) {
+    store.delete(deletedID);
+  }
+}
 
 export default function DeleteDatasetFilesMutation(
   connectionKey,
@@ -32,29 +54,9 @@ export default function DeleteDatasetFilesMutation(
       datasetOwner,
       datasetName,
       keys,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: uuidv4(),
     },
   };
-
-  function sharedUpdater(store, datasetID, deletedID, connectionKey) {
-    const userProxy = store.get(datasetID);
-
-    const conn = RelayRuntime.ConnectionHandler.getConnection(
-      userProxy,
-      connectionKey,
-    );
-
-    if (conn) {
-      RelayRuntime.ConnectionHandler.deleteNode(
-        conn,
-        deletedID,
-      );
-    }
-
-    if (store.get(deletedID)) {
-      store.delete(deletedID);
-    }
-  }
 
   commitMutation(
     environment,

@@ -82,11 +82,11 @@ class TestDataloaderPackage(object):
         assert version_list[0].description == 'A set of tools to manipulate climate data'
         assert version_list[0].docs_url == 'http://anaconda.org/conda-forge/cdutil'
 
-        assert version_list[1].latest_version == "2.9.2"
+        assert version_list[1].latest_version == "2.9.3"
         assert version_list[1].description == 'Python interface to coveralls.io API\\n'
         assert version_list[1].docs_url == 'http://anaconda.org/conda-forge/python-coveralls'
 
-        assert version_list[2].latest_version == "3.2.5"
+        assert version_list[2].latest_version == "3.4.4"
         assert version_list[2].description == 'Natural Language Toolkit'
         assert version_list[2].docs_url == 'http://www.nltk.org/'
 
@@ -109,11 +109,11 @@ class TestDataloaderPackage(object):
         assert version_list[0].description == 'A set of tools to manipulate climate data'
         assert version_list[0].docs_url == 'http://anaconda.org/conda-forge/cdutil'
 
-        assert version_list[1].latest_version == "2.9.2"
+        assert version_list[1].latest_version == "2.9.3"
         assert version_list[1].description == 'Python interface to coveralls.io API\\n'
         assert version_list[1].docs_url == 'http://anaconda.org/conda-forge/python-coveralls'
 
-        assert version_list[2].latest_version == "3.2.5"
+        assert version_list[2].latest_version == "3.4.4"
         assert version_list[2].description == 'Natural Language Toolkit'
         assert version_list[2].docs_url == 'http://www.nltk.org/'
 
@@ -139,7 +139,7 @@ class TestDataloaderPackage(object):
         assert version_list[2].description == 'Package 1 for Gigantum Client unit testing.'
         assert version_list[2].docs_url == 'https://github.com/gigantum/gigantum-client'
 
-        assert version_list[3].latest_version == '3.2.5'
+        assert version_list[3].latest_version == '3.4.4'
         assert version_list[3].description == 'Natural Language Toolkit'
         assert version_list[3].docs_url == 'http://www.nltk.org/'
 

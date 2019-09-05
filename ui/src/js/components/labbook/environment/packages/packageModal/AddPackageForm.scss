@@ -24,14 +24,15 @@
 }
 
 .AddPackageForm__version {
+  input {
+    padding: 0 10px !important;
+  }
   &-title {
-    margin-right: 20px;
-    margin-left: 69px;
+    margin-right: 89px;
   }
   &--active {
     input {
       background: $white;
-      padding: 0 10px !important;
     }
   }
 }

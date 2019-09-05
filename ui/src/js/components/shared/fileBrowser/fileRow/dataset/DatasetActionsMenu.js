@@ -13,9 +13,8 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 import './DatasetActionsMenu.scss';
 
 export default class DatasetActionsMenu extends Component {
-
   state = {
-    showSessionValidMessage: false,
+    fileDownloading: false,
   }
 
   /**
@@ -24,10 +23,11 @@ export default class DatasetActionsMenu extends Component {
   *  @return {}
   */
   _unlinkDataset = () => {
+    const { props } = this;
     const labbookOwner = store.getState().routes.owner;
     const { labbookName } = store.getState().routes;
-    const datasetOwner = this.props.edge.node.owner;
-    const { datasetName } = this.props.edge.node;
+    const datasetOwner = props.edge.node.owner;
+    const { datasetName } = props.edge.node;
 
     this.setState({ buttonState: 'loading' });
 
@@ -58,7 +58,7 @@ export default class DatasetActionsMenu extends Component {
       edges: [props.edge],
     };
 
-    props.mutations.deleteLabbookFiles(deleteFileData, (reponse) => {});
+    props.mutations.deleteLabbookFiles(deleteFileData, () => {});
 
     this._togglePopup(evt, false);
   }
@@ -79,6 +79,7 @@ export default class DatasetActionsMenu extends Component {
    *  @return {}
    */
   _downloadFile = (isLocal) => {
+    // TODO break up this function
     const { props, state } = this;
     UserIdentity.getUserIdentity().then((response) => {
       const isSessionValid = response.data && response.data.userIdentity && response.data.userIdentity.isSessionValid;
@@ -89,10 +90,11 @@ export default class DatasetActionsMenu extends Component {
         const searchChildren = (parent) => {
           if (parent.children) {
             Object.keys(parent.children).forEach((childKey) => {
-              if (parent.children[childKey].edge) {
-                if (!parent.children[childKey].edge.node.isDir) {
-                  let key = parent.children[childKey].edge.node.key;
-                  if (this.props.section !== 'data') {
+              const child = parent.children[childKey];
+              if (child.edge) {
+                if (!child.edge.node.isDir) {
+                  let { key } = child.edge.node;
+                  if (props.section !== 'data') {
                     const splitKey = key.split('/');
                     key = splitKey.slice(1, splitKey.length).join('/');
                   }

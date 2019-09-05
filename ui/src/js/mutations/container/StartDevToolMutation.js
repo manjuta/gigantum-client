@@ -1,7 +1,10 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
 
 const mutation = graphql`
@@ -12,9 +15,6 @@ const mutation = graphql`
     }
   }
 `;
-
-let tempID = 0;
-
 
 export default function AddEnvironmentPackageMutation(
   owner,
@@ -28,7 +28,7 @@ export default function AddEnvironmentPackageMutation(
       owner,
       devTool,
       containerOverrideId: null,
-      clientMutationId: tempID++,
+      clientMutationId: uuidv4(),
     },
   };
   commitMutation(

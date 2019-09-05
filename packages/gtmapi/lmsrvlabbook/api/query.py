@@ -26,7 +26,6 @@ from lmsrvlabbook.api.connections.environment import BaseComponentConnection
 from lmsrvlabbook.api.connections.jobstatus import JobStatusConnection
 from lmsrvlabbook.api.objects.datasettype import DatasetType
 from lmsrvlabbook.api.objects.dataset import Dataset
-from lmsrvlabbook.api.objects.apphealth import AppHealthMonitor
 
 logger = LMLogger.get_logger()
 
@@ -54,8 +53,6 @@ class AppQueries(graphene.ObjectType):
 
     # Get the current logged in user identity, primarily used when running offline
     user_identity = graphene.Field(UserIdentity)
-
-    app_health = graphene.Field(AppHealthMonitor)
 
     def resolve_build_info(self, info):
         """Return this LabManager build info (hash, build timestamp, etc)"""
@@ -117,9 +114,6 @@ class AppQueries(graphene.ObjectType):
         """
         return UserIdentity()
 
-    def resolve_app_health(self, info):
-        return AppHealthMonitor()
-
 
 class LabbookQuery(AppQueries, graphene.ObjectType):
     """Entry point for all LabBook queryable fields"""
@@ -151,7 +145,7 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
     def resolve_nodes(self, info, ids):
         return [graphene.relay.Node.get_node_from_global_id(info, x) for x in ids]
 
-    def resolve_labbook(self, info, owner: str, name: str):
+    def resolve_labbook(self, info, owner, name):
         """Method to return a graphene Labbook instance based on the name
 
         Uses the "currently logged in" user
@@ -259,7 +253,7 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
             remote = remote_config.get('git_remote')
 
         # Get collaborators from remote service
-        mgr = GitLabManager(remote, auth_service, flask.g.access_token)
+        mgr = GitLabManager(remote, auth_service, flask.g.access_token, flask.g.id_token)
         if mgr.repository_exists(logged_in_username, name):
             return False
 

@@ -10,6 +10,7 @@ export const UPDATE_ALL = 'UPDATE_ALL';
  * datasets
  */
 export const SET_IS_PROCESSING = 'SET_IS_PROCESSING';
+export const SET_IS_SYNCHING = 'SET_IS_SYNCHING';
 
 /**
  * environment
@@ -41,8 +42,8 @@ export const IS_LOOKING_UP_PACKAGES = 'IS_LOOKING_UP_PACKAGES';
 /**
  * labboook
  */
+export const INITIATE_NAMESPACE = 'INITIATE_NAMESPACE';
 export const INITIALIZE = 'INITIALIZE';
-export const RESET_LABBOOK_STORE = 'RESET_LABBOOK_STORE';
 export const IS_BUILDING = 'IS_BUILDING';
 export const IS_SYNCING = 'IS_SYNCING';
 export const IS_UPLOADING = 'IS_UPLOADING';

@@ -1,10 +1,14 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
-import environment from 'JS/createRelayEnvironment';
 import uuidv4 from 'uuid/v4';
+// environment
+import environment from 'JS/createRelayEnvironment';
+// redux
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
+// utils
 import FooterUtils from 'Components/common/footer/FooterUtils';
 import footerCallback from 'Components/common/footer/utils/SyncDataset';
 
@@ -16,8 +20,6 @@ const mutation = graphql`
     }
   }
 `;
-
-let tempID = 0;
 
 export default function SyncDatasetMutation(
   owner,
@@ -33,7 +35,7 @@ export default function SyncDatasetMutation(
       owner,
       datasetName,
       pullOnly,
-      clientMutationId: tempID++,
+      clientMutationId: uuidv4(),
     },
     first: 10,
     cursor: null,

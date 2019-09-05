@@ -1,7 +1,6 @@
 // vendor
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
-import { boundMethod } from 'autobind-decorator';
 import { connect } from 'react-redux';
 // store
 import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
@@ -22,7 +21,7 @@ const getSubText = (isComplete, error, cancelingBuild) => {
   subText = error ? 'Environment Build Failed' : subText;
   subText = cancelingBuild ? 'Build Canceled' : subText;
   return subText;
-}
+};
 
 
 class BuildProgress extends Component {
@@ -30,6 +29,7 @@ class BuildProgress extends Component {
     showBuild: this.props.keepOpen,
     cancelingBuild: false,
   }
+
   /** *
   * @param {}
   * sets mounted to true for component
@@ -50,8 +50,7 @@ class BuildProgress extends Component {
   *  @param {Boolean} showBuild
   *  sets entry method state
   */
-  @boundMethod
-  _setShowbuild(showBuild) {
+  _setShowbuild = (showBuild) => {
     this.setState({ showBuild });
   }
 
@@ -61,13 +60,14 @@ class BuildProgress extends Component {
   */
   _cancelBuild = () => {
     const { props } = this;
+    const { owner, name } = props;
     const callback = () => {
       setTimeout(() => {
-        setBuildingState(false);
+        setBuildingState(owner, name, false);
       }, 3000);
     };
 
-    setBuildingState(true);
+    setBuildingState(owner, name, true);
     this.setState({ cancelingBuild: true });
     CancelBuildMutation(
       props.owner,
@@ -80,7 +80,7 @@ class BuildProgress extends Component {
     @param {}
     gets percentage for progress
   */
-  _getPercentageComplete() {
+  _getPercentageComplete = () => {
     const { props } = this;
     const { buildId, messageStackHistory } = props;
     const footerMessage = messageStackHistory.filter(message => message.id === buildId);
@@ -123,7 +123,12 @@ class BuildProgress extends Component {
       isComplete,
       error,
     } = this._getPercentageComplete();
-    const buildButtonText = state.showBuild ? 'Back' : 'View Build Ouput';
+    const buildButtonText = state.showBuild ? 'Back' : 'View Build Output';
+    const subText = getSubText(isComplete, error, state.cancelingBuild);
+    let { headerText } = props;
+    headerText = ((isComplete || state.cancelingBuild || error) && state.showBuild)
+      ? subText : headerText;
+    // decalre css here
     const headerCSS = classNames({
       'BuildProgress__header-text': true,
       'BuildProgress__header-text--completed': isComplete && state.showBuild,
@@ -139,11 +144,6 @@ class BuildProgress extends Component {
       'BuildProgress__text--completed': isComplete,
       'BuildProgress__text--failed': state.cancelingBuild || error,
     });
-    const subText = getSubText(isComplete, error, state.cancelingBuild);
-
-    let { headerText } = props;
-    headerText = ((isComplete || state.cancelingBuild || error) && state.showBuild)
-      ? subText : headerText;
 
     return (
       <div className="BuildProgress">
@@ -156,9 +156,7 @@ class BuildProgress extends Component {
             <div
               className="BuildProgress__output"
             >
-              <div
-                dangerouslySetInnerHTML={{ __html: message }}
-              />
+              <div dangerouslySetInnerHTML={{ __html: message }} />
             </div>
           )
         }

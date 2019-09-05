@@ -120,11 +120,7 @@
 
   .Overview__readme--editing-buttons {
     position: relative;
-    @include flex(center, row);
-
-    button {
-      margin: 0 10px;
-    }
+    @include flex(flex-end, row);
 
     .BranchMenu__menu-pointer{
       right: auto;
@@ -372,8 +368,10 @@
     color: $mineShaft;
   }
   .Overview__empty-action{
+
+    width: 120px;
     color: $azure;
-    text-decoration: underline;
+    align-self: center;
     cursor: pointer;
   }
 

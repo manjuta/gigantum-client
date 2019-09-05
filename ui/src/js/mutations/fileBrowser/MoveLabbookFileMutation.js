@@ -1,10 +1,13 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
 import RelayRuntime from 'relay-runtime';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
-
+// redux
 import { setErrorMessage } from 'JS/redux/actions/footer';
 
 const mutation = graphql`
@@ -24,8 +27,6 @@ const mutation = graphql`
     }
   }
 `;
-
-let tempID = 0;
 
 function sharedDeleteUpdater(store, labbookID, removeIds, connectionKey) {
   const labbookProxy = store.get(labbookID);
@@ -67,7 +68,7 @@ export default function MoveLabbookFileMutation(
       srcPath,
       dstPath,
       section,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: uuidv4(),
     },
   };
 
@@ -137,21 +138,21 @@ export default function MoveLabbookFileMutation(
       updater: (store, response) => {
         sharedDeleteUpdater(store, labbookId, removeIds, connectionKey);
         if (response && response.moveLabbookFile && response.moveLabbookFile.updatedEdges) {
-          response.moveLabbookFile.updatedEdges.forEach((edge) => {
+          response.moveLabbookFile.updatedEdges.forEach((labbookEdge) => {
             const labbookProxy = store.get(labbookId);
 
-            if (labbookProxy && (edge.node !== null)) {
+            if (labbookProxy && (labbookEdge.node !== null)) {
               const conn = RelayRuntime.ConnectionHandler.getConnection(
                 labbookProxy,
                 connectionKey,
               );
-              const node = store.get(edge.node.id) ? store.get(edge.node.id) : store.create(edge.node.id, 'LabbookFile');
+              const node = store.get(labbookEdge.node.id) ? store.get(labbookEdge.node.id) : store.create(labbookEdge.node.id, 'LabbookFile');
 
-              node.setValue(edge.node.id, 'id');
-              node.setValue(edge.node.isDir, 'isDir');
-              node.setValue(edge.node.key, 'key');
-              node.setValue(edge.node.modifiedAt, 'modifiedAt');
-              node.setValue(edge.node.size, 'size');
+              node.setValue(labbookEdge.node.id, 'id');
+              node.setValue(labbookEdge.node.isDir, 'isDir');
+              node.setValue(labbookEdge.node.key, 'key');
+              node.setValue(labbookEdge.node.modifiedAt, 'modifiedAt');
+              node.setValue(labbookEdge.node.size, 'size');
               const newEdge = RelayRuntime.ConnectionHandler.createEdge(
                 store,
                 conn,
@@ -161,7 +162,7 @@ export default function MoveLabbookFileMutation(
               RelayRuntime.ConnectionHandler.insertEdgeAfter(
                 conn,
                 newEdge,
-                edge.cursor,
+                labbookEdge.cursor,
               );
             }
           });

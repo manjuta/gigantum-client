@@ -6,17 +6,24 @@ import ActivityDetails from 'Components/shared/activity/ActivityDetails';
 // assets
 import './ActivityCard.scss';
 
+/**
+  @param {Object} props
+  logic if the card should show by default or not
+  @return {Boolean}
+*/
+const shouldShowDetails = (props) => {
+  const { node } = props.edge;
+  const { show, detailObjects } = node;
+  const detailsHasShow = detailObjects.filter(details => details.show).length !== 0;
+
+  return (show && detailsHasShow);
+};
+
 export default class ActivityCard extends Component {
-  constructor(props) {
-    super(props);
-
-    const showDetails = props.edge.node.show && props.edge.node.detailObjects.filter(details => details.show).length !== 0;
-
-    this.state = {
-      showExtraInfo: showDetails,
-      show: true,
-      isOver: false,
-    };
+  state = {
+    showExtraInfo: shouldShowDetails(this.props),
+    show: true,
+    isOver: false,
   }
 
   /**
@@ -25,7 +32,7 @@ export default class ActivityCard extends Component {
     inputs a time stamp and return the time of day HH:MM am/pm
     @return {string}
   */
-  _getTimeOfDay(timestamp) {
+  _getTimeOfDay = (timestamp) => {
     const time = (timestamp !== undefined) ? new Date(timestamp) : new Date();
     const hour = (time.getHours() % 12 === 0) ? 12 : time.getHours() % 12;
     const minutes = (time.getMinutes() > 9) ? time.getMinutes() : `0${time.getMinutes()}`;
@@ -39,11 +46,9 @@ export default class ActivityCard extends Component {
     * determines the appropriate margins for cards when compressing
     @return {object}
   */
-  _processCardStyle() {
+  _processCardStyle = () => {
     const activityCardStyle = {};
-
-
-    const { props, state } = this;
+    const { props } = this;
 
     if (props.isCompressed) {
       if (!props.isExpandedHead && !props.isExpandedEnd) {
@@ -67,54 +72,45 @@ export default class ActivityCard extends Component {
     return activityCardStyle;
   }
 
-
-  _expandCollapseSideBar(isOver) {
+  /**
+    @param {Boolean} isOver
+    sets state for side bar to compress on hover
+  */
+  _expandCollapseSideBar = (isOver) => {
     const { props } = this;
     props.compressExpanded(props.attachedCluster, !isOver);
 
     this.setState({ isOver });
   }
 
+  /**
+    @param {} isOver
+    toggles show and showExtraInfo
+  */
+  _toggleDetails = () => {
+    this.setState((state) => {
+      const show = !state.show;
+      const showExtraInfo = !state.showExtraInfo;
+      return { show, showExtraInfo };
+    });
+  }
 
   render() {
     const { props, state } = this;
-    const node = props.edge.node;
-
-
+    const { node } = props.edge;
     const type = node.type && node.type.toLowerCase();
+    const expandedHeight = props.attachedCluster
+      ? 110 * (props.attachedCluster.length - 1)
+      : 0;
+    const expandedBarHeight = state.isOver
+      ? expandedHeight - ((props.attachedCluster.length - 1) * 15)
+      : expandedHeight;
+    const margin = state.isOver
+      ? ((props.attachedCluster.length - 1) * 7.5)
+      : 0;
 
-    const activityCardCSS = classNames({
-      'ActivityCard card': state.showExtraInfo,
-      'ActivityCard ActivityCard--collapsed card': !state.showExtraInfo,
-      'ActivityCard--faded': props.hoveredRollback > props.position,
-      ActivityCard__expanded: props.isExpandedNode,
-      ActivityCard__compressed: props.isCompressed && !props.isExpandedEnd,
-    });
-
-
-    const titleCSS = classNames({
-      'ActivityCard__title flex flex--row justify--space-between': true,
-      open: state.showExtraInfo || (type === 'note' && state.show),
-      closed: !state.showExtraInfo || (type === 'note' && !state.show),
-    });
-
-
-    const expandedCSS = classNames({
-      ActivityCard__node: props.isExpandedNode && !props.isExpandedHead && !props.isExpandedEnd,
-      'ActivityCard__start-node': props.isExpandedHead,
-      'ActivityCard__end-node': props.isExpandedEnd,
-    });
-
-    const expandedHeight = props.attachedCluster ? 110 * (props.attachedCluster.length - 1) : 0;
-
-    const expandedBarHeight = state.isOver ? expandedHeight - ((props.attachedCluster.length - 1) * 15) : expandedHeight;
-
-    const margin = state.isOver ? ((props.attachedCluster.length - 1) * 7.5) : 0;
-
-    const expandedContainerStyle = props.attachedCluster && {
-      height: `${expandedHeight}px`,
-    };
-
+    // declare style here
+    const activityCardStyle = this._processCardStyle();
     const expandedStyle = props.attachedCluster && {
       height: `${expandedBarHeight}px`,
       margin: `${margin}px 0 0 0`,
@@ -123,12 +119,23 @@ export default class ActivityCard extends Component {
     if (props.isFirstCard && props.attachedCluster) {
       expandedStyle.top = '2px';
     }
+    // declare css here
+    const activityCardCSS = classNames({
+      'ActivityCard card': state.showExtraInfo,
+      'ActivityCard ActivityCard--collapsed card': !state.showExtraInfo,
+      'ActivityCard--faded': props.hoveredRollback > props.position,
+      ActivityCard__expanded: props.isExpandedNode,
+      ActivityCard__compressed: props.isCompressed && !props.isExpandedEnd,
+    });
+    const titleCSS = classNames({
+      'ActivityCard__title flex flex--row justify--space-between': true,
+      open: state.showExtraInfo || (type === 'note' && state.show),
+      closed: !state.showExtraInfo || (type === 'note' && !state.show),
+    });
 
-    const activityCardStyle = this._processCardStyle();
     return (
       <div className="ActivityCard__container column-1-span-9">
-
-        <div className={activityCardCSS} ref="card" style={activityCardStyle}>
+        <div className={activityCardCSS} style={activityCardStyle}>
 
           <div
             className={`ActivityCard__badge ActivityCard__badge--${type}`}
@@ -139,9 +146,8 @@ export default class ActivityCard extends Component {
 
             <div
               className={titleCSS}
-              onClick={() => this.setState({ show: !state.show, showExtraInfo: !state.showExtraInfo })}
+              onClick={() => this._toggleDetails()}
             >
-
               <div className="ActivityCard__stack">
 
                 <p className="ActivityCard__time">
@@ -155,19 +161,19 @@ export default class ActivityCard extends Component {
                 <b>{`${props.edge.node.username} - `}</b>
                 { props.edge.node.message }
               </h6>
-
             </div>
-
             {
-              (state.showExtraInfo && (type !== 'note' || state.show))
+              (state.showExtraInfo && ((type !== 'note') || state.show))
                 && (
-                <ActivityDetails
-                  sectionType={props.sectionType}
-                  edge={props.edge}
-                  show={state.showExtraInfo}
-                  key={`${node.id}_activity-details`}
-                  node={node}
-                />
+                  <ActivityDetails
+                    sectionType={props.sectionType}
+                    edge={props.edge}
+                    show={state.showExtraInfo}
+                    key={`${node.id}_activity-details`}
+                    node={node}
+                    owner={props.owner}
+                    name={props.name}
+                  />
                 )
             }
           </div>

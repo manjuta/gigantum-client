@@ -4,7 +4,6 @@ import {
   createPaginationContainer,
   graphql,
 } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
 // components
 import LocalDatasetPanel from 'Components/dashboard/datasets/localDatasets/LocalDatasetsPanel';
 import CardLoader from 'Components/dashboard/shared/loaders/CardLoader';
@@ -55,8 +54,7 @@ export class LocalDatasets extends Component {
     *  fires when user scrolls
     *  if nextPage exists and user is scrolled down, it will cause loadmore to fire
   */
-  @boundMethod
-  _captureScroll() {
+  _captureScroll = () => {
     const { props, state } = this;
     const root = document.getElementById('root');
     const distanceY = window.innerHeight + document.documentElement.scrollTop + 200;
@@ -74,8 +72,7 @@ export class LocalDatasets extends Component {
     *  @param {}
     *  loads more datasets using the relay pagination container
   */
-  @boundMethod
-  _loadMore() {
+  _loadMore = () => {
     const { props } = this;
     this.setState({
       isPaginating: true,
@@ -98,8 +95,7 @@ export class LocalDatasets extends Component {
     * @param {integer} count
     * attempts to fetch a demo if no datasets are present, 3 times
   */
-  @boundMethod
-  _fetchDemo(count = 0) {
+  _fetchDemo = (count = 0) => {
     const { props } = this;
     if (count < 3) {
       const self = this;
@@ -118,8 +114,7 @@ export class LocalDatasets extends Component {
     * @param {}
     * calls VisibilityLookup query and attaches the returned data to the state
     */
-  @boundMethod
-  _visibilityLookup() {
+  _visibilityLookup = () => {
     const { props } = this;
     const self = this;
     const idArr = props.localDatasets.localDatasets.edges.map(edges => edges.node.id);

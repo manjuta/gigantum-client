@@ -6,8 +6,6 @@ import ReactMarkdown from 'react-markdown';
 import CodeBlock from 'Components/labbook/renderers/CodeBlock';
 // environment
 import environment from 'JS/createRelayEnvironment';
-// store
-import store from 'JS/redux/store';
 // assets
 import './DetailRecords.scss';
 
@@ -48,18 +46,6 @@ query DetailRecordsDatasetsQuery($name: String!, $owner: String!, $keys: [String
 
 
 export default class UserNote extends Component {
-  constructor(props) {
-  	super(props);
-
-    const { owner, labbookName } = store.getState().routes;
-
-    this.state = {
-      owner,
-      labbookName,
-    };
-    this._setLinks = this._setLinks.bind(this);
-  }
-
   /**
    * Lifecycle methods start
    */
@@ -85,30 +71,38 @@ export default class UserNote extends Component {
   /**
    * Lifecycle methods end
    */
-  _setLinks() {
+  _setLinks = () => {
     const elements = Array.prototype.slice.call(document.getElementsByClassName('ReactMarkdown'));
-    const moreObj = {};
-    elements.forEach((elOuter, index) => {
-      if (this._checkOverflow(elOuter) === true) moreObj[index] = true;
-      if (this._checkOverflow(elOuter.childNodes[elOuter.childNodes.length - 1]) === true) moreObj[index] = true;
-    });
     const pElements = Array.prototype.slice.call(document.getElementsByClassName('DetailsRecords__link'));
+    const fadeElements = Array.prototype.slice.call(document.getElementsByClassName('DetailsRecords__fadeout'));
+    const fadeElementsKeys = Object.keys(fadeElements);
+    const pElementKeys = Object.keys(pElements);
+    const moreObj = {};
 
-    for (const key in pElements) {
+    elements.forEach((elOuter, index) => {
+      if (this._checkOverflow(elOuter) === true) {
+        moreObj[index] = true;
+      }
+      if (this._checkOverflow(elOuter.childNodes[elOuter.childNodes.length - 1]) === true) {
+        moreObj[index] = true;
+      }
+    });
+
+    pElementKeys.forEach((key) => {
       if (!moreObj[key]) {
         pElements[key].className = 'DetailsRecords__link hidden';
       } else {
         pElements[key].className = 'DetailsRecords__link';
       }
-    }
-    const fadeElements = Array.prototype.slice.call(document.getElementsByClassName('DetailsRecords__fadeout'));
-    for (const key in fadeElements) {
+    });
+
+    fadeElementsKeys.forEach((key) => {
       if (!moreObj[key]) {
         fadeElements[key].className = 'DetailsRecords__fadeout hidden';
       } else {
         fadeElements[key].className = 'DetailsRecords__fadeout';
       }
-    }
+    });
   }
 
   /**
@@ -116,10 +110,13 @@ export default class UserNote extends Component {
     checks if elements scrollheight is greater than it's client height
     @return {boolean} isOverflowing
   */
-  _checkOverflow(element) {
+  _checkOverflow = (element) => {
     if (element) {
       const curOverflow = element.style.overflow;
-      if (!curOverflow || curOverflow === 'visible') { element.style.overflow = 'hidden'; }
+      if (!curOverflow || (curOverflow === 'visible')) {
+        element.style.overflow = 'hidden';
+      }
+
       const isOverflowing = element.clientHeight + 3 < element.scrollHeight;
       return isOverflowing;
     }
@@ -130,7 +127,7 @@ export default class UserNote extends Component {
     returns tag to render if item matches a case
     @return {JSX}
   */
-  _renderDetail(item) {
+  _renderDetail = (item) => {
     switch (item[0]) {
       case 'text/plain':
         return (<div className="ReactMarkdown"><p>{item[1]}</p></div>);
@@ -162,7 +159,7 @@ export default class UserNote extends Component {
     toggles content in a record when it has more to show
     @return {}
   */
-  _moreClicked(target) {
+  _moreClicked = (target) => {
     // TODO remove setting classNames in react, using state is preffered
     if (target.className !== 'DetailsRecords__link-clicked') {
       const elements = Array.prototype.slice.call(document.getElementsByClassName('ReactMarkdown'));
@@ -182,14 +179,21 @@ export default class UserNote extends Component {
   }
 
   render() {
-    const { props, state } = this;
+    const { props } = this;
+    const {
+      keys,
+      owner,
+      name,
+    } = props;
     const variables = {
-      keys: props.keys,
-      owner: state.owner,
-      name: state.labbookName,
+      keys,
+      owner,
+      name,
     };
 
-    const query = props.sectionType === 'labbook' ? DetailRecordsQuery : DetailRecordsDatasetsQuery;
+    const query = (props.sectionType === 'labbook')
+      ? DetailRecordsQuery
+      : DetailRecordsDatasetsQuery;
 
     return (
       <QueryRenderer
@@ -201,32 +205,34 @@ export default class UserNote extends Component {
             return (
               <div className="DetailsRecords">
                 <ul className="DetailsRecords__list">
-                  {
-                      response.props[props.sectionType].detailRecords.map((detailRecord) => {
-                        const liCSS = detailRecord.type === 'NOTE' ? 'DetailsRecords__item-note' : 'DetailsRecords__item';
-                        const containerCSS = detailRecord.type === 'NOTE' ? 'DetailsRecords__container note' : 'DetailsRecords__container';
-                        return (
-                          <div className={containerCSS} key={detailRecord.id}>
-                            {
-                              detailRecord.type !== 'NOTE'
-                              && <div className={`DetailsRecords__action DetailsRecords__action--${detailRecord.action && detailRecord.action.toLowerCase()}`} />
-                            }
-                            {
-                              detailRecord.data.map((item, index) => (
-                                <li
-                                  key={`${detailRecord.id}_${index}`}
-                                  className={liCSS}
-                                >
-                                  {this._renderDetail(item)}
-                                  <div className="DetailsRecords hidden" />
-                                  <p className="DetailsRecords__link hidden" onClick={e => this._moreClicked(e.target)}>More...</p>
-                                  {this._setLinks()}
-                                </li>))
-                            }
-                          </div>
-                        );
-                      })
-                    }
+                  { response.props[props.sectionType].detailRecords.map((detailRecord) => {
+                    const liCSS = detailRecord.type === 'NOTE' ? 'DetailsRecords__item-note' : 'DetailsRecords__item';
+                    const containerCSS = detailRecord.type === 'NOTE' ? 'DetailsRecords__container note' : 'DetailsRecords__container';
+                    return (
+                      <div className={containerCSS} key={detailRecord.id}>
+                        {(detailRecord.type !== 'NOTE')
+                          && <div className={`DetailsRecords__action DetailsRecords__action--${detailRecord.action && detailRecord.action.toLowerCase()}`} />
+                        }
+                        { detailRecord.data &&
+                          detailRecord.data.map((item, index) => (
+                            <li
+                              key={`${detailRecord.id}_${index}`}
+                              className={liCSS}
+                            >
+                              {this._renderDetail(item)}
+                              <div className="DetailsRecords hidden" />
+                              <p
+                                className="DetailsRecords__link hidden"
+                                onClick={e => this._moreClicked(e.target)}>
+                                  More...
+                              </p>
+                              {this._setLinks()}
+                            </li>
+                          ))
+                        }
+                      </div>
+                    );
+                  })}
                 </ul>
               </div>
             );

@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import { createPaginationContainer, graphql } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
 // store
 import store from 'JS/redux/store';
 import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
@@ -26,32 +25,40 @@ class Packages extends Component {
     this._loadMore();
   }
 
+  componentWillUnmount = () => {
+    const { props } = this;
+    props.cancelRefetch();
+  }
+
   /**
   *  @param{}
   *  triggers relay pagination function loadMore
   */
-  @boundMethod
-  _loadMore() {
-    const { props, state } = this;
+  _loadMore = () => {
+    const { props } = this;
     const self = this;
-
-    props.relay.loadMore(
-      10, // Fetch the next 10 items
-      (response, error) => {
-        if (error) {
-          console.error(error);
-        }
-        if (props.environment.packageDependencies
-          && props.environment.packageDependencies.pageInfo.hasNextPage) {
-          self._loadMore();
-        } else {
-          props.packageLatestRefetch();
-        }
-      },
-      {
-        cursor: props.environment.packageDependencies.pageInfo.endCursor,
-      },
-    );
+    if (props.environment.packageDependencies
+      && props.environment.packageDependencies.pageInfo.hasNextPage) {
+      props.relay.loadMore(
+        10, // Fetch the next 10 items
+        (response, error) => {
+          if (error) {
+            console.error(error);
+          }
+          if (props.environment.packageDependencies
+            && props.environment.packageDependencies.pageInfo.hasNextPage) {
+            self._loadMore();
+          } else {
+            props.packageLatestRefetch();
+          }
+        },
+        {
+          cursor: props.environment.packageDependencies.pageInfo.endCursor,
+        },
+      );
+    } else {
+      props.packageLatestRefetch();
+    }
   }
 
 
@@ -59,8 +66,7 @@ class Packages extends Component {
   *  @param {Boolean} packageModalVisible
   *  toggles package modal visibility
   */
-  @boundMethod
-  _togglePackageModalVisibility(packageModalVisible) {
+  _togglePackageModalVisibility = (packageModalVisible) => {
     this.setState({ packageModalVisible });
   }
 
@@ -96,6 +102,8 @@ class Packages extends Component {
             base={props.base}
             togglePackageModal={this._togglePackageModalVisibility}
             packages={flatPackages}
+            name={props.name}
+            owner={props.owner}
             packageMutations={state.packageMutations}
             buildCallback={props.buildCallback}
             setBuildingState={setBuildingState}
@@ -113,7 +121,7 @@ export default createPaginationContainer(
     environment: graphql`fragment Packages_environment on Environment {
     packageDependencies(first: $first, after: $cursor) @connection(key: "Packages_packageDependencies", filters: []){
         edges{
-          node{
+          node {
             id
             schema
             manager

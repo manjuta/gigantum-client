@@ -109,10 +109,13 @@ def dockerize_windows_path(dkrpath: str) -> str:
     components of the docker ecosystem may support a different set of formats
     for paths. This one seems to work across docker cp, docker compose and
     command-line volume mounts on Windows. Specifically, this routine converts
-    C:\a\b -> C:/a/b
+    C:\a\b -> /C/a/b
+    C:/a/b -> /C/a/b
 
-    Note that the above colon + forward-slash notation is *necessary* to build
-    images with docker-py.
+    (As in general with current Windows, forwards and backwards slashes are accepted)
+
+    Previously, the colon + forward-slash notation was necessary to build
+    images with docker-py. Currently that syntax breaks docker-compose (again?).
 
     Args:
         dkrpath(str): a python path
@@ -120,4 +123,8 @@ def dockerize_windows_path(dkrpath: str) -> str:
     Returns:
         str: path that can be handed to Docker for a volume mount
     """
-    return dkrpath.replace('\\', '/')
+    dkrpath = dkrpath.replace('\\', '/')
+    if dkrpath[1] == ':':
+        dkrpath = '/' + dkrpath[0] + dkrpath[2:]
+
+    return dkrpath

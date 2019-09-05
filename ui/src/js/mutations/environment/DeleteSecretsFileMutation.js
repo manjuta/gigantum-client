@@ -1,9 +1,11 @@
+// vendor
 import {
   commitMutation,
   graphql,
 } from 'react-relay';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
-import RelayRuntime from 'relay-runtime';
 
 const mutation = graphql`
   mutation DeleteSecretsFileMutation($input: DeleteSecretsFileInput!){
@@ -26,8 +28,6 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
-
 export default function DeleteSecretsFileMutation(
   owner,
   labbookName,
@@ -36,13 +36,12 @@ export default function DeleteSecretsFileMutation(
   filename,
   callback,
 ) {
-  tempID++;
   const variables = {
     input: {
       owner,
       labbookName,
       filename,
-      clientMutationId: `${tempID}`,
+      clientMutationId: uuidv4(),
     },
   };
   commitMutation(

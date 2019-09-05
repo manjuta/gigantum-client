@@ -3,6 +3,7 @@
 exports[`Activity renders a snapshot 1`] = `
 <div
   className="ActivityCard__container column-1-span-9"
+  data-selenium-id="ActivityCard"
 >
   <div
     className="ActivityCard ActivityCard--collapsed card ActivityCard--faded ActivityCard__expanded"
@@ -25,7 +26,7 @@ exports[`Activity renders a snapshot 1`] = `
           <p
             className="ActivityCard__time"
           >
-            2:59pm
+            9:59am
           </p>
           <div
             className="ActivityCard__user"

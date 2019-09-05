@@ -1,9 +1,9 @@
 // vendor
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 // assets
 import './Type.scss';
 
-export default class Type extends Component {
+export default class Type extends PureComponent {
   render() {
     const { type, isManaged } = this.props;
     return (

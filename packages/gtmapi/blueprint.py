@@ -26,7 +26,7 @@ from flask_graphql import GraphQLView
 
 from gtmcore.configuration import Configuration
 from lmsrvcore.middleware import AuthorizationMiddleware, DataloaderMiddleware, time_all_resolvers_middleware, \
-    error_middleware
+    error_middleware, RepositoryCacheMiddleware
 from lmsrvlabbook.api import LabbookQuery, LabbookMutations
 
 
@@ -47,9 +47,9 @@ complete_labbook_service.add_url_rule(f'{config.config["proxy"]["labmanager_api_
                                       view_func=GraphQLView.as_view('graphql', schema=full_schema,
                                                                     graphiql=config.config["flask"]["DEBUG"],
                                                                     middleware=[error_middleware,
-                                                                                #time_all_resolvers_middleware,
-                                                                                AuthorizationMiddleware(),
-                                                                                DataloaderMiddleware()]),
+                                                                                RepositoryCacheMiddleware(),
+                                                                                DataloaderMiddleware(),
+                                                                                AuthorizationMiddleware()]),
                                       methods=['GET', 'POST', 'OPTION'])
 
 

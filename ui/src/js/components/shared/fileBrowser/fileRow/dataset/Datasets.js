@@ -9,9 +9,10 @@ import './Datasets.scss';
 export default class Datasets extends PureComponent {
   render() {
     const { props } = this;
+    // declare css here
     const headerCSS = classNames({
       'DatasetsBrowser__header flex justify--space-between': true,
-      'DatasetsBrowser__header--empty': props.linkedDatasets.length === 0,
+      'DatasetsBrowser__header--empty': (props.linkedDatasets.length === 0),
     });
 
     return (

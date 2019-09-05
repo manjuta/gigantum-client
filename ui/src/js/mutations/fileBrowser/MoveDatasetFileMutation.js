@@ -3,8 +3,10 @@ import {
   graphql,
 } from 'react-relay';
 import RelayRuntime from 'relay-runtime';
+import uuidv4 from 'uuid/v4';
+// environment
 import environment from 'JS/createRelayEnvironment';
-
+// redux
 import { setErrorMessage } from 'JS/redux/actions/footer';
 
 const mutation = graphql`
@@ -25,8 +27,6 @@ const mutation = graphql`
     }
   }
 `;
-
-let tempID = 0;
 
 function sharedDeleteUpdater(store, datasetID, removeIds, connectionKey) {
   const datasetProxy = store.get(datasetID);
@@ -67,7 +67,7 @@ export default function MoveDatasetFileMutation(
       datasetName,
       srcPath,
       dstPath,
-      clientMutationId: `${tempID++}`,
+      clientMutationId: uuidv4(),
     },
   };
 
@@ -135,22 +135,22 @@ export default function MoveDatasetFileMutation(
       updater: (store, response) => {
         sharedDeleteUpdater(store, datasetId, removeIds, connectionKey);
         if (response && response.moveDatasetFile && response.moveDatasetFile.updatedEdges) {
-          response.moveDatasetFile.updatedEdges.forEach((edge) => {
+          response.moveDatasetFile.updatedEdges.forEach((datasetEdge) => {
             const datasetProxy = store.get(datasetId);
 
-            if (datasetProxy && (edge.node !== null)) {
+            if (datasetProxy && (datasetEdge.node !== null)) {
               const conn = RelayRuntime.ConnectionHandler.getConnection(
                 datasetProxy,
                 connectionKey,
               );
 
-              const node = store.get(edge.node.id) ? store.get(edge.node.id) : store.create(edge.node.id, 'DatasetFile');
+              const node = store.get(datasetEdge.node.id) ? store.get(datasetEdge.node.id) : store.create(datasetEdge.node.id, 'DatasetFile');
 
-              node.setValue(edge.node.id, 'id');
-              node.setValue(edge.node.isDir, 'isDir');
-              node.setValue(edge.node.key, 'key');
-              node.setValue(edge.node.modifiedAt, 'modifiedAt');
-              node.setValue(edge.node.size, 'size');
+              node.setValue(datasetEdge.node.id, 'id');
+              node.setValue(datasetEdge.node.isDir, 'isDir');
+              node.setValue(datasetEdge.node.key, 'key');
+              node.setValue(datasetEdge.node.modifiedAt, 'modifiedAt');
+              node.setValue(datasetEdge.node.size, 'size');
               const newEdge = RelayRuntime.ConnectionHandler.createEdge(
                 store,
                 conn,
@@ -160,7 +160,7 @@ export default function MoveDatasetFileMutation(
               RelayRuntime.ConnectionHandler.insertEdgeAfter(
                 conn,
                 newEdge,
-                edge.cursor,
+                datasetEdge.cursor,
               );
             }
           });

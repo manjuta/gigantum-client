@@ -1,8 +1,7 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { boundMethod } from 'autobind-decorator';
 // store
 import store from 'JS/redux/store';
 import { setContainerState } from 'JS/redux/actions/labbook/overview/overview';
@@ -17,37 +16,24 @@ import Tooltip from 'Components/common/Tooltip';
 import './ContainerStatus.scss';
 
 class ContainerStatus extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      status: '',
-      isMouseOver: false,
-      showDevList: false,
-      attemptingRebuild: false,
-    };
-
-    this._getContainerStatusText = this._getContainerStatusText.bind(this);
-    this._containerAction = this._containerAction.bind(this);
-    this._closePopupMenus = this._closePopupMenus.bind(this);
-    this._rebuildContainer = this._rebuildContainer.bind(this);
-  }
+  state = {
+    status: '',
+    isMouseOver: false,
+    showDevList: false,
+    attemptingRebuild: false,
+  };
 
   static getDerivedStateFromProps(nextProps, state) {
-    const displayTransitionState = nextProps.transitionState[nextProps.labbookName] && nextProps.transitionState[nextProps.labbookName].length;
+    const { name } = nextProps.labbook;
+    const displayTransitionState = nextProps.transitionState
+      && nextProps.transitionState.length;
+    const status = displayTransitionState
+      ? nextProps.transitionState
+      : state.status;
     return ({
       ...state,
-      status: displayTransitionState ? nextProps.transitionState[nextProps.labbookName] : state.status,
+      status,
     });
-  }
-
-  /**
-  *  @param {}
-  *  clear interval to stop polling and clean up garbage
-  */
-  componentWillUnmount() {
-    // memory clean up
-    window.removeEventListener('click', this._closePopupMenus);
   }
 
   /**
@@ -74,13 +60,22 @@ class ContainerStatus extends Component {
     window.addEventListener('click', this._closePopupMenus);
   }
 
+  /**
+  *  @param {}
+  *  clear interval to stop polling and clean up garbage
+  */
+  componentWillUnmount() {
+    // memory clean up
+    window.removeEventListener('click', this._closePopupMenus);
+  }
+
 
   /**
    *  @param {event} evt
    *  closes menu box when menu is open and the menu has not been clicked on
    *
   */
-  _closePopupMenus(evt) {
+  _closePopupMenus = (evt) => {
     const { props, state } = this;
     // TODO fix this implementation, this is not sustainable.
     const containerMenuClicked = evt.target.getAttribute('data-container-popup') === 'true';
@@ -162,7 +157,7 @@ class ContainerStatus extends Component {
     @param {}
     triggers stop container mutation
   */
-  _stopContainerMutation() {
+  _stopContainerMutation = () => {
     const { props } = this;
     const self = this;
 
@@ -187,8 +182,7 @@ class ContainerStatus extends Component {
     @param {}
     triggers stop build mutation
   */
-  @boundMethod
-  _cancelBuildMutation() {
+  _cancelBuildMutation = () => {
     const { props } = this;
     const self = this;
 
@@ -209,7 +203,7 @@ class ContainerStatus extends Component {
     @param {}
     triggers start container mutation
   */
-  _startContainerMutation(launchDevTool) {
+  _startContainerMutation = (launchDevTool) => {
     const { state, props } = this;
     const self = this;
     const data = launchDevTool ? { devTool: state.selectedDevTool } : {};
@@ -245,18 +239,19 @@ class ContainerStatus extends Component {
     trigger mutatuion to stop or start container depdending on the state
     @return {string} newStatus
    */
-  _containerAction(status, cssStatus, evt) {
+  _containerAction = (status, cssStatus, evt) => {
     const { props } = this;
+    const { owner, name } = props.labbook;
 
     if (!store.getState().labbook.isBuilding && !props.isLookingUpPackages) {
       if (status === 'Stop') {
-        updateTransitionState(props.labbookName, 'Stopping');
+        updateTransitionState(owner, name, 'Stopping');
         this.setState({ contanerMenuRunning: false });
         this._stopContainerMutation();
       } else if ((status === 'Start') && (cssStatus !== 'Rebuild')) {
-        updateTransitionState(props.labbookName, 'Starting');
+        updateTransitionState(owner, name, 'Starting');
         this.setState({ contanerMenuRunning: false });
-        props.setMergeMode(false, false);
+        props.setMergeMode(owner, name, false, false);
         this._startContainerMutation();
       } else if ((status === 'Start') || (status === 'Rebuild')) {
         this.setState({
@@ -282,7 +277,7 @@ class ContainerStatus extends Component {
     @param {} value
     shows message plugin menu
   */
-  _openPluginMenu() {
+  _openPluginMenu = () => {
     this.setState((state) => {
       const pluginsMenu = !state.pluginsMenu;
       return {
@@ -295,7 +290,7 @@ class ContainerStatus extends Component {
     @param {boolean} value
     trigger mutatuion to stop or start container depdending on the state
   */
-  _setMouseOverState(value) {
+  _setMouseOverState = (value) => {
     this.setState({ isMouseOver: value });
   }
 
@@ -304,7 +299,7 @@ class ContainerStatus extends Component {
     trigger mutatuion to stop or start container depdending on the state
     @return {string} newStatus
   */
-  _getStatusText(status) {
+  _getStatusText = (status) => {
     const { props, state } = this;
     let newStatus = status;
 
@@ -331,7 +326,7 @@ class ContainerStatus extends Component {
     triggers build image mutations with force === true
     @return {}
   */
-  _rebuildContainer() {
+  _rebuildContainer = () => {
     const { props } = this;
     const data = { noCache: true };
 
@@ -404,7 +399,8 @@ class ContainerStatus extends Component {
         <Tooltip
           section="containerStatus"
         />
-      </div>);
+      </div>
+    );
   }
 }
 

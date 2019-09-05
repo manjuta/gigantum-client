@@ -1,3 +1,4 @@
+// vendor
 import {
   commitMutation,
   graphql,
@@ -20,8 +21,6 @@ const mutation = graphql`
   }
 `;
 
-let tempID = 0;
-
 export default function BuildImageMutation(
   owner,
   labbookName,
@@ -33,7 +32,7 @@ export default function BuildImageMutation(
       labbookName,
       owner,
       noCache: (buildData && buildData.noCache) || false,
-      clientMutationId: tempID++,
+      clientMutationId: uuidv4(),
     },
   };
   const id = uuidv4();
@@ -59,11 +58,6 @@ export default function BuildImageMutation(
         callback(response, error, id);
       },
       onError: err => console.error(err),
-
-      updater: (store) => {
-
-
-      },
     },
   );
 }

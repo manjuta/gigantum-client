@@ -8,6 +8,7 @@ from gtmcore.inventory.branching import BranchManager
 from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitCommit, GitRepository
+from lmsrvcore.utilities import configure_git_credentials
 from lmsrvlabbook.dataloader.fetch import FetchLoader
 
 
@@ -99,40 +100,12 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
 
         return mergeable
 
-    @classmethod
-    def _configure_git(cls, lb, info) -> GitLabManager:
-        # Extract valid Bearer token
-        # TODO - This code is duplicated all over the place, must be refactored.
-        token = None
-        if hasattr(info.context.headers, 'environ'):
-            if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-                token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-
-        if not token:
-            raise ValueError("Authorization header not provided. "
-                             "Must have a valid session to query for collaborators")
-
-        default_remote = lb.client_config.config['git']['default_remote']
-        admin_service = None
-        for remote in lb.client_config.config['git']['remotes']:
-            if default_remote == remote:
-                admin_service = lb.client_config.config['git']['remotes'][remote]['admin_service']
-                break
-
-        if not admin_service:
-            raise ValueError('admin_service could not be found')
-
-        # Configure git creds
-        mgr = GitLabManager(default_remote, admin_service, access_token=token)
-        mgr.configure_git_credentials(default_remote, get_logged_in_username())
-        return mgr
-
     def resolve_commits_ahead(self, info):
         logged_in_user = get_logged_in_username()
         lb = InventoryManager().load_labbook(logged_in_user,
                                              self.owner,
                                              self.name)
-        self._configure_git(lb, info)
+        configure_git_credentials()
         bm = BranchManager(lb)
         if self._fetch_loader:
             return self._fetch_loader.load(f"labbook&{logged_in_user}&{self.owner}&{self.name}").then(
@@ -145,7 +118,7 @@ class Branch(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository
         lb = InventoryManager().load_labbook(logged_in_user,
                                              self.owner,
                                              self.name)
-        self._configure_git(lb, info)
+        configure_git_credentials()
         bm = BranchManager(lb)
         if self._fetch_loader:
             return self._fetch_loader.load(f"labbook&{logged_in_user}&{self.owner}&{self.name}").then(

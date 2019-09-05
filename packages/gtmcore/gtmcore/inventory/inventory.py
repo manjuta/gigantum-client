@@ -7,6 +7,7 @@ from pkg_resources import resource_filename
 import pathlib
 import subprocess
 import glob
+
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
 
 from gtmcore.exceptions import GigantumException
@@ -122,57 +123,6 @@ class InventoryManager(object):
         lb = self.load_labbook_from_directory(final_path)
         return lb
 
-    @staticmethod
-    def update_linked_datasets(labbook: LabBook, username: str, init: bool = False) -> None:
-        """Method to initialize or update all git submodule references for linked datasets.
-
-        This is used when loading and initializing linked datasets
-
-        Args:
-            labbook: The labbook instance to inspect
-            username: the current logged in username
-            init: a flag indicating if the `git submodule init` command should be run
-
-        Returns:
-            None
-        """
-        # List all existing linked datasets IN this repository
-        existing_dataset_abs_paths = glob.glob(os.path.join(labbook.root_dir, '.gigantum', 'datasets', "*/*"))
-
-        if len(labbook.git.repo.submodules) > 0:
-            for submodule in labbook.git.list_submodules():
-                try:
-                    namespace, dataset_name = submodule['name'].split("&")
-                    rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
-                    submodule_dir = os.path.join(labbook.root_dir, rel_submodule_dir)
-
-                    # If submodule is currently present, init/update it, don't remove it!
-                    if submodule_dir in existing_dataset_abs_paths:
-                        existing_dataset_abs_paths.remove(submodule_dir)
-
-                    if init:
-                        # Optionally Init submodule
-                        call_subprocess(['git', 'submodule', 'init', rel_submodule_dir],
-                                        cwd=labbook.root_dir, check=True)
-                    # Update submodule
-                    call_subprocess(['git', 'submodule', 'update', rel_submodule_dir],
-                                    cwd=labbook.root_dir, check=True)
-
-                    ds = InventoryManager().load_dataset_from_directory(submodule_dir)
-                    ds.namespace = namespace
-                    manifest = Manifest(ds, username)
-                    manifest.link_revision()
-
-                except Exception as err:
-                    logger.error(f"Failed to initialize linked Dataset (submodule reference): {submodule['name']}. "
-                                 f"This may be an actual error or simply due to repository permissions")
-                    logger.exception(err)
-                    continue
-
-        # Clean out lingering dataset files if you previously had a dataset linked, but now don't
-        for submodule_dir in existing_dataset_abs_paths:
-            shutil.rmtree(submodule_dir)
-
     def put_labbook(self, path: str, username: str, owner: str) -> LabBook:
         """ Take given path to a candidate labbook and insert it
         into its proper place in the file system.
@@ -274,29 +224,32 @@ class InventoryManager(object):
                     logger.warning(f'Unknown artifact in inventory: {repository_dir}')
         return repository_paths
 
-    def list_labbooks(self, username: str, sort_mode: str = "name") -> List[LabBook]:
+    def list_labbooks(self, username: str, sort_mode: Optional[str] = "name") -> List[LabBook]:
         """ Return list of all available labbooks for a given user
 
         Args:
             username: Active username
-            sort_mode: One of "name", "modified_on" or "created_on"
+            sort_mode: Sort by name, creation date, or last modified date.
 
         Returns:
             Sorted list of LabBook objects
         """
+        local_labbooks = []
+        for username, owner, lbname in self.list_repository_ids(username, 'labbook'):
+            try:
+                labbook = self.load_labbook(username, owner, lbname)
+                local_labbooks.append(labbook)
+            except Exception as e:
+                logger.error(e)
+
         if sort_mode == "name":
-            local_labbooks = self._safe_load(username, key_f=lambda lb: lb.name)
-            sorted_list = natsorted(local_labbooks, key=lambda tup: tup[1])
+            return natsorted(local_labbooks, key=lambda ds: ds.name)
         elif sort_mode == 'modified_on':
-            local_labbooks = self._safe_load(username, key_f=lambda lb: lb.modified_on)
-            sorted_list = sorted(local_labbooks, key=lambda tup: tup[1])
+            return sorted(local_labbooks, key=lambda ds: ds.modified_on)
         elif sort_mode == 'created_on':
-            local_labbooks = self._safe_load(username, key_f=lambda lb: lb.creation_date)
-            sorted_list = sorted(local_labbooks, key=lambda tup: tup[1])
+            return sorted(local_labbooks, key=lambda ds: ds.creation_date)
         else:
             raise InventoryException(f"Invalid sort mode {sort_mode}")
-
-        return [lb for (lb, key) in sorted_list]
 
     def _safe_load(self, username, key_f: Callable) -> List[Tuple[LabBook, Any]]:
         """Helper method to prevent loading corrupt LabBooks into the list of local labbooks."""
@@ -472,6 +425,7 @@ class InventoryManager(object):
 
         """
         lb = self.load_labbook(username, owner, labbook_name)
+        target_dir = lb.root_dir
 
         # Get list of datasets and cache roots to schedule for cleanup
         datasets = self.get_linked_datasets(lb)
@@ -492,8 +446,13 @@ class InventoryManager(object):
         # Delete all secrets pertaining to this project.
         SecretStore(lb, username).clear_files()
 
+        if 'WINDOWS_HOST' in os.environ:
+            # Windows host. Remove all git clients so no file handles prevent deletion
+            lb.git.repo.__del__()
+            lb = None  # type: ignore
+
         # Remove labbook contents
-        shutil.rmtree(lb.root_dir, ignore_errors=True)
+        shutil.rmtree(target_dir, ignore_errors=True)
 
         return datasets_to_schedule
 
@@ -630,16 +589,24 @@ class InventoryManager(object):
 
         """
         ds = self.load_dataset(username, owner, dataset_name)
+        target_dir = ds.root_dir
 
         # Delete dataset contents from file cache
         m = Manifest(ds, username)
+        cache_root = m.cache_mgr.cache_root
+        m = None  # type: ignore
+
+        if 'WINDOWS_HOST' in os.environ:
+            # Windows host. Remove all git clients so no file handles prevent deletion
+            ds.git.repo.__del__()
+            ds = None  # type: ignore
 
         # Delete dataset repository from working dir
-        shutil.rmtree(ds.root_dir, ignore_errors=True)
+        shutil.rmtree(target_dir, ignore_errors=True)
 
         return DatasetCleanupJob(namespace=owner,
                                  name=dataset_name,
-                                 cache_root=m.cache_mgr.cache_root)
+                                 cache_root=cache_root)
 
     def put_dataset(self, path: str, username: str, owner: str) -> Dataset:
         try:
@@ -811,7 +778,7 @@ class InventoryManager(object):
 
         labbook.git.add_all()
         commit = labbook.git.commit(f"adding submodule ref to link dataset {dataset_namespace}/{dataset_name}")
-        labbook.git.update_submodules(init=True)
+        call_subprocess(['git', 'submodule', 'update', '--init', '--', relative_submodule_dir], cwd=labbook.root_dir)
 
         ds = self.load_dataset_from_directory(absolute_submodule_dir)
         dataset_revision = ds.git.repo.head.commit.hexsha
@@ -870,6 +837,53 @@ class InventoryManager(object):
         ars = ActivityStore(labbook)
         ars.create_activity_record(ar)
 
+    @staticmethod
+    def update_linked_datasets(labbook: LabBook, username: str) -> None:
+        """Method to initialize or update all git submodule references for linked datasets.
+
+        This is used when loading and initializing linked datasets
+
+        Args:
+            labbook: The labbook instance to inspect
+            username: the current logged in username
+
+        Returns:
+            None
+        """
+        submodules = labbook.git.list_submodules()
+        for submodule in submodules:
+            try:
+                namespace, dataset_name = submodule.split("&")
+                rel_submodule_dir = os.path.join('.gigantum', 'datasets', namespace, dataset_name)
+                submodule_dir = os.path.join(labbook.root_dir, rel_submodule_dir)
+
+                call_subprocess(['git', 'submodule', 'update', '--init', '--', rel_submodule_dir],
+                                cwd=labbook.root_dir, check=True)
+
+                ds = InventoryManager().load_dataset_from_directory(submodule_dir)
+                ds.namespace = namespace
+                manifest = Manifest(ds, username)
+                manifest.force_reload()
+                manifest.link_revision()
+
+            except Exception as err:
+                logger.warning(f"Failed to initialize linked Dataset (submodule reference): {submodule}. "
+                               f"This may be an actual error or simply due to repository permissions",
+                               exc_info=True)
+                logger.warning(err)
+
+        # Clean out lingering dataset files if you previously had a dataset linked, but now don't
+        current_dataset_set = set([os.path.join(labbook.root_dir,
+                                                '.gigantum',
+                                                'datasets',
+                                                x.replace("&", "/")) for x in submodules])
+        dataset_directory_set = set(glob.glob(os.path.join(labbook.root_dir, '.gigantum', 'datasets', "*/*")))
+        defunct_dataset_dirs = dataset_directory_set.difference(current_dataset_set)
+        for submodule_dir_to_clean in defunct_dataset_dirs:
+            if os.path.isdir(submodule_dir_to_clean):
+                logger.info(f"Detected un-used dataset submodule dir. Removing: {submodule_dir_to_clean}")
+                shutil.rmtree(submodule_dir_to_clean)
+
     def update_linked_dataset_reference(self, dataset_namespace: str, dataset_name: str, labbook: LabBook) -> Dataset:
         """Method to update a linked dataset reference to the latest revision
 
@@ -888,19 +902,25 @@ class InventoryManager(object):
 
         # Update the submodule reference with the latest changes
         original_revision = ds.git.repo.head.object.hexsha
-        ds.git.pull()
-        revision = ds.git.repo.head.object.hexsha
+        ds.git.fetch()
+
+        latest_revision = call_subprocess(['git', 'rev-list', 'origin/master', '--max-count=1'],
+                                          cwd=ds.root_dir, check=True)
+        latest_revision = latest_revision.strip()
 
         # If the submodule has changed, commit the changes.
-        if original_revision != revision:
+        if original_revision != latest_revision:
+            call_subprocess(['git', 'checkout', '-q', latest_revision],
+                            cwd=ds.root_dir, check=True)
+
             labbook.git.add_all()
             commit = labbook.git.commit("Updating submodule ref")
 
             # Add Activity Record
             adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.DELETE)
             adr.add_value('text/markdown',
-                          f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to {revision}")
-            msg = f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to version {revision[0:8]}"
+                          f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to {latest_revision}")
+            msg = f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to version {latest_revision[0:8]}"
             ar = ActivityRecord(ActivityType.DATASET,
                                 message=msg,
                                 linked_commit=commit.hexsha,
@@ -916,16 +936,16 @@ class InventoryManager(object):
         """Method to get all datasets linked to a project
 
         Args:
-            labbook:
+            labbook(LabBook): the labbook to inspect for linked datasets
 
         Returns:
-
+            list
         """
         submodules = labbook.git.list_submodules()
         datasets = list()
         for submodule in submodules:
             try:
-                namespace, dataset_name = submodule['name'].split("&")
+                namespace, dataset_name = submodule.split("&")
                 submodule_dir = os.path.join(labbook.root_dir, '.gigantum', 'datasets', namespace, dataset_name)
                 ds = self.load_dataset_from_directory(submodule_dir, author=labbook.author)
                 ds.namespace = namespace

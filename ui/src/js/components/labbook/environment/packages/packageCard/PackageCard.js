@@ -1,8 +1,7 @@
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // components
-import AdvancedSearch from 'Components/common/AdvancedSearch';
+import AdvancedSearch from 'Components/common/advancedSearch/AdvancedSearch';
 import PackageHeader from './PackageHeader';
 import PackageBody from './PackageBody';
 // assets
@@ -94,8 +93,7 @@ export default class PackageCard extends Component {
     @param {Array} tags
     sets component tags from child
   */
-  @boundMethod
-  _setTags(tags) {
+  _setTags = (tags) => {
     this.setState({ tags });
   }
 
@@ -103,8 +101,7 @@ export default class PackageCard extends Component {
   *  @param {String} sort
   *  sets sort state
   */
-  @boundMethod
-  _handleSort(sort) {
+  _handleSort = (sort) => {
     const { state } = this;
 
     if (sort === state.sort) {
@@ -118,8 +115,7 @@ export default class PackageCard extends Component {
   *  @param {Boolean} forceClear
   *  toggles selectedPackages
   */
-  @boundMethod
-  _selectPackages(forceClear) {
+  _selectPackages = (forceClear) => {
     const { props, state } = this;
     const packageEdges = props.packages;
     if (state.selectedPackages.size === packageEdges.length || forceClear) {
@@ -139,8 +135,7 @@ export default class PackageCard extends Component {
   *  @param {Object} pkg
   *  adds or removes package from selectedPackages
   */
-  @boundMethod
-  _selectSinglePackage(pkg) {
+  _selectSinglePackage = (pkg) => {
     const { state } = this;
     const hasPackage = state.selectedPackages.has(pkg.id);
     const newSelectedPackages = new Map(state.selectedPackages);
@@ -154,6 +149,7 @@ export default class PackageCard extends Component {
 
   render() {
     const { props, state } = this;
+    const { owner, name } = props;
     const selectedLength = state.selectedPackages.size;
     const propsLength = props.packages.length;
     let multiSelect = selectedLength === propsLength ? 'all' : 'partial';
@@ -193,8 +189,12 @@ export default class PackageCard extends Component {
           isLocked={props.isLocked}
           buildCallback={props.buildCallback}
           setBuildingState={props.setBuildingState}
+          name={name}
+          owner={owner}
         />
         <PackageBody
+          name={name}
+          owner={owner}
           packages={packages}
           isLocked={props.isLocked}
           selectPackages={this._selectPackages}

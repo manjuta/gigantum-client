@@ -10,21 +10,18 @@ import './DatasetFolder.scss';
 
 
 class Folder extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expanded: false,
-      isDownloading: false,
-      renameEditMode: false,
-    };
-  }
+  state = {
+    expanded: false,
+    isDownloading: false,
+    renameEditMode: false,
+  };
 
   /**
     *  @param {boolean} value
     *  sets visibility of edit mode
     *  @return {}
     */
-  _renameEditMode(value) {
+  _renameEditMode = (value) => {
     this.setState({ renameEditMode: value });
   }
 
@@ -81,10 +78,10 @@ class Folder extends Component {
 
 
       let lowerB;
-      if (type === 'az' || type === 'size' && section === 'folder') {
+      if ((type === 'az') || (type === 'size') && (section === 'folder')) {
         lowerA = a.toLowerCase();
         lowerB = b.toLowerCase();
-        if (type === 'size' || !reverse) {
+        if ((type === 'size') || !reverse) {
           return (lowerA < lowerB) ? -1 : (lowerA > lowerB) ? 1 : 0;
         }
         return (lowerA < lowerB) ? 1 : (lowerA > lowerB) ? -1 : 0;

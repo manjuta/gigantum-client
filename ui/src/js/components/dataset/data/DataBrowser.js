@@ -45,7 +45,6 @@ export default createPaginationContainer(
     },
     getVariables(props, { count, cursor }, fragmentVariables) {
       const { owner, labbookName } = store.getState().routes;
-
       return {
         first: count,
         cursor,

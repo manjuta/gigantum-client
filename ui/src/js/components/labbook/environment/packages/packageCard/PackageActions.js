@@ -1,27 +1,25 @@
 // vendor
 import React, { Component } from 'react';
-// components
-import Tooltip from 'Components/common/Tooltip';
 // assets
 import './PackageActions.scss';
 
 export default class PackageActions extends Component {
-
   /**
   *  @param{}
   *  removes singular package
   */
   _updatePackage() {
     const { props } = this;
+    const { owner, name } = props;
     const data = {
       packages: [{
         ...props.packageNode,
         version: props.packageNode.latestVersion,
       }],
-      duplicates: [props.id],
+      duplicates: [props.packageNode],
     };
     props.selectPackages(true);
-    props.setBuildingState(true);
+    props.setBuildingState(owner, name, true);
     const callback = () => {
       props.buildCallback();
     };
@@ -34,11 +32,12 @@ export default class PackageActions extends Component {
   */
   _removePackage() {
     const { props } = this;
+    const { owner, name } = props;
     const data = {
       packages: [props.packageNode],
     };
     props.selectPackages(true);
-    props.setBuildingState(true);
+    props.setBuildingState(owner, name, true);
     const callback = () => {
       props.buildCallback();
     };
@@ -63,15 +62,15 @@ export default class PackageActions extends Component {
     return {
       deleteTooltip,
       updateTooltip,
-    }
+    };
   }
 
   render() {
     const { props } = this;
-    const disableUpdate = (!props.latestVersion) || (props.version === props.latestVersion) || props.isLocked || props.fromBase;
+    const disableUpdate = (!props.latestVersion) || (props.version === props.latestVersion)
+      || props.isLocked || props.fromBase;
     const disableDelete = (props.fromBase) || (props.isLocked);
     const { deleteTooltip, updateTooltip } = this._getTooltip();
-
 
     return (
       <div className="PackageActions flex flex--column justify--space-between">

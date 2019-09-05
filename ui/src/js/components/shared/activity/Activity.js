@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
-import { boundMethod } from 'autobind-decorator';
 import shallowCompare from 'react-addons-shallow-compare';
 // store
 import store from 'JS/redux/store';
@@ -151,7 +150,6 @@ class Activity extends Component {
   constructor(props) {
     super(props);
     const section = props[props.sectionType];
-
     this.state = {
       loadingMore: false,
       modalVisible: false,
@@ -227,10 +225,8 @@ class Activity extends Component {
     window.addEventListener('scroll', this._handleScroll);
     window.addEventListener('visibilitychange', this._handleVisibilityChange);
 
-    if (props.sectionType === 'labbook') {
-      window.addEventListener('focus', this._pollForActivity);
-      this._pollForActivity();
-    }
+    window.addEventListener('focus', this._pollForActivity);
+    this._pollForActivity();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -247,15 +243,11 @@ class Activity extends Component {
   }
 
   componentWillUnmount() {
-    const { props } = this;
     this._isMounted = false;
 
     window.removeEventListener('visibilitychange', this._handleVisibilityChange);
     window.removeEventListener('scroll', this._handleScroll);
-
-    if (props.sectionType === 'labbook') {
-      window.removeEventListener('focus', this._pollForActivity);
-    }
+    window.removeEventListener('focus', this._pollForActivity);
   }
 
   /**
@@ -267,8 +259,7 @@ class Activity extends Component {
    * removes scroll listener
    * @return {}
    */
-  @boundMethod
-  _scrollTo(evt) {
+  _scrollTo = (evt) => {
     if (document.documentElement.scrollTop === 0) {
       const { props } = this;
       const { relay } = props;
@@ -290,8 +281,7 @@ class Activity extends Component {
    * handles refiring new activity query if visibility changes back to visible
    * @return {}
    */
-  @boundMethod
-  _handleVisibilityChange() {
+  _handleVisibilityChange = () => {
     if (document.hasFocus()) {
       this._pollForActivity();
     }
@@ -303,8 +293,7 @@ class Activity extends Component {
    * kicks off scroll to top
    * @return {}
    */
-  @boundMethod
-  _getNewActivities() {
+  _getNewActivities = () => {
     window.addEventListener('scroll', this._scrollTo);
 
     this.setState({ newActivityAvailable: false });
@@ -320,8 +309,7 @@ class Activity extends Component {
    * sets hovered rollback position
    * @return {}
    */
-  @boundMethod
-  _setHoveredRollback(position) {
+  _setHoveredRollback = (position) => {
     const { props } = this;
     if (!props.isLocked) {
       this.setState({ hoveredRollback: position });
@@ -333,24 +321,23 @@ class Activity extends Component {
    * stops refetch from firing
    * @return {}
    */
-   @boundMethod
-  _pollForActivity() {
+  _pollForActivity = () => {
     const self = this;
     const { props } = this;
+    const { sectionType } = props;
 
     this.setState({ newActivityAvailable: false });
-
-    const { labbookName, owner } = store.getState().routes;
-
+    const { name, owner } = props;
     const getNewActivity = () => {
-      NewActivity.getNewActivity(labbookName, owner).then((response) => {
-
-        const firstRecordCommitId = (props.labbook && props.labbook.activityRecords)
-          ? this.props.labbook.activityRecords.edges[0].node.commit
+      NewActivity.getNewActivity(name, owner, sectionType).then((response) => {
+        const section = props[sectionType];
+        const firstRecordCommitId = (section && section.activityRecords)
+          ? section.activityRecords.edges[0].node.commit
           : null;
-        const newRecordCommitId = response.data.labbook.activityRecords.edges[0].node.commit;
+        const newRecordCommitId = response.data[sectionType].activityRecords.edges[0].node.commit;
 
-        if ((firstRecordCommitId !== newRecordCommitId) && (firstRecordCommitId !== null)) {
+        if ((firstRecordCommitId !== newRecordCommitId)
+          && (firstRecordCommitId !== null)) {
           const { automaticRefetch } = self.state;
           if (automaticRefetch) {
             this._refetch();
@@ -373,8 +360,7 @@ class Activity extends Component {
   * refetches component looking for new edges to insert at the top of the activity feed
   * @return {}
   */
-  @boundMethod
-   _refetch() {
+   _refetch = () => {
      const { props } = this;
      const { relay } = props;
 
@@ -395,16 +381,15 @@ class Activity extends Component {
   *  @param {}
   *  pagination container loads more items
   */
-  @boundMethod
-  _loadMore() {
-    const { props } = this;
+  _loadMore = () => {
+    const { props, state } = this;
     const section = props[props.sectionType];
     const { activityRecords } = section;
     const cursor = activityRecords && activityRecords.pageInfo
       ? activityRecords.pageInfo.endCursor
       : null;
 
-    if (props.relay.isLoading()) {
+    if (props.relay.isLoading() || state.loadingMore) {
       return;
     }
 
@@ -429,8 +414,7 @@ class Activity extends Component {
   *  @param {}
   *  counts visible non clustered activity records
   */
-  @boundMethod
-  _countExpandedRecords() {
+  _countExpandedRecords = () => {
     const { props } = this;
     const section = props[props.sectionType];
     const records = (section.activityRecords !== undefined) ? section.activityRecords.edges : [];
@@ -463,16 +447,13 @@ class Activity extends Component {
     *   determines value of stickyDate by checking vertical offset and assigning it to the state
     *
   */
-  @boundMethod
-  _setStickyDate() {
+  _setStickyDate = () => {
     const { props, state } = this;
     let offsetAmount = ((window.location.hostname === config.demoHostName) || props.diskLow)
       ? 50 : 0;
     offsetAmount = props.isDeprecated ? offsetAmount + 70 : offsetAmount;
     const upperBound = offsetAmount + 120;
-
     let stickyDate = null;
-
 
     this.offsetDistance = window.pageYOffset;
 
@@ -505,8 +486,7 @@ class Activity extends Component {
   *   handles scolls and passes off loading to pagination container
   *
   */
-  @boundMethod
-  _handleScroll(evt) {
+  _handleScroll = (evt) => {
     const { props, state } = this;
     const section = props[props.sectionType];
     const { activityRecords } = section;
@@ -530,8 +510,7 @@ class Activity extends Component {
   *   toggles activity visibility
   *   @return {}
   */
-  @boundMethod
-  _toggleActivity() {
+  _toggleActivity = () => {
     const { modalVisible } = this.state;
     this.setState({
       modalVisible: !modalVisible,
@@ -543,8 +522,7 @@ class Activity extends Component {
   *   hides add activity
   *   @return {}
   */
-  @boundMethod
-  _hideAddActivity() {
+  _hideAddActivity = () => {
     this.setState({
       modalVisible: false,
     });
@@ -555,8 +533,7 @@ class Activity extends Component {
   *   hides add activity
   *   @return {}
   */
-  @boundMethod
-  _toggleRollbackMenu(node) {
+  _toggleRollbackMenu = (node) => {
     const { status } = store.getState().containerStatus;
     const { props } = this;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status);
@@ -577,8 +554,7 @@ class Activity extends Component {
   *   toggle create branch modal visibility
   *   @return {}
   */
-  @boundMethod
-  _toggleCreateModal() {
+  _toggleCreateModal = () => {
     const { createBranchVisible } = this.state;
     this.setState({ createBranchVisible: !createBranchVisible });
   }
@@ -588,8 +564,7 @@ class Activity extends Component {
   *   opens create branch modal and also sets selectedNode to null
   *   @return {}
   */
-  @boundMethod
-  _createBranch() {
+  _createBranch = () => {
     const { status } = store.getState().containerStatus;
     const canEditEnvironment = config.containerStatus.canEditEnvironment(status);
     if (canEditEnvironment) {
@@ -605,8 +580,7 @@ class Activity extends Component {
   *   isFullscreen is true, else it swaps existing state
   *   @return {}
   */
-  @boundMethod
-  _changeFullscreenState(isFullscreen) {
+  _changeFullscreenState = (isFullscreen) => {
     if (isFullscreen) {
       this.setState({ editorFullscreen: isFullscreen });
     } else {
@@ -620,8 +594,7 @@ class Activity extends Component {
   *   modifies expandedClusterObject from state
   *   @return {}
   */
-  @boundMethod
-  _expandCluster(indexItem) {
+  _expandCluster = (indexItem) => {
     const { state } = this;
     const { activityRecords } = state;
     activityRecords[indexItem.timestamp][indexItem.j].cluster = true;
@@ -634,8 +607,7 @@ class Activity extends Component {
     *   modifies expandedClusterObject from state
     *   @return {}
   */
-  @boundMethod
-  _addCluster(clusterElements) {
+  _addCluster = (clusterElements) => {
     const { props, state } = this;
     const section = props[props.sectionType];
     const newExpandedClusterObject = new Map(state.expandedClusterObject);
@@ -658,8 +630,7 @@ class Activity extends Component {
   *   adds or removes elements to cluster on expand and collapse
   *   @return {}
   */
-  @boundMethod
-  _compressExpanded(clusterElements, remove) {
+  _compressExpanded = (clusterElements, remove) => {
     const { compressedElements } = this.state;
     const newCompressedElements = new Set(compressedElements);
 
@@ -679,6 +650,7 @@ class Activity extends Component {
     const { props, state } = this;
     const section = props[props.sectionType];
 
+    // declare css here
     const activityCSS = classNames({
       Activity: true,
       fullscreen: state.editorFullscreen,
@@ -815,6 +787,9 @@ class Activity extends Component {
                       >
                         {
                           state.activityRecords[timestamp].map((record, timestampIndex) => {
+                            const isBaseRecord = !section.activityRecords.pageInfo.hasNextPage
+                              && (section.activityRecords.edges.length - 1 === record.flatIndex);
+
                             if (record.cluster) {
                               return (
                                 <ClusterCardWrapper
@@ -830,6 +805,8 @@ class Activity extends Component {
                                   toggleRollbackMenu={this._toggleRollbackMenu}
                                   isLocked={props.isLocked}
                                   setHoveredRollback={this._setHoveredRollback}
+                                  owner={props.owner}
+                                  name={props.name}
                                 />
                               );
                             }
@@ -837,6 +814,7 @@ class Activity extends Component {
                             return (
                               <CardWrapper
                                 section={section}
+                                isBaseRecord={isBaseRecord}
                                 isMainWorkspace={props.isMainWorkspace}
                                 activityRecords={state.activityRecords}
                                 clusterElements={clusterElements}
@@ -853,6 +831,8 @@ class Activity extends Component {
                                 toggleRollbackMenu={this._toggleRollbackMenu}
                                 isLocked={props.isLocked}
                                 setHoveredRollback={this._setHoveredRollback}
+                                owner={props.owner}
+                                name={props.name}
                               />
                             );
                           })

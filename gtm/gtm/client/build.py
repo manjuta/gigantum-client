@@ -253,8 +253,8 @@ priority=0""")
         print("\n\n*** Building Gigantum Client image `{}`, please wait...\n\n".format(self.image_name))
 
         if is_windows:
+            # This is a relative path from the *build context* (which is Linux)
             dockerfile_path = dockerize_windows_path(os.path.relpath(dockerfile_path, client_root_dir))
-            client_root_dir = dockerize_windows_path(client_root_dir)
             for path_var in ['CLIENT_CONFIG_FILE', 'SUPERVISOR_CONFIG']:
                 docker_args[path_var] = dockerize_windows_path(docker_args[path_var]) 
 

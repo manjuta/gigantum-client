@@ -76,8 +76,28 @@ const configureUploadData = (config, transactionId) => {
       }
       chunkIndex += 1;
     }
-  });
 
+    if (file.file.size === 0) {
+      const chunk = {
+        file,
+        path,
+        mutationData,
+        accessToken,
+        idToken,
+        transactionId,
+        chunkSize: 0,
+        totalChunks: 1,
+        chunkIndex: 0,
+        uploadId,
+        size: file.file.size,
+        sizeUploaded: 0,
+        proccessed: false,
+        chunkId: uuidv4(),
+      };
+
+      filesData.push(chunk);
+    }
+  });
   return {
     totalSize,
     filesData,
@@ -120,11 +140,11 @@ const chunkForWorkQueue = (filesData) => {
 */
 const getDeadLetterFailures = (deadLetter) => {
   const failures = Object.keys(deadLetter).filter((key) => {
-      return (deadLetter[key].attempts > 3);
+    return (deadLetter[key].attempts > 3);
   });
 
   const failureFileNames = failures.map((key) => {
-      return deadLetter[key].chunk.file.entry.fullPath
+    return deadLetter[key].chunk.file.entry.fullPath
   });
 
   return failureFileNames;
@@ -441,7 +461,14 @@ export default class MultithreadUploader {
       }
 
       if (response && response.completeDatasetUploadTransaction) {
-        FooterUtils.datasetUploadStatus(response, this.finishedCallback);
+        FooterUtils.datasetUploadStatus(
+          response,
+          this.finishedCallback,
+          {
+            owner,
+            name: labbookName,
+          },
+        );
       }
 
       if (error) {

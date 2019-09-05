@@ -1,15 +1,12 @@
 // vendor
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 // components
 import SecretsTable from './SecretsTable';
 import AddSecret from './AddSecret';
 // assets
 import './SecretsCard.scss';
 
-export default class PackageCard extends Component {
-  state = {
-  }
-
+export default class PackageCard extends PureComponent {
   render() {
     const { props } = this;
     return (

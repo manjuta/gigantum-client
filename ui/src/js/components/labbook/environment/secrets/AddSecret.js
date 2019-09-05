@@ -156,27 +156,27 @@ export default class AddSecret extends Component {
             />
           </div>
         </div>
-          <div className="AddSecret__actions flex justify--right">
-            { state.error
-              && <p className="AddSecrets__paragraph AddSecrets__paragraph--error error">{state.error}</p>
-            }
-            <button
-              type="button"
-              className="Btn Btn--flat AddSecrets__btn"
-              disabled={!state.file}
-              onClick={() => this._cancel()}
-            >
-              Cancel
-            </button>
-            <button
-              disabled={(state.file === null) || state.showError}
-              type="button"
-              className="Btn Btn--last"
-              onClick={() => this._uploadFile()}
-            >
-              Save
-            </button>
-          </div>
+        <div className="AddSecret__actions flex justify--right">
+          { state.error
+            && <p className="AddSecrets__paragraph AddSecrets__paragraph--error error">{state.error}</p>
+          }
+          <button
+            type="button"
+            className="Btn Btn--flat AddSecrets__btn"
+            disabled={!state.file}
+            onClick={() => this._cancel()}
+          >
+            Cancel
+          </button>
+          <button
+            disabled={(state.file === null) || state.showError}
+            type="button"
+            className="Btn Btn--last"
+            onClick={() => this._uploadFile()}
+          >
+            Save
+          </button>
+        </div>
       </div>
     );
   }

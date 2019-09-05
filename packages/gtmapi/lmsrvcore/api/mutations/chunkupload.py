@@ -137,8 +137,12 @@ class ChunkUploadMutation(object):
             None
         """
         if not os.path.exists(filename):
-            args = ['dd', 'if=/dev/null', f'of={filename}', 'bs=1', 'count=1', f'seek={total_file_size - 1}']
-            subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            if total_file_size > 0:
+                args = ['dd', 'if=/dev/null', f'of={filename}', 'bs=1', 'count=1', f'seek={total_file_size - 1}']
+                subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            else:
+                # Touch the file so it exists for future seek/write ops
+                open(filename, 'a').close()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **kwargs):
