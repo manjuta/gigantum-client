@@ -29,7 +29,9 @@ LABEL maintainer="Gigantum <support@gigantum.com>"
 COPY packages/gtmcore/requirements.txt /opt/gtmcore/requirements.txt
 COPY packages/gtmapi/requirements.txt /opt/gtmapi/requirements.txt
 COPY packages/confhttpproxy /opt/confhttpproxy
-ENV SHELL=/bin/bash
+ENV SHELL=/bin/bash \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
 
 # Super instruction to install all dependencies
 RUN apt-get -y update && \
