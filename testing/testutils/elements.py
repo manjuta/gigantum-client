@@ -425,9 +425,12 @@ class ImportProjectElements(UiComponent):
     def import_project_drop_box(self):
         return CssElement(self.driver,'.DropZone')
 
-    @property
-    def first_project_card_title(self):
-        return self.driver.find_element_by_css_selector('.LocalLabbooks__panel-title')
+    def local_project_card_titles(self):
+        titles=[]
+        projects = self.driver.find_elements_by_css_selector('.LocalLabbooks__panel-title')
+        for project in projects:
+            titles.append(project.text)
+        return titles
 
     def import_project_via_url(self, project_url):
         self.import_existing_button.wait().click()
@@ -867,6 +870,7 @@ class FileBrowserElements(UiComponent):
         file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
         file_input.send_keys(file_path)
         self.file_information.wait()
+        time.sleep(1)
 
     def link_dataset(self, ds_owner: str, ds_name: str):
         logging.info("Linking the dataset to project")

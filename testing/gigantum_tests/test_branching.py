@@ -45,7 +45,6 @@ def test_delete_file_local_branch(driver: selenium.webdriver, *args, **kwargs):
     time.sleep(4)
     file_browser_elts = testutils.FileBrowserElements(driver)
     file_browser_elts.drag_drop_file_in_drop_zone()
-    time.sleep(4)
     branch_elts = testutils.BranchElements(driver)
     branch_elts.create_local_branch("test-branch")
     time.sleep(8)

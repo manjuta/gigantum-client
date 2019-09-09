@@ -35,7 +35,7 @@ def test_packages(driver: selenium.webdriver, *args, **kwargs):
     env_elts.add_apt_package("vim")
 
     # Installing all packages added to installation queue
-    env_elts.install_queued_packages(180)
+    env_elts.install_queued_packages(240)
     environment_package_versions = [pandas_version, numpy_version]
 
     # Open JupyterLab and create Jupyter notebook
