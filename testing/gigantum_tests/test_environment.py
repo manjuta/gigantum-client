@@ -10,7 +10,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 import testutils
 
-
+'''
 def test_packages(driver: selenium.webdriver, *args, **kwargs):
     """
     Test that pip ,conda and apt packages install successfully.
@@ -109,3 +109,31 @@ def test_invalid_custom_docker(driver: selenium.webdriver, *args, **kwargs):
     cloud_elts = testutils.CloudProjectElements(driver)
     footer_message_text = cloud_elts.sync_cloud_project_message.find().text
     assert "Project failed to build" in footer_message_text, "Expected 'Project failed to build' in footer message"
+'''
+
+def test_vim(driver: selenium.webdriver, *args, **kwargs):
+    # Create project
+    r = testutils.prep_py3_minimal_base(driver)
+    username, project_title = r.username, r.project_name
+
+    # Adding pip apt and conda packages
+    env_elts = testutils.EnvironmentElements(driver)
+    env_elts.open_add_packages_window()
+    env_elts.add_apt_package("vim")
+
+    # Installing all packages added to installation queue
+    env_elts.install_queued_packages(240)
+    # Open JupyterLab and create Jupyter notebook
+    project_control = testutils.ProjectControlElements(driver)
+    project_control.container_status_stopped.wait(120)
+    project_control.launch_devtool('JupyterLab')
+
+    jupyterlab_elts = testutils.JupyterLabElements(driver)
+    jupyterlab_elts.open_terminal_button.wait(30)
+    jupyterlab_elts.open_terminal_button.click()
+    time.sleep(5)
+    #jupyterlab_elts.terminal_input.wait(30)
+    jupyterlab_elts.terminal.click()
+    time.sleep(10)
+    jupyterlab_elts.terminal_input.send_keys("oof")
+    time.sleep(2000)

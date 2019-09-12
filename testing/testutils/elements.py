@@ -365,6 +365,17 @@ class JupyterLabElements(UiComponent):
     def code_output(self):
         return CssElement(self.driver, ".jp-OutputArea-output>pre")
 
+    @property
+    def open_terminal_button(self):
+        return CssElement(self.driver,".jp-TerminalIcon")
+
+    @property
+    def terminal_input(self):
+        return self.driver.find_element_by_css_selector(".jp-main-dock-panel")
+
+    @property
+    def terminal(self):
+        return self.driver.find_element_by_css_selector(".xterm-cursor-layer")
 
 class RStudioElements(UiComponent):
     @property
