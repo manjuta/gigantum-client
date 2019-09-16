@@ -286,6 +286,26 @@ class EnvironmentElements(UiComponent):
     def advanced_configuration_button(self):
         return CssElement(self.driver, ".Btn__advanced")
 
+    @property
+    def add_sensitive_file_manager_upload(self):
+        return self.driver.find_element_by_id('add_secret')
+
+    @property
+    def sensitive_file_label(self):
+        return self.driver.find_element_by_class_name("AddSecret__label")
+
+    @property
+    def sensitive_file_save_button(self):
+        return CssElement(self.driver, ".Btn.Btn--last")
+
+    @property
+    def sensitive_file_table(self):
+        return self.driver.find_elements_by_css_selector(".SecretsTable__name")
+
+    @property
+    def add_sensitive_file_location(self):
+        return self.driver.find_element_by_css_selector(".AddSecret__input")
+
     def specify_package_version(self, version):
         self.specify_version_button.click()
         self.specify_version_textbox.find().send_keys(version)
@@ -316,6 +336,24 @@ class EnvironmentElements(UiComponent):
         logging.info(f"Adding apt package {apt_package}")
         self.package_name_input.find().send_keys(apt_package)
         self.add_button.wait().click()
+
+    def add_sensitive_file(self, sensitive_file_path,sensitive_file_destination):
+        logging.info("Adding sensitive file")
+        file_name = sensitive_file_path.split("/")
+        file_name = file_name[len(file_name)-1]
+        self.environment_tab_button.wait().click()
+        self.driver.execute_script("window.scrollBy(0, 600);")
+        self.advanced_configuration_button.wait().click()
+        self.driver.execute_script("window.scrollBy(0, 600);")
+        self.add_sensitive_file_manager_upload.send_keys(sensitive_file_path)
+        self.add_sensitive_file_location.click()
+        self.add_sensitive_file_location.send_keys(Keys.BACKSPACE)
+        self.add_sensitive_file_location.send_keys(Keys.BACKSPACE)
+        self.add_sensitive_file_location.send_keys(sensitive_file_destination)
+        assert self.sensitive_file_label.text == file_name
+        self.sensitive_file_save_button.click()
+        time.sleep(1)
+        assert self.sensitive_file_table[0].text == file_name
 
     def install_queued_packages(self, timeout_sec):
         logging.info('Waiting for packages to validate')
@@ -363,8 +401,7 @@ class JupyterLabElements(UiComponent):
 
     @property
     def code_output(self):
-        return CssElement(self.driver, ".jp-OutputArea-output>pre")
-
+        return self.driver.find_element_by_css_selector(".jp-OutputArea-output>pre")
 
 class RStudioElements(UiComponent):
     @property

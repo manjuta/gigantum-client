@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 import testutils
+import os
 
 
 def test_packages(driver: selenium.webdriver, *args, **kwargs):
@@ -109,3 +110,38 @@ def test_invalid_custom_docker(driver: selenium.webdriver, *args, **kwargs):
     cloud_elts = testutils.CloudProjectElements(driver)
     footer_message_text = cloud_elts.sync_cloud_project_message.find().text
     assert "Project failed to build" in footer_message_text, "Expected 'Project failed to build' in footer message"
+
+
+def test_sensitive_file_manager(driver: selenium.webdriver, *args, **kwargs):
+    r = testutils.prep_py3_minimal_base(driver)
+    username, project_name = r.username, r.project_name
+    env_elts = testutils.EnvironmentElements(driver)
+    env_elts.add_sensitive_file(f'{os.environ["HOME"]}/gigantum-client/testing/driver.py','mnt/labbook/code')
+    project_control = testutils.ProjectControlElements(driver)
+    project_control.launch_devtool('JupyterLab')
+    jupyterlab_elts = testutils.JupyterLabElements(driver)
+    jupyterlab_elts.jupyter_notebook_button.wait(60)
+    time.sleep(1)
+    jupyterlab_elts.jupyter_notebook_button.click()
+    logging.info("Parsing selected file")
+    f = open("driver.py","r")
+    driver_text = ""
+    for line in f:
+        driver_text+=line
+    f.close()
+    logging.info("Printing file info in jupyter")
+    print_file = 'f = open("driver.py","r") \n'\
+                'for line in f:\n' \
+                'print(line.strip("\\n"))'
+    time.sleep(1)
+    actions = ActionChains(driver)
+    actions.move_to_element(jupyterlab_elts.code_input.find()) \
+        .click(jupyterlab_elts.code_input.find()) \
+        .send_keys(print_file) \
+        .key_down(Keys.SHIFT).send_keys(Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.CONTROL) \
+        .perform()
+
+    logging.info("Reading file info from jupyter")
+    output = jupyterlab_elts.code_output
+
+    assert output.text+"\n" == driver_text
