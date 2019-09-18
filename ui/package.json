@@ -119,7 +119,6 @@
     "react-slick": "^0.23.2",
     "react-syntax-highlighter": "^10.1.2",
     "react-tag-input": "^6.3.0",
-    "react-text-truncate": "^0.13.1",
     "react-virtualized": "^9.21.0",
     "react-youtube": "^7.6.0",
     "redux": "^4.0.1",

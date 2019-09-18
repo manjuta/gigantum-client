@@ -58,6 +58,7 @@ export default class ImportModule extends Component {
       remoteURL: '',
       showImportModal: false,
       ready: null,
+      isOver: false,
     };
 
     this._getBlob = this._getBlob.bind(this);
@@ -142,21 +143,27 @@ export default class ImportModule extends Component {
     const nameArray = dataTransfer.files[0].name.split('-');
     nameArray.pop();
     const name = nameArray.join('-');
-    this.setState({
-      files: dataTransfer.files,
-      ready: {
-        owner: localStorage.getItem('username'),
-        name,
-      },
-    });
+    const nameArrayExtension = dataTransfer.files[0].name.split('.');
+    const extension = nameArrayExtension[nameArrayExtension.length - 1];
+    if ((extension === 'zip') || (extension === 'lbk')) {
+      this.setState({
+        files: dataTransfer.files,
+        ready: {
+          owner: localStorage.getItem('username'),
+          name,
+        },
+      });
+    }
   }
 
   /**
   *  @param {Object} event
+  *  @param {Boolean} isOver
   *  preventDefault on dragOver event
   */
-  _dragoverHandler = (evt) => { // use evt, event is a reserved word in chrome
+  _dragoverHandler = (evt, isOver) => { // use evt, event is a reserved word in chrome
     evt.preventDefault(); // this kicks the event up the event loop
+    this.setState({ isOver });
   }
 
   /**
@@ -170,7 +177,7 @@ export default class ImportModule extends Component {
     evt.dataTransfer.effectAllowed = 'none';
     evt.dataTransfer.dropEffect = 'none';
     this._getBlob(dataTransfer);
-
+    this.setState({ isOver: false })
     return false;
   }
 
@@ -321,6 +328,7 @@ export default class ImportModule extends Component {
                   error: false,
                 },
               });
+              this.setState({ ready: null });
               if (props.section === 'labbook') {
                 prepareUpload(state.files[0], 'ImportLabbookMutation', buildImage, state, props.history);
               } else {
@@ -563,7 +571,11 @@ const ImportModal = ({ self }) => {
   const owner = state.ready ? state.ready.owner : '';
   const name = state.ready ? state.ready.name : '';
   const section = props.section === 'labbook' ? 'Project' : 'Dataset';
-
+  const dropBoxCSS = classNames({
+    'Dropbox ImportDropzone flex flex--column align-items--center': true,
+    'Dropbox--hovered': state.isOver,
+    'Dropbox--dropped': state.ready && state.files[0],
+  });
   return (
     <div className="Import__main">
       {
@@ -587,12 +599,12 @@ const ImportModal = ({ self }) => {
 
             <div
               id="dropZone"
-              className="ImportDropzone"
+              className={dropBoxCSS}
               ref={div => self.dropZone = div}
               type="file"
-              onDragEnd={evt => self._dragendHandler(evt)}
+              onDragEnd={evt => self._dragendHandler(evt, false)}
               onDrop={evt => self._dropHandler(evt)}
-              onDragOver={evt => self._dragoverHandler(evt)}
+              onDragOver={evt => self._dragoverHandler(evt, true)}
             >
               {
                  (state.ready && state.files[0])

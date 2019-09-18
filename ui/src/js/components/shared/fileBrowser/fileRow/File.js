@@ -4,7 +4,6 @@ import Moment from 'moment';
 import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
 import { DragSource } from 'react-dnd';
-import TextTruncate from 'react-text-truncate';
 // config
 import config from 'JS/config';
 // store
@@ -309,6 +308,18 @@ class File extends Component {
     }
   }
 
+  /**
+  *  @param {String} isLaunchable
+  *  @param {String} devTool
+  *  checks if devtool is launchable
+  *  @return {}
+  */
+  _validateFile = (isLaunchable, devTool) => {
+    if (isLaunchable) {
+      this._openDevTool(devTool);
+    }
+  }
+
   render() {
     const { props, state } = this;
     const { node } = props.fileData.edge;
@@ -322,6 +333,7 @@ class File extends Component {
       isNotebook,
       isRFile,
     } = getDevTool(fileName);
+    const isLaunchable = isNotebook || isRFile;
     const addButtonDisabled = (state.newFileName === fileName);
     // declare css here
     const fileRowCSS = classNames({
@@ -342,10 +354,6 @@ class File extends Component {
     const renameCSS = classNames({
       'File__cell File__cell--edit': true,
       hidden: !state.renameEditMode,
-    });
-    const truncateCSS = classNames({
-      File__paragragh: true,
-      'File__paragragh--external': isNotebook || isRFile,
     });
 
     const file = (
@@ -376,22 +384,12 @@ class File extends Component {
 
             <div className={`File__icon ${fileIconsJs.getClass(fileName)}`} />
 
-            <div className="File__text">
-              { props.expanded
-                && (
-                <TextTruncate
-                  className={truncateCSS}
-                  line={1}
-                  truncateText="…"
-                  text={fileName}
-                  onClick={() => {
-                    if (isNotebook || isRFile) {
-                      this._openDevTool(devTool);
-                    }
-                  }}
-                />
-                )
-              }
+            <div
+              className="File__text"
+              role="presentation"
+              onClick={() => this._validateFile(isLaunchable, devTool)}
+            >
+              {fileName}
             </div>
           </div>
 

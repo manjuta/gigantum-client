@@ -102,9 +102,10 @@
           border: 1px solid $azure;
           margin-left: -4px;
         }
+        &:hover:disabled,
         &:disabled{
             background: $background-color url(~Images/icons/branches/chevron-disabled.svg) no-repeat center center;
-            background-size: 20px !important;
+            background-size: 20px;
             border: 1px solid $romanSilver;
             color: $romanSilver;
             cursor: auto;

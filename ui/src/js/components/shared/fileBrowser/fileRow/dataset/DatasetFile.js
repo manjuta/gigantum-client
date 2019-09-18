@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import Moment from 'moment';
 import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
-import TextTruncate from 'react-text-truncate';
 // config
 import config from 'JS/config';
 // components
@@ -44,17 +43,7 @@ class File extends Component {
             <div className={`File__icon ${fileIconsJs.getClass(fileName)}`} />
 
             <div className="File__text">
-              {
-                props.expanded
-                && (
-                  <TextTruncate
-                    className="File__paragragh"
-                    line={1}
-                    truncateText="…"
-                    text={fileName}
-                  />
-                )
-               }
+              {fileName}
             </div>
 
           </div>

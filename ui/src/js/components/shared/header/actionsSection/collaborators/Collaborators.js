@@ -48,7 +48,7 @@ class CollaboratorButton extends Component {
     	this.state = {
       collaboratorModalVisible: false,
       canClickCollaborators: false,
-      sessionValid: true,
+      sessionValid: false,
     };
 
     this._toggleCollaborators = this._toggleCollaborators.bind(this);
@@ -73,23 +73,27 @@ class CollaboratorButton extends Component {
   }
 
   /**
-  *  @param {}
+  *  @param {Function} retry
   *  shows hide collaborators modal
   *  @return {}
   */
-  _toggleCollaborators() {
+  _toggleCollaborators(retry) {
+    const { props, state } = this;
     if (navigator.onLine) {
-      if (this.state.sessionValid) {
-        this.setState({ collaboratorModalVisible: !this.state.collaboratorModalVisible });
+      if (state.sessionValid) {
+        this.setState({ collaboratorModalVisible: !state.collaboratorModalVisible });
       } else {
-        this.props.auth.renewToken(true, () => {
-          this.props.showLoginPrompt();
+        props.auth.renewToken(true, () => {
+          props.showLoginPrompt();
         }, () => {
-          this.setState({ collaboratorModalVisible: !this.state.collaboratorModalVisible });
+          if (retry) {
+            retry();
+          }
+          this.setState({ collaboratorModalVisible: !state.collaboratorModalVisible });
         });
       }
     } else {
-      this.props.showLoginPrompt();
+      props.showLoginPrompt();
     }
   }
 
@@ -198,11 +202,18 @@ class CollaboratorButton extends Component {
 
               <div className={collaboratorCSS}>
                 <button
-                  onClick={() => this._toggleCollaborators()}
+                  onClick={() => this._toggleCollaborators(response.retry)}
                   className={collaboratorButtonCSS}
                 >
                       Collaborators
                   <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
+                  {
+                    (collaboratorNames.length === 0)
+                    &&
+                    <p className="Collaborators__icon--add">
+                      Click to add
+                    </p>
+                  }
                 </button>
 
                 {
@@ -246,6 +257,7 @@ class CollaboratorButton extends Component {
                 >
                       Collaborators
                   <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
+
                 </button>
 
                 {

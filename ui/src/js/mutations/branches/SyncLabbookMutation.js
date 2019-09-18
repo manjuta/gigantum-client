@@ -53,7 +53,6 @@ export default function SyncLabbookMutation(
     isLast: false,
     error: false,
     messageBody: [{ message: startMessage }],
-    messageListOpen: false,
   };
   setMultiInfoMessage(messageData);
 
@@ -80,7 +79,6 @@ export default function SyncLabbookMutation(
             successCall,
             failureCall,
             id,
-            hideFooter: true,
           };
 
           FooterUtils.getJobStatus(footerData);

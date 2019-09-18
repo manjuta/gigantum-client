@@ -75,6 +75,7 @@
       min-height: 20px;
       background: url(~Images/icons/folder.svg) no-repeat 0% 50%;
       background-size: 20px;
+      overflow: hidden;
   }
 
   &--open{
@@ -186,4 +187,8 @@
     flex: 1;
     text-align: left;
     align-self: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    word-break: break-all;
 }

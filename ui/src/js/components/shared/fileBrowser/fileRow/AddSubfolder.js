@@ -152,6 +152,8 @@ class AddSubfolder extends Component {
         onClick={() => { this._updateStateBoolean('editMode', true); }}
         style={props.rowStyle}
         className={addFolderCSS}
+        role="presentation"
+        data-click-id="addFolder"
       >
         <div className={subfolderTextCSS}>
             Add Folder
@@ -164,6 +166,7 @@ class AddSubfolder extends Component {
               type="text"
               className="AddSubfolder__input"
               onKeyUp={(evt) => { this._updateFolderName(evt); }}
+              data-click-id="addFolder"
             />
             { (state.folderName.length > 0)
               && (
@@ -171,24 +174,25 @@ class AddSubfolder extends Component {
                   type="button"
                   className="Btn--noShadow Btn Btn--flat"
                   onClick={() => { this._clearInput(); }}
+                  data-click-id="addFolder"
                 >
                   Clear
                 </button>
               )
             }
           </div>
-          <div className="flex justify--space-around">
-            <button
-              type="button"
-              className="File__btn--round File__btn--cancel"
-              onClick={() => { this._clearInput(); }}
-            />
-            <button
-              type="button"
-              className="File__btn--round File__btn--add"
-              onClick={() => { this._triggerMutation(); }}
-            />
-          </div>
+        </div>
+        <div className="flex justify--space-around">
+          <button
+            type="button"
+            className="File__btn--round File__btn--cancel"
+            onClick={() => props.setAddFolderVisible(false)}
+          />
+          <button
+            type="button"
+            className="File__btn--round File__btn--add"
+            onClick={() => { this._triggerMutation(); }}
+          />
         </div>
       </div>
     );

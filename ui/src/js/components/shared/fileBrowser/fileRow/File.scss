@@ -47,6 +47,7 @@
   &--name{
       margin: 0 20px;
       flex: 1;
+      overflow: hidden;
       @extend .UserSelect--none;
   }
 
@@ -75,6 +76,10 @@
   text-align: left;
   align-self: center;
   position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
   @extend .UserSelect--none;
 }
 
@@ -183,7 +188,7 @@
     padding: 0;
 
     border: 0 !important;
-
+    margin: 0 5px;
     border-radius: 15px;
   }
 

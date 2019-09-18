@@ -66,6 +66,7 @@
       min-height: 20px;
       background: url(~Images/icons/folder-white.svg) no-repeat 0% 50%;
       background-size: 20px;
+      overflow: hidden;
   }
 
   &--open{

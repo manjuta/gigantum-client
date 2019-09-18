@@ -211,8 +211,7 @@
       color: $jet;
       font-size: 15px;
 
-      &:focus,
-      &:disabled, {
+      &:focus {
         cursor: pointer;
         background-color: $white;
         border: 0px solid $white;
@@ -228,13 +227,15 @@
         border: 0px solid $white;
       }
 
+      &:disabled,
       &.disabled,
-       .disabled:hover{
-          width: 100%;
+      .disabled:hover{
+          cursor: auto;
+          width: auto;
           margin: 1.5px 0;
           background-color: $white;
           border: 0px solid $white;
-          opacity: 0.3;
+          color: $grey;
        }
      }
 
