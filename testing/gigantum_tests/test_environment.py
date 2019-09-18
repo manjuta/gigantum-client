@@ -14,7 +14,7 @@ import os
 
 def test_packages(driver: selenium.webdriver, *args, **kwargs):
     """
-    Test that pip ,conda and apt packages install successfully.
+    Test that pip ,conda, and apt packages install successfully.
 
     Args:
         driver
@@ -25,7 +25,7 @@ def test_packages(driver: selenium.webdriver, *args, **kwargs):
     r = testutils.prep_py3_minimal_base(driver)
     username, project_title = r.username, r.project_name
 
-    # Adding pip apt and conda packages
+    # Adding pip apt, conda, and apt packages
     env_elts = testutils.EnvironmentElements(driver)
     env_elts.open_add_packages_window()
     pandas_version = '0.24.0'
@@ -35,8 +35,8 @@ def test_packages(driver: selenium.webdriver, *args, **kwargs):
     env_elts.add_conda_package("numpy", numpy_version)
     env_elts.add_apt_package("vim")
 
-    # Installing all packages added to installation queue
-    env_elts.install_queued_packages(240)
+    # Install all packages added to installation queue
+    env_elts.install_queued_packages(300)
     environment_package_versions = [pandas_version, numpy_version]
 
     # Open JupyterLab and create Jupyter notebook
@@ -66,6 +66,106 @@ def test_packages(driver: selenium.webdriver, *args, **kwargs):
 
     assert environment_package_versions == jupyterlab_package_versions,\
         "Environment and JupyterLab package versions do not match"
+
+
+def test_package_removal_via_trash_can_button(driver: selenium.webdriver, *args, **kwargs):
+    """
+    Test that packages can be removed successfully via trash can button.
+    """
+    # Create project
+    r = testutils.prep_py3_minimal_base(driver)
+    username, project_title = r.username, r.project_name
+    package = "gigantum"
+
+    # Add pip package
+    env_elts = testutils.EnvironmentElements(driver)
+    env_elts.open_add_packages_window()
+    time.sleep(1)
+    env_elts.add_pip_package(package)
+    env_elts.install_queued_packages(300)
+    project_control_elts = testutils.ProjectControlElements(driver)
+    project_control_elts.close_notification_menu_button.find().click()
+
+    # Check that pip package exists in the UI
+    assert env_elts.package_info_table_version_one.find().is_displayed(), \
+        f"{package} package was not installed successfully since it is not visible in the UI"
+
+    # Check that pip package was installed inside the container
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_running.wait(30)
+    container_pip_packages = env_elts.obtain_container_pip_packages(username, project_title)
+
+    assert package in container_pip_packages, \
+        f"{package} package was not installed successfully since it is not installed inside the container"
+
+    # Stop container
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_stopped.wait()
+    # Delete package via trash can button
+    env_elts.delete_package_via_trash_can_button(package)
+
+    assert env_elts.check_if_packages_is_empty(), \
+        f"{package} package was not deleted successfully from the UI via trash can button"
+
+    # Start container
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_running.wait(30)
+    # Check pip package is not installed inside container
+    container_pip_packages = env_elts.obtain_container_pip_packages(username, project_title)
+
+    assert package not in container_pip_packages, \
+        f"{package} package still found inside the container after deletion via trash can button"
+
+
+def test_package_removal_via_check_box_button(driver: selenium.webdriver, *args, **kwargs):
+    """
+    Test that packages can be removed successfully via check box button.
+    """
+    # Create project
+    r = testutils.prep_py3_minimal_base(driver)
+    username, project_title = r.username, r.project_name
+    package = "gtmunit1"
+
+    # Add pip package
+    env_elts = testutils.EnvironmentElements(driver)
+    env_elts.open_add_packages_window()
+    time.sleep(1)
+    env_elts.add_pip_package(package)
+    env_elts.install_queued_packages(300)
+    project_control_elts = testutils.ProjectControlElements(driver)
+    project_control_elts.close_notification_menu_button.find().click()
+
+    # Check that pip package exists in the UI
+    assert env_elts.package_info_table_version_one.find().is_displayed(), \
+        f"{package} package was not installed successfully since it is not visible in the UI"
+
+    # Check that pip package was installed inside the container
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_running.wait(30)
+    container_pip_packages = env_elts.obtain_container_pip_packages(username, project_title)
+
+    assert package in container_pip_packages, \
+        f"{package} package was not installed successfully since it is not installed inside the container"
+
+    # Stop container
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_stopped.wait()
+
+    # Delete package via check box button
+    env_elts.delete_package_via_check_box_button(package)
+
+    assert env_elts.check_if_packages_is_empty(), \
+        f"{package} package was not deleted successfully from the UI via check box button"
+
+    # Start container
+    project_control_elts = testutils.ProjectControlElements(driver)
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_running.wait(30)
+    # Check pip package is not installed inside container
+    container_pip_packages = env_elts.obtain_container_pip_packages(username, project_title)
+
+    assert package not in container_pip_packages, \
+        f"{package} package still found inside the container after deletion via check box button"
 
 
 def test_valid_custom_docker(driver: selenium.webdriver, *args, **kwargs):
