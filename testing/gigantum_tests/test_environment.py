@@ -68,9 +68,47 @@ def test_packages(driver: selenium.webdriver, *args, **kwargs):
         "Environment and JupyterLab package versions do not match"
 
 
+def test_packages_requirements_file(driver: selenium.webdriver, *args, **kwargs):
+    """
+    Test that packages can be installed successfully using a requirements.txt file.
+
+    Args:
+        driver
+    """
+    # Create project
+    r = testutils.prep_py3_minimal_base(driver)
+    username, project_title = r.username, r.project_name
+
+    # Open packages window
+    env_elts = testutils.EnvironmentElements(driver)
+    env_elts.open_add_packages_window()
+    env_elts.add_requirements_file_button.find().click()
+
+    # Drag and drop requirements.txt
+    file_browser_elts = testutils.FileBrowserElements(driver)
+    file_browser_elts.drag_drop_requirements_file_in_drop_zone()
+    env_elts.install_queued_packages(300)
+    project_control_elts = testutils.ProjectControlElements(driver)
+    project_control_elts.close_notification_menu_button.find().click()
+
+    assert env_elts.package_info_table_version_one.contains_text("0.19"), \
+        "gigantum==0.19 package was not installed successfully since it is not visible in the UI"
+
+    # Check that pip package was installed inside the container
+    project_control_elts.start_stop_container_button.find().click()
+    project_control_elts.container_status_running.wait(30)
+    container_pip_packages = env_elts.obtain_container_pip_packages(username, project_title)
+
+    assert "gigantum==0.19" in container_pip_packages, \
+        "gigantum==0.19 package was not installed successfully since it is not installed inside the container"
+
+
 def test_package_removal_via_trash_can_button(driver: selenium.webdriver, *args, **kwargs):
     """
     Test that packages can be removed successfully via trash can button.
+
+    Args:
+        driver
     """
     # Create project
     r = testutils.prep_py3_minimal_base(driver)
@@ -120,6 +158,9 @@ def test_package_removal_via_trash_can_button(driver: selenium.webdriver, *args,
 def test_package_removal_via_check_box_button(driver: selenium.webdriver, *args, **kwargs):
     """
     Test that packages can be removed successfully via check box button.
+
+    Args:
+        driver
     """
     # Create project
     r = testutils.prep_py3_minimal_base(driver)
@@ -213,6 +254,12 @@ def test_invalid_custom_docker(driver: selenium.webdriver, *args, **kwargs):
 
 
 def test_sensitive_file_manager(driver: selenium.webdriver, *args, **kwargs):
+    """
+    Test sensitive file manager.
+
+    Args:
+        driver
+    """
     r = testutils.prep_py3_minimal_base(driver)
     username, project_name = r.username, r.project_name
     env_elts = testutils.EnvironmentElements(driver)

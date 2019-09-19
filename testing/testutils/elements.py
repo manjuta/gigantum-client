@@ -228,6 +228,10 @@ class EnvironmentElements(UiComponent):
         return CssElement(self.driver, ".PackageDependencies__input--version")
 
     @property
+    def add_requirements_file_button(self):
+        return CssElement(self.driver, ".AddPackages__header--file")
+
+    @property
     def add_button(self):
         return CssElement(self.driver, ".Btn__add")
 
@@ -921,6 +925,14 @@ class FileBrowserElements(UiComponent):
         return CssElement(self.driver, "#data")
 
     @property
+    def requirements_file_area(self):
+        return CssElement(self.driver, ".Dropbox")
+
+    @property
+    def requirements_file_information(self):
+        return CssElement(self.driver, ".Requirements__dropped-file")
+
+    @property
     def file_browser_area(self):
         return CssElement(self.driver, ".FileBrowser")
 
@@ -951,6 +963,21 @@ class FileBrowserElements(UiComponent):
     @property
     def link_dataset_button(self):
         return CssElement(self.driver, ".Btn__FileBrowserAction--link")
+
+    def drag_drop_requirements_file_in_drop_zone(self, file_content="gigantum==0.19"):
+        logging.info("Dragging and dropping a requirements.txt file into the drop zone")
+        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
+            js_script = js_file.read()
+        if os.name == 'nt':
+            file_path = "C:\\tmp\\requirements.txt"
+        else:
+            file_path = "/tmp/requirements.txt"
+        with open(file_path, "w") as example_file:
+            example_file.write(file_content)
+        file_input = self.driver.execute_script(js_script, self.requirements_file_area.find(), 0, 0)
+        file_input.send_keys(file_path)
+        self.requirements_file_information.wait()
+        time.sleep(1)
 
     def is_file_browser_empty(self):
         return CssElement(self.driver, ".Dropbox--menu").contains_text('Drag and drop files here')
