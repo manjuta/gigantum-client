@@ -24,6 +24,6 @@ container:
 # Dispatcher and permitted number of workers -
 # NOTE! Only the default queue is burstable
 dispatcher:
-  gigantum_default_queue: 10
+  gigantum_default_queue: 6
   gigantum_build_queue: 1
   gigantum_publish_queue: 2

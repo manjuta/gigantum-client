@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import argparse
 import sys
 import os
@@ -159,8 +140,8 @@ def client_actions(args):
         sys.exit(1)
 
 
-def demo_actions(args):
-    """Method to provide logic and perform actions for the LabManager component
+def cloud_actions(args):
+    """Method to provide logic and perform actions for the cloud-client component
 
     Args:
         args(Namespace): Parsed arguments
@@ -169,7 +150,7 @@ def demo_actions(args):
         None
     """
 
-    builder = client.build.ClientBuilder("gigantum/gigantum-cloud-demo")
+    builder = client.build.ClientBuilder("gigantum/cloud-client")
     if "override_name" in args:
         if args.override_name:
             builder.image_name = args.override_name
@@ -177,9 +158,9 @@ def demo_actions(args):
     if args.action == "build":
 
         build_args = {"build_dir": os.path.join("build", "demo"),
-                      "supervisor_file": os.path.join("resources", "client", "supervisord-demo.conf"),
+                      "supervisor_file": os.path.join("resources", "client", "supervisord-cloud.conf"),
                       "config_override_file": os.path.join("resources", "client",
-                                                           "demo-config-override.yaml")}
+                                                           "cloud-config-override.yaml")}
 
         docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
                        "NGINX_UI_CONFIG": "resources/client/nginx_ui.conf",
@@ -192,7 +173,7 @@ def demo_actions(args):
         builder.build_image(no_cache=args.no_cache, build_args=build_args, docker_args=docker_args)
 
         # Print Name of image
-        print("\n\n*** Built LabManager Image with Demo configuration: {}\n".format(builder.image_name))
+        print("\n\n*** Built Cloud Client: {}\n".format(builder.image_name))
 
     elif args.action == "publish":
         image_tag = None
@@ -205,10 +186,10 @@ def demo_actions(args):
         # Print Name of image
         if not image_tag:
             image_tag = "latest"
-        print("\n\n*** Published Demo Image: gigantum/gigantum-cloud-demo:{}\n".format(image_tag))
+        print("\n\n*** Published Cloud Client Image: gigantum/cloud-client:{}\n".format(image_tag))
 
     elif args.action == "prune":
-        builder.cleanup("gigantum/gigantum-cloud-demo")
+        builder.cleanup("gigantum/cloud-client")
 
     else:
         print("Error: Unsupported action provided: `{}`".format(args.action), file=sys.stderr)
@@ -333,9 +314,9 @@ def main():
                             ["log", "Show the client log file in real-time"],
                             ]
 
-    components['demo'] = [["build", "Build the LabManager Docker image"],
-                          ["prune", "Remove all images except the latest build"],
-                          ["publish", "Publish the latest build to Docker Hub as a Demo release"]]
+    components['cloud-client'] = [["build", "Build the Cloud Client Docker image"],
+                                  ["prune", "Remove all images except the latest build"],
+                                  ["publish", "Publish the latest build to Docker Hub"]]
 
     components['dev'] = [["setup", "Generate configuration for development. YOU MUST RUN THIS BEFORE USING GTM."],
                          ["build", "Build the Client Development Docker image"],
@@ -395,8 +376,8 @@ def main():
     elif args.component == "circleci":
         # CircleCI Selected
         circleci_actions(args)
-    elif args.component == "demo":
-        demo_actions(args)
+    elif args.component == "cloud-client":
+        cloud_actions(args)
     elif args.component == "mitm":
         mitm_actions(args)
 
