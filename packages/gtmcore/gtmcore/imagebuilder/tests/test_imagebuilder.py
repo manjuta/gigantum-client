@@ -7,7 +7,7 @@ import shutil
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.environment import ComponentManager, RepositoryManager
 from gtmcore.fixtures import labbook_dir_tree, mock_config_file, setup_index, mock_config_with_repo, mock_labbook, \
-    ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
+    ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, mock_enabled_iframes
 from gtmcore.environment.bundledapp import BundledAppManager
 
 import gtmcore.fixtures
@@ -169,6 +169,26 @@ class TestImageBuilder(object):
                       'EXPOSE 8050',
                       'EXPOSE 9000',
                       'EXPOSE 9001']
+
+        docker_lines = dockerfile_text.split(os.linesep)
+        for line in test_lines:
+            assert line in docker_lines
+
+    def test_iframe_support(self, mock_enabled_iframes):
+        """Test if the Dockerfile builds with iframe support when enabled"""
+        lb = mock_enabled_iframes[2]
+        erm = RepositoryManager(mock_enabled_iframes[0])
+        erm.update_repositories()
+        erm.index_repositories()
+        cm = ComponentManager(lb)
+        cm.add_base('gigantum_base-images', 'rstudio-server', 1)
+
+        ib = ImageBuilder(lb)
+        dockerfile_text = ib.assemble_dockerfile(write=False)
+        test_lines = ["# Enable IFrame support in JupyterLab/Jupyter Notebook",
+                      "COPY jupyter_notebook_config.py /etc/jupyter",
+                      "# Enable IFrame support in RStudio",
+                      'RUN echo "\\n#Enable IFrames\\nwww-frame-origin=gigantum.com\\n" >> /etc/rstudio/rserver.conf']
 
         docker_lines = dockerfile_text.split(os.linesep)
         for line in test_lines:

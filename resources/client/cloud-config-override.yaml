@@ -11,6 +11,13 @@ auth:
   identity_manager: browser
 
 
+environment:
+  iframe:
+    enabled: true
+    allowed_origin: gtm-dev.cloud
+
+
+
 # LabBook Container Configuration
 container:
   # If null, no limit

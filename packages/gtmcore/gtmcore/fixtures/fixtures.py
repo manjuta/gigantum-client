@@ -377,6 +377,30 @@ def mock_labbook():
 
 
 @pytest.fixture()
+def mock_enabled_iframes():
+    """A pytest fixture that creates a temporary directory and a config file to match.
+    Deletes directory after test"""
+    overrides = {"environment": {
+        "repo_url": ["https://github.com/gigantum/base-images.git"],
+        "iframe": {
+           "enabled": True,
+           "allowed_origin": "gigantum.com"
+        }
+        }}
+
+    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
+    erm = RepositoryManager(conf_file)
+    erm.update_repositories()
+    erm.index_repositories()
+
+    im = InventoryManager(conf_file)
+    # description was "my first labbook1"
+    lb = im.create_labbook('test', 'test', 'labbook1', description="my test description")
+    yield conf_file, lb.root_dir, lb
+    shutil.rmtree(working_dir)
+
+
+@pytest.fixture()
 def mock_labbook_lfs_disabled():
     """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
 
