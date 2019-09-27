@@ -10,9 +10,6 @@ flask:
 auth:
   identity_manager: browser
 
-proxy:
-  apparent_proxy_port: 80
-
 
 # LabBook Container Configuration
 container:
@@ -28,5 +25,5 @@ container:
 # NOTE! Only the default queue is burstable
 dispatcher:
   gigantum_default_queue: 10
-  gigantum_build_queue: 4
-  gigantum_publish_queue: 8
+  gigantum_build_queue: 1
+  gigantum_publish_queue: 2
