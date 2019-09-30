@@ -58,6 +58,7 @@ class InventoryManager(object):
         return isinstance(other, InventoryManager) \
                and self.inventory_root == other.inventory_root
 
+    # TODO 1069 - this is somewhat redundant with the owner property on labbook (and probably dataset?). Standardize.
     @staticmethod
     def query_owner(repository: Repository) -> str:
         """Returns the Repository's owner in the Inventory. """

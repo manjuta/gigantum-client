@@ -4,7 +4,6 @@ import time
 import json
 import pandas
 import redis
-from docker.errors import NotFound
 import mitmproxy.io as mitmio
 from mitmproxy.exceptions import FlowReadException
 from typing import (Dict, List, Optional, BinaryIO)
@@ -20,7 +19,7 @@ from gtmcore.activity.processors.rserver import (RStudioServerCodeProcessor,
                                                  RStudioServerPlaintextProcessor,
                                                  RStudioServerImageExtractorProcessor)
 from gtmcore.activity.services import stop_dev_env_monitors
-from gtmcore.configuration import get_docker_client
+from gtmcore.container import container_for_context
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
@@ -106,6 +105,9 @@ class RServerMonitor(DevEnvMonitor):
             dev_env_monitor_key: The unique string used as the key in redis to track this DevEnvMonitor instance
             database: The redis database number for dev env monitors to use
         """
+        # We decode some info from the dev_env_monitor_key (a little brittle)
+        _, username, owner, labbook_name, devtool_name = dev_env_monitor_key.split(':')
+
         redis_conn = redis.Redis(db=database)
         activity_monitor_key = f'{dev_env_monitor_key}:activity_monitor'
 
@@ -120,15 +122,9 @@ class RServerMonitor(DevEnvMonitor):
             stop_dev_env_monitors(dev_env_monitor_key, redis_conn, 'unknown')
             return
 
-        # For now, we directly query docker, this could be cleaned up in #453
-        client = get_docker_client()
-        try:
-            dev_env_container_status = client.containers.get(labbook_container_name).status
-        except NotFound:
-            dev_env_container_status = 'not found'
 
         # Clean up and return labbook container names for running proxies
-        running_proxy_lb_names = MITMProxyOperations.get_running_proxies()
+        running_proxy_lb_names = MITMProxyOperations.get_running_proxies(username)
 
         # As part of #453, we should re-start the proxy if the dev tool is still running
         if labbook_container_name not in running_proxy_lb_names:
@@ -137,44 +133,46 @@ class RServerMonitor(DevEnvMonitor):
             logger.info(f"Running proxies: {running_proxy_lb_names}")
             # This should clean up everything it's managing
             stop_dev_env_monitors(dev_env_monitor_key, redis_conn, labbook_container_name)
-        elif dev_env_container_status != "running":
-            # RStudio container isn't running anymore. Clean up by setting run flag to `False` so worker exits
-            logger.info(f"Detected exited RStudio Project {labbook_container_name}. Stopping monitoring for {activity_monitor_key}")
-            logger.info(f"Running proxies: {running_proxy_lb_names}")
-            # This should clean up everything it's managing
-            stop_dev_env_monitors(dev_env_monitor_key, redis_conn, labbook_container_name)
-            # I don't believe we yet have a way to fit MITM proxy cleanup into the abstract dev env monitor machinery
-            # Could be addressed in #453
-            MITMProxyOperations.stop_mitm_proxy(labbook_container_name)
         else:
-            am_running = redis_conn.hget(activity_monitor_key, 'run')
-            if not am_running or am_running.decode() == 'False':
-                # Get author info
-                # RB this is not populated until a labbook is started why running?
-                author_name = redis_conn.hget(dev_env_monitor_key, "author_name").decode()
-                author_email = redis_conn.hget(dev_env_monitor_key, "author_email").decode()
-                # Start new Activity Monitor
-                _, user, owner, labbook_name, dev_env_name = dev_env_monitor_key.split(':')
+            labbook_container = container_for_context(username, override_image_name=labbook_container_name)
+            if labbook_container.query_container() != "running":
+                # RStudio container isn't running anymore. Clean up by setting run flag to `False` so worker exits
+                logger.info(f"Detected exited RStudio Project {labbook_container_name}. Stopping monitoring for {activity_monitor_key}")
+                logger.info(f"Running proxies: {running_proxy_lb_names}")
+                # This should clean up everything it's managing
+                stop_dev_env_monitors(dev_env_monitor_key, redis_conn, labbook_container_name)
+                # I don't believe we yet have a way to fit MITM proxy cleanup into the abstract dev env monitor machinery
+                # Could be addressed in #453
+                MITMProxyOperations.stop_mitm_proxy(username, labbook_container_name)
+                return
 
-                args = {"module_name": "gtmcore.activity.monitors.monitor_rserver",
-                        "class_name": "RStudioServerMonitor",
-                        "user": user,
-                        "owner": owner,
-                        "labbook_name": labbook_name,
-                        "monitor_key": activity_monitor_key,
-                        "author_name": author_name,
-                        "author_email": author_email,
-                        "session_metadata": None}
+        # We haven't found any major issues
+        am_running = redis_conn.hget(activity_monitor_key, 'run')
+        if not am_running or am_running.decode() == 'False':
+            # We need to configure and run a fresh Activity Monitor
+            author_name = redis_conn.hget(dev_env_monitor_key, "author_name").decode()
+            author_email = redis_conn.hget(dev_env_monitor_key, "author_email").decode()
 
-                d = Dispatcher()
-                process_id = d.dispatch_task(jobs.start_and_run_activity_monitor, kwargs=args, persist=True)
-                logger.info(f"Started RStudio Server Notebook Activity Monitor: Process {process_id}")
+            # start new Activity Monitor
+            args = {"module_name": "gtmcore.activity.monitors.monitor_rserver",
+                    "class_name": "RStudioServerMonitor",
+                    "user": username,
+                    "owner": owner,
+                    "labbook_name": labbook_name,
+                    "monitor_key": activity_monitor_key,
+                    "author_name": author_name,
+                    "author_email": author_email,
+                    "session_metadata": None}
 
-                # Update redis
-                redis_conn.hset(activity_monitor_key, "process_id", process_id.key_str)
-                redis_conn.hset(activity_monitor_key, "run", "True")
-                redis_conn.hset(activity_monitor_key, "logfile_path",
-                                MITMProxyOperations.get_mitmlogfile_path(labbook_container_name))
+            d = Dispatcher()
+            process_id = d.dispatch_task(jobs.start_and_run_activity_monitor, kwargs=args, persist=True)
+            logger.info(f"Started RStudio Server Notebook Activity Monitor: Process {process_id}")
+
+            # Update redis
+            redis_conn.hset(activity_monitor_key, "process_id", process_id.key_str)
+            redis_conn.hset(activity_monitor_key, "run", "True")
+            redis_conn.hset(activity_monitor_key, "logfile_path",
+                            MITMProxyOperations.get_mitmlogfile_path(labbook_container_name))
 
 
 class RStudioServerMonitor(ActivityMonitor):
@@ -289,7 +287,7 @@ class RStudioServerMonitor(ActivityMonitor):
             logger.info(f"Shutting down RStudio monitor {self.monitor_key}")
             redis_conn.delete(self.monitor_key)
             # At this point, there is no chance we'll get anything else out of unmonitored files!
-            MITMProxyOperations.clean_logfiles()
+            MITMProxyOperations.clean_logfiles(self.user)
 
     def store_record(self) -> None:
         """Store R input/output/code to ActivityRecord / git commit

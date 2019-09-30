@@ -12,7 +12,7 @@ from gtmcore.logging import LMLogger
 logger = LMLogger.get_logger()
 
 
-class DevEnvMonitor(metaclass=abc.ABCMeta):
+class DevEnvMonitor(abc.ABC):
     """Class to monitor a development environments for the need to start Activity Monitor Instances"""
 
     @staticmethod
@@ -21,12 +21,13 @@ class DevEnvMonitor(metaclass=abc.ABCMeta):
         Should be the value used in the `name` attribute of the Dev Env Environment Component"""
         raise NotImplemented
 
+    @abc.abstractmethod
     def run(self, dev_env_monitor_key: str) -> None:
         """Method called in a periodically scheduled async worker that should check the dev env and manage Activity
         Monitor Instances as needed
 
         Args:
-            key(str): The unique string used as the key in redis to track this DevEnvMonitor instance
+            dev_env_monitor_key(str): The unique string used as the key in redis to track this DevEnvMonitor instance
         """
         raise NotImplemented
 

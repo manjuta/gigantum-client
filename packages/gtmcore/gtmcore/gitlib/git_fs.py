@@ -1,4 +1,4 @@
-from .git import GitRepoInterface
+from gtmcore.gitlib.git import GitRepoInterface
 from git import Repo, Head, RemoteReference
 from git import InvalidGitRepositoryError, BadName
 import os

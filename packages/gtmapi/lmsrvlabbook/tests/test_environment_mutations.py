@@ -1,29 +1,9 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-import pytest
+import re
 import time
-from docker.errors import ImageNotFound
-import getpass
-import pprint
 
-from gtmcore.configuration import get_docker_client
+import pytest
+
+from gtmcore.container import container_for_context
 from gtmcore.inventory.inventory import InventoryManager
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped
 from lmsrvcore.auth.user import get_logged_in_username
@@ -37,24 +17,22 @@ TIMEOUT_MAX = 45
 @pytest.fixture
 def reset_images(request):
     """A pytest fixture that checks if the test images exist and deletes them"""
-    # Clean up images
-    client = get_docker_client()
+    username = get_logged_in_username()
+    container_ops = container_for_context(username)
 
     # image should never exist before the test starts
-    image_name = "gmlb-{}-{}".format(get_logged_in_username(), f'default-{request.param}')
+    image_name = "gmlb-{}-{}".format(username, f'default-{request.param}')
     try:
-        client.images.get(image_name)
-        client.images.remove(image_name)
-        raise ValueError("Test image exists before test started. Attempting to automatically removing image. Run again")
-    except ImageNotFound:
+        container_ops.delete_image(image_name)
+        raise ValueError("Test image exists before test started. Attempting to automatically remove image. Run again")
+    except:
         pass
 
     yield None
 
     try:
-        client.images.get(image_name)
-        client.images.remove(image_name)
-    except ImageNotFound:
+        container_ops.delete_image(image_name)
+    except:
         pass
 
 
@@ -97,8 +75,6 @@ class TestEnvironmentMutations(object):
         """
 
         r = fixture_working_dir_env_repo_scoped[2].execute(build_query)
-        import pprint;
-        pprint.pprint(r)
         assert 'errors' not in r
 
         assert r['data']['buildImage']['environment']['imageStatus'] in ['BUILD_QUEUED', 'BUILD_IN_PROGRESS']
@@ -122,7 +98,6 @@ class TestEnvironmentMutations(object):
         r = fixture_working_dir_env_repo_scoped[2].execute(get_bg_jobs_query)
         assert 'errors' not in r, "There should be no errors when querying for background job status"
         assert r['data']['labbook']['backgroundJobs'][0]['status'], "Background Jobs status query should not be None"
-        pprint.pprint(r)
 
         # Wait for build to succeed for up to TIMEOUT_MAX seconds
         success = False
@@ -137,9 +112,10 @@ class TestEnvironmentMutations(object):
         r = fixture_working_dir_env_repo_scoped[2].execute(get_bg_jobs_query)
         assert 'errors' not in r
         assert r['data']['labbook']['backgroundJobs'][0]['status'] == 'finished'
-        assert r['data']['labbook']['backgroundJobs'][0]['result'].isalnum()
+
+        # This should be the ContainerOperations image tag
+        assert re.match('[-A-Za-z0-9]+', r['data']['labbook']['backgroundJobs'][0]['result'])
         assert 'build_image' in r['data']['labbook']['backgroundJobs'][0]['jobMetadata']
-        pprint.pprint(r)
 
         assert success is True, f"Failed to build within {TIMEOUT_MAX} second timeout."
 

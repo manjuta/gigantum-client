@@ -8,7 +8,7 @@ import requests
 from lmsrvlabbook.tests.fixtures import fixture_working_dir, fixture_working_dir_env_repo_scoped, \
     build_image_for_jupyterlab, build_image_for_rserver
 
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 
 
 @pytest.fixture
@@ -122,16 +122,17 @@ class TestContainerMutations(object):
     def test_start_jupyterlab(self, build_image_for_jupyterlab):
         """Test listing labbooks"""
         # Start the container
-
-        lb, container_id = ContainerOperations.start_container(build_image_for_jupyterlab[0],
-                                                               username='default')
         lb = build_image_for_jupyterlab[0]
-
-        docker_client = build_image_for_jupyterlab[2]
         gql_client = build_image_for_jupyterlab[4]
         owner = build_image_for_jupyterlab[-1]
 
+        proj_container = container_for_context(username='default', labbook=lb)
+        docker_client = proj_container._client
+        container_id = proj_container.image_tag
+
         try:
+            proj_container.start_project_container()
+
             q = f"""
             mutation x {{
                 startDevTool(input: {{
@@ -148,14 +149,14 @@ class TestContainerMutations(object):
             assert 'errors' not in r
 
             assert ':10000/jupyter/' in r['data']['startDevTool']['path']
-            rc, t = docker_client.containers.get(container_id=container_id).exec_run(
+            rc, t = docker_client.containers.get(container_id).exec_run(
                 'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
             l = [a for a in t.decode().split('\n') if a]
             assert len(l) == 1
         finally:
             # Remove the container you fired up
-            docker_client.containers.get(container_id=container_id).stop(timeout=10)
-            docker_client.containers.get(container_id=container_id).remove()
+            docker_client.containers.get(container_id).stop(timeout=10)
+            docker_client.containers.get(container_id).remove()
 
     @pytest.mark.skipif(getpass.getuser() == 'circleci', reason="Cannot run this networking test in CircleCI")
     def test_start_bundled_app(self, build_image_for_jupyterlab):
@@ -171,15 +172,16 @@ class TestContainerMutations(object):
         to create a funtioning test. So if you go to the route provided you'll get a 200 back if everything started
         and is wired up OK.
         """
-        # Start the container
-        _, container_id = ContainerOperations.start_container(build_image_for_jupyterlab[0],
-                                                                          username='default')
-
         lb = build_image_for_jupyterlab[0]
-
-        docker_client = build_image_for_jupyterlab[2]
         gql_client = build_image_for_jupyterlab[4]
         owner = build_image_for_jupyterlab[-1]
+
+        # Start the container
+        project_container = container_for_context('default', labbook=lb)
+        project_container.start_project_container()
+        container_id = project_container._container.id
+
+        docker_client = project_container._client
 
         try:
             q = f"""

@@ -1,12 +1,10 @@
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 from gtmcore.labbook import LabBook
 from typing import Optional
 import time
 import redis
-from docker.errors import NotFound
 
 from gtmcore.logging import LMLogger
-from gtmcore.configuration import get_docker_client
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.environment import ComponentManager
 from gtmcore.gitlib.git import GitAuthor
@@ -14,8 +12,6 @@ from gtmcore.activity.monitors import DevEnvMonitorManager
 
 from gtmcore.dispatcher import Dispatcher, JobKey
 from gtmcore.dispatcher.jobs import run_dev_env_monitor
-from gtmcore.container.utils import infer_docker_image_name
-
 
 logger = LMLogger.get_logger()
 
@@ -33,8 +29,7 @@ logger = LMLogger.get_logger()
 #       process_id: <id for the background task>
 #        ... custom fields for the specific activity monitor class
 
-# TODO DC: This is currently tuned to the organization of the Jupyter monitor, and should be made more generic,
-# see issue #453
+# TODO #453: This is currently tuned to the organization of the Jupyter monitor, and should be made more generic
 def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
                           url: str, database: int = 1,
                           author: Optional[GitAuthor] = None) -> None:
@@ -58,19 +53,24 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
     dev_env_monitors = redis_conn.keys("dev_env_monitor:*")
 
     # Clean up after Lab Books that have "closed" by checking if the container is running
-    docker_client = get_docker_client()
+
     for key in dev_env_monitors:
-        if "activity_monitor" in key.decode():
+        if key:
+            key_str = key.decode()
+        else:
+            continue
+
+        if "activity_monitor" in key_str:
             # Ignore all associated activity monitors, as they'll get cleaned up with the dev env monitor
             continue
 
         container_name = redis_conn.hget(key, 'container_name')
-        try:
-            docker_client.containers.get(container_name.decode())
-        except NotFound:
-            # Container isn't running, clean up
-            logger.warn("Shutting down zombie Activity Monitoring for {}.".format(key.decode()))
-            stop_dev_env_monitors(key.decode(), redis_conn, labbook.name)
+        if container_name:
+            container_info = container_for_context(username)
+            if container_info.query_container(container_name.decode()) != 'running':
+                # Container isn't running, clean up
+                logger.warn("Shutting down zombie Activity Monitoring for {}.".format(key_str))
+                stop_dev_env_monitors(key_str, redis_conn, labbook.name)
 
     # Check if Dev Env is supported and then start Dev Env Monitor
     dev_env_mgr = DevEnvMonitorManager(database=database)
@@ -88,10 +88,9 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
             logger.info(f'Found existing entry for {dev_env_monitor_key}, skipping setup')
             return
 
-        owner = InventoryManager().query_owner(labbook)
-        redis_conn.hset(dev_env_monitor_key, "container_name", infer_docker_image_name(labbook.name,
-                                                                                       owner,
-                                                                                       username))
+        # XXX problem here
+        proj_info = container_for_context(username, labbook=labbook)
+        redis_conn.hset(dev_env_monitor_key, "container_name", proj_info.image_tag)
         redis_conn.hset(dev_env_monitor_key, "labbook_root", labbook.root_dir)
         redis_conn.hset(dev_env_monitor_key, "url", url)
 
@@ -112,8 +111,8 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
         raise ValueError(f"{dev_tool} Developer Tool does not support monitoring")
 
 
-# This one function could be tightened up to ensure that everything managed by a dev moniotor is cleaned up: containers, redis, etc.
-# Part of #453
+# This one function could be tightened up to ensure that everything managed by a dev monitor is cleaned up:
+# containers, redis, etc. Part of #453
 def stop_dev_env_monitors(dev_env_key: str, redis_conn: redis.Redis, labbook_name: str) -> None:
     """Method to stop a dev env monitor and all related activity monitors
 
@@ -121,9 +120,6 @@ def stop_dev_env_monitors(dev_env_key: str, redis_conn: redis.Redis, labbook_nam
         dev_env_key(str): Key in redis containing the dev env monitor info
         redis_conn(redis.Redis): The redis instance to the state db
         labbook_name(str): The name of the related lab book - used only for logging / user messaging purposes
-
-    Returns:
-
     """
     # Unschedule dev env monitor
     logger.info(f"Stopping dev env monitor {dev_env_key}")
@@ -142,12 +138,14 @@ def stop_dev_env_monitors(dev_env_key: str, redis_conn: redis.Redis, labbook_nam
         # Make sure the monitor is unscheduled so it doesn't start activity monitors again
         time.sleep(2)
     else:
-        logger.info("Shutting down container with no Dev Tool monitoring processes to stop.")
+        logger.info("Shutting down container, no Dev Tool monitoring processes for specified tool.")
 
     # Get all related activity monitor keys
     activity_monitor_keys = redis_conn.keys("{}:activity_monitor*".format(dev_env_key))
 
-    logger.info(f"Signaling {activity_monitor_keys} for shutdown.")
+    if activity_monitor_keys:
+        logger.info(f"Signaling {activity_monitor_keys} for shutdown.")
+
     # Signal all activity monitors to exit
     for am in activity_monitor_keys:
         # Set run flag in redis

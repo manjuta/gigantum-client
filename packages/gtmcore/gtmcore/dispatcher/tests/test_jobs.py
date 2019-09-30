@@ -5,7 +5,7 @@ import tempfile
 import pytest
 import mock
 
-from gtmcore.configuration import get_docker_client
+from gtmcore.container import container_for_context
 from gtmcore.dispatcher import jobs
 from gtmcore.workflows import GitWorkflow, LabbookWorkflow
 import gtmcore.fixtures
@@ -92,8 +92,8 @@ class TestJobs(object):
             }
             docker_image_id = jobs.build_labbook_image(**build_kwargs)
             try:
-                client = get_docker_client()
-                client.images.remove(docker_image_id)
+                project_container = container_for_context('unittester')
+                project_container.delete_image(docker_image_id)
             except Exception as e:
                 pprint.pprint(e)
                 raise

@@ -9,42 +9,6 @@ from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 @pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestConda3PackageManager(object):
-    def test_search(self, build_lb_image_for_env_conda):
-        """Test search command"""
-        mrg = Conda3PackageManager()
-        lb = build_lb_image_for_env_conda[0]
-        username = build_lb_image_for_env_conda[1]
-        result = mrg.search("reque*", lb, username)
-        assert type(result) == list
-        assert type(result[0]) == str
-        assert len(result) > 6
-        assert "requests" in result
-        result = mrg.search("nump*", lb, username)
-        assert type(result) == list
-        assert type(result[0]) == str
-        assert len(result) > 2
-        assert "numpy" in result
-
-    def test_search_no_wildcard(self, build_lb_image_for_env_conda):
-        """Test search command"""
-        mrg = Conda3PackageManager()
-        lb = build_lb_image_for_env_conda[0]
-        username = build_lb_image_for_env_conda[1]
-        result = mrg.search("reque", lb, username)
-        assert type(result) == list
-        assert type(result[0]) == str
-        assert len(result) > 6
-        assert "requests" in result
-
-    def test_search_empty(self, build_lb_image_for_env_conda):
-        """Test search command with no result"""
-        mrg = Conda3PackageManager()
-        lb = build_lb_image_for_env_conda[0]
-        username = build_lb_image_for_env_conda[1]
-        result = mrg.search("asdffdghdfghdraertasdfsadfa", lb, username)
-        assert type(result) == list
-        assert len(result) == 0
-
     def test_list_versions(self, build_lb_image_for_env_conda):
         """Test list_versions command"""
         mrg = Conda3PackageManager()

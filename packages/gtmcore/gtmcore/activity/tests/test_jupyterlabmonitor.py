@@ -1,28 +1,9 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import json
 from pkg_resources import resource_filename
 import os
 import requests
 from gtmcore.activity.tests.fixtures import get_redis_client_mock, redis_client, MockSessionsResponse
-from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.container import container_for_context
 
 from gtmcore.activity.monitors.monitor_jupyterlab import JupyterLabMonitor
 
@@ -48,7 +29,6 @@ class TestJupyterLabMonitor(object):
     def test_get_sessions(self, redis_client, monkeypatch):
         """Test getting the session information from jupyterlab"""
         monkeypatch.setattr(requests, 'get', MockSessionsResponse)
-        monkeypatch.setattr(JupyterLabMonitor, 'get_container_ip', mock_ip)
         monitor = JupyterLabMonitor()
 
         # prep redis data
@@ -56,7 +36,8 @@ class TestJupyterLabMonitor(object):
                                                            'default',
                                                            'test-labbook',
                                                            'jupyterlab')
-        lb_key = infer_docker_image_name('test-labbook', 'default', 'default')
+        project_info = container_for_context(username='default')
+        lb_key = project_info.default_image_tag('default', 'test-labbook')
         redis_client.set(f"{lb_key}-jupyter-token", "afaketoken")
         redis_client.hset(dev_env_key, "url", "http://localhost:10000/jupyter/asdf/")
 
@@ -74,7 +55,6 @@ class TestJupyterLabMonitor(object):
     def test_run(self, redis_client, monkeypatch):
         """Test running the monitor process"""
         monkeypatch.setattr(requests, 'get', MockSessionsResponse)
-        monkeypatch.setattr(JupyterLabMonitor, 'get_container_ip', mock_ip)
         # TODO: Mock dispatch methods once added
         monitor = JupyterLabMonitor()
 
@@ -82,7 +62,8 @@ class TestJupyterLabMonitor(object):
                                                            'default',
                                                            'test-labbook',
                                                            'jupyterlab-ubuntu1604')
-        lb_key = infer_docker_image_name('test-labbook', 'default', 'default')
+        project_info = container_for_context(username='default')
+        lb_key = project_info.default_image_tag('default', 'test-labbook')
         redis_client.set(f"{lb_key}-jupyter-token", "afaketoken")
         redis_client.hset(dev_env_key, "author_name", "default")
         redis_client.hset(dev_env_key, "author_email", "default@default.io")

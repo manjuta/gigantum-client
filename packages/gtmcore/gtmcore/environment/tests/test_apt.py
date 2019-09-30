@@ -9,15 +9,6 @@ from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 @pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestAptPackageManager(object):
-    def test_search(self, build_lb_image_for_env):
-        """Test search command"""
-        lb = build_lb_image_for_env[0]
-        username = build_lb_image_for_env[1]
-        mrg = AptPackageManager()
-        result = mrg.search("libtiff", lb, username)
-        assert len(result) == 7
-        assert 'libtiff5' in result
-
     def test_list_versions(self, build_lb_image_for_env):
         """Test list_versions command"""
         mrg = AptPackageManager()
