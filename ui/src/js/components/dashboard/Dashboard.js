@@ -97,7 +97,7 @@ export default class DashboardContainer extends Component {
         environment={environment}
         query={query}
         variables={{
-          first: sectionRoute === 'cloud' ? 8 : 100,
+          first: sectionRoute === 'cloud' ? 10 : 100,
           cursor: null,
           orderBy: state.orderBy,
           sort: state.sort,

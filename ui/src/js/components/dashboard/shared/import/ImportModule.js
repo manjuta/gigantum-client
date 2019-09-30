@@ -285,7 +285,7 @@ export default class ImportModule extends Component {
     const newValue = evt.target.value;
     const name = newValue.split('/')[newValue.split('/').length - 1];
     const owner = newValue.split('/')[newValue.split('/').length - 2];
-    if (newValue.indexOf('gigantum.com/') > -1 && name && owner) {
+    if (name && owner) {
       this.setState({
         ready: {
           name,
@@ -304,9 +304,10 @@ export default class ImportModule extends Component {
   _import = () => {
     const { props, state } = this;
     const id = uuidv4();
+    const domain = new URL(state.remoteURL);
     const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
     const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
-    const remote = `https://repo.${config.domain}/${owner}/${name}.git`;
+    const remote = `https://repo.${domain.hostname}/${owner}/${name}.git`;
 
 
     if (state.files[0] !== undefined) {

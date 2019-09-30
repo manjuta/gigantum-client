@@ -31,6 +31,9 @@ class RemoteDataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
     # Flag indicating if the Dataset also exists locally
     is_local = graphene.Boolean()
 
+    # Url to import the Dataset from the remote server
+    import_url = graphene.String()
+
     @classmethod
     def get_node(cls, info, id):
         """Method to resolve the object based on it's Node ID"""
@@ -102,3 +105,16 @@ class RemoteDataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
             return True
         except InventoryException:
             return False
+
+    def resolve_import_url(self, info):
+        """Return the url to import the dataset
+
+        Args:
+            info:
+
+        Returns:
+
+        """
+        if self.import_url is None:
+            raise ValueError("RemoteDataset requires all fields to be explicitly set")
+        return self.import_url

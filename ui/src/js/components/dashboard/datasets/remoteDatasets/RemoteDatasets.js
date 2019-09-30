@@ -22,6 +22,7 @@ class RemoteDatasets extends Component {
       remoteId: null,
       remoteOwner: null,
       remoteDatasetName: null,
+      remoteUrl: null,
       existsLocally: null,
     },
     deleteModalVisible: false,
@@ -115,6 +116,7 @@ class RemoteDatasets extends Component {
         deleteData: {
           remoteId: null,
           remoteOwner: null,
+          remoteUrl: null,
           remoteDatasetName: null,
           existsLocally: null,
         },
@@ -171,6 +173,7 @@ class RemoteDatasets extends Component {
               toggleModal={this._toggleDeleteModal}
               remoteOwner={state.deleteData.remoteOwner}
               remoteDatasetName={state.deleteData.remoteDatasetName}
+              remoteUrl={state.deleteData.remoteUrl}
               existsLocally={state.deleteData.existsLocally}
               remoteDelete
               history={props.history}
@@ -200,6 +203,7 @@ export default createPaginationContainer(
             isLocal
             creationDateUtc
             modifiedDateUtc
+            importUrl
           }
           cursor
         }
@@ -226,7 +230,7 @@ export default createPaginationContainer(
     getVariables(props, {
       first, cursor, orderBy, sort,
     }, fragmentVariables) {
-      first = 20;
+      first = 10;
       cursor = props.remoteDatasets.remoteDatasets.pageInfo.endCursor;
       orderBy = fragmentVariables.orderBy;
       sort = fragmentVariables.sort;

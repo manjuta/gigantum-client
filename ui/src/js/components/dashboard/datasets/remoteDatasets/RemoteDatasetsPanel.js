@@ -16,8 +16,6 @@ import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
 import './RemoteDatasetsPanel.scss';
-// config
-import config from 'JS/config';
 
 export default class RemoteDatasetPanel extends Component {
   state = {
@@ -76,7 +74,7 @@ export default class RemoteDatasetPanel extends Component {
   _importDataset = (owner, datasetName) => {
     const { props } = this;
     const id = uuidv4();
-    const remote = `https://repo.${config.domain}/${owner}/${datasetName}`;
+    const remote = props.edge.node.importUrl;
 
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
@@ -157,6 +155,7 @@ export default class RemoteDatasetPanel extends Component {
                 remoteOwner: edge.node.owner,
                 remoteDatasetName: edge.node.name,
                 existsLocally: props.existsLocally,
+                remoteUrl: edge.node.remoteUrl,
               });
             } else {
               props.auth.renewToken(true, () => {
@@ -165,6 +164,7 @@ export default class RemoteDatasetPanel extends Component {
                 props.toggleDeleteModal({
                   remoteId: edge.node.id,
                   remoteOwner: edge.node.owner,
+                  remoteUrl: edge.node.remoteUrl,
                   remoteDatasetName: edge.node.name,
                   existsLocally: props.existsLocally,
                 });

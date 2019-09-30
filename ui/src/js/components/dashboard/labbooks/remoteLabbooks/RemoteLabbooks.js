@@ -25,6 +25,7 @@ class RemoteLabbooks extends Component {
         remoteId: null,
         remoteOwner: null,
         remoteLabbookName: null,
+        remoteUrl: null,
         existsLocally: null,
       },
       deleteModalVisible: false,
@@ -120,6 +121,7 @@ class RemoteLabbooks extends Component {
         deleteData: {
           remoteId: null,
           remoteOwner: null,
+          remoteUrl: null,
           remoteLabbookName: null,
           existsLocally: null,
         },
@@ -179,6 +181,7 @@ class RemoteLabbooks extends Component {
                 remoteLabbookName={state.deleteData.remoteLabbookName}
                 existsLocally={state.deleteData.existsLocally}
                 remoteDelete
+                remoteUrl={state.deleteData.remoteUrl}
                 history={props.history}
               />
             )
@@ -206,6 +209,7 @@ export default createPaginationContainer(
             isLocal
             creationDateUtc
             modifiedDateUtc
+            importUrl
           }
           cursor
         }
@@ -232,7 +236,7 @@ export default createPaginationContainer(
     getVariables(props, {
       first, cursor, orderBy, sort,
     }, fragmentVariables) {
-      first = 20;
+      first = 10;
       cursor = props.remoteLabbooks.remoteLabbooks.pageInfo.endCursor;
       orderBy = fragmentVariables.orderBy;
       sort = fragmentVariables.sort;

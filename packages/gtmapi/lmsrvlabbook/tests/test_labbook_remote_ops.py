@@ -1,98 +1,11 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import responses
-
-from gtmcore.inventory.inventory import InventoryManager
-
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir
-
-import pytest
-
-
-DUMMY_DATA = [
-    {
-        "environment": {
-            "base": {
-                "name": "Python3 Minimal",
-                "os_class": "ubuntu",
-                "os_release": "18.04",
-                "languages": [
-                    "python3"
-                ],
-                "development_tools": [
-                    "jupyterlab"
-                ],
-                "description": "A minimal Base containing Python 3.6 and JupyterLab with no additional packages"
-            },
-            "packages": {
-                "pip": 1
-            }
-        },
-        "hashed_namespace": "26fdb6eafd356c3e4ae0303f5f39e431|tester",
-        "created_at": "2018-08-30T18:01:33.312Z",
-        "namespace": "tester",
-        "storage_size": 122,
-        "project_schema": 1,
-        "indexed_at": "2018-08-30T18:01:49.165815Z",
-        "visibility": "private_project",
-        "project": "test-proj-1",
-        "description": "No Description",
-        "modified_at": "2018-08-30T18:01:33.312Z",
-        "cursor": "eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ=="
-    },
-    {
-        "environment": {
-            "base": {
-                "name": "Python3 Minimal",
-                "os_class": "ubuntu",
-                "os_release": "18.04",
-                "languages": [
-                    "python3"
-                ],
-                "development_tools": [
-                    "jupyterlab"
-                ],
-                "description": "A minimal Base containing Python 3.6 and JupyterLab with no additional packages"
-            },
-            "packages": {
-                "pip": 1
-            }
-        },
-        "hashed_namespace": "26fdb6eafd356c3e4ae0303f5f39e431|tester",
-        "created_at": "2018-08-29T18:01:33.312Z",
-        "namespace": "tester",
-        "storage_size": 122,
-        "project_schema": 1,
-        "indexed_at": "2018-08-30T18:01:49.165815Z",
-        "visibility": "private_project",
-        "project": "test-proj-2",
-        "description": "No Description",
-        "modified_at": "2018-09-01T18:01:33.312Z",
-        "cursor": "eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ=="
-    }
-]
+from lmsrvlabbook.tests.mock_hub_api import mock_project_list_az, mock_project_list_za, mock_project_list_az_end, \
+    mock_project_list_modified_desc, mock_project_list_modified_asc, mock_project_list_page_1, mock_project_list_page_2
 
 
 class TestLabBookRemoteOperations(object):
-
 
     def test_list_remote_labbooks_invalid_args(self, fixture_working_dir, snapshot):
         """test list labbooks"""
@@ -153,12 +66,12 @@ class TestLabBookRemoteOperations(object):
     @responses.activate
     def test_list_remote_labbooks_az(self, fixture_working_dir, snapshot):
         """test list labbooks"""
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=2&order_by=name&sort=desc',
-                      json=DUMMY_DATA, status=200)
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=3&order_by=name&sort=asc',
-                      json=list(reversed(DUMMY_DATA)), status=200)
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=3&after=eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ==&order_by=name&sort=asc',
-                      json=list(), status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_az, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_za, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_az_end, status=200)
 
         list_query = """
                     {
@@ -173,6 +86,7 @@ class TestLabBookRemoteOperations(object):
                             name
                             owner
                             isLocal
+                            importUrl
                           }
                           cursor
                         }
@@ -190,7 +104,7 @@ class TestLabBookRemoteOperations(object):
         list_query = """
                     {
                     labbookList{
-                      remoteLabbooks(orderBy: "name", sort: "asc", first: 3){
+                      remoteLabbooks(first: 3){
                         edges{
                           node{
                             id
@@ -217,7 +131,7 @@ class TestLabBookRemoteOperations(object):
         list_query = """
                     {
                     labbookList{
-                      remoteLabbooks(orderBy: "name", sort: "asc", first: 3, after: "eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ=="){
+                      remoteLabbooks(orderBy: "name", sort: "asc", first: 3, after: "MTo3"){
                         edges{
                           node{
                             id
@@ -244,10 +158,10 @@ class TestLabBookRemoteOperations(object):
     @responses.activate
     def test_list_remote_labbooks_modified(self, fixture_working_dir, snapshot):
         """test list labbooks"""
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=2&order_by=modified_on&sort=desc',
-                      json=list(reversed(DUMMY_DATA)), status=200)
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=10&order_by=modified_on&sort=asc',
-                      json=DUMMY_DATA, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_modified_desc, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_modified_asc, status=200)
 
         list_query = """
                     {
@@ -267,6 +181,9 @@ class TestLabBookRemoteOperations(object):
                         }
                         pageInfo{
                           hasNextPage
+                          hasPreviousPage
+                          startCursor
+                          endCursor
                         }
                       }
                     }
@@ -293,67 +210,9 @@ class TestLabBookRemoteOperations(object):
                         }
                         pageInfo{
                           hasNextPage
-                        }
-                      }
-                    }
-                    }"""
-
-        r = fixture_working_dir[2].execute(list_query)
-        assert 'errors' not in r
-        snapshot.assert_match(r)
-
-    @responses.activate
-    def test_list_remote_labbooks_created(self, fixture_working_dir, snapshot):
-        """test list labbooks"""
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=2&order_by=created_on&sort=desc',
-                      json=DUMMY_DATA, status=200)
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=10&order_by=created_on&sort=asc',
-                      json=list(reversed(DUMMY_DATA)), status=200)
-
-        list_query = """
-                    {
-                    labbookList{
-                      remoteLabbooks(orderBy: "created_on", sort: "desc", first: 2){
-                        edges{
-                          node{
-                            id
-                            description
-                            creationDateUtc
-                            modifiedDateUtc
-                            name
-                            owner
-                            isLocal
-                          }
-                          cursor
-                        }
-                        pageInfo{
-                          hasNextPage
-                        }
-                      }
-                    }
-                    }"""
-
-        r = fixture_working_dir[2].execute(list_query)
-        assert 'errors' not in r
-        snapshot.assert_match(r)
-
-        list_query = """
-                    {
-                    labbookList{
-                      remoteLabbooks(orderBy: "created_on", sort: "asc", first: 10){
-                        edges{
-                          node{
-                            id
-                            description
-                            creationDateUtc
-                            modifiedDateUtc
-                            name
-                            owner
-                          }
-                          cursor
-                        }
-                        pageInfo{
-                          hasNextPage
+                          hasPreviousPage
+                          startCursor
+                          endCursor
                         }
                       }
                     }
@@ -366,14 +225,12 @@ class TestLabBookRemoteOperations(object):
     @responses.activate
     def test_list_remote_labbooks_page(self, fixture_working_dir, snapshot):
         """test list labbooks"""
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=1&order_by=name&sort=desc',
-                      json=[DUMMY_DATA[0]], status=200)
-
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=1&after=eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ==&order_by=name&sort=desc',
-                      json=[DUMMY_DATA[1]], status=200)
-
-        responses.add(responses.GET, 'https://api.gigantum.com/read/projects?version=2&first=1&after=eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ==&order_by=name&sort=desc',
-                      json=list(), status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_page_1, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_page_2, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json=mock_project_list_az_end, status=200)
 
         list_query = """
                     {
@@ -393,6 +250,9 @@ class TestLabBookRemoteOperations(object):
                         }
                         pageInfo{
                           hasNextPage
+                          hasPreviousPage
+                          startCursor
+                          endCursor
                         }
                       }
                     }
@@ -405,7 +265,7 @@ class TestLabBookRemoteOperations(object):
         list_query = """
                     {
                     labbookList{
-                      remoteLabbooks(orderBy: "name", sort: "desc", first: 1, after: "eyJwYWdlIjogMSwgIml0ZW0iOiAxfQ=="){
+                      remoteLabbooks(orderBy: "name", sort: "desc", first: 4, after: "MTow"){
                         edges{
                           node{
                             id
@@ -419,6 +279,9 @@ class TestLabBookRemoteOperations(object):
                         }
                         pageInfo{
                           hasNextPage
+                          hasPreviousPage
+                          startCursor
+                          endCursor
                         }
                       }
                     }
@@ -431,7 +294,7 @@ class TestLabBookRemoteOperations(object):
         list_query = """
                     {
                     labbookList{
-                      remoteLabbooks(orderBy: "name", sort: "desc", first: 1, after: "eyJwYWdlIjogMSwgIml0ZW0iOiAzfQ=="){
+                      remoteLabbooks(orderBy: "name", sort: "desc", first: 1, after: "Mjoz"){
                         edges{
                           node{
                             id
@@ -445,6 +308,8 @@ class TestLabBookRemoteOperations(object):
                         }
                         pageInfo{
                           hasNextPage
+                          startCursor
+                          endCursor
                         }
                       }
                     }
@@ -454,4 +319,6 @@ class TestLabBookRemoteOperations(object):
         assert 'errors' not in r
         assert len(r['data']['labbookList']['remoteLabbooks']['edges']) == 0
         assert r['data']['labbookList']['remoteLabbooks']['pageInfo']['hasNextPage'] is False
+        assert r['data']['labbookList']['remoteLabbooks']['pageInfo']['startCursor'] is None
+        assert r['data']['labbookList']['remoteLabbooks']['pageInfo']['endCursor'] is None
 

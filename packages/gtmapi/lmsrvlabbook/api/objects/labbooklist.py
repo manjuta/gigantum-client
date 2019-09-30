@@ -1,27 +1,9 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import time
 import base64
 import graphene
 import requests
 import flask
+from string import Template
 
 from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
@@ -30,7 +12,6 @@ from gtmcore.configuration import Configuration
 from lmsrvcore.caching import LabbookCacheController
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.connections import ListBasedConnection
-from lmsrvcore.auth.identity import parse_token
 
 from lmsrvlabbook.api.connections.labbook import LabbookConnection, Labbook
 from lmsrvlabbook.api.connections.remotelabbook import RemoteLabbookConnection, RemoteLabbook
@@ -165,87 +146,114 @@ class LabbookList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
         Returns:
             list(Labbook)
         """
-        # Load config data
-        configuration = Configuration().config
+        # Load config class out of flask config obj
+        config: Configuration = flask.current_app.config['LABMGR_CONFIG']
 
-        # Extract valid Bearer token
-        token = None
-        if hasattr(info.context.headers, 'environ'):
-            if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-                token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        if not token:
-            raise ValueError("Authorization header not provided. Cannot list remote LabBooks.")
-
-        # Get remote server configuration
-        default_remote = configuration['git']['default_remote']
-        index_service = None
-        for remote in configuration['git']['remotes']:
-            if default_remote == remote:
-                index_service = configuration['git']['remotes'][remote]['index_service']
-                break
-
-        if not index_service:
-            raise ValueError('index_service could not be found')
+        if "last" in kwargs or "before" in kwargs:
+            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
 
         # Prep arguments
         if "first" in kwargs:
-            per_page = int(kwargs['first'])
-        elif "last" in kwargs:
-            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
+            first = int(kwargs['first'])
         else:
-            per_page = 20
-
-        # use version=2 to page through both projects and datasets returned by gitlab but only return projects.
-        # omitting the version parameter will return projects and datasets together, but avoids breaking functionality
-        # in any gigantum instances not using the latest client code
-        url = f"https://{index_service}/projects?version=2&first={per_page}"
+            first = 8
 
         # Add optional arguments
-        if kwargs.get("after"):
-            url = f"{url}&after={kwargs.get('after')}"
-        elif kwargs.get("before"):
-            raise ValueError("Cannot page in reverse direction, must provide first/after parameters instead")
+        if "after" in kwargs:
+            after = "\"" + kwargs['after'] + "\""
+        else:
+            after = "null"
 
         if order_by is not None:
             if order_by not in ['name', 'created_on', 'modified_on']:
                 raise ValueError(f"Unsupported order_by: {order_by}. Use `name`, `created_on`, `modified_on`")
-            url = f"{url}&order_by={order_by}"
+        else:
+            order_by = 'last_activity_at'
+
+        # Translate order by argument for gateway
+        if order_by == "created_on":
+            order_by = "created_at"
+
+        if order_by == "modified_on":
+            order_by = "last_activity_at"
 
         if sort is not None:
             if sort not in ['desc', 'asc']:
                 raise ValueError(f"Unsupported sort: {sort}. Use `desc`, `asc`")
-            url = f"{url}&sort={sort}"
+        else:
+            sort = "desc"
 
-        # Query SaaS index service for data
+        # Extract valid tokens
         access_token = flask.g.get('access_token', None)
         id_token = flask.g.get('id_token', None)
-        response = requests.get(url, headers={"Authorization": f"Bearer {access_token}",
-                                              "Identity": id_token})
+        if access_token is None or id_token is None:
+            raise ValueError("Authorization headers not provided. Cannot list remote Projects.")
+
+        query_template = Template("""
+{
+  repositories(orderBy: "$order_by", sort: "$sort", first: $first, after: $after){
+    edges{
+      node{
+        ... on Project{
+          id
+          namespace
+          repositoryName
+          description
+          visibility
+          createdOnUtc
+          modifiedOnUtc
+        }
+      }
+      cursor
+    }
+    pageInfo{
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+""")
+        query_str = query_template.substitute(order_by=order_by, sort=sort, first=str(first), after=after)
+        # Query SaaS index service for data
+        response = requests.post(config.get_hub_api_url(),
+                                 json={"query": query_str},
+                                 headers={"Authorization": f"Bearer {access_token}",
+                                          "Identity": id_token,
+                                          "Content-Type": "application/json"})
 
         if response.status_code != 200:
-            raise IOError("Failed to retrieve Project listing from remote server")
-        edges = response.json()
+            raise IOError(f"Failed to retrieve Project listing from remote server: {response.json()}")
+        response_data = response.json()
+        if 'errors' in response_data:
+            raise IOError(f"Failed to retrieve Project listing from remote server: {response_data['errors']}")
 
+        remote_url = config.get_remote_configuration()['git_remote']
         # Get Labbook instances
         edge_objs = []
-        for edge in edges:
-            create_data = {"id": "{}&{}".format(edge["namespace"], edge["project"]),
-                           "name": edge["project"],
-                           "owner": edge["namespace"],
-                           "description": edge["description"],
-                           "creation_date_utc": edge["created_at"],
-                           "modified_date_utc": edge["modified_at"],
-                           "visibility": "public" if edge.get("visibility") == "public_project" else "private"}
+        for edge in response_data['data']['repositories']['edges']:
+            node = edge['node']
+            if node:
+                create_data = {
+                                "id": "{}&{}".format(node["namespace"], node["repositoryName"]),
+                                "owner": node["namespace"],
+                                "name": node["repositoryName"],
+                                "description": node["description"],
+                                "creation_date_utc": node["createdOnUtc"],
+                                "modified_date_utc": node["modifiedOnUtc"],
+                                "visibility": node["visibility"],
+                                "import_url": f"https://{remote_url}/{node['namespace']}/{node['repositoryName']}.git"
+                              }
 
-            edge_objs.append(RemoteLabbookConnection.Edge(node=RemoteLabbook(**create_data),
-                                                          cursor=edge['cursor']))
+                edge_objs.append(RemoteLabbookConnection.Edge(node=RemoteLabbook(**create_data),
+                                                              cursor=edge['cursor']))
 
         # Create Page Info instance
-        has_previous_page = True if kwargs.get("after") else False
-        has_next_page = len(edges) == per_page
-
-        page_info = graphene.relay.PageInfo(has_next_page=has_next_page, has_previous_page=has_previous_page,
-                                            start_cursor=edges[0]['cursor'] if edges else None,
-                                            end_cursor=edges[-1]['cursor'] if edges else None)
+        page_info_data = response_data['data']['repositories']['pageInfo']
+        page_info = graphene.relay.PageInfo(has_next_page=page_info_data['hasNextPage'],
+                                            has_previous_page=page_info_data['hasPreviousPage'],
+                                            start_cursor=page_info_data['startCursor'],
+                                            end_cursor=page_info_data['endCursor'])
 
         return RemoteLabbookConnection(edges=edge_objs, page_info=page_info)

@@ -61,7 +61,7 @@ export default class RemoteLabbookPanel extends Component {
     const { props } = this;
     const self = this;
     const id = uuidv4();
-    const remote = `https://repo.${config.domain}/${owner}/${labbookName}`;
+    const remote = props.edge.node.importUrl;
 
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
@@ -175,6 +175,7 @@ export default class RemoteLabbookPanel extends Component {
             if (response.data.userIdentity.isSessionValid) {
               props.toggleDeleteModal({
                 remoteId: edge.node.id,
+                remoteUrl: edge.node.remoteUrl,
                 remoteOwner: edge.node.owner,
                 remoteLabbookName: edge.node.name,
                 existsLocally: props.existsLocally,
@@ -185,6 +186,7 @@ export default class RemoteLabbookPanel extends Component {
               }, () => {
                 props.toggleDeleteModal({
                   remoteId: edge.node.id,
+                  remoteUrl: edge.node.remoteUrl,
                   remoteOwner: edge.node.owner,
                   remoteLabbookName: edge.node.name,
                   existsLocally: props.existsLocally,
