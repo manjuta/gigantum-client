@@ -269,22 +269,6 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
             mgr.remove_repository(owner, labbook_name)
             logger.info(f"Deleted {owner}/{labbook_name} from the remote repository {remote_config['git_remote']}")
 
-            # Call Index service to remove project from cloud index and search
-            # Don't raise an exception if the index delete fails, since this can be handled relatively gracefully
-            # for now, but do return success=false
-            success = True
-            repo_id = mgr.get_repository_id(owner, labbook_name)
-            response = requests.delete(f"https://{remote_config['index_service']}/index/{repo_id}",
-                                       headers={"Authorization": f"Bearer {access_token}",
-                                                "Identity": id_token}, timeout=30)
-
-            if response.status_code != 204:
-                logger.error(f"Failed to remove project from cloud index. "
-                             f"Status Code: {response.status_code}")
-                logger.error(response.json())
-            else:
-                logger.info(f"Deleted remote repository {owner}/{labbook_name} from cloud index")
-
             # Remove locally any references to that cloud repo that's just been deleted.
             try:
                 username = get_logged_in_username()

@@ -1,8 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
-// config
-import config from 'JS/config';
 // store
 import {
   setErrorMessage,
@@ -156,7 +154,7 @@ export default class DeleteDataset extends Component {
       }
       : store.getState().routes;
     const datasetName = labbookName;
-    const remote = `https://repo.${config.domain}/${owner}/${datasetName}`;
+    const remote = props.remoteUrl;
 
 
     if (datasetName === state.datasetName) {

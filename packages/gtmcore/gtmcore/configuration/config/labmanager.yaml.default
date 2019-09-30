@@ -50,8 +50,8 @@ git:
   remotes:
     repo.gigantum.io:
       remote_type: gitlab
+      hub_api: https://gigantum.com/api/v1
       admin_service: usersrv.gigantum.io
-      index_service: api.gigantum.com/read
       object_service: api.gigantum.com/object-v1
 
 

@@ -168,14 +168,12 @@ class TestConfiguration(object):
         assert remote['git_remote'] == 'repo.gigantum.io'
         assert remote['remote_type'] == 'gitlab'
         assert remote['admin_service'] == 'usersrv.gigantum.io'
-        assert remote['index_service'] == 'api.gigantum.com/read'
         assert remote['object_service'] == 'api.gigantum.com/object-v1'
 
         remote = configuration.get_remote_configuration("repo.gigantum.io")
         assert remote['git_remote'] == 'repo.gigantum.io'
         assert remote['remote_type'] == 'gitlab'
         assert remote['admin_service'] == 'usersrv.gigantum.io'
-        assert remote['index_service'] == 'api.gigantum.com/read'
         assert remote['object_service'] == 'api.gigantum.com/object-v1'
 
     def test_get_remote_configuration_not_found(self):
@@ -196,3 +194,9 @@ class TestConfiguration(object):
     def test_upload_cpu_limit(self):
         configuration = Configuration()
         assert configuration.upload_cpu_limit > 0
+
+    def test_get_hub_api_url(self):
+        """Test get_hub_api_url"""
+        configuration = Configuration()
+        url = configuration.get_hub_api_url()
+        assert url == 'https://gigantum.com/api/v1'

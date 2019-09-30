@@ -202,3 +202,16 @@ class Configuration(object):
             raise ValueError(f'Configuration for {remote_name} could not be found')
 
         return result
+
+    def get_hub_api_url(self, remote_name: Optional[str] = None) -> str:
+        """Method to return the url for the desired Gigantum Hub API
+
+        Args:
+            remote_name: Name of the remote to lookup, if omitted uses the default remote
+
+        Returns:
+
+        """
+        remote_config = self.get_remote_configuration(remote_name)
+
+        return remote_config['hub_api']
