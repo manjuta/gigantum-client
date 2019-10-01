@@ -304,11 +304,6 @@ export default class ImportModule extends Component {
   _import = () => {
     const { props, state } = this;
     const id = uuidv4();
-    const domain = new URL(state.remoteURL);
-    const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
-    const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
-    const remote = `https://repo.${domain.hostname}/${owner}/${name}.git`;
-
 
     if (state.files[0] !== undefined) {
       const self = this;
@@ -352,6 +347,10 @@ export default class ImportModule extends Component {
         }
       });
     } else if (state.remoteURL) {
+      const domain = new URL(state.remoteURL);
+      const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
+      const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
+      const remote = `https://repo.${domain.hostname}/${owner}/${name}.git`;
       if (props.section === 'labbook') {
         this._importRemoteProject(owner, name, remote, id);
       } else {
