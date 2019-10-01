@@ -171,7 +171,7 @@ class ContainerOperations(ABC):
     def start_project_container(self):
         """Start the Docker container for the Project connected to this instance.
 
-        This method writes the Client IP in `/home/giguser/labmanager_ip`.
+        This method sets the Client IP to the environment variable `GIGANTUM_CLIENT_IP`
 
         All relevant configuration for a fully functional Project is set up here, then passed off to self.run_container()
         """
@@ -204,6 +204,15 @@ class ContainerOperations(ABC):
         else:
             env_var = ["WINDOWS_HOST=1"]
 
+        # Set the client IP in the project container
+        try:
+            gigantum_client_ip = self.get_gigantum_client_ip()
+        except ContainerException as e:
+            logger.warning(e)
+            gigantum_client_ip = ""
+
+        env_var.append(f"GIGANTUM_CLIENT_IP={gigantum_client_ip}")
+
         # Get resource limits
         resource_args = dict()
         memory_limit = self.labbook.client_config.config['container']['memory']
@@ -229,24 +238,6 @@ class ContainerOperations(ABC):
             logger.info(f"Launching container without GPU support. {reason}")
 
         self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
-
-        try:
-            gclient_ip = self.get_gigantum_client_ip()
-        except ContainerException as e:
-            logger.warning(e)
-            gclient_ip = ""
-
-        cmd = f"echo {gclient_ip} > /home/giguser/labmanager_ip"
-        for timeout in range(20):
-            time.sleep(0.5)
-            status = self.query_container()
-            if status == 'running':
-                r = self.exec_command(cmd)
-                logger.info(f"Response to write Client IP in {self.image_tag} Container: {r}")
-                break
-        else:
-            logger.error("After 10 seconds could not write Client IP to Project container."
-                         f" Container status = {status}")
 
     @abstractmethod
     def stop_container(self, container_name: Optional[str] = None) -> bool:
@@ -404,10 +395,11 @@ def container_for_context(username: str, labbook: Optional[LabBook] = None, path
     if CONTEXT == 'local':
         # We do the import here to (1) avoid circular dependencies and (2) allow for any crazy run-time logic for
         # the cloud
-        from .local_container import LocalProjectContainer
+        from gtmcore.container.local_container import LocalProjectContainer
         return LocalProjectContainer(username, labbook, path, override_image_name)
-    # elif context == 'cloud':
-    #     ???
+    elif CONTEXT == 'hub':
+        from gtmcore.container.hub_container import HubProjectContainer
+        return HubProjectContainer(username, labbook, path, override_image_name)
     else:
         raise NotImplementedError(f'"{CONTEXT}" support for ContainerOperations not yet supported')
 

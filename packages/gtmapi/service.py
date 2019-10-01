@@ -114,7 +114,7 @@ post_save_hook_code = """
 import subprocess, os
 def post_save_hook(os_path, model, contents_manager, **kwargs):
     try:
-        labmanager_ip = open('/home/giguser/labmanager_ip').read().strip()
+        labmanager_ip = os.environ.get('GIGANTUM_CLIENT_IP')
         tokens = open('/home/giguser/jupyter_token').read().strip()
         username, owner, lbname, jupyter_token = tokens.split(',')
         url_args = "file={}&jupyter_token={}".format(os.path.basename(os_path), jupyter_token)

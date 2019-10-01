@@ -20,6 +20,7 @@ environment:
 
 # LabBook Container Configuration
 container:
+  context: hub
   # If null, no limit
   # To set enter string with a units identification char (e.g. 100000b, 1000k, 128m, 1g)
   memory: 4g
