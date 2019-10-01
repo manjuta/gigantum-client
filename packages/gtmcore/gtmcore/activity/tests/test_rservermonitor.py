@@ -1,16 +1,10 @@
-import json
-
-from docker.errors import NotFound
-
 from gtmcore.mitmproxy.mitmproxy import CURRENT_MITMPROXY_TAG, MITMProxyOperations
-from pkg_resources import resource_filename
 import os
-import requests
+
 from gtmcore.activity.tests.fixtures import get_redis_client_mock, redis_client, MockSessionsResponse
 from gtmcore.fixtures import mock_labbook
-from gtmcore.container.utils import infer_docker_image_name
-from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType
-from gtmcore.configuration import get_docker_client
+from gtmcore.activity import ActivityStore
+from gtmcore.container import container_for_context
 
 from gtmcore.activity.monitors.monitor_rserver import RServerMonitor, RStudioServerMonitor
 
@@ -91,45 +85,36 @@ class TestRStudioServerMonitor:
 class TestMITMproxy:
 
     def test_start_mitm_proxy(self, redis_client, mock_labbook):
-        docker_client = get_docker_client()
         # The name of the MITM proxy container is simply the target container prefixed with gmitmproxy
         # E.g., gmitmproxy.gmlb-tinydav-tinydav-rstudio-test
         labbook_name = 'wholly-irrelevant'
+        username = 'soycapitan'
         mitm_name = f"gmitmproxy.{labbook_name}"
 
+        container_ops = container_for_context(username)
         # Ensure this container doesn't exist already
-        try:
-            zombie_container = docker_client.containers.get(mitm_name)
-            # Shoot
-            zombie_container.remove(force=True)
-        except NotFound:
-            # good!
-            pass
+        container_ops.stop_container(mitm_name)
 
         # The below image should ideally already be on the system, maybe not tagged
         # If not, it'll hopefully be useful later - we won't clean it up
         image_name = 'ubuntu:18.04'
+
+        # We still use Docker directly here. Doesn't make sense to create an abstraction that's only used by a test
+        docker_client = container_ops._client
         docker_client.images.pull(image_name)
         docker_client.containers.create(image_name, name=mitm_name)
 
         # This gets all the containers that are based on our current mitmproxy image
-        clist = docker_client.containers.list(filters={'ancestor': 'gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG})
+        clist = container_ops.container_list('gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG)
         # If our mitm_name'd container shows up there, it's a properly deployed MITM Proxy (it's not yet)
-        assert mitm_name not in [c.name for c in clist]
+        assert mitm_name not in clist
 
-        MITMProxyOperations.start_mitm_proxy('http://127.0.0.1:8787', labbook_name)
+        MITMProxyOperations.start_mitm_proxy(username, 'http://127.0.0.1:8787', labbook_name)
 
-        clist = docker_client.containers.list(filters={'ancestor': 'gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG})
-        assert mitm_name in [c.name for c in clist]
+        clist = container_ops.container_list('gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG)
+        assert mitm_name in clist
 
-        MITMProxyOperations.stop_mitm_proxy(labbook_name)
+        MITMProxyOperations.stop_mitm_proxy(username, labbook_name)
 
-        try:
-            zombie_container = docker_client.containers.get(mitm_name)
-            # Shoot
-            zombie_container.remove(force=True)
-            # This isn't quite the right assertion - we want the above to throw an exception
+        if container_ops.stop_container(mitm_name):
             assert False, "MITM container not cleaned up during `stop_mitm_proxy()`"
-        except NotFound:
-            # good!
-            pass

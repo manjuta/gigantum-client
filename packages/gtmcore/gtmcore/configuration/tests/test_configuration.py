@@ -25,7 +25,7 @@ from unittest.mock import PropertyMock, patch
 
 import yaml
 
-from gtmcore.configuration import (Configuration, _get_docker_server_api_version, get_docker_client)
+from gtmcore.configuration import (Configuration)
 from gtmcore.fixtures import mock_config_file, mock_config_file_team
 
 
@@ -127,19 +127,6 @@ class TestConfiguration(object):
         assert configuration.config["core"]["team_mode"] is False
         assert 'git' in configuration.config
         assert configuration.config["git"]["working_directory"] == "/some/dir/now/"
-
-    def test_get_docker_version_str(self):
-        """Docker API version strings are in the format of X.XX. """
-        try:
-            f_val = float(_get_docker_server_api_version())
-            assert f_val > 1.0 and f_val < 2.0
-        except ValueError:
-            pass
-
-    def test_get_docker_client(self):
-        """Test no exceptions when getting docker client both for max-compatible versions and default versions. """
-        docker_client = get_docker_client(check_server_version=True)
-        docker_client_2 = get_docker_client(check_server_version=False)
 
     def test_load_user_config(self, mock_config_file):
         """ Test loading configuration override items from a user's custom config """

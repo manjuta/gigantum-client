@@ -1,27 +1,8 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import base64
 import os
 import graphene
 
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 from gtmcore.dispatcher import (Dispatcher, jobs)
 
 from gtmcore.inventory.inventory import InventoryManager
@@ -103,13 +84,10 @@ class DeleteLabbook(graphene.ClientIDMutation):
                                              author=get_logged_in_author())
         if confirm:
             logger.info(f"Deleting {str(lb)}...")
-            try:
-                lb, stopped = ContainerOperations.stop_container(labbook=lb, username=username)
-            except OSError as e:
-                logger.warning(e)
+            project_container = container_for_context(username, labbook=lb)
+            project_container.stop_container()
 
-            lb, docker_removed = ContainerOperations.delete_image(labbook=lb, username=username)
-            if not docker_removed:
+            if not project_container.delete_image():
                 raise ValueError(f'Cannot delete docker image for {str(lb)} - unable to delete Project from disk')
 
             # Remove git references so delete works on a windows host

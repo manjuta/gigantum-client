@@ -7,7 +7,7 @@ from confhttpproxy import ProxyRouter
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.exceptions import GigantumException
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.jupyter import check_jupyter_reachable, start_jupyter
 from gtmcore.container.rserver import start_rserver
@@ -71,7 +71,8 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     def _start_jupyter_tool(cls, labbook: LabBook, router: ProxyRouter, username: str,
                             container_override_id: str = None):
         tool_port = 8888
-        labbook_ip = ContainerOperations.get_labbook_ip(labbook, username)
+        project_container = container_for_context(username, labbook=labbook)
+        labbook_ip = project_container.query_container_ip()
         labbook_endpoint = f'http://{labbook_ip}:{tool_port}'
 
         matched_routes = router.get_matching_routes(labbook_endpoint, 'jupyter')
@@ -88,6 +89,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                 run_start_jupyter = False
             except GigantumException:
                 logger.warning(f'Detected stale route. Attempting to restart Jupyter and clean up route table.')
+                # TODO #680 - should probably clean up redis here also?
                 router.remove(suffix[1:])
 
         elif len(matched_routes) > 1:
@@ -129,7 +131,8 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     def _start_bundled_app(cls, labbook: LabBook, router: ProxyRouter, username: str, bundled_app: dict,
                            container_override_id: str = None):
         tool_port = bundled_app['port']
-        labbook_ip = ContainerOperations.get_labbook_ip(labbook, username)
+        project_container = container_for_context(username, labbook=labbook)
+        labbook_ip = project_container.query_container_ip()
         endpoint = f'http://{labbook_ip}:{tool_port}'
 
         route_prefix = quote_plus(bundled_app['name'])

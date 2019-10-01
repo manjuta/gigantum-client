@@ -5,11 +5,9 @@ import redis
 
 from gtmcore.activity import ActivityRecord, ActivityStore, ActivityType
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
-from gtmcore.configuration import get_docker_client
+from gtmcore.container import container_for_context
 from gtmcore.inventory.inventory  import InventoryManager
 from gtmcore.gitlib.git import GitAuthor
-from gtmcore.container.utils import infer_docker_image_name
-
 
 logger = LMLogger.get_logger()
 
@@ -134,12 +132,9 @@ class ActivityMonitor(metaclass=abc.ABCMeta):
         Returns:
             str
         """
-        client = get_docker_client()
-        lb_key = infer_docker_image_name(self.labbook_name, self.owner, self.user)
-        container = client.containers.get(lb_key)
-        ip = container.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']
-        logger.info("container {} IP: {}".format(container.name, ip))
-
+        project_container = container_for_context(self.user, labbook=self.labbook)
+        ip = project_container.query_container_ip()
+        logger.info("container {} IP: {}".format(self.labbook, ip))
         return ip
 
     def set_busy_state(self, is_busy: bool) -> None:

@@ -1,26 +1,18 @@
 import pytest
 import os
-import time
 import getpass
 import docker
 import time
-import requests
 import shutil
 import tempfile
 from gtmcore.container.jupyter import start_jupyter
 from gtmcore.container.bundledapp import start_bundled_app
 
-from gtmcore.configuration import get_docker_client
-
-from gtmcore.container.container import ContainerOperations
-from gtmcore.container.utils import infer_docker_image_name
-from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.container import container_for_context
 
 from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo, ContainerFixture
-from gtmcore.container.exceptions import ContainerBuildException, ContainerException
 from gtmcore.container.exceptions import ContainerBuildException
 from gtmcore.environment.bundledapp import BundledAppManager
-
 
 
 def remove_image_cache_data():
@@ -67,26 +59,28 @@ class TestContainerOps(object):
         my_lb = build_lb_image_for_jupyterlab[0]
         docker_image_id = build_lb_image_for_jupyterlab[3]
 
-        result = ContainerOperations.run_command("echo My sample message", my_lb, username="unittester")
-        assert result.decode().strip() == 'My sample message'
+        proj_container = container_for_context("unittester", labbook=my_lb)
+        result = proj_container.exec_command("echo My sample message", get_results=True)
+        assert result.strip() == 'My sample message'
 
-        result = ContainerOperations.run_command("pip search gigantum", my_lb, username="unittester")
-        assert any(['Gigantum Platform' in l for l in result.decode().strip().split('\n')])
+        result = proj_container.exec_command("pip search gigantum", get_results=True)
+        assert any(['Gigantum Platform' in l for l in result.strip().split('\n')])
 
-        result = ContainerOperations.run_command("/bin/true", my_lb, username="unittester")
-        assert result.decode().strip() == ""
+        result = proj_container.exec_command("/bin/true", get_results=True)
+        assert result.strip() == ""
 
-        result = ContainerOperations.run_command("/bin/false", my_lb, username="unittester")
-        assert result.decode().strip() == ""
+        result = proj_container.exec_command("/bin/false", get_results=True)
+        assert result.strip() == ""
 
     def test_old_dockerfile_removed_when_new_build_fails(self, build_lb_image_for_jupyterlab):
         # Test that when a new build fails, old images are removed so they cannot be launched.
         my_lb = build_lb_image_for_jupyterlab[0]
-        docker_image_id = build_lb_image_for_jupyterlab[3]
+        docker_client = build_lb_image_for_jupyterlab[2]
 
-        my_lb, stopped = ContainerOperations.stop_container(my_lb, username="unittester")
+        proj_container = container_for_context("unittester", labbook=my_lb)
+        proj_container.stop_container()
 
-        assert stopped
+        assert proj_container.query_container() is None
 
         olines = open(os.path.join(my_lb.root_dir, '.gigantum/env/Dockerfile')).readlines()[:6]
         with open(os.path.join(my_lb.root_dir, '.gigantum/env/Dockerfile'), 'w') as dockerfile:
@@ -97,17 +91,14 @@ class TestContainerOps(object):
         remove_image_cache_data()
 
         with pytest.raises(ContainerBuildException):
-            ContainerOperations.build_image(labbook=my_lb, username="unittester")
+            proj_container.build_image()
 
         with pytest.raises(docker.errors.ImageNotFound):
-            owner = InventoryManager().query_owner(my_lb)
-            get_docker_client().images.get(infer_docker_image_name(labbook_name=my_lb.name,
-                                                                   owner=owner,
-                                                                   username="unittester"))
+            docker_client.images.get(proj_container.image_tag)
 
-        with pytest.raises(requests.exceptions.HTTPError):
+        with pytest.raises(docker.errors.ImageNotFound):
             # Image not found so container cannot be started
-            ContainerOperations.start_container(labbook=my_lb, username="unittester")
+            proj_container.start_project_container()
 
 
 class TestPutFile(object):
@@ -116,7 +107,6 @@ class TestPutFile(object):
         # We do not want to build, start, execute, stop, and delete at container for each
         # of the following test points.
         fixture = ContainerFixture(build_lb_image_for_jupyterlab)
-        container = docker.from_env().containers.get(fixture.docker_container_id)
 
         # Test insert of a single file.
         dst_dir_1 = "/home/giguser/sample-creds"
@@ -124,11 +114,10 @@ class TestPutFile(object):
             with open(os.path.join(tempdir, 'secretfile'), 'w') as sample_secret:
                 sample_secret.write("<<Secret File Content>>")
             t0 = time.time()
-            ContainerOperations.copy_into_container(fixture.labbook, fixture.username,
-                                                    src_path=sample_secret.name,
-                                                    dst_dir=dst_dir_1)
+            proj_container = container_for_context(fixture.username, labbook=fixture.labbook)
+            proj_container.copy_into_container(src_path=sample_secret.name, dst_dir=dst_dir_1)
             tf = time.time()
-            container.exec_run(f'sh -c "cat {dst_dir_1}/secretfile"')
+            proj_container.exec_command("cat {dst_dir_1}/secretfile")
 
             # The copy_into_container should NOT remove the original file on disk.
             assert os.path.exists(sample_secret.name)

@@ -110,8 +110,9 @@ cached_id_jwt
 
 testing/testenv
 testing/test-env
-testing/credentials.txt
+testing/credentials.*
 testing/geckodriver.log
 testing/testutils/.DS_Store
 testing/testmaterial
 /packages/gtmcore/gtmcore/auth/tests/auth_config.json
+testing/outputs/

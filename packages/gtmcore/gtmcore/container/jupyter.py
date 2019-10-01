@@ -8,17 +8,15 @@ import redis
 import requests
 
 from gtmcore.logging import LMLogger
-from gtmcore.configuration import get_docker_client
-from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.environment import ComponentManager
-from gtmcore.container.core import infer_docker_image_name, get_container_ip, ps_search
+from gtmcore.container import container_for_context, ContainerOperations
 from gtmcore.labbook import LabBook
 from gtmcore.exceptions import GigantumException
 
 logger = LMLogger.get_logger()
 
 DEFAULT_JUPYTER_PORT = 8888
-PYTHON_ENV_CMD = "export PYTHONPATH=/mnt/share:$PYTHONPATH"
+PYTHON_ENV_CMD = "PYTHONPATH=/mnt/share:$PYTHONPATH"
 
 
 def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
@@ -30,25 +28,19 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
     Returns:
         Path to jupyter (e.g., "/lab?token=xyz")
     """
-    owner = InventoryManager().query_owner(labbook)
-    lb_key = tag or infer_docker_image_name(labbook_name=labbook.name,
-                                            owner=owner,
-                                            username=username)
-    docker_client = get_docker_client()
-    lb_container = docker_client.containers.get(lb_key)
-    if lb_container.status != 'running':
+    project_container = container_for_context(username, labbook=labbook, override_image_name=tag)
+    if project_container.query_container() != 'running':
         raise GigantumException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
 
-    jupyter_ps = ps_search(lb_container, 'jupyter lab')
-
     # Get IP of container on Docker Bridge Network
-    lb_ip_addr = get_container_ip(lb_key)
+    lb_ip_addr = project_container.query_container_ip()
+    jupyter_ps = project_container.ps_search('jupyter lab', reps=1)
 
     if len(jupyter_ps) == 1:
         logger.info(f'Found existing Jupyter instance for {str(labbook)}.')
 
         # Get token from PS in container
-        t = re.search("token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
+        t = re.search(r"token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
         if not t:
             raise GigantumException('Cannot detect Jupyter Lab token')
         token = t.groups()[0]
@@ -62,8 +54,7 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
         token = str(uuid.uuid4()).replace('-', '')
         if proxy_prefix and proxy_prefix[0] != '/':
             proxy_prefix = f'/{proxy_prefix}'
-        _start_jupyter_process(labbook, lb_container, username, lb_key, token,
-                               proxy_prefix)
+        _start_jupyter_process(project_container, token, proxy_prefix)
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
         if check_reachable:
             check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
@@ -82,17 +73,17 @@ def _shim_skip_python2_savehook(labbook: LabBook) -> bool:
     return 'python2' in cm.base_fields['id'].lower().replace(' ', '')
 
 
-def _start_jupyter_process(labbook: LabBook, lb_container,
-                           username: str, lb_key: str, token: str,
+def _start_jupyter_process(project_container: ContainerOperations, token: str,
                            proxy_prefix: Optional[str] = None) -> None:
+    if not project_container.labbook:
+        raise ValueError('ContainerOperations object must include a LabBook (Project)')
+    labbook = project_container.labbook
     use_savehook = os.path.exists('/mnt/share/jupyterhooks') \
                    and not _shim_skip_python2_savehook(labbook)
-    owner = InventoryManager().query_owner(labbook)
 
-    cmd = (PYTHON_ENV_CMD +
-           f'&& echo "{username},{owner},{labbook.name},{token}" > /home/giguser/jupyter_token && '
-           "cd /mnt/labbook && "
-           f"jupyter lab --port={DEFAULT_JUPYTER_PORT} --ip=0.0.0.0 "
+    cmd = (f'echo "{project_container.username},{labbook.owner},{labbook.name},{token}" > /home/giguser/jupyter_token'
+           " && cd /mnt/labbook"
+           f" && {PYTHON_ENV_CMD} jupyter lab --port={DEFAULT_JUPYTER_PORT} --ip=0.0.0.0 "
            f"--NotebookApp.token='{token}' --no-browser "
            '--ConnectionFileMixin.ip=0.0.0.0 ' +
            ('--FileContentsManager.post_save_hook="jupyterhooks.post_save_hook" '
@@ -100,26 +91,20 @@ def _start_jupyter_process(labbook: LabBook, lb_container,
            (f'--NotebookApp.base_url="{proxy_prefix}" '
             if proxy_prefix else ''))
 
-    lb_container.exec_run(f'sh -c "{cmd}"', detach=True, user='giguser')
+    project_container.exec_command(cmd, user='giguser')
 
-    # Pause briefly to avoid race conditions
-    for timeout in range(10):
-        time.sleep(1)
-        if ['jupyter lab' in l or 'jupyter-lab' in l for l in ps_search(lb_container, 'jupyter')]:
-            logger.info(f"JupyterLab started within {timeout + 1} seconds")
-            break
-    else:
+    if not project_container.ps_search('jupyter lab'):
         raise ValueError('Jupyter Lab failed to start after 10 seconds')
 
     # Store token in redis for later activity monitoring
     # (activity data is stored in db1)
     redis_conn = redis.Redis(db=1)
-    redis_conn.set(f"{lb_key}-jupyter-token", token)
+    redis_conn.set(f"{project_container.image_tag}-jupyter-token", token)
 
 
 def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
+    test_url = f'http://{ip_address}:{port}{prefix}/api'
     for n in range(20):
-        test_url = f'http://{ip_address}:{port}{prefix}/api'
         logger.debug(f"Attempt {n + 1}: Testing if JupyerLab is up at {test_url}...")
         try:
             r = requests.get(test_url, timeout=0.5)

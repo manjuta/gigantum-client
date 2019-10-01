@@ -1,7 +1,7 @@
 import os
 import queue
 import json
-from typing import (Any, Dict, List, Optional, Union)
+from typing import (Any, Dict, List, Optional)
 import time
 
 import jupyter_client
@@ -9,8 +9,7 @@ import redis
 import requests
 
 from gtmcore.activity.processors.processor import ExecutionData
-from gtmcore.configuration import get_docker_client
-from gtmcore.container.utils import infer_docker_image_name
+from gtmcore.container import container_for_context
 from gtmcore.activity.monitors.devenv import DevEnvMonitor
 from gtmcore.activity.monitors.activity import ActivityMonitor
 from gtmcore.activity.processors.jupyterlab import JupyterLabCodeProcessor, \
@@ -34,20 +33,6 @@ class JupyterLabMonitor(DevEnvMonitor):
         return ["jupyterlab"]
 
     @staticmethod
-    def get_container_ip(container_name: str) -> str:
-        """Method to get a container IP address
-
-        Args:
-            container_name(str): Name of the container to query
-
-        Returns:
-            str
-        """
-        client = get_docker_client()
-        container = client.containers.get(container_name)
-        return container.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']
-
-    @staticmethod
     def get_sessions(key: str, redis_conn: redis.Redis) -> Dict[str, Any]:
         """Method to get and reformat session info from JupyterLab
 
@@ -60,7 +45,8 @@ class JupyterLabMonitor(DevEnvMonitor):
         """
 
         _, username, owner, labbook_name, _ = key.split(':')
-        lb_key = infer_docker_image_name(labbook_name, owner, username)
+        project_info = container_for_context(username)
+        lb_key = project_info.default_image_tag(owner, labbook_name)
         token = redis_conn.get(f"{lb_key}-jupyter-token").decode()
         url = redis_conn.hget(key, "url").decode()
 

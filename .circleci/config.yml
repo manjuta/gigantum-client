@@ -3,7 +3,7 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:e8281b2c90-2019-09-29
+      - image: gigantum/circleci-client:1df051aa7d-2019-09-30
   test_harness_exec:
     machine: true
 
@@ -239,4 +239,3 @@ workflows:
       - fossa:
           requires:
             - test-confhttpproxy
-

@@ -8,6 +8,7 @@ import shutil
 from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
+from gtmcore.container import container_for_context
 from gtmcore.labbook import LabBook
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
@@ -16,7 +17,6 @@ from gtmcore.inventory import Repository
 
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
-from gtmcore.container.core import (build_docker_image as build_image)
 
 from gtmcore.dataset.storage.backend import UnmanagedStorageBackend
 
@@ -254,8 +254,7 @@ def import_dataset_from_zip(archive_path: str, username: str, owner: str,
             os.remove(archive_path)
 
 
-def build_labbook_image(path: str, username: str,
-                        tag: Optional[str] = None, nocache: bool = False) -> str:
+def build_labbook_image(path: str, username: str, tag: Optional[str] = None, nocache: bool = False) -> str:
     """Return a docker image ID of given LabBook.
 
     Args:
@@ -287,11 +286,13 @@ def build_labbook_image(path: str, username: str,
                 logger.error(e)
 
         save_metadata_callback("Build task in queue")
-        image_id = build_image(path, override_image_tag=tag, nocache=nocache, username=username,
-                               feedback_callback=save_metadata_callback)
+        container_ops = container_for_context(username, path=path, override_image_name=tag)
+        container_ops.build_image(nocache=nocache, feedback_callback=save_metadata_callback)
 
-        logger.info(f"Completed build_labbook_image in pid {os.getpid()}: {image_id}")
-        return image_id
+        logger.info(f"Completed build_labbook_image in pid {os.getpid()}: {container_ops.image_tag}")
+        # This used to return and image ID, but this nametag should work equally well for all docker-py operations
+        # Also note that we can be certain image_tag is not None, but we add some logic for the type-checker
+        return container_ops.image_tag or ''
     except Exception as e:
         logger.error(f"Error on build_labbook_image in pid {os.getpid()}: {e}")
         raise

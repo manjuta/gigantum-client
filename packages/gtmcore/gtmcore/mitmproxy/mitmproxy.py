@@ -1,19 +1,15 @@
 import os
 from glob import glob
-
-import time
-from confhttpproxy import ProxyRouter
 from typing import Optional, Tuple, List
 
 import redis
-from docker.errors import NotFound
 
-from gtmcore.configuration import get_docker_client
-from gtmcore.container.utils import ps_search
-from gtmcore.labbook import LabBook
-from gtmcore.container.container import ContainerOperations
-from gtmcore.logging import LMLogger
-from gtmcore.exceptions import GigantumException
+from confhttpproxy import ProxyRouter
+
+from ..labbook import LabBook
+from ..container import container_for_context
+from ..logging import LMLogger
+from ..exceptions import GigantumException
 
 logger = LMLogger.get_logger()
 CURRENT_MITMPROXY_TAG = 'eab6f480'
@@ -36,27 +32,30 @@ class MITMProxyOperations(object):
         Returns:
             str that contains the mitm proxy endpoint as http://{ip}:{port}
         """
-        labbook_container_name = ContainerOperations.labbook_image_name(labbook, username)
+        devtool_container = container_for_context(username, labbook=labbook)
+        if not devtool_container.image_tag:
+            raise ValueError('Problem building image tag from username + project info')
+
         # Note that the use of rserver is not intrinsically meaningful - we could make this more generic
         # if mitmproxy supports multiple dev tools
-        proxy_target = f'rserver/{labbook_container_name}/'
-        mitm_key = cls.get_mitm_redis_key(labbook_container_name)
+        proxy_target = f'rserver/{devtool_container.image_tag}/'
+        mitm_key = cls.get_mitm_redis_key(devtool_container.image_tag)
 
         redis_conn = redis.Redis(db=1)
 
-        devtool_ip = ContainerOperations.get_labbook_ip(labbook, username)
+        devtool_ip = devtool_container.query_container_ip()
         devtool_endpoint = f"http://{devtool_ip}:8787"
 
-        for monitored_labbook_name in cls.get_running_proxies():
+        for monitored_labbook_name in cls.get_running_proxies(username):
             # We clean up all running MITM proxy containers
-            if (monitored_labbook_name != labbook_container_name) and \
+            if (monitored_labbook_name != devtool_container.image_tag) and \
                     (cls.get_devtool_endpoint(monitored_labbook_name) == devtool_endpoint):
                 # Some other MITM proxy is pointing at our dev tool
-                cls.stop_mitm_proxy(monitored_labbook_name)
+                cls.stop_mitm_proxy(username, monitored_labbook_name)
 
         if not redis_conn.exists(mitm_key):
             # start mitm proxy if it's not configured yet - we'll delete a stopped container first in this call
-            mitm_endpoint = cls.start_mitm_proxy(devtool_endpoint, labbook_container_name)
+            mitm_endpoint = cls.start_mitm_proxy(username, devtool_endpoint, devtool_container.image_tag)
 
             # add route
             rt_prefix, _ = router.add(mitm_endpoint, proxy_target)
@@ -64,20 +63,20 @@ class MITMProxyOperations(object):
             suffix = f'/{rt_prefix}'
         elif _retry:
             # This should never happen - but it's better than the chance of infinite recursion
-            raise ValueError(f'Unable to cleanly stop mitmproxy_proxy for {labbook_container_name}. Please try manually.')
+            raise ValueError(f'Unable to cleanly stop mitmproxy_proxy for {devtool_container.image_tag}. Please try manually.')
         else:
             # Are we pointing to the correct dev tool endpoint?
-            configured_devtool_endpoint = cls.get_devtool_endpoint(labbook_container_name)
+            configured_devtool_endpoint = cls.get_devtool_endpoint(devtool_container.image_tag)
             if devtool_endpoint != configured_devtool_endpoint:
                 logger.warning(f'Existing RStudio mitmproxy_proxy for stale endpoint {configured_devtool_endpoint}, removing')
-                cls.stop_mitm_proxy(labbook_container_name)
+                cls.stop_mitm_proxy(username, devtool_container.image_tag)
                 return cls.configure_mitmroute(labbook, router, username, _retry=True)
 
             # Is the MITM endpoint configured in Redis?
-            retval = cls.get_mitmendpoint(labbook_container_name)
+            retval = cls.get_mitmendpoint(devtool_container.image_tag)
             if retval is None:
                 logger.warning('Existing RStudio mitmproxy_proxy is partially configured, removing')
-                cls.stop_mitm_proxy(labbook_container_name)
+                cls.stop_mitm_proxy(username, devtool_container.image_tag)
                 return cls.configure_mitmroute(labbook, router, username, _retry=True)
             else:
                 mitm_endpoint = retval
@@ -184,7 +183,7 @@ class MITMProxyOperations(object):
         return f"mitm:{labbook_container_name}"
 
     @classmethod
-    def start_mitm_proxy(cls, devtool_endpoint: str, target_key: str) -> str:
+    def start_mitm_proxy(cls, username, devtool_endpoint: str, target_key: str) -> str:
         """Launch a proxy cointainer between client and labbook.
 
         Args:
@@ -206,31 +205,14 @@ class MITMProxyOperations(object):
             'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
         }
 
-        docker_client = get_docker_client()
+        mitm_container = container_for_context(username,
+                                               override_image_name="gigantum/mitmproxy_proxy:" + CURRENT_MITMPROXY_TAG)
+        if mitm_container.stop_container(nametag):
+            logger.warning(f"Removed existing container {nametag}, will create anew")
 
-        try:
-            zombie_container = docker_client.containers.get(nametag)
-            # Should have already cleaned up running containers before calling
-            # So we could assume this is stopped, but this shouldn't happen often
-            # and it doesn't hurt to be paranoid
-            logger.warning(f"Removing stopped container {nametag}, will create anew")
-            zombie_container.remove(force=True)
-        except NotFound:
-            # good!
-            pass
+        mitm_container.run_container(container_name=nametag, volumes=volumes_dict, environment=env_var)
 
-        container = docker_client.containers.run("gigantum/mitmproxy_proxy:" + CURRENT_MITMPROXY_TAG, detach=True,
-                                                 init=True, name=nametag, volumes=volumes_dict,
-                                                 environment=env_var)
-
-        # We hammer repeatedly for 5 seconds (this should be very fast since it's a small, simple container)
-        for _ in range(10):
-            time.sleep(.5)
-            # Hope that our container is actually up and reload
-            container.reload()
-            mitm_ip = container.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']
-            if mitm_ip:
-                break
+        mitm_ip = mitm_container.query_container_ip()
 
         if not mitm_ip:
             raise GigantumException("Unable to get mitmproxy_proxy IP address.")
@@ -241,39 +223,34 @@ class MITMProxyOperations(object):
         # register the proxy in KV store
         redis_conn = redis.Redis(db=1)
         redis_conn.hset(hkey, "endpoint", mitm_endpoint)
-        redis_conn.hset(hkey, "container_id", container.id)
+        redis_conn.hset(hkey, "container_id", nametag)
         redis_conn.hset(hkey, "logfile_path", logfile_path)
         redis_conn.hset(hkey, "devtool_endpoint", devtool_endpoint)
 
-        # make sure proxy is up.
-        for timeout in range(10):
-            time.sleep(1)
-            if ps_search(container, 'nginx'):
-                logger.info(f"Proxy to rserver started within {timeout + 1} seconds")
-                break
-        else:
+        if not mitm_container.ps_search('nginx'):
             raise ValueError('mitmproxy failed to start after 10 seconds')
 
         return mitm_endpoint
 
     @classmethod
-    def get_running_proxies(cls) -> List[str]:
+    # TODO #1063 - this is part of a nontrivial refactor that remains
+    def get_running_proxies(cls, username: str) -> List[str]:
         """Return a list of the running gmitmproxy
 
             Returns: List of strs with image names for proxied dev tool containers.
         """
-        client = get_docker_client()
-        clist = client.containers.list(filters={'ancestor': 'gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG})
+        container_ops = container_for_context(username)
+        clist = container_ops.container_list('gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG)
         retlist = []
         for cont in clist:
             # container name is gmitmproxy.<mitm key> - currently the monitored container image name
-            _, container_key = cont.name.split('.')
+            _, container_key = cont.split('.')
             retlist.append(container_key)
         return retlist
 
     @classmethod
-    def clean_logfiles(cls):
-        active_logfiles = {cls.get_mitmlogfile_path(proxied_name) for proxied_name in cls.get_running_proxies()}
+    def clean_logfiles(cls, username: str):
+        active_logfiles = {cls.get_mitmlogfile_path(proxied_name) for proxied_name in cls.get_running_proxies(username)}
         existing_logfiles = set(glob(f'/mnt/share/{cls.logfile_dir}/*.rserver.dump'))
 
         for logfile in (existing_logfiles - active_logfiles):
@@ -289,22 +266,21 @@ class MITMProxyOperations(object):
         return existing_logfiles.intersection(active_logfiles)
 
     @classmethod
-    def stop_mitm_proxy(cls, labbook_container_name: str) -> Optional[str]:
+    def stop_mitm_proxy(cls, username: str, labbook_container_name: str) -> Optional[str]:
         """Stop the MITM proxy. Destroy container. Delete volume.
 
         Args:
+            username: username in case we need this for the Docker context
             labbook_container_name: the specific target running a dev tool
 
         Returns:
             ip address of the mitm_proxy for removing the route (if configured) else None
         """
         container_id = MITMProxyOperations.get_mitmcontainerid(labbook_container_name)
-
-        # stop the mitm container
-        docker_client = get_docker_client()
-        mitm_container = docker_client.containers.get(container_id)
-        mitm_container.stop()
-        mitm_container.remove()
+        if container_id:
+            # stop the mitm container
+            mitm_container = container_for_context(username)
+            mitm_container.stop_container(container_name=container_id)
 
         mitm_endpoint = cls.get_mitmendpoint(labbook_container_name)
 
