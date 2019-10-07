@@ -55,7 +55,7 @@ ARG CLIENT_CONFIG_FILE=build/client/labmanager-config.yaml
 ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
 ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
 ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
-ARG ENTRYPOINT_FILE=resources/client/entrypoint.sh
+ARG ENTRYPOINT_FILE=resources/client/entrypoint-local.sh
 ARG REDIS_CONFIG=resources/client/redis.conf
 
 # Copy Libraries

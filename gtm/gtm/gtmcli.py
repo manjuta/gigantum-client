@@ -67,7 +67,7 @@ def client_actions(args):
                        "NGINX_UI_CONFIG": "resources/client/nginx_ui.conf",
                        "NGINX_API_CONFIG": "resources/client/nginx_api.conf",
                        "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
-                       "ENTRYPOINT_FILE": "resources/client/entrypoint.sh"}
+                       "ENTRYPOINT_FILE": "resources/client/entrypoint-local.sh"}
 
         builder.write_empty_testing_requirements_file()
         builder.build_image(no_cache=args.no_cache, build_args=build_args, docker_args=docker_args)
@@ -166,7 +166,7 @@ def cloud_actions(args):
                        "NGINX_UI_CONFIG": "resources/client/nginx_ui.conf",
                        "NGINX_API_CONFIG": "resources/client/nginx_api.conf",
                        "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
-                       "ENTRYPOINT_FILE": "resources/client/entrypoint.sh"}
+                       "ENTRYPOINT_FILE": "resources/client/entrypoint-cloud.sh"}
 
         builder.write_empty_testing_requirements_file()
 
