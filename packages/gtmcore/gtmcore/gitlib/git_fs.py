@@ -240,7 +240,15 @@ class GitFilesystem(GitRepoInterface):
         path_type = 'file' if os.path.isfile(filename) else 'directory'
         logger.info(f"Removing {path_type} {filename} from Git repo at {self.working_directory}")
 
-        if os.path.isfile(filename):
+        # check-ignore appears to use return value as a kind of boolean, not as an error code
+        # So, we can't do a `check=True` here
+        git_ignored = subprocess.run(['git', 'check-ignore', filename], stdout=subprocess.PIPE,
+                                     cwd=self.working_directory)
+        # git check-ignore echos back the given filenames if they are untracked, else it's b''
+        if git_ignored.stdout:
+            # This file is ignored - don't do any git operations
+            pass
+        elif os.path.isfile(filename):
             self.repo.index.remove([filename])
         else:
             # How to pass the -r to handle the directory.
@@ -251,8 +259,6 @@ class GitFilesystem(GitRepoInterface):
                 os.remove(filename)
             else:
                 shutil.rmtree(filename)
-
-        # TODO: DMK look into if force option is needed
 
     @staticmethod
     def _parse_diff_strings(value):
