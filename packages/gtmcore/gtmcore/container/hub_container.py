@@ -104,7 +104,7 @@ class HubProjectContainer(ContainerOperations):
                 "project_name": self.labbook.name
                 }
         response = requests.post(url, json=data)
-        if response.status_code != 201:
+        if response.status_code != 200:
             raise ContainerException(f"Failed to start container in launch service:"
                                      f" {response.status_code} : {response.json()}")
 
