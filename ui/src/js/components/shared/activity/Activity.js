@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
 import shallowCompare from 'react-addons-shallow-compare';
+import InfiniteScroll from 'react-infinite-scroller';
 // store
 import store from 'JS/redux/store';
 // config
@@ -221,8 +222,6 @@ class Activity extends Component {
 
     props.refetch('activity');
     this._isMounted = true;
-
-    window.addEventListener('scroll', this._handleScroll);
     window.addEventListener('visibilitychange', this._handleVisibilityChange);
 
     window.addEventListener('focus', this._pollForActivity);
@@ -246,7 +245,6 @@ class Activity extends Component {
     this._isMounted = false;
 
     window.removeEventListener('visibilitychange', this._handleVisibilityChange);
-    window.removeEventListener('scroll', this._handleScroll);
     window.removeEventListener('focus', this._pollForActivity);
   }
 
@@ -727,80 +725,113 @@ class Activity extends Component {
                 toggleModal={this._toggleCreateModal}
                 setBuildingState={props.setBuildingState}
               />
-              {
-                recordDates.map((timestamp, i) => {
-                  const clusterElements = [];
-                  const activityDateCSS = classNames({
-                    'Activity__date-tab': true,
-                    note: (i === 0),
-                  });
-                  const activityContainerCSS = classNames({
-                    'Activity__card-container': true,
-                    'Activity__card-container--last': recordDates.length === i + 1,
-                  });
+              <InfiniteScroll
+                pageStart={0}
+                loadMore={this._loadMore}
+                hasMore={section.activityRecords.pageInfo.hasNextPage}
+                loader={<PaginationLoader index={0} isLoadingMore />}
+                useWindow
+              >
+                {
+                  recordDates.map((timestamp, i) => {
+                    const clusterElements = [];
+                    const activityDateCSS = classNames({
+                      'Activity__date-tab': true,
+                      note: (i === 0),
+                    });
+                    const activityContainerCSS = classNames({
+                      'Activity__card-container': true,
+                      'Activity__card-container--last': recordDates.length === i + 1,
+                    });
 
-                  const dataSectionCSS = classNames({
-                    [`Activity__date-section Activity__date-section--${i}`]: true,
-                  });
+                    const dataSectionCSS = classNames({
+                      [`Activity__date-section Activity__date-section--${i}`]: true,
+                    });
 
-                  return (
-                    <div
-                      key={timestamp}
-                      className={dataSectionCSS}
-                    >
+                    return (
                       <div
-                        ref={evt => this.dates[i] = { e: evt, time: timestamp }}
-                        className={activityDateCSS}
+                        key={timestamp}
+                        className={dataSectionCSS}
                       >
+                        <div
+                          ref={evt => this.dates[i] = { e: evt, time: timestamp }}
+                          className={activityDateCSS}
+                        >
 
-                        <div className="Activity__date-day">
-                          { timestamp.split('_')[2] }
-                        </div>
-
-                        <div className="Activity__date-sub">
-
-                          <div className="Activity__date-month">
-                            { config.months[parseInt(timestamp.split('_')[1], 10)] }
+                          <div className="Activity__date-day">
+                            { timestamp.split('_')[2] }
                           </div>
 
-                          <div className="Activity__date-year">
-                            {timestamp.split('_')[0]}
+                          <div className="Activity__date-sub">
+
+                            <div className="Activity__date-month">
+                              { config.months[parseInt(timestamp.split('_')[1], 10)] }
+                            </div>
+
+                            <div className="Activity__date-year">
+                              {timestamp.split('_')[0]}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      {
-                        (i === 0)
-                        && (
-                        <UserNoteWrapper
-                          modalVisible={state.modalVisible}
-                          hideLabbookModal={this._hideAddActivity}
-                          changeFullScreenState={this._changeFullscreenState}
-                          labbookId={section.id}
-                          editorFullscreen={state.editorFullscreen}
-                          {...props}
-                        />
-                        )
-                      }
-                      <div
-                        key={`${timestamp}__card`}
-                        className={activityContainerCSS}
-                      >
                         {
-                          state.activityRecords[timestamp].map((record, timestampIndex) => {
-                            const isBaseRecord = !section.activityRecords.pageInfo.hasNextPage
-                              && (section.activityRecords.edges.length - 1 === record.flatIndex);
+                          (i === 0)
+                          && (
+                          <UserNoteWrapper
+                            modalVisible={state.modalVisible}
+                            hideLabbookModal={this._hideAddActivity}
+                            changeFullScreenState={this._changeFullscreenState}
+                            labbookId={section.id}
+                            editorFullscreen={state.editorFullscreen}
+                            {...props}
+                          />
+                          )
+                        }
+                        <div
+                          key={`${timestamp}__card`}
+                          className={activityContainerCSS}
+                        >
+                          {
+                            state.activityRecords[timestamp].map((record, timestampIndex) => {
+                              const isBaseRecord = !section.activityRecords.pageInfo.hasNextPage
+                                && (section.activityRecords.edges.length - 1 === record.flatIndex);
 
-                            if (record.cluster) {
+                              if (record.cluster) {
+                                return (
+                                  <ClusterCardWrapper
+                                    sectionType={props.sectionType}
+                                    isMainWorkspace={props.isMainWorkspace}
+                                    section={section}
+                                    activityRecords={state.activityRecords}
+                                    key={`ClusterCardWrapper_${timestamp}_${record.id}`}
+                                    record={record}
+                                    hoveredRollback={state.hoveredRollback}
+                                    indexItem={{ i, timestampIndex, timestamp }}
+                                    toggleSubmenu={toggleSubmenu}
+                                    toggleRollbackMenu={this._toggleRollbackMenu}
+                                    isLocked={props.isLocked}
+                                    setHoveredRollback={this._setHoveredRollback}
+                                    owner={props.owner}
+                                    name={props.name}
+                                  />
+                                );
+                              }
+
                               return (
-                                <ClusterCardWrapper
-                                  sectionType={props.sectionType}
-                                  isMainWorkspace={props.isMainWorkspace}
+                                <CardWrapper
                                   section={section}
+                                  isBaseRecord={isBaseRecord}
+                                  isMainWorkspace={props.isMainWorkspace}
                                   activityRecords={state.activityRecords}
-                                  key={`ClusterCardWrapper_${timestamp}_${record.id}`}
+                                  clusterElements={clusterElements}
+                                  sectionType={props.sectionType}
                                   record={record}
+                                  compressExpanded={this._compressExpanded}
+                                  clusterObject={state.clusterObject}
+                                  compressedElements={state.compressedElements}
                                   hoveredRollback={state.hoveredRollback}
                                   indexItem={{ i, timestampIndex, timestamp }}
+                                  addCluster={this._addCluster}
+                                  key={`VisibileCardWrapper_${record.flatIndex}`}
                                   toggleSubmenu={toggleSubmenu}
                                   toggleRollbackMenu={this._toggleRollbackMenu}
                                   isLocked={props.isLocked}
@@ -809,51 +840,14 @@ class Activity extends Component {
                                   name={props.name}
                                 />
                               );
-                            }
-
-                            return (
-                              <CardWrapper
-                                section={section}
-                                isBaseRecord={isBaseRecord}
-                                isMainWorkspace={props.isMainWorkspace}
-                                activityRecords={state.activityRecords}
-                                clusterElements={clusterElements}
-                                sectionType={props.sectionType}
-                                record={record}
-                                compressExpanded={this._compressExpanded}
-                                clusterObject={state.clusterObject}
-                                compressedElements={state.compressedElements}
-                                hoveredRollback={state.hoveredRollback}
-                                indexItem={{ i, timestampIndex, timestamp }}
-                                addCluster={this._addCluster}
-                                key={`VisibileCardWrapper_${record.flatIndex}`}
-                                toggleSubmenu={toggleSubmenu}
-                                toggleRollbackMenu={this._toggleRollbackMenu}
-                                isLocked={props.isLocked}
-                                setHoveredRollback={this._setHoveredRollback}
-                                owner={props.owner}
-                                name={props.name}
-                              />
-                            );
-                          })
-                        }
+                            })
+                          }
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              }
-              {
-                Array(5).fill(1).map((value, index) => (
-                  <PaginationLoader
-                    key={`Actvity_paginationLoader${index}`}
-                    index={index}
-                    isLoadingMore={state.loadingMore
-                      || ((state.activityCardCount < 10)
-                      && section.activityRecords.pageInfo.hasNextPage)
-                    }
-                  />
-                ))
-              }
+                    );
+                  })
+                }
+              </InfiniteScroll>
             </div>
           </div>
         </div>
