@@ -128,8 +128,21 @@ class HubProjectContainer(ContainerOperations):
 
         Returns:
             String of container status - "stopped", "running", etc., or None if container is NotFound
+
+        message ProjectStatus {
+            string client_id = 1;
+            string project_id = 2;
+            string state = 3;
+        }
         """
-        pass
+        url = f"{self._launch_service}/v1/project_status/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise ContainerException(f"Failed to get container status:"
+                                     f" {response.status_code} : {response.json()}")
+        
+        logger.info(f"Project state: {response.json()}")
+        return response.json().state
 
     def exec_command(self, command: str, container_name: Optional[str] = None, get_results=False,
                      **kwargs) -> Optional[str]:
