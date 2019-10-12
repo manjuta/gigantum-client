@@ -36,6 +36,7 @@ class HubProjectContainer(ContainerOperations):
         self._launch_service = os.environ['LAUNCH_SERVICE_URL']
         self._client_id = os.environ['GIGANTUM_CLIENT_ID']
 
+        logger.info(f"HubProjectContainer.init()")
         ContainerOperations.__init__(self, username, labbook=labbook, path=path,
                                      override_image_name=override_image_name)
 
@@ -55,6 +56,7 @@ class HubProjectContainer(ContainerOperations):
         Raises:
             ContainerBuildException if container build fails.
         """
+        logger.info(f"HubProjectContainer.build_image()")
         pass
 
     def delete_image(self, override_image_name: Optional[str] = None) -> bool:
@@ -66,6 +68,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             Did we succeed? (includes image already non-existent)
         """
+        logger.info(f"HubProjectContainer.delete_image()")
         return True
 
     def image_available(self) -> bool:
@@ -74,7 +77,8 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             True if we've gotten an Image ID stored.
         """
-        return True
+        logger.info(f"HubProjectContainer.image_available()")
+        return False
 
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
                       volumes: Dict = None, wait_for_output=False, container_name: Optional[str] = None,
@@ -97,6 +101,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             If wait_for_output is specified, the stdout of the cmd. Otherwise, or if stdout cannot be obtained, None.
         """
+        logger.info(f"HubProjectContainer.run_container()")
         url = f"{self._launch_service}/v1/project"
         data = {"client_id": self._client_id,
                 "project_id": None,
@@ -119,6 +124,7 @@ class HubProjectContainer(ContainerOperations):
             A boolean indicating whether the container was successfully stopped (False implies no container
             was running).
         """
+        logger.info(f"HubProjectContainer.stop_container()")
         return True
 
     def query_container(self, container_name: Optional[str] = None) -> Optional[str]:
@@ -140,7 +146,7 @@ class HubProjectContainer(ContainerOperations):
         if response.status_code != 200:
             raise ContainerException(f"Failed to get container status:"
                                      f" {response.status_code} : {response.json()}")
-        
+        logger.info(f"HubProjectContainer.query_container()")
         logger.info(f"Project state: {response.json()}")
         return response.json().state
 
@@ -158,6 +164,7 @@ class HubProjectContainer(ContainerOperations):
             If get_results is True (or unspecified), a str with output of the command.
             Otherwise, None.
         """
+        logger.info(f"HubProjectContainer.exec_command()")
         pass
 
     def query_container_ip(self, container_name: Optional[str] = None) -> str:
@@ -169,6 +176,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             IP address as string
         """
+        logger.info(f"HubProjectContainer.query_container_ip()")
         return ""
 
     def copy_into_container(self, src_path: str, dst_dir: str) -> None:
@@ -178,6 +186,7 @@ class HubProjectContainer(ContainerOperations):
             src_path: Source path ON THE HOST of the file - callers responsibility to sanitize
             dst_dir: Destination directory INSIDE THE CONTAINER.
         """
+        logger.info(f"HubProjectContainer.copy_into_container()")
         raise NotImplemented
 
     # Utility methods
@@ -187,6 +196,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             str of IP address
         """
+        logger.info(f"HubProjectContainer.get_gigantum_client_ip")
         return ""
 
     # TODO #1063 - update MITMproxy and related code so it no longer needs this logic
@@ -196,6 +206,7 @@ class HubProjectContainer(ContainerOperations):
         Args:
             ancestor: the name of an image or container this container is derived from
         """
+        logger.info(f"HubProjectContainer.container_list")
         raise NotImplemented
 
     def start_project_container(self):
@@ -205,6 +216,7 @@ class HubProjectContainer(ContainerOperations):
 
         All relevant configuration for a fully functional Project is set up here, then passed off to self.run_container()
         """
+        logger.info(f"HubProjectContainer.start_project_container")
         if not self.labbook:
             raise ValueError('labbook must be specified for run_container')
 
