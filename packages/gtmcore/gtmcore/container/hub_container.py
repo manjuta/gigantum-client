@@ -78,7 +78,18 @@ class HubProjectContainer(ContainerOperations):
             True if we've gotten an Image ID stored.
         """
         logger.info(f"HubProjectContainer.image_available()")
-        return False
+        url = f"{self._launch_service}/v1/image_exists/{self.labbook.owner}/{self.labbook.name}"
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError:
+            logger.Error("Couldn't connect to {url}.")
+            return False
+        logger.info(f"image_available() status code: {response.status_code}")
+        if response.status_code != 200:
+            logger.error("Couldn't determine if image exists.")
+            return False
+        logger.info(f"{response.json()}/t{response.json()}")
+        return response.json().exists
 
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
                       volumes: Dict = None, wait_for_output=False, container_name: Optional[str] = None,
