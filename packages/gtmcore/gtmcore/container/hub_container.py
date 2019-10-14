@@ -186,8 +186,14 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             IP address as string
         """
-        logger.info(f"HubProjectContainer.query_container_ip()")
-        return ""
+        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise ContainerException(f"Failed to get container status:"
+                                     f" {response.status_code} : {response.json()}")
+        hostname = response.json().hostname
+        logger.info(f"HubProjectContainer.query_container_ip() found: {hostname}")
+        return hostname
 
     def copy_into_container(self, src_path: str, dst_dir: str) -> None:
         """Copy the given file in src_path into the project's container.
