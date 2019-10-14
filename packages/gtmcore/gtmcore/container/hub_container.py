@@ -186,7 +186,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             IP address as string
         """
-        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}
+        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get container hostname:"
@@ -212,7 +212,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             str of IP address
         """
-        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}
+        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}"
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get client hostname:"
