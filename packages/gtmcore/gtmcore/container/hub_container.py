@@ -189,7 +189,7 @@ class HubProjectContainer(ContainerOperations):
         url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}
         response = requests.get(url)
         if response.status_code != 200:
-            raise ContainerException(f"Failed to get container status:"
+            raise ContainerException(f"Failed to get container hostname:"
                                      f" {response.status_code} : {response.json()}")
         hostname = response.json().hostname
         logger.info(f"HubProjectContainer.query_container_ip() found: {hostname}")
@@ -212,8 +212,14 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             str of IP address
         """
-        logger.info(f"HubProjectContainer.get_gigantum_client_ip")
-        return ""
+        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise ContainerException(f"Failed to get client hostname:"
+                                     f" {response.status_code} : {response.json()}")
+        hostname = response.json().hostname
+        logger.info(f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
+        return hostname
 
     # TODO #1063 - update MITMproxy and related code so it no longer needs this logic
     def container_list(self, ancestor: Optional[str]) -> List[str]:
