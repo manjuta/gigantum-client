@@ -84,11 +84,10 @@ class HubProjectContainer(ContainerOperations):
         except requests.ConnectionError:
             logger.Error("Couldn't connect to {url}.")
             return False
-        logger.info(f"image_available() status code: {response.status_code}")
         if response.status_code != 200:
             logger.error("Couldn't determine if image exists.")
             return False
-        logger.info(f"{response.json()}/t{response.json()}")
+        logger.info(f"HubProjectContainer.image_available(): {response.json()}")
         return response.json().exists
 
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
