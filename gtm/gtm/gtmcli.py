@@ -96,7 +96,7 @@ def client_actions(args):
 
     elif args.action == "publish":
         image_tag = None
-        builder.publish(image_tag=image_tag, verbose=args.verbose)
+        builder.publish(image_tag=image_tag)
 
         # Print Name of image
         if not image_tag:
@@ -109,7 +109,7 @@ def client_actions(args):
             if args.override_name:
                 image_tag = args.override_name
 
-        builder.publish_edge(image_tag=image_tag, verbose=args.verbose)
+        builder.publish_edge(image_tag=image_tag)
 
         # Print Name of image
         if not image_tag:
@@ -134,8 +134,7 @@ def client_actions(args):
         else:
             image_name = builder.image_name
 
-        launcher = client.run.ClientRunner(image_name=image_name, container_name=builder.container_name,
-                                           show_output=args.verbose)
+        launcher = client.run.ClientRunner(image_name=image_name, container_name=builder.container_name)
 
         if args.action == "start":
             if not launcher.is_running:
@@ -200,7 +199,7 @@ def demo_actions(args):
             if args.override_name:
                 image_tag = args.override_name
 
-        builder.publish(image_tag=image_tag, verbose=args.verbose)
+        builder.publish(image_tag=image_tag)
 
         # Print Name of image
         if not image_tag:
@@ -293,7 +292,7 @@ def circleci_actions(args):
     builder = circleci.CircleCIImageBuilder()
 
     if args.action == 'update':
-        builder.update(verbose=args.verbose, no_cache=args.no_cache)
+        builder.update(no_cache=args.no_cache)
     else:
         print("Error: Unsupported action provided: {}".format(args.action), file=sys.stderr)
         sys.exit(1)
@@ -365,10 +364,6 @@ def main():
                         default=None,
                         metavar="<alternative name>",
                         help="Alternative image target for base-image or labmanager")
-    parser.add_argument("--verbose", "-v",
-                        default=False,
-                        action='store_true',
-                        help="Boolean indicating if detail status should be printed")
     parser.add_argument("--all", "-a",
                         default=False,
                         action='store_true',
