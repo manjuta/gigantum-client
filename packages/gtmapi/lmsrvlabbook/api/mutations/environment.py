@@ -142,11 +142,13 @@ class StopContainer(graphene.relay.ClientIDMutation):
         project_container = container_for_context(username, labbook=lb)
 
         # TODO #1063: refactor some of these details into domain-related modules / classes
+        #  note that the jupyter clause below may ALSO be implicated in rserver-supported projects
         # Remove route from proxy
-        lb_name = project_container.default_image_tag(lb.owner, lb.name)
-        if MITMProxyOperations.get_mitmendpoint(lb_name):
+        mitm_endpoint = MITMProxyOperations.get_mitmendpoint(project_container)
+        if mitm_endpoint:
             # there is an MITMProxy (currently only used for RStudio)
-            proxy_endpoint = MITMProxyOperations.stop_mitm_proxy(username, lb_name)
+            MITMProxyOperations.stop_mitm_proxy(project_container)
+            proxy_endpoint = mitm_endpoint
             tool = 'rserver'
         else:
             lb_ip = project_container.query_container_ip()

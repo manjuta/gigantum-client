@@ -8,7 +8,9 @@ COPY packages/gtmcore/requirements-testing.txt /opt/gtmcore/requirements-testing
 COPY packages/gtmapi/requirements.txt /opt/gtmapi/requirements.txt
 COPY packages/gtmapi/requirements-testing.txt /opt/gtmapi/requirements-testing.txt
 COPY packages/confhttpproxy /opt/confhttpproxy
-ENV SHELL=/bin/bash
+ENV SHELL=/bin/bash \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
 
 # Install system level dependencies
 RUN apt-get -y update && \

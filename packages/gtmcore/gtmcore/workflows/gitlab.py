@@ -543,7 +543,7 @@ class GitLabManager(object):
             child.sendline(f"username={username}")
             child.expect("")
             child.sendline("")
-            i = child.expect(["Password for 'https://", "password=[\w\-\._]+", pexpect.EOF])
+            i = child.expect(["Password for 'https://", r"password=[\w\-\._]+", pexpect.EOF])
         finally:
             # Switch back to where you were
             os.chdir(os.path.expanduser(cwd))
@@ -552,8 +552,8 @@ class GitLabManager(object):
             child.sendline("")
             return None
         elif i == 1:
-            # Possibly configured, verify a valid string TODO - Why does pycharm complain about redundant chars?
-            matches = re.finditer(r"password=[a-zA-Z0-9\-_\!@\#\$%\^&\*]+", child.after.decode("utf-8"))
+            # Possibly configured, verify a valid string
+            matches = re.finditer(r"password=[a-zA-Z0-9\-_!@#$%^&*]+", child.after.decode("utf-8"))
 
             token = None
             try:
@@ -570,7 +570,7 @@ class GitLabManager(object):
             return token
         elif i == 2:
             # Possibly configured, verify a valid string
-            matches = re.finditer(r"password=[a-zA-Z0-9\-_\!@\#\$%\^&\*]+", child.before.decode("utf-8"))
+            matches = re.finditer(r"password=[a-zA-Z0-9\-_!@#$%^&*]+", child.before.decode("utf-8"))
 
             token = None
             try:

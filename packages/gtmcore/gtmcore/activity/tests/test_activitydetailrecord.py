@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import pytest
 import json
 from gtmcore.activity.records import ActivityDetailRecord, ActivityDetailType, ActivityAction
@@ -92,14 +73,14 @@ class TestActivityDetailRecord(object):
         adr = ActivityDetailRecord(ActivityDetailType.CODE_EXECUTED, key="my_key2")
 
         adr.add_value("text/plain", "this is some data")
-        adr.add_value("text/html", "<p>this is some data<\p>")
+        adr.add_value("text/html", "<p>this is some data</p>")
 
         assert len(adr.data.keys()) == 2
         assert adr.data["text/plain"] == "this is some data"
-        assert adr.data["text/html"] == "<p>this is some data<\p>"
+        assert adr.data["text/html"] == "<p>this is some data</p>"
 
         with pytest.raises(ValueError):
-            adr.add_value("text/html", "<p>this is some data<\p>")
+            adr.add_value("text/html", "<p>this is some data</p>")
 
     def test_data_size(self):
         """Test getting the size of details stored"""
@@ -117,7 +98,7 @@ class TestActivityDetailRecord(object):
         """Test converting to a dictionary"""
         adr = ActivityDetailRecord(ActivityDetailType.CODE_EXECUTED, key="my_key2", show=True, importance=25)
         adr.add_value("text/plain", "this is some data")
-        adr.add_value("text/html", "<p>this is some data<\p>")
+        adr.add_value("text/html", "<p>this is some data</p>")
 
         dict_obj = adr.to_dict()
         assert type(dict_obj) == dict
@@ -126,7 +107,7 @@ class TestActivityDetailRecord(object):
         assert dict_obj['importance'] == 25
         assert dict_obj['show'] == 1
         assert dict_obj['data'] == {"text/plain": "this is some data",
-                                    "text/html": "<p>this is some data<\p>"}
+                                    "text/html": "<p>this is some data</p>"}
 
     def test_to_bytes_from_bytes(self):
         """Test converting to a byte array"""

@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import pytest
 import os
 import random
@@ -77,10 +58,10 @@ class TestActivityStore:
 
     def test_validate_tags_cleanup(self, mock_config_with_activitystore):
         """Method to test tag validation and cleanup"""
-        tags = ["goodtag", "another tag", "dup", "dup", "bad tag\`;"]
+        tags = ["goodtag", "another tag", "dup", "dup", r"bad tag\`;"]
         clean_tags = mock_config_with_activitystore[0]._validate_tags(tags)
         assert len(clean_tags) == 4
-        assert "bad tag\`;" not in clean_tags
+        assert r"bad tag\`;" not in clean_tags
         assert "bad tag" in clean_tags
         assert "goodtag" in clean_tags
         assert "another tag" in clean_tags

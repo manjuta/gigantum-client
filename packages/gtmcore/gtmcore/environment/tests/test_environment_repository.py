@@ -15,7 +15,7 @@ class TestEnvironmentRepository(object):
         data = repo.get_base_list()
 
         assert type(data) == list
-        assert len(data) == 5
+        assert len(data) == 6
 
         assert any(n.get('id') == ENV_UNIT_TEST_BASE for n in data)
         assert any(n.get('repository') == ENV_UNIT_TEST_REPO for n in data)

@@ -1,3 +1,3 @@
-from gtmcore.container.container import ContainerOperations, container_for_context
+from gtmcore.container.container import ContainerOperations, container_for_context, SidecarContainerOperations
 from gtmcore.container.exceptions import ContainerException
 

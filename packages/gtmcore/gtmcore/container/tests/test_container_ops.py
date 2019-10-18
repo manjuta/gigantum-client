@@ -5,12 +5,15 @@ import docker
 import time
 import shutil
 import tempfile
+
+from gtmcore.container.container import SidecarContainerOperations
 from gtmcore.container.jupyter import start_jupyter
+from gtmcore.container.rserver import start_rserver
 from gtmcore.container.bundledapp import start_bundled_app
 
 from gtmcore.container import container_for_context
 
-from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo, ContainerFixture
+from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, build_lb_image_for_rstudio, mock_config_with_repo, ContainerFixture
 from gtmcore.container.exceptions import ContainerBuildException
 from gtmcore.environment.bundledapp import BundledAppManager
 
@@ -22,7 +25,7 @@ def remove_image_cache_data():
         pass
 
 
-class TestContainerOps(object):
+class TestContainerOps:
     def test_build_image_fixture(self, build_lb_image_for_jupyterlab):
         # Note, the test is in the fixure (the fixture is needed by other tests around here).
         pass
@@ -39,7 +42,9 @@ class TestContainerOps(object):
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 0
 
-        start_jupyter(lb, username='unittester', check_reachable=not (getpass.getuser() == 'circleci'))
+        jupyter_container = container_for_context('unittester', lb)
+
+        start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
         ec, stdo = client.containers.get(container_id=container_id).exec_run(
             'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
@@ -47,13 +52,28 @@ class TestContainerOps(object):
         assert len(l) == 1
 
         # Now, we test the second path through, start jupyterlab when it's already running.
-        start_jupyter(lb, username='unittester', check_reachable=not (getpass.getuser() == 'circleci'))
+        start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
         # Validate there is only one instance running.
         ec, stdo = client.containers.get(container_id=container_id).exec_run(
             'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
+
+    def test_start_rstudio(self, build_lb_image_for_rstudio):
+        lb_container, ib, username = build_lb_image_for_rstudio
+
+        len(lb_container.ps_search('rserver')) == 1
+
+        start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
+
+        assert len(lb_container.ps_search('rserver')) == 1
+
+        # Now, we test the second path through, start jupyterlab when it's already running.
+        start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
+
+        # Validate there is still only one instance running.
+        assert len(lb_container.ps_search('rserver')) == 1
 
     def test_run_command(self, build_lb_image_for_jupyterlab):
         my_lb = build_lb_image_for_jupyterlab[0]
@@ -101,7 +121,39 @@ class TestContainerOps(object):
             proj_container.start_project_container()
 
 
-class TestPutFile(object):
+class TestSidecarContainers:
+    def test_all_sidecar_container_ops(self):
+        """We test all functions at once because start and stop is expensive, and also requried to test other stuff"""
+        primary_container = container_for_context('unittester', override_image_name='necessary-detail')
+        sidecar_container = SidecarContainerOperations(primary_container, 'support')
+        assert sidecar_container.sidecar_container_name == 'support.necessary-detail'
+        # Just in case
+        sidecar_container.stop_container()
+        assert sidecar_container.query_container() is None
+
+        # The below image should ideally already be on the system, maybe not tagged
+        # If not, it'll hopefully be useful later - we won't clean it up
+        image_name = 'ubuntu:18.04'
+
+        # We still use Docker directly here. Doesn't make sense to create an abstraction that's only used by a test
+        docker_client = primary_container._client
+        docker_client.images.pull(image_name)
+
+        sidecar_container.run_container(image_name, cmd='tail -f /dev/null')
+
+        try:
+            assert sidecar_container.query_container() == 'running'
+            # The CMD shows up once in the init and once for its own process
+            assert len(sidecar_container.ps_search('tail -f')) == 2
+            assert len(sidecar_container.query_container_ip().split('.')) == 4
+            assert len(sidecar_container.query_container_env()) > 0
+        finally:
+            sidecar_container.stop_container()
+
+        assert sidecar_container.query_container() is None
+
+
+class TestPutFile:
     def test_put_single_file(self, build_lb_image_for_jupyterlab):
         # Note - we are combining multiple tests in one to speed things up
         # We do not want to build, start, execute, stop, and delete at container for each

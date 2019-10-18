@@ -1,11 +1,13 @@
 import hashlib
 import os
-import sys
 import time
 from abc import ABC, abstractmethod
 from typing import Optional, Callable, List, Dict, Any
 
+import requests
+
 from gtmcore.configuration import Configuration
+from gtmcore.exceptions import GigantumException
 from gtmcore.container.cuda import should_launch_with_cuda_support
 from gtmcore.dataset.cache import get_cache_manager_class
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
@@ -148,7 +150,7 @@ class ContainerOperations(ABC):
 
     @abstractmethod
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
-                      volumes: Dict = None, wait_for_output=False, container_name: Optional[str] = None, **run_args) \
+                      volumes: Optional[Dict] = None, wait_for_output=False, container_name: Optional[str] = None, **run_args) \
             -> Optional[str]:
         """ Start a Docker container, by default for the Project connected to this instance.
 
@@ -268,14 +270,26 @@ class ContainerOperations(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def query_container_ip(self, container_name: Optional[str] = None) -> str:
+    def query_container_ip(self, container_name: Optional[str] = None) -> Optional[str]:
         """Query the given container's IP address. Defaults to the Project container for this instance.
 
         Args:
             container_name: alternative to the current project container. Use anything that works for containers.get()
 
         Returns:
-            IP address as string
+            IP address as string, None if not available (e.g., container doesn't exist)
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def query_container_env(self, container_name: Optional[str] = None) -> List[str]:
+        """Get the list of environment variables from the container
+
+        Args:
+            container_name: an optional container name (otherwise, will use self.image_tag)
+
+        Returns:
+            A list of strings like 'VAR=value'
         """
         raise NotImplementedError()
 
@@ -356,7 +370,7 @@ class ContainerOperations(ABC):
             return 'changed'
 
     @abstractmethod
-    def get_gigantum_client_ip(self) -> str:
+    def get_gigantum_client_ip(self) -> Optional[str]:
         """Method to get the monitored lab book container's IP address on the Docker bridge network
 
         Returns:
@@ -364,17 +378,56 @@ class ContainerOperations(ABC):
         """
         raise NotImplementedError()
 
-    # TODO #1063 - update MITMproxy and related code so it no longer needs this logic
-    def container_list(self, ancestor: Optional[str]) -> List[str]:
-        """Return a list of containers, optionally only those that are based on `ancestor`
 
-        Note that this is not marked as an abstractmethod as the goal is to remove it.
+class SidecarContainerOperations:
+    """Keep track of containers related to a parent (for now, Project) container"""
+
+    def __init__(self, primary_container: ContainerOperations, sidecar_name: str):
+        """Set up names for things
 
         Args:
-            ancestor: the name of an image or container this container is derived from
+            primary_container: who are we a sidecar for?
+            sidecar_name: a tag that helps us keep track of what this sidecar does (e.g., `mitmproxy`)
         """
-        raise NotImplementedError()
+        if not primary_container.image_tag:
+            raise ValueError('primary_container needs a concrete image tag.')
 
+        self.primary_container = primary_container
+        self.sidecar_name = sidecar_name
+        self.sidecar_container_name = '.'.join((sidecar_name, primary_container.image_tag))
+
+    def run_container(self, image_name: str, volumes: Optional[Dict] = None, environment: Optional[List] = None,
+                      cmd: Optional[str] = None):
+        """Run the sidecar container
+
+        Args:
+            image_name: a valid docker image
+            volumes: a dict that complies with the docker-py API for specifying volumes
+            environment: a list of strings like "VAR=something"
+            cmd: (discouraged - sidecars should be simple) override the default CMD
+
+        Returns:
+            The IP address of the new container as a string
+        """
+        self.primary_container.run_container(cmd=cmd, image_name=image_name, container_name=self.sidecar_container_name,
+                                             volumes=volumes, environment=environment)
+
+        return self.primary_container.query_container_ip(self.sidecar_container_name)
+
+    def stop_container(self):
+        return self.primary_container.stop_container(container_name=self.sidecar_container_name)
+
+    def query_container(self):
+        return self.primary_container.query_container(self.sidecar_container_name)
+
+    def ps_search(self, ps_name, reps=10):
+        return self.primary_container.ps_search(ps_name, self.sidecar_container_name, reps)
+
+    def query_container_env(self) -> List[str]:
+        return self.primary_container.query_container_env(self.sidecar_container_name)
+
+    def query_container_ip(self) -> Optional[str]:
+        return self.primary_container.query_container_ip(self.sidecar_container_name)
 
 # We only want to hit the filesystem once to get this value (otherwise, we parse the config file for every container
 # operation). This is used ONLY in container_for_context() below. Context-specific logic should otherwise be contained
