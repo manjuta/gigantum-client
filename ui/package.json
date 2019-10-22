@@ -136,8 +136,8 @@
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
-    "start": "BUILD_TYPE='cloud' node scripts/start.js NODE_ENV='development'",
-    "build": "BUILD_TYPE='local' node scripts/build.js",
+    "start": "node scripts/start.js NODE_ENV='development'",
+    "build": "node scripts/build.js",
     "build:local": "BUILD_TYPE='local' node scripts/build.js",
     "build:cloud": "BUILD_TYPE='cloud' node scripts/build.js",
     "test": "TZ='Europe/London' jest --env=jsdom shared/fileBrowser activity dashboard",

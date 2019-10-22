@@ -1,7 +1,10 @@
-
-const {
+// @flow
+// vendor
+import {
   Environment, Network, RecordSource, Store, ConnectionHandler, ViewerHandler,
-} = require('relay-runtime');
+} from 'relay-runtime';
+// utils
+import getApiURL from 'JS/utils/apiUrl';
 
 const parseParams = (str) => {
   const pieces = str.split('&');
@@ -66,18 +69,7 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
     body.append('variables', JSON.stringify(variables));
     body.append('uploadChunk', uploadables[0]);
   }
-  const { pathname } = globalObject.location;
-  const pathList = pathname.split('/');
-  const cloudPath = pathList.length > 2 ? pathList[2] : '';
-  const apiHost = process.env.NODE_ENV === 'development'
-    ? 'localhost:10000'
-    : globalObject.location.host;
-
-  const apiPath = (process.env.BUILD_TYPE === 'cloud')
-    ? `/run/${cloudPath}${process.env.GIGANTUM_API}`
-    : `${process.env.GIGANTUM_API}`;
-  const apiURL = `${globalObject.location.protocol}//${apiHost}${apiPath}`;
-
+  const apiURL = getApiURL('base');
 
   return fetch(apiURL, {
     method: 'POST',
