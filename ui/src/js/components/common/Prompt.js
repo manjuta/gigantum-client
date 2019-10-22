@@ -44,9 +44,16 @@ const Cloud = () => (
 );
 
 const pingServer = () => {
+  const { pathname } = window.location;
+  const pathList = pathname.split('/');
+  const cloudPath = pathList.length > 2 ? pathList[2] : '';
+  const apiPath = (process.env.BUILD_TYPE === 'cloud')
+    ? `/run/${cloudPath}${process.env.PING_API}`
+    : `${process.env.PING_API}`;
+
   const apiHost = process.env.NODE_ENV === 'development' ? 'localhost:10000' : window.location.host;
   const uuid = uuidv4();
-  const url = `${window.location.protocol}//${apiHost}${process.env.PING_API}?v=${uuid}`;
+  const url = `${window.location.protocol}//${apiHost}${apiPath}?v=${uuid}`;
   const currentVersion = localStorage.getItem('currentVersion');
 
   return fetch(url, {
