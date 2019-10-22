@@ -15,8 +15,10 @@ RUN mkdir /opt/ui
 ENV PORT "10001"
 
 # Copy source to build
+ARG UI_BUILD_SCRIPT=resources/docker/ui_build_script.sh
+
 COPY ui /opt/ui
-COPY resources/docker/ui_build_script.sh /opt/ui_build_script.sh
+COPY $UI_BUILD_SCRIPT /opt/ui_build_script.sh
 RUN /bin/bash /opt/ui_build_script.sh
 
 
