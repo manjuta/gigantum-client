@@ -28,7 +28,9 @@ import './Routes.scss';
 
 const Loading = () => <div />;
 const auth = new Auth();
-
+/* eslint-disable */
+const globalObject = self || window;
+/* eslint-enable */
 const Home = Loadable({
   loader: () => import('Components/home/Home'),
   loading: Loading,
@@ -43,6 +45,15 @@ const DatasetQueryContainer = Loadable({
   loader: () => import('Components/dataset/DatasetQueryContainer'),
   loading: Loading,
 });
+
+const { pathname } = globalObject.window.location;
+const pathList = pathname.split['/'];
+const uniqueClientString = (pathList.length > 2)
+  ? pathList[2]
+  : '';
+const basename = process.env.BUILD_TYPE === 'cloud'
+  ? `/run/${uniqueClientString}`
+  : '/';
 
 
 class Routes extends Component {
@@ -218,7 +229,7 @@ class Routes extends Component {
 
       return (
 
-        <Router>
+        <Router basename={basename}>
 
           <Switch>
 
