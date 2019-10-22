@@ -67,13 +67,14 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
     body.append('uploadChunk', uploadables[0]);
   }
   const { pathname } = globalObject.location;
-  const pathList = pathname.split['/'];
+  const pathList = pathname.split('/');
   const cloudPath = pathList.length > 2 ? pathList[2] : '';
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'
     : globalObject.location.host;
+
   const apiPath = (process.env.BUILD_TYPE === 'cloud')
-    ? `/run/${cloudPath}/${process.env.GIGANTUM_API}`
+    ? `/run/${cloudPath}${process.env.GIGANTUM_API}`
     : `${process.env.GIGANTUM_API}`;
   const apiURL = `${globalObject.location.protocol}//${apiHost}${apiPath}`;
 

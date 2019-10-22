@@ -145,6 +145,9 @@ module.exports = {
         test: /\.(js|jsx)$/,
         enforce: 'pre',
         loader: "eslint-loader",
+        options: {
+          sourceMap: true,
+        },
         include: paths.appSrc,
       },
       // ** ADDING/UPDATING LOADERS **

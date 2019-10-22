@@ -136,7 +136,7 @@
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
-    "start": "node scripts/start.js NODE_ENV='development'",
+    "start": "BUILD_TYPE='cloud' node scripts/start.js NODE_ENV='development'",
     "build": "BUILD_TYPE='local' node scripts/build.js",
     "build:local": "BUILD_TYPE='local' node scripts/build.js",
     "build:cloud": "BUILD_TYPE='cloud' node scripts/build.js",

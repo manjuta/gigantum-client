@@ -29,7 +29,7 @@ import './Routes.scss';
 const Loading = () => <div />;
 const auth = new Auth();
 /* eslint-disable */
-const globalObject = self || window;
+const globalObject = window || self;
 /* eslint-enable */
 const Home = Loadable({
   loader: () => import('Components/home/Home'),
@@ -45,9 +45,8 @@ const DatasetQueryContainer = Loadable({
   loader: () => import('Components/dataset/DatasetQueryContainer'),
   loading: Loading,
 });
-
-const { pathname } = globalObject.window.location;
-const pathList = pathname.split['/'];
+const { pathname } = globalObject.location;
+const pathList = pathname.split('/');
 const uniqueClientString = (pathList.length > 2)
   ? pathList[2]
   : '';
