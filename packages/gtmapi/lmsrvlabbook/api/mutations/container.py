@@ -10,7 +10,7 @@ from gtmcore.exceptions import GigantumException
 from gtmcore.container import container_for_context
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.jupyter import check_jupyter_reachable, start_jupyter
-from gtmcore.container.rserver import start_rserver
+from gtmcore.container.rserver import start_rserver, check_rstudio_reachable
 from gtmcore.container.bundledapp import start_bundled_app
 from gtmcore.logging import LMLogger
 from gtmcore.activity.services import start_labbook_monitor
@@ -71,7 +71,8 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     def _start_jupyter_tool(cls, labbook: LabBook, router: ProxyRouter, username: str,
                             container_override_id: str = None):
         tool_port = 8888
-        project_container = container_for_context(username, labbook=labbook)
+        # Recall that we re-use the image name for Projects as the container name
+        project_container = container_for_context(username, labbook=labbook, override_image_name=container_override_id)
         labbook_ip = project_container.query_container_ip()
         labbook_endpoint = f'http://{labbook_ip}:{tool_port}'
 
@@ -100,7 +101,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             rt_prefix, _ = router.add(labbook_endpoint, f'jupyter/{rt_prefix}')
 
             # Start jupyterlab
-            suffix = start_jupyter(labbook, username, tag=container_override_id, proxy_prefix=rt_prefix)
+            suffix = start_jupyter(project_container, proxy_prefix=rt_prefix)
 
             # Ensure we start monitor IFF jupyter isn't already running.
             start_labbook_monitor(labbook, username, 'jupyterlab',
@@ -112,10 +113,11 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     @classmethod
     def _start_rstudio(cls, labbook: LabBook, router: ProxyRouter, username: str,
                        container_override_id: str = None):
-        mitm_url, pr_suffix = MITMProxyOperations.configure_mitmroute(labbook, router, username)
 
         # All messages will come through MITM, so we don't need to monitor rserver directly
-        start_rserver(labbook, username, tag=container_override_id)
+        project_container = container_for_context(username, labbook, override_image_name=container_override_id)
+        fresh_rserver = start_rserver(project_container)
+        mitm_url, pr_suffix = MITMProxyOperations.configure_mitmroute(project_container, router, fresh_rserver)
 
         # Ensure monitor is running
         start_labbook_monitor(labbook, username, "rstudio",
@@ -124,6 +126,8 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                               # But url isn't used currently by monitor_rserver.RServerMonitor!
                               url=mitm_url,
                               author=get_logged_in_author())
+
+        check_rstudio_reachable(mitm_url)
 
         return pr_suffix
 

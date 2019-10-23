@@ -72,21 +72,15 @@ class CircleCIImageBuilder(object):
         base_tag = "gigantum/circleci-client"
         named_tag = "{}:{}".format(base_tag, self._generate_image_tag_suffix())
 
-        docker_file = os.path.join(get_resources_root(), 'docker', 'Dockerfile_circleci')
+        docker_file = '/'.join(get_resources_root(), 'docker', 'Dockerfile_circleci')
 
         self._generate_config_file()
 
-        if verbose:
-            [print(ln[list(ln.keys())[0]], end='') for ln in client.api.build(path=get_client_root(),
-                                                                              dockerfile=docker_file,
-                                                                              tag=named_tag,
-                                                                              nocache=no_cache,
-                                                                              pull=True, rm=True,
-                                                                              decode=True)]
-        else:
-            client.images.build(path=get_client_root(),  dockerfile=docker_file, tag=named_tag,
-                                pull=True, nocache=no_cache)
-
+        build_lines = client.api.build(path=get_client_root(), dockerfile=docker_file, tag=named_tag, nocache=no_cache,
+                                       pull=True, rm=True, decode=True)
+        for line in build_lines:
+            print(next(iter(line.values())), end='')
+            
         # Verify the desired image built successfully
         try:
             client.images.get(named_tag)
@@ -127,11 +121,10 @@ class CircleCIImageBuilder(object):
         else:
             client.images.push(image, tag=tag)
 
-    def update(self, verbose=True, no_cache=False) -> None:
+    def update(self, no_cache=False) -> None:
         """Method to circleCI container
 
         Args:
-            verbose(bool): flag indication if output should print to the console
             no_cache(bool): flag indicating if the docker cache should be ignored
 
         Returns:

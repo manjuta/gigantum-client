@@ -19,7 +19,7 @@ class TestAptPackageManager(object):
         assert len(result) == 1
 
         # assert result == "4.0.9-5"
-        assert re.match('\d.\d.\d-\d', result[0])
+        assert re.match(r'\d.\d.\d-\d', result[0])
 
     def test_list_installed_packages(self, build_lb_image_for_env):
         """Test list_installed_packages command

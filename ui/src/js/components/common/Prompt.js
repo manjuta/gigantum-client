@@ -11,36 +11,61 @@ let updateAvailable = false;
 
 const Localhost = () => (
   <div>
-    <p>Ensure Gigantum is running or restart the application</p>
+    <div className="Prompt__header">
+      <p>Cannot connect to Gigantum Client</p>
+    </div>
     <p>
-       If the problem continues to persist, follow the steps
+      Please verify that that the Client is running by clicking on the Gigantum logo in your system tray to open Gigantum Desktop.
+    </p>
+    <p>
+       If the problem persists, try the steps outlined here, contact
       {' '}
       <a
-        href="https://docs.gigantum.com/docs/client-interface-fails-to-load"
+        href="mailto:support@gigantum.com"
+      >
+        support@gigantum.com
+      </a>
+      , or visit our
+      {' '}
+      <a
+        href="https://spectrum.chat/gigantum/"
         rel="noopener noreferrer"
         target="_blank"
       >
-          here
+        forum
       </a>
-       .
+      {' '}
+      and post a question.
     </p>
   </div>
 );
 
 const Cloud = () => (
   <div>
-    <p>Please ensure you have a valid internet connection.</p>
+    <div className="Prompt__header">
+      <p>Cannot connect to your Gigantum Hub Client</p>
+    </div>
     <p>
-       If the problem continues to persist, please report it&nbsp;
+      Please verify that you are connected to the internet and have a running Client.
+    </p>
+    <p>
+        If the problem persists, contact
       {' '}
       <a
-        href="https://spectrum.chat/gigantum"
+        href="mailto:support@gigantum.com"
+      >
+        support@gigantum.com
+      </a>
+      , or visit our
+      {' '}
+      <a
+        href="https://spectrum.chat/gigantum/"
         rel="noopener noreferrer"
         target="_blank"
       >
-           here
+        forum
       </a>
-       .
+      .
     </p>
   </div>
 );
@@ -66,7 +91,7 @@ const pingServer = () => {
       return true;
     }
     return false;
-  }).catch(error => false);
+  }).catch(() => false);
 };
 
 export default class Prompt extends Component {
@@ -75,7 +100,6 @@ export default class Prompt extends Component {
 
     this.state = {
       failureCount: 0,
-      connected: false,
       promptState: true,
       updateAvailable: false,
     };
@@ -129,7 +153,6 @@ export default class Prompt extends Component {
   render() {
     const { state } = this;
     // variables here
-    const failedTwiceOrMore = (state.failureCount >= 2);
     const failedEightTimesOrMore = (state.failureCount >= 8);
     const lessThanEight = (state.failureCount < 8);
     // decalre css here
@@ -140,11 +163,10 @@ export default class Prompt extends Component {
     const propmptLogoCSS = classNames({
       Prompt__logo: true,
       'Prompt__logo--final': failedEightTimesOrMore,
-      'Prompt__logo--raised': failedTwiceOrMore && !failedEightTimesOrMore,
     });
     const loadingMessageCSS = classNames({
-      'Prompt__loading-text': ((lessThanEight) && failedTwiceOrMore),
-      hidden: !((failedTwiceOrMore) && lessThanEight),
+      'Prompt__loading-text': lessThanEight,
+      hidden: !lessThanEight,
     });
     const failureContainerCSS = classNames({
       'Prompt__failure-container': failedEightTimesOrMore,
@@ -160,11 +182,10 @@ export default class Prompt extends Component {
         <div className={promptInfoCSS}>
           <div className={propmptLogoCSS} />
           <div className={loadingMessageCSS}>
-            Loading Please Wait...
+            Please wait. Gigantum Client is starting...
           </div>
           <div className={failureContainerCSS}>
             <div className="Prompt__failure-text">
-              <p>There was a problem loading Gigantum</p>
               {
                 (window.location.hostname === 'localhost')
                   ? <Localhost />

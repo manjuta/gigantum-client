@@ -272,7 +272,7 @@ class GitFilesystem(GitRepoInterface):
         """
         value = str(value, 'utf-8')
 
-        split_str = re.split('(@{2}\s-?\+?\d+,?\s?\d+\s-?\+?\d+,?\s?\d+\s@{2})', value)
+        split_str = re.split(r'(@{2}\s-?\+?\d+,?\s?\d+\s-?\+?\d+,?\s?\d+\s@{2})', value)
         if len(split_str) == 1:
             split_value = value.split("@@")
             line_info = ["@@{}@@".format(split_value[1])]
