@@ -347,7 +347,10 @@ export default class ImportModule extends Component {
         }
       });
     } else if (state.remoteURL) {
-      const domain = new URL(state.remoteURL);
+      const modifiedURL = (state.remoteURL.indexOf('http') > -1)
+        ? state.remoteURL
+        : `https://${state.remoteURL}`;
+      const domain = new URL(modifiedURL);
       const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
       const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
       const remote = `https://repo.${domain.hostname}/${owner}/${name}.git`;

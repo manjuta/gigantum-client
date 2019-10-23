@@ -1,10 +1,11 @@
-from gtmcore.mitmproxy.mitmproxy import CURRENT_MITMPROXY_TAG, MITMProxyOperations
+from gtmcore.container.container import SidecarContainerOperations
+from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 import os
 
 from gtmcore.activity.tests.fixtures import get_redis_client_mock, redis_client, MockSessionsResponse
-from gtmcore.fixtures import mock_labbook
+from gtmcore.fixtures import mock_labbook, mock_config_with_repo
+from gtmcore.fixtures.container import build_lb_image_for_rstudio
 from gtmcore.activity import ActivityStore
-from gtmcore.container import container_for_context
 
 from gtmcore.activity.monitors.monitor_rserver import RServerMonitor, RStudioServerMonitor
 
@@ -84,37 +85,30 @@ class TestRStudioServerMonitor:
 
 class TestMITMproxy:
 
-    def test_start_mitm_proxy(self, redis_client, mock_labbook):
-        # The name of the MITM proxy container is simply the target container prefixed with gmitmproxy
-        # E.g., gmitmproxy.gmlb-tinydav-tinydav-rstudio-test
-        labbook_name = 'wholly-irrelevant'
-        username = 'soycapitan'
-        mitm_name = f"gmitmproxy.{labbook_name}"
+    def test_start_mitm_proxy(self, build_lb_image_for_rstudio):
+        lb_container, ib, username = build_lb_image_for_rstudio
 
-        container_ops = container_for_context(username)
+        mitm_container = SidecarContainerOperations(lb_container, MITMProxyOperations.namespace_key)
+
         # Ensure this container doesn't exist already
-        container_ops.stop_container(mitm_name)
+        mitm_container.stop_container()
 
         # The below image should ideally already be on the system, maybe not tagged
         # If not, it'll hopefully be useful later - we won't clean it up
         image_name = 'ubuntu:18.04'
 
         # We still use Docker directly here. Doesn't make sense to create an abstraction that's only used by a test
-        docker_client = container_ops._client
+        docker_client = lb_container._client
         docker_client.images.pull(image_name)
-        docker_client.containers.create(image_name, name=mitm_name)
+        docker_client.containers.create(image_name, name=mitm_container.sidecar_container_name)
 
-        # This gets all the containers that are based on our current mitmproxy image
-        clist = container_ops.container_list('gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG)
-        # If our mitm_name'd container shows up there, it's a properly deployed MITM Proxy (it's not yet)
-        assert mitm_name not in clist
+        assert mitm_container.query_container() == 'created'
 
-        MITMProxyOperations.start_mitm_proxy(username, 'http://127.0.0.1:8787', labbook_name)
+        MITMProxyOperations.start_mitm_proxy(lb_container, new_rserver_session=True)
 
-        clist = container_ops.container_list('gigantum/mitmproxy_proxy:' + CURRENT_MITMPROXY_TAG)
-        assert mitm_name in clist
+        assert mitm_container.query_container() == 'running'
 
-        MITMProxyOperations.stop_mitm_proxy(username, labbook_name)
+        MITMProxyOperations.stop_mitm_proxy(lb_container)
 
-        if container_ops.stop_container(mitm_name):
+        if lb_container.stop_container(mitm_container.sidecar_container_name):
             assert False, "MITM container not cleaned up during `stop_mitm_proxy()`"

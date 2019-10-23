@@ -166,7 +166,7 @@ class LocalProjectContainer(ContainerOperations):
     # Working with Containers
 
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
-                      volumes: Dict = None, wait_for_output=False, container_name: Optional[str] = None, **run_args) \
+                      volumes: Optional[Dict] = None, wait_for_output=False, container_name: Optional[str] = None, **run_args) \
             -> Optional[str]:
         """ Start a Docker container, by default for the Project connected to this instance.
 
@@ -202,8 +202,10 @@ class LocalProjectContainer(ContainerOperations):
         if not wait_for_output:
             container_name = container_name or image_name
             # We use negative logic because this branch is much simpler
-            self._container = self._client.containers.run(image_name, detach=True, init=True, name=container_name,
-                                                          **run_args)
+            container_object = self._client.containers.run(image_name, detach=True, init=True, name=container_name,
+                                                           **run_args)
+            if not container_name:
+                self._container = container_object
             return None
         else:
             t0 = time.time()
@@ -290,18 +292,18 @@ class LocalProjectContainer(ContainerOperations):
         else:
             return None
 
-    def query_container_ip(self, container_name: Optional[str] = None) -> str:
+    def query_container_ip(self, container_name: Optional[str] = None) -> Optional[str]:
         """Query the given container's IP address. Defaults to the Project container for this instance.
 
         Args:
             container_name: alternative to the current project container. Use anything that works for containers.get()
 
         Returns:
-            IP address as string
+            IP address as string, None if not available (e.g., container doesn't exist)
         """
         container = self._get_container(container_name)
         if container is None:
-            return ''
+            return None
 
         # We hammer repeatedly for 5 seconds
         for _ in range(10):
@@ -313,7 +315,22 @@ class LocalProjectContainer(ContainerOperations):
 
             time.sleep(0.5)
 
-        return ''
+        return None
+
+    def query_container_env(self, container_name: Optional[str] = None) -> List[str]:
+        """Get the list of environment variables from the container
+
+        Args:
+            container_name: an optional container name (otherwise, will use self.image_tag)
+
+        Returns:
+            A list of strings like 'VAR=value'
+        """
+        container = self._get_container(container_name)
+        if container is None:
+            return []
+
+        return container.attrs['Config']['Env']
 
     def copy_into_container(self, src_path: str, dst_dir: str):
         """Copy the given file in src_path into the project's container.
@@ -347,7 +364,7 @@ class LocalProjectContainer(ContainerOperations):
 
     # Utility methods
 
-    def get_gigantum_client_ip(self) -> str:
+    def get_gigantum_client_ip(self) -> Optional[str]:
         """Method to get the monitored lab book container's IP address on the Docker bridge network
 
         Returns:
@@ -355,7 +372,7 @@ class LocalProjectContainer(ContainerOperations):
         """
         clist: List[Container] = [c for c in self._client.containers.list()
                                   if 'gigantum.labmanager' in c.name
-                                  # This catches the client contaienr name during development w/ docker-compose
+                                  # This catches the client container name during development w/ docker-compose
                                   or 'developer_labmanager' in c.name
                                   and 'gmlb-' not in c.name]
         if len(clist) != 1:
@@ -393,18 +410,6 @@ class LocalProjectContainer(ContainerOperations):
                 return self._client.containers.get(container_name)
             except docker.errors.NotFound:
                 return None
-
-    # TODO #1063 - update MITMproxy and related code so it no longer needs this logic
-    def container_list(self, ancestor: Optional[str]) -> List[str]:
-        """Return a list of containers, optionally only those that are based on `ancestor`
-
-        Args:
-            ancestor: the name of an image or container this container is derived from
-        """
-        filters = {}
-        if ancestor:
-            filters['ancestor'] = ancestor
-        return [c.name for c in self._client.containers.list(filters=filters)]
 
 
 def get_docker_client(check_server_version=True, fallback=True) -> DockerClient:

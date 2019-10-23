@@ -73,6 +73,52 @@ def build_lb_image_for_jupyterlab(mock_config_with_repo):
                 pass
 
 
+@pytest.fixture(scope='function')
+def build_lb_image_for_rstudio(mock_config_with_repo):
+    """A far more minimal fixture than the one for jupyterlab
+
+    Generally, given the extra complexity of RStudio, when we're beating on other parts of the system, we should default
+    to Jupyter. For similar reasons, we don't do nearly as many checks as are done in the jupyterlab fixture.
+    """
+    with patch.object(Configuration, 'find_default_config', lambda self: mock_config_with_repo[0]):
+        username = 'soycapitan'
+        im = InventoryManager(mock_config_with_repo[0])
+        lb = im.create_labbook(username, username, "containerunittestbookrstudio")
+
+        cm = ComponentManager(lb)
+        cm.add_base(ENV_UNIT_TEST_REPO, 'ut-rstudio-server', 1)
+
+        ib = ImageBuilder(lb)
+        docker_lines = ib.assemble_dockerfile(write=True)
+        lb_container = container_for_context(username=username, labbook=lb)
+        # Here and we use the private docker client for LocalProjectContainer that may fail on cloud
+        client = lb_container._client
+        client.containers.prune()
+
+        try:
+            lb_container.build_image()
+            lb_container.start_project_container()
+
+            yield lb_container, ib, username
+
+            lb_container.stop_container()
+        finally:
+            shutil.rmtree(lb.root_dir, ignore_errors=True)
+            # Stop and remove container if it's still there
+            try:
+                client.containers.get(lb_container.image_tag).stop(timeout=2)
+                client.containers.get(lb_container.image_tag).remove()
+            except:
+                pass
+
+            # Remove image if it's still there
+            try:
+                if not lb_container.delete_image():
+                    client.images.remove(lb_container.image_tag, force=True, noprune=False)
+            except:
+                pass
+
+
 @pytest.fixture(scope='class')
 def build_lb_image_for_env(mock_config_with_repo):
     # Create a labook

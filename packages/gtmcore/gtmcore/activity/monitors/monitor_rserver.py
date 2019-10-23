@@ -1,3 +1,4 @@
+import os
 import traceback
 import time
 
@@ -20,6 +21,7 @@ from gtmcore.activity.processors.rserver import (RStudioServerCodeProcessor,
                                                  RStudioServerImageExtractorProcessor)
 from gtmcore.activity.services import stop_dev_env_monitors
 from gtmcore.container import container_for_context
+from gtmcore.container.container import SidecarContainerOperations
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
@@ -124,26 +126,24 @@ class RServerMonitor(DevEnvMonitor):
 
 
         # Clean up and return labbook container names for running proxies
-        running_proxy_lb_names = MITMProxyOperations.get_running_proxies(username)
+        labbook_container = container_for_context(username, override_image_name=labbook_container_name)
+        mitm_container = SidecarContainerOperations(labbook_container, MITMProxyOperations.namespace_key)
 
         # As part of #453, we should re-start the proxy if the dev tool is still running
-        if labbook_container_name not in running_proxy_lb_names:
+        if mitm_container.query_container() is None:
             # MITM proxy isn't running anymore.
             logger.info(f"Detected exited RStudio proxy {labbook_container_name}. Stopping monitoring for {activity_monitor_key}")
-            logger.info(f"Running proxies: {running_proxy_lb_names}")
             # This should clean up everything it's managing
             stop_dev_env_monitors(dev_env_monitor_key, redis_conn, labbook_container_name)
         else:
-            labbook_container = container_for_context(username, override_image_name=labbook_container_name)
             if labbook_container.query_container() != "running":
                 # RStudio container isn't running anymore. Clean up by setting run flag to `False` so worker exits
                 logger.info(f"Detected exited RStudio Project {labbook_container_name}. Stopping monitoring for {activity_monitor_key}")
-                logger.info(f"Running proxies: {running_proxy_lb_names}")
                 # This should clean up everything it's managing
                 stop_dev_env_monitors(dev_env_monitor_key, redis_conn, labbook_container_name)
                 # I don't believe we yet have a way to fit MITM proxy cleanup into the abstract dev env monitor machinery
                 # Could be addressed in #453
-                MITMProxyOperations.stop_mitm_proxy(username, labbook_container_name)
+                MITMProxyOperations.stop_mitm_proxy(labbook_container)
                 return
 
         # We haven't found any major issues
@@ -172,7 +172,7 @@ class RServerMonitor(DevEnvMonitor):
             redis_conn.hset(activity_monitor_key, "process_id", process_id.key_str)
             redis_conn.hset(activity_monitor_key, "run", "True")
             redis_conn.hset(activity_monitor_key, "logfile_path",
-                            MITMProxyOperations.get_mitmlogfile_path(labbook_container_name))
+                            MITMProxyOperations.get_mitmlogfile_path(labbook_container))
 
 
 class RStudioServerMonitor(ActivityMonitor):
@@ -253,7 +253,8 @@ class RStudioServerMonitor(ActivityMonitor):
         # Get connection to the DB
         redis_conn = redis.Redis(db=database)
 
-        logfile_path = redis_conn.hget(self.monitor_key, "logfile_path")
+        project_container = container_for_context(self.user, self.labbook)
+        logfile_path = MITMProxyOperations.get_mitmlogfile_path(project_container)
 
         mitmlog = open(logfile_path, "rb")
         if not mitmlog:
@@ -287,7 +288,7 @@ class RStudioServerMonitor(ActivityMonitor):
             logger.info(f"Shutting down RStudio monitor {self.monitor_key}")
             redis_conn.delete(self.monitor_key)
             # At this point, there is no chance we'll get anything else out of unmonitored files!
-            MITMProxyOperations.clean_logfiles(self.user)
+            os.remove(logfile_path)
 
     def store_record(self) -> None:
         """Store R input/output/code to ActivityRecord / git commit

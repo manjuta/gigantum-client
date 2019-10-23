@@ -1,7 +1,7 @@
 import uuid
-import time
-import os
 import re
+import os
+import time
 from typing import Optional
 
 import redis
@@ -9,7 +9,7 @@ import requests
 
 from gtmcore.logging import LMLogger
 from gtmcore.environment import ComponentManager
-from gtmcore.container import container_for_context, ContainerOperations
+from gtmcore.container import ContainerOperations
 from gtmcore.labbook import LabBook
 from gtmcore.exceptions import GigantumException
 
@@ -19,8 +19,7 @@ DEFAULT_JUPYTER_PORT = 8888
 PYTHON_ENV_CMD = "PYTHONPATH=/mnt/share:$PYTHONPATH"
 
 
-def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
-                  check_reachable: bool = True,
+def start_jupyter(project_container: ContainerOperations, check_reachable: bool = True,
                   proxy_prefix: Optional[str] = None) -> str:
     """ Main entrypoint to launching Jupyter. Note, the caller must
         determine for themselves the host and port.
@@ -28,16 +27,18 @@ def start_jupyter(labbook: LabBook, username: str, tag: Optional[str] = None,
     Returns:
         Path to jupyter (e.g., "/lab?token=xyz")
     """
-    project_container = container_for_context(username, labbook=labbook, override_image_name=tag)
     if project_container.query_container() != 'running':
-        raise GigantumException(f"{str(labbook)} container is not running. Start it before launch a dev tool.")
+        raise GigantumException(
+            f"{str(project_container.labbook)} container is not running. Start it before launch a dev tool.")
 
     # Get IP of container on Docker Bridge Network
     lb_ip_addr = project_container.query_container_ip()
+    if not lb_ip_addr:
+        raise GigantumException("Can't obtain IP address for Jupyter container")
     jupyter_ps = project_container.ps_search('jupyter lab', reps=1)
 
     if len(jupyter_ps) == 1:
-        logger.info(f'Found existing Jupyter instance for {str(labbook)}.')
+        logger.info(f'Found existing Jupyter instance for {str(project_container.labbook)}.')
 
         # Get token from PS in container
         t = re.search(r"token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
@@ -104,15 +105,16 @@ def _start_jupyter_process(project_container: ContainerOperations, token: str,
 
 def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
     test_url = f'http://{ip_address}:{port}{prefix}/api'
-    for n in range(20):
-        logger.debug(f"Attempt {n + 1}: Testing if JupyerLab is up at {test_url}...")
+
+    for n in range(30):
+        logger.debug(f"Attempt {n + 1}: Testing if Jupyter is up at {test_url}...")
         try:
             r = requests.get(test_url, timeout=0.5)
             if r.status_code != 200:
                 time.sleep(0.5)
             else:
                 if "version" in r.json():
-                    logger.info(f'Found JupyterLab up at {test_url} after {n/2.0} seconds')
+                    logger.info(f'Found Jupyter up at {test_url} after {n/2.0} seconds')
                     break
                 else:
                     time.sleep(0.5)
@@ -120,4 +122,4 @@ def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
             # Assume API isn't up at all yet, so no connection can be made
             time.sleep(0.5)
     else:
-        raise GigantumException(f'Could not reach JupyterLab at {test_url} after timeout')
+        raise GigantumException(f'Could not reach Jupyter at {test_url} after timeout')
