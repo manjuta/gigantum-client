@@ -57,7 +57,18 @@ class HubProjectContainer(ContainerOperations):
             ContainerBuildException if container build fails.
         """
         logger.info(f"HubProjectContainer.build_image()")
-        pass
+        url = f"{self._launch_service}/v1/projectbuild"
+        data = {"client_id": self._client_id,
+                "project_id": None,
+                "project_namespace": self.labbook.owner,
+                "project_name": self.labbook.name
+                }
+        response = requests.post(url, json=data)
+        if response.status_code != 200:
+            raise ContainerException(f"Failed to launch project build in launch service:"
+                                     f" {response.status_code} : {response.json()}")
+
+        return None
 
     def delete_image(self, override_image_name: Optional[str] = None) -> bool:
         """ Delete the Docker image for the given LabBook
