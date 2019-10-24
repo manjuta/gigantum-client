@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
+import queryString from 'querystring';
 import {
   BrowserRouter as Router,
   Route,
@@ -23,6 +24,8 @@ import config from 'JS/config';
 // auth
 import UserIdentity from 'JS/Auth/UserIdentity';
 import Auth from 'JS/Auth/Auth';
+// utils
+import getApiURL from 'JS/utils/apiUrl';
 // assets
 import './Routes.scss';
 
@@ -66,6 +69,13 @@ class Routes extends Component {
     diskLow: false,
     available: 0,
   };
+
+  componentWillMount = () => {
+    const { path } = queryString.parse(history.location.search.slice(1));
+    if (path) {
+      history.replace(`${path}${history.location.hash}`);
+    }
+  }
 
   /**
     @param {}
@@ -184,14 +194,10 @@ class Routes extends Component {
   */
   _checkSysinfo = () => {
     // TODO move to utils file
-
-    const apiHost = (process.env.NODE_ENV === 'development')
-      ? 'localhost:10000'
-      : window.location.host;
     const self = this;
-    const url = `${window.location.protocol}//${apiHost}${process.env.SYSINFO_API}`;
+    const apiURL = getApiURL('sysinfo');
     setTimeout(self._checkSysinfo.bind(this), 60 * 1000);
-    return fetch(url, {
+    return fetch(apiURL, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

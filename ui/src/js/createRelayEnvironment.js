@@ -17,7 +17,8 @@ const parseParams = (str) => {
     if (parts.length < 2) {
       parts.push('');
     }
-    data[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+    const remainingParts = parts.slice(1).join('=');
+    data[decodeURIComponent(parts[0])] = decodeURIComponent(remainingParts);
   }
   return data;
 };
