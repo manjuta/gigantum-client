@@ -20,7 +20,6 @@ const getApiURL = (route) => {
   const routePath = route === 'ping'
     ? `${process.env.PING_API}?v=${uuid}`
     : process.env.GIGANTUM_API;
-
   const apiPath = (process.env.BUILD_TYPE === 'cloud')
     ? `/run/${cloudPath}${routePath}`
     : `${routePath}`;
