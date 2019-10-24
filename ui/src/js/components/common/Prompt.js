@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import classNames from 'classnames';
+// utils
+import getApiURL from 'JS/utils/apiUrl';
 // assets
 import './Prompt.scss';
 
@@ -69,19 +71,10 @@ const Cloud = () => (
 );
 
 const pingServer = () => {
-  const { pathname } = window.location;
-  const pathList = pathname.split('/');
-  const cloudPath = pathList.length > 2 ? pathList[2] : '';
-  const apiPath = (process.env.BUILD_TYPE === 'cloud')
-    ? `/run/${cloudPath}${process.env.PING_API}`
-    : `${process.env.PING_API}`;
-
-  const apiHost = process.env.NODE_ENV === 'development' ? 'localhost:10000' : window.location.host;
-  const uuid = uuidv4();
-  const url = `${window.location.protocol}//${apiHost}${apiPath}?v=${uuid}`;
+  const apiURL = getApiURL('ping');
   const currentVersion = localStorage.getItem('currentVersion');
 
-  return fetch(url, {
+  return fetch(apiURL, {
     method: 'GET',
   }).then((response) => {
     if (response.status === 200 && (response.headers.get('content-type') === 'application/json')) {
