@@ -81,7 +81,7 @@ export default class DashboardContainer extends Component {
       && props.match.params
       && props.match.params.labbookSection;
     let query;
-    console.log(sectionRoute);
+
     if (sectionRoute !== 'cloud' && sectionRoute !== 'local') {
       props.history.replace('/projects/local');
     }
