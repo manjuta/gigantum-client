@@ -3,24 +3,9 @@
 import {
   Environment, Network, RecordSource, Store, ConnectionHandler, ViewerHandler,
 } from 'relay-runtime';
+import qs from 'querystring';
 // utils
 import getApiURL from 'JS/utils/apiUrl';
-
-const parseParams = (str) => {
-  const pieces = str.split('&');
-  const data = {};
-  let i;
-  let parts;
-  // process each query pair
-  for (i = 0; i < pieces.length; i++) {
-    parts = pieces[i].split('=');
-    if (parts.length < 2) {
-      parts.push('');
-    }
-    data[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
-  }
-  return data;
-};
 
 function fetchQuery(operation, variables, cacheConfig, uploadables) {
   /* eslint-disable */
@@ -42,15 +27,24 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
       headers.Identity = `${uploadables[2]}`;
     }
   } else if (globalObject.location.href.indexOf('access_token') > -1) {
-    const hashObj = parseParams(globalObject.location.href.split('#')[1]);
+    const values = qs.parse(globalObject.location.hash.slice(1));
+    const {
+      access_token,
+      id_token,
+    } = values;
+    if (access_token) {
+      headers.authorization = `Bearer ${access_token}`;
+      globalObject.localStorage.setItem('access_token', access_token);
+      delete values.access_token;
+    }
+    if (id_token) {
+      headers.Identity = `${id_token}`;
+      globalObject.localStorage.setItem('id_token', id_token);
+      delete values.id_token;
+    }
+    const stringifiedValues = qs.stringify(values);
 
-    headers.authorization = `Bearer ${hashObj.access_token}`;
-    headers.Identity = `${hashObj.id_token}`;
-
-    globalObject.localStorage.setItem('access_token', hashObj.access_token);
-    globalObject.localStorage.setItem('id_token', hashObj.id_token);
-
-    globalObject.location.hash = '';
+    globalObject.location.hash = stringifiedValues;
   } else if (globalObject.localStorage.getItem('access_token')) {
     const accessToken = globalObject.localStorage.getItem('access_token');
     const idToken = globalObject.localStorage.getItem('id_token');
