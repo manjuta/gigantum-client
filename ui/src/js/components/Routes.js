@@ -70,9 +70,12 @@ class Routes extends Component {
   };
 
   componentWillMount = () => {
-    const { path } = queryString.parse(history.location.search.slice(1));
-    if (path) {
-      history.replace(`${basename}${path}${history.location.hash}`);
+    const values = queryString.parse(history.location.hash.slice(1));
+    const newPath = values.path;
+    if (newPath) {
+      delete values.path;
+      const stringifiedValues = queryString.stringify(values);
+      history.replace(`${basename}${newPath}#${stringifiedValues}`);
     }
   }
 

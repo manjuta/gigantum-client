@@ -32,7 +32,7 @@ class Labbooks extends Component {
       filter,
       orderBy,
       sort,
-    } = queryString.parse(props.history.location.search.slice(1));
+    } = queryString.parse(props.history.location.hash.slice(1));
 
     this.state = {
       labbookModalVisible: false,
@@ -109,6 +109,7 @@ class Labbooks extends Component {
     if ((nextProps.section !== 'cloud') && (nextProps.section !== 'local')) {
       nextProps.history.replace('/projects/local');
     }
+
     this.setState({ selectedSection: nextProps.section });
   }
 
@@ -394,12 +395,12 @@ class Labbooks extends Component {
     const { props } = this;
     const searchObj = Object.assign(
       {},
-      queryString.parse(props.history.location.search.slice(1)),
+      queryString.parse(props.history.location.hash.slice(1)),
       newValues,
     );
     const urlParameters = queryString.stringify(searchObj);
 
-    props.history.replace(`..${props.history.location.pathname}?${urlParameters}`);
+    props.history.replace(`..${props.history.location.pathname}#${urlParameters}`);
   }
 
   /**

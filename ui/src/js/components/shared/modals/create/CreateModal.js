@@ -43,7 +43,7 @@ export default class CreateModal extends Component {
     repository: '',
     componentId: '',
     revision: '',
-    modalVisible: queryString.parse(this.props.history.location.search.slice(1)).createNew || false,
+    modalVisible: queryString.parse(this.props.history.location.hash.slice(1)).createNew || false,
     selectedComponentId: 'createLabbook',
     continueDisabled: true,
     modalBlur: false,
@@ -52,12 +52,12 @@ export default class CreateModal extends Component {
 
   componentDidMount = () => {
     const { props } = this;
-    const values = queryString.parse(props.history.location.search.slice(1));
+    const values = queryString.parse(props.history.location.hash.slice(1));
     if (values.createNew) {
       delete values.createNew;
     }
     const stringifiedValues = queryString.stringify(values);
-    props.history.push(`${props.history.location.pathname}?${stringifiedValues}`);
+    props.history.replace(`${props.history.location.pathname}#${stringifiedValues}`);
   }
 
 

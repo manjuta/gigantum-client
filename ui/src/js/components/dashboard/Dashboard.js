@@ -33,7 +33,7 @@ export default class DashboardContainer extends Component {
   constructor(props) {
     super(props);
 
-    const { orderBy, sort } = queryString.parse(props.history.location.search.slice(1));
+    const { orderBy, sort } = queryString.parse(props.history.location.hash.slice(1));
 
     this.state = {
       selectedComponent: props.match && props.match.path,
@@ -81,7 +81,7 @@ export default class DashboardContainer extends Component {
       && props.match.params
       && props.match.params.labbookSection;
     let query;
-
+    console.log(sectionRoute);
     if (sectionRoute !== 'cloud' && sectionRoute !== 'local') {
       props.history.replace('/projects/local');
     }
@@ -139,6 +139,7 @@ export default class DashboardContainer extends Component {
                   auth={props.auth}
                   labbookList={queryProps}
                   history={props.history}
+                  section={sectionRoute}
                   refetchSort={this._refetchSort}
                   diskLow={props.diskLow}
                 />
@@ -150,6 +151,7 @@ export default class DashboardContainer extends Component {
                 auth={props.auth}
                 labbookList={queryProps}
                 history={props.history}
+                section={sectionRoute}
                 refetchSort={this._refetchSort}
                 diskLow={props.diskLow}
               />

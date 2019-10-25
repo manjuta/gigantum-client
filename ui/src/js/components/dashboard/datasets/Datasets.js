@@ -32,7 +32,7 @@ class Datasets extends Component {
       filter,
       orderBy,
       sort,
-    } = queryString.parse(props.history.location.search.slice(1));
+    } = queryString.parse(props.history.location.hash.slice(1));
 
     let { section } = this.props;
     if (section !== 'cloud' && section !== 'local') {
@@ -379,10 +379,10 @@ class Datasets extends Component {
     const { props } = this;
     const searchObj = Object.assign(
       {},
-      queryString.parse(props.history.location.search.slice(1)),
+      queryString.parse(props.history.location.hash.slice(1)),
       newValues,
     );
-    props.history.replace(`..${props.history.location.pathname}?${queryString.stringify(searchObj)}`);
+    props.history.replace(`..${props.history.location.pathname}#${queryString.stringify(searchObj)}`);
   }
 
   /**
