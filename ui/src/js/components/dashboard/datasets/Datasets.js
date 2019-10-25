@@ -34,12 +34,11 @@ class Datasets extends Component {
       sort,
     } = queryString.parse(props.history.location.search.slice(1));
 
-    const paths = props.history.location.pathname.split('/');
-    let sectionRoute = paths.length > 2 ? paths[2] : 'local';
-
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
-      sectionRoute = 'local';
+    let { section } = this.props;
+    if (section !== 'cloud' && section !== 'local') {
+      section = 'local';
     }
+
     this.state = {
       datasetModalVisible: false,
       oldDatasetName: '',
@@ -49,7 +48,7 @@ class Datasets extends Component {
       filter: filter || 'all',
       sortMenuOpen: false,
       refetchLoading: false,
-      selectedSection: sectionRoute,
+      selectedSection: section,
       showLoginPrompt: false,
       orderBy: orderBy || 'modified_on',
       sort: sort || 'desc',
@@ -88,7 +87,7 @@ class Datasets extends Component {
     const sectionRoute = paths.length > 2 ? paths[2] : 'local';
 
     if (paths[2] !== 'cloud' && paths[2] !== 'local') {
-      this.props.history.replace('../../../../datasets/local');
+      // this.props.history.replace('../../../../datasets/local');
     }
     this.setState({ selectedSection: sectionRoute });
   }

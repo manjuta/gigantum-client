@@ -77,12 +77,13 @@ export default class DashboardContainer extends Component {
   */
   _displaySelectedComponent = () => {
     const { props, state } = this;
-    const paths = props.history.location.pathname.split('/');
-    const sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    const sectionRoute = props.match
+      && props.match.params
+      && props.match.params.labbookSection;
     let query;
 
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
-      props.history.replace('../../../../projects/local');
+    if (sectionRoute !== 'cloud' && sectionRoute !== 'local') {
+      props.history.replace('/projects/local');
     }
     if (state.selectedComponent === '/datasets/:labbookSection') {
       query = sectionRoute === 'cloud' ? RemoteDatasetListingQuery : LocalDatasetListingQuery;

@@ -91,15 +91,13 @@ class Labbooks extends Component {
     * set unsubcribe for store
   */
   UNSAFE_componentWillMount() {
-    const { props } = this;
-    const paths = props.history.location.pathname.split('/');
-    let sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    let { section } = this.props;
 
-    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
-      sectionRoute = 'local';
+    if ((section !== 'cloud') && (section !== 'local')) {
+      section = 'local';
     }
 
-    this.setState({ selectedSection: sectionRoute });
+    this.setState({ selectedSection: section });
 
     document.title = 'Gigantum';
 
@@ -108,15 +106,10 @@ class Labbooks extends Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    const paths = nextProps.history.location.pathname.split('/');
-    const sectionRoute = (paths.length > 2)
-      ? paths[2]
-      : 'local';
-
-    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
-      nextProps.history.replace('../../../../projects/local');
+    if ((nextProps.section !== 'cloud') && (nextProps.section !== 'local')) {
+      nextProps.history.replace('/projects/local');
     }
-    this.setState({ selectedSection: sectionRoute });
+    this.setState({ selectedSection: nextProps.section });
   }
 
   /**
@@ -245,6 +238,7 @@ class Labbooks extends Component {
     if (section === 'cloud') {
       this._viewRemote();
     } else {
+      console.log('this ran');
       props.history.replace(`../projects/${section}${props.history.location.search}`);
     }
   }

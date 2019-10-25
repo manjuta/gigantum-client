@@ -57,7 +57,7 @@ export default class CreateModal extends Component {
       delete values.createNew;
     }
     const stringifiedValues = queryString.stringify(values);
-    props.history.push(`${window.location.pathname}?${stringifiedValues}`);
+    props.history.push(`${props.history.location.pathname}?${stringifiedValues}`);
   }
 
 
