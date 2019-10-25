@@ -18,7 +18,7 @@
   &--finished:disabled {
     color: $white;
     background: none !important;
-    background-color: $azure !important;
+    background-color: $primary !important;
   }
   &--error,
   &--error:focus,
@@ -59,7 +59,7 @@
    background-size: 22px;
    margin: 0 auto;
    border: 1px solid $white;
-   border-left: 1px solid $turquise;
+   border-left: 1px solid $secondary;
    border-radius: 10px;
 
    position: absolute;

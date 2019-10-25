@@ -62,7 +62,7 @@
   transition: 0.25s opacity;
 
   opacity: 0;
-  background: $jet;
+  background: $primaryText;
 
 }
 
@@ -96,7 +96,7 @@
 .Dataset__configs {
   height: 215px;
   overflow: auto;
-  border-bottom: 1px solid $azure;
+  border-bottom: 1px solid $primary;
 }
 
 .Dataset__config-container{

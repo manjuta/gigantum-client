@@ -31,13 +31,13 @@
   font-size: 14px;
 
   &--owner {
-    color: $jet;
+    color: $primaryText;
     font-size: 15px;
     margin: 2px 0 10px 0;
   }
 
   &--metadata{
-    color: $jet;
+    color: $primaryText;
     font-size: 10px;
     line-height: 1.5;
     margin: 0;
@@ -102,7 +102,7 @@
   line-height: 30px;
   width: 250px;
   font-size: 19px;
-  color: $azure;
+  color: $primary;
   margin: 10px 0 0 0;
 }
 

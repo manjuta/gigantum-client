@@ -27,7 +27,7 @@
     &--current {
         cursor: auto;
         padding: 5px 10px;
-        border: 2px solid $azure;
+        border: 2px solid $primary;
         margin: 0;
 
         .Branches__branchname {
@@ -42,7 +42,7 @@
             pointer-events: none;
             position: relative;
             background: $white !important;
-            border: 2px solid $azure;
+            border: 2px solid $primary;
         }
     }
     &--selected {
@@ -50,13 +50,13 @@
         pointer-events: none;
         position: relative;
         background: $fileBrowserHover;
-        color: $azure;
+        color: $primary;
         font-size: 15px;
-        border: 1px solid $azure;
+        border: 1px solid $primary;
     }
     &:hover {
         background: $fileBrowserHover;
-        color: $azure;
+        color: $primary;
         font-size: 15px;
     }
 }
@@ -80,7 +80,7 @@
 }
 
 .Branches__btn{
-    border: 1px solid $azure;
+    border: 1px solid $primary;
     margin: 0 5px 0 0;
     background: $background-color;
     border-radius: 4px;
@@ -97,9 +97,9 @@
         background-size: 20px;
 
         &:hover, &:focus {
-          background: $azure url(~Images/icons/branches/chevron-hover.svg) no-repeat center center;
+          background: $primary url(~Images/icons/branches/chevron-hover.svg) no-repeat center center;
           background-size: 20px;
-          border: 1px solid $azure;
+          border: 1px solid $primary;
           margin-left: -4px;
         }
         &:hover:disabled,
@@ -116,11 +116,11 @@
     &--create {
         background: $white url('~Images/icons/branches/create.svg') no-repeat center center;
         background-size: cover;
-        border: 1px solid $azure;
+        border: 1px solid $primary;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/create-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/create-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/create-disabled.svg') no-repeat center center !important;
@@ -133,9 +133,9 @@
         background: $white url('~Images/icons/branches/reset.svg') no-repeat center center;
         background-size: cover;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/reset-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/reset-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/reset-disabled.svg') no-repeat center center !important;
@@ -148,9 +148,9 @@
         background: $white url('~Images/icons/branches/switch.svg') no-repeat center center;
         background-size: cover;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/switch-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/switch-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/switch-disabled.svg') no-repeat center center !important;
@@ -163,14 +163,14 @@
         background: $white url('~Images/icons/branches/merge.svg') no-repeat center center;
         background-size: cover;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &--selected {
-            background: $azure url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/merge-disabled.svg') no-repeat center center !important;
@@ -183,14 +183,14 @@
         background: $white url('~Images/icons/branches/delete.svg') no-repeat center center;
         background-size: cover;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &--selected {
-            background: $azure url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/delete-disabled.svg') no-repeat center center !important;
@@ -204,9 +204,9 @@
         background-size: cover;
         border-radius: 4px 0 0 4px;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/sync-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/sync-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/sync-disabled.svg') no-repeat center center !important;
@@ -220,9 +220,9 @@
         background-size: cover;
         border-radius: 4px 0 0 4px;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/push-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/push-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/push-disabled.svg') no-repeat center center !important;
@@ -236,9 +236,9 @@
         background-size: cover;
         border-radius: 4px 0 0 4px;
         &:hover, &:focus {
-            background: $azure url('~Images/icons/branches/pull-hover.svg') no-repeat center center;
+            background: $primary url('~Images/icons/branches/pull-hover.svg') no-repeat center center;
             background-size: cover;
-            border: 1px solid $azure;
+            border: 1px solid $primary;
         }
         &:disabled{
             background: $background-color url('~Images/icons/branches/pull-disabled.svg') no-repeat center center !important;
@@ -323,7 +323,7 @@
     top: 34px;
     left: -15px;
     border-radius: 10px;
-    color: $jet;
+    color: $primaryText;
     background: $white;
     position: absolute;
     width: 260px;
@@ -342,7 +342,7 @@
 
 }
 .Branches__Modal-header{
-    color: $azure;
+    color: $primary;
     font-size: 16px;
     padding: 5px;
 }
@@ -354,7 +354,7 @@
 .Branches__Modal-buttons {
     margin-top: 20px;
     .Btn--flat {
-        color: $azure;
+        color: $primary;
         font-weight: bold
     }
 }
@@ -390,14 +390,14 @@
 
 .Branches__list-item {
     padding: 10px 10px;
-    color: $jet;
+    color: $primaryText;
     cursor: pointer;
     @include flex(space-between, row);
     align-items: center;
     font-size: 14px !important;
 
     &:hover {
-        background-color: $azure;
+        background-color: $primary;
         color: $white;
     }
 
@@ -418,7 +418,7 @@
     font-size: 12px;
     margin: 0 3px;
     padding: 2px;
-    background: $azure;
+    background: $primary;
     border-radius: 10px;
     height: 20px;
 
@@ -446,8 +446,8 @@
         background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
         background-size: 20px;
         &:hover {
-            border: 1px solid $azure;
-            background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+            border: 1px solid $primary;
+            background: $primary url(~Images/icons/down-arrow-white.svg) no-repeat center center;
             background-size: 20px;
         }
     }
@@ -456,8 +456,8 @@
         background: url(~Images/icons/up-arrow-azure.svg) no-repeat center center;
         background-size: 20px;
         &:hover {
-            border: 1px solid $azure;
-            background: $azure url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+            border: 1px solid $primary;
+            background: $primary url(~Images/icons/up-arrow-white.svg) no-repeat center center;
             background-size: 20px;
         }
     }

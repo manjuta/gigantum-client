@@ -33,7 +33,7 @@
   align-items: center;
 
   a {
-    color: $azure;
+    color: $primary;
     text-decoration: none;
     margin-left: 20px;
     margin-top: 40px;
@@ -45,7 +45,7 @@
 .Overview__title {
   padding: 0px;
   position: relative;
-  color: $jet;
+  color: $primaryText;
 }
 
 .Overview__header {
@@ -71,7 +71,7 @@
 }
 
 .Overview__human-name {
-  color: $jet;
+  color: $primaryText;
   font-size: 12px;
 }
 
@@ -145,39 +145,39 @@
   h1 {
     padding: 10px 0;
     font-size: 2em;
-    color: $jet;
+    color: $primaryText;
     border-bottom: 1px solid $grey-light;
     font-weight: 400;
   }
   h2 {
     padding: 10px 0;
     font-size: 1.5em;
-    color: $jet;
+    color: $primaryText;
     border-bottom: 1px solid $grey-light;
     font-weight: 400;
 
   }
   h3 {
     font-size: 1.17em;
-    color: $jet;
+    color: $primaryText;
     font-weight: 400;
 
   }
   h4 {
     font-size: 1.12em;
-    color: $jet;
+    color: $primaryText;
     font-weight: 400;
 
   }
   h5 {
     font-size: .83em;
     font-weight: 400;
-    color: $jet;
+    color: $primaryText;
   }
   h6 {
     font-weight: 400;
     font-size: .75em;
-    color: $jet;
+    color: $primaryText;
   }
 }
 
@@ -186,7 +186,7 @@
     border-left: 5px solid $lightblue;
   }
   a {
-    color: $azure;
+    color: $primary;
   }
   a:hover {
     text-decoration: underline;
@@ -210,39 +210,39 @@
   h1 {
     padding: 10px 0;
     font-size: 2em;
-    color: $jet;
+    color: $primaryText;
     border-bottom: 1px solid $grey-light;
     font-weight: 400;
   }
   h2 {
     padding: 10px 0;
     font-size: 1.5em;
-    color: $jet;
+    color: $primaryText;
     border-bottom: 1px solid $grey-light;
     font-weight: 400;
 
   }
   h3 {
     font-size: 1.17em;
-    color: $jet;
+    color: $primaryText;
     font-weight: 400;
 
   }
   h4 {
     font-size: 1.12em;
-    color: $jet;
+    color: $primaryText;
     font-weight: 400;
 
   }
   h5 {
     font-size: .83em;
     font-weight: 400;
-    color: $jet;
+    color: $primaryText;
   }
   h6 {
     font-weight: 400;
     font-size: .75em;
-    color: $jet;
+    color: $primaryText;
   }
 }
 
@@ -253,7 +253,7 @@
     border-left: 5px solid $lightblue;
   }
   a {
-    color: $azure;
+    color: $primary;
   }
   a:hover {
     text-decoration: underline;
@@ -307,7 +307,7 @@
 
 .Overview__readme-more,
 .Overview__readme-more:focus {
-  color: $azure;
+  color: $primary;
   border: 0px;
   background: url('~Images/icons/down-arrow-azure.svg') no-repeat 80px;
   background-size: 15px;
@@ -315,7 +315,7 @@
 }
 
 .Overview__readme-more:hover {
-  color: $turquise;
+  color: $secondary;
   border: 0px;
   background: url('~Images/icons/down-arrow-turquise.svg') no-repeat 80px;
   background-size: 15px;
@@ -324,7 +324,7 @@
 
 .Overview__readme-less,
 .Overview__readme-less:focus {
-  color: $azure;
+  color: $primary;
   border: 0px;
   background: url('~Images/icons/up-arrow-azure.svg') no-repeat 87px;
   background-size: 15px;
@@ -332,7 +332,7 @@
 }
 
 .Overview__readme-less:hover {
-  color: $turquise;
+  color: $secondary;
   border: 0px;
   background: url('~Images/icons/up-arrow-turquise.svg') no-repeat 87px;
   background-size: 15px;
@@ -370,7 +370,7 @@
   .Overview__empty-action{
 
     width: 120px;
-    color: $azure;
+    color: $primary;
     align-self: center;
     cursor: pointer;
   }

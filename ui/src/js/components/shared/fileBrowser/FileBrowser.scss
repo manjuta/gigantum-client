@@ -8,7 +8,7 @@
 
     &--highlight {
       background-color: rgba(0,126,168, 0.2);
-      border: 1px solid $azure;
+      border: 1px solid $primary;
 
       .AddSubfolder {
         background-color: transparent !important;
@@ -119,16 +119,16 @@
 
 .FileBrowser__btn {
   margin: 0 43px 0 8px;
-  background: $azure url(~Images/icons/trash-white.svg) no-repeat center center;
+  background: $primary url(~Images/icons/trash-white.svg) no-repeat center center;
   background-size: 20px;
 
   &:focus {
-    background: $azure url(~Images/icons/trash-white.svg) no-repeat center center;
+    background: $primary url(~Images/icons/trash-white.svg) no-repeat center center;
     background-size: 20px;
   }
 
   &:hover {
-    background: $turquise url(~Images/icons/trash-white.svg) no-repeat center center;
+    background: $secondary url(~Images/icons/trash-white.svg) no-repeat center center;
     background-size: 20px;
   }
 }
@@ -142,7 +142,7 @@
   left: 0;
 
   opacity: 0.7;
-  background-color: $azure;
+  background-color: $primary;
 
   @include flex(center, column);
 }
@@ -215,7 +215,7 @@
   width: 23px;
   margin: 0 10px;
   position: relative;
-  border: 1px solid $azure;
+  border: 1px solid $primary;
 
   &--download-all {
     height: 30px;
@@ -248,7 +248,7 @@
         width: 25px;
         height: 25px;
         border: 2px solid $grey;
-        border-top: 2px solid $azure;
+        border-top: 2px solid $primary;
         border-radius: 50%;
         animation: spin 2s linear infinite;
       }
@@ -280,7 +280,7 @@
 }
 
 .FileBrowser__menu-buttons{
-  color: $azure;
+  color: $primary;
 }
 
 .FileBrowser__upload-label {
@@ -296,7 +296,7 @@
     }
 
     .Btn__upArrow {
-      background: $azure url(~Images/icons/update-white.svg) no-repeat center center;
+      background: $primary url(~Images/icons/update-white.svg) no-repeat center center;
       background-size: 18px;
     }
   }
@@ -310,7 +310,7 @@
   height: 34px;
   margin: 0;
 
-  color: $azure;
+  color: $primary;
   background: transparent;
 
   &:hover {
@@ -329,7 +329,7 @@
 
   &:hover {
     .Btn__addFolder {
-      background: $azure url(~Images/icons/folder-add-new-hover.svg) no-repeat 4px top 2px;
+      background: $primary url(~Images/icons/folder-add-new-hover.svg) no-repeat 4px top 2px;
       background-size: 18px;
     }
   }
@@ -343,7 +343,7 @@
 
   &:hover {
     .Btn__addDataset {
-      background: $azure url(~Images/icons/database-add-hover.svg) no-repeat center center;
+      background: $primary url(~Images/icons/database-add-hover.svg) no-repeat center center;
       background-size: 18px;
     }
   }
@@ -387,7 +387,7 @@
 
   z-index: 10;
 
-  background: $jet;
+  background: $primaryText;
 
   opacity: 0.3;
 
@@ -397,7 +397,7 @@
 .Btn {
   &__FileBrowserAction {
     padding: 2px 10px 2px 25px;
-    color: $azure;
+    color: $primary;
     border-radius: 13px;
     height: 26px;
     &--upload {
@@ -471,7 +471,7 @@
 
 .FileBrowser__toolbar{
   color: $white;
-  background: $azure;
+  background: $primary;
   height: 40px;
   position: relative;
   &-text {
@@ -480,7 +480,7 @@
   }
   &:before {
     content: '';
-    @include triangle('down', 12px, $azure);
+    @include triangle('down', 12px, $primary);
     position: absolute;
     bottom: -12px;
     left: 11px;

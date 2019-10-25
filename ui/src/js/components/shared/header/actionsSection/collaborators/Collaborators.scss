@@ -24,24 +24,6 @@
   }
 }
 
-.Collaborators__icon {
-
-  &--add {
-    position: relative;
-    &:before {
-      content: "";
-      position: absolute;
-      right: 0;
-      left: 70px;
-      height: 14px;
-      width: 14px;
-      border-radius: 10px;
-      background: $azure url('~Images/icons/add.svg') no-repeat left 3px bottom 2px;
-      background-size: 9px;
-    }
-  }
-}
-
 .Collaborators__btn {
   background: url('~Images/icons/user.svg') no-repeat 7px center;
   background-size: 24px;
@@ -52,7 +34,7 @@
   border: 0px solid $white;
   text-align: left;
   padding: 0 0 0 40px !important;
-  color: $jet;
+  color: $primaryText;
   font-size: 15px;
   border: 0px solid $white !important;
 
@@ -69,7 +51,7 @@
   &:hover {
     width: 100%;
     cursor: pointer;
-    color: $azure;
+    color: $primary;
     border: 0px solid $white;
     background: $background-color url('~Images/icons/user.svg') no-repeat 7px center;
     background-size: 24px;

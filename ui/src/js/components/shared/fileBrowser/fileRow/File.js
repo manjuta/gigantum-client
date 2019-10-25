@@ -4,6 +4,7 @@ import Moment from 'moment';
 import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
 import { DragSource } from 'react-dnd';
+import ReactTooltip from 'react-tooltip';
 // config
 import config from 'JS/config';
 // store
@@ -388,9 +389,16 @@ class File extends Component {
               className="File__text"
               role="presentation"
               onClick={() => this._validateFile(isLaunchable, devTool)}
+              data-tip={fileName}
+              data-for="Tooltip--file"
             >
               {fileName}
             </div>
+            <ReactTooltip
+              place="bottom"
+              id="Tooltip--file"
+              delayShow={500}
+            />
           </div>
 
           <div className={renameCSS}>
@@ -402,6 +410,7 @@ class File extends Component {
                 value={state.newFileName}
                 type="text"
                 className="File__input"
+                maxLength="255"
                 onClick={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
                 onDragStart={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
                 onChange={(evt) => { this._updateFileName(evt); }}

@@ -117,7 +117,7 @@
   }
 
   &:hover {
-    color: $turquise;
+    color: $secondary;
   }
 
   &--username {
@@ -229,7 +229,7 @@
     &:hover {
       transition: background-color 0.25s ease-in-out;
 
-      background: $azure;
+      background: $primary;
       color: $white;
     }
   }

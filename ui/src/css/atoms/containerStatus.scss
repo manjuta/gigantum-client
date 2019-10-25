@@ -12,7 +12,7 @@
   transition: all 0.125s;
   text-align: center;
 
-  color: $jet;
+  color: $primaryText;
   border: 1px solid rgba(0,0,0,0);
   border-radius: 3px;
   background-color: white;
@@ -67,7 +67,7 @@
 }
 
 .ContainerStatus__container-state.Running {
-  border: 1px solid $turquise;
+  border: 1px solid $green;
 
   .ContainerStatus__toggle-btn {
     top: 3px;
@@ -77,7 +77,7 @@
   }
 
   .ContainerStatus__toggle {
-    background: $turquise;
+    background: $green;
   }
 }
 .ContainerStatus__container-state.loading{
@@ -91,7 +91,7 @@
   border: 1px solid $romanSilver;
 
   .ContainerStatus__toggle {
-    background: $turquise;
+    background: $green;
   }
 }
 
@@ -138,10 +138,10 @@
   width: 141px;
   height: 40px;
 
-  border: 1px solid $turquise;
+  border: 1px solid $green;
 
   .ContainerStatus__toggle {
-    background: $turquise;
+    background: $green;
   }
 }
 
@@ -174,7 +174,7 @@
 .ContainerStatus__container-state.Stopping,
 .ContainerStatus__container-state.Starting {
   color: $grey;
-  border: 1px solid $turquise;
+  border: 1px solid $green;
 
   .ContainerStatus__toggle {
     background: $romanSilver url(~Images/icons/container-status-spinner.svg) no-repeat center center;

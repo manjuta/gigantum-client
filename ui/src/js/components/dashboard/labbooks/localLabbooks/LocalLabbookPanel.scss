@@ -4,12 +4,12 @@
 .Card--text{
   text-decoration: none;
 
-  color: $jet;
+  color: $primaryText;
 
   &:hover{
     text-decoration: none;
 
-    color: $jet;
+    color: $primaryText;
   }
 }
 
@@ -40,13 +40,13 @@
   font-size: 14px;
 
   &--owner{
-    color: $jet;
+    color: $primaryText;
     font-size: 15px;
     margin: 2px 0 10px 0;
   }
 
   &--metadata{
-    color: $jet;
+    color: $primaryText;
     font-size: 10px;
     line-height: 1.5;
     margin: 0;
@@ -72,7 +72,7 @@
 
 .LocalLabbooks__highlighted{
   color: $white;
-  background: $azure;
+  background: $primary;
 }
 
 .LocalLabbookPanel__private{
@@ -168,7 +168,7 @@
    }
 
    &.Stopped:hover{
-     border: 3px solid $turquise;
+     border: 3px solid $secondary;
      background: $background-color url('~Images/icons/run.svg') no-repeat 90% center;
      background-size: 20px;
      box-shadow: 0 0px 12px 0 rgba(0, 0, 0, 0.5);
@@ -177,7 +177,7 @@
    .Running{
      transition: box-shadow 0.5s;
 
-     border: 3px solid $turquise;
+     border: 3px solid $secondary;
      background: $background-color url('~Images/icons/run.svg') no-repeat 90% center;
      background-size: 20px;
    }
@@ -195,7 +195,7 @@
       cursor: auto;
 
       opacity: 0.75;
-      color: $jet !important;
+      color: $primaryText !important;
       border: 3px solid $goldenLemon;
       background: none;
    }
@@ -232,6 +232,6 @@
   overflow: hidden;
   line-height: 30px;
   font-size: 19px;
-  color: $azure;
+  color: $primary;
   margin: 10px 0 0 0;
 }

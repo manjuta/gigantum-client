@@ -12,7 +12,7 @@
 }
 .UserNote{
   .UserNote__title[type="text"] {
-    color: $jet;
+    color: $primaryText;
     margin: 10px 0 20px;
     width: 100% !important;
   }
@@ -85,14 +85,14 @@
       height: auto;
       top: 100px;
       border: 1px solid $grey;
-      border-top: 1px solid $azure;
+      border-top: 1px solid $primary;
       padding: 0 10px;
       overflow: auto;
     }
 
   .ReactTags__tag.Languages,
   .ReactTags__tag.Dataset.Type {
-      background: $azure !important;
+      background: $primary !important;
       color: $white !important;
       a {
           color: $white !important;

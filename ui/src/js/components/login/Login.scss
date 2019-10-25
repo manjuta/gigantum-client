@@ -20,7 +20,7 @@
   width: 100%;
   height: 100%;
 
-  background: $jet;
+  background: $primaryText;
   background-image: $gradient;
   @include flex(flex-start, column);
 }
@@ -52,7 +52,7 @@
   cursor: auto;
 
   border: 1px solid $white;
-  background: $azure;
+  background: $primary;
 
   font-size: 24px;
 

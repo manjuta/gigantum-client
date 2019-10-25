@@ -119,9 +119,9 @@
 
   cursor: pointer;
 
-  border-top: 4px solid $azure;
-  border-bottom: 4px solid $azure;
-  border-left: 4px solid $azure;
+  border-top: 4px solid $primary;
+  border-bottom: 4px solid $primary;
+  border-left: 4px solid $primary;
 }
 
 .ClusterCard__sidebar-container{
@@ -138,9 +138,9 @@
 
   &:hover .ClusterCard__sidebar {
     transition: 0.25s all;
-    border-top: 5px solid $azure;
-    border-bottom: 5px solid $azure;
-    border-left: 5px solid $azure;
+    border-top: 5px solid $primary;
+    border-bottom: 5px solid $primary;
+    border-left: 5px solid $primary;
   }
 }
 

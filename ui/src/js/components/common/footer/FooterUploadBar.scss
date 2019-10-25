@@ -65,9 +65,9 @@
 
 
   color: $white !important;
-  background-color: $turquise;
+  background-color: $secondary;
 
   &--animation {
-     transition: width 1s, opacity 1s; 
+     transition: width 1s, opacity 1s;
   }
 }
