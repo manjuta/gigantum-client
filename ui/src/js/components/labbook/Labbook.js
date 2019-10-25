@@ -151,7 +151,8 @@ class Labbook extends Component {
       || nextProps.isSyncing
       || isPublishing
       || isUploading
-      || (transitionState === 'Starting');
+      || (transitionState === 'Starting')
+      || (transitionState === 'Exporting');
 
     const canManageCollaborators = nextProps.labbook
       ? nextProps.labbook.canManageCollaborators

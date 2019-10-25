@@ -14,8 +14,8 @@
   padding: 30px;
 
   color: $romanSilver;
-  border-left: 3px solid $azure;
-  border-right: 1.5px solid $azure;
+  border-left: 3px solid $primary;
+  border-right: 1.5px solid $primary;
   @include flex(space-between, row);
 }
 

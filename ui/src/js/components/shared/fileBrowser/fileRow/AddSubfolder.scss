@@ -58,17 +58,17 @@
 
     border-radius: 15px;
 
-    background: $azure url(~Images/icons/add.svg) no-repeat center center;
+    background: $primary url(~Images/icons/add.svg) no-repeat center center;
     background-size: 16px;
     flex: 0 1 30px;
 
     &:hover {
-      background: $turquise url(~Images/icons/add.svg) no-repeat center center;
+      background: $secondary url(~Images/icons/add.svg) no-repeat center center;
       background-size: 16px;
     }
 
     &:focus {
-      background: $azure url(~Images/icons/add.svg) no-repeat center center;
+      background: $primary url(~Images/icons/add.svg) no-repeat center center;
       background-size: 16px;
     }
   }

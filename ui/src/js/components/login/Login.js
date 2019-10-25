@@ -84,7 +84,7 @@ export default class Login extends Component {
                     )
                     : (
                       <a
-                        href={`http://gtm-dev.cloud/client/login?route=${window.location.origin}`}
+                        href={`https://gtm-dev.cloud/client/login?route=${window.location.origin}`}
                         className="Btn Login__button"
                         onClick={this.login.bind(this)}
                       >

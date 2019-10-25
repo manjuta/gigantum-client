@@ -14,18 +14,18 @@
     height: 3px;
 
     /* Progress bar value for IE10+ */
-    color: $azure;
+    color: $primary;
     margin-bottom: 10px;
     width: 100%;
   }
 
   progress::-webkit-progress-value {
-    background-color: $azure;
+    background-color: $primary;
     border-radius: 20px;
   }
 
   progress::progress-value {
-    background-color: $azure;
+    background-color: $primary;
     border-radius: 20px;
   }
   progress::-webkit-progress-bar {
@@ -45,7 +45,7 @@
     position: absolute;
     left: 16px;
     top: 29px;
-    @include triangle('right', 7px, $azure);
+    @include triangle('right', 7px, $primary);
   }
   &--expanded {
     padding: 0;
@@ -53,7 +53,7 @@
     left: 12px;
     top: 35px;
     position: absolute;
-    @include triangle('down', 7px, $azure);
+    @include triangle('down', 7px, $primary);
   }
 }
 
@@ -94,7 +94,7 @@
 }
 
 .DatasetCard__name {
-  color: $azure;
+  color: $primary;
   font-size: 19px;
   text-decoration: none;
   margin: 0;
@@ -121,7 +121,7 @@
 }
 
 .DatasetCard__onDisk{
-  color: $azure;
+  color: $primary;
   &--primary{
     font-size: 15px
   }
@@ -156,7 +156,7 @@
   font-size: 12px;
   margin: 2px;
   padding: 2px;
-  background: $azure;
+  background: $primary;
   border-radius: 10px;
   height: 20px;
 
@@ -173,7 +173,7 @@
   }
 
   &--info {
-    background: $azure url('~Images/icons/info-exclamation.svg') no-repeat center center !important;
+    background: $primary url('~Images/icons/info-exclamation.svg') no-repeat center center !important;
     background-size: 16px !important;
     width: 20px;
   }

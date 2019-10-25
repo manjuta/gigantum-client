@@ -26,8 +26,8 @@
 
     opacity: 0.3 !important;
     border-width: 1px;
-    border-color: #00487c !important;
-    background-color: #00487c !important;
+    border-color: $primary !important;
+    background-color: $primary !important;
   }
 }
 
@@ -51,8 +51,8 @@
 }
 
 .Modal__content {
-  border-top: 7px solid $azure !important;
-  border-bottom: 7px solid $azure !important;
+  border-top: 7px solid $primary !important;
+  border-bottom: 7px solid $primary !important;
   &--noPadding {
     padding: 0 !important;
     .Modal__container {
@@ -147,7 +147,7 @@
 
   text-align: center;
 
-  color: #00487c;
+  color: $primary;
 }
 
 // modal header
@@ -159,7 +159,7 @@
   text-align: center;
   white-space: nowrap;
 
-  color: $azure;
+  color: $primary;
   background-size: 50px;
 
   font-weight: 600;

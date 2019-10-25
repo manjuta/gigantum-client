@@ -3,7 +3,7 @@
 .Folder {
   &--highlight {
     background-color: rgba(0, 126, 168, 0.5);
-    border: 1px solid $azure;
+    border: 1px solid $primary;
 
     .AddSubfolder {
       background-color: transparent !important;
@@ -115,7 +115,7 @@
 
     &:hover {
         border: none;
-        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
     }
 
@@ -127,7 +127,7 @@
 
     &--selected {
         border: none;
-        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
     }
 
@@ -138,13 +138,13 @@
     }
 
     &--selected:focus {
-        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: none;
     }
 
     &--incomplete {
-        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: none;
     }
@@ -156,7 +156,7 @@
     }
 
     &--incomplete:focus {
-        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: none;
     }

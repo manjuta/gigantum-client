@@ -92,6 +92,11 @@ class SectionBrowser extends Component {
 
   render() {
     const { props } = this;
+    const {
+      owner,
+      name,
+    } = this.props;
+    const { isProcessing } = props.datasetState[`${owner}_${name}`];
     if (props[props.section] && props[props.section].allFiles) {
       const capitalSection = props.section[0].toUpperCase() + props.section.slice(1);
       let files = props[props.section].allFiles;
@@ -110,7 +115,7 @@ class SectionBrowser extends Component {
           selectedFiles={props.selectedFiles}
           clearSelectedFiles={props.clearSelectedFiles}
           files={files}
-          isProcessing={props.isProcessing}
+          isProcessing={isProcessing}
           parentId={props.sectionId}
           connection={`${capitalSection}Browser_allFiles`}
           isLocked={props.isLocked}
@@ -127,7 +132,7 @@ class SectionBrowser extends Component {
 
 
 const mapStateToProps = state => ({
-  isProcessing: state.dataset.isProcessing,
+  datasetState: state.dataset,
 });
 
 const mapDispatchToProps = () => ({});

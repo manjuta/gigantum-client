@@ -24,7 +24,7 @@ tbody {
     &--asc {
       &:before {
         content: '';
-        @include triangle('up', 7px, $jet);
+        @include triangle('up', 7px, $primaryText);
         position: absolute;
         bottom: 11px;
         left: 100px;
@@ -33,7 +33,7 @@ tbody {
     &--desc {
       &:before {
         content: '';
-        @include triangle('down', 7px, $jet);
+        @include triangle('down', 7px, $primaryText);
         position: absolute;
         bottom: 11px;
         left: 100px;

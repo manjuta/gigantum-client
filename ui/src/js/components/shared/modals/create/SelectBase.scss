@@ -27,7 +27,7 @@
   height: 100%;
   min-width: 100%;
   flex-wrap: nowrap;
-  border-bottom: 1px solid $azure;
+  border-bottom: 1px solid $primary;
   margin-bottom: 15px;
   min-height: 330px;
 }
@@ -38,7 +38,7 @@
 }
 
 .SelectedBase__modal-header {
-  color: $azure;
+  color: $primary;
   text-align: center;
 }
 .SelectBase__images {
@@ -95,7 +95,7 @@
       content: 'POPULAR';
       font-size: 12px;
       padding: 2px 10px;
-      background: $azure;
+      background: $primary;
       color: $white;
       position: absolute;
       top: 0;
@@ -118,7 +118,7 @@
 .BaseSlide__mostRecent{
   position: absolute;
   background: white;
-  color: $azure;
+  color: $primary;
   margin-left: 45%;
   padding: 0 20px;
   font-size: 14px;

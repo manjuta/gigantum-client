@@ -210,7 +210,7 @@ class CollaboratorButton extends Component {
                   {
                     (collaboratorNames.length === 0)
                     &&
-                    <p className="Collaborators__icon--add">
+                    <p>
                       Click to add
                     </p>
                   }

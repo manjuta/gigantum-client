@@ -21,7 +21,7 @@
     text-align: left;
 
     color: $romanSilver;
-    border: 2px solid $azure;
+    border: 2px solid $primary;
     border-radius: 3px;
     background: $white url('~Images/icons/branches/actionsMenu.svg') no-repeat no-repeat center center !important;
     background-color: $white !important;
@@ -32,8 +32,8 @@
 
     &:hover {
       color: $romanSilver;
-      border: 3px solid $azure;
-      background: $azure url('~Images/icons/ellipsis-white.svg') no-repeat no-repeat center center !important;
+      border: 3px solid $primary;
+      background: $primary url('~Images/icons/ellipsis-white.svg') no-repeat no-repeat center center !important;
       background-size: 30px 30px !important;
     }
 
@@ -102,13 +102,13 @@
     padding: 5px 0 5px 40px;
     line-height: 24px;
     cursor: pointer;
-    color: $jet;
+    color: $primaryText;
 
 
     border-bottom: 2px solid $grey;
 
     a {
-      color: $jet;
+      color: $primaryText;
     }
 
     &:hover button {
@@ -159,7 +159,7 @@
     &--copy {
       padding: 0px;
       &:hover button {
-        background-color: $azure;
+        background-color: $primary;
       }
     }
 
@@ -194,7 +194,7 @@
 
   .ActionsMenu__btn{
     &:focus {
-      color: $jet;
+      color: $primaryText;
     }
   }
 
@@ -208,7 +208,7 @@
       border: 0px solid $white;
       text-align: left;
       padding: 0px;
-      color: $jet;
+      color: $primaryText;
       font-size: 15px;
 
       &:focus {
@@ -216,14 +216,14 @@
         background-color: $white;
         border: 0px solid $white;
         padding: 0px;
-        color: $jet;
+        color: $primaryText;
       }
 
       &:hover {
         background-color: $background-color;
         width: 100%;
         cursor: pointer;
-        color: $jet;
+        color: $primaryText;
         border: 0px solid $white;
       }
 
@@ -248,8 +248,8 @@
        text-align: center;
 
        &:hover, &:focus{
-         background-color: $turquise !important;
-         border-color: $turquise !important;
+         background-color: $secondary !important;
+         border-color: $secondary !important;
        }
      }
 

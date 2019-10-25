@@ -39,7 +39,7 @@ $dropBoxWidth: 250px;
      height: 40px;
      width: auto;
      max-width: $dropBoxWidth + 100px;
-     border: 1px solid $azure;
+     border: 1px solid $primary;
      cursor: pointer;
      @include flex(space-around, row);
      flex-wrap: nowrap;
@@ -85,13 +85,13 @@ $dropBoxWidth: 250px;
    }
 
    &-label {
-     color: $jet;
+     color: $primaryText;
      font-size: 14px;
    }
 
    &-text {
      margin: 0 0 0 5px;
-     color: $azure;
+     color: $primary;
      font-size: 18px;
      max-width: 220px;
    }
@@ -105,9 +105,9 @@ $dropBoxWidth: 250px;
 .Btn--branch {
   height: 40px;
   line-height: 30px;
-  color: $azure;
+  color: $primary;
   background: transparent;
-  border: 1px solid $azure;
+  border: 1px solid $primary;
   margin: 0 2px;
   border-radius: 3px;
 
@@ -115,8 +115,8 @@ $dropBoxWidth: 250px;
 
   &:hover {
     color: $white;
-    background-color: $azure;
-    border: 1px solid $azure;
+    background-color: $primary;
+    border: 1px solid $primary;
     padding: 0 10px 0 30px;
   }
   &:disabled{
@@ -131,7 +131,7 @@ $dropBoxWidth: 250px;
 
     &:hover, &:focus {
       color: $white;
-      background: $azure url(~Images/icons/branches/create-hover.svg) no-repeat center center;
+      background: $primary url(~Images/icons/branches/create-hover.svg) no-repeat center center;
       background-size: 25px;
     }
     &:disabled {
@@ -149,7 +149,7 @@ $dropBoxWidth: 250px;
 
     &:hover, &:focus {
       color: $white;
-      background: $azure url(~Images/icons/branches/manage-hover.svg) no-repeat center center;
+      background: $primary url(~Images/icons/branches/manage-hover.svg) no-repeat center center;
       background-size: 25px;
     }
     &:disabled {
@@ -167,7 +167,7 @@ $dropBoxWidth: 250px;
 
     &:hover, &:focus {
       color: $white;
-      background: $azure url(~Images/icons/branches/reset-hover.svg) no-repeat center center;
+      background: $primary url(~Images/icons/branches/reset-hover.svg) no-repeat center center;
       background-size: 25px;
     }
     &:disabled{
@@ -184,19 +184,19 @@ $dropBoxWidth: 250px;
     @include flex(space-around, row);
     align-items: center;
     background: transparent;
-    color: $azure;
+    color: $primary;
     border-radius: 3px 0 0 3px;
     &:hover {
       padding: 0 10px 0 10px;
 
-      background: $azure;
+      background: $primary;
       color: $white;
 
       .BranchMenu__sync-status {
         font-weight: 100;
         font-size: 12px;
         background: $white;
-        color: $azure;
+        color: $primary;
 
         .BranchMenu__sync-status--commits-behind {
           background: url(~Images/icons/branches/commit-behind-azure.svg) no-repeat  right -6px bottom 8px;
@@ -214,7 +214,7 @@ $dropBoxWidth: 250px;
       background-size: 25px !important;
       padding: 0 10px 0 30px !important;
       &:hover, &:focus{
-        background: $azure url('~Images/icons/branches/sync-hover.svg') no-repeat left 5px center;
+        background: $primary url('~Images/icons/branches/sync-hover.svg') no-repeat left 5px center;
         background-size: 25px !important;
         color: $white;
       }
@@ -232,7 +232,7 @@ $dropBoxWidth: 250px;
       background-size: 25px !important;
       padding: 0 10px 0 30px !important;
       &:hover, &:focus{
-        background: $azure url('~Images/icons/branches/push-hover.svg') no-repeat left 5px center;
+        background: $primary url('~Images/icons/branches/push-hover.svg') no-repeat left 5px center;
         background-size: 25px !important;
         color: $white;
       }
@@ -250,7 +250,7 @@ $dropBoxWidth: 250px;
       background-size: 25px !important;
       padding: 0 10px 0 30px !important;
       &:hover, &:focus{
-        background: $azure url('~Images/icons/branches/pull-hover.svg') no-repeat left 5px center;
+        background: $primary url('~Images/icons/branches/pull-hover.svg') no-repeat left 5px center;
         background-size: 25px !important;
         color: $white;
       }
@@ -273,7 +273,7 @@ $dropBoxWidth: 250px;
     background-size: 20px;
     border-radius: 0 3px 3px 0;
     &:hover, &:focus {
-      background: $azure url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+      background: $primary url(~Images/icons/down-arrow-white.svg) no-repeat center center;
       background-size: 20px;
       margin-left: 0px;
       width: 24px;
@@ -294,7 +294,7 @@ $dropBoxWidth: 250px;
     background-size: 20px;
 
     &:hover, &:focus {
-      background: $azure url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+      background: $primary url(~Images/icons/up-arrow-white.svg) no-repeat center center;
       background-size: 20px;
     }
   }
@@ -316,7 +316,7 @@ $dropBoxWidth: 250px;
   font-size: 12px;
   margin: 0 3px;
   padding: 2px;
-  background: $azure;
+  background: $primary;
   border-radius: 10px;
   height: 20px;
 
@@ -345,7 +345,7 @@ $dropBoxWidth: 250px;
 
 .BranchMenu__list-item {
   padding: 10px 10px;
-  color: $jet;
+  color: $primaryText;
   cursor: pointer;
   @include flex(space-between, row);
   align-items: center;
@@ -354,11 +354,11 @@ $dropBoxWidth: 250px;
     flex-direction: column;
     font-size: 14px !important;
     &:hover > button {
-      color: $turquise;
+      color: $secondary;
     }
   }
   &:hover {
-    background-color: $azure;
+    background-color: $primary;
     color: $white;
   }
 
@@ -420,7 +420,7 @@ $dropBoxWidth: 250px;
 .BranchMenu__other-text{
   font-size: 12px;
   padding: 5px 0;
-  color: $jet;
+  color: $primaryText;
 }
 
 

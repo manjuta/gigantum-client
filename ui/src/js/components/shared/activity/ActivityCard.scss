@@ -10,7 +10,7 @@
   position: relative;
   background: white;
   min-height: 80px;
-  border-bottom: 10px solid $azure;
+  border-bottom: 10px solid $primary;
   @include flex(flex-start, row)
 
   &--collapsed {
@@ -87,7 +87,7 @@
   }
 
   &.open:hover {
-    color: $turquise;
+    color: $secondary;
     cursor: pointer;
     background: url('~Images/icons/up-arrow-turquise.svg') no-repeat 98% center;
     background-size: 20px;
@@ -109,7 +109,7 @@
   }
 
   &.closed:hover {
-    color: $turquise;
+    color: $secondary;
     background: url('~Images/icons/down-arrow-turquise.svg') no-repeat 98% center;
     background-size: 20px;
   }
@@ -224,7 +224,7 @@
 
 .ActivityCard__expanded-view {
   overflow: hidden;
-  border-top: 2px solid $azure;
+  border-top: 2px solid $primary;
   min-height: 0px;
   transition: height 0.5s;
 }
@@ -393,14 +393,14 @@
 }
 
 .ActivityDetail__details-title--open:hover {
-  color: $turquise;
+  color: $secondary;
   background: url('~Images/icons/up-arrow-turquise.svg') no-repeat 94% center;
   background-size: 20px;
 
 }
 
 .ActivityDetail__details-title--closed:hover {
-  color: $turquise;
+  color: $secondary;
   background: url('~Images/icons/down-arrow-turquise.svg') no-repeat 94% center;
   background-size: 20px;
 
@@ -440,7 +440,7 @@
   text-align: center;
   align-self: flex-start;
   line-height: 40px;
-  color: $jet;
+  color: $primaryText;
 }
 .ActivityCard__badge:before {
   font-size: 40px !important;
@@ -452,7 +452,7 @@
   text-align: center;
   align-self: center;
   line-height: 40px;
-  color: $jet;
+  color: $primaryText;
 }
 .ActivityDetail__badge:before {
   font-size: 20px !important;
@@ -553,7 +553,7 @@
     height: 32px;
     width: 100%;
     background: white;
-    border-bottom: 3px solid $azure;
+    border-bottom: 3px solid $primary;
   }
 
   &--layer1{
@@ -596,11 +596,11 @@
     height: 32px;
     width: 100%;
     background: #fff;
-    border-bottom: 3px solid #00487c;
+    border-bottom: 3px solid $primary;
 }
 
 .ActivityCard--cluster:hover .ActivityCard__cluster--layer1{
-  color: $turquise;
+  color: $secondary;
   top: -5px;
 }
 .ActivityCard--cluster:hover .ActivityCard__cluster--layer3{

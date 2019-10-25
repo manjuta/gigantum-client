@@ -20,7 +20,7 @@
   background-color: rgba(254, 254, 254, 0.8);
   justify-content: center;
   align-items: center;
-  color: $jet;
+  color: $primaryText;
 }
 
 .SectionWrapper__files {
@@ -67,11 +67,11 @@
 
 .SectionWrapper__filter:hover,
 .SectionWrapper__import-file:hover {
-  color: $jet;
+  color: $primaryText;
 }
 
 .SectionWrapper__filter--selected {
-  color: $jet;
+  color: $primaryText;
 }
 
 .SectionWrapper__file-browser {
@@ -102,7 +102,7 @@
   width: 30px;
   height: 30px;
   border: 3px solid $grey;
-  border-top: 3px solid $turquise;
+  border-top: 3px solid $secondary;
   border-radius: 50%;
   position: absolute;
   margin-left: 200px;
@@ -115,7 +115,7 @@
   width: 30px;
   height: 30px;
   border: 3px solid $grey;
-  border-top: 3px solid $turquise;
+  border-top: 3px solid $secondary;
   border-radius: 50%;
   margin-left: 10px;
   margin-top: -5px;
@@ -144,7 +144,7 @@
     .btn {
       padding: 0 10px;
 
-      color: $jet;
+      color: $primaryText;
       background-color: initial;
       box-shadow: none;
     }
@@ -160,7 +160,7 @@
     }
 
     th {
-      color: $jet;
+      color: $primaryText;
     }
   }
 

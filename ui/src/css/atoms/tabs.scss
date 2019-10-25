@@ -12,8 +12,8 @@
     margin: 0;
     padding: .5rem 10px;
     text-decoration: none !important;
-    color: $jet;
-    border-bottom: 2px solid $azure;
+    color: $primaryText;
+    border-bottom: 2px solid $primary;
   }
 
   &:hover,
@@ -22,7 +22,7 @@
       position: relative;
       z-index: 6;
       color: $white;
-      background: $azure;
+      background: $primary;
       &:hover {
         color: $white;
       }
