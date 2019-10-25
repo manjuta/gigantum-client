@@ -114,7 +114,7 @@ class Labbooks extends Component {
       : 'local';
 
     if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
-      nextProps.props.history.replace('../../../../projects/local');
+      nextProps.history.replace('../../../../projects/local');
     }
     this.setState({ selectedSection: sectionRoute });
   }

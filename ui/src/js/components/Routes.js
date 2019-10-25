@@ -54,9 +54,8 @@ const uniqueClientString = (pathList.length > 2)
   ? pathList[2]
   : '';
 const basename = process.env.BUILD_TYPE === 'cloud'
-  ? `/run/${uniqueClientString}`
+  ? `/run/${uniqueClientString}/`
   : '/';
-
 
 class Routes extends Component {
   state = {
@@ -73,7 +72,7 @@ class Routes extends Component {
   componentWillMount = () => {
     const { path } = queryString.parse(history.location.search.slice(1));
     if (path) {
-      history.replace(`${path}${history.location.hash}`);
+      history.replace(`${basename}${path}${history.location.hash}`);
     }
   }
 
@@ -299,7 +298,6 @@ class Routes extends Component {
                   <div className={headerCSS} />
                   <SideBar
                     auth={auth}
-                    history={history}
                     diskLow={showDiskLow}
                   />
                   <div className={routesCSS}>
@@ -311,7 +309,6 @@ class Routes extends Component {
                         <Home
                           loadingRenew={state.loadingRenew}
                           userIdentityReturned={state.userIdentityReturned}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -327,7 +324,6 @@ class Routes extends Component {
                         <Home
                           userIdentityReturned={state.userIdentityReturned}
                           loadingRenew={state.loadingRenew}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -355,7 +351,6 @@ class Routes extends Component {
                         <Home
                           userIdentityReturned={state.userIdentityReturned}
                           loadingRenew={state.loadingRenew}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -372,7 +367,6 @@ class Routes extends Component {
                         <Home
                           userIdentityReturned={state.userIdentityReturned}
                           loadingRenew={state.loadingRenew}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -393,7 +387,6 @@ class Routes extends Component {
                             datasetName={parentProps.match.params.datasetName}
                             owner={parentProps.match.params.owner}
                             auth={auth}
-                            history={history}
                             diskLow={showDiskLow}
                             {...props}
                             {...parentProps}
@@ -415,7 +408,6 @@ class Routes extends Component {
                             labbookName={parentProps.match.params.labbookName}
                             owner={parentProps.match.params.owner}
                             auth={auth}
-                            history={history}
                             diskLow={showDiskLow}
                             {...props}
                             {...parentProps}
@@ -431,7 +423,6 @@ class Routes extends Component {
                     <Prompt />
 
                     <Footer
-                      history={history}
                     />
 
                   </div>
