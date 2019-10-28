@@ -187,6 +187,25 @@ class HubProjectContainer(ContainerOperations):
         """
         logger.info(f"HubProjectContainer.exec_command()")
         pass
+    
+    def query_container_env(self, container_name: Optional[str] = None) -> List[str]:
+         """Get the list of environment variables from the container
+
+        Args:
+            container_name: an optional container name (otherwise, will use self.image_tag)
+
+        Returns:
+            A list of strings like 'VAR=value'
+        """
+        logger.info(f"HubProjectContainer.query_container_env()")
+        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise ContainerException(f"Failed to get container environment:"
+                                     f" {response.status_code} : {response.json()}")
+        env = response.json().vars
+        envvars = ['='.join(kv) for kv in env]
+        return envvars
 
     def query_container_ip(self, container_name: Optional[str] = None) -> str:
         """Query the given container's IP address. Defaults to the Project container for this instance.
