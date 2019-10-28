@@ -77,6 +77,10 @@ class Routes extends Component {
       values.redirect = false;
       const stringifiedValues = queryString.stringify(values);
       history.replace(`${basename}${newPath}#${stringifiedValues}`);
+    } else if (values.redirect === false && values.redirecet !== undefined) {
+      delete values.redirect;
+      const stringifiedValues = queryString.stringify(values);
+      history.replace(`${basename}${newPath}#${stringifiedValues}`);
     }
   }
 
