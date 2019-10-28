@@ -4,7 +4,7 @@
     <script>
       if (window.location.pathname.startsWith('/run/')) {
         const pathArr = window.location.pathname.split('/');
-        if (pathArr.length > 4) {
+        if (pathArr.length > 4 && window.location.hash.indexOf('redirect=false') === -1) {
           const hashParameter = window.location.hash ? '&' + windowlocation.hash.slice(1) : '';
           const newPathname = pathArr.slice(0, 3).join('/') + '/';
           const fullHash = '#path=' + pathArr.slice(3).join('/') + hashParameter;
