@@ -9,8 +9,7 @@
           const newPathname = pathArr.slice(0, 3).join('/') + '/';
           const fullHash = '#path=' + pathArr.slice(3).join('/') + hashParameter;
           window.open(window.location.origin + newPathname + fullHash, "_self");
-        }
-        if (window.location.hash.indexOf('redirect=false') > -1) {
+        } else if (window.location.hash.indexOf('redirect=false') > -1) {
           let currentHash = window.location.hash;
           currentHash = currentHash.replace('&redirect=false', '');
           currentHash = currentHash.replace('#redirect=false', '');
