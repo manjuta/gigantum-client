@@ -30,33 +30,33 @@
     padding: 8px;
     width: 34px;
 
-    background: $azure url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+    background: $primary url('~Images/icons/down-arrow-white.svg') no-repeat center center;
     background-size: 20px;
     margin: 0;
     border-radius: 0 4px 4px 0;
 
     &:hover, &:focus:hover{
-      background: $azure url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+      background: $primary url('~Images/icons/down-arrow-white.svg') no-repeat center center;
       background-size: 20px;
     }
 
     &:focus{
-      background: $azure url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+      background: $primary url('~Images/icons/down-arrow-white.svg') no-repeat center center;
       background-size: 20px;
     }
   }
 
   &--open {
-    background: $azure url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+    background: $primary url('~Images/icons/up-arrow-white.svg') no-repeat center center;
     background-size: 20px;
 
     &:hover, &:focus:hover{
-      background: $azure url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+      background: $primary url('~Images/icons/up-arrow-white.svg') no-repeat center center;
       background-size: 20px;
     }
 
     &:focus{
-      background: $azure url('~Images/icons/up-arrow-white.svg') no-repeat center center;
+      background: $primary url('~Images/icons/up-arrow-white.svg') no-repeat center center;
       background-size: 20px;
     }
   }
@@ -79,7 +79,7 @@
 
 .DevTool__menu-title{
   border-bottom: 2px solid $romanSilver;
-  color: $jet;
+  color: $primaryText;
   padding: 5px 0 5px 25px;
   background: url('~Images/icons/offsite-grey.svg') no-repeat left center;
   background-size: 16px;
@@ -98,18 +98,18 @@
   text-align: center;
   vertical-align: baseline;
   align-items: center;
-  color: $jet;
+  color: $primaryText;
 
   @include flex(space-around, column);
 
   cursor: pointer;
 
   &--selected {
-    border: 1px solid $azure;
+    border: 1px solid $primary;
   }
 
   &:hover {
-    background: $azure;
+    background: $primary;
     color: $white;
   }
 }

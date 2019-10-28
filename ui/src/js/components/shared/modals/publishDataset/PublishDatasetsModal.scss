@@ -168,7 +168,7 @@ ul.PublishDatasetsModal__list {
     text-align: center;
     display: table-cell;
     position: relative;
-    color: $azure;
+    color: $primary;
     padding-top: 20px;
     transition: all 0.25s;
 
@@ -189,7 +189,7 @@ ul.PublishDatasetsModal__list {
       border:{
         width: 2px;
         style: solid;
-        color: $azure;
+        color: $primary;
         radius: 50%;
       }
     }
@@ -198,7 +198,7 @@ ul.PublishDatasetsModal__list {
       content: '';
       height: 2px;
       width: 100%;
-      background-color: $azure;
+      background-color: $primary;
       position: absolute;
       top: 10px;
       left: 50%;
@@ -213,7 +213,7 @@ ul.PublishDatasetsModal__list {
 
     &.is-completed{
       transition: all 0.25s;
-      color: $azure;
+      color: $primary;
 
       &:before{
         transition: all 0.25s;
@@ -223,7 +223,7 @@ ul.PublishDatasetsModal__list {
         content: '\10004';
         content: '\2713';
         position: absolute;
-        background: $azure;
+        background: $primary;
         color: $white;
         top: 0;
         left: 54px;
@@ -234,7 +234,7 @@ ul.PublishDatasetsModal__list {
       transition: all 0.25s;
       @extend %remain-steps;
       &:before{
-        border-color: $turquise;
+        border-color: $secondary;
         animation: spin 2s linear infinite;
         background: $white url(~Images/loaders/publish-spinner.svg) no-repeat 50% 50%;
         background-size: 20px;
@@ -245,11 +245,11 @@ ul.PublishDatasetsModal__list {
 
       ~ li{
         transition: all 0.25s;
-        color: $azure;
+        color: $primary;
         @extend %remain-steps;
         &:before{
           background-color: $white;
-          border-color: $azure;
+          border-color: $primary;
         }
       }
     }

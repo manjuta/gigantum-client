@@ -93,21 +93,26 @@ export default class User extends Component {
         <div className={userDropdownCSS}>
           <a
             id="profile"
-            href="http://gigantum.com/profile"
+            href={`https://gtm-dev.cloud/${state.username}/settings`}
             rel="noopener noreferrer"
             target="_blank"
             className="User__button"
           >
             Profile
           </a>
-          <button
-            type="button"
-            id="logout"
-            className="User__button Btn Btn--flat"
-            onClick={this.logout.bind(this)}
-          >
-            Logout
-          </button>
+          {
+            (process.env.BUILD_TYPE !== 'cloud')
+            && (
+              <button
+                type="button"
+                id="logout"
+                className="User__button Btn Btn--flat"
+                onClick={this.logout.bind(this)}
+              >
+                Logout
+              </button>
+            )
+          }
         </div>
       </div>
     );

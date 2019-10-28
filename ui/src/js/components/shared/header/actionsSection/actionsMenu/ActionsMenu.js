@@ -19,6 +19,7 @@ import {
   setMultiInfoMessage,
 } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
+import { updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setContainerMenuWarningMessage, setContainerMenuVisibility } from 'JS/redux/actions/labbook/environment/environment';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -330,16 +331,20 @@ class ActionsMenu extends Component {
   */
   _jobStatus(jobKey) {
     const self = this;
-
+    const {
+      owner,
+      labbookName,
+    } = self.state;
     JobStatus.getJobStatus(jobKey).then((data) => {
       this.props.setExportingState(false);
-
+      updateTransitionState(owner, labbookName, '');
       if (data.jobStatus.result) {
         setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
       }
 
       this.setState({ exporting: false });
     }).catch((error) => {
+      updateTransitionState(owner, labbookName, '');
       console.log(error);
 
       this.props.setExportingState(false);
@@ -359,18 +364,24 @@ class ActionsMenu extends Component {
   */
   _exportLabbook = () => {
     const { props } = this;
+    const {
+      owner,
+      labbookName,
+    } = this.state;
     if (!props.isLocked) {
       this.setState({ exporting: true, menuOpen: false });
 
       const exportType = (this.props.sectionType === 'dataset') ? 'Dataset' : 'Project';
 
-      setInfoMessage(`Exporting ${this.state.labbookName} ${exportType}`);
+      setInfoMessage(`Exporting ${labbookName} ${exportType}`);
+
+      updateTransitionState(owner, labbookName, 'Exporting');
 
       this.props.setExportingState(true);
       if (this.props.sectionType !== 'dataset') {
         ExportLabbookMutation(
-          this.state.owner,
-          this.state.labbookName,
+          owner,
+          labbookName,
           (response, error) => {
             if (response.exportLabbook) {
               this._jobStatus(response.exportLabbook.jobKey);
@@ -385,8 +396,8 @@ class ActionsMenu extends Component {
         );
       } else {
         ExportDatasetMutation(
-          this.state.owner,
-          this.state.labbookName,
+          owner,
+          labbookName,
           (response, error) => {
             if (response.exportDataset) {
               this._jobStatus(response.exportDataset.jobKey);

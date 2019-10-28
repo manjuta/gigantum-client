@@ -3,7 +3,7 @@ html, body, .root {
   height: 100%;
   margin: 0;
   padding: 0;
-  color: $jet;
+  color: $primaryText;
   font-family: 'NunitoSans', arial;
 }
 
@@ -23,12 +23,12 @@ body {
 }
 
 a {
-  color: $azure;
+  color: $primary;
   text-decoration: underline;
 }
 
 a:hover {
-  color: $turquise;
+  color: $secondary;
   text-decoration: underline;
 }
 
@@ -59,7 +59,7 @@ h5 { font-size: $h5-fontsize; line-height: 110%;}
 h6 { font-size: $h6-fontsize; line-height: 110%;}
 
 h1, h2 {
-  color: $jet;
+  color: $primaryText;
 }
 
 h3, h4, h5, h6 {

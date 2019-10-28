@@ -16,7 +16,7 @@
   }
 
   &--selected {
-    border: 2px solid $azure;
+    border: 2px solid $primary;
   }
 
   &:hover {
@@ -76,7 +76,7 @@
   font-size: 12px !important;
 }
 .BaseCard__name{
-  color: $jet;
+  color: $primaryText;
   font-weight: 1000;
 }
 

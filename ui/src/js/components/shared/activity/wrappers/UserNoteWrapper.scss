@@ -41,7 +41,7 @@
 }
 
 .UserNote__button{
-  background: $azure url('~Images/icons/note-white.svg') no-repeat 14px center;
+  background: $primary url('~Images/icons/note-white.svg') no-repeat 14px center;
   background-size: 16px;
 }
 
@@ -64,7 +64,7 @@
   transition: all 0.125s;
 
   color: $romanSilver;
-  border-bottom: 10px solid $azure;
+  border-bottom: 10px solid $primary;
   background: white;
 
   @include flex(flex-start, row)

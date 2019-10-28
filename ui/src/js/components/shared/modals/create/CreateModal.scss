@@ -31,7 +31,7 @@
 }
 
 .CreateModal__title {
-  color: $jet;
+  color: $primaryText;
   text-align: center;
 }
 
@@ -56,7 +56,7 @@
 
     li{
       flex: 1 0 auto;
-      border-top: 2px solid $azure;
+      border-top: 2px solid $primary;
       text-align: center;
       padding: 2px;
       height: 4px;
@@ -65,7 +65,7 @@
     }
 
     li.selected {
-      border-top: 6px solid $azure;
+      border-top: 6px solid $primary;
     }
 }
 

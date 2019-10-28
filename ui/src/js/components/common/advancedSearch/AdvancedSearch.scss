@@ -88,7 +88,7 @@
           transition: background-color 0.25s ease-in-out;
 
           color: $white;
-          background: $azure;
+          background: $primary;
         }
     }
 }
@@ -138,7 +138,7 @@ div.ReactTags__selected span.ReactTags__tag {
 
     white-space: nowrap;
 
-    color: $jet;
+    color: $primaryText;
     border: 1px solid #ddd;
     border-radius: 2px;
     background: #eee;
@@ -205,7 +205,7 @@ div.ReactTags__selected span.ReactTags__tag {
   .ReactTags__tag.Dataset.Type,
   .ReactTags__tag.Package.Managers {
       color: $white !important;
-      background: $azure !important;
+      background: $primary !important;
       a {
           color: $white !important;
       }
@@ -257,7 +257,7 @@ div.ReactTags__selected span.ReactTags__tag {
         width: 50px;
         height: 50px;
         margin: 0;
-        background: $azure url(~Images/icons/search-white.svg) no-repeat center center;
+        background: $primary url(~Images/icons/search-white.svg) no-repeat center center;
         background-size: 30px;
         border-radius: 0;
     }

@@ -65,7 +65,7 @@
   margin: 10px 10px 10px 66px;
   width: calc(100% - 66px);
   height: 2px;
-  background-color: $jet;
+  background-color: $primaryText;
   opacity: 0.1;
   animation: fluxuateLoad 3s infinite;
 }
@@ -102,22 +102,22 @@ li.DetailsRecords__item-note .ReactMarkdown {
 .DetailsRecords__link {
   text-align: right;
   margin-right: 20px;
-  color: $jet;
+  color: $primaryText;
 }
 
 .DetailsRecords__link:hover {
-  color: $turquise;
+  color: $secondary;
   cursor: pointer;
 }
 
 .DetailsRecords__link-clicked {
   text-align: right;
   margin-right: 20px;
-  color: $jet;
+  color: $primaryText;
 }
 
 .DetailsRecords__link-clicked:hover {
-  color: $turquise;
+  color: $secondary;
   cursor: pointer;
 }
 

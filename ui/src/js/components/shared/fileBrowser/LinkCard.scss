@@ -25,7 +25,7 @@
 }
 
 .LinkCard__header {
-  color: $azure;
+  color: $primary;
 }
 
 .LinkCard__paragraph {
@@ -64,6 +64,6 @@
     @include flex(flex-start, row);
 
     &--selected {
-      border: 2px solid $azure;
+      border: 2px solid $primary;
     }
   }
