@@ -147,9 +147,9 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_image_status(labbook))
 
-    def resolve_container_status(self, info):
-        """Resolve the image_status field"""
-        container_ops = container_for_context(get_logged_in_username())
+    def helper_resolve_container_status(self, labbook):
+        """Helper to resolve the container status of a labbook"""
+        container_ops = container_for_context(get_logged_in_username(), labbook=labbook)
         container_name = container_ops.default_image_tag(self.owner, self.name)
 
         status = container_ops.query_container(container_name)
@@ -160,6 +160,11 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
             container_status = ContainerStatus.NOT_RUNNING
 
         return container_status.value
+
+    def resolve_container_status(self, info):
+        """Resolve the container_status field"""
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: self.helper_resolve_container_status(labbook))
 
     def helper_resolve_base(self, labbook):
         """Helper to resolve the base component object"""

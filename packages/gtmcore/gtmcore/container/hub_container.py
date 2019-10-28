@@ -184,7 +184,6 @@ class HubProjectContainer(ContainerOperations):
 
         return None
 
-
     def exec_command(self, command: str, container_name: Optional[str] = None, get_results=False,
                      **kwargs) -> Optional[str]:
         """Run a command inside a given container, defaulting to the Project container.
