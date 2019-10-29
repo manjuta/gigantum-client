@@ -180,12 +180,12 @@ class HubProjectContainer(ContainerOperations):
             string state = 3;
         }
         """
+        logger.info(f"HubProjectContainer.query_container()")
         url = f"{self._launch_service}/v1/project_status/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:
-            raise ContainerException(f"Failed to get container status:"
-                                     f" {response.status_code} : {response.json()}")
-        logger.info(f"HubProjectContainer.query_container()")
+            logger.Info(f"hub_container.query_container(), response status: {response.status_code}")
+            return None
         logger.info(f"Project state: {response.json()}")
         projectCRPhase = response.json()["state"]
 
