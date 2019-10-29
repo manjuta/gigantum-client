@@ -17,9 +17,12 @@ const getApiURL = (route) => {
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'
     : globalObject.location.host;
-  const routePath = route === 'ping'
+  let routePath = route === 'ping'
     ? `${process.env.PING_API}?v=${uuid}`
     : process.env.GIGANTUM_API;
+  routePath = route === 'sysinfo'
+    ? process.env.SYSINFO_API
+    : routePath;
   const apiPath = (process.env.BUILD_TYPE === 'cloud')
     ? `/run/${cloudPath}${routePath}`
     : `${routePath}`;
