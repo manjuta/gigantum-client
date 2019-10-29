@@ -68,6 +68,24 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to launch project build in launch service:"
                                      f" {response.status_code} : {response.json()}")
 
+        # Wait for build completion
+        start_time = time.time()
+        while True:
+            time_elapsed = time.time() - start_time
+            if time_elapsed > 300:
+                raise ContainerException(f"Timed out building project in launch service:"
+                                         f" {response.status_code} : {response.json()}")
+            resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}/projectbuild")
+            if resp.status_code == 200:
+                logger.info(resp.json())
+                status = resp.json()["state"]
+                if status == "COMPLETE":
+                    return None
+            elif resp.status_code != 304:
+                # back off if the server is throwing errors
+                time.sleep(10)
+                continue
+            time.sleep(0.5)
         return None
 
     def delete_image(self, override_image_name: Optional[str] = None) -> bool:
