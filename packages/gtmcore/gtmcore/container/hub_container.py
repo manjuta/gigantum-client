@@ -68,6 +68,24 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to launch project build in launch service:"
                                      f" {response.status_code} : {response.json()}")
 
+        # Wait for build completion
+        start_time = time.time()
+        while True:
+            time_elapsed = time.time() - start_time
+            if time_elapsed > 300:
+                raise ContainerException(f"Timed out building project in launch service:"
+                                         f" {response.status_code} : {response.json()}")
+            resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}/projectbuild")
+            if resp.status_code == 200:
+                logger.info(resp.json())
+                status = resp.json()["state"]
+                if status == "COMPLETE":
+                    return None
+            elif resp.status_code != 304:
+                # back off if the server is throwing errors
+                time.sleep(10)
+                continue
+            time.sleep(0.5)
         return None
 
     def delete_image(self, override_image_name: Optional[str] = None) -> bool:
@@ -98,8 +116,8 @@ class HubProjectContainer(ContainerOperations):
         if response.status_code != 200:
             logger.error("Couldn't determine if image exists.")
             return False
-        logger.info(f"HubProjectContainer.image_available(): {response.json()}")
-        return response.json().exists
+        existsRaw = response.json()["exists"]
+        return True if existsRaw == "true" else False
 
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
                       volumes: Dict = None, wait_for_output=False, container_name: Optional[str] = None,
@@ -169,7 +187,20 @@ class HubProjectContainer(ContainerOperations):
                                      f" {response.status_code} : {response.json()}")
         logger.info(f"HubProjectContainer.query_container()")
         logger.info(f"Project state: {response.json()}")
-        return response.json().state
+        projectCRPhase = response.json()["state"]
+
+        if projectCRPhase == "PENDING":
+            return "created"
+        if projectCRPhase == "BUILDING":
+            return "created"
+        if projectCRPhase == "BUILT":
+            return "created"
+        if projectCRPhase == "RUNNING":
+            return "running"
+        if projectCRPhase == "STOPPED":
+            return "exited"
+
+        return None
 
     def exec_command(self, command: str, container_name: Optional[str] = None, get_results=False,
                      **kwargs) -> Optional[str]:
@@ -189,11 +220,10 @@ class HubProjectContainer(ContainerOperations):
         pass
     
     def query_container_env(self, container_name: Optional[str] = None) -> List[str]:
-         """Get the list of environment variables from the container
-
+        """Get the list of environment variables from the container
         Args:
             container_name: an optional container name (otherwise, will use self.image_tag)
-
+        
         Returns:
             A list of strings like 'VAR=value'
         """
@@ -202,8 +232,8 @@ class HubProjectContainer(ContainerOperations):
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get container environment:"
-                                     f" {response.status_code} : {response.json()}")
-        env = response.json().vars
+                f" {response.status_code} : {response.json()}")
+        env = response.json()["vars"]
         envvars = ['='.join(kv) for kv in env]
         return envvars
 
@@ -221,7 +251,11 @@ class HubProjectContainer(ContainerOperations):
         if response.status_code != 200:
             raise ContainerException(f"Failed to get container hostname:"
                                      f" {response.status_code} : {response.json()}")
-        hostname = response.json().hostname
+        try:
+            hostname = response.json()["hostname"]
+        except AttributeError:
+            raise ContainerException(f"No hostname attribute in response:"
+                                     f" {response.json()}")
         logger.info(f"HubProjectContainer.query_container_ip() found: {hostname}")
         return hostname
 
@@ -246,8 +280,8 @@ class HubProjectContainer(ContainerOperations):
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get client hostname:"
-                                     f" {response.status_code} : {response.json()}")
-        hostname = response.json().hostname
+                f" {response.status_code} : {response.json()}")
+        hostname = response.json()["hostname"]
         logger.info(f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
         return hostname
 
