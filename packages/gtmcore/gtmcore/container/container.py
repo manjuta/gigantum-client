@@ -38,6 +38,7 @@ class ContainerOperations(ABC):
         self.username = username
 
         # This will get updated below based on labbook attributes if it's still None
+        # It is used both for image and container names
         self.image_tag = override_image_name
 
         if labbook:
@@ -243,6 +244,7 @@ class ContainerOperations(ABC):
             time.sleep(0.5)
             status = self.query_container()
             if status == 'running':
+                # This is run as root because we don't want the user to be able to modify the IP file
                 r = self.exec_command(cmd)
                 logger.info(f"Response to write Client IP in {self.image_tag} Container: {r}")
                 break

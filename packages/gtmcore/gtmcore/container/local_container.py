@@ -345,7 +345,7 @@ class LocalProjectContainer(ContainerOperations):
         if not os.path.isfile(src_path):
             raise ContainerException(f"Source file {src_path} is not a file")
 
-        self.exec_command(f"mkdir -p {dst_dir}")
+        self.exec_command(f"mkdir -p {dst_dir}", user='giguser')
 
         # Tar up the src file to copy into container
         tarred_secret_file = tempfile.NamedTemporaryFile()
@@ -357,6 +357,7 @@ class LocalProjectContainer(ContainerOperations):
 
         try:
             logger.info(f"Copying file {src_path} into {dst_dir} in {str(self.labbook)}")
+            # Currently, files will likely have the same owner and group they had in the host OS
             self._client.api.put_archive(self.image_tag, dst_dir, tarred_secret_file)
         finally:
             # Make sure the temporary Tar archive gets deleted.
