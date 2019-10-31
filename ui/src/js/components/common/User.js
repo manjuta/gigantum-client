@@ -25,6 +25,7 @@ export default class User extends Component {
   logout = () => {
     const { props } = this;
     props.auth.logout();
+    localStorage.setItem('fresh_login', true);
     this._toggleDropdown();
   }
 

@@ -36,6 +36,8 @@ export default class Login extends Component {
     const { props } = this;
     const errorType = window.sessionStorage.getItem('LOGIN_ERROR_TYPE');
     const errorDescription = window.sessionStorage.getItem('LOGIN_ERROR_DESCRIPTION');
+    const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
+    const loginURL = `https://gtm-dev.cloud/client/login#route=${window.location.origin}${freshLoginText}`;
     return (
       <div className="Login">
         { props.userIdentityReturned
@@ -84,7 +86,7 @@ export default class Login extends Component {
                     )
                     : (
                       <a
-                        href={`https://gtm-dev.cloud/client/login?route=${window.location.origin}`}
+                        href={loginURL}
                         className="Btn Login__button"
                         onClick={this.login.bind(this)}
                       >

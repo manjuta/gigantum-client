@@ -43,7 +43,7 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
       delete values.id_token;
     }
     const stringifiedValues = qs.stringify(values);
-
+    globalObject.localStorage.removeItem('fresh_login');
     globalObject.location.hash = stringifiedValues;
   } else if (globalObject.localStorage.getItem('access_token')) {
     const accessToken = globalObject.localStorage.getItem('access_token');
