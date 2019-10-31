@@ -37,6 +37,7 @@ auth:
   provider_domain: gigantum.auth0.com
   audience: api.gigantum.io
   signing_algorithm: RS256
+  # Set to `browser` for multi-tenant
   identity_manager: local
 
 # Environment Management Configuration
@@ -58,7 +59,6 @@ git:
     repo.gigantum.io:
       remote_type: gitlab
       hub_api: https://gigantum.com/api/v1
-      admin_service: usersrv.gigantum.io
       object_service: api.gigantum.com/object-v1
 
 

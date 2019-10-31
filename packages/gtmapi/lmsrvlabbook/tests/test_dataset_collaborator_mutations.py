@@ -16,8 +16,8 @@ def mock_create_dataset(fixture_working_dir):
     im.create_dataset("default", "default", "dataset1",
                       storage_type="gigantum_object_v1", description="Test labbook 1")
 
-    responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                  json={'key': 'afaketoken'}, status=200)
+    responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
     responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects?search=dataset1',
                   json=[{
                           "id": 22,

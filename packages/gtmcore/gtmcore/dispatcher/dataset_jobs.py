@@ -270,16 +270,16 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
                 else:
                     remote_target = remote_parts.path
 
-                admin_service = None
+                hub_api = None
                 for remote in config_obj.config['git']['remotes']:
                     if remote == remote_target:
-                        admin_service = config_obj.config['git']['remotes'][remote]['admin_service']
+                        hub_api = config_obj.config['git']['remotes'][remote]['hub_api']
                         break
 
-                if not admin_service:
-                    raise ValueError(f"Failed to configure admin service URL based on target remote: {remote_target}")
+                if not hub_api:
+                    raise ValueError(f"Failed to configure git service URL based on target remote: {remote_target}")
 
-                gl_mgr = GitLabManager(remote_target, admin_service=admin_service,
+                gl_mgr = GitLabManager(remote_target, hub_api=hub_api,
                                        access_token=access_token, id_token=id_token)
                 gl_mgr.configure_git_credentials(remote_target, logged_in_username)
 

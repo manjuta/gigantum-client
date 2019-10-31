@@ -7,14 +7,14 @@ from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions, GitLabEx
 @pytest.fixture()
 def gitlab_mngr_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
-    yield GitLabManager("repo.gigantum.io", "usersrv.gigantum.io", "fakeaccesstoken", "fakeidtoken")
+    yield GitLabManager("repo.gigantum.io", "https://gigantum.com/api/v1", "fakeaccesstoken", "fakeidtoken")
 
 
 @pytest.fixture()
 def property_mocks_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
-    responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                  json={'key': 'afaketoken'}, status=200)
+    responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
     responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/testuser%2Ftest-labbook',
                   json=[{
                           "id": 26,
@@ -29,8 +29,8 @@ class TestGitLabManager(object):
     def test_user_token(self, gitlab_mngr_fixture):
         """test the user_token property"""
         # Setup responses mock for this test
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
         assert gitlab_mngr_fixture._gitlab_token is None
 
@@ -40,15 +40,17 @@ class TestGitLabManager(object):
         assert gitlab_mngr_fixture._gitlab_token == 'afaketoken'
 
         # Assert token is returned and set on second call and does not make a request
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key', status=400)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'NOTTHERIGHTTOKEN'}}}, status=500)
         assert token == gitlab_mngr_fixture.user_token
+        assert token == 'afaketoken'
 
     @responses.activate
     def test_user_token_error(self, gitlab_mngr_fixture):
         """test the user_token property"""
         # Setup responses mock for this test
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'message': 'it failed'}, status=400)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'NOTTHERIGHTTOKEN'}}}, status=500)
 
         # Make sure error is raised when getting the key fails and returns !=200
         with pytest.raises(GitLabException):
@@ -66,8 +68,8 @@ class TestGitLabManager(object):
     @responses.activate
     def test_exists_false(self, gitlab_mngr_fixture):
         """test the exists method for a repo that should not exist"""
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/testuser%2Fderp',
                       json=[{
                                 "message": "404 Project Not Found"
@@ -84,11 +86,6 @@ class TestGitLabManager(object):
                       json={
                               "id": 27,
                               "description": "",
-                            },
-                      status=201)
-        responses.add(responses.POST, 'https://usersrv.gigantum.io/webhook/testuser/new-labbook',
-                      json={
-                              "success": True
                             },
                       status=201)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/testuser%2Fnew-labbook',
@@ -312,8 +309,8 @@ class TestGitLabManager(object):
     @responses.activate
     def test_error_on_missing_repo(self, gitlab_mngr_fixture):
         """Test the exception handling on a repo when it doesn't exist"""
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/testuser%2Ftest-labbook',
                       json=[{
                                 "message": "404 Project Not Found"
@@ -334,8 +331,8 @@ class TestGitLabManager(object):
         username = "testuser"
 
         # Setup responses mock for this test
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
         # Check that creds are empty
         token = gitlab_mngr_fixture._check_if_git_credentials_configured(host, username)
@@ -386,9 +383,6 @@ class TestGitLabManager(object):
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
-        responses.add(responses.DELETE, 'https://usersrv.gigantum.io/webhook/testuser/new-labbook',
-                      json={},
-                      status=204)
 
         assert gitlab_mngr_fixture.repository_exists("testuser", "new-labbook") is True
 

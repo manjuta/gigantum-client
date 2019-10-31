@@ -690,13 +690,12 @@ class TestGitWorkflowsMethods(object):
     @responses.activate
     @mock.patch('gtmcore.gitlib.git_fs_shim.GitFilesystemShimmed.fetch', new=_mock_fetch)
     def test_create_remote_gitlab_repo(self, mock_config_file):
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/test%2Flabbook-1',
                       status=404)
         responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects', status=201)
-        responses.add(responses.POST, 'https://usersrv.gigantum.io/webhook/test/labbook-1', status=201)
 
         username = 'test'
         im = InventoryManager(mock_config_file[0])
