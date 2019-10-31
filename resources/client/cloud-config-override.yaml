@@ -14,7 +14,6 @@ git:
   remotes:
     repo.gtm-dev.cloud:
       remote_type: gitlab
-      admin_service: usersrv.gtm-dev.cloud
       hub_api: https://gtm-dev.cloud/api/v1/
       object_service: api.gtm-dev.cloud/object-v1
   working_directory: /mnt/gigantum

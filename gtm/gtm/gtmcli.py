@@ -157,7 +157,7 @@ def cloud_actions(args):
 
     if args.action == "build":
 
-        build_args = {"build_dir": os.path.join("build", "demo"),
+        build_args = {"build_dir": os.path.join("build", "cloud-client"),
                       "supervisor_file": os.path.join("resources", "client", "supervisord-cloud.conf"),
                       "config_override_file": os.path.join("resources", "client",
                                                            "cloud-config-override.yaml")}
