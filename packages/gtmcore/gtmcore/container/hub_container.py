@@ -72,7 +72,7 @@ class HubProjectContainer(ContainerOperations):
         start_time = time.time()
         while True:
             time_elapsed = time.time() - start_time
-            if time_elapsed > 300:
+            if time_elapsed > 900:
                 raise ContainerException(f"Timed out building project in launch service:"
                                          f" {response.status_code} : {response.json()}")
             resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}/projectbuild")
