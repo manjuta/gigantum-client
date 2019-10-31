@@ -1,11 +1,9 @@
 from typing import Optional
 import graphene
 
-from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import BranchManager
 
-from lmsrvcore.auth.identity import parse_token
 from lmsrvcore.auth.user import get_logged_in_username
 from lmsrvcore.api.interfaces import GitCommit, GitRepository
 from lmsrvcore.utilities import configure_git_credentials

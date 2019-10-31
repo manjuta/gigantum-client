@@ -422,7 +422,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             raise ValueError("Deleting a remote Dataset requires a valid session.")
 
         mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['admin_service'],
+                            remote_config['hub_api'],
                             access_token=access_token,
                             id_token=id_token)
         try:
@@ -556,7 +556,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             raise ValueError("Deleting a remote Dataset requires a valid session.")
 
         mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['admin_service'],
+                            remote_config['hub_api'],
                             access_token=access_token,
                             id_token=id_token)
         try:

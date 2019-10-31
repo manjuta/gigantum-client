@@ -418,8 +418,8 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset(self, fixture_working_dir):
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
                       json=[{
                               "id": 27,
@@ -506,8 +506,8 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset_gitlab_error(self, fixture_working_dir):
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
                       json=[{
                               "id": 27,

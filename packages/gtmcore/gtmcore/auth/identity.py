@@ -132,19 +132,10 @@ class IdentityManager(metaclass=abc.ABCMeta):
                             f"Docker image for labbook `{demo_lb.name}`")
 
                 # Add user to backend if needed
-                default_remote = self.config.config['git']['default_remote']
-                admin_service = None
-                for remote in self.config.config['git']['remotes']:
-                    if default_remote == remote:
-                        admin_service = self.config.config['git']['remotes'][remote]['admin_service']
-                        break
+                remote_config = self.config.get_remote_configuration()
 
-                if not admin_service:
-                    raise ValueError('admin_service could not be found')
-
-                check_and_add_user(admin_service=admin_service,
-                                   access_token=access_token, id_token=id_token,
-                                   username=username)
+                check_and_add_user(hub_api=remote_config['hub_api'],
+                                   access_token=access_token, id_token=id_token)
 
     def _get_jwt_public_key(self, id_token: str) -> Optional[Dict[str, str]]:
         """Method to get the public key for JWT signing

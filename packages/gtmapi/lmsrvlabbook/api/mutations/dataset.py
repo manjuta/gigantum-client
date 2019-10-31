@@ -358,7 +358,7 @@ class DeleteDataset(graphene.ClientIDMutation):
             remote_config = config.get_remote_configuration()
 
             # Delete the repository
-            mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'], access_token=access_token,
+            mgr = GitLabManager(remote_config['git_remote'], remote_config['hub_api'], access_token=access_token,
                                 id_token=id_token)
             mgr.remove_repository(owner, dataset_name)
             logger.info(f"Deleted {owner}/{dataset_name} repository from the"
