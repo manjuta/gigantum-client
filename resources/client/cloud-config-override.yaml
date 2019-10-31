@@ -1,14 +1,23 @@
 # Set LabManger configuration file fields you wish to override from the default file stored in
 # labmanager-common/lmcommon/configuration/config/labmanager.yaml.default
-git:
-  working_directory: "/mnt/gigantum"
-  lfs_enabled: true
 flask:
   DEBUG: false
   TESTING: false
 
 auth:
   identity_manager: browser
+
+git:
+  backend: filesystem-shim
+  default_remote: repo.gtm-dev.cloud
+  lfs_enabled: true
+  remotes:
+    repo.gtm-dev.cloud:
+      remote_type: gitlab
+      admin_service: usersrv.gtm-dev.cloud
+      hub_api: https://gtm-dev.cloud/api/v1/
+      object_service: api.gtm-dev.cloud/object-v1
+  working_directory: /mnt/gigantum
 
 
 environment:
