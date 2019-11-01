@@ -35,7 +35,7 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
     lb_ip_addr = project_container.query_container_ip()
     if not lb_ip_addr:
         raise GigantumException("Can't obtain IP address for Jupyter container")
-    jupyter_ps = project_container.ps_search('jupyter lab', reps=1)
+    jupyter_ps = project_container.ps_search('jupyter', reps=1)
 
     if len(jupyter_ps) == 1:
         logger.info(f'Found existing Jupyter instance for {str(project_container.labbook)}.')
@@ -94,7 +94,7 @@ def _start_jupyter_process(project_container: ContainerOperations, token: str,
 
     project_container.exec_command(cmd, user='giguser')
 
-    if not project_container.ps_search('jupyter lab'):
+    if not project_container.ps_search('jupyter'):
         raise ValueError('Jupyter Lab failed to start after 10 seconds')
 
     # Store token in redis for later activity monitoring

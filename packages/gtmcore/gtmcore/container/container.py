@@ -133,8 +133,7 @@ class ContainerOperations(ABC):
             A list of matching processes
         """
         for timeout in range(reps):
-            ps_output = self.exec_command(f"ps aux | grep '{ps_name}'| grep -v ' grep '", container_name=container_name,
-                                          get_results=True)
+            ps_output = self.exec_command(f"pgrep '{ps_name}'", container_name=container_name, get_results=True)
             if ps_output:  # Needed for mypy given abstractmethod
                 ps_list = [l for l in ps_output.split('\n') if l]
                 if ps_list:
