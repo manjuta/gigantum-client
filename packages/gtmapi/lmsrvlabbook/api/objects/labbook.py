@@ -8,7 +8,7 @@ from gtmcore.inventory.branching import BranchManager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from gtmcore.activity import ActivityStore
-from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
+from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions, GitLabException
 from gtmcore.workflows import LabbookWorkflow
 from gtmcore.files import FileOperations
 from gtmcore.environment.utils import get_package_manager
@@ -564,7 +564,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             d = mgr.repo_details(namespace=owner, repository_name=labbook.name)
             assert 'visibility' in d.keys(), 'Visibility is not in repo details response keys'
             return d.get('visibility')
-        except ValueError:
+        except GitLabException:
             return "local"
 
     def resolve_visibility(self, info):
