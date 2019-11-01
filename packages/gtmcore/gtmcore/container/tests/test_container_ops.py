@@ -37,8 +37,7 @@ class TestContainerOps:
         ib = build_lb_image_for_jupyterlab[1]
         lb = build_lb_image_for_jupyterlab[0]
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(
-            'sh -c "ps aux | grep jupyter | grep -v \' grep \'"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run('sh -c "pgrep jupyter"', user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 0
 
@@ -46,8 +45,7 @@ class TestContainerOps:
 
         start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(
-            'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run('sh -c "pgrep jupyter"', user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
 
@@ -55,15 +53,14 @@ class TestContainerOps:
         start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
         # Validate there is only one instance running.
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(
-            'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run('sh -c "pgrep jupyter"', user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
 
     def test_start_rstudio(self, build_lb_image_for_rstudio):
         lb_container, ib, username = build_lb_image_for_rstudio
 
-        len(lb_container.ps_search('rserver')) == 1
+        assert len(lb_container.ps_search('rserver')) == 1
 
         start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
@@ -144,7 +141,7 @@ class TestSidecarContainers:
         try:
             assert sidecar_container.query_container() == 'running'
             # The CMD shows up once in the init and once for its own process
-            assert len(sidecar_container.ps_search('tail -f')) == 2
+            assert len(sidecar_container.ps_search('tail')) == 1
             assert len(sidecar_container.query_container_ip().split('.')) == 4
             assert len(sidecar_container.query_container_env()) > 0
         finally:

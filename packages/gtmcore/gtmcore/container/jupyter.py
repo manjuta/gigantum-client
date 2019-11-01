@@ -40,11 +40,9 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
     if len(jupyter_ps) == 1:
         logger.info(f'Found existing Jupyter instance for {str(project_container.labbook)}.')
 
-        # Get token from PS in container
-        t = re.search(r"token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
-        if not t:
-            raise GigantumException('Cannot detect Jupyter Lab token')
-        token = t.groups()[0]
+        # Get token
+        redis_conn = redis.Redis(db=1)
+        token = redis_conn.get(f"{project_container.image_tag}-jupyter-token").decode()
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
 
         if check_reachable:
