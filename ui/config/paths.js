@@ -36,7 +36,8 @@ function getServedPath(appPackageJson) {
   const publicUrl = getPublicUrl(appPackageJson);
   const servedUrl = envPublicUrl ||
     (publicUrl ? url.parse(publicUrl).pathname : '/');
-  return ensureSlash(servedUrl, false);
+  const needsSlash = process.env.BUILD_TYPE !== 'cloud'
+  return ensureSlash(servedUrl, needsSlash);
 }
 
 const htmlPath = process.env.BUILD_TYPE === 'cloud' ? resolveApp('public/index.html') : resolveApp('public/indexLocal.html');
