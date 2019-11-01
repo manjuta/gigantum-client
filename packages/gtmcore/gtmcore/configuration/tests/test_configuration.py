@@ -154,13 +154,13 @@ class TestConfiguration(object):
         remote = configuration.get_remote_configuration()
         assert remote['git_remote'] == 'repo.gigantum.io'
         assert remote['remote_type'] == 'gitlab'
-        assert remote['admin_service'] == 'usersrv.gigantum.io'
+        assert remote['hub_api'] == 'https://gigantum.com/api/v1'
         assert remote['object_service'] == 'api.gigantum.com/object-v1'
 
         remote = configuration.get_remote_configuration("repo.gigantum.io")
         assert remote['git_remote'] == 'repo.gigantum.io'
         assert remote['remote_type'] == 'gitlab'
-        assert remote['admin_service'] == 'usersrv.gigantum.io'
+        assert remote['hub_api'] == 'https://gigantum.com/api/v1'
         assert remote['object_service'] == 'api.gigantum.com/object-v1'
 
     def test_get_remote_configuration_not_found(self):

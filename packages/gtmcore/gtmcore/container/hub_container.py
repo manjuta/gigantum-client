@@ -72,7 +72,7 @@ class HubProjectContainer(ContainerOperations):
         start_time = time.time()
         while True:
             time_elapsed = time.time() - start_time
-            if time_elapsed > 300:
+            if time_elapsed > 900:
                 raise ContainerException(f"Timed out building project in launch service:"
                                          f" {response.status_code} : {response.json()}")
             resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}/projectbuild")
@@ -180,12 +180,12 @@ class HubProjectContainer(ContainerOperations):
             string state = 3;
         }
         """
-        url = f"{self._launch_service}/v1/project_status/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
+        logger.info(f"HubProjectContainer.query_container()")
+        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:
-            raise ContainerException(f"Failed to get container status:"
-                                     f" {response.status_code} : {response.json()}")
-        logger.info(f"HubProjectContainer.query_container()")
+            logger.info(f"hub_container.query_container(), response status: {response.status_code}")
+            return None
         logger.info(f"Project state: {response.json()}")
         projectCRPhase = response.json()["state"]
 
@@ -217,8 +217,22 @@ class HubProjectContainer(ContainerOperations):
             Otherwise, None.
         """
         logger.info(f"HubProjectContainer.exec_command()")
-        pass
-    
+        logger.info(f"HubProjectContainer.run_container()")
+        url = f"{self._launch_service}/v1/exec/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
+        data = command
+        response = requests.post(url, json=data)
+        if response.status_code != 200:
+            logger.error(f"Failed to exec into project container {self._client_id}:{self.labbook.owner}/{self.labbook.name}.")
+            return None
+
+        if get_results:
+            raw_out = response.json()
+            output = raw_out.get("stdout", "")
+            output = raw_out.get("stderr", "") if output == "" else ""
+            return output
+
+        return None
+
     def query_container_env(self, container_name: Optional[str] = None) -> List[str]:
         """Get the list of environment variables from the container
         Args:

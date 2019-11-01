@@ -38,6 +38,7 @@ class ContainerOperations(ABC):
         self.username = username
 
         # This will get updated below based on labbook attributes if it's still None
+        # It is used both for image and container names
         self.image_tag = override_image_name
 
         if labbook:
@@ -240,6 +241,25 @@ class ContainerOperations(ABC):
             logger.info(f"Launching container without GPU support. {reason}")
 
         self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
+
+        try:
+            gclient_ip = self.get_gigantum_client_ip()
+        except ContainerException as e:
+            logger.warning(e)
+            gclient_ip = ""
+
+        cmd = f"echo {gclient_ip} > /home/giguser/labmanager_ip"
+        for timeout in range(20):
+            time.sleep(0.5)
+            status = self.query_container()
+            if status == 'running':
+                # This is run as root because we don't want the user to be able to modify the IP file
+                r = self.exec_command(cmd)
+                logger.info(f"Response to write Client IP in {self.image_tag} Container: {r}")
+                break
+        else:
+            logger.error("After 10 seconds could not write Client IP to Project container."
+                         f" Container status = {status}")
 
     @abstractmethod
     def stop_container(self, container_name: Optional[str] = None) -> bool:

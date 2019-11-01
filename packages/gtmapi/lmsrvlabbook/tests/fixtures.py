@@ -511,8 +511,8 @@ def fixture_test_file():
 @pytest.fixture()
 def property_mocks_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
-    responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                  json={'key': 'afaketoken'}, status=200)
+    responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
     responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects?search=labbook1',
                   json=[{
                           "id": 26,

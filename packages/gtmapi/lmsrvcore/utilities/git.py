@@ -25,7 +25,7 @@ def configure_git_credentials(remote_name: Optional[str] = None) -> GitLabManage
         raise ValueError("A valid session is required for this operation and tokens are missing.")
 
     mgr = GitLabManager(remote_config['git_remote'],
-                        remote_config['admin_service'],
+                        remote_config['hub_api'],
                         access_token=access_token,
                         id_token=id_token)
     mgr.configure_git_credentials(remote_config['git_remote'], get_logged_in_username())

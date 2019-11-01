@@ -4,6 +4,7 @@ import time
 import datetime
 from snapshottest import snapshot
 import shutil
+import responses
 
 from lmsrvcore.caching import DatasetCacheController
 from lmsrvlabbook.tests.fixtures import fixture_working_dir_dataset_populated_scoped, fixture_working_dir
@@ -15,7 +16,12 @@ from gtmcore.fixtures import _MOCK_create_remote_repo2
 
 class TestDatasetQueries(object):
 
+    @responses.activate
     def test_get_dataset(self, fixture_working_dir_dataset_populated_scoped):
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset8', status=404)
+
         query = """{
                     dataset(name: "dataset8", owner: "default") {
                       id

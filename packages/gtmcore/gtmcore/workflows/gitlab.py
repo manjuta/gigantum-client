@@ -13,40 +13,38 @@ logger = LMLogger.get_logger()
 REQUEST_TIMEOUT = 30
 
 
-def check_and_add_user(admin_service: str, access_token: str, id_token: str, username: str) -> None:
+def check_and_add_user(hub_api: str, access_token: str, id_token: str) -> None:
     """Method to check if a user exists in GitLab and if not, create it
 
     Args:
-        admin_service(str): URL of the GitLab Auth service
+        hub_api(str): URL of the Gigantum Hub API
         access_token(str): The logged in user's access token
         id_token(str): The logged in user's id token
-        username(str): The logged in user's username
 
     Returns:
         None
     """
-    # Check for user
-    response = requests.get(f"https://{admin_service}/user",
-                            headers={"Authorization": f"Bearer {access_token}",
-                                     "Identity": id_token}, timeout=REQUEST_TIMEOUT)
-    if response.status_code == 200:
-        # User exists, do nothing
-        pass
-    elif response.status_code == 404:
-        assert response.json()['exists'] is False, "User not found in repository, but an error occurred"
+    # Use the "synchronizeUserAccount" mutation to ensure the user exists in the associated git backend
+    query = """mutation {
+                  synchronizeUserAccount(input: { clientMutationId: "1" }) {
+                    gitUserId
+                  }
+                }"""
 
-        # user does not exist, add!
-        response = requests.post(f"https://{admin_service}/user",
-                                 headers={"Authorization": f"Bearer {access_token}",
-                                          "Identity": id_token}, timeout=REQUEST_TIMEOUT)
-        if response.status_code != 201:
-            logger.error("Failed to create new user in GitLab")
-            logger.error(response.json())
-            raise ValueError("Failed to create new user in GitLab")
+    response = requests.post(hub_api,
+                             json={"query": query},
+                             headers={'Authorization': f"Bearer {access_token}", 'Identity': id_token})
 
-        logger.info(f"Created new user `{username}` in remote git server")
-    else:
-        raise ValueError("Failed to check for user in repository")
+    if response.status_code != 200:
+        logger.error(f"Failed to synchronize user account with git backend. Status Code: {response.status_code}")
+        logger.error(response.json())
+        raise GitLabException("Failed to synchronize user account with git backend")
+
+    result = response.json()
+    if "errors" in result:
+        logger.error(f"Failed to synchronize user account with git backend. Status Code: {response.status_code}")
+        logger.error(response.json())
+        raise GitLabException(f"Failed to synchronize user account with git backend: {result.get('errors')}")
 
 
 class GitLabException(Exception):
@@ -85,19 +83,19 @@ class ProjectPermissions(Enum):
 
 class GitLabManager(object):
     """Class to manage administrative operations to a remote GitLab server"""
-    def __init__(self, remote_host: str, admin_service: str, access_token: str, id_token: str) -> None:
+    def __init__(self, remote_host: str, hub_api: str, access_token: str, id_token: str) -> None:
         """
 
         Args:
             remote_host: the domain of the remote git host
-            admin_service: the domain of the admin service
+            hub_api: the url to the hub API
             access_token(str): The logged in user's access token
             id_token(str): The logged in user's id token
         """
         # GitLab Server URL
         self.remote_host = remote_host
-        # Admin Service URL
-        self.admin_service = admin_service
+        # Hub API URL
+        self.hub_api = hub_api
 
         # Current user's bearer token
         self.access_token = access_token
@@ -119,8 +117,8 @@ class GitLabManager(object):
         """
         return quote_plus(f"{namespace}/{repository_name}")
 
-    def _admin_service_headers(self) -> Dict[str, str]:
-        """Method to get the authorization and id headers for calling the admin service
+    def _hub_api_headers(self) -> Dict[str, str]:
+        """Method to get the authorization and id headers for calling the hub api
 
         Returns:
             dict
@@ -130,42 +128,31 @@ class GitLabManager(object):
 
     @property
     def user_token(self) -> Optional[str]:
-        """Method to get the user's API token from the auth microservice"""
-
+        """Method to get the user's API token from the hub API"""
         if self._gitlab_token is None:
             # Get the token
-            response = requests.get(f"https://{self.admin_service}/key",
-                                    headers=self._admin_service_headers(),
-                                    timeout=REQUEST_TIMEOUT)
-            if response.status_code == 200:
-                self._gitlab_token = response.json()['key']
-            elif response.status_code == 404:
-                # User not found so create it!
-                response = requests.post(f"https://{self.admin_service}/user",
-                                         headers=self._admin_service_headers(),
-                                         timeout=REQUEST_TIMEOUT)
-                if response.status_code != 201:
-                    logger.error("Failed to create new user in GitLab")
-                    logger.error(response.json())
-                    raise GitLabException("Failed to create new user in GitLab")
+            query = """{
+                          additionalCredentials {
+                            gitServiceToken
+                          }  
+                        }"""
 
-                logger.info(f"Created new user in remote git server")
+            response = requests.post(self.hub_api,
+                                     json={"query": query},
+                                     headers=self._hub_api_headers())
 
-                # New get the key so the current request that triggered this still succeeds
-                response = requests.get(f"https://{self.admin_service}/key",
-                                        headers=self._admin_service_headers(),
-                                        timeout=REQUEST_TIMEOUT)
-                if response.status_code == 200:
-                    self._gitlab_token = response.json()['key']
-                else:
-                    logger.error(f"Failed to get user access key from server after creation. "
-                                 f"Status Code: {response.status_code}")
-                    logger.error(response.json())
-                    raise GitLabException("Failed to get user access key from server after creation")
-            else:
+            if response.status_code != 200:
                 logger.error(f"Failed to get user access key from server. Status Code: {response.status_code}")
                 logger.error(response.json())
                 raise GitLabException("Failed to get user access key from server")
+
+            result = response.json()
+            if "errors" in result:
+                logger.error(f"Failed to get user access key from server. Status Code: {response.status_code}")
+                logger.error(response.json())
+                raise GitLabException(f"Failed to get user git token: {result.get('errors')}")
+
+            self._gitlab_token = result['data']['additionalCredentials']['gitServiceToken']
 
         return self._gitlab_token
 
@@ -254,8 +241,6 @@ class GitLabManager(object):
         """ Get all properties of a given Gitlab Repository, see API documentation
             at https://docs.gitlab.com/ee/api/projects.html#get-single-project.
 
-            TODO - Find or create a GitLab Python API project to replace (much) of this.
-
             Args:
                 namespace: Owner or organization
                 repository_name: Name of repository
@@ -270,29 +255,12 @@ class GitLabManager(object):
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
-            raise ValueError(f"Remote GitLab repo {namespace}/{repository_name} not found")
+            raise GitLabException(f"Remote GitLab repo {namespace}/{repository_name} not found")
         else:
             msg = f"Failed to check if {namespace}/{repository_name} exists. Status Code: {response.status_code}"
             logger.error(msg)
             logger.error(response.json())
             raise ValueError(msg)
-
-    def fork_labbook(self, username: str, namespace: str, labbook_name: str):
-        if self.repository_exists(namespace, labbook_name):
-            raise ValueError(f"Remote repository {namespace}/{labbook_name}")
-
-        repo_id = self.get_repository_id(namespace, labbook_name)
-        data = {"id": repo_id,
-                "namespace": username}
-        response = requests.post(f"https://{self.remote_host}/api/v4/projects/{repo_id}/fork",
-                                 headers={"PRIVATE-TOKEN": self.user_token},
-                                 json=data,
-                                 timeout=REQUEST_TIMEOUT)
-
-        if response.status_code != 201:
-            msg = f"Failed to fork {namespace}/{labbook_name} for user {username} ({response.status_code})"
-            logger.error(msg)
-            raise GitLabException(f'Failed to fork: {msg}')
 
     def create_labbook(self, namespace: str, labbook_name: str, visibility: str) -> None:
         """Method to create the remote repository
@@ -337,20 +305,6 @@ class GitLabManager(object):
         else:
             logger.info(f"Created remote repository {namespace}/{labbook_name}")
 
-        # Add project to quota service
-        try:
-            response = requests.post(f"https://{self.admin_service}/webhook/{namespace}/{labbook_name}",
-                                     headers=self._admin_service_headers(), timeout=REQUEST_TIMEOUT)
-            if response.status_code != 201:
-                logger.error(f"Failed to configure quota webhook: {response.status_code}")
-                logger.error(response.json)
-            else:
-                logger.info(f"Configured webhook for {namespace}/{labbook_name}")
-
-        except Exception as err:
-            # Don't let quota service errors stop you from continuing
-            logger.error(f"Failed to configure quota webhook: {err}")
-
     def remove_repository(self, namespace: str, repository_name: str) -> None:
         """Method to remove the remote repository
 
@@ -363,21 +317,6 @@ class GitLabManager(object):
         """
         if not self.repository_exists(namespace, repository_name):
             raise ValueError("Cannot remove remote repository that does not exist")
-
-        # Remove project from quota service
-        try:
-            response = requests.delete(f"https://{self.admin_service}/webhook/{namespace}/{repository_name}",
-                                       headers=self._admin_service_headers(),
-                                       timeout=REQUEST_TIMEOUT)
-            if response.status_code != 204:
-                logger.error(f"Failed to remove quota webhook: {response.status_code}")
-                logger.error(response.json)
-            else:
-                logger.info(f"Removed webhook for {namespace}/{repository_name}")
-
-        except Exception as err:
-            # Don't let quota service errors stop you from continuing
-            logger.error(f"Failed to remove quota webhook: {err}")
 
         # Call API to remove project
         repo_id = self.get_repository_id(namespace, repository_name)
@@ -392,8 +331,8 @@ class GitLabManager(object):
         else:
             logger.info(f"Deleted remote repository {namespace}/{repository_name}")
 
-    def get_collaborators(self, namespace: str, repository_name: str) \
-            -> List[Tuple[int, str, ProjectPermissions]]:
+    def get_collaborators(self, namespace: str,
+                          repository_name: str) -> List[Tuple[int, str, ProjectPermissions]]:
         """Method to get usernames and IDs of collaborators that have access to the repo
 
         Args:
@@ -421,8 +360,7 @@ class GitLabManager(object):
             return [(x['id'], x['username'], ProjectPermissions(x['access_level']))
                     for x in response.json()]
 
-    def add_collaborator(self, namespace: str, labbook_name: str, username: str, role: ProjectPermissions) \
-            -> None:
+    def add_collaborator(self, namespace: str, labbook_name: str, username: str, role: ProjectPermissions) -> None:
         """Method to add a collaborator to a remote repository by username
 
         Args:
@@ -490,7 +428,7 @@ class GitLabManager(object):
             logger.info(f"Removed user id `{user_id}` as a collaborator to {labbook_name}")
 
     @staticmethod
-    def _call_shell(command: str, input_list: Optional[List[str]]=None) -> Tuple[Optional[bytes], Optional[bytes]]:
+    def _call_shell(command: str, input_list: Optional[List[str]] = None) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Method to call shell commands, used to configure git client
 
         Args:
