@@ -168,7 +168,8 @@ class HubProjectContainer(ContainerOperations):
         response = requests.delete(url)
         if response.status_code != 200:
             logger.info(f"hub_container.stop_container(), response status: {response.status_code}")
-            return None
+            raise ContainerException(f"Failed to stop Project container.")
+
         logger.info(f"Project state: {response.json()}")
         projectCRPhase = response.json()["state"]
 
