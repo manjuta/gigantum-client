@@ -30,6 +30,17 @@ exports[`Project File component File Snapshot 1`] = `
       />
       <div
         className="File__text"
+        data-for="Tooltip--file"
+        data-tip="README.md"
+        onClick={[Function]}
+        role="presentation"
+      >
+        README.md
+      </div>
+      <div
+        className="__react_component_tooltip place-bottom type-dark "
+        data-id="tooltip"
+        id="Tooltip--file"
       />
     </div>
     <div
@@ -41,6 +52,7 @@ exports[`Project File component File Snapshot 1`] = `
         <input
           className="File__input"
           draggable={true}
+          maxLength="255"
           onChange={[Function]}
           onClick={[Function]}
           onDragStart={[Function]}

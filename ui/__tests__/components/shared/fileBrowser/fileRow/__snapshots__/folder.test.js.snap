@@ -32,9 +32,16 @@ exports[`File component File Snapshot 1`] = `
       />
       <div
         className="Folder__name"
+        data-for="Tooltip--folder"
+        data-tip="folder"
       >
         folder
       </div>
+      <div
+        className="__react_component_tooltip place-bottom type-dark "
+        data-id="tooltip"
+        id="Tooltip--folder"
+      />
     </div>
     <div
       className="File__cell File__cell--edit hidden"
@@ -45,6 +52,7 @@ exports[`File component File Snapshot 1`] = `
         <input
           className="File__input"
           draggable={true}
+          maxLength="255"
           onChange={[Function]}
           onDragStart={[Function]}
           onKeyDown={[Function]}

@@ -18,7 +18,17 @@ const Localhost = () => (
       Please verify that that the Client is running by clicking on the Gigantum logo in your system tray to open Gigantum Desktop.
     </p>
     <p>
-       If the problem persists, try the steps outlined here, contact
+      If the problem persists, try the steps outlined
+      {' '}
+      <a
+        href="https://docs.gigantum.com/docs/client-interface-fails-to-load"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        here
+      </a>
+      {' '}
+      , contact
       {' '}
       <a
         href="mailto:support@gigantum.com"

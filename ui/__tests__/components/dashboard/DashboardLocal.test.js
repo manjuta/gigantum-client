@@ -15,7 +15,12 @@ const fixtures = {
   auth: () => {},
   localLabbooks: json.data.labbookList,
   labbookList: json.data.labbookList,
-  history,
+  history: {
+    replace: () => jest.fn(),
+    location: {
+      hash: '',
+    },
+  },
   refetchSort: () => {},
   loading: false,
 };

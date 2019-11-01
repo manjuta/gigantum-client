@@ -1,4 +1,5 @@
 import Routes from 'Components/Routes';
+import history from 'JS/history';
 
 import React from 'react';
 // import toJson from 'enzyme-to-json';
@@ -56,7 +57,9 @@ describe('Test Router', () => {
       auth.logout = function () { return true; };
 
       const component = mount(<MemoryRouter initialEntries={['/labbooks/']}>
-                                <Routes />
+                                <Routes
+                                  history={history}
+                                />
                               </MemoryRouter>);
 
       it('check history props is labbook', () => {
@@ -84,7 +87,9 @@ describe('Test Labbooks routes', () => {
       it('with data', () => {
         const component = shallow(
           <MemoryRouter initialEntries={[`/labbooks/${variables.name}/`]}>
-              <Routes />
+              <Routes
+                history={history}
+              />
             </MemoryRouter>,
         );
         expect(component).toMatchSnapshot();
@@ -92,12 +97,12 @@ describe('Test Labbooks routes', () => {
       it('without data', () => {
         const component = shallow(
             <MemoryRouter initialEntries={[`/labbooks/${variables.name}/`]}>
-              <Routes />
+              <Routes
+                history={history}
+              />
             </MemoryRouter>,
         );
-        console.log(component);
-        console.log(component.node);
-        console.log(component.node.children);
+
         expect(component).toMatchSnapshot();
       });
 
@@ -105,7 +110,9 @@ describe('Test Labbooks routes', () => {
         const component = shallow(
             <MemoryRouter initialEntries={['/callback']}>
 
-              <Routes />
+              <Routes
+                history={history}
+              />
 
             </MemoryRouter>,
         );

@@ -8,9 +8,9 @@ import { setLogout, setLoginError } from 'JS/redux/actions/login';
 // variables
 import { AUTH_CONFIG } from './auth0-variables';
 
-const globalObject = window || this;
+const globalObject = this || window;
 const { pathname } = globalObject.location;
-const pathList = pathname.split('/');
+const pathList = pathname ? pathname.split('/') : [];
 const uniqueClientString = (pathList.length > 2)
   ? pathList[2]
   : '';
