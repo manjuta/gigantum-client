@@ -260,7 +260,7 @@ class GitLabManager(object):
             msg = f"Failed to check if {namespace}/{repository_name} exists. Status Code: {response.status_code}"
             logger.error(msg)
             logger.error(response.json())
-            raise ValueError(msg)
+            raise GitLabException(msg)
 
     def create_labbook(self, namespace: str, labbook_name: str, visibility: str) -> None:
         """Method to create the remote repository
