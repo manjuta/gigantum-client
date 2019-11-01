@@ -239,7 +239,6 @@ class Labbooks extends Component {
     if (section === 'cloud') {
       this._viewRemote();
     } else {
-      console.log('this ran');
       props.history.replace(`../projects/${section}${props.history.location.search}`);
     }
   }
