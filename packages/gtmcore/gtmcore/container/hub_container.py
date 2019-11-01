@@ -164,7 +164,18 @@ class HubProjectContainer(ContainerOperations):
             was running).
         """
         logger.info(f"HubProjectContainer.stop_container()")
-        return True
+        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
+        response = requests.delete(url)
+        if response.status_code != 200:
+            logger.info(f"hub_container.stop_container(), response status: {response.status_code}")
+            return None
+        logger.info(f"Project state: {response.json()}")
+        projectCRPhase = response.json()["state"]
+
+        if projectCRPhase == "STOPPED":
+            return True
+
+        return False
 
     def query_container(self, container_name: Optional[str] = None) -> Optional[str]:
         """Query the Project container and get its status. E.g., "running" or "stopped"
