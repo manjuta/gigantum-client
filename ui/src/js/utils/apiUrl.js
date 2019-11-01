@@ -8,7 +8,7 @@ import uuidv4 from 'uuid/v4';
  */
 const getApiURL = (route) => {
   /* eslint-disable */
-  const globalObject = window || self;
+  const globalObject = self || window;
   /* eslint-enable */
   const uuid = uuidv4();
   const { pathname } = globalObject.location;
