@@ -17,7 +17,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
 
-const htmlPath = process.env.BUILD_TYPE === 'cloud' ? '/index.html' : '/indexLocal.html',
+const htmlPath = process.env.BUILD_TYPE === 'cloud' ? '/index.html' : '/indexLocal.html';
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
