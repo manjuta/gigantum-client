@@ -60,7 +60,7 @@ class TestContainerOps:
     def test_start_rstudio(self, build_lb_image_for_rstudio):
         lb_container, ib, username = build_lb_image_for_rstudio
 
-        assert len(lb_container.ps_search('rserver')) == 1
+        assert len(lb_container.ps_search('rserver')) == 0
 
         start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
