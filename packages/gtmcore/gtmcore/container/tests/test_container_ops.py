@@ -37,7 +37,7 @@ class TestContainerOps:
         ib = build_lb_image_for_jupyterlab[1]
         lb = build_lb_image_for_jupyterlab[0]
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run('sh -c "pgrep jupyter"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 0
 
@@ -45,7 +45,7 @@ class TestContainerOps:
 
         start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run('sh -c "pgrep jupyter"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
 
@@ -53,7 +53,7 @@ class TestContainerOps:
         start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
         # Validate there is only one instance running.
-        ec, stdo = client.containers.get(container_id=container_id).exec_run('sh -c "pgrep jupyter"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
 

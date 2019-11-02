@@ -284,6 +284,8 @@ class LocalProjectContainer(ContainerOperations):
             return None
 
         detach = not get_results
+        # We can't run `command` directly, even using `shlex.split` because we sometimes use multiple commands,
+        # e.g., linked with `&&`
         exec_result = container.exec_run(f'sh -c "{command}"', detach=detach, **kwargs)
 
         if get_results:

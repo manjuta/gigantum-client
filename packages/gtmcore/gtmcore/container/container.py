@@ -135,7 +135,8 @@ class ContainerOperations(ABC):
         for timeout in range(reps):
             ps_output = self.exec_command(f"pgrep '{ps_name}'", container_name=container_name, get_results=True)
             if ps_output:  # Needed for mypy given abstractmethod
-                ps_list = [l for l in ps_output.split('\n') if l]
+                ps_list = [l for l in ps_output.split('\n')
+                           if l and 'pgrep' not in l]
                 if ps_list:
                     if reps > 1:
                         # We assume we're searching for a process, so we log how long it took to come up
