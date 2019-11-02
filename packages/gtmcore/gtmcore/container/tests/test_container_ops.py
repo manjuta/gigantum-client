@@ -141,6 +141,7 @@ class TestSidecarContainers:
         try:
             assert sidecar_container.query_container() == 'running'
             # The CMD shows up once in the init and once for its own process
+            time.sleep(2)
             assert len(sidecar_container.ps_search('tail')) == 1
             assert len(sidecar_container.query_container_ip().split('.')) == 4
             assert len(sidecar_container.query_container_env()) > 0
