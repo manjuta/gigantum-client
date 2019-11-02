@@ -63,9 +63,9 @@ class TestContainerOps:
         assert len(lb_container.ps_search('rserver')) == 0
 
         start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
-
+        time.sleep(5)
+        
         assert len(lb_container.ps_search('rserver')) == 1
-
         # Now, we test the second path through, start jupyterlab when it's already running.
         start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
