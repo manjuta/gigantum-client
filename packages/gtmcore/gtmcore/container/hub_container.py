@@ -36,7 +36,6 @@ class HubProjectContainer(ContainerOperations):
         self._launch_service = os.environ['LAUNCH_SERVICE_URL']
         self._client_id = os.environ['GIGANTUM_CLIENT_ID']
 
-        logger.info(f"HubProjectContainer.init()")
         ContainerOperations.__init__(self, username, labbook=labbook, path=path,
                                      override_image_name=override_image_name)
 
@@ -77,16 +76,15 @@ class HubProjectContainer(ContainerOperations):
                                          f" {response.status_code} : {response.json()}")
             resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}/projectbuild")
             if resp.status_code == 200:
-                logger.info(resp.json())
+                logger.info(f"HubProjectContainer.build_image() in progress: {resp.json()}")
                 status = resp.json()["state"]
                 if status == "COMPLETE":
                     return None
             elif resp.status_code != 304:
                 # back off if the server is throwing errors
-                time.sleep(10)
+                time.sleep(5)
                 continue
-            time.sleep(0.5)
-        return None
+            time.sleep(1)
 
     def delete_image(self, override_image_name: Optional[str] = None) -> bool:
         """ Delete the Docker image for the given LabBook
@@ -163,14 +161,14 @@ class HubProjectContainer(ContainerOperations):
             A boolean indicating whether the container was successfully stopped (False implies no container
             was running).
         """
-        logger.info(f"HubProjectContainer.stop_container()")
+        logger.debug(f"HubProjectContainer.stop_container()")
         url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
         response = requests.delete(url)
         if response.status_code != 200:
-            logger.info(f"hub_container.stop_container(), response status: {response.status_code}")
+            logger.error(f"hub_container.stop_container(), response status: {response.status_code}")
             raise ContainerException(f"Failed to stop Project container.")
 
-        logger.info(f"Project state: {response.json()}")
+        logger.debug(f"Project state: {response.json()}")
         projectCRPhase = response.json()["state"]
 
         if projectCRPhase == "STOPPED":
@@ -192,13 +190,13 @@ class HubProjectContainer(ContainerOperations):
             string state = 3;
         }
         """
-        logger.info(f"HubProjectContainer.query_container()")
+        logger.debug(f"HubProjectContainer.query_container()")
         url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:
-            logger.info(f"hub_container.query_container(), response status: {response.status_code}")
+            logger.error(f"hub_container.query_container(), response status: {response.status_code}")
             return None
-        logger.info(f"Project state: {response.json()}")
+        logger.debug(f"Project state: {response.json()}")
         projectCRPhase = response.json()["state"]
 
         if projectCRPhase == "PENDING":
@@ -228,8 +226,7 @@ class HubProjectContainer(ContainerOperations):
             If get_results is True (or unspecified), a str with output of the command.
             Otherwise, None.
         """
-        logger.info(f"HubProjectContainer.exec_command()")
-        logger.info(f"HubProjectContainer.run_container()")
+        logger.debug(f"HubProjectContainer.exec_command()")
         url = f"{self._launch_service}/v1/exec/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
         data = command
         response = requests.post(url, json=data)
@@ -253,12 +250,12 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             A list of strings like 'VAR=value'
         """
-        logger.info(f"HubProjectContainer.query_container_env()")
+        logger.debug(f"HubProjectContainer.query_container_env()")
         url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get container environment:"
-                f" {response.status_code} : {response.json()}")
+                                     f" {response.status_code} : {response.json()}")
         env = response.json()["vars"]
         envvars = ['='.join(kv) for kv in env]
         return envvars
@@ -292,7 +289,7 @@ class HubProjectContainer(ContainerOperations):
             src_path: Source path ON THE HOST of the file - callers responsibility to sanitize
             dst_dir: Destination directory INSIDE THE CONTAINER.
         """
-        logger.info(f"HubProjectContainer.copy_into_container()")
+        logger.warning(f"HubProjectContainer.copy_into_container()")
         raise NotImplemented
 
     # Utility methods
@@ -306,7 +303,7 @@ class HubProjectContainer(ContainerOperations):
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get client hostname:"
-                f" {response.status_code} : {response.json()}")
+                                     f" {response.status_code} : {response.json()}")
         hostname = response.json()["hostname"]
         logger.info(f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
         return hostname
@@ -328,7 +325,7 @@ class HubProjectContainer(ContainerOperations):
 
         All relevant configuration for a fully functional Project is set up here, then passed off to self.run_container()
         """
-        logger.info(f"HubProjectContainer.start_project_container")
+        logger.debug(f"HubProjectContainer.start_project_container")
         if not self.labbook:
             raise ValueError('labbook must be specified for run_container')
 

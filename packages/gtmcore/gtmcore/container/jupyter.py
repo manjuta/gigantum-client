@@ -35,7 +35,10 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
     lb_ip_addr = project_container.query_container_ip()
     if not lb_ip_addr:
         raise GigantumException("Can't obtain IP address for Jupyter container")
+    logger.info(f"START TRACE - in start_jupyter with lb_ip_addr = {lb_ip_addr}")
+
     jupyter_ps = project_container.ps_search('jupyter lab', reps=1)
+    logger.info(f"START TRACE - in start_jupyter with jupyter_ps = {jupyter_ps}")
 
     if len(jupyter_ps) == 1:
         logger.info(f'Found existing Jupyter instance for {str(project_container.labbook)}.')
@@ -50,13 +53,20 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
 
         return suffix
     elif len(jupyter_ps) == 0:
+        logger.info(f"START TRACE - in start_jupyter - starting jupyter")
         token = str(uuid.uuid4()).replace('-', '')
         if proxy_prefix and proxy_prefix[0] != '/':
             proxy_prefix = f'/{proxy_prefix}'
         _start_jupyter_process(project_container, token, proxy_prefix)
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
+
+        logger.info(f"START TRACE - in start_jupyter with suffix = {suffix}")
+
         if check_reachable:
+            logger.info(f"START TRACE - in start_jupyter checking if reachable")
             check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
+            logger.info(f"START TRACE - in start_jupyter checking if reachable - GOOD!")
+
         return suffix
     else:
         # If "ps aux" for jupyterlab returns multiple hits - this should never happen.

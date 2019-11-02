@@ -65,6 +65,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         else:
             path = f':{apparent_proxy_port}{suffix}'
 
+        logger.info(f"START TRACE - Ending _start_dev_tool with path = {path}")
         return path
 
     @classmethod
@@ -76,7 +77,11 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         labbook_ip = project_container.query_container_ip()
         labbook_endpoint = f'http://{labbook_ip}:{tool_port}'
 
+        logger.info(f"START TRACE - in _start_jupyter_tool with labbook_endpoint = {labbook_endpoint}")
+
         matched_routes = router.get_matching_routes(labbook_endpoint, 'jupyter')
+
+        logger.info(f"START TRACE - in _start_jupyter_tool with matched_routes = {matched_routes}")
 
         run_start_jupyter = True
         suffix = None
@@ -101,7 +106,9 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             rt_prefix, _ = router.add(labbook_endpoint, f'jupyter/{rt_prefix}')
 
             # Start jupyterlab
+            logger.info(f"START TRACE - in _start_jupyter_tool with rt_prefix = {rt_prefix}")
             suffix = start_jupyter(project_container, proxy_prefix=rt_prefix)
+            logger.info(f"START TRACE - in _start_jupyter_tool with suffix = {suffix}")
 
             # Ensure we start monitor IFF jupyter isn't already running.
             start_labbook_monitor(labbook, username, 'jupyterlab',
@@ -172,7 +179,9 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         labbook = InventoryManager().load_labbook(username, owner, labbook_name,
                                                   author=get_logged_in_author())
 
+        logger.info(f"START TRACE - START")
         with labbook.lock(failfast=True):
             path = cls._start_dev_tool(labbook, username, dev_tool.lower(), container_override_id)
 
+        logger.info(f"START TRACE - END")
         return StartDevTool(path=path)

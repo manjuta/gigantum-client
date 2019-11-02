@@ -31,10 +31,6 @@ app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration()
 app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
 
-if config.config["flask"]["allow_cors"]:
-    # Allow CORS
-    CORS(app, max_age=7200)
-
 # Set Debug mode
 app.config['DEBUG'] = config.config["flask"]["DEBUG"]
 app.register_blueprint(blueprint.complete_labbook_service)
@@ -53,6 +49,11 @@ try:
 except Exception as e:
     logger.error(e)
     logger.exception(e)
+
+
+if config.config["flask"]["allow_cors"]:
+    # Allow CORS
+    CORS(app, max_age=7200)
 
 
 # Set auth error handler
