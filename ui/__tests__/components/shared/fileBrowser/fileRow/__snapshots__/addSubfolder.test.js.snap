@@ -3,8 +3,10 @@
 exports[`AddSubFolder Component Renders a Snapshot 1`] = `
 <div
   className="AddSubfolder"
+  data-click-id="addFolder"
   data-selenium-id="AddSubfolder"
   onClick={[Function]}
+  role="presentation"
   style={Object {}}
 >
   <div
@@ -20,25 +22,26 @@ exports[`AddSubFolder Component Renders a Snapshot 1`] = `
     >
       <input
         className="AddSubfolder__input"
+        data-click-id="addFolder"
         onKeyUp={[Function]}
         placeholder="Enter Folder Name"
         type="text"
       />
     </div>
-    <div
-      className="flex justify--space-around"
-    >
-      <button
-        className="File__btn--round File__btn--cancel"
-        onClick={[Function]}
-        type="button"
-      />
-      <button
-        className="File__btn--round File__btn--add"
-        onClick={[Function]}
-        type="button"
-      />
-    </div>
+  </div>
+  <div
+    className="flex justify--space-around"
+  >
+    <button
+      className="File__btn--round File__btn--cancel"
+      onClick={[Function]}
+      type="button"
+    />
+    <button
+      className="File__btn--round File__btn--add"
+      onClick={[Function]}
+      type="button"
+    />
   </div>
 </div>
 `;

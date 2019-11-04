@@ -1,6 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import queryString from 'querystring';
 // mutations
 import CreateLabbookMutation from 'Mutations/CreateLabbookMutation';
 import CreateDatasetMutation from 'Mutations/CreateDatasetMutation';
@@ -42,12 +43,23 @@ export default class CreateModal extends Component {
     repository: '',
     componentId: '',
     revision: '',
-    modalVisible: false,
+    modalVisible: queryString.parse(this.props.history.location.hash.slice(1)).createNew || false,
     selectedComponentId: 'createLabbook',
     continueDisabled: true,
     modalBlur: false,
     createLabbookButtonState: '',
   };
+
+  componentDidMount = () => {
+    const { props } = this;
+    const values = queryString.parse(props.history.location.hash.slice(1));
+    if (values.createNew) {
+      delete values.createNew;
+    }
+    const stringifiedValues = queryString.stringify(values);
+    props.history.replace(`${props.history.location.pathname}#${stringifiedValues}`);
+  }
+
 
   /**
     @param {Object, string} evt,field

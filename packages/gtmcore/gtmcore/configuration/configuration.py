@@ -84,6 +84,19 @@ class Configuration(object):
             return int(config_val)
 
     @property
+    def is_hub_client(self) -> bool:
+        """Return true if configured as a client to run in the hub
+
+        Returns:
+            bool
+        """
+        context = self.config['container']['context']
+        if context == "hub":
+            return True
+        else:
+            return False
+
+    @property
     def upload_cpu_limit(self) -> int:
         """Return the max number of CPUs to use (i.e. concurrent jobs) when uploading dataset files
 

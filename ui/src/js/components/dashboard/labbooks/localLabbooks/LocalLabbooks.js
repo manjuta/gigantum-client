@@ -107,7 +107,9 @@ export class LocalLabbooks extends Component {
     const { props, state } = this;
     const self = this;
 
-    const idArr = props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id);
+    const idArr = props.localLabbooks.localLabbooks
+      ? props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id)
+      : [];
 
     ContainerLookup.query(idArr).then((res) => {
       if (res && res.data
@@ -157,7 +159,9 @@ export class LocalLabbooks extends Component {
   _visibilityLookup = () => {
     const { props } = this;
     const self = this;
-    const idArr = props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id);
+    const idArr = props.localLabbooks.localLabbooks
+      ? props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id)
+      : [];
     let index = 0;
 
     function query(ids) {

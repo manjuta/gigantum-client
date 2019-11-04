@@ -36,8 +36,11 @@ function getServedPath(appPackageJson) {
   const publicUrl = getPublicUrl(appPackageJson);
   const servedUrl = envPublicUrl ||
     (publicUrl ? url.parse(publicUrl).pathname : '/');
-  return ensureSlash(servedUrl, true);
+  const needsSlash = process.env.BUILD_TYPE !== 'cloud';
+  return ensureSlash(servedUrl, needsSlash);
 }
+
+const htmlPath = process.env.BUILD_TYPE === 'cloud' ? resolveApp('public/index.html') : resolveApp('public/indexLocal.html');
 
 // config after eject: we're in ./config/
 module.exports = {
@@ -45,7 +48,7 @@ module.exports = {
   dotenv: resolveApp('.env'),
   appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
-  appHtml: resolveApp('public/index.html'),
+  appHtml: htmlPath,
   appIndexJs: resolveApp('src/js/index.js'),
   dahshboardJs: resolveApp('src/js/components/dashboard/Dashboard.js'),
   labbookJs: resolveApp('src/js/components/labbook/Labbook.js'),

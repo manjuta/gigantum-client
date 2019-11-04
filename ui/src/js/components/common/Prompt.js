@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import classNames from 'classnames';
+// utils
+import getApiURL from 'JS/utils/apiUrl';
 // assets
 import './Prompt.scss';
 
@@ -16,7 +18,17 @@ const Localhost = () => (
       Please verify that that the Client is running by clicking on the Gigantum logo in your system tray to open Gigantum Desktop.
     </p>
     <p>
-       If the problem persists, try the steps outlined here, contact
+      If the problem persists, try the steps outlined
+      {' '}
+      <a
+        href="https://docs.gigantum.com/docs/client-interface-fails-to-load"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        here
+      </a>
+      {' '}
+      , contact
       {' '}
       <a
         href="mailto:support@gigantum.com"
@@ -69,12 +81,10 @@ const Cloud = () => (
 );
 
 const pingServer = () => {
-  const apiHost = process.env.NODE_ENV === 'development' ? 'localhost:10000' : window.location.host;
-  const uuid = uuidv4();
-  const url = `${window.location.protocol}//${apiHost}${process.env.PING_API}?v=${uuid}`;
+  const apiURL = getApiURL('ping');
   const currentVersion = localStorage.getItem('currentVersion');
 
-  return fetch(url, {
+  return fetch(apiURL, {
     method: 'GET',
   }).then((response) => {
     if (response.status === 200 && (response.headers.get('content-type') === 'application/json')) {

@@ -99,6 +99,41 @@ class ImageBuilder(object):
 
         return docker_lines
 
+    def _enable_iframes(self) -> List[str]:
+        """Step to add layers to enable iframe support, only if iframe support is enabled in the config"""
+        docker_lines: List[str] = list()
+        # Only perform this step if iframe support is enabled
+        if self.labbook.client_config.config['environment']['iframe']['enabled'] is True:
+            # Get dev tools in this project
+            fields = self._import_baseimage_fields()
+            tools = fields['development_tools']
+
+            # Get the allowed origin from the config file
+            allowed_origin = self.labbook.client_config.config['environment']['iframe']['allowed_origin']
+
+            if "jupyterlab" in tools or "notebook" in tools:
+                # Create config file
+                script = f"""c.NotebookApp.tornado_settings = {{
+    'headers': {{
+        'Content-Security-Policy': "frame-ancestors 'self' {allowed_origin} "
+    }}
+}}"""
+                jupyter_config_file = os.path.join(self.labbook.root_dir, '.gigantum', 'env',
+                                                   'jupyter_notebook_config.py')
+                with open(jupyter_config_file, 'wt') as cf:
+                    cf.write(script)
+                docker_lines.append("# Enable IFrame support in JupyterLab/Jupyter Notebook")
+                docker_lines.append("COPY jupyter_notebook_config.py /etc/jupyter")
+                docker_lines.append("")
+
+            if "rstudio" in tools:
+                docker_lines.append("# Enable IFrame support in RStudio")
+                docker_lines.append(f'RUN echo "\\n#Enable IFrames\\nwww-frame-origin={allowed_origin}\\n" >>'
+                                    f' /etc/rstudio/rserver.conf')
+                docker_lines.append("")
+
+        return docker_lines
+
     def _load_packages(self) -> List[str]:
         """Load packages from yaml files in expected location in directory tree. """
         root_dir = os.path.join(self.labbook.root_dir, '.gigantum', 'env', 'package_manager')
@@ -162,9 +197,6 @@ class ImageBuilder(object):
         """ Contents of docker setup that must be at end of Dockerfile. """
 
         env_vars = "ENV LB_HOME=/mnt/labbook"
-        env_vars = f"{env_vars} LB_CODE=/mnt/labbook/code"
-        env_vars = f"{env_vars} LB_INPUT=/mnt/labbook/input"
-        env_vars = f"{env_vars} LB_OUTPUT=/mnt/labbook/output"
         env_vars = f"{env_vars} PROJECT_ROOT=/mnt/labbook"
         env_vars = f"{env_vars} PROJECT_CODE=/mnt/labbook/code"
         env_vars = f"{env_vars} PROJECT_INPUT=/mnt/labbook/input"
@@ -192,6 +224,7 @@ class ImageBuilder(object):
                              self._load_packages,
                              self._load_docker_snippets,
                              self._load_bundled_apps,
+                             self._enable_iframes,
                              self._post_image_hook,
                              self._entrypoint_hooks]
 

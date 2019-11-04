@@ -36,6 +36,30 @@ class Footer extends Component<Props> {
     window.removeEventListener('resize', this._resize);
   }
 
+  componentDidUpdate() {
+    const {
+      messageListOpen,
+      viewHistory,
+      footerActions,
+    } = this.props;
+    const setTimeoutFunc = () => {
+      this.timeout = setTimeout(() => {
+        footerActions.setToggleMessageList(false, true);
+      }, 5000);
+    };
+
+    if (messageListOpen && !viewHistory && !this.timeout) {
+      setTimeoutFunc();
+    } else if (this.timeout && (messageListOpen && !viewHistory)) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+      setTimeoutFunc();
+    } else {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
+  }
+
   /**
     @param {} -
     opens project in view

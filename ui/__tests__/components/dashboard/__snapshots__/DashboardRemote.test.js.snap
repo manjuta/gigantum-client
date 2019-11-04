@@ -27,7 +27,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       className="Tabs"
     >
       <li
-        className="Tab Tab--local"
+        className="Tab Tab--local Tab--selected"
       >
         <a
           onClick={[Function]}
@@ -36,7 +36,7 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
         </a>
       </li>
       <li
-        className="Tab Tab--cloud Tab--selected"
+        className="Tab Tab--cloud"
       >
         <a
           onClick={[Function]}
@@ -195,131 +195,6 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       </ul>
     </div>
   </div>
-  <div
-    className="Labbooks__listing"
-    data-selenium-id="RemoteLabbooks"
-  >
-    <div
-      className="grid"
-    >
-      <div
-        className="Card Card--225 column-4-span-3 flex flex--column justify--space-between"
-        data-selenium-id="RemoteLabbookPanel"
-      >
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--icon"
-        >
-          <div
-            className="Tooltip-Listing RemoteLabbooks__private Tooltip-data Tooltip-data--small"
-            data-tooltip="private"
-          />
-          <button
-            className="Btn__dashboard Btn--action Btn__dashboard--cloud Btn__Tooltip-data"
-            data-tooltip="This Project has already been imported"
-            disabled={true}
-            type="button"
-          >
-            Imported
-          </button>
-          <button
-            className="Btn__dashboard Btn--action Btn__dashboard--delete"
-            data-tooltip=""
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-          >
-            Delete
-          </button>
-        </div>
-        <div
-          className="RemoteLabbooks__row RemoteLabbooks__row--text"
-        >
-          <div
-            className="RemoteLabbooks__row RemoteLabbooks__row--title"
-          >
-            <h5
-              className="RemoteLabbooks__panel-title"
-            >
-              <span>
-                <span
-                  className=""
-                >
-                  ui-test-remote
-                </span>
-              </span>
-            </h5>
-          </div>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner"
-          >
-            uitest
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
-          >
-            <span
-              className="bold"
-            >
-              Created:
-            </span>
-             
-            Fri Jan 18 2019
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
-          >
-            <span
-              className="bold"
-            >
-              Modified:
-            </span>
-             
-            Fri Jan 18 2019
-          </p>
-          <p
-            className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
-          >
-            <span>
-              <span
-                className=""
-              >
-                No Description
-              </span>
-            </span>
-          </p>
-        </div>
-      </div>
-      <div
-        className="CardLoader--hidden"
-        data-selenium-id="CardLoader"
-      >
-        <div />
-      </div>
-      <div
-        className="CardLoader--hidden"
-        data-selenium-id="CardLoader"
-      >
-        <div />
-      </div>
-      <div
-        className="CardLoader--hidden"
-        data-selenium-id="CardLoader"
-      >
-        <div />
-      </div>
-      <div
-        className="CardLoader--hidden"
-        data-selenium-id="CardLoader"
-      >
-        <div />
-      </div>
-      <div
-        className="CardLoader--hidden"
-        data-selenium-id="CardLoader"
-      >
-        <div />
-      </div>
-    </div>
-  </div>
+  <div />
 </div>
 `;

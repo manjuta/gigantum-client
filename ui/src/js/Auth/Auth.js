@@ -8,6 +8,21 @@ import { setLogout, setLoginError } from 'JS/redux/actions/login';
 // variables
 import { AUTH_CONFIG } from './auth0-variables';
 
+const getBasename = () => {
+  const globalObject = this || window;
+  const { pathname } = globalObject.location;
+  const pathList = pathname ? pathname.split('/') : [];
+  const uniqueClientString = (pathList.length > 2)
+    ? pathList[2]
+    : '';
+  const basename = process.env.BUILD_TYPE === 'cloud'
+    ? `/run/${uniqueClientString}`
+    : '';
+  return basename;
+};
+
+const basename = getBasename();
+
 export default class Auth {
   auth0 = new auth0.WebAuth({
     domain: AUTH_CONFIG.domain,
@@ -58,7 +73,7 @@ export default class Auth {
         window.sessionStorage.removeItem('LOGIN_ERROR_DESCRIPTION');
         window.sessionStorage.removeItem('LOGIN_ERROR_TYPE');
       } else if (err) {
-        history.replace('/login');
+        history.replace(`${basename}/login`);
         setLoginError(err);
         window.sessionStorage.setItem('LOGIN_ERROR_TYPE', err.error);
         window.sessionStorage.setItem('LOGIN_ERROR_DESCRIPTION', err.errorDescription);
@@ -87,7 +102,7 @@ export default class Auth {
       : route;
 
     if (!silent || forceHistory) {
-      history.replace(route);
+      history.replace(`${basename}${route}`);
     }
   }
 
@@ -105,7 +120,7 @@ export default class Auth {
       localStorage.removeItem('username');
       window.sessionStorage.removeItem('CALLBACK_ROUTE');
 
-      history.replace('/');
+      history.replace(`${basename}/`);
     });
   }
 

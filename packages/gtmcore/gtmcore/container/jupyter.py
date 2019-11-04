@@ -35,17 +35,20 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
     lb_ip_addr = project_container.query_container_ip()
     if not lb_ip_addr:
         raise GigantumException("Can't obtain IP address for Jupyter container")
+
     jupyter_ps = project_container.ps_search('jupyter lab', reps=1)
 
     if len(jupyter_ps) == 1:
         logger.info(f'Found existing Jupyter instance for {str(project_container.labbook)}.')
 
-        # Get token from PS in container
-        t = re.search(r"token='?([a-zA-Z\d-]+)'?", jupyter_ps[0])
-        if not t:
-            raise GigantumException('Cannot detect Jupyter Lab token')
-        token = t.groups()[0]
-        suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
+        # Get token
+        redis_conn = redis.Redis(db=1)
+        token = redis_conn.get(f"{project_container.image_tag}-jupyter-token")
+        if token:
+            token_str = f"token={token.decode()}"
+        else:
+            token_str = ""
+        suffix = f'{proxy_prefix or ""}/lab/tree/code?{token_str}'
 
         if check_reachable:
             check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
@@ -57,8 +60,10 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
             proxy_prefix = f'/{proxy_prefix}'
         _start_jupyter_process(project_container, token, proxy_prefix)
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={token}'
+
         if check_reachable:
             check_jupyter_reachable(lb_ip_addr, DEFAULT_JUPYTER_PORT, f'{proxy_prefix or ""}')
+
         return suffix
     else:
         # If "ps aux" for jupyterlab returns multiple hits - this should never happen.

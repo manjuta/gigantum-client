@@ -1,6 +1,8 @@
 import uuid
 from urllib.parse import quote_plus
 import graphene
+import redis
+import os
 
 from confhttpproxy import ProxyRouter
 
@@ -61,6 +63,10 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         # Don't include the port in the path if running on 80
         apparent_proxy_port = labbook.client_config.config['proxy']["apparent_proxy_port"]
         if apparent_proxy_port == 80:
+            # Running on 80, don't need the port
+            path = suffix
+        elif labbook.client_config.is_hub_client:
+            # Running in hub, don't prepend a port
             path = suffix
         else:
             path = f':{apparent_proxy_port}{suffix}'
@@ -82,30 +88,51 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         suffix = None
         if len(matched_routes) == 1:
             logger.info(f'Found existing Jupyter instance in route table for {str(labbook)}.')
-            suffix = matched_routes[0]
 
-            # wait for jupyter to be up
+            # Load the jupyter token out of redis, if available
+            redis_conn = redis.Redis(db=1)
+            token = redis_conn.get(f"{project_container.image_tag}-jupyter-token")
+            if token:
+                token_str = f"token={token.decode()}"
+            else:
+                token_str = ""
+
+            # Verify jupyter API is available and it's still running.
+            suffix = matched_routes[0]
             try:
                 check_jupyter_reachable(labbook_ip, tool_port, suffix)
+
+                # Add token on for the user before sending back, if available.
+                suffix = f'{suffix}/lab/tree/code?{token_str}'
                 run_start_jupyter = False
+
             except GigantumException:
                 logger.warning(f'Detected stale route. Attempting to restart Jupyter and clean up route table.')
-                # TODO #680 - should probably clean up redis here also?
+                # Trim leading slash and remove from the router
                 router.remove(suffix[1:])
+                # Delete the token from redis
+                redis_conn.delete(f"{project_container.image_tag}-jupyter-token")
 
         elif len(matched_routes) > 1:
             raise ValueError(f"Multiple Jupyter instances found in route table for {str(labbook)}! Restart container.")
 
         if run_start_jupyter:
-            rt_prefix = unique_id()
-            rt_prefix, _ = router.add(labbook_endpoint, f'jupyter/{rt_prefix}')
+            internal_rt_prefix = f'jupyter/{unique_id()}'
+
+            # Manipulate route prefix for hub if needed adding full hub prefix as well
+            if labbook.client_config.is_hub_client:
+                external_rt_prefix = f"run/{os.environ['GIGANTUM_CLIENT_ID']}/{internal_rt_prefix}"
+            else:
+                external_rt_prefix = internal_rt_prefix
+
+            external_rt_prefix, _ = router.add(labbook_endpoint, external_rt_prefix)
 
             # Start jupyterlab
-            suffix = start_jupyter(project_container, proxy_prefix=rt_prefix)
+            suffix = start_jupyter(project_container, proxy_prefix=external_rt_prefix)
 
-            # Ensure we start monitor IFF jupyter isn't already running.
+            # Ensure we start monitor IF jupyter isn't already running.
             start_labbook_monitor(labbook, username, 'jupyterlab',
-                                  url=f'{labbook_endpoint}/{rt_prefix}',
+                                  url=f'{labbook_endpoint}/{external_rt_prefix}',
                                   author=get_logged_in_author())
 
         return suffix

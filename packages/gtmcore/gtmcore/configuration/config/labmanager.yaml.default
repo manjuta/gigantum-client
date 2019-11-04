@@ -45,6 +45,9 @@ auth:
 environment:
   repo_url:
     - "https://github.com/gigantum/base-images.git"
+  iframe:
+    enabled: false
+    allowed_origin: localhost:10000
 
 # Git Configuration
 git:

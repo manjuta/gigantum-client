@@ -990,7 +990,7 @@ class BranchMenu extends Component {
             header="Publish"
             modalStateValue="visibilityModalVisible"
             sectionType={props.sectionType}
-            setPublishingState={props.setSyncingState}
+            setPublishingState={props.setPublishingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
             resetState={this._resetState}

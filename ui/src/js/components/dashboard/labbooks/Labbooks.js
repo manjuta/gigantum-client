@@ -32,7 +32,7 @@ class Labbooks extends Component {
       filter,
       orderBy,
       sort,
-    } = queryString.parse(props.history.location.search.slice(1));
+    } = queryString.parse(props.history.location.hash.slice(1));
 
     this.state = {
       labbookModalVisible: false,
@@ -91,15 +91,13 @@ class Labbooks extends Component {
     * set unsubcribe for store
   */
   UNSAFE_componentWillMount() {
-    const { props } = this;
-    const paths = props.history.location.pathname.split('/');
-    let sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    let { section } = this.props;
 
-    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
-      sectionRoute = 'local';
+    if ((section !== 'cloud') && (section !== 'local')) {
+      section = 'local';
     }
 
-    this.setState({ selectedSection: sectionRoute });
+    this.setState({ selectedSection: section });
 
     document.title = 'Gigantum';
 
@@ -108,15 +106,11 @@ class Labbooks extends Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    const paths = nextProps.history.location.pathname.split('/');
-    const sectionRoute = (paths.length > 2)
-      ? paths[2]
-      : 'local';
-
-    if ((paths[2] !== 'cloud') && (paths[2] !== 'local')) {
-      nextProps.props.history.replace('../../../../projects/local');
+    if ((nextProps.section !== 'cloud') && (nextProps.section !== 'local')) {
+      nextProps.history.replace('/projects/local');
     }
-    this.setState({ selectedSection: sectionRoute });
+
+    this.setState({ selectedSection: nextProps.section });
   }
 
   /**
@@ -400,12 +394,12 @@ class Labbooks extends Component {
     const { props } = this;
     const searchObj = Object.assign(
       {},
-      queryString.parse(props.history.location.search.slice(1)),
+      queryString.parse(props.history.location.hash.slice(1)),
       newValues,
     );
     const urlParameters = queryString.stringify(searchObj);
 
-    props.history.replace(`..${props.history.location.pathname}?${urlParameters}`);
+    props.history.replace(`..${props.history.location.pathname}#${urlParameters}`);
   }
 
   /**

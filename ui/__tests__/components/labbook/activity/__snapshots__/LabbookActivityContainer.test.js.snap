@@ -44,705 +44,707 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
       <div
         data-selenium-id="CreateBranch"
       />
-      <div
-        className="Activity__date-section Activity__date-section--0"
-      >
+      <div>
         <div
-          className="Activity__date-tab note"
+          className="Activity__date-section Activity__date-section--0"
         >
           <div
-            className="Activity__date-day"
-          >
-            18
-          </div>
-          <div
-            className="Activity__date-sub"
+            className="Activity__date-tab note"
           >
             <div
-              className="Activity__date-month"
+              className="Activity__date-day"
             >
-              Jan
+              18
             </div>
             <div
-              className="Activity__date-year"
-            >
-              2019
-            </div>
-          </div>
-        </div>
-        <div
-          className="UserNote__container"
-          data-selenium-id="UserNoteWrapper"
-        >
-          <button
-            className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
-            onClick={[Function]}
-            type="submit"
-          >
-            Add Note
-          </button>
-          <div
-            className="UserNote__add UserNote__card column-1-span-10 hidden"
-          />
-        </div>
-        <div
-          className="Activity__card-container Activity__card-container--last"
-        >
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
+              className="Activity__date-sub"
             >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="Activity__date-month"
               >
-                <div
-                  className="ActivityCard__badge ActivityCard__badge--environment"
-                  title="environment"
-                />
-                <div
-                  className="ActivityCard__content"
-                >
-                  <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="ActivityCard__stack"
-                    >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        9:59am
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
-                    </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Added 1 conda2 package(s). 
-                    </h6>
-                  </div>
-                </div>
+                Jan
+              </div>
+              <div
+                className="Activity__date-year"
+              >
+                2019
               </div>
             </div>
           </div>
           <div
-            className="CardWrapper CardWrapper--rollback"
-            data-selenium-id="CardWrapper"
+            className="UserNote__container"
+            data-selenium-id="UserNoteWrapper"
+          >
+            <button
+              className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
+              onClick={[Function]}
+              type="submit"
+            >
+              Add Note
+            </button>
+            <div
+              className="UserNote__add UserNote__card column-1-span-10 hidden"
+            />
+          </div>
+          <div
+            className="Activity__card-container Activity__card-container--last"
           >
             <div
-              className="Rollback"
-              data-selenium-id="Rollback"
-              data-tooltip="Can't rollback when the container is running."
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
             >
               <div
-                className="hidden activitySubmenu"
-                data-selenium-id="Tooltip"
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="Tooltip__glow-container"
+                    className="ActivityCard__badge ActivityCard__badge--environment"
+                    title="environment"
+                  />
+                  <div
+                    className="ActivityCard__content"
                   >
                     <div
-                      className="Tooltip__glow-ring-outer"
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
                     >
                       <div
-                        className="Tooltip__glow-ring-inner"
-                      />
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:59am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Added 1 conda2 package(s). 
+                      </h6>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper CardWrapper--rollback"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="Rollback"
+                data-selenium-id="Rollback"
+                data-tooltip="Can't rollback when the container is running."
+              >
                 <div
                   className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
+                  data-selenium-id="Tooltip"
                 >
-                  A dot between two activity records indicates the availability of the rollback menu. 
+                  <div
+                    className="Tooltip__toggle activitySubmenu"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="Tooltip__glow-container"
+                    >
+                      <div
+                        className="Tooltip__glow-ring-outer"
+                      >
+                        <div
+                          className="Tooltip__glow-ring-inner"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="hidden activitySubmenu"
+                  />
+                  <div
+                    className="hidden activitySubmenu"
+                  >
+                    A dot between two activity records indicates the availability of the rollback menu. 
  This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
  When choosing to rollback a new branch is created at the specified point.
+                  </div>
                 </div>
+                <button
+                  className="Rollback__button"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  type="button"
+                >
+                  Rollback
+                </button>
               </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                type="button"
-              >
-                Rollback
-              </button>
-            </div>
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--environment"
-                  title="environment"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    className="ActivityCard__badge ActivityCard__badge--environment"
+                    title="environment"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:57am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Added 1 pip package(s). 
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper CardWrapper--rollback"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="Rollback"
+                data-selenium-id="Rollback"
+                data-tooltip="Can't rollback when the container is running."
+              >
+                <div
+                  className="hidden activitySubmenu"
+                  data-selenium-id="Tooltip"
+                >
+                  <div
+                    className="Tooltip__toggle activitySubmenu"
                     onClick={[Function]}
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="Tooltip__glow-container"
                     >
-                      <p
-                        className="ActivityCard__time"
+                      <div
+                        className="Tooltip__glow-ring-outer"
                       >
-                        9:57am
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
+                        <div
+                          className="Tooltip__glow-ring-inner"
+                        />
+                      </div>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Added 1 pip package(s). 
-                    </h6>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper CardWrapper--rollback"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="Rollback"
-              data-selenium-id="Rollback"
-              data-tooltip="Can't rollback when the container is running."
-            >
-              <div
-                className="hidden activitySubmenu"
-                data-selenium-id="Tooltip"
-              >
-                <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
-                >
                   <div
-                    className="Tooltip__glow-container"
+                    className="hidden activitySubmenu"
+                  />
+                  <div
+                    className="hidden activitySubmenu"
                   >
-                    <div
-                      className="Tooltip__glow-ring-outer"
-                    >
-                      <div
-                        className="Tooltip__glow-ring-inner"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
-                >
-                  A dot between two activity records indicates the availability of the rollback menu. 
+                    A dot between two activity records indicates the availability of the rollback menu. 
  This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
  When choosing to rollback a new branch is created at the specified point.
+                  </div>
                 </div>
+                <button
+                  className="Rollback__button"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  type="button"
+                >
+                  Rollback
+                </button>
               </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                type="button"
-              >
-                Rollback
-              </button>
-            </div>
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--input_data"
-                  title="input_data"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    className="ActivityCard__badge ActivityCard__badge--input_data"
+                    title="input_data"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:56am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Uploaded 3 new file(s). 
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper CardWrapper--rollback"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="Rollback"
+                data-selenium-id="Rollback"
+                data-tooltip="Can't rollback when the container is running."
+              >
+                <div
+                  className="hidden activitySubmenu"
+                  data-selenium-id="Tooltip"
+                >
+                  <div
+                    className="Tooltip__toggle activitySubmenu"
                     onClick={[Function]}
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="Tooltip__glow-container"
                     >
-                      <p
-                        className="ActivityCard__time"
+                      <div
+                        className="Tooltip__glow-ring-outer"
                       >
-                        9:56am
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
+                        <div
+                          className="Tooltip__glow-ring-inner"
+                        />
+                      </div>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Uploaded 3 new file(s). 
-                    </h6>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper CardWrapper--rollback"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="Rollback"
-              data-selenium-id="Rollback"
-              data-tooltip="Can't rollback when the container is running."
-            >
-              <div
-                className="hidden activitySubmenu"
-                data-selenium-id="Tooltip"
-              >
-                <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
-                >
                   <div
-                    className="Tooltip__glow-container"
+                    className="hidden activitySubmenu"
+                  />
+                  <div
+                    className="hidden activitySubmenu"
                   >
-                    <div
-                      className="Tooltip__glow-ring-outer"
-                    >
-                      <div
-                        className="Tooltip__glow-ring-inner"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
-                >
-                  A dot between two activity records indicates the availability of the rollback menu. 
+                    A dot between two activity records indicates the availability of the rollback menu. 
  This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
  When choosing to rollback a new branch is created at the specified point.
+                  </div>
                 </div>
+                <button
+                  className="Rollback__button"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  type="button"
+                >
+                  Rollback
+                </button>
               </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                type="button"
-              >
-                Rollback
-              </button>
-            </div>
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--code"
-                  title="code"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    className="ActivityCard__badge ActivityCard__badge--code"
+                    title="code"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:55am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Uploaded 3 new file(s). 
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper CardWrapper--rollback"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="Rollback"
+                data-selenium-id="Rollback"
+                data-tooltip="Can't rollback when the container is running."
+              >
+                <div
+                  className="hidden activitySubmenu"
+                  data-selenium-id="Tooltip"
+                >
+                  <div
+                    className="Tooltip__toggle activitySubmenu"
                     onClick={[Function]}
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="Tooltip__glow-container"
                     >
-                      <p
-                        className="ActivityCard__time"
+                      <div
+                        className="Tooltip__glow-ring-outer"
                       >
-                        9:55am
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
+                        <div
+                          className="Tooltip__glow-ring-inner"
+                        />
+                      </div>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Uploaded 3 new file(s). 
-                    </h6>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper CardWrapper--rollback"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="Rollback"
-              data-selenium-id="Rollback"
-              data-tooltip="Can't rollback when the container is running."
-            >
-              <div
-                className="hidden activitySubmenu"
-                data-selenium-id="Tooltip"
-              >
-                <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
-                >
                   <div
-                    className="Tooltip__glow-container"
+                    className="hidden activitySubmenu"
+                  />
+                  <div
+                    className="hidden activitySubmenu"
                   >
-                    <div
-                      className="Tooltip__glow-ring-outer"
-                    >
-                      <div
-                        className="Tooltip__glow-ring-inner"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
-                >
-                  A dot between two activity records indicates the availability of the rollback menu. 
+                    A dot between two activity records indicates the availability of the rollback menu. 
  This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
  When choosing to rollback a new branch is created at the specified point.
+                  </div>
                 </div>
+                <button
+                  className="Rollback__button"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  type="button"
+                >
+                  Rollback
+                </button>
               </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                type="button"
-              >
-                Rollback
-              </button>
-            </div>
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--code"
-                  title="code"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    className="ActivityCard__badge ActivityCard__badge--code"
+                    title="code"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:54am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Created new Code directory \`code/folder2\`
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper CardWrapper--rollback"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="Rollback"
+                data-selenium-id="Rollback"
+                data-tooltip="Can't rollback when the container is running."
+              >
+                <div
+                  className="hidden activitySubmenu"
+                  data-selenium-id="Tooltip"
+                >
+                  <div
+                    className="Tooltip__toggle activitySubmenu"
                     onClick={[Function]}
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="Tooltip__glow-container"
                     >
-                      <p
-                        className="ActivityCard__time"
+                      <div
+                        className="Tooltip__glow-ring-outer"
                       >
-                        9:54am
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
+                        <div
+                          className="Tooltip__glow-ring-inner"
+                        />
+                      </div>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Created new Code directory \`code/folder2\`
-                    </h6>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper CardWrapper--rollback"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="Rollback"
-              data-selenium-id="Rollback"
-              data-tooltip="Can't rollback when the container is running."
-            >
-              <div
-                className="hidden activitySubmenu"
-                data-selenium-id="Tooltip"
-              >
-                <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
-                >
                   <div
-                    className="Tooltip__glow-container"
+                    className="hidden activitySubmenu"
+                  />
+                  <div
+                    className="hidden activitySubmenu"
                   >
-                    <div
-                      className="Tooltip__glow-ring-outer"
-                    >
-                      <div
-                        className="Tooltip__glow-ring-inner"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
-                >
-                  A dot between two activity records indicates the availability of the rollback menu. 
+                    A dot between two activity records indicates the availability of the rollback menu. 
  This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
  When choosing to rollback a new branch is created at the specified point.
+                  </div>
                 </div>
+                <button
+                  className="Rollback__button"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  type="button"
+                >
+                  Rollback
+                </button>
               </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                type="button"
-              >
-                Rollback
-              </button>
-            </div>
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--code"
-                  title="code"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
+                    className="ActivityCard__badge ActivityCard__badge--code"
+                    title="code"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:54am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Created new Code directory \`code/folder\`
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper CardWrapper--rollback"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="Rollback"
+                data-selenium-id="Rollback"
+                data-tooltip="Can't rollback when the container is running."
+              >
+                <div
+                  className="hidden activitySubmenu"
+                  data-selenium-id="Tooltip"
+                >
+                  <div
+                    className="Tooltip__toggle activitySubmenu"
                     onClick={[Function]}
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="Tooltip__glow-container"
                     >
-                      <p
-                        className="ActivityCard__time"
+                      <div
+                        className="Tooltip__glow-ring-outer"
                       >
-                        9:54am
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
+                        <div
+                          className="Tooltip__glow-ring-inner"
+                        />
+                      </div>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Created new Code directory \`code/folder\`
-                    </h6>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper CardWrapper--rollback"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="Rollback"
-              data-selenium-id="Rollback"
-              data-tooltip="Can't rollback when the container is running."
-            >
-              <div
-                className="hidden activitySubmenu"
-                data-selenium-id="Tooltip"
-              >
-                <div
-                  className="Tooltip__toggle activitySubmenu"
-                  onClick={[Function]}
-                >
                   <div
-                    className="Tooltip__glow-container"
+                    className="hidden activitySubmenu"
+                  />
+                  <div
+                    className="hidden activitySubmenu"
                   >
-                    <div
-                      className="Tooltip__glow-ring-outer"
-                    >
-                      <div
-                        className="Tooltip__glow-ring-inner"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="hidden activitySubmenu"
-                />
-                <div
-                  className="hidden activitySubmenu"
-                >
-                  A dot between two activity records indicates the availability of the rollback menu. 
+                    A dot between two activity records indicates the availability of the rollback menu. 
  This menu will allow you to rollback to a previous state, including code, data, and environment configuration. 
  When choosing to rollback a new branch is created at the specified point.
+                  </div>
                 </div>
+                <button
+                  className="Rollback__button"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  type="button"
+                >
+                  Rollback
+                </button>
               </div>
-              <button
-                className="Rollback__button"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                type="button"
-              >
-                Rollback
-              </button>
-            </div>
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--environment"
-                  title="environment"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
+                    className="ActivityCard__badge ActivityCard__badge--environment"
+                    title="environment"
+                  />
+                  <div
+                    className="ActivityCard__content"
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
                     >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        9:54am
-                      </p>
                       <div
-                        className="ActivityCard__user"
-                      />
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:54am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Added base: python2-minimal
+                      </h6>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Added base: python2-minimal
-                    </h6>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
             <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
             >
               <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
               >
                 <div
-                  className="ActivityCard__badge ActivityCard__badge--labbook"
-                  title="labbook"
-                />
-                <div
-                  className="ActivityCard__content"
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
                 >
                   <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
+                    className="ActivityCard__badge ActivityCard__badge--labbook"
+                    title="labbook"
+                  />
+                  <div
+                    className="ActivityCard__content"
                   >
                     <div
-                      className="ActivityCard__stack"
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
                     >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        9:54am
-                      </p>
                       <div
-                        className="ActivityCard__user"
-                      />
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          9:54am
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Created new LabBook: uitest/ui-test-project
+                      </h6>
                     </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Created new LabBook: uitest/ui-test-project
-                    </h6>
                   </div>
                 </div>
               </div>
@@ -750,26 +752,6 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
           </div>
         </div>
       </div>
-      <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader-hidden column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
     </div>
   </div>
 </div>

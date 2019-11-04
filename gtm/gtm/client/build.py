@@ -241,9 +241,9 @@ autorestart=true
 priority=0""")
 
         # Image Labels
-        labels = {'io.gigantum.app': 'client',
-                  'io.gigantum.revision': get_current_commit_hash(),
-                  'io.gigantum.maintainer.email': 'support@gigantum.com'}
+        labels = {'com.gigantum.app': 'client',
+                  'com.gigantum.revision': get_current_commit_hash(),
+                  'com.gigantum.maintainer.email': 'support@gigantum.com'}
 
         # Delete .pyc files in case dev tools used on something not ubuntu before building
         self._remove_pyc(os.path.join(client_root_dir, "packages"))
