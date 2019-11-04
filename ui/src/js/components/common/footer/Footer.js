@@ -45,7 +45,7 @@ class Footer extends Component<Props> {
     const setTimeoutFunc = () => {
       this.timeout = setTimeout(() => {
         footerActions.setToggleMessageList(false, true);
-      }, 5000);
+      }, 10 * 1000);
     };
 
     if (messageListOpen && !viewHistory && !this.timeout) {

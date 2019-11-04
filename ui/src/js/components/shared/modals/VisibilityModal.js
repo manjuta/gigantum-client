@@ -134,12 +134,12 @@ export default class PublishModal extends Component<Props> {
                 props.setPublishingState(owner, name, true);
 
                 const failureCall = () => {
-                  props.setPublishingState(false);
+                  props.setPublishingState(owner, name, false);
                   props.resetPublishState(false);
                 };
 
                 const successCall = () => {
-                  props.setPublishingState(false);
+                  props.setPublishingState(owner, name, false);
                   props.resetPublishState(false);
                   // self.props.remountCollab();
                   const messageData = {
