@@ -335,6 +335,7 @@ export default class ImportModule extends Component {
               document.getElementById('loader').classList.remove('hidden');
               this.setState({ showImportModal: false });
             } else {
+
               props.auth.renewToken(true, () => {
                 this.setState({ showLoginPrompt: true });
               }, () => {
@@ -351,9 +352,11 @@ export default class ImportModule extends Component {
         ? state.remoteURL
         : `https://${state.remoteURL}`;
       const domain = new URL(modifiedURL);
+      const hostname = domain.hostname.replace('.com', '.io');
       const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
       const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
-      const remote = `https://repo.${domain.hostname}/${owner}/${name}.git`;
+      const remote = `https://repo.${hostname}/${owner}/${name}.git`;
+
       if (props.section === 'labbook') {
         this._importRemoteProject(owner, name, remote, id);
       } else {
@@ -475,12 +478,22 @@ export default class ImportModule extends Component {
           error: true,
         },
       });
+
+      document.getElementById('loader').classList.add('hidden');
+      document.getElementById('modal__cover').classList.add('hidden');
     };
-    ImportRemoteLabbookMutation(owner, name, remote, sucessCall, failureCall, (response, error) => {
-      if (error) {
-        failurecall(error);
-      }
-    });
+    ImportRemoteLabbookMutation(
+      owner,
+      name,
+      remote,
+      sucessCall,
+      failureCall,
+      (response, error) => {
+        if (error) {
+          failureCall(error);
+        }
+      },
+    );
   }
 
 

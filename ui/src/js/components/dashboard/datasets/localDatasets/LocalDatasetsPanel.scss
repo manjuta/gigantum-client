@@ -16,7 +16,7 @@
 .LocalDatasets__row{
 
   &--icons{
-    margin: -10px;
+    margin: -10px 0;
     font-size: 15px;
     border-bottom: 1px solid $grey-border;
     @include flex(space-between, row);
