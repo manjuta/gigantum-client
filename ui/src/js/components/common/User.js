@@ -58,6 +58,7 @@ export default class User extends Component {
 
   render() {
     const { state } = this;
+    const baseURL = 'gigantum.com';
     // declare css here
     const usernameCSS = classNames({
       User__name: true,
@@ -94,7 +95,7 @@ export default class User extends Component {
         <div className={userDropdownCSS}>
           <a
             id="profile"
-            href={`https://gtm-dev.cloud/${state.username}/settings`}
+            href={`https://${baseURL}/${state.username}/settings`}
             rel="noopener noreferrer"
             target="_blank"
             className="User__button"

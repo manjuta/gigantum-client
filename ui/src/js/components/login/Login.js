@@ -37,7 +37,8 @@ export default class Login extends Component {
     const errorType = window.sessionStorage.getItem('LOGIN_ERROR_TYPE');
     const errorDescription = window.sessionStorage.getItem('LOGIN_ERROR_DESCRIPTION');
     const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
-    const loginURL = `https://gtm-dev.cloud/client/login#route=${window.location.origin}${freshLoginText}`;
+    const baseURL = 'gigantum.com'
+    const loginURL = `https://${baseURL}/client/login#route=${window.location.origin}${freshLoginText}`;
     return (
       <div className="Login">
         { props.userIdentityReturned
