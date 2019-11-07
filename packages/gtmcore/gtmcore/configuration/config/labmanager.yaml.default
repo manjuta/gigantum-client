@@ -14,6 +14,10 @@ core:
 
 # Project Container Configuration
 container:
+  # Where will we run our Project containers?
+  # Currently only a 'local' option is supported - essentially use docker.from_env()
+  context: local
+
   # If null, no limit
   # To set enter string with a units identification char (e.g. 100000b, 1000k, 128m, 1g)
   memory: null
@@ -33,6 +37,7 @@ auth:
   provider_domain: gigantum.auth0.com
   audience: api.gigantum.io
   signing_algorithm: RS256
+  # Set to `browser` for multi-tenant
   identity_manager: local
 
 # Environment Management Configuration
@@ -40,6 +45,9 @@ auth:
 environment:
   repo_url:
     - "https://github.com/gigantum/base-images.git"
+  iframe:
+    enabled: false
+    allowed_origin: localhost:10000
 
 # Git Configuration
 git:
@@ -50,8 +58,7 @@ git:
   remotes:
     repo.gigantum.io:
       remote_type: gitlab
-      admin_service: usersrv.gigantum.io
-      index_service: api.gigantum.com/read
+      hub_api: https://gigantum.com/api/v1
       object_service: api.gigantum.com/object-v1
 
 

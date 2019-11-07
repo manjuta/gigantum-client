@@ -44,312 +44,298 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
       <div
         data-selenium-id="CreateBranch"
       />
-      <div
-        className="Activity__date-section Activity__date-section--0"
-      >
+      <div>
         <div
-          className="Activity__date-tab note"
+          className="Activity__date-section Activity__date-section--0"
         >
           <div
-            className="Activity__date-day"
-          >
-            11
-          </div>
-          <div
-            className="Activity__date-sub"
+            className="Activity__date-tab note"
           >
             <div
-              className="Activity__date-month"
+              className="Activity__date-day"
             >
-              Jan
+              11
             </div>
             <div
-              className="Activity__date-year"
+              className="Activity__date-sub"
             >
-              2019
+              <div
+                className="Activity__date-month"
+              >
+                Jan
+              </div>
+              <div
+                className="Activity__date-year"
+              >
+                2019
+              </div>
+            </div>
+          </div>
+          <div
+            className="UserNote__container"
+            data-selenium-id="UserNoteWrapper"
+          >
+            <button
+              className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
+              onClick={[Function]}
+              type="submit"
+            >
+              Add Note
+            </button>
+            <div
+              className="UserNote__add UserNote__card column-1-span-10 hidden"
+            />
+          </div>
+          <div
+            className="Activity__card-container Activity__card-container--last"
+          >
+            <div
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
+              >
+                <div
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
+                >
+                  <div
+                    className="ActivityCard__badge ActivityCard__badge--dataset"
+                    title="dataset"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          12:15pm
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Uploaded 1 new file(s). 
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
+              >
+                <div
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
+                >
+                  <div
+                    className="ActivityCard__badge ActivityCard__badge--dataset"
+                    title="dataset"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          12:14pm
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Uploaded 1 new file(s). 
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
+              >
+                <div
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
+                >
+                  <div
+                    className="ActivityCard__badge ActivityCard__badge--dataset"
+                    title="dataset"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          12:12pm
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Uploaded 1 new file(s). 
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
+              >
+                <div
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
+                >
+                  <div
+                    className="ActivityCard__badge ActivityCard__badge--dataset"
+                    title="dataset"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          12:10pm
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Created new Dataset: uitest/ui-test-dataset
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="CardWrapper"
+              data-selenium-id="CardWrapper"
+            >
+              <div
+                className="ActivityCard__container column-1-span-9"
+                data-selenium-id="ActivityCard"
+              >
+                <div
+                  className="ActivityCard ActivityCard--collapsed card"
+                  style={Object {}}
+                >
+                  <div
+                    className="ActivityCard__badge ActivityCard__badge--dataset"
+                    title="dataset"
+                  />
+                  <div
+                    className="ActivityCard__content"
+                  >
+                    <div
+                      className="ActivityCard__title flex flex--row justify--space-between closed"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="ActivityCard__stack"
+                      >
+                        <p
+                          className="ActivityCard__time"
+                        >
+                          12:10pm
+                        </p>
+                        <div
+                          className="ActivityCard__user"
+                        />
+                      </div>
+                      <h6
+                        className="ActivityCard__commit-message"
+                      >
+                        <b>
+                          uitest - 
+                        </b>
+                        Updated Dataset storage backend configuration
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
         <div
-          className="UserNote__container"
-          data-selenium-id="UserNoteWrapper"
-        >
-          <button
-            className="Btn Btn--feature Btn--feature--expanded--paddingLeft relative UserNote__button"
-            onClick={[Function]}
-            type="submit"
-          >
-            Add Note
-          </button>
-          <div
-            className="UserNote__add UserNote__card column-1-span-10 hidden"
-          />
-        </div>
-        <div
-          className="Activity__card-container Activity__card-container--last"
-        >
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
-              <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
-              >
-                <div
-                  className="ActivityCard__badge ActivityCard__badge--dataset"
-                  title="dataset"
-                />
-                <div
-                  className="ActivityCard__content"
-                >
-                  <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="ActivityCard__stack"
-                    >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        12:15pm
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
-                    </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Uploaded 1 new file(s). 
-                    </h6>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
-              <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
-              >
-                <div
-                  className="ActivityCard__badge ActivityCard__badge--dataset"
-                  title="dataset"
-                />
-                <div
-                  className="ActivityCard__content"
-                >
-                  <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="ActivityCard__stack"
-                    >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        12:14pm
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
-                    </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Uploaded 1 new file(s). 
-                    </h6>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
-              <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
-              >
-                <div
-                  className="ActivityCard__badge ActivityCard__badge--dataset"
-                  title="dataset"
-                />
-                <div
-                  className="ActivityCard__content"
-                >
-                  <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="ActivityCard__stack"
-                    >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        12:12pm
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
-                    </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Uploaded 1 new file(s). 
-                    </h6>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
-              <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
-              >
-                <div
-                  className="ActivityCard__badge ActivityCard__badge--dataset"
-                  title="dataset"
-                />
-                <div
-                  className="ActivityCard__content"
-                >
-                  <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="ActivityCard__stack"
-                    >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        12:10pm
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
-                    </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Created new Dataset: uitest/ui-test-dataset
-                    </h6>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="CardWrapper"
-            data-selenium-id="CardWrapper"
-          >
-            <div
-              className="ActivityCard__container column-1-span-9"
-              data-selenium-id="ActivityCard"
-            >
-              <div
-                className="ActivityCard ActivityCard--collapsed card"
-                style={Object {}}
-              >
-                <div
-                  className="ActivityCard__badge ActivityCard__badge--dataset"
-                  title="dataset"
-                />
-                <div
-                  className="ActivityCard__content"
-                >
-                  <div
-                    className="ActivityCard__title flex flex--row justify--space-between closed"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="ActivityCard__stack"
-                    >
-                      <p
-                        className="ActivityCard__time"
-                      >
-                        12:10pm
-                      </p>
-                      <div
-                        className="ActivityCard__user"
-                      />
-                    </div>
-                    <h6
-                      className="ActivityCard__commit-message"
-                    >
-                      <b>
-                        uitest - 
-                      </b>
-                      Updated Dataset storage backend configuration
-                    </h6>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          className="ActivityCard ActivityCard__loader ActivityCard__loader--0 card column-1-span-9"
+          data-selenium-id="PaginationLoader"
+        />
       </div>
-      <div
-        className="ActivityCard ActivityCard__loader ActivityCard__loader--0 card column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader ActivityCard__loader--1 card column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader ActivityCard__loader--2 card column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader ActivityCard__loader--3 card column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
-      <div
-        className="ActivityCard ActivityCard__loader ActivityCard__loader--4 card column-1-span-9"
-        data-selenium-id="PaginationLoader"
-      />
     </div>
   </div>
 </div>

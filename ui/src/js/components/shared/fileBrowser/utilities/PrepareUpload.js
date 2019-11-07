@@ -61,13 +61,15 @@ const flattenFiles = (files) => {
     } else if (Array.isArray(filesArray.file) && (filesArray.file.length > 0)) {
       recursiveFlatten(filesArray.file);
     } else if (filesArray.entry) {
-      flattenedFiles.push({
-        file: filesArray.file,
-        entry: {
-          fullPath: filesArray.entry.fullPath,
-          name: filesArray.entry.name,
-        },
-      });
+      if (!Array.isArray(filesArray.file) || ((Array.isArray(filesArray.file)) && (filesArray.file.length > 0))) {
+        flattenedFiles.push({
+          file: filesArray.file,
+          entry: {
+            fullPath: filesArray.entry.fullPath,
+            name: filesArray.entry.name,
+          },
+        });
+      }
     } else {
       flattenedFiles.push({
         file: filesArray,
@@ -141,7 +143,6 @@ const uploadDirContent = (dndItem, props, monitor, callback) => {
   let path;
 
   dndItem.dirContent.then((fileList) => {
-
     if (fileList.length > 0) {
       const files = flattenFiles(fileList);
       let key = props.fileData ? props.fileData.edge.node.key : '';
@@ -153,7 +154,9 @@ const uploadDirContent = (dndItem, props, monitor, callback) => {
       // handle dragged files
       const item = monitor.getItem();
       const key = props.newKey || props.fileKey;
-      path = key.substr(0, key.lastIndexOf('/') || key.length);
+      if (key) {
+        path = key.substr(0, key.lastIndexOf('/') || key.length);
+      }
 
       if (item && item.files && props.browserProps.createFiles) {
         const files = flattenFiles(item.files);

@@ -31,6 +31,9 @@ class RemoteLabbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
     # Flag indicating if the LabBook also exists locally
     is_local = graphene.Boolean()
 
+    # Url to import the LabBook from the remote server
+    import_url = graphene.String()
+
     @classmethod
     def get_node(cls, info, id):
         """Method to resolve the object based on it's Node ID"""
@@ -102,3 +105,16 @@ class RemoteLabbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRep
             return True
         except InventoryException:
             return False
+
+    def resolve_import_url(self, info):
+        """Return the url to import the labbook
+
+        Args:
+            info:
+
+        Returns:
+
+        """
+        if self.import_url is None:
+            raise ValueError("RemoteLabbook requires all fields to be explicitly set")
+        return self.import_url

@@ -363,7 +363,7 @@ class ContainerStatus extends Component {
       Publishing: props.isPublishing,
       LookingUp: props.isLookingUpPackages,
       'ContainerStatus__container-state--expanded': state.isMouseOver && notExcluded && !props.isBuilding && !(state.imageStatus === 'BUILD_IN_PROGRESS'),
-      'ContainerStatus__container-remove-pointer': !notExcluded || props.isSyncing || props.isPublishing,
+      'ContainerStatus__container-remove-pointer': !notExcluded || props.isSyncing || props.isPublishing || (props.isLocked && constainerStatus === 'Stopped'),
     });
 
     return (

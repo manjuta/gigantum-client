@@ -164,6 +164,7 @@ class TestEnvironmentBaseImageQueries(object):
 
     def test_get_available_base_images_pagination_reverse(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the available base images using pagination from the end"""
+        gql_client = fixture_working_dir_env_repo_scoped[2]
         query = """
                 {
                   availableBases(last: 1){
@@ -197,9 +198,9 @@ class TestEnvironmentBaseImageQueries(object):
                   }
                 }
         """
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+        snapshot.assert_match(gql_client.execute(query))
 
-        query = """
+        query2 = """
                 {
                   availableBases(last: 2, before: "MQ=="){
                     edges{
@@ -232,7 +233,7 @@ class TestEnvironmentBaseImageQueries(object):
                   }
                 }
         """
-        snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
+        snapshot.assert_match(gql_client.execute(query2))
 
     def test_get_base_image_by_node(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the available base images"""

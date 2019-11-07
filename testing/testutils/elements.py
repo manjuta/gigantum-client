@@ -1,6 +1,7 @@
 import logging
-import time
 import os
+import subprocess
+import time
 
 import selenium
 from selenium.common.exceptions import NoSuchElementException
@@ -220,11 +221,15 @@ class EnvironmentElements(UiComponent):
 
     @property
     def package_name_input(self):
-        return CssElement(self.driver, "input:nth-child(2)")
+        return CssElement(self.driver, ".AddPackageForm__name input")
 
     @property
     def version_name_input(self):
         return CssElement(self.driver, ".PackageDependencies__input--version")
+
+    @property
+    def add_requirements_file_button(self):
+        return CssElement(self.driver, ".AddPackages__header--file")
 
     @property
     def add_button(self):
@@ -286,6 +291,38 @@ class EnvironmentElements(UiComponent):
     def advanced_configuration_button(self):
         return CssElement(self.driver, ".Btn__advanced")
 
+    @property
+    def trash_can_button(self):
+        return CssElement(self.driver, ".Btn__delete-secondary")
+
+    @property
+    def check_box_button(self):
+        return CssElement(self.driver, ".CheckboxMultiselect")
+
+    @property
+    def check_box_trash_can_button(self):
+        return CssElement(self.driver, ".Btn__delete-white")
+    
+    @property
+    def add_sensitive_file_manager_upload(self):
+        return self.driver.find_element_by_id('add_secret')
+
+    @property
+    def sensitive_file_label(self):
+        return self.driver.find_element_by_class_name("AddSecret__label")
+
+    @property
+    def sensitive_file_save_button(self):
+        return CssElement(self.driver, ".Btn.Btn--last")
+
+    @property
+    def sensitive_file_table(self):
+        return self.driver.find_elements_by_css_selector(".SecretsTable__name")
+
+    @property
+    def add_sensitive_file_location(self):
+        return self.driver.find_element_by_css_selector(".AddSecret__input")
+
     def specify_package_version(self, version):
         self.specify_version_button.click()
         self.specify_version_textbox.find().send_keys(version)
@@ -296,10 +333,13 @@ class EnvironmentElements(UiComponent):
         self.driver.execute_script("window.scrollBy(0, 400);")
         self.add_packages_button.wait().click()
 
-    def add_pip_package(self, pip_package, version):
+    def add_pip_package(self, pip_package, *args):
         logging.info(f"Adding pip package {pip_package}")
         self.package_name_input.find().send_keys(pip_package)
-        self.specify_package_version(version)
+        try:
+            self.specify_package_version(args)
+        except:
+            pass
         self.add_button.wait().click()
 
     def add_conda_package(self, conda_package, version):
@@ -316,6 +356,24 @@ class EnvironmentElements(UiComponent):
         logging.info(f"Adding apt package {apt_package}")
         self.package_name_input.find().send_keys(apt_package)
         self.add_button.wait().click()
+
+    def add_sensitive_file(self, sensitive_file_path,sensitive_file_destination):
+        logging.info("Adding sensitive file")
+        file_name = sensitive_file_path.split("/")
+        file_name = file_name[len(file_name)-1]
+        self.environment_tab_button.wait().click()
+        self.driver.execute_script("window.scrollBy(0, 600);")
+        self.advanced_configuration_button.wait().click()
+        self.driver.execute_script("window.scrollBy(0, 600);")
+        self.add_sensitive_file_manager_upload.send_keys(sensitive_file_path)
+        self.add_sensitive_file_location.click()
+        self.add_sensitive_file_location.send_keys(Keys.BACKSPACE)
+        self.add_sensitive_file_location.send_keys(Keys.BACKSPACE)
+        self.add_sensitive_file_location.send_keys(sensitive_file_destination)
+        assert self.sensitive_file_label.text == file_name
+        self.sensitive_file_save_button.click()
+        time.sleep(1)
+        assert self.sensitive_file_table[0].text == file_name
 
     def install_queued_packages(self, timeout_sec):
         logging.info('Waiting for packages to validate')
@@ -334,6 +392,42 @@ class EnvironmentElements(UiComponent):
         project_control = ProjectControlElements(self.driver)
         project_control.container_status_stopped.wait(timeout_sec)
 
+    def delete_package_via_trash_can_button(self, package):
+        logging.info(f"Deleting {package} using the trash can button")
+        project_control = ProjectControlElements(self.driver)
+        try:
+            project_control.close_notification_menu_button.click()
+        except:
+            pass
+        self.trash_can_button.click()
+        time.sleep(5)
+        project_control.container_status_stopped.wait()
+
+    def delete_package_via_check_box_button(self, package):
+        logging.info(f"Deleting {package} using the check box button")
+        project_control = ProjectControlElements(self.driver)
+        try:
+            project_control.close_notification_menu_button.click()
+        except:
+            pass
+        self.check_box_button.click()
+        time.sleep(2)
+        self.check_box_trash_can_button.click()
+        time.sleep(5)
+        project_control.container_status_stopped.wait()
+
+    def check_if_packages_is_empty(self):
+        return CssElement(self.driver, ".PackageBody p").contains_text(
+            "No packages have been added to this project")
+
+    def obtain_container_pip_packages(self, username, project_title):
+        container_id = subprocess.check_output(["docker", "ps", "-aqf",
+                                                f"name=gmlb-{username}-{username}-{project_title}"
+                                                ]).decode('utf-8').strip()
+        container_pip_packages = subprocess.check_output(["docker", "exec", container_id,
+                                                          "pip", "freeze"]).decode('utf-8').strip()
+        return container_pip_packages
+
     def add_custom_docker_instructions(self, docker_instruction):
         logging.info("Adding custom Docker instruction")
         self.environment_tab_button.wait().click()
@@ -346,6 +440,7 @@ class EnvironmentElements(UiComponent):
         time.sleep(2)
         self.driver.execute_script("window.scrollBy(0, 400);")
         self.custom_docker_save_button.wait().click()
+        time.sleep(5)
 
 
 class JupyterLabElements(UiComponent):
@@ -363,8 +458,7 @@ class JupyterLabElements(UiComponent):
 
     @property
     def code_output(self):
-        return CssElement(self.driver, ".jp-OutputArea-output>pre")
-
+        return self.driver.find_element_by_css_selector(".jp-OutputArea-output>pre")
 
 class RStudioElements(UiComponent):
     @property
@@ -425,16 +519,19 @@ class ImportProjectElements(UiComponent):
     def import_project_drop_box(self):
         return CssElement(self.driver,'.DropZone')
 
-    @property
-    def first_project_card_title(self):
-        return self.driver.find_element_by_css_selector('.LocalLabbooks__panel-title')
+    def local_project_card_titles(self):
+        titles=[]
+        projects = self.driver.find_elements_by_css_selector('.LocalLabbooks__panel-title')
+        for project in projects:
+            titles.append(project.text)
+        return titles
 
     def import_project_via_url(self, project_url):
         self.import_existing_button.wait().click()
         self.project_url_input.find().send_keys(project_url)
         try:
-            file_browser_elts = FileBrowserElements(self.driver)
-            file_browser_elts.close_notification_menu_button.click()
+            project_control = ProjectControlElements(self.driver)
+            project_control.close_notification_menu_button.click()
         except e as exception:
             logging.warning(f'Could not close notification window: {e}')
         self.import_button.wait().click()
@@ -761,12 +858,24 @@ class CloudProjectElements(UiComponent):
 
 class ProjectControlElements(UiComponent):
     @property
+    def start_stop_container_button(self):
+        return CssElement(self.driver, ".ContainerStatus__toggle>.ContainerStatus__toggle-btn")
+
+    @property
     def container_status_stopped(self):
         return CssElement(self.driver, ".flex>.Stopped")
 
     @property
     def container_status_building(self):
         return CssElement(self.driver, ".flex>.Building")
+
+    @property
+    def container_status_running(self):
+        return CssElement(self.driver, ".flex>.Running")
+
+    @property
+    def close_notification_menu_button(self):
+        return CssElement(self.driver, ".Footer__disc-button")
 
     @property
     def devtool_launch_button(self):
@@ -816,6 +925,14 @@ class FileBrowserElements(UiComponent):
         return CssElement(self.driver, "#data")
 
     @property
+    def requirements_file_area(self):
+        return CssElement(self.driver, ".Dropbox")
+
+    @property
+    def requirements_file_information(self):
+        return CssElement(self.driver, ".Requirements__dropped-file")
+
+    @property
     def file_browser_area(self):
         return CssElement(self.driver, ".FileBrowser")
 
@@ -847,12 +964,23 @@ class FileBrowserElements(UiComponent):
     def link_dataset_button(self):
         return CssElement(self.driver, ".Btn__FileBrowserAction--link")
 
+    def drag_drop_requirements_file_in_drop_zone(self, file_content="gigantum==0.19"):
+        logging.info("Dragging and dropping a requirements.txt file into the drop zone")
+        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
+            js_script = js_file.read()
+        if os.name == 'nt':
+            file_path = "C:\\tmp\\requirements.txt"
+        else:
+            file_path = "/tmp/requirements.txt"
+        with open(file_path, "w") as example_file:
+            example_file.write(file_content)
+        file_input = self.driver.execute_script(js_script, self.requirements_file_area.find(), 0, 0)
+        file_input.send_keys(file_path)
+        self.requirements_file_information.wait()
+        time.sleep(1)
+
     def is_file_browser_empty(self):
         return CssElement(self.driver, ".Dropbox--menu").contains_text('Drag and drop files here')
-
-    @property
-    def close_notification_menu_button(self):
-        return CssElement(self.driver, ".Footer__disc-button")
 
     def drag_drop_file_in_drop_zone(self, file_content="Sample Text"):
         logging.info("Dragging and dropping a file into the drop zone")
@@ -867,6 +995,7 @@ class FileBrowserElements(UiComponent):
         file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
         file_input.send_keys(file_path)
         self.file_information.wait()
+        time.sleep(1)
 
     def link_dataset(self, ds_owner: str, ds_name: str):
         logging.info("Linking the dataset to project")
@@ -879,7 +1008,7 @@ class FileBrowserElements(UiComponent):
         self.driver.find_element_by_css_selector(".LinkCard__details").click()
         time.sleep(4)
         wait = WebDriverWait(self.driver, 200)
-        self.close_notification_menu_button.wait().click()
+        project_control.close_notification_menu_button.wait().click()
         wait.until(expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, ".Footer__message-title")))
         self.driver.find_element_by_css_selector(".ButtonLoader ").click()
         # wait the linking window to disappear

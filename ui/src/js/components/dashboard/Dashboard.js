@@ -33,7 +33,7 @@ export default class DashboardContainer extends Component {
   constructor(props) {
     super(props);
 
-    const { orderBy, sort } = queryString.parse(props.history.location.search.slice(1));
+    const { orderBy, sort } = queryString.parse(props.history.location.hash.slice(1));
 
     this.state = {
       selectedComponent: props.match && props.match.path,
@@ -77,12 +77,13 @@ export default class DashboardContainer extends Component {
   */
   _displaySelectedComponent = () => {
     const { props, state } = this;
-    const paths = props.history.location.pathname.split('/');
-    const sectionRoute = paths.length > 2 ? paths[2] : 'local';
+    const sectionRoute = props.match
+      && props.match.params
+      && props.match.params.labbookSection;
     let query;
 
-    if (paths[2] !== 'cloud' && paths[2] !== 'local') {
-      props.history.replace('../../../../projects/local');
+    if ((sectionRoute !== 'cloud') && (sectionRoute !== 'local')) {
+      props.history.replace('/projects/local');
     }
     if (state.selectedComponent === '/datasets/:labbookSection') {
       query = sectionRoute === 'cloud' ? RemoteDatasetListingQuery : LocalDatasetListingQuery;
@@ -97,7 +98,7 @@ export default class DashboardContainer extends Component {
         environment={environment}
         query={query}
         variables={{
-          first: sectionRoute === 'cloud' ? 8 : 100,
+          first: sectionRoute === 'cloud' ? 10 : 100,
           cursor: null,
           orderBy: state.orderBy,
           sort: state.sort,
@@ -138,6 +139,7 @@ export default class DashboardContainer extends Component {
                   auth={props.auth}
                   labbookList={queryProps}
                   history={props.history}
+                  section={sectionRoute}
                   refetchSort={this._refetchSort}
                   diskLow={props.diskLow}
                 />
@@ -149,6 +151,7 @@ export default class DashboardContainer extends Component {
                 auth={props.auth}
                 labbookList={queryProps}
                 history={props.history}
+                section={sectionRoute}
                 refetchSort={this._refetchSort}
                 diskLow={props.diskLow}
               />

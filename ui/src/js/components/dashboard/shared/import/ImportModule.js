@@ -58,6 +58,7 @@ export default class ImportModule extends Component {
       remoteURL: '',
       showImportModal: false,
       ready: null,
+      isOver: false,
     };
 
     this._getBlob = this._getBlob.bind(this);
@@ -142,21 +143,27 @@ export default class ImportModule extends Component {
     const nameArray = dataTransfer.files[0].name.split('-');
     nameArray.pop();
     const name = nameArray.join('-');
-    this.setState({
-      files: dataTransfer.files,
-      ready: {
-        owner: localStorage.getItem('username'),
-        name,
-      },
-    });
+    const nameArrayExtension = dataTransfer.files[0].name.split('.');
+    const extension = nameArrayExtension[nameArrayExtension.length - 1];
+    if ((extension === 'zip') || (extension === 'lbk')) {
+      this.setState({
+        files: dataTransfer.files,
+        ready: {
+          owner: localStorage.getItem('username'),
+          name,
+        },
+      });
+    }
   }
 
   /**
   *  @param {Object} event
+  *  @param {Boolean} isOver
   *  preventDefault on dragOver event
   */
-  _dragoverHandler = (evt) => { // use evt, event is a reserved word in chrome
+  _dragoverHandler = (evt, isOver) => { // use evt, event is a reserved word in chrome
     evt.preventDefault(); // this kicks the event up the event loop
+    this.setState({ isOver });
   }
 
   /**
@@ -170,7 +177,7 @@ export default class ImportModule extends Component {
     evt.dataTransfer.effectAllowed = 'none';
     evt.dataTransfer.dropEffect = 'none';
     this._getBlob(dataTransfer);
-
+    this.setState({ isOver: false })
     return false;
   }
 
@@ -278,7 +285,7 @@ export default class ImportModule extends Component {
     const newValue = evt.target.value;
     const name = newValue.split('/')[newValue.split('/').length - 1];
     const owner = newValue.split('/')[newValue.split('/').length - 2];
-    if (newValue.indexOf('gigantum.com/') > -1 && name && owner) {
+    if (name && owner) {
       this.setState({
         ready: {
           name,
@@ -297,10 +304,6 @@ export default class ImportModule extends Component {
   _import = () => {
     const { props, state } = this;
     const id = uuidv4();
-    const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
-    const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
-    const remote = `https://repo.${config.domain}/${owner}/${name}.git`;
-
 
     if (state.files[0] !== undefined) {
       const self = this;
@@ -321,6 +324,7 @@ export default class ImportModule extends Component {
                   error: false,
                 },
               });
+              this.setState({ ready: null });
               if (props.section === 'labbook') {
                 prepareUpload(state.files[0], 'ImportLabbookMutation', buildImage, state, props.history);
               } else {
@@ -331,6 +335,7 @@ export default class ImportModule extends Component {
               document.getElementById('loader').classList.remove('hidden');
               this.setState({ showImportModal: false });
             } else {
+
               props.auth.renewToken(true, () => {
                 this.setState({ showLoginPrompt: true });
               }, () => {
@@ -343,6 +348,15 @@ export default class ImportModule extends Component {
         }
       });
     } else if (state.remoteURL) {
+      const modifiedURL = (state.remoteURL.indexOf('http') > -1)
+        ? state.remoteURL
+        : `https://${state.remoteURL}`;
+      const domain = new URL(modifiedURL);
+      const hostname = domain.hostname.replace('.com', '.io');
+      const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
+      const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
+      const remote = `https://repo.${hostname}/${owner}/${name}.git`;
+
       if (props.section === 'labbook') {
         this._importRemoteProject(owner, name, remote, id);
       } else {
@@ -464,12 +478,22 @@ export default class ImportModule extends Component {
           error: true,
         },
       });
+
+      document.getElementById('loader').classList.add('hidden');
+      document.getElementById('modal__cover').classList.add('hidden');
     };
-    ImportRemoteLabbookMutation(owner, name, remote, sucessCall, failureCall, (response, error) => {
-      if (error) {
-        failurecall(error);
-      }
-    });
+    ImportRemoteLabbookMutation(
+      owner,
+      name,
+      remote,
+      sucessCall,
+      failureCall,
+      (response, error) => {
+        if (error) {
+          failureCall(error);
+        }
+      },
+    );
   }
 
 
@@ -563,7 +587,11 @@ const ImportModal = ({ self }) => {
   const owner = state.ready ? state.ready.owner : '';
   const name = state.ready ? state.ready.name : '';
   const section = props.section === 'labbook' ? 'Project' : 'Dataset';
-
+  const dropBoxCSS = classNames({
+    'Dropbox ImportDropzone flex flex--column align-items--center': true,
+    'Dropbox--hovered': state.isOver,
+    'Dropbox--dropped': state.ready && state.files[0],
+  });
   return (
     <div className="Import__main">
       {
@@ -587,12 +615,12 @@ const ImportModal = ({ self }) => {
 
             <div
               id="dropZone"
-              className="ImportDropzone"
+              className={dropBoxCSS}
               ref={div => self.dropZone = div}
               type="file"
-              onDragEnd={evt => self._dragendHandler(evt)}
+              onDragEnd={evt => self._dragendHandler(evt, false)}
               onDrop={evt => self._dropHandler(evt)}
-              onDragOver={evt => self._dragoverHandler(evt)}
+              onDragOver={evt => self._dragoverHandler(evt, true)}
             >
               {
                  (state.ready && state.files[0])

@@ -1,16 +1,18 @@
 import uuid
 from urllib.parse import quote_plus
 import graphene
+import redis
+import os
 
 from confhttpproxy import ProxyRouter
 
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.exceptions import GigantumException
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 from gtmcore.mitmproxy.mitmproxy import MITMProxyOperations
 from gtmcore.container.jupyter import check_jupyter_reachable, start_jupyter
-from gtmcore.container.rserver import start_rserver
+from gtmcore.container.rserver import start_rserver, check_rstudio_reachable
 from gtmcore.container.bundledapp import start_bundled_app
 from gtmcore.logging import LMLogger
 from gtmcore.activity.services import start_labbook_monitor
@@ -61,6 +63,10 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         # Don't include the port in the path if running on 80
         apparent_proxy_port = labbook.client_config.config['proxy']["apparent_proxy_port"]
         if apparent_proxy_port == 80:
+            # Running on 80, don't need the port
+            path = suffix
+        elif labbook.client_config.is_hub_client:
+            # Running in hub, don't prepend a port
             path = suffix
         else:
             path = f':{apparent_proxy_port}{suffix}'
@@ -71,7 +77,9 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     def _start_jupyter_tool(cls, labbook: LabBook, router: ProxyRouter, username: str,
                             container_override_id: str = None):
         tool_port = 8888
-        labbook_ip = ContainerOperations.get_labbook_ip(labbook, username)
+        # Recall that we re-use the image name for Projects as the container name
+        project_container = container_for_context(username, labbook=labbook, override_image_name=container_override_id)
+        labbook_ip = project_container.query_container_ip()
         labbook_endpoint = f'http://{labbook_ip}:{tool_port}'
 
         matched_routes = router.get_matching_routes(labbook_endpoint, 'jupyter')
@@ -80,29 +88,51 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         suffix = None
         if len(matched_routes) == 1:
             logger.info(f'Found existing Jupyter instance in route table for {str(labbook)}.')
-            suffix = matched_routes[0]
 
-            # wait for jupyter to be up
+            # Load the jupyter token out of redis, if available
+            redis_conn = redis.Redis(db=1)
+            token = redis_conn.get(f"{project_container.image_tag}-jupyter-token")
+            if token:
+                token_str = f"token={token.decode()}"
+            else:
+                token_str = ""
+
+            # Verify jupyter API is available and it's still running.
+            suffix = matched_routes[0]
             try:
                 check_jupyter_reachable(labbook_ip, tool_port, suffix)
+
+                # Add token on for the user before sending back, if available.
+                suffix = f'{suffix}/lab/tree/code?{token_str}'
                 run_start_jupyter = False
+
             except GigantumException:
                 logger.warning(f'Detected stale route. Attempting to restart Jupyter and clean up route table.')
+                # Trim leading slash and remove from the router
                 router.remove(suffix[1:])
+                # Delete the token from redis
+                redis_conn.delete(f"{project_container.image_tag}-jupyter-token")
 
         elif len(matched_routes) > 1:
             raise ValueError(f"Multiple Jupyter instances found in route table for {str(labbook)}! Restart container.")
 
         if run_start_jupyter:
-            rt_prefix = unique_id()
-            rt_prefix, _ = router.add(labbook_endpoint, f'jupyter/{rt_prefix}')
+            internal_rt_prefix = f'jupyter/{unique_id()}'
+
+            # Manipulate route prefix for hub if needed adding full hub prefix as well
+            if labbook.client_config.is_hub_client:
+                external_rt_prefix = f"run/{os.environ['GIGANTUM_CLIENT_ID']}/{internal_rt_prefix}"
+            else:
+                external_rt_prefix = internal_rt_prefix
+
+            external_rt_prefix, _ = router.add(labbook_endpoint, external_rt_prefix)
 
             # Start jupyterlab
-            suffix = start_jupyter(labbook, username, tag=container_override_id, proxy_prefix=rt_prefix)
+            suffix = start_jupyter(project_container, proxy_prefix=external_rt_prefix)
 
-            # Ensure we start monitor IFF jupyter isn't already running.
+            # Ensure we start monitor IF jupyter isn't already running.
             start_labbook_monitor(labbook, username, 'jupyterlab',
-                                  url=f'{labbook_endpoint}/{rt_prefix}',
+                                  url=f'{labbook_endpoint}/{external_rt_prefix}',
                                   author=get_logged_in_author())
 
         return suffix
@@ -110,10 +140,11 @@ class StartDevTool(graphene.relay.ClientIDMutation):
     @classmethod
     def _start_rstudio(cls, labbook: LabBook, router: ProxyRouter, username: str,
                        container_override_id: str = None):
-        mitm_url, pr_suffix = MITMProxyOperations.configure_mitmroute(labbook, router, username)
 
         # All messages will come through MITM, so we don't need to monitor rserver directly
-        start_rserver(labbook, username, tag=container_override_id)
+        project_container = container_for_context(username, labbook, override_image_name=container_override_id)
+        fresh_rserver = start_rserver(project_container)
+        mitm_url, pr_suffix = MITMProxyOperations.configure_mitmroute(project_container, router, fresh_rserver)
 
         # Ensure monitor is running
         start_labbook_monitor(labbook, username, "rstudio",
@@ -123,13 +154,16 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                               url=mitm_url,
                               author=get_logged_in_author())
 
+        check_rstudio_reachable(mitm_url)
+
         return pr_suffix
 
     @classmethod
     def _start_bundled_app(cls, labbook: LabBook, router: ProxyRouter, username: str, bundled_app: dict,
                            container_override_id: str = None):
         tool_port = bundled_app['port']
-        labbook_ip = ContainerOperations.get_labbook_ip(labbook, username)
+        project_container = container_for_context(username, labbook=labbook)
+        labbook_ip = project_container.query_container_ip()
         endpoint = f'http://{labbook_ip}:{tool_port}'
 
         route_prefix = quote_plus(bundled_app['name'])

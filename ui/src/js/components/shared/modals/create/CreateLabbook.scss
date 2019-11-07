@@ -29,7 +29,7 @@
 }
 
 .CreateLabbook__warning--green {
-  color: $turquise;
+  color: $green;
 }
 
 .CreateLabbook__warning--orange {
@@ -39,10 +39,10 @@
 .CreateLabbook__header {
     margin: 0 0 20px 0;
     padding: 0 0 20px 0;
-    color: $azure;
+    color: $primary;
     text-align: center;
     font-weight: 400;
-    border-bottom: 1px solid $azure;
+    border-bottom: 1px solid $primary;
 }
 
 .CreateLabbook__modal-close {

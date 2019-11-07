@@ -8,19 +8,6 @@ from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 @pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestPipPackageManager(object):
-    def test_search(self, mock_config_with_repo, build_lb_image_for_env):
-        """Test search command"""
-        mrg = PipPackageManager()
-        lb = build_lb_image_for_env[0]
-        username = build_lb_image_for_env[1]
-        result = mrg.search("peppercorn", lb, username)
-        assert len(result) == 2
-
-        result = mrg.search("gigantum", lb, username)
-        assert len(result) == 4
-        assert result[0] == "gigantum"
-        assert result[3] == "gtmunit3"
-
     def test_list_versions(self, build_lb_image_for_env):
         """Test list_versions command"""
         mrg = PipPackageManager()

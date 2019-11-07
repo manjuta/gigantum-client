@@ -9,42 +9,6 @@ from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 @pytest.mark.skipif(ENV_SKIP_TEST, reason=ENV_SKIP_MSG)
 class TestConda3PackageManager(object):
-    def test_search(self, build_lb_image_for_env_conda):
-        """Test search command"""
-        mrg = Conda3PackageManager()
-        lb = build_lb_image_for_env_conda[0]
-        username = build_lb_image_for_env_conda[1]
-        result = mrg.search("reque*", lb, username)
-        assert type(result) == list
-        assert type(result[0]) == str
-        assert len(result) > 6
-        assert "requests" in result
-        result = mrg.search("nump*", lb, username)
-        assert type(result) == list
-        assert type(result[0]) == str
-        assert len(result) > 2
-        assert "numpy" in result
-
-    def test_search_no_wildcard(self, build_lb_image_for_env_conda):
-        """Test search command"""
-        mrg = Conda3PackageManager()
-        lb = build_lb_image_for_env_conda[0]
-        username = build_lb_image_for_env_conda[1]
-        result = mrg.search("reque", lb, username)
-        assert type(result) == list
-        assert type(result[0]) == str
-        assert len(result) > 6
-        assert "requests" in result
-
-    def test_search_empty(self, build_lb_image_for_env_conda):
-        """Test search command with no result"""
-        mrg = Conda3PackageManager()
-        lb = build_lb_image_for_env_conda[0]
-        username = build_lb_image_for_env_conda[1]
-        result = mrg.search("asdffdghdfghdraertasdfsadfa", lb, username)
-        assert type(result) == list
-        assert len(result) == 0
-
     def test_list_versions(self, build_lb_image_for_env_conda):
         """Test list_versions command"""
         mrg = Conda3PackageManager()
@@ -130,7 +94,7 @@ class TestConda3PackageManager(object):
         assert result[1].error is True
 
         assert result[2].package == "cdutil"
-        assert result[2].version == "8.1"
+        assert result[2].version == "8.2"
         assert result[2].error is False
 
         assert result[3].package == "asdfasdfasdf"
@@ -152,7 +116,7 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "cdutil"
-        assert result[1].version == "8.1"
+        assert result[1].version == "8.2"
         assert result[1].error is False
 
     def test_package_metadata(self, build_lb_image_for_env_conda):
@@ -170,7 +134,7 @@ class TestConda3PackageManager(object):
         assert result[1].package == "cdutil"
         assert result[1].description == 'A set of tools to manipulate climate data'
         assert result[1].docs_url == 'http://anaconda.org/conda-forge/cdutil'
-        assert result[1].latest_version == '8.1'
+        assert result[1].latest_version == '8.2'
         assert result[2].package == "numpy"
         assert result[2].description == 'Array processing for numbers, strings, records, and objects.'
         assert result[2].docs_url == 'https://docs.scipy.org/doc/numpy/reference/'
@@ -202,7 +166,7 @@ class TestConda3PackageManager(object):
         assert result[1].error is True
 
         assert result[2].package == "cdutil"
-        assert result[2].version == "8.1"
+        assert result[2].version == "8.2"
         assert result[2].error is False
 
         assert result[3].package == "asdfasdfasdf"
@@ -224,6 +188,6 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "cdutil"
-        assert result[1].version == "8.1"
+        assert result[1].version == "8.2"
         assert result[1].error is False
     # *** CONDA2 PACKAGE MANAGER TESTS ***

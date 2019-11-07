@@ -3,7 +3,7 @@
 .AddSubfolder {
     height: 40px;
     padding: 6px 0 6px 105px;
-
+    position: relative;
     cursor: pointer;
     text-align: left;
 
@@ -11,7 +11,7 @@
     background-size: 20px;
 
     line-height: 24px;
-    @include flex(space-between, row);
+    @include flex(flex-start, row);
     align-items: center;
 
     &:hover{
@@ -23,7 +23,6 @@
 .AddSubfolder__edit{
   @include flex(space-around, row);
   align-items: center;
-  width: 450px;
 }
 
 .AddSubfolder__input[type="text"]{
@@ -48,6 +47,7 @@
 .AddSubfolder__container {
   position: relative;
   min-width: 350px;
+  margin-right: 20px;
 }
 
 .AddSubfolder__btn {
@@ -58,17 +58,17 @@
 
     border-radius: 15px;
 
-    background: $azure url(~Images/icons/add.svg) no-repeat center center;
+    background: $primary url(~Images/icons/add.svg) no-repeat center center;
     background-size: 16px;
     flex: 0 1 30px;
 
     &:hover {
-      background: $turquise url(~Images/icons/add.svg) no-repeat center center;
+      background: $secondary url(~Images/icons/add.svg) no-repeat center center;
       background-size: 16px;
     }
 
     &:focus {
-      background: $azure url(~Images/icons/add.svg) no-repeat center center;
+      background: $primary url(~Images/icons/add.svg) no-repeat center center;
       background-size: 16px;
     }
   }

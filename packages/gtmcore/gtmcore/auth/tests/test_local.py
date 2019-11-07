@@ -393,9 +393,9 @@ class TestIdentityLocal(object):
     @responses.activate
     def test_check_first_login_no_user_locally_in_repo(self, mock_import, mock_config_file_with_auth_first_login,
                                                        cleanup_auto_import):
-        """Test login with the user in the repo alread"""
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/user',
-                      json={'exists': True}, status=200)
+        """Test login with the user in the repo already"""
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'synchronizeUserAccount': {'gitUserId': 123}}}, status=200)
 
         config = Configuration(mock_config_file_with_auth_first_login[0])
         mgr = get_identity_manager(config)
@@ -418,9 +418,8 @@ class TestIdentityLocal(object):
 
         """Test login with the user in the repo alread"""
         # Add mock for call to auth service
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/user',
-                      json={'exists': False}, status=404)
-        responses.add(responses.POST, 'https://usersrv.gigantum.io/user', status=201)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'synchronizeUserAccount': {'gitUserId': 123}}}, status=200)
 
         config = Configuration(mock_config_file_with_auth_first_login[0])
         mgr = get_identity_manager(config)

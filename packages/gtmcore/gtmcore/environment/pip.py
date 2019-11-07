@@ -1,7 +1,8 @@
-from typing import List, Dict, Optional
+from typing import List, Dict
 import requests
 import json
-from gtmcore.container.container import ContainerOperations
+
+from gtmcore.container import container_for_context
 from gtmcore.labbook import LabBook
 from gtmcore.http import ConcurrentRequestManager, ConcurrentRequest
 
@@ -16,26 +17,8 @@ class PipPackageManager(PackageManager):
     def __init__(self):
         self.request_mgr = ConcurrentRequestManager()
 
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
-        """Method to search a package manager for packages based on a string. The string can be a partial string.
-
-        Args:
-            search_str: The string to search on
-            labbook: Subject LabBook
-            username: username of current user
-
-        Returns:
-            list(str): The list of package names that match the search string
-        """
-        search_result = ContainerOperations.run_command(
-            f'pip search {search_str}', labbook, username,
-            fallback_image=self.fallback_image(labbook))
-
-        lines = search_result.decode().splitlines()
-        packages = [x.split(' ')[0] for x in lines]
-        return sorted(packages)
-
-    def _extract_versions(self, response: dict) -> List[str]:
+    @staticmethod
+    def _extract_versions(response: dict) -> List[str]:
         version_list = list(response["releases"].keys())
 
         # Don't include release candidates that have been pushed to pip
@@ -78,9 +61,12 @@ class PipPackageManager(PackageManager):
         Returns:
             list
         """
-        packages = ContainerOperations.run_command('pip list --format=json', labbook, username,
-                                                   fallback_image=self.fallback_image(labbook))
-        return json.loads(packages.decode())
+        project_container = container_for_context(username, labbook=labbook)
+        packages = project_container.run_container('pip list --format=json', wait_for_output=True)
+        if packages:
+            return json.loads(packages)
+        else:
+            return []
 
     def validate_packages(self, package_list: List[Dict[str, str]], labbook: LabBook, username: str) \
             -> List[PackageResult]:

@@ -68,8 +68,8 @@ def test_import_zip_projects(driver: selenium.webdriver, *args, **kwargs):
         side_bar_elts = testutils.SideBarElements(driver)
         side_bar_elts.projects_icon.find().click()
         time.sleep(2)
-        title = import_project_elts.first_project_card_title.text
-        assert title == project_name
+        titles = import_project_elts.local_project_card_titles()
+        assert project_name in titles
         # TODO: add graph ql query to assert project exists
     except Exception as e:
         logging.error(e)

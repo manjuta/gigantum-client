@@ -16,18 +16,18 @@
         height: 3px;
 
         /* Progress bar value for IE10+ */
-        color: $azure;
+        color: $primary;
         margin-bottom: 10px;
         width: 100%;
       }
 
       progress::-webkit-progress-value {
-        background-color: $azure;
+        background-color: $primary;
         border-radius: 20px;
       }
 
       progress::progress-value {
-        background-color: $azure;
+        background-color: $primary;
         border-radius: 20px;
       }
       progress::-webkit-progress-bar {
@@ -62,7 +62,7 @@
     font-weight: bold;
     font-size: 14px;
     padding-bottom: 10px;
-    color: $jet;
+    color: $primaryText;
 }
 
 .Summary__content{
@@ -74,13 +74,13 @@
 .Summary__file-count{
     width: 15%;
     text-align: center;
-    border-right: 1px solid $azure;
+    border-right: 1px solid $primary;
 }
 .Summary__size {
     @include flex(space-around, row);
     padding: 0 7%;
     width: 32.5%;
-    border-right: 1px solid $azure;
+    border-right: 1px solid $primary;
     progress[value] {
         &::-webkit-progress-value{
             &:before {
@@ -124,7 +124,7 @@
 
 
 .Summary__onDisk{
-color: $azure;
+color: $primary;
     &--primary{
       font-size: 15px
     }

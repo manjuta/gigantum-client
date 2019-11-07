@@ -32,7 +32,6 @@ def test_project_file_browser(driver: selenium.webdriver, *args, **kwargs):
     time.sleep(2)
     logging.info(f"Dragging and dropping file into Input Data for project: {project_title}")
     file_browser_elts.drag_drop_file_in_drop_zone()
-
     assert file_browser_elts.file_information.find().text == 'sample-upload.txt', \
         "Expected sample-upload.txt to be the first file in Input Data"
 
@@ -56,7 +55,6 @@ def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
     logging.info(f"Dragging and dropping file into Data for dataset: {dataset_title}")
     time.sleep(3)
     file_browser_elts.drag_drop_file_in_drop_zone()
-    time.sleep(3)
 
     assert file_browser_elts.file_information.find().text == 'sample-upload.txt', \
         "Expected sample-upload.txt to be the first file in Data"

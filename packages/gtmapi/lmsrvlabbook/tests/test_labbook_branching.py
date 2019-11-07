@@ -635,8 +635,8 @@ class TestWorkflowsBranching(object):
     @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
     def test_commits_ahead_behind(self, fixture_working_dir_lfs_disabled):
         with responses.RequestsMock() as rsps:
-            rsps.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                          json={'key': 'afaketoken'}, status=200)
+            rsps.add(responses.POST, 'https://gigantum.com/api/v1',
+                     json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
             config_file, client = fixture_working_dir_lfs_disabled[0], \
                                      fixture_working_dir_lfs_disabled[2]

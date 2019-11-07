@@ -192,7 +192,6 @@ class Header extends Component {
       hidden: !props.branchesOpen,
     });
 
-
     return (
 
       <div className="Header__wrapper">

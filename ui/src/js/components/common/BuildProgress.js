@@ -2,10 +2,12 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
+import ReactTooltip from 'react-tooltip';
 // store
 import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
 // mutations
 import CancelBuildMutation from 'Mutations/container/CancelBuildMutation';
+import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // assets
 import './BuildProgress.scss';
 
@@ -74,6 +76,30 @@ class BuildProgress extends Component {
       props.name,
       callback,
     );
+  }
+
+
+  /**
+  *  @param {}
+  *  fires build cancelation
+  */
+  _noCacheRebuild = () => {
+    const {
+      owner,
+      name,
+      toggleModal,
+    } = this.props;
+    const callback = () => {};
+
+    setBuildingState(owner, name, true);
+    this.setState({ cancelingBuild: true });
+    BuildImageMutation(
+      owner,
+      name,
+      { noCache: true },
+      callback,
+    );
+    toggleModal(false);
   }
 
   /**
@@ -200,6 +226,27 @@ class BuildProgress extends Component {
             </button>
           </Fragment>
           )
+          }
+          {
+            error
+            && (
+            <Fragment>
+              <button
+                className="Btn--inverted align-self--end"
+                type="button"
+                onClick={() => this._noCacheRebuild()}
+                data-tip="This will attempt to rebuild the container from the beginning without using Docker's cache"
+                data-for="Tooltip--noCache"
+              >
+                Clear Cache & Build
+              </button>
+              <ReactTooltip
+                place="top"
+                id="Tooltip--noCache"
+                delayShow={500}
+              />
+            </Fragment>
+            )
           }
           <button
             className="align-self--end"

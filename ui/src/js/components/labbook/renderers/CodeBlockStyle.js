@@ -87,22 +87,22 @@ export default {
     color: '#97c0d5',
   },
   selector: {
-    color: '#1ad8c1',
+    color: '#2f8da3',
   },
   'attr-name': {
-    color: '#1ad8c1',
+    color: '#2f8da3',
   },
   string: {
-    color: '#1ad8c1',
+    color: '#2f8da3',
   },
   char: {
-    color: '#1ad8c1',
+    color: '#2f8da3',
   },
   builtin: {
-    color: '#1ad8c1',
+    color: '#2f8da3',
   },
   inserted: {
-    color: '#1ad8c1',
+    color: '#2f8da3',
   },
   operator: {
     color: '#74a4bc',

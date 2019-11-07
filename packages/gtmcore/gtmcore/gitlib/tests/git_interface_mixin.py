@@ -158,7 +158,7 @@ def create_dummy_repo(working_dir):
     repo.index.commit("initial commit")
 
 
-def write_file(git_instance, filename, content, add=True, commit_msg=None):
+def write_file(git_instance, filename, content, add=True, commit_msg=None) -> str:
     """Write content to a file
 
     Args:
@@ -168,10 +168,11 @@ def write_file(git_instance, filename, content, add=True, commit_msg=None):
         commit_msg (str): If not none, commit file with this message
 
     Returns:
-
+        The full path of the file
     """
     working_dir = git_instance.config["working_directory"]
-    with open(os.path.join(working_dir, filename), 'wt') as dt:
+    full_path = os.path.join(working_dir, filename)
+    with open(full_path, 'wt') as dt:
         dt.write(content)
 
     if add:
@@ -179,6 +180,8 @@ def write_file(git_instance, filename, content, add=True, commit_msg=None):
 
     if commit_msg:
         git_instance.commit(commit_msg)
+
+    return full_path
 
 
 class GitInterfaceMixin(object):
@@ -516,6 +519,49 @@ class GitInterfaceMixin(object):
         assert len(status["unstaged"]) == 0
         assert len(status["untracked"]) == 0
         assert status["staged"][0] == ("staged.txt", "deleted")
+
+    def test_remove_untracked(self, mock_initialized):
+        """Test removing a gitignored file from a repository and delete it"""
+        git = mock_initialized[0]
+        working_directory = mock_initialized[1]
+
+        # We will ignore the file untracked.txt, and files in untracked/
+        write_file(git, ".gitignore", "untracked.txt\nuntracked/\n", commit_msg="Ignoring 'untracked' files")
+
+        # Create file
+        untracked_fname = write_file(git, "untracked.txt", "I will not be added", add=False)
+
+        # Verify nothing staged
+        status = git.status()
+        assert len(status["staged"]) == 0
+        assert len(status["unstaged"]) == 0
+        assert len(status["untracked"]) == 0
+
+        git.remove(untracked_fname, keep_file=False)
+
+        assert not os.path.exists(untracked_fname)
+
+        # Verify nothing staged
+        status = git.status()
+        assert len(status["staged"]) == 0
+        assert len(status["unstaged"]) == 0
+        assert len(status["untracked"]) == 0
+
+        # Create files in an untracked dir
+        untracked_dirname = os.path.join(working_directory, 'untracked')
+        os.mkdir(untracked_dirname)
+        write_file(git, "untracked/file1.txt", "I will not be added", add=False)
+        write_file(git, "untracked/file2.txt", "Me neither", add=False)
+
+        git.remove(untracked_dirname, keep_file=False)
+
+        assert not os.path.exists(untracked_dirname)
+
+        # Verify nothing staged
+        status = git.status()
+        assert len(status["staged"]) == 0
+        assert len(status["unstaged"]) == 0
+        assert len(status["untracked"]) == 0
 
     def test_diff_unstaged(self, mock_initialized):
         """Test getting the diff for unstaged changes"""

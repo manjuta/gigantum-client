@@ -44,11 +44,15 @@ export default class CollaboratorsModal extends Component {
   }
 
   componentDidMount() {
+    const { collaborators } = this.props;
     const buttonLoaderRemoveCollaborator = {};
 
-    this.props.collaborators.forEach(({ collaboratorUsername }) => {
-      buttonLoaderRemoveCollaborator[collaboratorUsername] = '';
-    });
+    if (collaborators) {
+      collaborators.forEach(({ collaboratorUsername }) => {
+        buttonLoaderRemoveCollaborator[collaboratorUsername] = '';
+      });
+    }
+
     window.addEventListener('click', this._closePermissionsMenu);
 
     this.setState({ buttonLoaderRemoveCollaborator });
@@ -544,6 +548,12 @@ export default class CollaboratorsModal extends Component {
                   && (
                   <ul className={collaboratorList}>
                     {
+                      (props.collaborators.length === 0)
+                      && (
+                        <h4 className="text-center">No Collaborators found</h4>
+                      )
+                    }
+                    {
                       props.collaborators.map((collaborator) => {
                         const collaboratorName = collaborator.collaboratorUsername;
                         const collaboratorItemCSS = classNames({
@@ -605,7 +615,7 @@ export default class CollaboratorsModal extends Component {
                               ref={collaboratorName}
                               buttonState={state.buttonLoaderRemoveCollaborator[collaboratorName]}
                               buttonText=""
-                              className="ButtonLoader__collaborator Btn__remove Btn--round Btn--small"
+                              className="ButtonLoader__collaborator Btn__delete Btn--round Btn--bordered"
                               params={{ collaborator: collaboratorName, button: this }}
                               buttonDisabled={disableButtonLoader}
                               clicked={this._removeCollaborator}

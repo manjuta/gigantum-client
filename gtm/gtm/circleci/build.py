@@ -57,11 +57,10 @@ class CircleCIImageBuilder(object):
         with open(os.path.join(output_dir, 'labmanager.yaml'), "wt") as cf:
             cf.write(yaml.dump(base_data, default_flow_style=False))
 
-    def _build_image(self, verbose: bool=True, no_cache: bool=False) -> str:
+    def _build_image(self, no_cache: bool=False) -> str:
         """
 
         Args:
-            verbose(bool): set to True to print output
             no_cache(bool): set to True to ignore docker build cache
 
         Returns:
@@ -72,21 +71,15 @@ class CircleCIImageBuilder(object):
         base_tag = "gigantum/circleci-client"
         named_tag = "{}:{}".format(base_tag, self._generate_image_tag_suffix())
 
-        docker_file = os.path.join(get_resources_root(), 'docker', 'Dockerfile_circleci')
+        docker_file = '/'.join([get_resources_root(), 'docker', 'Dockerfile_circleci'])
 
         self._generate_config_file()
 
-        if verbose:
-            [print(ln[list(ln.keys())[0]], end='') for ln in client.api.build(path=get_client_root(),
-                                                                              dockerfile=docker_file,
-                                                                              tag=named_tag,
-                                                                              nocache=no_cache,
-                                                                              pull=True, rm=True,
-                                                                              decode=True)]
-        else:
-            client.images.build(path=get_client_root(),  dockerfile=docker_file, tag=named_tag,
-                                pull=True, nocache=no_cache)
-
+        build_lines = client.api.build(path=get_client_root(), dockerfile=docker_file, tag=named_tag, nocache=no_cache,
+                                       pull=True, rm=True, decode=True)
+        for line in build_lines:
+            print(next(iter(line.values())), end='')
+            
         # Verify the desired image built successfully
         try:
             client.images.get(named_tag)
@@ -127,11 +120,10 @@ class CircleCIImageBuilder(object):
         else:
             client.images.push(image, tag=tag)
 
-    def update(self, verbose=True, no_cache=False) -> None:
+    def update(self, no_cache=False) -> None:
         """Method to circleCI container
 
         Args:
-            verbose(bool): flag indication if output should print to the console
             no_cache(bool): flag indicating if the docker cache should be ignored
 
         Returns:
@@ -139,11 +131,11 @@ class CircleCIImageBuilder(object):
         """
         # Build image
         print(f"\n** Building CircleCI Docker image")
-        image_tag = self._build_image(verbose=verbose, no_cache=no_cache)
+        image_tag = self._build_image(no_cache=no_cache)
 
         # Publish to dockerhub
         print(f"\n\n** Publishing CircleCI Docker image to DockerHub: {image_tag}")
-        self._publish_image(image_tag, verbose)
+        self._publish_image(image_tag)
 
         print("Done!")
         print(f"\n\n** Update `.circleci/config.yml` to point to {image_tag} and "

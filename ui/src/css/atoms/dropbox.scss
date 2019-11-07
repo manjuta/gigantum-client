@@ -19,6 +19,9 @@
       display: none;
     }
   }
+  &--dropped {
+    background: $white !important;
+  }
   &--fileBrowser {
     margin-top: 20px;
     background: $white url('~Images/icons/cloud-upload.svg') no-repeat center 25px;

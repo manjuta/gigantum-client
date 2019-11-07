@@ -55,20 +55,18 @@ export default class SideBar extends Component {
     });
     const projectsCSS = classNames({
       SideBar__icon: true,
-      'SideBar__icon--labbooks-selected': isLabbooks,
-      'SideBar__icon SideBar__icon--labbooks': !isLabbooks,
+      'SideBar__icon--labbooks': true,
     });
     const datasetCSS = classNames({
       SideBar__icon: true,
-      'SideBar__icon SideBar__icon--datasets': isLabbooks,
-      'SideBar__icon SideBar__icon--datasets-selected': !isLabbooks,
+      'SideBar__icon SideBar__icon--datasets': true,
     });
     const labbookSideBarItemCSS = classNames({
-      'SideBar__nav-item SideBar__nav-item--labbooks': true,
+      'SideBar__nav-item SideBar__nav-item--labbooks flex': true,
       'SideBar__nav-item--selected': isLabbooks,
     });
     const datasetSideBarItemCSS = classNames({
-      'SideBar__nav-item SideBar__nav-item--datasets': true,
+      'SideBar__nav-item SideBar__nav-item--datasets flex': true,
       'SideBar__nav-item--selected': !isLabbooks,
     });
 

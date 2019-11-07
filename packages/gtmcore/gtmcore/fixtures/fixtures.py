@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import json
 import os
 import shutil
@@ -37,7 +18,6 @@ from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor
 from gtmcore.files import FileOperations
 from gtmcore.inventory.branching import BranchManager
-
 
 
 ENV_UNIT_TEST_REPO = 'gigantum_base-images-testing'
@@ -365,6 +345,30 @@ def mock_labbook():
     Deletes directory after test"""
 
     conf_file, working_dir = _create_temp_work_dir()
+    erm = RepositoryManager(conf_file)
+    erm.update_repositories()
+    erm.index_repositories()
+
+    im = InventoryManager(conf_file)
+    # description was "my first labbook1"
+    lb = im.create_labbook('test', 'test', 'labbook1', description="my test description")
+    yield conf_file, lb.root_dir, lb
+    shutil.rmtree(working_dir)
+
+
+@pytest.fixture()
+def mock_enabled_iframes():
+    """A pytest fixture that creates a temporary directory and a config file to match.
+    Deletes directory after test"""
+    overrides = {"environment": {
+        "repo_url": ["https://github.com/gigantum/base-images.git"],
+        "iframe": {
+           "enabled": True,
+           "allowed_origin": "gigantum.com"
+        }
+        }}
+
+    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
     erm = RepositoryManager(conf_file)
     erm.update_repositories()
     erm.index_repositories()

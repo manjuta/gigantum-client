@@ -1,29 +1,9 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-from typing import (Any, List, Dict, Optional)
+from typing import List, Dict
 import json
 from gtmcore.http import ConcurrentRequestManager, ConcurrentRequest
 
 from gtmcore.environment.packagemanager import PackageManager, PackageResult, PackageMetadata
-from gtmcore.container.container import ContainerOperations
-from gtmcore.container.exceptions import ContainerException
+from gtmcore.container import container_for_context
 from gtmcore.labbook import LabBook
 from gtmcore.logging import LMLogger
 
@@ -45,42 +25,6 @@ class CondaPackageManagerBase(PackageManager):
         # will modify this behavior
         self.channel_priority = ['conda-forge', 'anaconda']
         self.request_mgr = ConcurrentRequestManager()
-
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
-        """Method to search a package manager for packages based on a string. The string can be a partial string.
-
-        Args:
-            search_str: The string to search on
-            labbook: Subject LabBook
-            username: username of current user
-
-        Returns:
-            list(str): The list of package names that match the search string
-        """
-        # Add wildcard for search
-        if search_str[-1] != '*':
-            search_str = search_str + '*'
-
-        try:
-            result = ContainerOperations.run_command(f'conda search  --json "{search_str}"',
-                                                     labbook=labbook, username=username,
-                                                     fallback_image=self.fallback_image(labbook))
-        except ContainerException as e:
-            logger.error(e)
-            return list()
-
-        data = json.loads(result.decode())
-        if 'exception_name' in data:
-            if data.get('exception_name') in ['PackagesNotFoundError', 'PackageNotFoundError']:
-                # This means you entered an invalid package name that didn't resolve to anything
-                return list()
-            else:
-                raise Exception(f"An error occurred while searching for packages: {data.get('exception_name')}")
-
-        if data:
-            return list(data.keys())
-        else:
-            return list()
 
     def list_versions(self, package_name: str, labbook: LabBook, username: str) -> List[str]:
         """Method to list all available versions of a package based on the package name
@@ -126,8 +70,11 @@ class CondaPackageManagerBase(PackageManager):
         Returns:
             list
         """
-        result = ContainerOperations.run_command(f"conda list --no-pip --json", labbook, username)
-        data = json.loads(result.decode().strip())
+        project_container = container_for_context(username, labbook=labbook)
+        result = project_container.run_container("conda list --no-pip --json", wait_for_output=True)
+        if result:
+            data = json.loads(result)
+
         if data:
             return [{"name": x['name'], 'version': x['version']} for x in data]
         else:

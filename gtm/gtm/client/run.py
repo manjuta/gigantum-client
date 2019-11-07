@@ -13,12 +13,11 @@ class ClientRunner(object):
     """Class to manage running the Gigantum client container
     """
 
-    def __init__(self, image_name: str, container_name: str, show_output: bool=False):
+    def __init__(self, image_name: str, container_name: str):
         self.docker_client = docker.from_env()
         self.image_name = image_name
         self.container_name = container_name
         self.docker_image = self.docker_client.images.get(image_name)
-        self.show_output = show_output
 
         if not self.docker_image:
             raise ValueError("Image name `{}' does not exist.".format(image_name))

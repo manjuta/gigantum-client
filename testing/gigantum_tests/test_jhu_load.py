@@ -24,7 +24,7 @@ def test_jhu_neurodata_import(driver: selenium.webdriver, *args, **kwargs):
         import_project_elts = testutils.ImportProjectElements(driver)
         import_project_elts.import_project_via_url(project)
         project_control = testutils.ProjectControlElements(driver)
-        project_control.container_status_stopped.wait(300)
+        project_control.container_status_stopped.wait(600)
         assert project_control.container_status_stopped.find().is_displayed(), "Expected stopped container status"
         logging.info(f"Featured public project {project} was imported successfully")
 

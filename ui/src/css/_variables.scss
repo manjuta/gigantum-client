@@ -8,30 +8,32 @@
 * primary colors
 *
 **********************/
-$turquise: #1ad8c1;
+$primary: #274686;
+$secondary: #2f8da3;
 $slateBlue: #364454;
-$jet: #1f2733;
-$azure: #00487c;
+$primaryText: #0b1425;
 $slateBlueOpaque: rgba(54,68,84, 0.6);
+$primary-light: rgba(39,70,134, 0.5);
 /*********************
 *
 * seconday colors
 *
 **********************/
-$crimson: #DB2763;
+$crimson: #e71d37;
 $goldenLemon: #ECA400;
-
 $romanSilver: #9b9c9e;
 $grey: #b9babc;
 $lightGrey: #f3f5f7;
 $lightBlue: #97c0d5;
-$tintBlue: #00487c;
+$tintBlue: #274686;
 $backgroundGrey: rgb(196, 199, 201);
 $lightblue: #74a4bc;
 $selected-blue: #53667C;
 $mineShaft: #4A4A4A;
 $orange: rgb(236, 128, 11);
-$green: #06a51a;
+$green: #39b983;
+
+$gradient: linear-gradient(230deg, #0b1425, #274686);
 
 
 /***********************

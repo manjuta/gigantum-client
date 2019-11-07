@@ -358,26 +358,11 @@ class DeleteDataset(graphene.ClientIDMutation):
             remote_config = config.get_remote_configuration()
 
             # Delete the repository
-            mgr = GitLabManager(remote_config['git_remote'], remote_config['admin_service'], access_token=access_token,
+            mgr = GitLabManager(remote_config['git_remote'], remote_config['hub_api'], access_token=access_token,
                                 id_token=id_token)
             mgr.remove_repository(owner, dataset_name)
             logger.info(f"Deleted {owner}/{dataset_name} repository from the"
                         f" remote repository {remote_config['git_remote']}")
-
-            # Call Index service to remove project from cloud index and search
-            # Don't raise an exception if the index delete fails, since this can be handled relatively gracefully
-            repo_id = mgr.get_repository_id(owner, dataset_name)
-            response = requests.delete(f"https://{remote_config['index_service']}/index/{repo_id}",
-                                       headers={"Authorization": f"Bearer {access_token}",
-                                                "Identity": id_token}, timeout=30)
-
-            if response.status_code != 204:
-                # Soft failure, still continue
-                logger.error(f"Failed to remove {owner}/{dataset_name} from cloud index. "
-                             f"Status Code: {response.status_code}")
-                logger.error(response.json())
-            else:
-                logger.info(f"Deleted remote repository {owner}/{dataset_name} from cloud index")
 
             # Remove locally any references to that cloud repo that's just been deleted.
             try:

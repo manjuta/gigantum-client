@@ -2,10 +2,10 @@
 
 .RecentActivity__title-container{
   align-items: center;
-  color: $jet;
+  color: $primaryText;
   @include flex(flex-start, row);
   a {
-    color: $azure;
+    color: $primary;
     text-decoration: none;
     margin-left: 20px;
     margin-top: 40px;
@@ -14,7 +14,7 @@
 
 .RecentActivity__card {
   @include flex(flex-start, row);
-  border-bottom: 10px solid $azure;
+  border-bottom: 10px solid $primary;
   min-height: 80x;
   max-height: 150px;
   padding: 0 10px;
@@ -22,7 +22,7 @@
 }
 
 .RecentActivity__card-date {
-  color: $jet;
+  color: $primaryText;
   padding-bottom: 10px;
 }
 
@@ -30,7 +30,7 @@
   position: absolute;
   margin-top: 10px;
   right: 30px;
-  color: $jet;
+  color: $primaryText;
 }
 
 .RecentActivity__card-detail .ReactMarkdown * {
@@ -61,45 +61,45 @@
   h1 {
     padding: 10px 0;
     font-size: 2em;
-    color: $jet;
+    color: $primaryText;
     border-bottom: 1px solid $grey-light;
     font-weight: 400;
   }
   h4 {
     padding: 10px 0;
     font-size: 1.5em;
-    color: $jet;
+    color: $primaryText;
     border-bottom: 1px solid $grey-light;
     font-weight: 400;
 
   }
   h3 {
     font-size: 1.17em;
-    color: $jet;
+    color: $primaryText;
     font-weight: 400;
 
   }
   h4 {
     font-size: 1.12em;
-    color: $jet;
+    color: $primaryText;
     font-weight: 400;
 
   }
   h5 {
     font-size: .83em;
     font-weight: 400;
-    color: $jet;
+    color: $primaryText;
   }
   h6 {
     font-weight: 400;
     font-size: .75em;
-    color: $jet;
+    color: $primaryText;
   }
   blockquote {
     border-left: 5px solid $lightblue;
   }
   a {
-    color: $azure;
+    color: $primary;
   }
   a:hover {
     text-decoration: underline;

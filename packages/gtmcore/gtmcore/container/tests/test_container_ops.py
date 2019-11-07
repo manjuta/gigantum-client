@@ -1,26 +1,21 @@
 import pytest
 import os
-import time
 import getpass
 import docker
 import time
-import requests
 import shutil
 import tempfile
+
+from gtmcore.container.container import SidecarContainerOperations
 from gtmcore.container.jupyter import start_jupyter
+from gtmcore.container.rserver import start_rserver
 from gtmcore.container.bundledapp import start_bundled_app
 
-from gtmcore.configuration import get_docker_client
+from gtmcore.container import container_for_context
 
-from gtmcore.container.container import ContainerOperations
-from gtmcore.container.utils import infer_docker_image_name
-from gtmcore.inventory.inventory import InventoryManager
-
-from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, mock_config_with_repo, ContainerFixture
-from gtmcore.container.exceptions import ContainerBuildException, ContainerException
+from gtmcore.fixtures.container import build_lb_image_for_jupyterlab, build_lb_image_for_rstudio, mock_config_with_repo, ContainerFixture
 from gtmcore.container.exceptions import ContainerBuildException
 from gtmcore.environment.bundledapp import BundledAppManager
-
 
 
 def remove_image_cache_data():
@@ -30,7 +25,7 @@ def remove_image_cache_data():
         pass
 
 
-class TestContainerOps(object):
+class TestContainerOps:
     def test_build_image_fixture(self, build_lb_image_for_jupyterlab):
         # Note, the test is in the fixure (the fixture is needed by other tests around here).
         pass
@@ -42,51 +37,67 @@ class TestContainerOps(object):
         ib = build_lb_image_for_jupyterlab[1]
         lb = build_lb_image_for_jupyterlab[0]
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(
-            'sh -c "ps aux | grep jupyter | grep -v \' grep \'"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 0
 
-        start_jupyter(lb, username='unittester', check_reachable=not (getpass.getuser() == 'circleci'))
+        jupyter_container = container_for_context('unittester', lb)
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(
-            'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
+        start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
+
+        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
 
         # Now, we test the second path through, start jupyterlab when it's already running.
-        start_jupyter(lb, username='unittester', check_reachable=not (getpass.getuser() == 'circleci'))
+        start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
         # Validate there is only one instance running.
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(
-            'sh -c "ps aux | grep jupyter-lab | grep -v \' grep \'"', user='giguser')
+        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
         l = [a for a in stdo.decode().split('\n') if a]
         assert len(l) == 1
+
+    def test_start_rstudio(self, build_lb_image_for_rstudio):
+        lb_container, ib, username = build_lb_image_for_rstudio
+
+        assert len(lb_container.ps_search('rserver')) == 0
+
+        start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
+        time.sleep(5)
+        
+        assert len(lb_container.ps_search('rserver')) == 1
+        # Now, we test the second path through, start jupyterlab when it's already running.
+        start_rserver(lb_container, check_reachable=not (getpass.getuser() == 'circleci'))
+
+        # Validate there is still only one instance running.
+        assert len(lb_container.ps_search('rserver')) == 1
 
     def test_run_command(self, build_lb_image_for_jupyterlab):
         my_lb = build_lb_image_for_jupyterlab[0]
         docker_image_id = build_lb_image_for_jupyterlab[3]
 
-        result = ContainerOperations.run_command("echo My sample message", my_lb, username="unittester")
-        assert result.decode().strip() == 'My sample message'
+        proj_container = container_for_context("unittester", labbook=my_lb)
+        result = proj_container.exec_command("echo My sample message", get_results=True)
+        assert result.strip() == 'My sample message'
 
-        result = ContainerOperations.run_command("pip search gigantum", my_lb, username="unittester")
-        assert any(['Gigantum Platform' in l for l in result.decode().strip().split('\n')])
+        result = proj_container.exec_command("pip search gigantum", get_results=True)
+        assert any(['Gigantum Platform' in l for l in result.strip().split('\n')])
 
-        result = ContainerOperations.run_command("/bin/true", my_lb, username="unittester")
-        assert result.decode().strip() == ""
+        result = proj_container.exec_command("/bin/true", get_results=True)
+        assert result.strip() == ""
 
-        result = ContainerOperations.run_command("/bin/false", my_lb, username="unittester")
-        assert result.decode().strip() == ""
+        result = proj_container.exec_command("/bin/false", get_results=True)
+        assert result.strip() == ""
 
     def test_old_dockerfile_removed_when_new_build_fails(self, build_lb_image_for_jupyterlab):
         # Test that when a new build fails, old images are removed so they cannot be launched.
         my_lb = build_lb_image_for_jupyterlab[0]
-        docker_image_id = build_lb_image_for_jupyterlab[3]
+        docker_client = build_lb_image_for_jupyterlab[2]
 
-        my_lb, stopped = ContainerOperations.stop_container(my_lb, username="unittester")
+        proj_container = container_for_context("unittester", labbook=my_lb)
+        proj_container.stop_container()
 
-        assert stopped
+        assert proj_container.query_container() is None
 
         olines = open(os.path.join(my_lb.root_dir, '.gigantum/env/Dockerfile')).readlines()[:6]
         with open(os.path.join(my_lb.root_dir, '.gigantum/env/Dockerfile'), 'w') as dockerfile:
@@ -97,26 +108,53 @@ class TestContainerOps(object):
         remove_image_cache_data()
 
         with pytest.raises(ContainerBuildException):
-            ContainerOperations.build_image(labbook=my_lb, username="unittester")
+            proj_container.build_image()
 
         with pytest.raises(docker.errors.ImageNotFound):
-            owner = InventoryManager().query_owner(my_lb)
-            get_docker_client().images.get(infer_docker_image_name(labbook_name=my_lb.name,
-                                                                   owner=owner,
-                                                                   username="unittester"))
+            docker_client.images.get(proj_container.image_tag)
 
-        with pytest.raises(requests.exceptions.HTTPError):
+        with pytest.raises(docker.errors.ImageNotFound):
             # Image not found so container cannot be started
-            ContainerOperations.start_container(labbook=my_lb, username="unittester")
+            proj_container.start_project_container()
 
 
-class TestPutFile(object):
+class TestSidecarContainers:
+    def test_all_sidecar_container_ops(self):
+        """We test all functions at once because start and stop is expensive, and also requried to test other stuff"""
+        primary_container = container_for_context('unittester', override_image_name='necessary-detail')
+        sidecar_container = SidecarContainerOperations(primary_container, 'support')
+        assert sidecar_container.sidecar_container_name == 'support.necessary-detail'
+        # Just in case
+        sidecar_container.stop_container()
+        assert sidecar_container.query_container() is None
+
+        # The below image should ideally already be on the system, maybe not tagged
+        # If not, it'll hopefully be useful later - we won't clean it up
+        image_name = 'ubuntu:18.04'
+
+        # We still use Docker directly here. Doesn't make sense to create an abstraction that's only used by a test
+        docker_client = primary_container._client
+        docker_client.images.pull(image_name)
+
+        sidecar_container.run_container(image_name, cmd='tail -f /dev/null')
+
+        try:
+            assert sidecar_container.query_container() == 'running'
+            assert len(sidecar_container.ps_search('tail')) == 1
+            assert len(sidecar_container.query_container_ip().split('.')) == 4
+            assert len(sidecar_container.query_container_env()) > 0
+        finally:
+            sidecar_container.stop_container()
+
+        assert sidecar_container.query_container() is None
+
+
+class TestPutFile:
     def test_put_single_file(self, build_lb_image_for_jupyterlab):
         # Note - we are combining multiple tests in one to speed things up
         # We do not want to build, start, execute, stop, and delete at container for each
         # of the following test points.
         fixture = ContainerFixture(build_lb_image_for_jupyterlab)
-        container = docker.from_env().containers.get(fixture.docker_container_id)
 
         # Test insert of a single file.
         dst_dir_1 = "/home/giguser/sample-creds"
@@ -124,11 +162,10 @@ class TestPutFile(object):
             with open(os.path.join(tempdir, 'secretfile'), 'w') as sample_secret:
                 sample_secret.write("<<Secret File Content>>")
             t0 = time.time()
-            ContainerOperations.copy_into_container(fixture.labbook, fixture.username,
-                                                    src_path=sample_secret.name,
-                                                    dst_dir=dst_dir_1)
+            proj_container = container_for_context(fixture.username, labbook=fixture.labbook)
+            proj_container.copy_into_container(src_path=sample_secret.name, dst_dir=dst_dir_1)
             tf = time.time()
-            container.exec_run(f'sh -c "cat {dst_dir_1}/secretfile"')
+            proj_container.exec_command("cat {dst_dir_1}/secretfile")
 
             # The copy_into_container should NOT remove the original file on disk.
             assert os.path.exists(sample_secret.name)

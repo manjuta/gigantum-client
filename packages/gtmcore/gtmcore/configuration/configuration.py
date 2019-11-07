@@ -84,6 +84,19 @@ class Configuration(object):
             return int(config_val)
 
     @property
+    def is_hub_client(self) -> bool:
+        """Return true if configured as a client to run in the hub
+
+        Returns:
+            bool
+        """
+        context = self.config['container']['context']
+        if context == "hub":
+            return True
+        else:
+            return False
+
+    @property
     def upload_cpu_limit(self) -> int:
         """Return the max number of CPUs to use (i.e. concurrent jobs) when uploading dataset files
 
@@ -202,3 +215,16 @@ class Configuration(object):
             raise ValueError(f'Configuration for {remote_name} could not be found')
 
         return result
+
+    def get_hub_api_url(self, remote_name: Optional[str] = None) -> str:
+        """Method to return the url for the desired Gigantum Hub API
+
+        Args:
+            remote_name: Name of the remote to lookup, if omitted uses the default remote
+
+        Returns:
+
+        """
+        remote_config = self.get_remote_configuration(remote_name)
+
+        return remote_config['hub_api']

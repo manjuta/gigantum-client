@@ -1,6 +1,5 @@
 # FRONTEND BUILD CONTAINER
 FROM ubuntu:18.04 as ui-builder
-MAINTAINER Gigantum <support@gigantum.com>
 
 # Install system level dependencies
 RUN apt-get -y update && apt-get -y install git curl gosu nodejs npm
@@ -16,8 +15,10 @@ RUN mkdir /opt/ui
 ENV PORT "10001"
 
 # Copy source to build
+ARG UI_BUILD_SCRIPT=resources/docker/ui_build_script.sh
+
 COPY ui /opt/ui
-COPY resources/docker/ui_build_script.sh /opt/ui_build_script.sh
+COPY $UI_BUILD_SCRIPT /opt/ui_build_script.sh
 RUN /bin/bash /opt/ui_build_script.sh
 
 
@@ -29,7 +30,9 @@ LABEL maintainer="Gigantum <support@gigantum.com>"
 COPY packages/gtmcore/requirements.txt /opt/gtmcore/requirements.txt
 COPY packages/gtmapi/requirements.txt /opt/gtmapi/requirements.txt
 COPY packages/confhttpproxy /opt/confhttpproxy
-ENV SHELL=/bin/bash
+ENV SHELL=/bin/bash \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
 
 # Super instruction to install all dependencies
 RUN apt-get -y update && \
@@ -54,7 +57,7 @@ ARG CLIENT_CONFIG_FILE=build/client/labmanager-config.yaml
 ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
 ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
 ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
-ARG ENTRYPOINT_FILE=resources/client/entrypoint.sh
+ARG ENTRYPOINT_FILE=resources/client/entrypoint-local.sh
 ARG REDIS_CONFIG=resources/client/redis.conf
 
 # Copy Libraries

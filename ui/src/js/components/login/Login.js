@@ -36,25 +36,14 @@ export default class Login extends Component {
     const { props } = this;
     const errorType = window.sessionStorage.getItem('LOGIN_ERROR_TYPE');
     const errorDescription = window.sessionStorage.getItem('LOGIN_ERROR_DESCRIPTION');
+    const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
+    const baseURL = 'gigantum.com'
+    const loginURL = `https://${baseURL}/client/login#route=${window.location.origin}${freshLoginText}`;
     return (
       <div className="Login">
         { props.userIdentityReturned
           && (
             <div className="Login__panel">
-              { (window.location.hostname === config.demoHostName)
-                && (
-                  <div className="demo-header">
-                    Login or create an account to try out Gigantum.
-                    <a
-                      href="https://docs.gigantum.com/docs/frequently-asked-questions#section-why-do-i-need-to-log-in"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                        Why?
-                    </a>
-                  </div>
-                )
-              }
               { errorType
                 && (
                   <div className="LoginError">
@@ -70,30 +59,44 @@ export default class Login extends Component {
                   </div>
                 )
                }
-
-              <div className="Login__logo" />
-
-              { props.loadingRenew
-                ? (
-                  <button
-                    type="button"
-                    disabled
-                    className="Login__button--loading"
-                  >
-                    Logging In
-                    <div className="Code__loading" />
-                  </button>
-                )
-                : (
-                  <button
-                    type="button"
-                    className="Login__button"
-                    onClick={this.login.bind(this)}
-                  >
-                    Log In
-                  </button>
-                )
-              }
+              <div className="Login__logo grid-v-3" />
+              <div className="justify--center flex align-items--start">
+                <div className="Login__section grid-6 flex flex--column justify--space-around">
+                  <div className="Login__summary">
+                    <h4 className="Login--ternary text-center">Sign up or Log In</h4>
+                    <p>Sign up or Log in to start using Gigantum Client locally.</p>
+                    <p>
+                      By logging in, all of your work will be properly attributed and you can
+                      easily sync up to 5GB of data to Gigantum Hub for free.
+                    </p>
+                    <p>Once you log in, you’ll be able to work offline.</p>
+                  </div>
+                </div>
+                <div className="grid-3" />
+                <div className="grid-5 flex flex--column justify--center">
+                  { props.loadingRenew
+                    ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="Login__button--loading"
+                      >
+                        Logging In
+                        <div className="Code__loading" />
+                      </button>
+                    )
+                    : (
+                      <a
+                        href={loginURL}
+                        className="Btn Login__button"
+                        onClick={this.login.bind(this)}
+                      >
+                        Sign Up or Log In
+                      </a>
+                    )
+                  }
+                </div>
+              </div>
             </div>
           )
         }

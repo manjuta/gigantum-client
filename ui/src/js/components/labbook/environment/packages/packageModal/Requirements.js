@@ -31,9 +31,10 @@ class Requirements extends Component {
           const rejectedPackages = [];
           const packages = evt.target.result.split('\n').filter(line => (line[0] !== '#') && (line !== ''));
           packages.forEach((pkg) => {
-            const splitPackage = pkg.split('==');
+            const trimmedPackage = pkg.trim();
+            const splitPackage = trimmedPackage.split('==');
             if (/ |\[| \]|=/.test(splitPackage[0])) {
-              rejectedPackages.push(pkg);
+              rejectedPackages.push(trimmedPackage);
             } else {
               const packageData = {
                 manager: 'pip',

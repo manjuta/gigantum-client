@@ -1,36 +1,11 @@
-
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import graphene
 import base64
-
-import docker
-from docker.errors import ImageNotFound, NotFound
-import requests
 
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.labbook import SecretStore
 from gtmcore.environment.componentmanager import ComponentManager
-from gtmcore.configuration import get_docker_client
+from gtmcore.container import container_for_context
 from gtmcore.logging import LMLogger
-from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.environment.bundledapp import BundledAppManager
 
 from lmsrvcore.api.interfaces import GitRepository
@@ -44,7 +19,6 @@ from lmsrvlabbook.api.objects.packagecomponent import PackageComponent
 from lmsrvlabbook.api.objects.secrets import SecretFileMapping
 from lmsrvlabbook.api.objects.bundledapp import BundledApp
 from lmsrvlabbook.dataloader.package import PackageDataloader
-
 
 logger = LMLogger.get_logger()
 
@@ -130,8 +104,6 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
 
     def helper_resolve_image_status(self, labbook):
         """Helper to resolve the image status of a labbook"""
-        labbook_image_key = infer_docker_image_name(labbook_name=self.name, owner=self.owner,
-                                                    username=get_logged_in_username())
 
         dispatcher = Dispatcher()
         lb_jobs = [dispatcher.query_task(j.job_key) for j in dispatcher.get_jobs_for_labbook(labbook.key)]
@@ -141,11 +113,11 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
 
         # First, check if image exists or not -- The first step of building an image untags any existing ones.
         # Therefore, we know that if one exists, there most likely is not one being built.
-        try:
-            client = get_docker_client()
-            client.images.get(labbook_image_key)
+        labbook_container = container_for_context(username=get_logged_in_username(), labbook=labbook)
+
+        if labbook_container.image_available():
             image_status = ImageStatus.EXISTS
-        except (ImageNotFound, requests.exceptions.ConnectionError):
+        else:
             image_status = ImageStatus.DOES_NOT_EXIST
 
         if any([j.status == 'failed' and j.meta.get('method') == 'build_image' for j in lb_jobs]):
@@ -175,23 +147,24 @@ class Environment(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepos
         return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
             lambda labbook: self.helper_resolve_image_status(labbook))
 
-    def resolve_container_status(self, info):
-        """Resolve the image_status field"""
-        # Check if the container is running by looking up the container
-        labbook_key = infer_docker_image_name(labbook_name=self.name, owner=self.owner,
-                                              username=get_logged_in_username())
+    def helper_resolve_container_status(self, labbook):
+        """Helper to resolve the container status of a labbook"""
+        container_ops = container_for_context(get_logged_in_username(), labbook=labbook)
+        container_name = container_ops.default_image_tag(self.owner, self.name)
 
-        try:
-            client = get_docker_client()
-            container = client.containers.get(labbook_key)
-            if container.status == "running":
-                container_status = ContainerStatus.RUNNING
-            else:
-                container_status = ContainerStatus.NOT_RUNNING
-        except (NotFound, requests.exceptions.ConnectionError):
+        status = container_ops.query_container(container_name)
+
+        if status == 'running':
+            container_status = ContainerStatus.RUNNING
+        else:
             container_status = ContainerStatus.NOT_RUNNING
 
         return container_status.value
+
+    def resolve_container_status(self, info):
+        """Resolve the container_status field"""
+        return info.context.labbook_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
+            lambda labbook: self.helper_resolve_container_status(labbook))
 
     def helper_resolve_base(self, labbook):
         """Helper to resolve the base component object"""

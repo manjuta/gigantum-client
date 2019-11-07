@@ -150,8 +150,8 @@ class TestMutationsLabbookSharing(object):
     def test_delete_remote_labbook(self, fixture_working_dir):
         """Test deleting a LabBook on a remote server"""
         # Setup responses mock for this test
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fnew-labbook',
                       json=[{
                               "id": 27,
@@ -230,8 +230,8 @@ class TestMutationsLabbookSharing(object):
     def test_sync_1(self, mock_create_labbooks_no_lfs, mock_config_file):
 
         # Setup responses mock for this test
-        responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                      json={'key': 'afaketoken'}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
         im = InventoryManager(mock_create_labbooks_no_lfs[0])
         test_user_lb = im.load_labbook('default', 'default', 'labbook1')

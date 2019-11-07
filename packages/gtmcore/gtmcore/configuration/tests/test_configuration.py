@@ -25,7 +25,7 @@ from unittest.mock import PropertyMock, patch
 
 import yaml
 
-from gtmcore.configuration import (Configuration, _get_docker_server_api_version, get_docker_client)
+from gtmcore.configuration import (Configuration)
 from gtmcore.fixtures import mock_config_file, mock_config_file_team
 
 
@@ -128,19 +128,6 @@ class TestConfiguration(object):
         assert 'git' in configuration.config
         assert configuration.config["git"]["working_directory"] == "/some/dir/now/"
 
-    def test_get_docker_version_str(self):
-        """Docker API version strings are in the format of X.XX. """
-        try:
-            f_val = float(_get_docker_server_api_version())
-            assert f_val > 1.0 and f_val < 2.0
-        except ValueError:
-            pass
-
-    def test_get_docker_client(self):
-        """Test no exceptions when getting docker client both for max-compatible versions and default versions. """
-        docker_client = get_docker_client(check_server_version=True)
-        docker_client_2 = get_docker_client(check_server_version=False)
-
     def test_load_user_config(self, mock_config_file):
         """ Test loading configuration override items from a user's custom config """
         with tempfile.TemporaryDirectory() as tempdir:
@@ -167,15 +154,13 @@ class TestConfiguration(object):
         remote = configuration.get_remote_configuration()
         assert remote['git_remote'] == 'repo.gigantum.io'
         assert remote['remote_type'] == 'gitlab'
-        assert remote['admin_service'] == 'usersrv.gigantum.io'
-        assert remote['index_service'] == 'api.gigantum.com/read'
+        assert remote['hub_api'] == 'https://gigantum.com/api/v1'
         assert remote['object_service'] == 'api.gigantum.com/object-v1'
 
         remote = configuration.get_remote_configuration("repo.gigantum.io")
         assert remote['git_remote'] == 'repo.gigantum.io'
         assert remote['remote_type'] == 'gitlab'
-        assert remote['admin_service'] == 'usersrv.gigantum.io'
-        assert remote['index_service'] == 'api.gigantum.com/read'
+        assert remote['hub_api'] == 'https://gigantum.com/api/v1'
         assert remote['object_service'] == 'api.gigantum.com/object-v1'
 
     def test_get_remote_configuration_not_found(self):
@@ -196,3 +181,9 @@ class TestConfiguration(object):
     def test_upload_cpu_limit(self):
         configuration = Configuration()
         assert configuration.upload_cpu_limit > 0
+
+    def test_get_hub_api_url(self):
+        """Test get_hub_api_url"""
+        configuration = Configuration()
+        url = configuration.get_hub_api_url()
+        assert url == 'https://gigantum.com/api/v1'

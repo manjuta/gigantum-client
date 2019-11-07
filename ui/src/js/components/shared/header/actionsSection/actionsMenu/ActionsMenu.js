@@ -19,6 +19,7 @@ import {
   setMultiInfoMessage,
 } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
+import { updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setContainerMenuWarningMessage, setContainerMenuVisibility } from 'JS/redux/actions/labbook/environment/environment';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -330,16 +331,20 @@ class ActionsMenu extends Component {
   */
   _jobStatus(jobKey) {
     const self = this;
-
+    const {
+      owner,
+      labbookName,
+    } = self.state;
     JobStatus.getJobStatus(jobKey).then((data) => {
       this.props.setExportingState(false);
-
+      updateTransitionState(owner, labbookName, '');
       if (data.jobStatus.result) {
         setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
       }
 
       this.setState({ exporting: false });
     }).catch((error) => {
+      updateTransitionState(owner, labbookName, '');
       console.log(error);
 
       this.props.setExportingState(false);
@@ -357,19 +362,26 @@ class ActionsMenu extends Component {
   *  runs export mutation if export has not been downloaded
   *  @return {}
   */
-  _exportLabbook = (evt) => {
-    if (store.getState().containerStatus.status !== 'Running') {
+  _exportLabbook = () => {
+    const { props } = this;
+    const {
+      owner,
+      labbookName,
+    } = this.state;
+    if (!props.isLocked) {
       this.setState({ exporting: true, menuOpen: false });
 
       const exportType = (this.props.sectionType === 'dataset') ? 'Dataset' : 'Project';
 
-      setInfoMessage(`Exporting ${this.state.labbookName} ${exportType}`);
+      setInfoMessage(`Exporting ${labbookName} ${exportType}`);
+
+      updateTransitionState(owner, labbookName, 'Exporting');
 
       this.props.setExportingState(true);
       if (this.props.sectionType !== 'dataset') {
         ExportLabbookMutation(
-          this.state.owner,
-          this.state.labbookName,
+          owner,
+          labbookName,
           (response, error) => {
             if (response.exportLabbook) {
               this._jobStatus(response.exportLabbook.jobKey);
@@ -384,8 +396,8 @@ class ActionsMenu extends Component {
         );
       } else {
         ExportDatasetMutation(
-          this.state.owner,
-          this.state.labbookName,
+          owner,
+          labbookName,
           (response, error) => {
             if (response.exportDataset) {
               this._jobStatus(response.exportDataset.jobKey);
@@ -510,76 +522,79 @@ class ActionsMenu extends Component {
 
 
   render() {
-    const { labbookName, owner } = this.state;
+    const { props, state } = this;
+    const { labbookName, owner } = state;
     const branchMenuCSS = classNames({
-      'ActionsMenu__menu--animation': this.state.justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
-      hidden: !this.state.menuOpen,
+      'ActionsMenu__menu--animation': state.justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
+      hidden: !state.menuOpen,
       'ActionsMenu__menu box-shadow': true,
     });
 
-    const branchMenuArrowCSS = classNames({
-      ActionsMenu__toggle: true,
-      hidden: !this.state.menuOpen,
+    const exportButtonCSS = classNames({
+      'ActionsMenu__btn--flat': true,
+      'Tooltip-data': props.isLocked,
     });
-    const deleteText = this.props.sectionType === 'labbook' ? 'Delete Project' : 'Delete Dataset';
+
+    const deleteText = props.sectionType === 'labbook' ? 'Delete Project' : 'Delete Dataset';
 
     return (
       <div className="ActionsMenu flex flex--column'">
 
         {
-          this.state.showLoginPrompt
+          state.showLoginPrompt
 
           && <LoginPrompt closeModal={this._closeLoginPromptModal} />
         }
-
         {
-          this.state.deleteModalVisible
-          && (this.props.sectionType === 'labbook'
-            ? (
-              <DeleteLabbook
-                handleClose={() => this._toggleDeleteModal()}
-                remoteAdded={this.props.defaultRemote}
-                history={this.props.history}
-              />
-            )
-            : (
-              <DeleteDataset
-                handleClose={() => this._toggleDeleteModal()}
-                remoteAdded={this.props.defaultRemote}
-                history={this.props.history}
-              />
-            ))
+          (state.deleteModalVisible && (props.sectionType === 'labbook'))
+          && (
+            <DeleteLabbook
+              handleClose={() => this._toggleDeleteModal()}
+              remoteAdded={props.defaultRemote}
+              history={props.history}
+            />
+          )
         }
-
         {
-          this.state.visibilityModalVisible
+          (state.deleteModalVisible && !(props.sectionType === 'labbook'))
+          && (
+            <DeleteDataset
+              handleClose={() => this._toggleDeleteModal()}
+              remoteAdded={props.defaultRemote}
+              history={props.history}
+            />
+          )
+        }
+        {
+          state.visibilityModalVisible
 
           && (
           <VisibilityModal
-            sectionType={this.props.sectionType}
-            owner={this.state.owner}
-            name={this.state.labbookName}
-            auth={this.props.auth}
+            sectionType={props.sectionType}
+            owner={state.owner}
+            name={state.labbookName}
+            auth={props.auth}
             toggleModal={this._toggleModal}
             buttonText="Save"
             header="Change Visibility"
             modalStateValue="visibilityModalVisible"
             checkSessionIsValid={this._checkSessionIsValid}
             resetState={this._resetState}
-            visibility={this.props.visibility}
+            visibility={props.visibility}
           />
           )
         }
 
         <CreateBranch
-          description={this.props.description}
-          modalVisible={this.state.createBranchVisible}
+          description={props.description}
+          modalVisible={state.createBranchVisible}
           toggleModal={this._toggleModal}
         />
 
         <button
           onClick={() => { this._toggleMenu(); }}
           className="ActionsMenu__btn Btn--last"
+          type="button"
         />
 
         <div className={branchMenuCSS}>
@@ -588,9 +603,11 @@ class ActionsMenu extends Component {
 
             <li className="ActionsMenu__item ActionsMenu__item--export">
               <button
-                onClick={evt => this._exportLabbook(evt)}
-                disabled={this.state.exporting}
-                className="ActionsMenu__btn--flat"
+                onClick={() => this._exportLabbook()}
+                disabled={state.exporting || props.isLocked}
+                className={exportButtonCSS}
+                type="button"
+                data-tooltip="Cannot export Project while in use"
               >
                 Export to Zip
               </button>
@@ -615,10 +632,10 @@ class ActionsMenu extends Component {
             </li>
 
             {
-              this.props.defaultRemote
+              props.defaultRemote
 
               && (
-              <li className={`ActionsMenu__item ActionsMenu__item--visibility-${this.props.visibility}`}>
+              <li className={`ActionsMenu__item ActionsMenu__item--visibility-${props.visibility}`}>
 
                 <button
                   onClick={evt => this._toggleModal('visibilityModalVisible')}
@@ -631,7 +648,7 @@ class ActionsMenu extends Component {
               )
             }
             {
-              (this.state.remoteUrl || this.props.defaultRemote)
+              (state.remoteUrl || props.defaultRemote)
               && (
               <li className="ActionsMenu__item ActionsMenu__item--copy">
                 <div className="ActionsMenu__item--label">Get Share URL</div>
@@ -640,7 +657,7 @@ class ActionsMenu extends Component {
                   <input
                     id="ActionsMenu-copy"
                     className="ActionsMenu__input"
-                    defaultValue={`gigantum.com/${this.state.owner}/${this.state.labbookName}`}
+                    defaultValue={`gigantum.com/${state.owner}/${state.labbookName}`}
                     type="text"
                   />
 

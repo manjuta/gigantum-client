@@ -47,6 +47,7 @@
   &--name{
       margin: 0 20px;
       flex: 1;
+      overflow: hidden;
       @extend .UserSelect--none;
   }
 
@@ -75,6 +76,10 @@
   text-align: left;
   align-self: center;
   position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
   @extend .UserSelect--none;
 }
 
@@ -96,7 +101,7 @@
 
     &:hover {
         border: none;
-        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
     }
 
@@ -108,7 +113,7 @@
 
     &--selected {
         border: none;
-        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
     }
 
@@ -120,12 +125,12 @@
 
     &--selected:focus {
         border: none;
-        background: $azure url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/check-selected.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
     }
 
     &--incomplete {
-        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: 1px solid red;
     }
@@ -137,7 +142,7 @@
     }
 
     &--incomplete:focus {
-        background: $azure url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
+        background: $primary url('~Images/icons/action-null.svg') no-repeat 50% 50% !important;
         background-size: 26px !important;
         border: none;
     }
@@ -183,7 +188,7 @@
     padding: 0;
 
     border: 0 !important;
-
+    margin: 0 5px;
     border-radius: 15px;
   }
 

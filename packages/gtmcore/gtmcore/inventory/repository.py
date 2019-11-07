@@ -152,7 +152,7 @@ class Repository(object):
                 raise IOError(f"Could not acquire file system lock within {config['timeout']} seconds.")
 
         except Exception as e:
-            logger.error(e)
+            logger.error(e, exc_info=True)
             raise
         finally:
             # Release the Lock

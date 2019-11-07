@@ -5,6 +5,7 @@ import Moment from 'moment';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import { boundMethod } from 'autobind-decorator';
+import ReactTooltip from 'react-tooltip';
 // components
 import ActionsMenu from './ActionsMenu';
 import File from './File';
@@ -608,9 +609,18 @@ class Folder extends Component {
           }
           <div className={folderNameCSS}>
             <div className="Folder__icon" />
-            <div className="Folder__name">
+            <div
+              className="Folder__name"
+              data-tip={folderName}
+              data-for="Tooltip--folder"
+            >
               {folderName}
             </div>
+            <ReactTooltip
+              place="bottom"
+              id="Tooltip--folder"
+              delayShow={500}
+            />
             { isUntrackedDirectory
               && (
               <div
@@ -630,6 +640,7 @@ class Folder extends Component {
                 type="text"
                 className="File__input"
                 value={state.renameValue}
+                maxLength="255"
                 onDragStart={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
                 onChange={(evt) => { this._updateFileName(evt); }}
                 onKeyDown={(evt) => { this._submitCancel(evt, folderName); }}

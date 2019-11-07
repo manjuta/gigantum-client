@@ -241,9 +241,9 @@ autorestart=true
 priority=0""")
 
         # Image Labels
-        labels = {'io.gigantum.app': 'client',
-                  'io.gigantum.revision': get_current_commit_hash(),
-                  'io.gigantum.maintainer.email': 'support@gigantum.com'}
+        labels = {'com.gigantum.app': 'client',
+                  'com.gigantum.revision': get_current_commit_hash(),
+                  'com.gigantum.maintainer.email': 'support@gigantum.com'}
 
         # Delete .pyc files in case dev tools used on something not ubuntu before building
         self._remove_pyc(os.path.join(client_root_dir, "packages"))
@@ -256,58 +256,50 @@ priority=0""")
             # This is a relative path from the *build context* (which is Linux)
             dockerfile_path = dockerize_windows_path(os.path.relpath(dockerfile_path, client_root_dir))
             for path_var in ['CLIENT_CONFIG_FILE', 'SUPERVISOR_CONFIG']:
-                docker_args[path_var] = dockerize_windows_path(docker_args[path_var]) 
+                docker_args[path_var] = dockerize_windows_path(docker_args[path_var])
 
-        [print(ln[list(ln.keys())[0]],
-               end='') for ln in self.docker_client.api.build(path=client_root_dir,
-                                                              dockerfile=dockerfile_path,
-                                                              tag=named_image,
-                                                              labels=labels, nocache=no_cache,
-                                                              pull=True, rm=True,
-                                                              decode=True,
-                                                              buildargs=docker_args)]
+        build_lines = self.docker_client.api.build(path=client_root_dir, dockerfile=dockerfile_path, tag=named_image,
+                                                   labels=labels, nocache=no_cache, pull=True, rm=True, decode=True,
+                                                   buildargs=docker_args)
+        for line in build_lines:
+            print(next(iter(line.values())), end='')
 
         # Tag with `latest` for auto-detection of image on launch
         # TODO: Rename container to gigantum/client
         self.docker_client.api.tag(named_image, self.image_name, 'latest')
 
-    def publish(self, image_tag: str = None, verbose: bool=False) -> None:
+    def publish(self, image_tag: str = None) -> None:
         """Method to push image to the logged in image repository server (e.g hub.docker.com)
 
         Args:
             image_tag(str): full image tag to publish
-            verbose(bool): Flag indicating if output should be printed
         """
         # If no tag provided, use current repo hash
         if not image_tag:
             image_tag = self.get_image_tag()
 
-        if verbose:
-            last_msg = ""
-            for ln in self.docker_client.api.push(self.image_name, tag=image_tag, stream=True, decode=True):
-                if 'status' in ln:
-                    if last_msg != ln.get('status'):
-                        print(f"\n{ln.get('status')}", end='', flush=True)
-                        last_msg = ln.get('status')
-                    else:
-                        print(".", end='', flush=True)
-
-                elif 'error' in ln:
-                    sys.stderr.write(f"\n{ln.get('error')}\n")
-                    sys.stderr.flush()
+        last_msg = ""
+        for ln in self.docker_client.api.push(self.image_name, tag=image_tag, stream=True, decode=True):
+            if 'status' in ln:
+                if last_msg != ln.get('status'):
+                    print(f"\n{ln.get('status')}", end='', flush=True)
+                    last_msg = ln.get('status')
                 else:
-                    print(ln)
-        else:
-            self.docker_client.images.push(self.image_name, tag=image_tag)
+                    print(".", end='', flush=True)
+
+            elif 'error' in ln:
+                sys.stderr.write(f"\n{ln.get('error')}\n")
+                sys.stderr.flush()
+            else:
+                print(ln)
 
         self.docker_client.images.push(self.image_name, tag='latest')
 
-    def publish_edge(self, image_tag: str = None, verbose: bool=False) -> None:
+    def publish_edge(self, image_tag: str = None) -> None:
         """Method to push image to the logged in image repository server (e.g hub.docker.com)
 
         Args:
             image_tag(str): full image tag to publish
-            verbose(bool): Flag indicating if output should be printed
         """
         # If no tag provided, use current repo hash
         if not image_tag:
@@ -317,23 +309,20 @@ priority=0""")
         self.docker_client.images.get(f'{self.image_name}:latest').tag(f'{self.image_name}-edge:{image_tag}')
         self.docker_client.images.get(f'{self.image_name}-edge:{image_tag}').tag(f'{self.image_name}-edge:latest')
 
-        if verbose:
-            last_msg = ""
-            for ln in self.docker_client.api.push(f'{self.image_name}-edge', tag=image_tag, stream=True, decode=True):
-                if 'status' in ln:
-                    if last_msg != ln.get('status'):
-                        print(f"\n{ln.get('status')}", end='', flush=True)
-                        last_msg = ln.get('status')
-                    else:
-                        print(".", end='', flush=True)
-
-                elif 'error' in ln:
-                    sys.stderr.write(f"\n{ln.get('error')}\n")
-                    sys.stderr.flush()
+        last_msg = ""
+        for ln in self.docker_client.api.push(f'{self.image_name}-edge', tag=image_tag, stream=True, decode=True):
+            if 'status' in ln:
+                if last_msg != ln.get('status'):
+                    print(f"\n{ln.get('status')}", end='', flush=True)
+                    last_msg = ln.get('status')
                 else:
-                    print(ln)
-        else:
-            self.docker_client.images.push(f'{self.image_name}-edge', tag=image_tag)
+                    print(".", end='', flush=True)
+
+            elif 'error' in ln:
+                sys.stderr.write(f"\n{ln.get('error')}\n")
+                sys.stderr.flush()
+            else:
+                print(ln)
 
         self.docker_client.images.push(f'{self.image_name}-edge', tag='latest')
 

@@ -78,7 +78,7 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
     try:
         # Add collaborator to remote service
         mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['admin_service'],
+                            remote_config['hub_api'],
                             access_token=access_token,
                             id_token=id_token)
         mgr.configure_git_credentials(remote_config['git_remote'], username)

@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import abc
 from typing import (List, Dict, Optional, NamedTuple)
 
@@ -32,33 +13,17 @@ PackageMetadata = NamedTuple('PackageMetadata', [('package_manager', str), ('pac
                                                  ('description', Optional[str]), ('docs_url', Optional[str])])
 
 
-class PackageManager(metaclass=abc.ABCMeta):
+class PackageManager(abc.ABC):
     """Class to implement the standard interface for all available Package Managers
     """
 
     @staticmethod
-    def fallback_image(labbook: LabBook) -> str:
+    def base_image_tag(labbook: LabBook) -> str:
         """ Generate the image name of the LabManager if the docker image for
             the given labbook cannot be found. """
         cm = getattr(gtmcore.environment, 'ComponentManager')(labbook)
-        base = cm.base_fields
-        return f"{base['image']['namespace']}" \
-               f"/{base['image']['repository']}" \
-               f":{base['image']['tag']}"
-
-    @abc.abstractmethod
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
-        """Method to search a package manager for packages based on a string. The string can be a partial string.
-
-        Args:
-            search_str: The string to search on
-            labbook: Subject LabBook
-            username: username of current user
-
-        Returns:
-            list(str): The list of package names that match the search string
-        """
-        raise NotImplemented
+        base = cm.base_fields['image']
+        return f"{base['namespace']}/{base['repository']}:{base['tag']}"
 
     @abc.abstractmethod
     def list_versions(self, package_name: str, labbook: LabBook, username: str) -> List[str]:

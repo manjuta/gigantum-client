@@ -1,244 +1,489 @@
+import hashlib
 import os
 import time
-import tempfile
-import tarfile
-from typing import Optional, Tuple
+from abc import ABC, abstractmethod
+from typing import Optional, Callable, List, Dict, Any
 
-import docker
-import docker.errors
+import requests
 
-from gtmcore.configuration import get_docker_client
+from gtmcore.configuration import Configuration
+from gtmcore.exceptions import GigantumException
+from gtmcore.container.cuda import should_launch_with_cuda_support
+from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
-from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.labbook import LabBook
 
-from gtmcore.container.utils import infer_docker_image_name
 from gtmcore.container.exceptions import ContainerException
-from gtmcore.container.core import (build_docker_image, stop_labbook_container,
-                                     start_labbook_container, get_container_ip)
 
 logger = LMLogger.get_logger()
 
 
-class ContainerOperations:
+class ContainerOperations(ABC):
+    """Represents the interface to perform Docker-related operations for Gigantum projects.
+    This includes, building, running, port-mapping, etc.
+    """
 
-    @classmethod
-    def build_image(cls, labbook: LabBook, username: str, override_image_tag: Optional[str] = None,
-                    nocache: bool = False) -> Tuple[LabBook, str]:
-        """ Build docker image according to the Dockerfile just assembled. Does NOT
-            assemble the Dockerfile from environment (See ImageBuilder)
+    def __init__(self, username: str, labbook: Optional[LabBook] = None, path: Optional[str] = None,
+                 override_image_name: Optional[str] = None):
+        """Establish the core attributes we can expect in all subclasses
 
         Args:
-            labbook: Subject LabBook to build.
-            override_image_tag: Tag of docker image
-            nocache: Don't user the Docker cache if True
-            username: The current logged in username
+            username: the logged-in Gigantum username (or a special-purpose username)
+            labbook: if provided, it is assumed that labbook.name and labbook.owner are populated (including from a path)
+            path: (ignored if labbook is not None) a path where we can load a LabBook from
+            override_image_name: should be set programmatically if we can obtain labbok owner and name, and there's no
+                "override" image "tag"
+        """
+        self.username = username
 
-        Returns:
-            A tuple containing the labbook, docker image id.
+        # This will get updated below based on labbook attributes if it's still None
+        # It is used both for image and container names
+        self.image_tag = override_image_name
+
+        if labbook:
+            if path:
+                logger.warning('path ignored when labbook is specified')
+            self.labbook = labbook
+        elif path:
+            self.labbook = InventoryManager().load_labbook_from_directory(path)
+        else:
+            # We are running with a "bare" instance. Explicit container names will be necessary (where relevant)
+            # Skipping the env_dir and image_tag logic below
+            return
+
+        self.env_dir = os.path.join(self.labbook.root_dir, '.gigantum', 'env')
+
+        # Some important checks
+        if not self.labbook.owner:
+            raise ContainerException(f"{str(self.labbook)} has no owner")
+        if not os.path.exists(self.env_dir):
+            raise ValueError(f'Expected env directory `{self.env_dir}` does not exist.')
+
+        if not self.image_tag:
+            self.image_tag = self.default_image_tag(self.labbook.owner, self.labbook.name)
+
+    @abstractmethod
+    def build_image(self, nocache: bool = False, feedback_callback: Optional[Callable] = None) -> None:
+        """Build a new docker image from the Dockerfile in the labbook's `.gigantum/env` directory.
+
+        This image should be named by the self.image_tag attribute.
+
+        Also note - This will delete any existing (but out-of-date) image pertaining to the given labbook.
+        Thus if this call fails, there will be no docker images pertaining to that labbook.
+
+        Args:
+            nocache: Don't user the Docker cache if True
+            feedback_callback: a function taking a str as it's sole argument to report progress back to the caller
 
         Raises:
             ContainerBuildException if container build fails.
         """
-        logger.info(f"Building docker image for {str(labbook)}, "
-                    f"using override name `{override_image_tag}`")
-        docker_img_id = build_docker_image(labbook.root_dir,
-                                           override_image_tag=override_image_tag,
-                                           username=username,
-                                           nocache=nocache)
-        return labbook, docker_img_id
+        raise NotImplementedError()
 
-    @classmethod
-    def delete_image(cls, labbook: LabBook, username: str,
-                     override_image_tag: Optional[str] = None) -> Tuple[LabBook, bool]:
+    @abstractmethod
+    def delete_image(self, override_image_name: Optional[str] = None) -> bool:
         """ Delete the Docker image for the given LabBook
 
         Args:
-            labbook: Subject LabBook.
-            override_image_tag: Tag of docker image (optional)
-            username: The current logged in username
+            override_image_name: Alternate Tag of docker image (optional)
 
         Returns:
-            A tuple containing the labbook, docker image id.
+            Did we succeed?
         """
-        image_name = override_image_tag or cls.labbook_image_name(labbook, username)
-        # We need to remove any images pertaining to this labbook before triggering a build.
-        logger.info(f"Deleting docker image for {str(labbook)}")
-        try:
-            get_docker_client().images.get(name=image_name)
-            get_docker_client().images.remove(image_name)
-            logger.info(f"Deleted docker image for {str(labbook)}: {image_name}")
-        except docker.errors.ImageNotFound:
-            logger.warning(f"Could not delete docker image for {str(labbook)}: {image_name} not found")
-        except Exception as e:
-            logger.error("Error deleting docker images for {str(lb)}: {e}")
-            return labbook, False
-        return labbook, True
+        raise NotImplementedError()
 
-    @classmethod
-    def run_command(
-            cls, cmd_text: str, labbook: LabBook, username: str,
-            override_image_tag: Optional[str] = None, fallback_image: str = None) -> bytes:
+    @abstractmethod
+    def image_available(self) -> bool:
+        """Do we currently see an up-to-date Docker image?
 
-        """Run a command executed in the context of the LabBook's docker image.
+        Returns:
+            True if we have an Image ID stored.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def exec_command(self, command: str, container_name: Optional[str] = None, get_results=False, **kwargs) \
+            -> Optional[str]:
+        """Run a command inside a given container, defaulting to the Project container.
 
         Args:
-            cmd_text: Content of command to be executed.
-            labbook: Subject labbook
-            username: Optional active username
-            override_image_tag: If set, does not automatically infer container name.
-            fallback_image: If LabBook image can't be found, use this one instead.
+            command: e.g., 'ls -la'. This will be tokenized
+            container_name: ID string of container in which to run - currently not actually used!
+            kwargs: see implementation for allowed keys, passed to `exec_run` in docker-py
 
         Returns:
-            A tuple containing the labbook, Docker container id, and port mapping.
+            If detach is False (or unspecified), a str with output of the command.
+            Otherwise, None.
         """
-        image_name = override_image_tag or cls.labbook_image_name(labbook, username)
-        # Get a docker client instance
-        client = get_docker_client()
+        raise NotImplementedError()
 
-        # Verify image name exists. If it doesn't, fallback and use the base image
-        try:
-            client.images.get(image_name)
-        except docker.errors.ImageNotFound:
-            # Image not found...assume build has failed and fallback to base
-            if not fallback_image:
-                raise
-            logger.warning(f"LabBook image not available for package query."
-                           f"Falling back to base image `{fallback_image}`.")
-            image_name = fallback_image
+    def ps_search(self, ps_name: str, container_name: Optional[str] = None, reps: int = 10) -> List[str]:
+        """Exec ps and grep in the container to check for a process
 
-        t0 = time.time()
-        try:
-            # Note, for container docs see: http://docker-py.readthedocs.io/en/stable/containers.html
-            container = client.containers.run(image_name, cmd_text, entrypoint=[], remove=False, detach=True,
-                                              stdout=True)
-            while container.status != "exited":
-                time.sleep(.25)
-                container.reload()
-            result = container.logs(stdout=True, stderr=False)
-            container.remove(v=True)
-
-        except docker.errors.ContainerError as e:
-            tfail = time.time()
-            logger.error(f'Command ({cmd_text}) failed after {tfail-t0:.2f}s - '
-                         f'output: {e.exit_status}, {e.stderr}')
-            raise ContainerException(e)
-
-        ts = time.time()
-        if ts - t0 > 5.0:
-            logger.warning(f'Command ({cmd_text}) in {str(labbook)} took {ts-t0:.2f} sec')
-
-        return result
-
-    @classmethod
-    def start_container(cls, labbook: LabBook, username: str,
-                        override_image_tag: Optional[str] = None) -> Tuple[LabBook, str]:
-        """ Start a Docker container for a given labbook LabBook. Return the new labbook instances
-            and a list of TCP port mappings.
+        ps_name should NOT include any extra quotes (it will be surrounded by single-quotes in the shell command)
 
         Args:
-            labbook: Subject labbook
-            username: Optional active username
-            override_image_tag: If set, does not automatically infer container name.
+            ps_name: the string that we'll use to grep `ps` output
+            container_name: any name that works for Docker
+            reps: number of repetitions (currently 1 second per loop).
+                 Note, an INFO log will be made if reps > 1 (the default)
 
         Returns:
-            A tuple containing the labbook, Docker container id
+            A list of matching processes
         """
+        for timeout in range(reps):
+            ps_output = self.exec_command(f"ps aux | grep '{ps_name}'", container_name=container_name, get_results=True)
+            if ps_output:  # Needed for mypy given abstractmethod
+                ps_list = [l for l in ps_output.split('\n') if l and 'grep' not in l]
+                ps_list = [l for l in ps_list if 'init -- ' not in l]
+                if ps_list:
+                    if reps > 1:
+                        # We assume we're searching for a process, so we log how long it took to come up
+                        logger.info(f"{ps_name} found after {timeout} seconds")
+                    return ps_list
+
+            # Pause briefly to avoid race conditions
+            time.sleep(1)
+
+        # ps_list is also [], but this is more clear
+        return []
+
+    @abstractmethod
+    def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
+                      volumes: Optional[Dict] = None, wait_for_output=False, container_name: Optional[str] = None, **run_args) \
+            -> Optional[str]:
+        """ Start a Docker container, by default for the Project connected to this instance.
+
+        The container should be reachable from the Client network.
+
+        Args:
+            cmd: override the default cmd for the image
+            image_name: use a different image than the current build for this Project
+            environment: modeled on the containers.run() API
+            volumes: same
+            wait_for_output: should the method collect and return stdout? If so, container is anonymous and will be deleted.
+            container_name: by default, container_name will be the same as image_name. Override by passing this argument
+            run_args: any other args are passed to containers.run()
+
+        Returns:
+            If wait_for_output is specified, the stdout of the cmd. Otherwise, or if stdout cannot be obtained, None.
+        """
+        raise NotImplementedError()
+
+    def start_project_container(self):
+        """Start the Docker container for the Project connected to this instance.
+
+        This method sets the Client IP to the environment variable `GIGANTUM_CLIENT_IP`
+
+        All relevant configuration for a fully functional Project is set up here, then passed off to self.run_container()
+        """
+        if not self.labbook:
+            raise ValueError('labbook must be specified for run_container')
+
         if not os.environ.get('HOST_WORK_DIR'):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
-        container_id = start_labbook_container(labbook_root=labbook.root_dir,
-                                               config_path=labbook.client_config.config_file,
-                                               override_image_id=override_image_tag,
-                                               username=username)
-        return labbook, container_id
+        mnt_point = self.labbook.root_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+        volumes_dict = {
+            mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
+            'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
+        }
 
-    @classmethod
-    def stop_container(cls, labbook: LabBook, username: str) -> Tuple[LabBook, bool]:
-        """ Stop the given labbook. Returns True in the second field if stopped,
-            otherwise False (False can simply imply no container was running).
+        # Set up additional bind mounts for datasets if needed.
+        datasets = InventoryManager().get_linked_datasets(self.labbook)
+        for ds in datasets:
+            try:
+                cm_class = get_cache_manager_class(ds.client_config)
+                cm = cm_class(ds, self.username)
+                ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+                volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+            except InventoryException:
+                continue
 
-        Args:
-            labbook: Subject labbook
-            username: Optional username of active user
+        # If re-mapping permissions, be sure to configure the container
+        if 'LOCAL_USER_ID' in os.environ:
+            env_var = [f"LOCAL_USER_ID={os.environ['LOCAL_USER_ID']}"]
+        else:
+            env_var = ["WINDOWS_HOST=1"]
 
-        Returns:
-            A tuple of (Labbook, boolean indicating whether a container was successfully stopped).
-        """
-        n = cls.labbook_image_name(labbook, username)
-        logger.info(f"Stopping {str(labbook)} ({n})")
+        # Set the client IP in the project container
+        try:
+            gigantum_client_ip = self.get_gigantum_client_ip()
+        except ContainerException as e:
+            logger.warning(e)
+            gigantum_client_ip = ""
+
+        env_var.append(f"GIGANTUM_CLIENT_IP={gigantum_client_ip}")
+
+        # Get resource limits
+        resource_args = dict()
+        memory_limit = self.labbook.client_config.config['container']['memory']
+        cpu_limit = self.labbook.client_config.config['container']['cpu']
+        gpu_shared_mem = self.labbook.client_config.config['container']['gpu_shared_mem']
+        if memory_limit:
+            # If memory_limit not None, pass to Docker to limit memory allocation to container
+            resource_args["mem_limit"] = memory_limit
+        if cpu_limit:
+            # If cpu_limit not None, pass to Docker to limit CPU allocation to container
+            # "nano_cpus" is an integer in factional parts of a CPU
+            resource_args["nano_cpus"] = round(cpu_limit * 1e9)
+
+        # run with nvidia-docker if we have GPU support on the Host compatible with the project
+        should_run_nvidia, reason = should_launch_with_cuda_support(self.labbook.cuda_version)
+        if should_run_nvidia:
+            logger.info(f"Launching container with GPU support:{reason}")
+            if gpu_shared_mem:
+                resource_args["shm_size"] = gpu_shared_mem
+                resource_args['runtime'] = 'nvidia'
+
+        else:
+            logger.info(f"Launching container without GPU support. {reason}")
+
+        self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
 
         try:
-            stopped = stop_labbook_container(n)
-        finally:
-            # Save state of LB when container turned off.
-            labbook.sweep_uncommitted_changes()
+            gclient_ip = self.get_gigantum_client_ip()
+        except ContainerException as e:
+            logger.warning(e)
+            gclient_ip = ""
 
-        return labbook, stopped
+        cmd = f"echo {gclient_ip} > /home/giguser/labmanager_ip"
+        for timeout in range(20):
+            time.sleep(0.5)
+            status = self.query_container()
+            if status == 'running':
+                # This is run as root because we don't want the user to be able to modify the IP file
+                r = self.exec_command(cmd)
+                logger.info(f"Response to write Client IP in {self.image_tag} Container: {r}")
+                break
+        else:
+            logger.error("After 10 seconds could not write Client IP to Project container."
+                         f" Container status = {status}")
 
-    @classmethod
-    def labbook_image_name(cls, labbook: LabBook, username: str) -> str:
-        """Return the image name of the LabBook container
-
-        Args:
-            labbook: Subject LabBook
-            username: Username of active user
-
-        Returns:
-            Externally facing IP
-        """
-        owner = InventoryManager().query_owner(labbook)
-        return infer_docker_image_name(labbook_name=labbook.name,
-                                       owner=owner,
-                                       username=username)
-
-    @classmethod
-    def get_labbook_ip(cls, labbook: LabBook, username: str) -> str:
-        """Return the IP on the docker network of the LabBook container
-
-        Args:
-            labbook: Subject LabBook
-            username: Username of active user
+    @abstractmethod
+    def stop_container(self, container_name: Optional[str] = None) -> bool:
+        """ Stop a container, defaults to the Project container.
 
         Returns:
-            Externally facing IP
+            A boolean indicating whether the container was successfully stopped (False can simply imply no container
+            was running).
         """
-        docker_key = cls.labbook_image_name(labbook, username)
-        return get_container_ip(docker_key)
+        raise NotImplementedError()
 
-    @classmethod
-    def copy_into_container(cls, labbook: LabBook, username: str, src_path: str, dst_dir: str):
+    @abstractmethod
+    def query_container(self, container_name: Optional[str] = None) -> Optional[str]:
+        """Query the given container and get its status. E.g., "running" or "stopped"
+
+        Returns:
+            String of container status - "stopped", "running", etc., or None if container can't be loaded
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def query_container_ip(self, container_name: Optional[str] = None) -> Optional[str]:
+        """Query the given container's IP address. Defaults to the Project container for this instance.
+
+        Args:
+            container_name: alternative to the current project container. Use anything that works for containers.get()
+
+        Returns:
+            IP address as string, None if not available (e.g., container doesn't exist)
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def query_container_env(self, container_name: Optional[str] = None) -> List[str]:
+        """Get the list of environment variables from the container
+
+        Args:
+            container_name: an optional container name (otherwise, will use self.image_tag)
+
+        Returns:
+            A list of strings like 'VAR=value'
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def copy_into_container(self, src_path: str, dst_dir: str):
         """Copy the given file in src_path into the project's container.
 
         Args:
-            labbook: Project under consideration.
-            username: Active username
             src_path: Source path ON THE HOST of the file - callers responsibility to sanitize
             dst_dir: Destination directory INSIDE THE CONTAINER.
         """
-        if not labbook.owner:
-            raise ContainerException(f"{str(labbook)} has no owner")
+        raise NotImplementedError()
 
-        if not os.path.isfile(src_path):
-            raise ContainerException(f"Source file {src_path} is not a file")
+    # Utility methods - might use across contexts, but can also override.
 
-        docker_key = infer_docker_image_name(labbook_name=labbook.name,
-                                             owner=labbook.owner,
-                                             username=username)
-        lb_container = docker.from_env().containers.get(docker_key)
-        r = lb_container.exec_run(f'sh -c "mkdir -p {dst_dir}"')
+    def default_image_tag(self, owner: str, labbook_name: str) -> str:
+        """The way we name our image for a Project on a local Docker instance
 
-        # Tar up the src file to copy into container
-        tarred_secret_file = tempfile.NamedTemporaryFile()
-        t = tarfile.open(mode='w', fileobj=tarred_secret_file)
-        abs_path = os.path.abspath(src_path)
-        t.add(abs_path, arcname=os.path.basename(src_path), recursive=True)
-        t.close()
-        tarred_secret_file.seek(0)
+        This is not quite a tag. It's passed in to the `tag()` function, but it's used for Image and Container names.
 
-        try:
-            logger.info(f"Copying file {src_path} into {dst_dir} in {str(labbook)}")
-            docker.from_env().api.put_archive(docker_key, dst_dir, tarred_secret_file)
-        finally:
-            # Make sure the temporary Tar archive gets deleted.
-            tarred_secret_file.close()
+        Args:
+            owner: of the project - maps to the second username in the local gigantum directory hierarchy
+            labbook_name: maps to the directory name for the project in the local gigantum hierarchy
+
+        Returns:
+            Our default name for a given project, used for both Image and Container names.
+        """
+        return f"gmlb-{self.username}-{owner}-{labbook_name}"
+
+    # TODO #1062 - this has nothing to do with (directly) managing comtainers except for a naming scheme. Can we move to
+    #  ComponentManager or some more related location? Do AFTER the cloud API is implemented.
+    @staticmethod
+    def check_cached_hash(image_tag: str, env_dir: str, update_cache=True) -> str:
+        """Determine if the environment changed since last we checked
+
+        NOTE - only call with update_cache=True in the context when the API requests building a new image! I.e., likely
+        only call from within .build_image(). Otherwise, the cached hash may be updated without updating the image
+        itself.
+
+        Args:
+            image_tag: the "key" where we'll use to look up / store environment hashes
+            env_dir: a directory where we can find a gigantum environment specification
+
+        Returns:
+            'not cached', 'match', or 'changed'
+        """
+        cache_dir = '/mnt/gigantum/.labmanager/image-cache'
+        if not os.path.exists(cache_dir):
+            logger.info(f"Making environment cache at {cache_dir}")
+            os.makedirs(cache_dir, exist_ok=True)
+        env_cache_path = os.path.join(cache_dir, f"{image_tag}.cache")
+
+        # Make a hash of the environment specification, by
+        m = hashlib.sha256()
+        for root, dirs, files in os.walk(env_dir):
+            for f in [n for n in files if '.yaml' in n]:
+                m.update(os.path.join(root, f).encode())
+                m.update(open(os.path.join(root, f)).read().encode())
+        env_cksum = m.hexdigest()
+        old_env_cksum: Optional[str] = None
+        if os.path.exists(env_cache_path):
+            old_env_cksum = open(env_cache_path).read()
+        else:
+            with open(env_cache_path, 'w') as cfile:
+                cfile.write(env_cksum)
+
+        if not old_env_cksum:
+            return 'not cached'
+        elif env_cksum == old_env_cksum:
+            return 'match'
+        else:
+            # Env checksum hash is outdated. Remove it.
+            os.remove(env_cache_path)
+            if update_cache:
+                with open(env_cache_path, 'w') as cfile:
+                    cfile.write(env_cksum)
+
+            return 'changed'
+
+    @abstractmethod
+    def get_gigantum_client_ip(self) -> Optional[str]:
+        """Method to get the monitored lab book container's IP address on the Docker bridge network
+
+        Returns:
+            str of IP address
+        """
+        raise NotImplementedError()
+
+
+class SidecarContainerOperations:
+    """Keep track of containers related to a parent (for now, Project) container"""
+
+    def __init__(self, primary_container: ContainerOperations, sidecar_name: str):
+        """Set up names for things
+
+        Args:
+            primary_container: who are we a sidecar for?
+            sidecar_name: a tag that helps us keep track of what this sidecar does (e.g., `mitmproxy`)
+        """
+        if not primary_container.image_tag:
+            raise ValueError('primary_container needs a concrete image tag.')
+
+        self.primary_container = primary_container
+        self.sidecar_name = sidecar_name
+        self.sidecar_container_name = '.'.join((sidecar_name, primary_container.image_tag))
+
+    def run_container(self, image_name: str, volumes: Optional[Dict] = None, environment: Optional[List] = None,
+                      cmd: Optional[str] = None):
+        """Run the sidecar container
+
+        Args:
+            image_name: a valid docker image
+            volumes: a dict that complies with the docker-py API for specifying volumes
+            environment: a list of strings like "VAR=something"
+            cmd: (discouraged - sidecars should be simple) override the default CMD
+
+        Returns:
+            The IP address of the new container as a string
+        """
+        self.primary_container.run_container(cmd=cmd, image_name=image_name, container_name=self.sidecar_container_name,
+                                             volumes=volumes, environment=environment)
+
+        return self.primary_container.query_container_ip(self.sidecar_container_name)
+
+    def stop_container(self):
+        return self.primary_container.stop_container(container_name=self.sidecar_container_name)
+
+    def query_container(self):
+        return self.primary_container.query_container(self.sidecar_container_name)
+
+    def ps_search(self, ps_name, reps=10):
+        return self.primary_container.ps_search(ps_name, self.sidecar_container_name, reps)
+
+    def query_container_env(self) -> List[str]:
+        return self.primary_container.query_container_env(self.sidecar_container_name)
+
+    def query_container_ip(self) -> Optional[str]:
+        return self.primary_container.query_container_ip(self.sidecar_container_name)
+
+# We only want to hit the filesystem once to get this value (otherwise, we parse the config file for every container
+# operation). This is used ONLY in container_for_context() below. Context-specific logic should otherwise be contained
+# in the subclasses.
+CONTEXT = Configuration().config['container']['context']
+
+
+def container_for_context(username: str, labbook: Optional[LabBook] = None, path: Optional[str] = None,
+                          override_image_name: Optional[str] = None) -> ContainerOperations:
+    """Instantiate an instance that can build images and run containers via Docker.
+
+    Context is obtained via the standard configuration file from build time + overrides in
+    ~/gigantum/.labmanager/config.yaml
+
+    The signature is isomorphic with the init for subclasses of ContainerOperations.
+
+    Args:
+        username (required): username logged into the client
+        labbook: a LabBook object
+        path: a directory where we can find a project - ignored when labbook is given
+        override_image_name: optional name to use instead of our default for username+labbook, can often also be
+            specified in individual methods
+
+    Returns:
+        A subclass of ContainerOperations depending on the value of context (looked up in the above global var)
+    """
+    if CONTEXT == 'local':
+        # We do the import here to (1) avoid circular dependencies and (2) allow for any crazy run-time logic for
+        # the cloud
+        from gtmcore.container.local_container import LocalProjectContainer
+        return LocalProjectContainer(username, labbook, path, override_image_name)
+    elif CONTEXT == 'hub':
+        from gtmcore.container.hub_container import HubProjectContainer
+        return HubProjectContainer(username, labbook, path, override_image_name)
+    else:
+        raise NotImplementedError(f'"{CONTEXT}" support for ContainerOperations not yet supported')
+
+
+def _check_allowed_args(provided_args: Dict[str, Any], allowed_args: set):
+    """Check that provided_args contains only keys are are present in allowed_args
+
+    Because of the deep usage of kwargs in docker-py, and the difficulty of finding default values, we can use this
+    approach to control the surface of what we have to support across platforms in the method
+    signature.
+    """
+    extra_args = set(provided_args.keys()) - allowed_args
+    if extra_args:
+        raise NotImplementedError(f'Unsupported arguments: {", ".join(extra_args)}')

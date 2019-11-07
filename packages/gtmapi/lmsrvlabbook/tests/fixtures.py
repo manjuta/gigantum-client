@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import pytest
 import tempfile
 import os
@@ -31,18 +12,19 @@ from mock import patch
 import responses
 from graphene.test import Client
 
+from gtmcore.container.local_container import get_docker_client
 from gtmcore.environment import RepositoryManager
-from gtmcore.configuration import Configuration, get_docker_client
+from gtmcore.configuration import Configuration
 from gtmcore.auth.identity import get_identity_manager
 from gtmcore.environment.bundledapp import BundledAppManager
 
 from gtmcore.inventory.inventory import InventoryManager
 from lmsrvcore.middleware import DataloaderMiddleware, error_middleware, RepositoryCacheMiddleware
-from lmsrvcore.caching import LabbookCacheController, DatasetCacheController
+from lmsrvcore.caching import DatasetCacheController
 from lmsrvcore.tests.fixtures import insert_cached_identity
 
 from gtmcore.fixtures import (ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, ENV_UNIT_TEST_BASE)
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 from gtmcore.environment import ComponentManager
 from gtmcore.imagebuilder import ImageBuilder
 
@@ -460,7 +442,8 @@ def build_image_for_jupyterlab():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
             # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
+            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()],
+                            context_value=ContextMock())
 
             # Create a labook
             im = InventoryManager(config_file)
@@ -475,10 +458,14 @@ def build_image_for_jupyterlab():
 
             ib = ImageBuilder(lb)
             ib.assemble_dockerfile(write=True)
-            docker_client = get_docker_client()
+
+            container_ops = container_for_context(username="default", labbook=lb)
+            # We are not currently concerned with running these tests on the cloud context
+            docker_client = container_ops._client
 
             try:
-                lb, docker_image_id = ContainerOperations.build_image(labbook=lb, username="default")
+                container_ops.build_image()
+                docker_image_id = container_ops._image_id
 
                 # Note: The final field is the owner
                 yield lb, ib, docker_client, docker_image_id, client, "unittester"
@@ -524,8 +511,8 @@ def fixture_test_file():
 @pytest.fixture()
 def property_mocks_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
-    responses.add(responses.GET, 'https://usersrv.gigantum.io/key',
-                  json={'key': 'afaketoken'}, status=200)
+    responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
     responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects?search=labbook1',
                   json=[{
                           "id": 26,
@@ -538,7 +525,8 @@ def property_mocks_fixture():
 @pytest.fixture()
 def docker_socket_fixture():
     """Helper method to get the docker client version"""
-    client = get_docker_client()
+
+    client = get_docker_client(check_server_version=False)
     version = client.version()['ApiVersion']
 
     if "CIRCLECI" in os.environ:

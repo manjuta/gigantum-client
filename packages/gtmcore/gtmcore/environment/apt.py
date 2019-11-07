@@ -1,7 +1,7 @@
-from typing import (List, Dict, Optional)
+from typing import List, Dict
 
 from gtmcore.environment.packagemanager import PackageManager, PackageResult, PackageMetadata
-from gtmcore.container.container import ContainerOperations
+from gtmcore.container import container_for_context
 from gtmcore.labbook import LabBook
 from gtmcore.logging import LMLogger
 
@@ -14,29 +14,6 @@ class AptPackageManager(PackageManager):
     Note: apt is somewhat limiting in the ability to access old versions of packages
     """
 
-    def search(self, search_str: str, labbook: LabBook, username: str) -> List[str]:
-        """Method to search a package manager for packages based on a string. The string can be a partial string.
-
-        Args:
-            search_str: The string to search on
-            labbook: Subject LabBook
-            username: username of current user
-
-        Returns:
-            list(str): The list of package names that match the search string
-        """
-        result = ContainerOperations.run_command(f"apt-cache search {search_str}", labbook, username,
-                                                 fallback_image=self.fallback_image(labbook))
-
-        packages = []
-        if result:
-            lines = result.decode('utf-8').split('\n')
-            for l in lines:
-                if l:
-                    packages.append(l.split(" - ")[0])
-
-        return packages
-
     def list_versions(self, package_name: str, labbook: LabBook, username: str) -> List[str]:
         """Method to list all available versions of a package based on the package name
 
@@ -48,12 +25,14 @@ class AptPackageManager(PackageManager):
         Returns:
             list(str): Version strings
         """
-        result = ContainerOperations.run_command(f"apt-cache madison {package_name}", labbook, username,
-                                                 override_image_tag=self.fallback_image(labbook))
+        base_container = container_for_context(username, labbook=labbook)
+        result = base_container.run_container(cmd=f"apt-cache madison {package_name}",
+                                              image_name=self.base_image_tag(labbook),
+                                              wait_for_output=True)
 
         package_versions: List[str] = []
         if result:
-            lines = result.decode('utf-8').split('\n')
+            lines = result.split('\n')
             for l in lines:
                 if l:
                     parts = l.split(" | ")
@@ -75,12 +54,12 @@ class AptPackageManager(PackageManager):
         Returns:
             list
         """
-        result = ContainerOperations.run_command("apt list --installed", labbook, username,
-                                                 fallback_image=self.fallback_image(labbook))
+        base_container = container_for_context(username, labbook=labbook)
+        result = base_container.run_container(cmd="apt list --installed", wait_for_output=True)
 
         packages = []
         if result:
-            lines = result.decode('utf-8').split('\n')
+            lines = result.split('\n')
             for line in lines:
                 if line is not None and line != "Listing..." and "/" in line:
                     parts = line.split(" ")
@@ -150,12 +129,14 @@ class AptPackageManager(PackageManager):
         """
         results = list()
         for package in package_list:
-            result = ContainerOperations.run_command(f"apt-cache search {package}", labbook, username,
-                                                     fallback_image=self.fallback_image(labbook))
+            base_container = container_for_context(username)
+            result = base_container.run_container(cmd=f"apt-cache search {package}",
+                                                  image_name=self.base_image_tag(labbook),
+                                                  wait_for_output=True)
             description = None
             latest_version = None
             if result:
-                lines = result.decode('utf-8').split('\n')
+                lines = result.split('\n')
                 for l in lines:
                     if l:
                         pkg_name, pkg_description = l.split(" - ", 1)

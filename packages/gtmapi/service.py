@@ -31,28 +31,43 @@ app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration()
 app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
 
-if config.config["flask"]["allow_cors"]:
-    # Allow CORS
-    CORS(app, max_age=7200)
-
 # Set Debug mode
 app.config['DEBUG'] = config.config["flask"]["DEBUG"]
 app.register_blueprint(blueprint.complete_labbook_service)
 
 # Configure CHP
 try:
+    # /api by default
     api_prefix = app.config["LABMGR_CONFIG"].config['proxy']["labmanager_api_prefix"]
+
+    # CHP interface params
     apparent_proxy_port = app.config["LABMGR_CONFIG"].config['proxy']["apparent_proxy_port"]
     api_port = app.config["LABMGR_CONFIG"].config['proxy']['api_port']
-
     proxy_router = ProxyRouter.get_proxy(app.config["LABMGR_CONFIG"].config['proxy'])
-    proxy_router.add("http://localhost:10001", "api")
+
+    if config.is_hub_client:
+        # Use full route prefix, including run/<client_id> if running in the Hub
+        api_target = f"run/{os.environ['GIGANTUM_CLIENT_ID']}{api_prefix}"
+        api_prefix = f"/{api_target}"
+
+        # explicit routes for UI with full route prefix
+        proxy_router.add("http://localhost:10002", f"run/{os.environ['GIGANTUM_CLIENT_ID']}")
+    else:
+        api_target = "api"
+
+    proxy_router.add("http://localhost:10001", api_target)
     logger.info(f"Proxy routes ({type(proxy_router)}): {proxy_router.routes}")
 
+    # Add rest routes
     app.register_blueprint(rest_routes.rest_routes, url_prefix=api_prefix)
 except Exception as e:
     logger.error(e)
     logger.exception(e)
+
+
+if config.config["flask"]["allow_cors"]:
+    # Allow CORS
+    CORS(app, max_age=7200)
 
 
 # Set auth error handler
@@ -114,7 +129,7 @@ post_save_hook_code = """
 import subprocess, os
 def post_save_hook(os_path, model, contents_manager, **kwargs):
     try:
-        labmanager_ip = open('/home/giguser/labmanager_ip').read().strip()
+        labmanager_ip = os.environ.get('GIGANTUM_CLIENT_IP')
         tokens = open('/home/giguser/jupyter_token').read().strip()
         username, owner, lbname, jupyter_token = tokens.split(',')
         url_args = "file={}&jupyter_token={}".format(os.path.basename(os_path), jupyter_token)

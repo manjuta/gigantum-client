@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
+import queryString from 'querystring';
 import {
   BrowserRouter as Router,
   Route,
@@ -23,12 +24,16 @@ import config from 'JS/config';
 // auth
 import UserIdentity from 'JS/Auth/UserIdentity';
 import Auth from 'JS/Auth/Auth';
+// utils
+import getApiURL from 'JS/utils/apiUrl';
 // assets
 import './Routes.scss';
 
 const Loading = () => <div />;
 const auth = new Auth();
-
+/* eslint-disable */
+const globalObject = window || self;
+/* eslint-enable */
 const Home = Loadable({
   loader: () => import('Components/home/Home'),
   loading: Loading,
@@ -44,6 +49,19 @@ const DatasetQueryContainer = Loadable({
   loading: Loading,
 });
 
+const getBasename = () => {
+  const { pathname } = globalObject.location;
+  const pathList = pathname.split('/');
+  const uniqueClientString = (pathList.length > 2)
+    ? pathList[2]
+    : '';
+  const basename = process.env.BUILD_TYPE === 'cloud'
+    ? `/run/${uniqueClientString}/`
+    : '/';
+  return basename;
+};
+
+const basename = getBasename();
 
 class Routes extends Component {
   state = {
@@ -56,6 +74,20 @@ class Routes extends Component {
     diskLow: false,
     available: 0,
   };
+
+  componentWillMount = () => {
+    const values = queryString.parse(history.location.hash.slice(1));
+    const newPath = values.path;
+    if (newPath) {
+      delete values.path;
+      values.redirect = false;
+      let stringifiedValues = queryString.stringify(values);
+      history.replace(`${basename}${newPath}#${stringifiedValues}`);
+      delete values.redirect;
+      stringifiedValues = queryString.stringify(values);
+      window.location.hash = stringifiedValues;
+    }
+  }
 
   /**
     @param {}
@@ -73,7 +105,11 @@ class Routes extends Component {
       let loadingRenew = false;
 
       if (response.data) {
-        if (response.data.userIdentity && ((response.data.userIdentity.isSessionValid && navigator.onLine) || !navigator.onLine)) {
+        if (
+          response.data.userIdentity
+            && ((response.data.userIdentity.isSessionValid && navigator.onLine)
+            || !navigator.onLine)
+        ) {
           localStorage.setItem('family_name', response.data.userIdentity.familyName);
           localStorage.setItem('given_name', response.data.userIdentity.givenName);
           localStorage.setItem('email', response.data.userIdentity.email);
@@ -170,14 +206,10 @@ class Routes extends Component {
   */
   _checkSysinfo = () => {
     // TODO move to utils file
-
-    const apiHost = (process.env.NODE_ENV === 'development')
-      ? 'localhost:10000'
-      : window.location.host;
     const self = this;
-    const url = `${window.location.protocol}//${apiHost}${process.env.SYSINFO_API}`;
+    const apiURL = getApiURL('sysinfo');
     setTimeout(self._checkSysinfo.bind(this), 60 * 1000);
-    return fetch(url, {
+    return fetch(apiURL, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -214,7 +246,7 @@ class Routes extends Component {
 
       return (
 
-        <Router>
+        <Router basename={basename}>
 
           <Switch>
 
@@ -279,7 +311,6 @@ class Routes extends Component {
                   <div className={headerCSS} />
                   <SideBar
                     auth={auth}
-                    history={history}
                     diskLow={showDiskLow}
                   />
                   <div className={routesCSS}>
@@ -291,7 +322,6 @@ class Routes extends Component {
                         <Home
                           loadingRenew={state.loadingRenew}
                           userIdentityReturned={state.userIdentityReturned}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -307,7 +337,6 @@ class Routes extends Component {
                         <Home
                           userIdentityReturned={state.userIdentityReturned}
                           loadingRenew={state.loadingRenew}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -335,7 +364,6 @@ class Routes extends Component {
                         <Home
                           userIdentityReturned={state.userIdentityReturned}
                           loadingRenew={state.loadingRenew}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -352,7 +380,6 @@ class Routes extends Component {
                         <Home
                           userIdentityReturned={state.userIdentityReturned}
                           loadingRenew={state.loadingRenew}
-                          history={history}
                           auth={auth}
                           diskLow={showDiskLow}
                           {...parentProps}
@@ -373,7 +400,6 @@ class Routes extends Component {
                             datasetName={parentProps.match.params.datasetName}
                             owner={parentProps.match.params.owner}
                             auth={auth}
-                            history={history}
                             diskLow={showDiskLow}
                             {...props}
                             {...parentProps}
@@ -395,7 +421,6 @@ class Routes extends Component {
                             labbookName={parentProps.match.params.labbookName}
                             owner={parentProps.match.params.owner}
                             auth={auth}
-                            history={history}
                             diskLow={showDiskLow}
                             {...props}
                             {...parentProps}
@@ -411,7 +436,6 @@ class Routes extends Component {
                     <Prompt />
 
                     <Footer
-                      history={history}
                     />
 
                   </div>

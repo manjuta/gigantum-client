@@ -21,7 +21,7 @@
 
 .PackageHeader__toolbar{
   color: $white;
-  background: $azure;
+  background: $primary;
   height: 50px;
   position: relative;
   &-text {
@@ -30,7 +30,7 @@
   }
   &:before {
     content: '';
-    @include triangle('down', 12px, $azure);
+    @include triangle('down', 12px, $primary);
     position: absolute;
     bottom: -12px;
     left: 11px;
