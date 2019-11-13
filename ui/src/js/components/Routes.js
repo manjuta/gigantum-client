@@ -190,6 +190,8 @@ class Routes extends Component {
     const { state } = this;
     if (forceLoginScreen !== state.forceLoginScreen) {
       this.setState({ forceLoginScreen });
+
+      return <Redirect to="/login" />;
     }
   }
 
@@ -239,10 +241,6 @@ class Routes extends Component {
       const routesCSS = classNames({
         Routes__main: true,
       });
-
-      if (state.forceLoginScreen === null) {
-        return <Loader />;
-      }
 
       return (
 
