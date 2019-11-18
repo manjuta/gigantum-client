@@ -74,3 +74,11 @@ like so:
 
 The app will automatically update to this branch at launch (it's stored in the
 .labmanager directory under your gigantum directory).
+
+Other useful tools
+------------------
+
+For a GUI to clean up your Docker context, the easiest tool is portainer, which can 
+itself be run via Docker. See their website for up-to-date instructions for use, or just run:
+
+    docker run --rm -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
