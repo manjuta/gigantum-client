@@ -1,7 +1,8 @@
 import logging
 import os
-import subprocess
 import time
+import subprocess
+from subprocess import Popen, PIPE
 
 import selenium
 from selenium.common.exceptions import NoSuchElementException
@@ -11,8 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.action_chains import ActionChains
 
-from .testutils import unique_project_description, load_credentials
-from .graphql_helpers import list_remote_datasets
+from .testutils import load_credentials, unique_dataset_name, unique_project_description
 
 
 class CssElement:
@@ -24,28 +24,38 @@ class CssElement:
         return self.find()
 
     def find(self):
-        """Immediately try to find and return the element.
-        raises NoSuchElementException if selector doesn't match anything"""
+        """Immediately try to find and return the element."""
         return self.driver.find_element_by_css_selector(self.selector)
 
     def click(self):
-        """Immediately try to find and return the element. """
+        """Immediately try to find and click the element."""
         return self.find().click()
 
-    def is_displayed(self):
-        return self.find().is_displayed()
-
-    def wait(self, nsec: int = 10):
-        """Block until the element is visible, and then return it. """
+    def wait_to_appear(self, nsec: int = 10):
+        """Wait until the element appears."""
         t0 = time.time()
         try:
             wait = WebDriverWait(self.driver, nsec)
-            time.sleep(0.1)
             wait.until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, self.selector)))
-            return self.find()
         except Exception as e:
             tf = time.time()
-            m = f'Timed out finding {self.selector} after {tf-t0:.1f}sec'
+            m = f'Timed out on {self.selector} after {tf-t0:.1f}sec'
+            logging.error(m)
+            if not str(e).strip():
+                raise ValueError(m)
+            else:
+                raise e
+        return self.find()
+
+    def wait_to_disappear(self, nsec: int = 10):
+        """Wait until the element disappears."""
+        t0 = time.time()
+        try:
+            wait = WebDriverWait(self.driver, nsec)
+            wait.until(expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, self.selector)))
+        except Exception as e:
+            tf = time.time()
+            m = f'Timed out on {self.selector} after {tf - t0:.1f}sec'
             logging.error(m)
             if not str(e).strip():
                 raise ValueError(m)
@@ -60,10 +70,6 @@ class CssElement:
         except NoSuchElementException:
             return False
 
-    def contains_text(self, text: str) -> bool:
-        """Does *text* exist in the text of the specified element?"""
-        return text in self.find().text
-
 
 class UiComponent:
     def __init__(self, driver: selenium.webdriver):
@@ -77,7 +83,7 @@ class Auth0LoginElements(UiComponent):
 
     @property
     def auth0_lock_widget(self):
-        return CssElement(self.driver, "form.auth0-lock-widget")
+        return CssElement(self.driver, ".auth0-lock-form")
 
     @property
     def auth0_lock_button(self):
@@ -89,23 +95,24 @@ class Auth0LoginElements(UiComponent):
 
     @property
     def username_input(self):
-        return CssElement(self.driver, ".auth0-lock-input[name = username]")
+        return CssElement(self.driver, ".auth0-lock-input[name=username]")
 
     @property
     def password_input(self):
-        return CssElement(self.driver, ".auth0-lock-input[name = password]")
+        return CssElement(self.driver, ".auth0-lock-input[name=password]")
 
     @property
     def login_grey_button(self):
         return CssElement(self.driver, ".auth0-lock-submit")
 
     def do_login(self, username, password):
-        self.username_input.wait().click()
+        """Perform login."""
+        self.username_input.wait_to_appear().click()
         self.username_input().send_keys(username)
-        self.password_input.wait().click()
+        self.password_input.wait_to_appear().click()
         self.password_input().send_keys(password)
         try:
-            self.login_grey_button.wait().click()
+            self.login_grey_button.wait_to_appear().click()
         except:
             pass
 
@@ -128,10 +135,12 @@ class SideBarElements(UiComponent):
         return CssElement(self.driver, "#logout")
 
     def do_logout(self, username):
+        """Perform logout."""
         logging.info(f"Logging out as {username}")
-        self.username_button.wait().click()
-        self.logout_button.wait().click()
-        time.sleep(2)
+        self.username_button.wait_to_appear().click()
+        self.logout_button.wait_to_appear().click()
+        auth0_login_elts = Auth0LoginElements(self.driver)
+        auth0_login_elts.login_green_button.wait_to_appear()
 
 
 class GuideElements(UiComponent):
@@ -148,120 +157,207 @@ class GuideElements(UiComponent):
         return CssElement(self.driver, ".Helper__button--open")
 
     def remove_guide(self):
+        """Remove guide icons and messages."""
         try:
             logging.info("Getting rid of 'Got it!'")
-            self.got_it_button.wait().click()
+            self.got_it_button.wait_to_appear().click()
             logging.info("Turning off guide and helper")
-            self.guide_button.wait().click()
-            self.helper_button.wait().click()
+            self.guide_button.wait_to_appear().click()
+            self.helper_button.wait_to_appear().click()
         except Exception as e:
             logging.warning(e)
+
+
+class ImportProjectElements(UiComponent):
+    @property
+    def import_existing_button(self):
+        return CssElement(self.driver, ".btn--import~.btn--import")
+
+    @property
+    def project_url_input(self):
+        return CssElement(self.driver, ".Import__input")
+
+    @property
+    def import_project_file_area(self):
+        return CssElement(self.driver, ".DropZone")
+
+    @property
+    def import_project_button(self):
+        return CssElement(self.driver, ".Btn--last")
+
+    def import_project_via_url(self, project_url):
+        """Import a project via the project url."""
+        _, owner, project_title = project_url.split('/')
+        logging.info(f"Importing project {project_title} via url")
+        self.import_existing_button.wait_to_appear().click()
+        self.project_url_input.find().send_keys(project_url)
+        project_control = ProjectControlElements(self.driver)
+        self.import_project_button.wait_to_appear().click()
+        project_control.container_status_building.wait_to_appear(15)
+        project_control.container_status_stopped.wait_to_appear(500)
+
+    def import_project_via_zip_file_drag_and_drop(self, file_path):
+        """Import a project via zip file drag and drop in the zip file drop zone."""
+        project_zip_file = file_path.rsplit("/", 1)[1]
+        logging.info(f"Importing project {project_zip_file} via zip file drag and drop")
+        self.import_existing_button.wait_to_appear().click()
+        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
+            js_script = js_file.read()
+        file_input = self.driver.execute_script(js_script, self.import_project_file_area.find(), 0, 0)
+        file_input.send_keys(file_path)
+        self.import_project_button.wait_to_appear().click()
+        project_control = ProjectControlElements(self.driver)
+        project_control.container_status_building.wait_to_appear(15)
+        project_control.container_status_stopped.wait_to_appear(500)
 
 
 class AddProjectElements(UiComponent):
     @property
     def create_new_button(self):
-        return self.driver.find_element_by_css_selector(".btn--import")
+        return CssElement(self.driver, ".btn--import")
 
     @property
     def project_title_input(self):
-        return self.driver.find_element_by_css_selector(".CreateLabbook input")
+        return CssElement(self.driver, ".CreateLabbook input")
 
     @property
     def project_description_input(self):
-        return self.driver.find_element_by_css_selector(".CreateLabbook__description-input")
+        return CssElement(self.driver, ".CreateLabbook__description-input")
 
     @property
     def project_continue_button(self):
-        return self.driver.find_element_by_xpath("//button[contains(text(), 'Continue')]")
+        return CssElement(self.driver, ".CreateModal__buttons > .ButtonLoader")
 
 
 class AddProjectBaseElements(UiComponent):
     @property
     def arrow_button(self):
-        return self.driver.find_element_by_css_selector(".slick-arrow slick-next")
+        return CssElement(self.driver, ".slick-arrow slick-next")
 
     @property
     def create_project_button(self):
-        return self.driver.find_element_by_css_selector(".ButtonLoader ")
-
-    @property
-    def projects_page_button(self):
-        return self.driver.find_element_by_css_selector(".SideBar__icon")
+        return CssElement(self.driver, ".ButtonLoader")
 
     @property
     def py2_minimal_base_button(self):
-        return self.driver.find_element_by_css_selector("h6[data-name='python2-minimal']")
+        return CssElement(self.driver, "h6[data-name='python2-minimal']")
 
     @property
     def py3_minimal_base_button(self):
-        return self.driver.find_element_by_css_selector("h6[data-name='python3-minimal']")
+        return CssElement(self.driver, "h6[data-name='python3-minimal']")
 
     @property
     def py3_data_science_base_button(self):
-        return self.driver.find_element_by_css_selector("h6[data-name='python3-data-science']")
+        return CssElement(self.driver, "h6[data-name='python3-data-science']")
 
     @property
     def r_tidyverse_base_button(self):
-        return self.driver.find_element_by_css_selector("h6[data-name='r-tidyverse']")
+        return CssElement(self.driver, "h6[data-name='r-tidyverse']")
 
     @property
     def rstudio_base_button(self):
-        return self.driver.find_element_by_css_selector("h6[data-name='rstudio-server']")
+        return CssElement(self.driver, "h6[data-name='rstudio-server']")
+
+
+class ProjectControlElements(UiComponent):
+    @property
+    def start_stop_container_button(self):
+        return CssElement(self.driver, ".ContainerStatus__toggle-btn")
+
+    @property
+    def container_status_stopped(self):
+        return CssElement(self.driver, ".flex>.Stopped")
+
+    @property
+    def container_status_building(self):
+        return CssElement(self.driver, ".flex>.Building")
+
+    @property
+    def container_status_running(self):
+        return CssElement(self.driver, ".flex>.Running")
+
+    @property
+    def container_status_rebuild(self):
+        return CssElement(self.driver, ".flex>.Rebuild")
+
+    @property
+    def container_status_publishing(self):
+        return CssElement(self.driver, ".flex>.Publishing")
+
+    @property
+    def container_status_syncing(self):
+        return CssElement(self.driver, ".flex>.Syncing")
+
+    @property
+    def footer_notification_message(self):
+        return CssElement(self.driver, ".Footer__messageList")
+
+    @property
+    def close_footer_notification_button(self):
+        return CssElement(self.driver, ".Footer__messageContainer > .Footer__disc-button")
+
+    @property
+    def devtool_launch_button(self):
+        return CssElement(self.driver, ".DevTools__btn--launch")
+
+    def launch_devtool(self, tool_name='dev tool'):
+        """Launch a dev tool, then switch to it.
+        tool_name:
+            Name of the dev tool, used only for messages
+        """
+        logging.info(f"Switching to {tool_name}")
+        self.devtool_launch_button.wait_to_appear().click()
+        self.open_devtool_tab(tool_name)
+
+    def open_devtool_tab(self, tool_name) -> None:
+        """Wait for dev tool tab, then switch to it.
+        tool_name:
+            Name of the dev tool, used only in Exception message
+        """
+        # Starting a dev tool may take a long time, hence the 35 second timeout
+        waiting_start = time.time()
+        window_handles = self.driver.window_handles
+        while len(window_handles) == 1:
+            window_handles = self.driver.window_handles
+            if time.time() - waiting_start > 45:
+                raise ValueError(f'Timed out waiting for {tool_name} tab (35 second max)')
+        self.driver.switch_to.window(window_handles[1])
+
+    def open_gigantum_client_tab(self) -> None:
+        """Switch to the Gigantum Client tab."""
+        window_handles = self.driver.window_handles
+        self.driver.switch_to.window(window_handles[0])
+
+
+class OverviewElements(UiComponent):
+    @property
+    def project_description(self):
+        return CssElement(self.driver, ".Description__text")
+
+
+class ActivityElements(UiComponent):
+    @property
+    def link_activity_tab(self):
+        return CssElement(self.driver, "li#activity > a")
+
+    @property
+    def first_card_label(self):
+        return CssElement(self.driver, "h6.ActivityCard__commit-message")
+
+    @property
+    def first_card_img(self):
+        """Returns the first img in an Activity Detail List - not necessarily from the first list!"""
+        return CssElement(self.driver, "li.DetailsRecords__item img")
 
 
 class EnvironmentElements(UiComponent):
-    @property
-    def environment_tab_button(self):
-        return CssElement(self.driver, "#environment")
-
     @property
     def add_packages_button(self):
         return CssElement(self.driver, ".Btn__plus--featurePosition")
 
     @property
-    def package_name_input(self):
-        return CssElement(self.driver, ".AddPackageForm__name input")
-
-    @property
-    def version_name_input(self):
-        return CssElement(self.driver, ".PackageDependencies__input--version")
-
-    @property
-    def add_requirements_file_button(self):
-        return CssElement(self.driver, ".AddPackages__header--file")
-
-    @property
-    def add_button(self):
-        return CssElement(self.driver, ".Btn__add")
-
-    @property
-    def install_packages_button(self):
-        return CssElement(self.driver, ".PackageQueue__buttons > .Btn:nth-child(2)")
-
-    @property
-    def package_info_table_version_one(self):
-        return CssElement(self.driver, f".PackageRow:nth-child(1) .PackageRow__version")
-
-    @property
-    def package_info_table_version_two(self):
-        return CssElement(self.driver, f".PackageRow:nth-child(2) .PackageRow__version")
-
-    @property
-    def package_info_table_version_three(self):
-        return CssElement(self.driver, f".PackageRow:nth-child(3) .PackageRow__version")
-
-    @property
-    def custom_docker_edit_button(self):
-        return CssElement(self.driver, ".CustomDockerfile__content .Btn")
-
-    @property
-    def custom_docker_text_input(self):
-        return CssElement(self.driver, ".CustomDockerfile__content textarea")
-
-    @property
-    def custom_docker_save_button(self):
-        return CssElement(self.driver, ".CustomDockerfile__content-save-button")
+    def add_packages_modal(self):
+        return CssElement(self.driver, "#modal")
 
     @property
     def package_manager_dropdown(self):
@@ -276,8 +372,8 @@ class EnvironmentElements(UiComponent):
         return CssElement(self.driver, ".Dropdown__item:nth-child(3)")
 
     @property
-    def close_install_window(self):
-        return CssElement(self.driver, ".align-self--end:nth-child(3)")
+    def package_name_input(self):
+        return CssElement(self.driver, ".AddPackageForm__name input")
 
     @property
     def specify_version_button(self):
@@ -288,8 +384,44 @@ class EnvironmentElements(UiComponent):
         return CssElement(self.driver, "input:nth-child(3)")
 
     @property
-    def advanced_configuration_button(self):
-        return CssElement(self.driver, ".Btn__advanced")
+    def package_version_input(self):
+        return CssElement(self.driver, ".PackageDependencies__input--version")
+
+    @property
+    def add_button(self):
+        return CssElement(self.driver, ".Btn__add")
+
+    @property
+    def add_requirements_file_button(self):
+        return CssElement(self.driver, ".AddPackages__header--file")
+
+    @property
+    def add_requirements_file_area(self):
+        return CssElement(self.driver, ".Dropbox")
+
+    @property
+    def add_requirements_file_information(self):
+        return CssElement(self.driver, ".Requirements__dropped-file")
+
+    @property
+    def install_packages_button(self):
+        return CssElement(self.driver, ".PackageQueue__buttons > .Btn:nth-child(2)")
+
+    @property
+    def package_info_area(self):
+        return CssElement(self.driver, ".PackageBody p")
+
+    @property
+    def package_info_table_version_one(self):
+        return CssElement(self.driver, ".PackageRow:nth-child(1) .PackageRow__version")
+
+    @property
+    def package_info_table_version_two(self):
+        return CssElement(self.driver, ".PackageRow:nth-child(2) .PackageRow__version")
+
+    @property
+    def package_info_table_version_three(self):
+        return CssElement(self.driver, ".PackageRow:nth-child(3) .PackageRow__version")
 
     @property
     def trash_can_button(self):
@@ -302,14 +434,30 @@ class EnvironmentElements(UiComponent):
     @property
     def check_box_trash_can_button(self):
         return CssElement(self.driver, ".Btn__delete-white")
-    
+
+    @property
+    def advanced_configuration_button(self):
+        return CssElement(self.driver, ".Btn__advanced")
+
+    @property
+    def custom_docker_edit_button(self):
+        return CssElement(self.driver, ".CustomDockerfile__content .Btn")
+
+    @property
+    def custom_docker_text_input(self):
+        return CssElement(self.driver, ".CustomDockerfile__content textarea")
+
+    @property
+    def custom_docker_save_button(self):
+        return CssElement(self.driver, ".CustomDockerfile__content-save-button")
+
     @property
     def add_sensitive_file_manager_upload(self):
-        return self.driver.find_element_by_id('add_secret')
+        return CssElement(self.driver, "#add_secret")
 
     @property
     def sensitive_file_label(self):
-        return self.driver.find_element_by_class_name("AddSecret__label")
+        return CssElement(self.driver, ".AddSecret__label")
 
     @property
     def sensitive_file_save_button(self):
@@ -317,110 +465,111 @@ class EnvironmentElements(UiComponent):
 
     @property
     def sensitive_file_table(self):
-        return self.driver.find_elements_by_css_selector(".SecretsTable__name")
+        return CssElement(self.driver, ".SecretsTable__name")
 
     @property
     def add_sensitive_file_location(self):
-        return self.driver.find_element_by_css_selector(".AddSecret__input")
+        return CssElement(self.driver, ".AddSecret__input")
+
+    def open_add_packages_modal(self, username, project_title):
+        """Open Add Packages modal."""
+        self.driver.get(os.environ['GIGANTUM_HOST'] + f'/projects/{username}/{project_title}/environment')
+        self.driver.execute_script("window.scrollBy(0, -400);")
+        self.driver.execute_script("window.scrollBy(0, 400);")
+        self.add_packages_button.wait_to_appear().click()
 
     def specify_package_version(self, version):
+        """Specify package version."""
         self.specify_version_button.click()
         self.specify_version_textbox.find().send_keys(version)
 
-    def open_add_packages_window(self):
-        self.environment_tab_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, -400);")
-        self.driver.execute_script("window.scrollBy(0, 400);")
-        self.add_packages_button.wait().click()
-
     def add_pip_package(self, pip_package, *args):
+        """Add a pip package with optional pip package version."""
         logging.info(f"Adding pip package {pip_package}")
         self.package_name_input.find().send_keys(pip_package)
         try:
             self.specify_package_version(args)
         except:
             pass
-        self.add_button.wait().click()
+        self.add_button.wait_to_appear().click()
 
     def add_conda_package(self, conda_package, version):
-        self.package_manager_dropdown.wait().click()
-        self.conda_package_manager_dropdown.wait().click()
+        """Add a conda package."""
+        self.package_manager_dropdown.wait_to_appear().click()
+        self.conda_package_manager_dropdown.wait_to_appear().click()
         logging.info(f"Adding conda package {conda_package}")
         self.package_name_input.find().send_keys(conda_package)
         self.specify_package_version(version)
-        self.add_button.wait().click()
+        self.add_button.wait_to_appear().click()
 
     def add_apt_package(self, apt_package):
-        self.package_manager_dropdown.wait().click()
-        self.apt_package_manager_dropdown.wait().click()
+        """Add an apt package."""
+        self.package_manager_dropdown.wait_to_appear().click()
+        self.apt_package_manager_dropdown.wait_to_appear().click()
         logging.info(f"Adding apt package {apt_package}")
         self.package_name_input.find().send_keys(apt_package)
-        self.add_button.wait().click()
+        self.add_button.wait_to_appear().click()
 
-    def add_sensitive_file(self, sensitive_file_path,sensitive_file_destination):
-        logging.info("Adding sensitive file")
-        file_name = sensitive_file_path.split("/")
-        file_name = file_name[len(file_name)-1]
-        self.environment_tab_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, 600);")
-        self.advanced_configuration_button.wait().click()
-        self.driver.execute_script("window.scrollBy(0, 600);")
-        self.add_sensitive_file_manager_upload.send_keys(sensitive_file_path)
-        self.add_sensitive_file_location.click()
-        self.add_sensitive_file_location.send_keys(Keys.BACKSPACE)
-        self.add_sensitive_file_location.send_keys(Keys.BACKSPACE)
-        self.add_sensitive_file_location.send_keys(sensitive_file_destination)
-        assert self.sensitive_file_label.text == file_name
-        self.sensitive_file_save_button.click()
-        time.sleep(1)
-        assert self.sensitive_file_table[0].text == file_name
-
-    def install_queued_packages(self, timeout_sec):
-        logging.info('Waiting for packages to validate')
-        for i in range(timeout_sec):
-            time.sleep(1)
-            content = self.driver.find_element_by_css_selector('.PackageQueue__buttons > .Btn:nth-child(2)')
-            if content.is_enabled():
-                break
+    def drag_drop_requirements_file_in_drop_zone(self, file_content="gigantum==0.19"):
+        """Drag and drop a requirements file into the requirements file drop zone."""
+        logging.info("Dragging and dropping a requirements.txt file into the drop zone")
+        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
+            js_script = js_file.read()
+        if os.name == 'nt':
+            file_path = "C:\\tmp\\requirements.txt"
         else:
-            logging.error('Packages took too long to validate')
-            raise NoSuchElementException('Packages took too long to validate')
-        logging.info('Installing packages')
+            file_path = "/tmp/requirements.txt"
+        with open(file_path, "w") as example_file:
+            example_file.write(file_content)
+        file_input = self.driver.execute_script(js_script, self.add_requirements_file_area.find(), 0, 0)
+        file_input.send_keys(file_path)
+        self.add_requirements_file_information.wait_to_appear()
+
+    def install_queued_packages(self, nsec: int = 300):
+        """Install all queued packages inside the project container."""
+        logging.info("Waiting for packages to validate")
+        for t in range(nsec):
+            try:
+                if self.install_packages_button.find().is_enabled():
+                    break
+                else:
+                    time.sleep(0.5)
+            except:
+                logging.error(f"Packages took longer than {t} seconds to validate")
+                raise NoSuchElementException(f"Packages took longer than {t} seconds to validate")
+        logging.info("Installing packages")
         self.install_packages_button.click()
-        time.sleep(5)
-        self.close_install_window.wait().click()
+        self.add_packages_modal.wait_to_disappear(nsec)
         project_control = ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(timeout_sec)
+        project_control.container_status_stopped.wait_to_appear(200)
 
     def delete_package_via_trash_can_button(self, package):
+        """Delete a package via the trash can icon."""
         logging.info(f"Deleting {package} using the trash can button")
         project_control = ProjectControlElements(self.driver)
         try:
-            project_control.close_notification_menu_button.click()
+            project_control.close_footer_notification_button.click()
         except:
             pass
         self.trash_can_button.click()
-        time.sleep(5)
-        project_control.container_status_stopped.wait()
+        project_control.container_status_building.wait_to_appear()
+        project_control.container_status_stopped.wait_to_appear(20)
 
     def delete_package_via_check_box_button(self, package):
+        """Delete a package via the check box and pop up trash can icon."""
         logging.info(f"Deleting {package} using the check box button")
         project_control = ProjectControlElements(self.driver)
         try:
-            project_control.close_notification_menu_button.click()
+            project_control.close_footer_notification_button.click()
         except:
             pass
         self.check_box_button.click()
-        time.sleep(2)
-        self.check_box_trash_can_button.click()
-        time.sleep(5)
-        project_control.container_status_stopped.wait()
-
-    def check_if_packages_is_empty(self):
-        return CssElement(self.driver, ".PackageBody p").contains_text(
-            "No packages have been added to this project")
+        self.check_box_trash_can_button.wait_to_appear().click()
+        project_control.container_status_building.wait_to_appear()
+        project_control.container_status_stopped.wait_to_appear(20)
 
     def obtain_container_pip_packages(self, username, project_title):
+        """Check which pip packages are installed inside the project container."""
         container_id = subprocess.check_output(["docker", "ps", "-aqf",
                                                 f"name=gmlb-{username}-{username}-{project_title}"
                                                 ]).decode('utf-8').strip()
@@ -428,19 +577,31 @@ class EnvironmentElements(UiComponent):
                                                           "pip", "freeze"]).decode('utf-8').strip()
         return container_pip_packages
 
-    def add_custom_docker_instructions(self, docker_instruction):
+    def add_custom_docker_instructions(self, username, project_title, docker_instruction):
+        """Add a custom Docker instruction."""
         logging.info("Adding custom Docker instruction")
-        self.environment_tab_button.wait().click()
-        time.sleep(2)
+        self.driver.get(os.environ['GIGANTUM_HOST'] + f'/projects/{username}/{project_title}/environment')
         self.driver.execute_script("window.scrollBy(0, 600);")
-        self.advanced_configuration_button.wait().click()
+        self.advanced_configuration_button.wait_to_appear().click()
         self.custom_docker_edit_button.find().click()
-        time.sleep(2)
-        self.custom_docker_text_input.find().send_keys(docker_instruction)
-        time.sleep(2)
+        self.custom_docker_text_input.wait_to_appear().send_keys(docker_instruction)
         self.driver.execute_script("window.scrollBy(0, 400);")
-        self.custom_docker_save_button.wait().click()
-        time.sleep(5)
+        self.custom_docker_save_button.wait_to_appear().click()
+
+    def add_sensitive_file(self, username, project_title, sensitive_file_path, sensitive_file_destination):
+        """Add a sensitive file."""
+        logging.info("Adding sensitive file")
+        self.driver.get(os.environ['GIGANTUM_HOST'] + f'/projects/{username}/{project_title}/environment')
+        self.driver.execute_script("window.scrollBy(0, 600);")
+        self.advanced_configuration_button.wait_to_appear().click()
+        self.driver.execute_script("window.scrollBy(0, 600);")
+        self.add_sensitive_file_manager_upload.find().send_keys(sensitive_file_path)
+        self.add_sensitive_file_location.click()
+        self.add_sensitive_file_location.find().send_keys(Keys.BACKSPACE)
+        self.add_sensitive_file_location.find().send_keys(Keys.BACKSPACE)
+        self.add_sensitive_file_location.find().send_keys(sensitive_file_destination)
+        self.sensitive_file_save_button.click()
+        self.sensitive_file_table.wait_to_appear()
 
 
 class JupyterLabElements(UiComponent):
@@ -458,7 +619,8 @@ class JupyterLabElements(UiComponent):
 
     @property
     def code_output(self):
-        return self.driver.find_element_by_css_selector(".jp-OutputArea-output>pre")
+        return CssElement(self.driver, ".jp-OutputArea-output > pre")
+
 
 class RStudioElements(UiComponent):
     @property
@@ -487,9 +649,9 @@ class RStudioElements(UiComponent):
         return CssElement(self.driver, 'table#rstudio_label_r_notebook_command')
 
     def new_notebook(self):
-        """Create a new notebook"""
+        """Create a new notebook."""
         self.new_button.click()
-        self.r_notebook.wait().click()
+        self.r_notebook.wait_to_appear().click()
 
     def ctrl_shift_enter(self, actions):
         """Useful for executing a code block"""
@@ -497,153 +659,97 @@ class RStudioElements(UiComponent):
             .key_up(Keys.SHIFT).key_up(Keys.CONTROL).perform()
 
 
-class ImportProjectElements(UiComponent):
+class FileBrowserElements(UiComponent):
     @property
-    def import_existing_button(self):
-        return CssElement(self.driver, ".btn--import~.btn--import")
-
-    @property
-    def project_url_input(self):
-        return CssElement(self.driver, ".Import__input")
+    def file_browser_area(self):
+        return CssElement(self.driver, ".Dropbox")
 
     @property
-    def import_button(self):
-        # TODO This needs to be made more specific
-        return CssElement(self.driver, ".Btn--last")
+    def file_browser_message(self):
+        return CssElement(self.driver, ".Dropbox--menu")
 
     @property
-    def overview_tab(self):
-        return CssElement(self.driver, "#overview")
+    def file_information(self):
+        return CssElement(self.driver, ".File__text")
 
     @property
-    def import_project_drop_box(self):
-        return CssElement(self.driver,'.DropZone')
+    def untracked_directory(self):
+        return CssElement(self.driver, ".Folder__cell")
 
-    def local_project_card_titles(self):
-        titles=[]
-        projects = self.driver.find_elements_by_css_selector('.LocalLabbooks__panel-title')
-        for project in projects:
-            titles.append(project.text)
-        return titles
+    @property
+    def trash_can_button(self):
+        return CssElement(self.driver, ".Btn__delete-secondary")
 
-    def import_project_via_url(self, project_url):
-        self.import_existing_button.wait().click()
-        self.project_url_input.find().send_keys(project_url)
-        try:
-            project_control = ProjectControlElements(self.driver)
-            project_control.close_notification_menu_button.click()
-        except e as exception:
-            logging.warning(f'Could not close notification window: {e}')
-        self.import_button.wait().click()
-        self.overview_tab.wait(90)
-        # Wait to ensure that the container changes from stopped to building
-        time.sleep(5)
+    @property
+    def delete_file_button(self):
+        return CssElement(self.driver, ".Btn__delete-white")
 
-    def import_project_drag_and_drop(self,filepath):
+    @property
+    def confirm_delete_file_button(self):
+        return CssElement(self.driver, ".ActionsMenu__popup>.justify--space-around>.File__btn--add")
+
+    @property
+    def link_dataset_button(self):
+        return CssElement(self.driver, ".Btn__FileBrowserAction--link")
+
+    @property
+    def link_dataset_modal(self):
+        return CssElement(self.driver, ".LinkModal__header-text")
+
+    @property
+    def link_dataset_card_button(self):
+        return CssElement(self.driver, "div[data-selenium-id='LinkCard']")
+
+    @property
+    def confirm_link_dataset_button(self):
+        return CssElement(self.driver, "button[data-selenium-id='ButtonLoader']")
+
+    @property
+    def linked_dataset_card_name(self):
+        return CssElement(self.driver, ".DatasetCard__name")
+
+    def drag_drop_file_in_drop_zone(self, file_content="sample text", output_data_target=False):
+        """Drag and drop a file into a file browser drop zone."""
         logging.info("Dragging and dropping a file into the drop zone")
         with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
             js_script = js_file.read()
-        file_input = self.driver.execute_script(js_script, self.import_project_drop_box.find(), 0, 0)
-        file_input.send_keys(filepath)
-        self.import_button.wait().click()
-        self.overview_tab.wait(90)
-
-
-class DatasetElements(UiComponent):
-    @property
-    def dataset_page_tab(self):
-        return CssElement(self.driver, 'a[href="/datasets/local"]')
-
-    @property
-    def create_new_button(self):
-        return CssElement(self.driver, ".btn--import")
-
-    @property
-    def dataset_title_input(self):
-        return CssElement(self.driver, ".CreateLabbook input")
-
-    @property
-    def dataset_description_input(self):
-        return CssElement(self.driver, ".CreateLabbook__description-input")
-
-    @property
-    def dataset_continue_button(self):
-        return CssElement(self.driver, ".ButtonLoader")
-
-    @property
-    def gigantum_cloud_button(self):
-        return self.driver.find_element_by_css_selector(".BaseCard")
-
-    @property
-    def data_tab(self):
-        return CssElement(self.driver, '#data')
-
-    @property
-    def managed_cloud_card_selector(self):
-        # TODO - We need a better selector for this
-        return CssElement(self.driver, '.BaseCard-wrapper')
-
-    @property
-    def create_dataset_button(self):
-        return CssElement(self.driver, '.ButtonLoader')
-
-    @property
-    def publish_dataset_button(self):
-        return CssElement(self.driver, ".Btn--branch--sync--publish")
-
-    @property
-    def dataset_cloud_page(self):
-        return CssElement(self.driver, ".Tab--cloud")
-
-    @property
-    def title(self):
-        return CssElement(self.driver, ".TitleSection__namespace-title")
-
-    @property
-    def sync_button(self):
-        return CssElement(self.driver, 'button[data-tooltip="Sync changes to Gigantum Hub"]')
-
-    @property
-    def publish_confirm_button(self):
-        return CssElement(self.driver, ".VisibilityModal__buttons .Btn--last")
-
-    def publish_dataset(self):
-        """
-        Publish a dataset to cloud and navigate to the cloud.
-        """
-        logging.info("Publish dataset to cloud")
-        self.publish_dataset_button.wait().click()
-        # TODO: figure out why this breaks if time.sleep is lowered
+        if os.name == 'nt':
+            file_path = "C:\\tmp\\sample-upload.txt"
+        else:
+            file_path = "/tmp/sample-upload.txt"
+        with open(file_path, "w") as example_file:
+            example_file.write(file_content)
+        # This deals with the untracked directory in output data
+        if output_data_target:
+            file_input = self.driver.execute_script(js_script, self.untracked_directory.find(), 0, 0)
+        else:
+            file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
+        file_input.send_keys(file_path)
+        # Time sleep consistent and necessary
         time.sleep(5)
-        self.publish_confirm_button.wait().click()
-        self.sync_button.wait(30)
-        dss = list_remote_datasets()
-        owner, name = self.title().text.split('/')
-        owner = owner.strip()
-        name = name.strip()
-        assert (owner, name) in dss, f"Cannot find {owner}/{name} in remote datasets."
-        logging.info(f"Published dataset {owner}/{name}.")
 
-    def create_dataset(self, dataset_name: str) -> str:
-        logging.info(f"Creating a new dataset: {dataset_name}...")
-        self.driver.get(os.environ['GIGANTUM_HOST'] + '/datasets/local')
-        self.dataset_page_tab.wait().click()
-        self.create_new_button.wait().click()
-        self.dataset_title_input.wait().click()
-        self.dataset_title_input().send_keys(dataset_name)
-        self.dataset_description_input().click()
-        self.dataset_description_input().send_keys(unique_project_description())
-        self.dataset_continue_button().click()
-        wait = WebDriverWait(self.driver, 20)
-        wait.until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, ".TitleSection")))
-        logging.info(f"Finished creating dataset {dataset_name}")
-        return dataset_name
+    def link_dataset(self, dataset_title, project_title):
+        """Link a dataset to a project."""
+        logging.info(f"Linking the dataset {dataset_title} to project {project_title}")
+        self.link_dataset_button.wait_to_appear().click()
+        self.link_dataset_card_button.wait_to_appear().click()
+        project_control_elts = ProjectControlElements(self.driver)
+        try:
+            project_control_elts.close_footer_notification_button.wait_to_appear(5).click()
+        except:
+            pass
+        self.confirm_link_dataset_button.wait_to_appear().click()
+        self.link_dataset_modal.wait_to_disappear()
 
 
 class BranchElements(UiComponent):
     @property
     def create_branch_button(self):
         return CssElement(self.driver, ".Btn--branch--create")
+
+    @property
+    def create_branch_modal(self):
+        return CssElement(self.driver, "#modal")
 
     @property
     def branch_name_input(self):
@@ -659,7 +765,7 @@ class BranchElements(UiComponent):
 
     @property
     def upper_left_branch_local_only(self):
-        return CssElement(self.driver, ".BranchMenu__dropdown-btn>div[data-tooltip='Local only']")
+        return CssElement(self.driver, ".BranchMenu__dropdown-btn > div[data-tooltip='Local only']")
 
     @property
     def upper_left_branch_drop_down_button(self):
@@ -670,8 +776,16 @@ class BranchElements(UiComponent):
         return CssElement(self.driver, ".BranchMenu__text")
 
     @property
+    def upper_left_switching_branch(self):
+        return CssElement(self.driver, ".hidden")
+
+    @property
     def manage_branches_button(self):
-        return CssElement(self.driver, ".Btn--branch--manage")
+        return CssElement(self.driver, ".BranchMenu__buttons button[data-tooltip='Manage Branches']")
+
+    @property
+    def manage_branches_modal(self):
+        return CssElement(self.driver, ".Branches__title")
 
     @property
     def manage_branches_branch_name(self):
@@ -683,41 +797,44 @@ class BranchElements(UiComponent):
 
     @property
     def manage_branches_branch_container(self):
-        return CssElement(self.driver, ".Branches__branch>.Branches__base-section>.Branches__branchname-container")
+        return CssElement(self.driver, ".Branches__branch > .Branches__base-section > .Branches__branchname-container")
 
     @property
     def manage_branches_merge_branch_button(self):
-        return CssElement(self.driver, ".Branches__btn--merge")
+        return CssElement(self.driver, ".Branches__actions-section > .Branches__btn--merge")
 
     @property
     def manage_branches_confirm_merge_branch_button(self):
         return CssElement(self.driver, ".Branches__Modal-confirm")
 
     def create_local_branch(self, branch_name):
+        """Create a local branch within a project."""
         logging.info(f"Creating a new local branch {branch_name}")
-        self.create_branch_button.wait().click()
+        self.create_branch_button.wait_to_appear().click()
         self.branch_name_input.find().send_keys(branch_name)
-        self.create_button.wait().click()
+        self.create_button.wait_to_appear().click()
+        self.create_branch_modal.wait_to_disappear()
 
     def switch_to_alternate_branch(self):
-        """ Switch from the current branch to the alternate branch """
+        """Switch from the current branch to the alternate branch."""
         logging.info("Switching from current branch to alternate branch")
-        self.upper_left_branch_drop_down_button.find().click()
-        self.upper_left_first_branch_button.wait().click()
-        time.sleep(4)
+        self.upper_left_branch_drop_down_button.wait_to_appear().click()
+        self.upper_left_first_branch_button.wait_to_appear().click()
+        self.upper_left_switching_branch.wait_to_disappear()
+        # Time sleep is consistent and necessary
+        time.sleep(5)
 
     def merge_alternate_branch(self):
-        """ Merge the alternate branch into the current branch """
+        """Merge the alternate branch into the current branch."""
         logging.info("Merging alternate branch into current branch")
         project_control= ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(30)
-        self.manage_branches_button.wait().click()
+        project_control.container_status_stopped.wait_to_appear(30)
+        self.manage_branches_button.wait_to_appear().click()
         branch_container_hover = ActionChains(self.driver).move_to_element(self.manage_branches_branch_container.find())
         branch_container_hover.perform()
-        self.manage_branches_merge_branch_button.wait().click()
-        time.sleep(2)
-        self.manage_branches_confirm_merge_branch_button.wait().click()
-        time.sleep(8)
+        self.manage_branches_merge_branch_button.wait_to_appear().click()
+        self.manage_branches_confirm_merge_branch_button.wait_to_appear().click()
+        self.manage_branches_confirm_merge_branch_button.wait_to_disappear()
 
 
 class CloudProjectElements(UiComponent):
@@ -727,7 +844,7 @@ class CloudProjectElements(UiComponent):
 
     @property
     def publish_confirm_button(self):
-        return CssElement(self.driver, ".VisibilityModal__buttons .Btn--last")
+        return CssElement(self.driver, ".VisibilityModal__buttons > .Btn--last")
 
     @property
     def open_collaborators_button(self):
@@ -751,7 +868,7 @@ class CloudProjectElements(UiComponent):
 
     @property
     def add_collaborator_button(self):
-        return CssElement(self.driver, ".Btn__plus")
+        return CssElement(self.driver, ".ButtonLoader__collaborator")
 
     @property
     def close_collaborators_button(self):
@@ -762,12 +879,12 @@ class CloudProjectElements(UiComponent):
         return CssElement(self.driver, ".Btn--branch--sync")
 
     @property
-    def sync_cloud_project_message(self):
-        return CssElement(self.driver, ".Footer__messageList")
+    def delete_cloud_project_button(self):
+        return CssElement(self.driver, ".Card:nth-child(1) .Btn__dashboard--delete")
 
     @property
-    def delete_cloud_project_button(self):
-        return CssElement(self.driver,".Card:nth-child(1) .Btn__dashboard--delete")
+    def delete_cloud_project_modal(self):
+        return CssElement(self.driver, ".Modal__header")
 
     @property
     def delete_cloud_project_input(self):
@@ -794,237 +911,179 @@ class CloudProjectElements(UiComponent):
         return CssElement(self.driver, ".TitleSection__namespace-title")
 
     @property
+    def merge_conflict_modal(self):
+        return CssElement(self.driver, "div[data-selenium-id='ForceSync']")
+
+    @property
     def merge_conflict_use_mine_button(self):
-        return CssElement(self.driver, ".ForceSync__buttonContainer > button:nth-child(1)")
+        return CssElement(self.driver, ".ForceSync__buttonContainer button")
 
     @property
     def merge_conflict_use_theirs_button(self):
-        return CssElement(self.driver, ".ForceSync__buttonContainer button:nth-child(2)")
+        return CssElement(self.driver, ".ForceSync__buttonContainer button:nth-of-type(2)")
 
     @property
     def merge_conflict_abort_button(self):
-        return CssElement(self.driver, ".ForceSync__buttonContainer button:nth-child(3)")
+        return CssElement(self.driver, ".ForceSync__buttonContainer button:nth-of-type(3)")
 
-    def publish_private_project(self, project_title):
+    def publish_private_project(self, project_title, *args):
+        """Publish a project as private."""
         logging.info(f"Publishing private project {project_title}")
-        self.publish_project_button.wait().click()
-        self.publish_confirm_button.wait().click()
-        time.sleep(5)
-        project_control= ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait(30)
-        time.sleep(10)
-
-    def add_collaborator_with_permissions(self, project_title, permissions="read"):
-        logging.info(f"Adding a collaborator to project {project_title} with {permissions} permissions")
-        self.open_collaborators_button.find().click()
-        collaborator = load_credentials(user_index=1)[0].rstrip()
-        self.collaborator_input.wait().send_keys(collaborator)
-        if permissions == "read":
-            self.add_collaborator_button.wait().click()
-            time.sleep(2)
-        elif permissions == "write":
-            self.collaborator_permissions_button.wait().click()
-            self.select_write_permissions_button.click()
-            self.add_collaborator_button.wait().click()
-            time.sleep(2)
-        elif permissions == "admin":
-            self.collaborator_permissions_button.wait().click()
-            self.select_admin_permissions_button.click()
-            self.add_collaborator_button.wait().click()
-            time.sleep(2)
-        else:
-            assert False, "An invalid argument was supplied for permissions in add_collaborator_with_permissions"
-        self.close_collaborators_button.find().click()
-        return collaborator
+        self.publish_project_button.wait_to_appear().click()
+        self.publish_confirm_button.wait_to_appear().click()
+        project_control = ProjectControlElements(self.driver)
+        project_control.container_status_publishing.wait_to_appear(30)
+        project_control.container_status_stopped.wait_to_appear(30)
+        # Time sleep necessary or cloud project does not appear in cloud tab
+        # Once the new cloud platform is up, this can be removed
+        time.sleep(15)
 
     def sync_cloud_project(self, project_title):
+        """Sync a published project."""
         logging.info(f"Syncing cloud project {project_title}")
-        self.sync_cloud_project_button.find().click()
-        time.sleep(5)
+        self.sync_cloud_project_button.wait_to_appear().click()
         project_control = ProjectControlElements(self.driver)
-        project_control.container_status_stopped.wait()
+        project_control.container_status_syncing.wait_to_appear(30)
+        project_control.container_status_stopped.wait_to_appear(30)
 
     def delete_cloud_project(self, project_title):
+        """Delete a published project."""
         logging.info(f"Deleting cloud project {project_title}")
         side_bar_elts = SideBarElements(self.driver)
-        side_bar_elts.projects_icon.find().click()
-        self.cloud_tab.wait().click()
-        self.first_cloud_project.wait(20)
-        self.delete_cloud_project_button.find().click()
-        self.delete_cloud_project_input.wait().send_keys(project_title)
-        self.delete_cloud_project_confirm_button.wait().click()
-        time.sleep(10)
+        side_bar_elts.projects_icon.wait_to_appear().click()
+        self.cloud_tab.wait_to_appear().click()
+        self.delete_cloud_project_button.wait_to_appear(30).click()
+        self.delete_cloud_project_input.wait_to_appear().send_keys(project_title)
+        self.delete_cloud_project_confirm_button.wait_to_appear().click()
+        self.delete_cloud_project_modal.wait_to_disappear(30)
+
+    def add_collaborator_with_permissions(self, project_title, permissions="read"):
+        """Add a collaborator with specified permissions to a published project."""
+        logging.info(f"Adding a collaborator to {project_title} with {permissions} permissions")
+        self.open_collaborators_button.wait_to_appear().click()
+        collaborator = load_credentials(user_index=1)[0].rstrip()
+        self.collaborator_input.wait_to_appear().send_keys(collaborator)
+        if permissions == "read":
+            self.add_collaborator_button.wait_to_appear().click()
+            self.add_collaborator_button.wait_to_appear()
+        elif permissions == "write":
+            self.collaborator_permissions_button.wait_to_appear().click()
+            self.select_write_permissions_button.click()
+            self.add_collaborator_button.wait_to_appear().click()
+            self.add_collaborator_button.wait_to_appear()
+        elif permissions == "admin":
+            self.collaborator_permissions_button.wait_to_appear().click()
+            self.select_admin_permissions_button.click()
+            self.add_collaborator_button.wait_to_appear().click()
+            self.add_collaborator_button.wait_to_appear()
+        else:
+            assert False, "An invalid argument was supplied for permissions in add_collaborator_with_permissions"
+        self.close_collaborators_button.wait_to_appear().click()
+        self.close_collaborators_button.wait_to_disappear()
+        return collaborator
+
+    def check_cloud_project_remote_git_repo(self, username, project_title):
+        """Obtain information regarding a remote Git repo for a given project."""
+        project_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username,
+                                    'labbooks', project_title)
+        git_get_remote_command = Popen(['git', 'remote', 'get-url', 'origin'],
+                                                    cwd=project_path, stdout=PIPE, stderr=PIPE)
+        cloud_project_stdout = git_get_remote_command.stdout.readline().decode('utf-8').strip()
+        cloud_project_stderr = git_get_remote_command.stderr.readline().decode('utf-8').strip()
+        return cloud_project_stdout, cloud_project_stderr
 
 
-class ProjectControlElements(UiComponent):
+class DeleteProjectElements(UiComponent):
     @property
-    def start_stop_container_button(self):
-        return CssElement(self.driver, ".ContainerStatus__toggle>.ContainerStatus__toggle-btn")
+    def actions_menu_button(self):
+        return CssElement(self.driver, ".ActionsMenu > .ActionsMenu__btn")
 
     @property
-    def container_status_stopped(self):
-        return CssElement(self.driver, ".flex>.Stopped")
+    def delete_project_modal(self):
+        return CssElement(self.driver, "#modal")
 
     @property
-    def container_status_building(self):
-        return CssElement(self.driver, ".flex>.Building")
+    def delete_project_button(self):
+        return CssElement(self.driver, ".ActionsMenu__item--delete")
 
     @property
-    def container_status_running(self):
-        return CssElement(self.driver, ".flex>.Running")
+    def delete_project_input(self):
+        return CssElement(self.driver, "#deleteInput")
 
     @property
-    def close_notification_menu_button(self):
-        return CssElement(self.driver, ".Footer__disc-button")
+    def confirm_delete_project_button(self):
+        return CssElement(self.driver, ".DeleteLabbook .ButtonLoader")
+
+    def delete_local_project(self, project_name):
+        """Delete a local project."""
+        self.actions_menu_button.click()
+        self.delete_project_button.wait_to_appear().click()
+        self.delete_project_input.wait_to_appear().send_keys(project_name.lstrip())
+        self.confirm_delete_project_button.wait_to_appear().click()
+        self.delete_project_modal.wait_to_disappear()
+
+
+class DatasetElements(UiComponent):
+    @property
+    def datasets_header(self):
+        return CssElement(self.driver, ".Datasets__panel-bar")
 
     @property
-    def devtool_launch_button(self):
-        return CssElement(self.driver, ".DevTools__btn--launch")
+    def dataset_title(self):
+        return CssElement(self.driver, ".TitleSection__namespace-title")
 
-    def launch_devtool(self, tool_name='dev tool'):
-        """Launch a dev tool, then switch to it
-        tool_name:
-            Name of the dev tool, used only for messages
-        """
-        logging.info(f"Switching to {tool_name}")
-        self.devtool_launch_button.wait().click()
-        self.open_devtool_tab(tool_name)
+    @property
+    def publish_project_linked_dataset_button(self):
+        return CssElement(self.driver, ".PublishDatasetsModal__buttons button:nth-of-type(2)")
 
-    def open_devtool_tab(self, tool_name) -> None:
-        """Wait for a new tab, then switch to it
-        tool_name:
-            Name of the dev tool, used only in Exception message
-        """
-        # Starting a dev tool may take a long time, hence the 35 second timeout
+    @property
+    def publish_project_linked_dataset_private_button(self):
+        return CssElement(self.driver, ".Radio input[id='project_private'] + span b")
+
+    def create_dataset(self):
+        """Create a new dataset."""
+        dataset_title = unique_dataset_name()
+        logging.info(f"Creating a new dataset {dataset_title}")
+        self.driver.get(os.environ['GIGANTUM_HOST'] + "/datasets/local")
+        self.datasets_header.wait_to_appear()
+        add_project_elts = AddProjectElements(self.driver)
+        add_project_elts.create_new_button.click()
+        add_project_elts.project_title_input.find().send_keys(dataset_title)
+        add_project_elts.project_description_input.find().send_keys(unique_project_description())
+        add_project_elts.project_continue_button().click()
+        self.dataset_title.wait_to_appear()
+        # Time sleep is consistent and necessary
+        time.sleep(1)
+        return dataset_title
+
+    def publish_dataset(self, dataset_title):
+        """Publish a dataset as private."""
+        logging.info(f"Publishing dataset {dataset_title} to cloud")
+        cloud_project_elts = CloudProjectElements(self.driver)
+        cloud_project_elts.publish_project_button.wait_to_appear().click()
+        cloud_project_elts.publish_confirm_button.wait_to_appear().click()
+        project_control_elts = ProjectControlElements(self.driver)
         waiting_start = time.time()
-        window_handles = self.driver.window_handles
-        while len(window_handles) == 1:
-            window_handles = self.driver.window_handles
-            if time.time() - waiting_start > 35:
-                raise ValueError(f'Timed out waiting for {tool_name} tab (35 second max)')
+        while "Added remote" not in project_control_elts.footer_notification_message.find().text:
+            logging.warning("Dataset is being published")
+            time.sleep(0.5)
+            if time.time() - waiting_start > 45:
+                raise ValueError(f'Timed out waiting for dataset {dataset_title} to publish')
 
-        self.driver.switch_to.window(window_handles[1])
-
-    def open_gigatab(self) -> None:
-        """Switch to the Gigantum Client"""
-        window_handles = self.driver.window_handles
-        self.driver.switch_to.window(window_handles[0])
-
-
-class FileBrowserElements(UiComponent):
-    @property
-    def code_tab(self):
-        return CssElement(self.driver, "#code")
-
-    @property
-    def input_data_tab(self):
-        return CssElement(self.driver, "#inputData")
-
-    @property
-    def data_tab(self):
-        return CssElement(self.driver, "#data")
-
-    @property
-    def requirements_file_area(self):
-        return CssElement(self.driver, ".Dropbox")
-
-    @property
-    def requirements_file_information(self):
-        return CssElement(self.driver, ".Requirements__dropped-file")
-
-    @property
-    def file_browser_area(self):
-        return CssElement(self.driver, ".FileBrowser")
-
-    @property
-    def file_information(self):
-        return CssElement(self.driver, ".File__text div span")
-
-    @property
-    def check_file_check_box(self):
-        return CssElement(self.driver, ".File__row>.CheckboxMultiselect")
-
-    @property
-    def delete_file_button(self):
-        return CssElement(self.driver, ".Btn__delete-white")
-
-    @property
-    def confirm_delete_file_button(self):
-        return CssElement(self.driver, ".justify--space-around>.File__btn--add")
-
-    @property
-    def favorite_file_button_off(self):
-        return CssElement(self.driver, ".Btn__Favorite-off")
-
-    @property
-    def favorite_file_button_on(self):
-        return CssElement(self.driver, ".Btn__Favorite-on")
-
-    @property
-    def link_dataset_button(self):
-        return CssElement(self.driver, ".Btn__FileBrowserAction--link")
-
-    def drag_drop_requirements_file_in_drop_zone(self, file_content="gigantum==0.19"):
-        logging.info("Dragging and dropping a requirements.txt file into the drop zone")
-        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
-            js_script = js_file.read()
-        if os.name == 'nt':
-            file_path = "C:\\tmp\\requirements.txt"
-        else:
-            file_path = "/tmp/requirements.txt"
-        with open(file_path, "w") as example_file:
-            example_file.write(file_content)
-        file_input = self.driver.execute_script(js_script, self.requirements_file_area.find(), 0, 0)
-        file_input.send_keys(file_path)
-        self.requirements_file_information.wait()
-        time.sleep(1)
-
-    def is_file_browser_empty(self):
-        return CssElement(self.driver, ".Dropbox--menu").contains_text('Drag and drop files here')
-
-    def drag_drop_file_in_drop_zone(self, file_content="Sample Text"):
-        logging.info("Dragging and dropping a file into the drop zone")
-        with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
-            js_script = js_file.read()
-        if os.name == 'nt':
-            file_path = "C:\\tmp\\sample-upload.txt"
-        else:
-            file_path = "/tmp/sample-upload.txt"
-        with open(file_path, "w") as example_file:
-            example_file.write(file_content)
-        file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
-        file_input.send_keys(file_path)
-        self.file_information.wait()
-        time.sleep(1)
-
-    def link_dataset(self, ds_owner: str, ds_name: str):
-        logging.info("Linking the dataset to project")
-        self.input_data_tab.wait().click()
-        project_control = ProjectControlElements(self.driver)
-        time.sleep(5)
-        project_control.container_status_stopped.wait(120)
-        self.link_dataset_button.wait().click()
-        time.sleep(4)
-        self.driver.find_element_by_css_selector(".LinkCard__details").click()
-        time.sleep(4)
-        wait = WebDriverWait(self.driver, 200)
-        project_control.close_notification_menu_button.wait().click()
-        wait.until(expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, ".Footer__message-title")))
-        self.driver.find_element_by_css_selector(".ButtonLoader ").click()
-        # wait the linking window to disappear
-        wait.until(expected_conditions.invisibility_of_element_located((By.CSS_SELECTOR, ".LinkModal__container")))
-
-
-class ActivityElements(UiComponent):
-    @property
-    def link_activity_tab(self):
-        return CssElement(self.driver, 'li#activity > a')
-
-    @property
-    def first_card_label(self):
-        return CssElement(self.driver, "h6.ActivityCard__commit-message")
-
-    @property
-    def first_card_img(self):
-        """Returns the first img in an Activity Detail List - not necessarily from the first list!"""
-        return CssElement(self.driver, "li.DetailsRecords__item img")
+    def publish_private_project_with_unpublished_linked_dataset(self, username, project_title, dataset_title):
+        """Publish a project with an unpublished linked dataset as private."""
+        cloud_project_elts = CloudProjectElements(self.driver)
+        cloud_project_elts.publish_project_button.wait_to_appear().click()
+        logging.info(f"Publishing project {project_title} with unpublished linked dataset {dataset_title} "
+                     f"as private to cloud")
+        self.publish_project_linked_dataset_button.wait_to_appear().click()
+        self.publish_project_linked_dataset_private_button.wait_to_appear().click()
+        self.driver.find_element_by_css_selector(f".Radio input[id='{username}/{dataset_title}_private'] "
+                                                 f"+ span b").click()
+        self.publish_project_linked_dataset_button.click()
+        project_control_elts = ProjectControlElements(self.driver)
+        project_control_elts.container_status_publishing.wait_to_appear(60)
+        project_control_elts.container_status_stopped.wait_to_appear(60)
+        # Time sleep necessary or cloud project does not appear in cloud tab
+        # Once the new cloud platform is up, this can be removed
+        time.sleep(15)

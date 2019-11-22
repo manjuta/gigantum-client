@@ -1,106 +1,115 @@
+import os
 import logging
 import time
-import os
 from subprocess import Popen, PIPE
 
 import selenium
-from selenium.webdriver.common.by import By
 
 import testutils
-from testutils import graphql_helpers
 
 
 def test_use_mine_merge_conflict_project(driver: selenium.webdriver, *args, **kwargs):
     """
-    Test a merge conflict in a cloud project in which the owner resolves it with 'Use Mine.'
+    Test that a merge conflict is properly resolved when the user decides to "use mine."
+
+    Args:
+        driver
     """
     # Prepare merge conflict
     username, project_title, collaborator = prep_merge_conflict(driver)
+
     # Owner resolves the merge conflict with 'Use Mine'
     cloud_project_elts = testutils.CloudProjectElements(driver)
-    cloud_project_elts.merge_conflict_use_mine_button.wait(30).click()
-    timeout = time.time() + 30
+    cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    cloud_project_elts.merge_conflict_use_mine_button.click()
+    cloud_project_elts.merge_conflict_modal.wait_to_disappear()
+    project_control_elts = testutils.ProjectControlElements(driver)
+    waiting_start = time.time()
+    while "Sync complete" not in project_control_elts.footer_notification_message.find().text:
+        time.sleep(0.5)
+        if time.time() - waiting_start > 35:
+            raise ValueError(f'Timed out waiting for sync to complete')
 
-    while timeout > time.time():
-        try:
-            assert(cloud_project_elts.sync_cloud_project_message.find().text == "Sync complete")
-            break
-        except AssertionError:
-            time.sleep(1)
-            logging.warning("Error finding Sync complete notification")
-
-    # Check that merge conflict resolves to 'Use Mine'
+    # Check that merge conflict resolves to "use mine"
     file_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username, 'labbooks',
                              project_title, 'input', 'sample-upload.txt')
     with open(file_path, "r") as resolve_merge_conflict_file:
         resolve_merge_conflict_file = resolve_merge_conflict_file.read()
 
-    assert resolve_merge_conflict_file == "Owner", \
-        f"Merge did not resolve to 'Use Mine' expected to see 'Owner' in file, " \
+    assert resolve_merge_conflict_file == "owner", \
+        f"Merge did not resolve to 'use mine,' expected to see 'owner' in file, " \
         f"but instead got {resolve_merge_conflict_file}"
 
 
 def test_use_theirs_merge_conflict_project(driver: selenium.webdriver, *args, **kwargs):
     """
-    Test a merge conflict in a cloud project in which the owner resolves it with 'Use Theirs.'
+    Test that a merge conflict is properly resolved when the user decides to "use theirs."
+
+    Args:
+        driver
     """
     # Prepare merge conflict
     username, project_title, collaborator = prep_merge_conflict(driver)
-    # Owner uploads file, syncs, and resolves the merge conflict with 'Use Theirs'
+
+    # Owner uploads file, syncs, and resolves the merge conflict with "use theirs"
     cloud_project_elts = testutils.CloudProjectElements(driver)
-    cloud_project_elts.merge_conflict_use_theirs_button.wait(30).click()
-    timeout = time.time() + 30
+    cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    cloud_project_elts.merge_conflict_use_theirs_button.click()
+    cloud_project_elts.merge_conflict_modal.wait_to_disappear()
+    project_control_elts = testutils.ProjectControlElements(driver)
+    waiting_start = time.time()
+    while "Sync complete" not in project_control_elts.footer_notification_message.find().text:
+        time.sleep(0.5)
+        if time.time() - waiting_start > 35:
+            raise ValueError(f'Timed out waiting for sync to complete')
 
-    while timeout > time.time():
-        try:
-            assert(cloud_project_elts.sync_cloud_project_message.find().text == "Sync complete")
-            break
-        except AssertionError:
-            time.sleep(1)
-            logging.warning("Error finding Sync complete notification")
-
-    # Check that merge conflict resolves to 'Use Theirs'
+    # Check that merge conflict resolves to "use theirs"
     file_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username, 'labbooks',
                              project_title, 'input', 'sample-upload.txt')
-
     with open(file_path, "r") as resolve_merge_conflict_file:
         resolve_merge_conflict_file = resolve_merge_conflict_file.read()
 
-    assert resolve_merge_conflict_file == "Collaborator", \
-        f"Merge did not resolve to 'Use Theirs' expected to see 'Collaborator' in file, " \
+    assert resolve_merge_conflict_file == "collaborator", \
+        f"Merge did not resolve to 'use theirs,' expected to see 'collaborator' in file, " \
         f"but instead got {resolve_merge_conflict_file}"
 
 
 def test_abort_merge_conflict_project(driver: selenium.webdriver, *args, **kwargs):
     """
-    Test a merge conflict in a cloud project in which the owner resolves it with 'Abort.'
+    Test that a merge conflict is properly resolved when the user decides to "abort."
+
+    Args:
+        driver
     """
     # Prepare merge conflict
     username, project_title, collaborator = prep_merge_conflict(driver)
-    # Owner uploads file, syncs, and resolves the merge conflict with 'Abort'
+
+    # Owner uploads file, syncs, and resolves the merge conflict with "abort"
     cloud_project_elts = testutils.CloudProjectElements(driver)
-    project_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username,
-                                'labbooks', project_title)
-    git_get_log_command_1 = Popen(['git', 'log', '--pretty=format%H'],
-                                  cwd=project_path, stdout=PIPE, stderr=PIPE)
+    project_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username, 'labbooks', project_title)
+    git_get_log_command_1 = Popen(['git', 'log', '--pretty=format%H'], cwd=project_path, stdout=PIPE, stderr=PIPE)
     before_merge_conflict_resolve_stdout = git_get_log_command_1.stdout.readline().decode('utf-8').strip()
-    cloud_project_elts.merge_conflict_abort_button.wait(30).click()
-    time.sleep(2)
-    # Check that merge conflict resolves to 'Abort'
-    git_get_log_command_2 = Popen(['git', 'log', '--pretty=format%H'],
-                                  cwd=project_path, stdout=PIPE, stderr=PIPE)
+    cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    cloud_project_elts.merge_conflict_abort_button.click()
+    cloud_project_elts.merge_conflict_modal.wait_to_disappear()
+
+    # Check that merge conflict resolves to "abort"
+    git_get_log_command_2 = Popen(['git', 'log', '--pretty=format%H'], cwd=project_path, stdout=PIPE, stderr=PIPE)
     after_merge_conflict_resolve_stdout = git_get_log_command_2.stdout.readline().decode('utf-8').strip()
 
     assert before_merge_conflict_resolve_stdout == after_merge_conflict_resolve_stdout, \
-        f"Merge did not resolve to 'Abort' expected to see {before_merge_conflict_resolve_stdout}, " \
+        f"Merge did not resolve to 'abort,' expected to see {before_merge_conflict_resolve_stdout}, " \
         f"but instead got {after_merge_conflict_resolve_stdout}"
 
 
 def prep_merge_conflict(driver: selenium.webdriver, *args, **kwargs):
     """
-    Prepare a merge conflict in a cloud project.
+    Prepare a merge conflict in a cloud project
+
+    Args:
+        driver
     """
-    # Owner creates a project, publishes it, adds a collaborator, and logs out
+    # Owner creates a project, publishes it, adds a collaborator
     r = testutils.prep_py3_minimal_base(driver)
     username, project_title = r.username, r.project_name
     cloud_project_elts = testutils.CloudProjectElements(driver)
@@ -109,48 +118,34 @@ def prep_merge_conflict(driver: selenium.webdriver, *args, **kwargs):
     side_bar_elts = testutils.SideBarElements(driver)
     side_bar_elts.do_logout(username)
 
-    # Collaborator logs in and imports the cloud project
+    # Collaborator imports the cloud project
     logging.info(f"Logging in as {collaborator}")
     testutils.log_in(driver, user_index=1)
-    time.sleep(2)
-    try:
-        testutils.GuideElements.remove_guide(driver)
-    except:
-        pass
-    time.sleep(2)
-    logging.info(f"Navigating to {collaborator}'s Cloud tab")
+    guide_elts = testutils.GuideElements(driver)
+    guide_elts.remove_guide()
+    logging.info(f"Navigating to {collaborator}'s cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
-    time.sleep(2)
-    cloud_project_elts.first_cloud_project.wait(30)
+    cloud_project_elts.first_cloud_project.wait_to_appear(30)
     cloud_project_elts.import_first_cloud_project_button.find().click()
     project_control = testutils.ProjectControlElements(driver)
-    project_control.container_status_stopped.wait(30)
+    project_control.container_status_stopped.wait_to_appear(30)
 
-    # Collaborator adds a file, syncs, and logs out
-    logging.info(f"Navigating to {collaborator}'s Input Data tab")
+    # Collaborator adds a file and syncs
+    logging.info(f"Navigating to {collaborator}'s input data tab")
     driver.get(f'{os.environ["GIGANTUM_HOST"]}/projects/{username}/{project_title}/inputData')
-    time.sleep(2)
     file_browser_elts = testutils.FileBrowserElements(driver)
-    time.sleep(5)
-    file_browser_elts.drag_drop_file_in_drop_zone(file_content="Collaborator")
+    file_browser_elts.file_browser_area.wait_to_appear()
+    file_browser_elts.drag_drop_file_in_drop_zone(file_content="collaborator")
     cloud_project_elts.sync_cloud_project(project_title)
     side_bar_elts.do_logout(collaborator)
 
-    # Owner logs in and navigates to Input Data
+    # Owner adds a file and syncs
     logging.info(f"Logging in as {username}")
     testutils.log_in(driver)
-    time.sleep(2)
-    try:
-        testutils.GuideElements.remove_guide(driver)
-    except:
-        pass
-    time.sleep(2)
-    logging.info(f"Navigating to {username}'s Input Data tab")
+    guide_elts.remove_guide()
+    logging.info(f"Navigating to {username}'s input data tab")
     driver.get(f'{os.environ["GIGANTUM_HOST"]}/projects/{username}/{project_title}/inputData')
-    time.sleep(2)
-    file_browser_elts = testutils.FileBrowserElements(driver)
-    time.sleep(5)
-    file_browser_elts.drag_drop_file_in_drop_zone(file_content="Owner")
-    cloud_project_elts = testutils.CloudProjectElements(driver)
-    cloud_project_elts.sync_cloud_project(project_title)
+    file_browser_elts.file_browser_area.wait_to_appear()
+    file_browser_elts.drag_drop_file_in_drop_zone(file_content="owner")
+    cloud_project_elts.sync_cloud_project_button.click()
     return username, project_title, collaborator
