@@ -1,8 +1,7 @@
+import os
 import logging
-import time
 
 import selenium
-from selenium.webdriver.common.by import By
 
 import testutils
 
@@ -17,25 +16,34 @@ def test_project_file_browser(driver: selenium.webdriver, *args, **kwargs):
     """
     r = testutils.prep_py3_minimal_base(driver)
     username, project_title = r.username, r.project_name
-    logging.info(f"Navigating to Code for project: {project_title}")
+
+    logging.info(f"Navigating to code for project {project_title}")
+    driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/code")
     file_browser_elts = testutils.FileBrowserElements(driver)
-    file_browser_elts.code_tab.wait().click()
-    time.sleep(2)
-    logging.info(f"Dragging and dropping file into code for project: {project_title}")
+    file_browser_elts.file_browser_area.wait_to_appear()
+    logging.info(f"Dragging and dropping a file into code for project {project_title}")
     file_browser_elts.drag_drop_file_in_drop_zone()
 
-    assert file_browser_elts.file_information.find().text == 'sample-upload.txt', \
-        "Expected sample-upload.txt to be the first file in Code"
+    assert file_browser_elts.file_information.find().text == "sample-upload.txt", \
+        "Expected sample-upload.txt to be the first file in code"
 
-    logging.info(f"Navigating to Input Data for project: {project_title}")
-    file_browser_elts.input_data_tab.wait().click()
-    time.sleep(2)
-    logging.info(f"Dragging and dropping file into Input Data for project: {project_title}")
+    logging.info(f"Navigating to input data for project: {project_title}")
+    driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+    file_browser_elts.file_browser_area.wait_to_appear()
+    logging.info(f"Dragging and dropping file into input data for project {project_title}")
     file_browser_elts.drag_drop_file_in_drop_zone()
-    assert file_browser_elts.file_information.find().text == 'sample-upload.txt', \
-        "Expected sample-upload.txt to be the first file in Input Data"
 
-    # TODO - Upload file to Output Data, need to deal with untracked directory
+    assert file_browser_elts.file_information.find().text == "sample-upload.txt", \
+        "Expected sample-upload.txt to be the first file in input data"
+
+    logging.info(f"Navigating to output data for project: {project_title}")
+    driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/outputData")
+    file_browser_elts.untracked_directory.wait_to_appear()
+    logging.info(f"Dragging and dropping file into the untracked directory in output data for project {project_title}")
+    file_browser_elts.drag_drop_file_in_drop_zone(output_data_target=True)
+
+    assert file_browser_elts.file_information.find().text == "sample-upload.txt", \
+        "Expected sample-upload.txt to be the first file in Output Data"
 
 
 def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
@@ -45,17 +53,17 @@ def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
     Args:
         driver
     """
-    testutils.log_in(driver)
+    username = testutils.log_in(driver)
     testutils.GuideElements(driver).remove_guide()
     dataset_elts = testutils.DatasetElements(driver)
-    dataset_title = dataset_elts.create_dataset(testutils.unique_dataset_name())
-    logging.info(f"Navigating to Data for dataset: {dataset_title}")
+    dataset_title = dataset_elts.create_dataset()
+
+    logging.info(f"Navigating to data for dataset {dataset_title}")
+    driver.get(f"{os.environ['GIGANTUM_HOST']}/datasets/{username}/{dataset_title}/data")
     file_browser_elts = testutils.FileBrowserElements(driver)
-    file_browser_elts.data_tab.wait().click()
-    logging.info(f"Dragging and dropping file into Data for dataset: {dataset_title}")
-    time.sleep(3)
+    file_browser_elts.file_browser_area.wait_to_appear()
+    logging.info(f"Dragging and dropping file into data for dataset {dataset_title}")
     file_browser_elts.drag_drop_file_in_drop_zone()
 
     assert file_browser_elts.file_information.find().text == 'sample-upload.txt', \
         "Expected sample-upload.txt to be the first file in Data"
-

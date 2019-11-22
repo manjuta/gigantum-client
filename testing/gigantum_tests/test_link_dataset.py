@@ -1,179 +1,159 @@
-import time
 import os
+import logging
+import time
 
 import selenium
-from selenium.webdriver.common.by import By
 
 import testutils
 from testutils import graphql_helpers
 
 
-def test_linked_published_dataset_then_publish(driver: selenium.webdriver, *args, **kwargs):
+def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdriver, *args, **kwargs):
     """
-    Test that a dataset can be created, published,
-    linked to a project and published with the project.
+    Test:
+     1. A dataset can be created and linked to a project
+     2. The dataset and project can be published together as private with a collaborator
+     3. The collaborator can import the project and view the linked dataset
+
+    Args:
+         driver
     """
-    user = testutils.log_in(driver)
+    username = testutils.log_in(driver)
     testutils.GuideElements(driver).remove_guide()
-    ds_elts = testutils.DatasetElements(driver)
-    # Create and publish dataset
-    ds_name=ds_elts.create_dataset(testutils.unique_dataset_name())
-    ds_elts.publish_dataset()
-    # Create a project, link dataset, and publish project
-    driver.get(os.environ['GIGANTUM_HOST'])
-    r = testutils.prep_py3_minimal_base(driver, skip_login=True)
-    username, project_title = r.username, r.project_name
-    file_browser_elts = testutils.FileBrowserElements(driver)
-    file_browser_elts.link_dataset('a', 'b')
-    time.sleep(4)
-    cloud_project_elts = testutils.CloudProjectElements(driver)
-    cloud_project_elts.publish_private_project(project_title)
-    time.sleep(4)
-    graphql_helpers.delete_dataset(user,ds_name)
 
-    # TODO - Use query to affirm that dataset linked properly
+    # Create a dataset
+    dataset_elts = testutils.DatasetElements(driver)
+    dataset_title = dataset_elts.create_dataset()
+    try:
+        # Create a project and link the dataset
+        driver.get(os.environ['GIGANTUM_HOST'])
+        r = testutils.prep_py3_minimal_base(driver, skip_login=True)
+        _, project_title = r.username, r.project_name
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+        file_browser_elts = testutils.FileBrowserElements(driver)
+        file_browser_elts.file_browser_area.wait_to_appear(15)
+        file_browser_elts.link_dataset(dataset_title, project_title)
 
-#
-# def test_published_dataset_link_sync(driver: selenium.webdriver, *args, **kwargs):
-#     """
-#     1. create and publish a dataset
-#     2. create a project and publish the project
-#     3. link the dataset and sync
-#
-#     Args:
-#         driver
-#     """
-#     # create a dataset
-#     # dataset set up
-#     testutils.log_in(driver)
-#     time.sleep(2)
-#     testutils.remove_guide(driver)
-#     time.sleep(2)
-#     # create and publish datset
-#     dataset_title_local = testutils.create_dataset(driver)
-#     testutils.publish_dataset(driver)
-#
-#     # check published dataset in the cloud
-#     time.sleep(3)
-#     dataset_title_cloud = driver.find_element_by_css_selector(".RemoteDatasets__panel-title:first-child span span").text
-#
-#     assert dataset_title_local == dataset_title_cloud, \
-#         f"Expected dataset {dataset_title_local} be the first one in cloud tab"
-#
-#     # Project set up
-#     driver.find_element_by_css_selector(".SideBar__nav-item--labbooks").click()
-#     project_title_local = testutils.create_project_without_base(driver)
-#     # Python 3 minimal base
-#     testutils.add_py3_min_base(driver)
-#     wait = WebDriverWait(driver, 200)
-#     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".flex>.Stopped")))
-#     # Publish the project itself
-#     testutils.publish_project(driver)
-#     time.sleep(5)
-#     publish_elts = testutils.PublishProjectElements(driver)
-#     publish_elts.project_page_tab.click()
-#     publish_elts.cloud_tab.click()
-#     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".RemoteLabbooks__panel-title")))
-#
-#     project_title_cloud = driver.find_element_by_css_selector(".RemoteLabbooks__panel-title:first-child span span").text
-#     assert project_title_local == project_title_cloud, \
-#         f"Expected project {project_title_local} to be the first project in the cloud tab"
-#
-#     # Link the dataset and sync
-#     driver.find_element_by_xpath("//a[contains(text(), 'Projects')]").click()
-#     time.sleep(3)
-#     driver.find_element_by_css_selector(".LocalLabbooks__panel-title").click()
-#     time.sleep(3)
-#     testutils.link_dataset(driver)
-#     linked_dataset_title = driver.find_element_by_css_selector(".DatasetBrowser__name").text
-#     assert linked_dataset_title == dataset_title_local, \
-#         f"Expected dataset {dataset_title_local} linked to project"
-#     logging.info("Syncing the project")
-#     driver.find_element_by_css_selector(".BranchMenu__btn--sync--upToDate").click()
-#     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".flex>.Stopped")))
-#
-#     # Delete project from cloud
-#     testutils.delete_project_cloud(driver, project_title_local)
-#     project_title_cloud = driver.find_element_by_css_selector(".RemoteLabbooks__panel-title:first-child span span").text
-#     assert project_title_cloud != project_title_local, "Expected project no longer the first one in cloud tab"
-#
-#     # Delete dataset from cloud
-#     testutils.delete_dataset_cloud(driver, dataset_title_local)
-#     dataset_title_cloud = driver.find_element_by_css_selector(".RemoteDatasets__panel-title:first-child span span").text
-#
-#     assert dataset_title_local != dataset_title_cloud, \
-#         f"Expected dataset {dataset_title_local} no longer the first one in cloud tab"
-#
-#
-# def test_unpublished_dataset_link(driver: selenium.webdriver, *args, **kwargs):
-#     """
-#     1. create a dataset, don't publish
-#     2. create a project and link the dataset
-#     3. publish the project (dataset is published along with project)
-#
-#     Args:
-#         driver
-#     """
-#     # create a dataset
-#     # dataset set up
-#     testutils.log_in(driver)
-#     time.sleep(2)
-#     testutils.remove_guide(driver)
-#     time.sleep(2)
-#     # create and publish datset
-#     dataset_title_local = testutils.create_dataset(driver)
-#
-#     # Project set up
-#     driver.find_element_by_css_selector(".SideBar__nav-item--labbooks").click()
-#     project_title_local = testutils.create_project_without_base(driver)
-#     # Python 3 minimal base
-#     testutils.add_py3_min_base(driver)
-#     wait = WebDriverWait(driver, 200)
-#     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".flex>.Stopped")))
-#
-#     # Link the dataset
-#     testutils.link_dataset(driver)
-#     linked_dataset_title = driver.find_element_by_css_selector(".DatasetBrowser__name").text
-#
-#     assert linked_dataset_title == dataset_title_local, \
-#         f"Expected dataset {dataset_title_local} linked to project"
-#
-#     # Publish the project with dataset linked
-#     logging.info("Publishing project with local dataset")
-#     publish_elts = testutils.PublishProjectElements(driver)
-#     publish_elts.publish_project_button.click()
-#     publish_elts.publish_continue_button.click()
-#     time.sleep(3)
-#     publish_elts.publish_private_project_button.click()
-#     publish_elts.publish_private_dataset_button.click()
-#     publish_elts.publish_all_button.click()
-#     wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".PublishDatasetsModal")))
-#     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".flex>.Stopped")))
-#     time.sleep(5)
-#     side_bar_elts = testutils.SideBarElements(driver)
-#     side_bar_elts.projects_icon.click()
-#     publish_elts.cloud_tab.click()
-#     wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".RemoteLabbooks__panel-title")))
-#
-#     project_title_cloud = driver.find_element_by_css_selector(".RemoteLabbooks__panel-title:first-child span span").text
-#     assert project_title_local == project_title_cloud, \
-#         f"Expected project {project_title_local} to be the first project in the cloud tab"
-#
-#     # Delete project from cloud
-#     testutils.delete_project_cloud(driver, project_title_local)
-#     project_title_cloud = driver.find_element_by_css_selector(".RemoteLabbooks__panel-title:first-child span span").text
-#     assert project_title_cloud != project_title_local, \
-#         f"Expected project {project_title_local} no longer the first one in cloud tab"
-#
-#     # Delete dataset from cloud
-#     testutils.delete_dataset_cloud(driver, dataset_title_local)
-#     dataset_title_cloud = driver.find_element_by_css_selector(".RemoteDatasets__panel-title:first-child span span").text
-#
-#     assert dataset_title_local != dataset_title_cloud, \
-#         f"Expected dataset {dataset_title_local} no longer the first one in cloud tab"
-#
-#
-#
-#
-#
-#
+        assert file_browser_elts.linked_dataset_card_name.find().text == dataset_title, \
+            f"Dataset {dataset_title} was not linked successfully to project {project_title}"
+
+        # Publish the dataset and project as private and add collaborator (read permissions)
+        dataset_elts.publish_private_project_with_unpublished_linked_dataset(username, project_title, dataset_title)
+        # Add collaborator to project
+        cloud_project_elts = testutils.CloudProjectElements(driver)
+        collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
+        # Add collaborator to dataset
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/datasets/{username}/{dataset_title}")
+        time.sleep(3)
+        cloud_project_elts.add_collaborator_with_permissions(dataset_title)
+        # Log out
+        side_bar_elts = testutils.SideBarElements(driver)
+        side_bar_elts.do_logout(username)
+
+        # Collaborator logs in and imports the project
+        logging.info(f"Logging in as {collaborator}")
+        testutils.log_in(driver, user_index=1)
+        side_bar_elts.projects_icon.wait_to_appear()
+        try:
+            testutils.GuideElements.remove_guide(driver)
+        except:
+            pass
+        logging.info(f"Navigating to {collaborator}'s cloud tab")
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
+        cloud_project_elts.first_cloud_project.wait_to_appear(30)
+        # Temporary for dev cloud
+        driver.refresh()
+        cloud_project_elts.first_cloud_project.wait_to_appear(30)
+
+        assert project_title == cloud_project_elts.first_cloud_project.find().text, \
+            f"Expected {project_title} to be the first cloud project in {collaborator}'s cloud tab, " \
+            f"but instead got {cloud_project_elts.first_cloud_project.find().text}"
+
+        cloud_project_elts.import_first_cloud_project_button.click()
+        project_control = testutils.ProjectControlElements(driver)
+        project_control.container_status_stopped.wait_to_appear(30)
+
+        # Collaborator checks that they can view linked dataset
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+        file_browser_elts.linked_dataset_card_name.wait_to_appear(30)
+
+        assert file_browser_elts.linked_dataset_card_name.find().text == dataset_title, \
+            f"Linked dataset {dataset_title} does not appear in input data for imported project {project_title}"
+
+    finally:
+        # Clean up
+        graphql_helpers.delete_dataset(username, dataset_title)
+
+
+def test_link_published_dataset_then_publish_project(driver: selenium.webdriver, *args, **kwargs):
+    """
+    Test:
+     1. A dataset can be published as private with a collaborator then linked to a project
+     2. The project can be published as private with the same collaborator
+     3. The collaborator can import the project and view the linked dataset
+
+    Args:
+        driver
+    """
+    username = testutils.log_in(driver)
+    testutils.GuideElements(driver).remove_guide()
+
+    # Publish a dataset as private with a collaborator (read permissions)
+    dataset_elts = testutils.DatasetElements(driver)
+    dataset_title = dataset_elts.create_dataset()
+    try:
+        dataset_elts.publish_dataset(dataset_title)
+        cloud_project_elts = testutils.CloudProjectElements(driver)
+        cloud_project_elts.add_collaborator_with_permissions(dataset_title)
+
+        # Create a project and link the dataset
+        driver.get(os.environ['GIGANTUM_HOST'])
+        r = testutils.prep_py3_minimal_base(driver, skip_login=True)
+        _, project_title = r.username, r.project_name
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+        file_browser_elts = testutils.FileBrowserElements(driver)
+        file_browser_elts.file_browser_area.wait_to_appear(15)
+        file_browser_elts.link_dataset(dataset_title, project_title)
+
+        assert file_browser_elts.linked_dataset_card_name.find().text == dataset_title, \
+            f"Dataset {dataset_title} was not linked successfully to project {project_title}"
+
+        # Publish the project as private and add same collaborator (read permissions)
+        cloud_project_elts.publish_private_project(project_title)
+        collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
+        side_bar_elts = testutils.SideBarElements(driver)
+        side_bar_elts.do_logout(username)
+
+        # Collaborator logs in and imports the project
+        logging.info(f"Logging in as {collaborator}")
+        testutils.log_in(driver, user_index=1)
+        side_bar_elts.projects_icon.wait_to_appear()
+        try:
+            testutils.GuideElements.remove_guide(driver)
+        except:
+            pass
+        logging.info(f"Navigating to {collaborator}'s cloud tab")
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
+        cloud_project_elts.first_cloud_project.wait_to_appear(30)
+        # Temporary for dev cloud
+        driver.refresh()
+        cloud_project_elts.first_cloud_project.wait_to_appear(30)
+
+        assert project_title == cloud_project_elts.first_cloud_project.find().text, \
+            f"Expected {project_title} to be the first cloud project in {collaborator}'s cloud tab, " \
+            f"but instead got {cloud_project_elts.first_cloud_project.find().text}"
+
+        cloud_project_elts.import_first_cloud_project_button.click()
+        project_control = testutils.ProjectControlElements(driver)
+        project_control.container_status_stopped.wait_to_appear(30)
+
+        # Collaborator checks that they can view linked dataset
+        driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+        file_browser_elts.linked_dataset_card_name.wait_to_appear(30)
+
+        assert file_browser_elts.linked_dataset_card_name.find().text == dataset_title, \
+            f"Linked dataset {dataset_title} does not appear in input data for imported project {project_title}"
+
+    finally:
+        # Clean up
+        graphql_helpers.delete_dataset(username, dataset_title)

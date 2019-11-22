@@ -24,13 +24,13 @@ def test_jhu_neurodata_import(driver: selenium.webdriver, *args, **kwargs):
         import_project_elts = testutils.ImportProjectElements(driver)
         import_project_elts.import_project_via_url(project)
         project_control = testutils.ProjectControlElements(driver)
-        project_control.container_status_stopped.wait(600)
+        project_control.container_status_stopped.wait_to_appear(600)
         assert project_control.container_status_stopped.find().is_displayed(), "Expected stopped container status"
         logging.info(f"Featured public project {project} was imported successfully")
 
         # Open JupyterLab and create Jupyter notebook
         project_control = testutils.ProjectControlElements(driver)
-        project_control.container_status_stopped.wait(150)
+        project_control.container_status_stopped.wait_to_appear(150)
         project_control.launch_devtool('JupyterLab')
         time.sleep(5)
         nb = CssElement(driver, 'li[title="plot_emsemble_oob.ipynb"]').find()
@@ -39,11 +39,11 @@ def test_jhu_neurodata_import(driver: selenium.webdriver, *args, **kwargs):
 
         # Running all cells
         jl_control = testutils.JupyterLabElements(driver)
-        jl_control.run_button.wait().click()
-        jl_control.run_button.wait().click()
-        jl_control.run_button.wait().click()
-        jl_control.run_button.wait().click()
-        jl_control.run_button.wait().click()
+        jl_control.run_button.wait_to_appear().click()
+        jl_control.run_button.wait_to_appear().click()
+        jl_control.run_button.wait_to_appear().click()
+        jl_control.run_button.wait_to_appear().click()
+        jl_control.run_button.wait_to_appear().click()
         logging.info('Getting jupyterlab status')
         status = driver.find_element_by_xpath('//*[@title="Active kernel type for plot_emsemble_oob.ipynb"]')
         time.sleep(1)
