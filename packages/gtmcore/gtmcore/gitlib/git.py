@@ -665,3 +665,14 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
             None
         """
         raise NotImplemented
+
+    @abc.abstractmethod
+    def check_ignored(self, path: str) -> bool:
+        """Check if path is ignored (e.g., via .gitignore)
+
+        path: a path relative to the repository root
+
+        Returns:
+            is the path ignored?
+        """
+        pass
