@@ -2,6 +2,7 @@ import datetime
 import functools
 import glob
 import os
+from string import Template
 
 import yaml
 from gtmcore.environment.componentmanager import ComponentManager
@@ -112,19 +113,13 @@ class ImageBuilder(object):
             allowed_origin = self.labbook.client_config.config['environment']['iframe']['allowed_origin']
 
             if "jupyterlab" in tools or "notebook" in tools:
-                # Create config file
-                script = f"""c.NotebookApp.tornado_settings = {{
-    'headers': {{
-        'Content-Security-Policy': "frame-ancestors 'self' {allowed_origin} "
-    }}
-}}"""
-                jupyter_config_file = os.path.join(self.labbook.root_dir, '.gigantum', 'env',
-                                                   'jupyter_notebook_config.py')
-                with open(jupyter_config_file, 'wt') as cf:
-                    cf.write(script)
+                # Create notebook config file to allow iframes
                 docker_lines.append("# Enable IFrame support in JupyterLab/Jupyter Notebook")
-                docker_lines.append("COPY jupyter_notebook_config.py /etc/jupyter")
-                docker_lines.append("")
+                docker_lines.append("RUN mkdir -p /etc/jupyter/custom/")
+
+                notebook_config_template = Template("RUN echo \"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\"frame-ancestors $allowed_origin 'self'; report-uri /api/security/csp-report\\\"}}\" >> /etc/jupyter/jupyter_notebook_config.py")
+                notebook_config_str = notebook_config_template.substitute(allowed_origin=allowed_origin)
+                docker_lines.append(notebook_config_str)
 
             if "rstudio" in tools:
                 docker_lines.append("# Enable IFrame support in RStudio")

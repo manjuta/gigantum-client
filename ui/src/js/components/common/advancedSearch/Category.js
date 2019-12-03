@@ -1,22 +1,21 @@
 // @flow
+// vendor
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 
 type Props = {
-  category: PropTypes.String,
-  expandedIndex: PropTypes.Number,
-  filterCategories: PropTypes.Array,
-  handleAddition: PropTypes.Func,
-  index: PropTypes.Number,
-  setExpandedIndex: PropTypes.Number,
-  toggleTooltip: PropTypes.Func,
-  tooltipShown: PropTypes.Boolean,
+  category: string,
+  expandedIndex: number,
+  filterCategories: Array,
+  handleAddition: Function,
+  index: number,
+  setExpandedIndex: number,
+  toggleTooltip: Function,
+  tooltipShown: boolean,
 }
 
 
 class Category extends PureComponent<Props> {
-
   render() {
     const {
       category,

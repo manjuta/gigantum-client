@@ -1,7 +1,6 @@
 // @flow
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import Moment from 'moment';
 // store
 import store from 'JS/redux/store';
@@ -11,15 +10,14 @@ import BuildModal from 'Components/shared/modals/BuildModal';
 import './FooterMessage.scss';
 
 type Props = {
-  messageItem: PropTypes.object.isRequired,
-  selectedBuildId: PropTypes.string,
-  setBuildId: PropTypes.func,
-  updateOpenCount: PropTypes.func,
+  messageItem: Object,
+  selectedBuildId: string,
+  setBuildId: Function,
+  updateOpenCount: Function,
 };
 
 
 class FooterMessage extends PureComponent<Props> {
-  props: Props;
 
   state = {
     messageBodyVisible: false,

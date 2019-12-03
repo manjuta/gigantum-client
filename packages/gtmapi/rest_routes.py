@@ -97,8 +97,11 @@ def savehook(username: str, owner: str, labbook_name: str):
             logger.info(f"Skipping jupyter savehook for {username}/{owner}/{labbook_name} due to active kernel")
             return 'success'
 
-        lb = InventoryManager().load_labbook(username, owner, labbook_name,
-                                             author=get_logged_in_author())
+        # TODO: DMK fix when integrating anonymous support.
+        # lb = InventoryManager().load_labbook(username, owner, labbook_name,
+        #                                      author=get_logged_in_author())
+
+        lb = InventoryManager().load_labbook(username, owner, labbook_name)
         with lb.lock():
             lb.sweep_uncommitted_changes()
 

@@ -186,7 +186,7 @@ class TestImageBuilder(object):
         ib = ImageBuilder(lb)
         dockerfile_text = ib.assemble_dockerfile(write=False)
         test_lines = ["# Enable IFrame support in JupyterLab/Jupyter Notebook",
-                      "COPY jupyter_notebook_config.py /etc/jupyter",
+                      "RUN mkdir -p /etc/jupyter/custom/",
                       "# Enable IFrame support in RStudio",
                       'RUN echo "\\n#Enable IFrames\\nwww-frame-origin=gigantum.com\\n" >> /etc/rstudio/rserver.conf']
 

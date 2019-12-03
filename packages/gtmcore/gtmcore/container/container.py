@@ -37,9 +37,9 @@ class ContainerOperations(ABC):
         """
         self.username = username
 
-        # This will get updated below based on labbook attributes if it's still None
-        # It is used both for image and container names
-        self.image_tag = override_image_name
+        if override_image_name:
+            # If manually setting the image name, use it for the tag.
+            self.image_tag = override_image_name
 
         if labbook:
             if path:
@@ -60,8 +60,9 @@ class ContainerOperations(ABC):
         if not os.path.exists(self.env_dir):
             raise ValueError(f'Expected env directory `{self.env_dir}` does not exist.')
 
-        if not self.image_tag:
-            self.image_tag = self.default_image_tag(self.labbook.owner, self.labbook.name)
+        if not override_image_name:
+            # If you haven't manually set the image tag, load the default tag AFTER the labbook instance has been loaded
+            self.image_tag: str = self.default_image_tag(self.labbook.owner, self.labbook.name)
 
     @abstractmethod
     def build_image(self, nocache: bool = False, feedback_callback: Optional[Callable] = None) -> None:
@@ -242,24 +243,6 @@ class ContainerOperations(ABC):
 
         self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
 
-        try:
-            gclient_ip = self.get_gigantum_client_ip()
-        except ContainerException as e:
-            logger.warning(e)
-            gclient_ip = ""
-
-        cmd = f"echo {gclient_ip} > /home/giguser/labmanager_ip"
-        for timeout in range(20):
-            time.sleep(0.5)
-            status = self.query_container()
-            if status == 'running':
-                # This is run as root because we don't want the user to be able to modify the IP file
-                r = self.exec_command(cmd)
-                logger.info(f"Response to write Client IP in {self.image_tag} Container: {r}")
-                break
-        else:
-            logger.error("After 10 seconds could not write Client IP to Project container."
-                         f" Container status = {status}")
 
     @abstractmethod
     def stop_container(self, container_name: Optional[str] = None) -> bool:
@@ -386,6 +369,34 @@ class ContainerOperations(ABC):
 
         Returns:
             str of IP address
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def open_ports(self, port_list: List[int]) -> None:
+        """A method to dynamically open ports to a running container. Locally this isn't really needed, but in the hub
+        it is required
+
+        Args:
+            port_list: list of ports to open
+
+        Returns:
+            None
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def configure_dev_tool(self, dev_tool: str) -> None:
+        """A method to configure a dev tool if needed. This is to be inserted right before starting the tool process,
+        so it lets you configure things after the giguser is created and everything is set up, but before the dev
+        tool process starts. This method exists here, because projects running in different contexts (e.g. hub, local)
+        may require different configuration.
+
+        Args:
+            dev_tool: dev tool to configure (i.e jupyterlab, notebook, rstudio)
+
+        Returns:
+            None
         """
         raise NotImplementedError()
 
