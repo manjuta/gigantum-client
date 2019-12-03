@@ -1,31 +1,38 @@
+// @flow
 // vendor
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 // assets
 import './NoResults.scss';
 
-const NoResults = ({ setFilterValue }) => (
-  <div className="NoResults">
+type Props = {
+  setFilterValue: Function,
+}
 
-    <h3>No Results Found</h3>
+class NoResults extends PureComponent<Props> {
+  render() {
+    const { setFilterValue } = this.props;
+    return (
+      <div className="NoResults">
 
-    <p>
-      Edit your filters above or
-      {' '}
-      <button
-        type="button"
-        className="Btn Btn--flat Btn--noPadding Btn--noMargin"
-        onClick={() => setFilterValue({ target: { value: '' } })}
-      >
-       clear
-      </button>
-      {' '}
-      to try again.
-    </p>
+        <h3>No Results Found</h3>
 
-  </div>
-);
+        <p>
+          Edit your filters above or
+          {' '}
+          <button
+            type="button"
+            className="Btn Btn--flat Btn--noPadding Btn--noMargin"
+            onClick={() => setFilterValue({ target: { value: '' } })}
+          >
+           clear
+          </button>
+          {' '}
+          to try again.
+        </p>
 
-NoResults.propTypes = { setFilterValue: PropTypes.func.isRequired };
+      </div>
+    );
+  }
+}
 
 export default NoResults;

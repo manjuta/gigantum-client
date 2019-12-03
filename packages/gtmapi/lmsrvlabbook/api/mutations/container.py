@@ -85,7 +85,11 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         matched_routes = router.get_matching_routes(labbook_endpoint, 'jupyter')
 
         run_start_jupyter = True
+        # The "suffix" is the relative route to return to the browser for the user
         suffix = None
+        # The "external_rt_prefix" is the external route to jupyter (just to the server, so you can do things like hit
+        # the jupyter API or build a full "suffix"
+        external_rt_prefix = None
         if len(matched_routes) == 1:
             logger.info(f'Found existing Jupyter instance in route table for {str(labbook)}.')
 
@@ -99,6 +103,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
 
             # Verify jupyter API is available and it's still running.
             suffix = matched_routes[0]
+            external_rt_prefix = suffix
             try:
                 check_jupyter_reachable(labbook_ip, tool_port, suffix)
 
@@ -130,7 +135,9 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             # Start jupyterlab
             suffix = start_jupyter(project_container, proxy_prefix=external_rt_prefix)
 
-            # Ensure we start monitor IF jupyter isn't already running.
+        # Ensure we start monitor IF jupyter isn't already running. This method will exit if the dev env monitor
+        # for this jupyter instance is already running.
+        if external_rt_prefix:
             start_labbook_monitor(labbook, username, 'jupyterlab',
                                   url=f'{labbook_endpoint}/{external_rt_prefix}',
                                   author=get_logged_in_author())

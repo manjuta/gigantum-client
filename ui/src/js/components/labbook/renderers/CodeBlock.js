@@ -1,6 +1,6 @@
+// @flow
 // vendor
 import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import SyntaxHighlighterHLJS from 'react-syntax-highlighter';
@@ -11,7 +11,18 @@ import customizedStyling from './CodeBlockStyle';
 import './CodeBlock.scss';
 
 
-class CodeBlock extends React.PureComponent {
+const defaultProps = {
+  language: '',
+};
+
+type Props = {
+  value: string,
+  language: string,
+};
+
+class CodeBlock extends React.PureComponent<Props> {
+  props: defaultProps;
+
   constructor(props) {
     super(props);
 
@@ -53,14 +64,5 @@ class CodeBlock extends React.PureComponent {
     );
   }
 }
-
-CodeBlock.defaultProps = {
-  language: '',
-};
-
-CodeBlock.propTypes = {
-  value: PropTypes.string.isRequired,
-  language: PropTypes.string,
-};
 
 export default CodeBlock;

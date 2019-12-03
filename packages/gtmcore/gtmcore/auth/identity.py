@@ -100,11 +100,11 @@ class IdentityManager(metaclass=abc.ABCMeta):
         if not id_token:
             raise ValueError("Cannot check first login without a valid id_token")
 
-        if self.config.config['core']['import_demo_on_first_login']:
-            user_dir = os.path.join(working_directory, username)
+        user_dir = os.path.join(working_directory, username)
 
-            # Check if the user has already logged into this instance
-            if not os.path.exists(user_dir):
+        # Check if the user has already logged into this instance
+        if not os.path.exists(user_dir):
+            if self.config.config['core']['import_demo_on_first_login']:
                 # Create user dir
                 pathlib.Path(os.path.join(working_directory, username, username, 'labbooks')).mkdir(parents=True,
                                                                                                     exist_ok=True)
@@ -121,7 +121,6 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 }
                 build_img_metadata = {
                     'method': 'build_image',
-                    # TODO - we need labbook key but labbook is not available...
                     'labbook': f"{username}|{username}|{demo_lb.name}"
                 }
                 dispatcher = Dispatcher()
@@ -131,11 +130,10 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 logger.info(f"Adding job {build_image_job_key} to build "
                             f"Docker image for labbook `{demo_lb.name}`")
 
-                # Add user to backend if needed
-                remote_config = self.config.get_remote_configuration()
-
-                check_and_add_user(hub_api=remote_config['hub_api'],
-                                   access_token=access_token, id_token=id_token)
+            # Add user to backend if needed
+            remote_config = self.config.get_remote_configuration()
+            check_and_add_user(hub_api=remote_config['hub_api'],
+                               access_token=access_token, id_token=id_token)
 
     def _get_jwt_public_key(self, id_token: str) -> Optional[Dict[str, str]]:
         """Method to get the public key for JWT signing

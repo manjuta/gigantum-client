@@ -1,3 +1,5 @@
+// @flow
+// vendor
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 // components
@@ -44,7 +46,6 @@ const continueButtonText = (isDataset, selectedComponentId) => {
   Pure Component that renders the buttons for the navigation menu
 */
 class CreateNav extends PureComponent<Props> {
-  props: Props;
 
   render() {
     const {

@@ -15,8 +15,12 @@ core:
 # Project Container Configuration
 container:
   # Where will we run our Project containers?
-  # Currently only a 'local' option is supported - essentially use docker.from_env()
+  # Currently only a 'local' and `hub` are supported
   context: local
+
+  # Only applicable for `hub` container context, set to null for `local
+  # Indicate the number of seconds a build can last before it times out
+  build_timeout: null
 
   # If null, no limit
   # To set enter string with a units identification char (e.g. 100000b, 1000k, 128m, 1g)

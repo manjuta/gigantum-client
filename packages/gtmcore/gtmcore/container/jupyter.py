@@ -87,6 +87,8 @@ def _start_jupyter_process(project_container: ContainerOperations, token: str,
     use_savehook = os.path.exists('/mnt/share/jupyterhooks') \
                    and not _shim_skip_python2_savehook(labbook)
 
+    project_container.configure_dev_tool('jupyterlab')
+
     cmd = (f'echo "{project_container.username},{labbook.owner},{labbook.name},{token}" > /home/giguser/jupyter_token'
            " && cd /mnt/labbook"
            f" && {PYTHON_ENV_CMD} jupyter lab --port={DEFAULT_JUPYTER_PORT} --ip=0.0.0.0 "

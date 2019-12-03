@@ -1,7 +1,7 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 // store
 import { setUpdateHistoryView } from 'JS/redux/actions/footer';
 // componenets
@@ -11,8 +11,8 @@ import './FooterNotificationList.scss';
 import './FooterMessage.scss';
 
 type Props = {
-  toggleMessageList: PropTypes.func,
-  parentState: PropTypes.object,
+  toggleMessageList: Function,
+  parentState: Object,
 }
 
 /**
@@ -28,7 +28,6 @@ const getHeight = (messageList, messageListOpenItems) => {
 };
 
 export default class FooterNotificationList extends Component<Props> {
-  props: Props;
 
   state = {
     selectedBuildId: '',

@@ -229,7 +229,7 @@ def developer_actions(args):
 
         if config.get("is_backend") is True:
             build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_backend.conf")
-            docker_args["NGINX_UI_CONFIG"] = "resources/client/nginx_ui.conf"
+            docker_args["NGINX_UI_CONFIG"] = "resources/client/nginx_ui-local.conf"
         else:
             build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_frontend.conf")
             docker_args["NGINX_API_CONFIG"] = "resources/client/nginx_api.conf"
