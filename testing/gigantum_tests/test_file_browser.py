@@ -79,7 +79,7 @@ def test_rename_file_project_file_browser(driver: selenium.webdriver, *args, **k
 
 def test_delete_file_project_file_browser(driver: selenium.webdriver, *args, **kwargs):
     """
-    Test that a file can be dragged and dropped into input data, and deleted properly.
+    Test that a file can be dragged and dropped into input data and deleted properly.
 
     Args:
         driver
