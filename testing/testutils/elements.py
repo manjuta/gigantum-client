@@ -681,10 +681,6 @@ class FileBrowserElements(UiComponent):
         return CssElement(self.driver, ".Btn__delete-secondary")
 
     @property
-    def delete_file_button(self):
-        return CssElement(self.driver, ".Btn__delete-white")
-
-    @property
     def confirm_delete_file_button(self):
         return CssElement(self.driver, ".ActionsMenu__popup>.justify--space-around>.File__btn--add")
 
@@ -727,6 +723,7 @@ class FileBrowserElements(UiComponent):
         file_input.send_keys(file_path)
         # Time sleep consistent and necessary
         time.sleep(5)
+
 
     def link_dataset(self, dataset_title, project_title):
         """Link a dataset to a project."""
