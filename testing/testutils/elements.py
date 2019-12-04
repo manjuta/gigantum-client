@@ -673,6 +673,18 @@ class FileBrowserElements(UiComponent):
         return CssElement(self.driver, ".File__text")
 
     @property
+    def rename_file_button(self):
+        return CssElement(self.driver, ".Btn__rename")
+
+    @property
+    def rename_file_input(self):
+        return CssElement(self.driver, ".File__container input")
+
+    @property
+    def confirm_file_rename_button(self):
+        return CssElement(self.driver, ".justify-space-around>.File__btn--rename-add")
+
+    @property
     def untracked_directory(self):
         return CssElement(self.driver, ".Folder__cell")
 

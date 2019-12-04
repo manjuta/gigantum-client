@@ -75,6 +75,37 @@ def test_delete_file_project_file_browser(driver: selenium.webdriver, *args, **k
         f"Expected file browser to be empty, but instead found {file_browser_elts.file_browser_message.find().text}"
 
 
+def test_rename_file_project_file_browser(driver: selenium.webdriver, *args, **kwargs):
+    """
+    Test that a file can be renamed.
+
+    Args:
+        driver
+    """
+    r = testutils.prep_py3_minimal_base(driver)
+    username, project_title = r.username, r.project_name
+
+    file_browser_elts = testutils.FileBrowserElements(driver)
+    logging.info(f"Navigating to input data for project: {project_title}")
+    driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+    file_browser_elts.file_browser_area.wait_to_appear()
+    logging.info(f"Dragging and dropping file into input data for project {project_title}")
+    file_browser_elts.drag_drop_file_in_drop_zone()
+
+    assert file_browser_elts.file_information.find().text == "sample-upload.txt", \
+        "Expected sample-upload.txt to be the first file in input data"
+
+    file_browser_elts.rename_file_button().click()
+    file_browser_elts.rename_file_input().send_keys("_rename")
+    file_browser_elts.confirm_file_rename_button().click()
+    driver.refresh()
+    file_browser_elts.file_information.wait_to_appear()
+
+    assert file_browser_elts.file_information.find().text == "sample-upload.txt_rename", \
+        f"Expected sample-upload.txt to be renamed to sample-upload.txt_rename, but instead got " \
+        f"{file_browser_elts.file_information.find().text}"
+
+
 def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
     """
     Test that a file can be dragged and dropped into data in a dataset.
