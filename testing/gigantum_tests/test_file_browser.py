@@ -105,7 +105,7 @@ def test_delete_file_project_file_browser(driver: selenium.webdriver, *args, **k
     assert "Drag and drop files here" in file_browser_elts.file_browser_message.find().text, \
         f"Expected file browser to be empty, but instead found {file_browser_elts.file_browser_message.find().text}"
 
-
+               
 def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
     """
     Test that a file can be dragged and dropped into data in a dataset.

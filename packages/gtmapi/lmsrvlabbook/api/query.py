@@ -253,9 +253,14 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
             remote = remote_config.get('git_remote')
 
         # Get collaborators from remote service
-        mgr = GitLabManager(remote, hub_api, flask.g.access_token, flask.g.id_token)
-        if mgr.repository_exists(logged_in_username, name):
-            return False
+        try:
+            mgr = GitLabManager(remote, hub_api, flask.g.access_token, flask.g.id_token)
+            if mgr.repository_exists(logged_in_username, name):
+                return False
+        except:
+            # We make a best effort to check, but don't stop the user from working. Just log and return True if it fails
+            logger.warning(f"Failed to verify that remove repository `{name}` exists before creating repository! "
+                           f"This may result in an issue publishing this repository in the future.")
 
         # If you get here the name is available
         return True

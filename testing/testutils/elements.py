@@ -736,7 +736,6 @@ class FileBrowserElements(UiComponent):
         # Time sleep consistent and necessary
         time.sleep(5)
 
-
     def link_dataset(self, dataset_title, project_title):
         """Link a dataset to a project."""
         logging.info(f"Linking the dataset {dataset_title} to project {project_title}")
