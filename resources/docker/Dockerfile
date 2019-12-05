@@ -34,6 +34,18 @@ ENV SHELL=/bin/bash \
     LC_ALL=C.UTF-8 \
     LANG=C.UTF-8
 
+
+# Arguments, defaulted to production values
+ARG CLIENT_CONFIG_FILE=build/client/labmanager-config.yaml
+ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
+ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
+ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
+ARG ENTRYPOINT_FILE=resources/client/entrypoint-local.sh
+ARG REDIS_CONFIG=resources/client/redis.conf
+ARG HONEYTAIL_INSTALLER=resources/client/honeytail-installer-local.sh
+
+COPY $HONEYTAIL_INSTALLER /tmp/honeytail.sh
+
 # Super instruction to install all dependencies
 RUN apt-get -y update && \
     apt-get -y --no-install-recommends install git nginx supervisor wget openssl python3 python3-pip python3-distutils \
@@ -48,17 +60,11 @@ RUN apt-get -y update && \
     pip3 install -r /opt/gtmcore/requirements.txt && \
     pip3 install -r /opt/gtmapi/requirements.txt && \
     pip3 install uwsgi && \
+    chmod u+x /tmp/honeytail.sh && /tmp/honeytail.sh && \
     apt-get -qq -y remove gcc g++ python3-dev wget curl gnupg gnupg1 gnupg2 && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
-
-# Arguments, defaulted to production values
-ARG CLIENT_CONFIG_FILE=build/client/labmanager-config.yaml
-ARG NGINX_UI_CONFIG=resources/client/nginx_ui.conf
-ARG NGINX_API_CONFIG=resources/client/nginx_api.conf
-ARG SUPERVISOR_CONFIG=build/client/supervisord.conf
-ARG ENTRYPOINT_FILE=resources/client/entrypoint-local.sh
-ARG REDIS_CONFIG=resources/client/redis.conf
+    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log && \
+    rm /tmp/honeytail.sh
 
 # Copy Libraries
 # TODO: Make pip installs once refactor is completed
@@ -99,6 +105,8 @@ COPY $SUPERVISOR_CONFIG /etc/supervisor/conf.d/supervisord.conf
 
 COPY $ENTRYPOINT_FILE /usr/local/bin/entrypoint.sh
 RUN chmod u+x /usr/local/bin/entrypoint.sh
+
+
 
 # Setup demo labbook
 COPY resources/my-first-project.zip /opt/my-first-project.zip
