@@ -673,16 +673,24 @@ class FileBrowserElements(UiComponent):
         return CssElement(self.driver, ".File__text")
 
     @property
+    def rename_file_button(self):
+        return CssElement(self.driver, ".Btn__rename")
+
+    @property
+    def rename_file_input(self):
+        return CssElement(self.driver, ".File__container input")
+
+    @property
+    def confirm_file_rename_button(self):
+        return CssElement(self.driver, ".justify-space-around>.File__btn--rename-add")
+
+    @property
     def untracked_directory(self):
         return CssElement(self.driver, ".Folder__cell")
 
     @property
     def trash_can_button(self):
         return CssElement(self.driver, ".Btn__delete-secondary")
-
-    @property
-    def delete_file_button(self):
-        return CssElement(self.driver, ".Btn__delete-white")
 
     @property
     def confirm_delete_file_button(self):

@@ -40,10 +40,12 @@ def test_rstudio_session(driver: selenium.webdriver, *args, **kwargs):
     assert rstudio_elements.selected_files_tab.selector_exists()
 
     logging.info("Using R console")
-    time.sleep(20)
+    time.sleep(30)
     ActionChains(driver).send_keys("with(mtcars, {plot(wt, mpg); abline(lm(mpg~wt))})\n"
                                    "title('Regression of MPG on Weight')\n").perform()
-    time.sleep(20)
+    ActionChains(driver).send_keys("with(mtcars, {plot(wt, mpg); abline(lm(mpg~wt))})\n"
+                                   "title('Regression of MPG on Weight')\n").perform()
+    time.sleep(30)
 
     logging.info("Checking for active plot")
     # Now the plots tab should be active...
