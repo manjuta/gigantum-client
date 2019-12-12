@@ -14,11 +14,18 @@ class FilterByDropdown extends Component {
   _getFilter() {
     switch (this.props.filter) {
       case 'all':
-        return 'All';
+        return (
+          <div className="Dropdown__filter-selector">
+            All&nbsp;
+            <span className="Dropdown__filter-selector subtext">
+              (includes collaborators)
+            </span>
+          </div>
+        );
       case 'owner':
         return 'My Projects';
       case 'others':
-        return 'Shared With Me';
+        return 'Collaborator\'s Projects';
       default:
         return this.props.filter;
     }
@@ -56,7 +63,10 @@ class FilterByDropdown extends Component {
             className="DashboardDropdown__list-item"
             onClick={() => props.setFilter('all')}
           >
-            All
+            All&nbsp;
+            <span className="subtext">
+              (includes collaborators)
+            </span>
             {props.filter === 'all' ? ' ✓ ' : ''}
           </li>
           <li
@@ -71,7 +81,7 @@ class FilterByDropdown extends Component {
             className="DashboardDropdown__list-item"
             onClick={() => props.setFilter('others')}
           >
-            Shared with me
+            Collaborator's Projects
             {props.filter === 'others' ? ' ✓ ' : ''}
           </li>
         </ul>

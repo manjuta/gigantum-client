@@ -19,7 +19,7 @@ export default ({
       {' '}
       <a
         target="_blank"
-        href="https://docs.gigantum.com/docs/using-cuda-with-nvidia-gpus"
+        href="https://docs.gigantum.com/docs/managing-secrets"
         rel="noopener noreferrer"
       >
         Learn more.

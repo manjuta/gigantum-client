@@ -624,8 +624,17 @@ class Folder extends Component {
             { isUntrackedDirectory
               && (
               <div
-                className="Folder__info Tooltip-data"
-                data-tooltip="Files in this folder will not be versioned or synced."
+                className="Folder__info"
+                data-tip="Files in this folder will not be versioned or synced."
+                data-for="Tooltip--untracked"
+              />
+              )
+            }
+            { isUntrackedDirectory
+              && (
+              <ReactTooltip
+                place="bottom"
+                id="Tooltip--untracked"
               />
               )
             }
