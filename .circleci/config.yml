@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@1.0.5
+
 executors:
   gig_client:
     docker:
@@ -63,7 +66,9 @@ jobs:
             rqscheduler --interval=2 --db 13 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
             pytest --cov=gtmcore packages/gtmcore/gtmcore/
-            codecov -F core
+      - codecov/upload:
+          flags: core
+
 
   test-gtmapi:
     executor: gig_client
@@ -87,7 +92,8 @@ jobs:
             pytest --cov=lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
             pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvcore
             pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
-            codecov -F api
+      - codecov/upload:
+          flags: api
 
   test-gtmcore-environment:
     executor: gig_client
@@ -107,7 +113,8 @@ jobs:
             rqscheduler --interval=2 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
             pytest --cov=gtmcore packages/gtmcore/gtmcore/environment/tests
-            codecov -F core
+      - codecov/upload:
+          flags: core
 
   test-background-jobs:
     executor: gig_client
@@ -127,7 +134,8 @@ jobs:
             rqscheduler --interval=2 --db 13 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
             pytest --cov=gtmcore packages/gtmcore/gtmcore/dispatcher/tests
-            codecov -F core
+      - codecov/upload:
+          flags: core
 
   test-ui-components:
     executor: gig_client
