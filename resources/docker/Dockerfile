@@ -2,7 +2,13 @@
 FROM ubuntu:18.04 as ui-builder
 
 # Install system level dependencies
-RUN apt-get -y update && apt-get -y install git curl gosu nodejs npm
+RUN apt-get -y update && apt-get -y install git curl gosu
+
+# Install Node
+RUN curl -sL https://deb.nodesource.com/setup_11.x | bash - && \
+    apt-get -y install nodejs
+
+# Install Yarn
 RUN npm install yarn -g
 
 # Install babel-node
@@ -80,7 +86,7 @@ RUN apt-get -y update && \
     cd /tmp && rm -rf ./lfs_install && \
     # Install node so you can run the CHP, and install the CHP
     apt-get -y install curl gnupg gnupg1 gnupg2 && \
-    curl -sL https://deb.nodesource.com/setup_8.x | bash && \
+    curl -sL https://deb.nodesource.com/setup_11.x | bash && \
     apt-get -y install nodejs && \
     npm install -g configurable-http-proxy && \
     cd /opt/confhttpproxy && pip3 install . && \
