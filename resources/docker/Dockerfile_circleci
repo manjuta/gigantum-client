@@ -51,7 +51,7 @@ RUN apt-get -y update && \
     pip3 install -r /opt/gtmapi/requirements.txt && \
     pip3 install -r /opt/gtmcore/requirements-testing.txt && \
     pip3 install -r /opt/gtmapi/requirements-testing.txt && \
-    pip3 install codecov pytest-cov pytest-xdist && \
+    pip3 install pytest-cov && \
     apt-get -qq -y remove gcc g++ wget gnupg gnupg1 gnupg2 make autoconf dh-autoreconf && \
     apt-get -qq -y autoremove && \
     apt-get -qq -y autoclean && \
