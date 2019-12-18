@@ -202,7 +202,7 @@ module.exports = {
         use: {
           loader: 'worker-loader',
           options: {
-            name: '[name].[hash].worker.js',
+            name: 'static/js/[name].[hash].worker.js',
           },
         },
       },
