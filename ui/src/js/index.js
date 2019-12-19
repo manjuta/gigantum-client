@@ -1,6 +1,7 @@
+// vendor
 import React from 'react';
 import { render } from 'react-dom';
-
+import xhook from 'xhook';
 import { Provider } from 'react-redux';
 import { detect } from 'detect-browser';
 // store
@@ -12,6 +13,14 @@ import BrowserSupport from 'Components/browserSupport/BrowserSupport';
 import { unregister } from './registerServiceWorker';
 // assets
 import '../css/critical.scss';
+
+
+xhook.before((request) => {
+  console.log(request);
+  // if (request.url.match(/example\.txt$/)) {
+  //   response.text = response.text.replace(/[aeiou]/g, 'z');
+  // }
+});
 
 const browser = detect();
 if ((browser.name === 'chrome') || (browser.name === 'firefox')) {
