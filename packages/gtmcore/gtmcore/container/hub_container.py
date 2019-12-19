@@ -6,7 +6,8 @@ import requests
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
-
+from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook import LabBook
 
 
@@ -129,7 +130,7 @@ class HubProjectContainer(ContainerOperations):
         return True if existsRaw == "true" else False
 
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
-                      volumes: Dict = None, wait_for_output=False, container_name: Optional[str] = None,
+                      volumes: Optional[Dict] = None, wait_for_output=False, container_name: Optional[str] = None,
                       **run_args) -> Optional[str]:
         """ Start a Docker container, by default for the Project connected to this instance.
 
@@ -150,11 +151,13 @@ class HubProjectContainer(ContainerOperations):
             If wait_for_output is specified, the stdout of the cmd. Otherwise, or if stdout cannot be obtained, None.
         """
         logger.info(f"HubProjectContainer.run_container()")
+        logger.info(f"volumes: {volumes}")
         url = f"{self._launch_service}/v1/project"
         data = {"client_id": self._client_id,
                 "project_id": None,
                 "project_namespace": self.labbook.owner,
-                "project_name": self.labbook.name
+                "project_name": self.labbook.name,
+                "volumes": volumes
                 }
         response = requests.post(url, json=data)
         if response.status_code != 200:
@@ -350,7 +353,25 @@ class HubProjectContainer(ContainerOperations):
         if not os.environ.get('HOST_WORK_DIR'):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
-        self.run_container()
+        mnt_point = self.labbook.root_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+
+        volumes_dict = {
+            mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
+            'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
+        }
+
+        # Set up additional bind mounts for datasets if needed.
+        datasets = InventoryManager().get_linked_datasets(self.labbook)
+        for ds in datasets:
+            try:
+                cm_class = get_cache_manager_class(ds.client_config)
+                cm = cm_class(ds, self.username)
+                ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+                volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+            except InventoryException:
+                continue
+
+        self.run_container(volumes=volumes_dict)
 
     def open_ports(self, port_list: List[int]) -> None:
         """A method to dynamically open ports to a running container. Locally this isn't really needed, but in the hub
