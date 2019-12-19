@@ -435,7 +435,7 @@ class Datasets extends Component {
                 <a onClick={() => this._setSection('local')}>Local</a>
               </li>
               <li className={cloudNavItemCSS}>
-                <a onClick={() => this._setSection('cloud')}>Cloud</a>
+                <a onClick={() => this._setSection('cloud')}>Gigantum Hub</a>
               </li>
 
               <Tooltip section="cloudLocal" />
@@ -470,7 +470,7 @@ class Datasets extends Component {
 
             <FilterByDropdown
               {...this.state}
-              type="Datasets"
+              type="Dataset"
               toggleFilterMenu={this._toggleFilterMenu}
               setFilter={this._setFilter}
             />

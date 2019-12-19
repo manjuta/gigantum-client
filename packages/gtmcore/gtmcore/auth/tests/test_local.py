@@ -276,8 +276,14 @@ class TestIdentityLocal(object):
 
         clean_local_cache(mgr)
 
+    @responses.activate
     def test_is_authenticated_token(self, mock_config_file_with_auth):
         """test checking if the user is authenticated via a token"""
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
+                      status=200)
+        responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
+
         config = Configuration(mock_config_file_with_auth[0])
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
@@ -305,8 +311,14 @@ class TestIdentityLocal(object):
 
         clean_local_cache(mgr)
 
+    @responses.activate
     def test_get_user_profile(self, mock_config_file_with_auth):
         """test getting a user profile from Auth0"""
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
+                      status=200)
+        responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
+
         config = Configuration(mock_config_file_with_auth[0])
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager

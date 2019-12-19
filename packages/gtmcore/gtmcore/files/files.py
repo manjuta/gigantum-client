@@ -1,22 +1,3 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import shutil
 import os
 from typing import Any, Dict, List, Optional
@@ -306,14 +287,12 @@ class FileOperations(object):
             raise
 
     @classmethod
-    def makedir(cls, labbook: LabBook, relative_path: str, make_parents: bool = True,
-                create_activity_record: bool = False) -> None:
+    def makedir(cls, labbook: LabBook, relative_path: str, create_activity_record: bool = False) -> None:
         """Make a new directory inside the labbook directory.
 
         Args:
             labbook: Subject LabBook
             relative_path(str): Path within the labbook to make directory
-            make_parents(bool): If true, create intermediary directories
             create_activity_record(bool): If true, create commit and activity record
 
         Returns:
@@ -328,10 +307,15 @@ class FileOperations(object):
             return
         else:
             logger.info(f"Making new directory in `{new_directory_path}`")
-            os.makedirs(new_directory_path, exist_ok=make_parents)
+            os.makedirs(new_directory_path, exist_ok=True)
             new_dir = ''
             for d in relative_path.split(os.sep):
                 new_dir = os.path.join(new_dir, d)
+                if labbook.git.check_ignored(new_dir):
+                    # This path is ignored - don't do any further git operations
+                    logger.info(f'Skipping git operations for untracked path {new_dir}')
+                    break
+
                 full_new_dir = os.path.join(labbook.root_dir, new_dir)
                 gitkeep_path = os.path.join(full_new_dir, '.gitkeep')
                 if not os.path.exists(gitkeep_path):

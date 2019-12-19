@@ -454,7 +454,7 @@ class Labbooks extends Component {
                 <a onClick={() => this._setSection('local')}>Local</a>
               </li>
               <li className={cloudNavItemCSS}>
-                <a onClick={() => this._setSection('cloud')}>Cloud</a>
+                <a onClick={() => this._setSection('cloud')}>Gigantum Hub</a>
               </li>
 
               <Tooltip section="cloudLocal" />

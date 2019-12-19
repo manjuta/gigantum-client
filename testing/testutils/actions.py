@@ -32,7 +32,7 @@ def prep_base(driver, base_button_check, skip_login=False):
         username = log_in(driver)
         elements.GuideElements(driver).remove_guide()
     else:
-        time.sleep(2)
+        time.sleep(3)
     proj_name = create_project_without_base(driver)
     time.sleep(5)
     select_project_base(driver, base_button_check())
@@ -40,7 +40,7 @@ def prep_base(driver, base_button_check, skip_login=False):
     # assert container status is stopped
     project_elts = elements.ProjectControlElements(driver)
     # This will throw an exception on time-out
-    project_elts.container_status_stopped.wait(200).is_displayed()
+    project_elts.container_status_stopped.wait_to_appear(300)
 
     return ProjectPrepResponse(username=username, project_name=proj_name)
 
@@ -60,9 +60,9 @@ def create_project_without_base(driver: selenium.webdriver) -> str:
     project_elts = elements.AddProjectElements(driver)
     project_elts.create_new_button.click()
     project_elts.project_title_input.click()
-    project_elts.project_title_input.send_keys(unique_project_name)
+    project_elts.project_title_input.find().send_keys(unique_project_name)
     project_elts.project_description_input.click()
-    project_elts.project_description_input.send_keys(testutils.unique_project_description())
+    project_elts.project_description_input.find().send_keys(testutils.unique_project_description())
     project_elts.project_continue_button.click()
     return unique_project_name
 
@@ -78,7 +78,12 @@ def select_project_base(driver, button_elt):
 
 
 def prep_py3_minimal_base(driver, skip_login=False):
-    b = lambda: elements.AddProjectBaseElements(driver).py3_minimal_base_button
+    b = lambda: elements.AddProjectBaseElements(driver).py3_minimal_base_button.find()
+    return prep_base(driver, b, skip_login)
+
+
+def prep_rstudio_base(driver, skip_login=False):
+    b = lambda: elements.AddProjectBaseElements(driver).rstudio_base_button.find()
     return prep_base(driver, b, skip_login)
 
 
@@ -97,13 +102,15 @@ def log_in(driver: selenium.webdriver, user_index: int = 0) -> str:
 
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/local#")
     auth0_elts = elements.Auth0LoginElements(driver)
-    auth0_elts.login_green_button.wait().click()
-    auth0_elts.auth0_lock_widget.wait()
+    auth0_elts.login_green_button.wait_to_appear().click()
+    auth0_elts.auth0_lock_widget.wait_to_appear()
+    # Time sleep is consistent and necessary
+    time.sleep(3)
     if auth0_elts.auth0_lock_button.selector_exists():
         logging.info("Clicking 'Not your account?'")
-        auth0_elts.not_your_account_button.wait().click()
+        auth0_elts.not_your_account_button.wait_to_appear().click()
     auth0_elts.do_login(username, password)
-    time.sleep(2)
+    time.sleep(3)
     # Set the ID and ACCESS TOKENS -- Used as headers for GraphQL mutations
     access_token = driver.execute_script("return window.localStorage.getItem('access_token')")
     id_token = driver.execute_script("return window.localStorage.getItem('id_token')")

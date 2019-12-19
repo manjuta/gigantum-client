@@ -214,6 +214,8 @@ export default class PublishModal extends Component<Props> {
 
   render() {
     const { props, state } = this;
+    const publishStatement = props.header === 'Publish' ? 'Once published, the Project will be visible in the Gigantum Hub tab on the Projects listing Page.' : '';
+    const message = `You are about to change the visibility of the Project. ${publishStatement}`;
     return (
       <Modal
         header={props.header}
@@ -223,7 +225,7 @@ export default class PublishModal extends Component<Props> {
         renderContent={() => (
           <div className="VisibilityModal">
             <div>
-              <p>You are about to change the visibility of the project.</p>
+              <p>{message}</p>
             </div>
 
             <div>

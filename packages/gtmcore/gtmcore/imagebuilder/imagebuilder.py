@@ -1,7 +1,9 @@
 import datetime
 import functools
 import glob
+import shutil
 import os
+from string import Template
 
 import yaml
 from gtmcore.environment.componentmanager import ComponentManager
@@ -112,25 +114,44 @@ class ImageBuilder(object):
             allowed_origin = self.labbook.client_config.config['environment']['iframe']['allowed_origin']
 
             if "jupyterlab" in tools or "notebook" in tools:
-                # Create config file
-                script = f"""c.NotebookApp.tornado_settings = {{
-    'headers': {{
-        'Content-Security-Policy': "frame-ancestors 'self' {allowed_origin} "
-    }}
-}}"""
-                jupyter_config_file = os.path.join(self.labbook.root_dir, '.gigantum', 'env',
-                                                   'jupyter_notebook_config.py')
-                with open(jupyter_config_file, 'wt') as cf:
-                    cf.write(script)
+                # Create notebook config file to allow iframes
                 docker_lines.append("# Enable IFrame support in JupyterLab/Jupyter Notebook")
-                docker_lines.append("COPY jupyter_notebook_config.py /etc/jupyter")
-                docker_lines.append("")
+                docker_lines.append("RUN mkdir -p /etc/jupyter/custom/")
+
+                notebook_config_template = Template("RUN echo \"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\"frame-ancestors $allowed_origin 'self'; report-uri /api/security/csp-report\\\"}}\" >> /etc/jupyter/jupyter_notebook_config.py")
+                notebook_config_str = notebook_config_template.substitute(allowed_origin=allowed_origin)
+                docker_lines.append(notebook_config_str)
 
             if "rstudio" in tools:
                 docker_lines.append("# Enable IFrame support in RStudio")
                 docker_lines.append(f'RUN echo "\\n#Enable IFrames\\nwww-frame-origin={allowed_origin}\\n" >>'
                                     f' /etc/rstudio/rserver.conf')
                 docker_lines.append("")
+
+        return docker_lines
+
+    def _install_user_defined_ca(self) -> List[str]:
+        """Step to add layers to install user defined CA certificates into Project containers"""
+        docker_lines: List[str] = list()
+        certificate_dir_client = os.path.join(self.labbook.client_config.config['git']['working_directory'],
+                                              'certificates')
+        certificate_files = [x for x in glob.glob(os.path.join(certificate_dir_client, "*.crt"))]
+
+        # Only perform this step if there are .crt files in the `certificates` dir in the root of the working dir
+        if certificate_files:
+            # Copy certificates into an untracked directory within the container build context
+            project_build_context = os.path.join(self.labbook.root_dir, '.gigantum', 'env', 'certificates')
+            os.makedirs(project_build_context, exist_ok=True)
+            for filename in certificate_files:
+                shutil.copy(filename, project_build_context)
+
+            # Render Dockerfile contents
+            docker_lines.append("# Configure user provided CA certificates")
+            docker_lines.append(f"COPY certificates/*.crt /usr/local/share/ca-certificates/")
+            docker_lines.append(f"RUN update-ca-certificates")
+            docker_lines.append(f"ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt "
+                                f"SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt")
+            docker_lines.append("")
 
         return docker_lines
 
@@ -221,6 +242,7 @@ class ImageBuilder(object):
         """
         assembly_pipeline = [self._extra_base_images,
                              self._load_baseimage,
+                             self._install_user_defined_ca,
                              self._load_packages,
                              self._load_docker_snippets,
                              self._load_bundled_apps,

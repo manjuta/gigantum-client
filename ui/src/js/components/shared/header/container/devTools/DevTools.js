@@ -19,8 +19,10 @@ class DevTools extends Component {
         const timeStampedName = devToolConfig._timestamps[0].name;
         const threeMonthsAgo = (new Date()).setMonth(new Date().getMonth() - 3);
         if (threeMonthsAgo > oldestConfig) {
-          delete devToolConfig[timeStampedOwner][timeStampedName];
-          if (Object.keys(devToolConfig[timeStampedOwner]).length === 0) {
+          if (devToolConfig[timeStampedOwner] && devToolConfig[timeStampedOwner][timeStampedName]) {
+            delete devToolConfig[timeStampedOwner][timeStampedName];
+          }
+          if (devToolConfig[timeStampedOwner] && Object.keys(devToolConfig[timeStampedOwner]).length === 0) {
             delete devToolConfig[timeStampedOwner];
           }
           devToolConfig._timestamps.shift();
@@ -138,29 +140,35 @@ class DevTools extends Component {
     } else {
       const data = { devTool: developmentTool };
       setInfoMessage(`Starting ${developmentTool}, make sure to allow popups.`);
-
-      props.containerMutations.startDevTool(
-        data,
-        (response, error) => {
-          if (response.startDevTool) {
-            tabName = `${developmentTool}-${owner}-${name}`;
-            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-            if (developmentTool === 'notebook') {
-              if (path.includes('/lab/tree')) {
-                path = path.replace('/lab/tree', '/tree');
-              } else {
-                path = `${path}/tree/code`;
+      if (process.env.BUILD_TYPE === 'cloud') {
+        const hostname = window.location.hostname.replace('client.', '');
+        const { protocol } = window.location;
+        const path = `${protocol}//${hostname}/client/${owner}/${name}/${developmentTool}`;
+        window[tabName] = window.open(path, tabName);
+      } else {
+        props.containerMutations.startDevTool(
+          data,
+          (response, error) => {
+            if (response.startDevTool) {
+              tabName = `${developmentTool}-${owner}-${name}`;
+              let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+              if (developmentTool === 'notebook') {
+                if (path.includes('/lab/tree')) {
+                  path = path.replace('/lab/tree', '/tree');
+                } else {
+                  path = `${path}/tree/code`;
+                }
               }
+
+              window[tabName] = window.open(path, tabName);
             }
 
-            window[tabName] = window.open(path, tabName);
-          }
-
-          if (error) {
-            setErrorMessage('Error Starting Dev tool', error);
-          }
-        },
-      );
+            if (error) {
+              setErrorMessage('Error Starting Dev tool', error);
+            }
+          },
+        );
+      }
     }
   }
 

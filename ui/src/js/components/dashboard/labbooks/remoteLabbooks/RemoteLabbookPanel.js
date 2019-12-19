@@ -310,7 +310,7 @@ export default class RemoteLabbookPanel extends Component {
                   textToHighlight={edge.node.description}
                 />
               )
-              : 'No descrition provided'
+              : 'No description provided'
            }
          </p>
        </div>

@@ -1,4 +1,5 @@
 import pytest
+import responses
 
 from gtmcore.configuration import Configuration
 from gtmcore.fixtures import mock_config_file_with_auth_browser
@@ -26,7 +27,6 @@ class TestIdentityBrowser(object):
 
     def test_is_authenticated_token(self, mock_config_file_with_auth_browser):
         """test checking if the user is authenticated via a token"""
-        # TODO: Possibly move to integration tests or fully mock since this makes a call out to Auth0
         config = Configuration(mock_config_file_with_auth_browser[0])
         mgr = get_identity_manager(config)
         assert type(mgr) == BrowserIdentityManager
@@ -43,8 +43,14 @@ class TestIdentityBrowser(object):
         assert mgr2.is_authenticated() is False
         assert mgr2.is_authenticated("asdfasdfa") is False  # An "expired" token will essentially do this
 
+    @responses.activate
     def test_get_user_profile(self, mock_config_file_with_auth_browser):
         """test getting a user profile from Auth0"""
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
+                      status=200)
+        responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
+
         config = Configuration(mock_config_file_with_auth_browser[0])
         mgr = get_identity_manager(config)
         assert type(mgr) == BrowserIdentityManager

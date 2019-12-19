@@ -294,6 +294,16 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
             raise ValueError("Failed to find LabBook container IP address.")
         cf_data['ip'] = container_ip
 
+        # Open ports if needed.
+        ports = [int(cf_data['shell_port']),
+                 int(cf_data['iopub_port']),
+                 int(cf_data['stdin_port']),
+                 int(cf_data['control_port']),
+                 int(cf_data['hb_port'])]
+
+        project_container = container_for_context(self.user, labbook=self.labbook)
+        project_container.open_ports(ports)
+
         km.load_connection_info(cf_data)
 
         # Get connection to the DB

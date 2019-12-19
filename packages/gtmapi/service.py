@@ -129,11 +129,18 @@ post_save_hook_code = """
 import subprocess, os
 def post_save_hook(os_path, model, contents_manager, **kwargs):
     try:
-        labmanager_ip = os.environ.get('GIGANTUM_CLIENT_IP')
+        client_ip = os.environ.get('GIGANTUM_CLIENT_IP')
+        if os.environ.get('HUB_CLIENT_ID'):
+            # Running in the Hub
+            service_route = "run/{}/api/savehook".format(os.environ.get('HUB_CLIENT_ID'))
+        else:
+            # Running locally
+            service_route = "api/savehook"
+        
         tokens = open('/home/giguser/jupyter_token').read().strip()
         username, owner, lbname, jupyter_token = tokens.split(',')
         url_args = "file={}&jupyter_token={}".format(os.path.basename(os_path), jupyter_token)
-        url = "http://{}:10001/api/savehook/{}/{}/{}?{}".format(labmanager_ip,username,owner,lbname,url_args)
+        url = "http://{}:10001/{}/{}/{}/{}?{}".format(client_ip,service_route,username,owner,lbname,url_args)
         subprocess.run(['wget', '--spider', url], cwd='/tmp')
     except Exception as e:
         print(e)
@@ -154,6 +161,12 @@ local_data_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working
 if os.path.isdir(local_data_dir) is False:
     os.makedirs(local_data_dir, exist_ok=True)
     logger.info(f'Created `local_data` dir for Local Filesystem Dataset Type: {local_data_dir}')
+
+# Create certificates file directory for custom CA certificate support.
+certificate_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_directory'], 'certificates')
+if os.path.isdir(certificate_dir) is False:
+    os.makedirs(certificate_dir, exist_ok=True)
+    logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
 
 
 # make sure temporary upload directory exists and is empty

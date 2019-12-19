@@ -110,6 +110,20 @@ class GitFilesystem(GitRepoInterface):
         """
         return self.repo.active_branch.name
 
+    def check_ignored(self, path: str) -> bool:
+        """Check if path is ignored (e.g., via .gitignore)
+
+        path: a path relative to the repository root
+
+        Returns:
+            is the path ignored?
+        """
+        git_ignored = subprocess.run(['git', 'check-ignore', path], stdout=subprocess.PIPE,
+                                     cwd=self.working_directory)
+
+        # git check-ignore echos back the given filenames if they are untracked, else it's b''
+        return git_ignored.stdout != b''
+
     # CREATE METHODS
     def initialize(self, bare=False):
         """Initialize a new repo
@@ -240,12 +254,7 @@ class GitFilesystem(GitRepoInterface):
         path_type = 'file' if os.path.isfile(filename) else 'directory'
         logger.info(f"Removing {path_type} {filename} from Git repo at {self.working_directory}")
 
-        # check-ignore appears to use return value as a kind of boolean, not as an error code
-        # So, we can't do a `check=True` here
-        git_ignored = subprocess.run(['git', 'check-ignore', filename], stdout=subprocess.PIPE,
-                                     cwd=self.working_directory)
-        # git check-ignore echos back the given filenames if they are untracked, else it's b''
-        if git_ignored.stdout:
+        if self.check_ignored(filename):
             # This file is ignored - don't do any git operations
             pass
         elif os.path.isfile(filename):

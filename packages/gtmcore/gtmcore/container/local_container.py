@@ -204,7 +204,7 @@ class LocalProjectContainer(ContainerOperations):
             # We use negative logic because this branch is much simpler
             container_object = self._client.containers.run(image_name, detach=True, init=True, name=container_name,
                                                            **run_args)
-            if not container_name:
+            if container_name == image_name:
                 self._container = container_object
             return None
         else:
@@ -413,6 +413,40 @@ class LocalProjectContainer(ContainerOperations):
                 return self._client.containers.get(container_name)
             except docker.errors.NotFound:
                 return None
+
+    def open_ports(self, port_list: List[int]) -> None:
+        """A method to dynamically open ports to a running container. Locally this isn't really needed, but in the hub
+        it is required
+
+        Args:
+            port_list: list of ports to open
+
+        Returns:
+            None
+        """
+        # This is a noop locally
+        pass
+
+    def configure_dev_tool(self, dev_tool: str) -> None:
+        """A method to configure a dev tool if needed. This is to be inserted right before starting the tool process,
+        so it lets you configure things after the giguser is created and everything is set up, but before the dev
+        tool process starts. This method exists here, because projects running in different contexts (e.g. hub, local)
+        may require different configuration.
+
+        Args:
+            dev_tool: dev tool to configure (i.e jupyterlab, notebook, rstudio)
+
+        Returns:
+            None
+        """
+        if dev_tool == "jupyterlab" or dev_tool == "notebook":
+            # No configuration needed for jupyter locally
+            pass
+        elif dev_tool == "rstudio":
+            # No configuration needed for rstudio locally
+            pass
+        else:
+            raise ValueError(f"Unsupported development tool type '{dev_tool}' when trying to configure pre-launch.")
 
 
 def get_docker_client(check_server_version=True, fallback=True) -> DockerClient:

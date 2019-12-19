@@ -1474,6 +1474,9 @@ class TestLabBookServiceQueries(object):
         responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Funique-name',
                       status=404)
 
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Ffailure',
+                      status=500)
+
         query = """
         {
           repositoryNameIsAvailable(name: "project-1")
@@ -1504,6 +1507,15 @@ class TestLabBookServiceQueries(object):
         query = """
         {
           repositoryNameIsAvailable(name: "unique-name")
+        }
+        """
+        r = fixture_working_dir[2].execute(query)
+        assert 'errors' not in r
+        assert r['data']['repositoryNameIsAvailable'] is True
+
+        query = """
+        {
+          repositoryNameIsAvailable(name: "failure")
         }
         """
         r = fixture_working_dir[2].execute(query)

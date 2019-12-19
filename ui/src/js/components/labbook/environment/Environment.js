@@ -93,6 +93,7 @@ class Environment extends Component {
 
   render() {
     const { props } = this;
+    const isLocked = props.isLocked || !navigator.onLine;
     // declare css here
     const advancedCSS = classNames({
       'Btn Btn__advanced Btn--action Btn--noShadow': true,
@@ -122,7 +123,7 @@ class Environment extends Component {
               buildCallback={this._buildCallback}
               blockClass="Environment"
               base={base}
-              isLocked={props.isLocked}
+              isLocked={isLocked}
               owner={props.owner}
               name={props.name}
             />
@@ -140,7 +141,7 @@ class Environment extends Component {
               buildCallback={this._buildCallback}
               overview={props.overview}
               base={base}
-              isLocked={props.isLocked}
+              isLocked={isLocked}
               packageLatestVersions={props.packageLatestVersions}
               packageLatestRefetch={props.packageLatestRefetch}
               cancelRefetch={props.cancelRefetch}
@@ -163,14 +164,14 @@ class Environment extends Component {
                 <CustomDockerfile
                   dockerfile={props.labbook.environment.dockerSnippet}
                   buildCallback={this._buildCallback}
-                  isLocked={props.isLocked}
+                  isLocked={isLocked}
                 />
                 <Secrets
                   environment={props.labbook.environment}
                   environmentId={props.labbook.environment.id}
                   owner={props.owner}
                   name={props.name}
-                  isLocked={props.isLocked}
+                  isLocked={isLocked}
                 />
               </div>
             )

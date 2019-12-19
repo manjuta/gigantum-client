@@ -86,9 +86,12 @@ class RemoteLabbooks extends Component {
               props.relay.loadMore(
                 8, // Fetch the next 8 items
                 () => {
-                  this.setState({
-                    isPaginating: false,
-                  });
+                  const newProps = this.props;
+                  if (!newProps.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
+                    this.setState({
+                      isPaginating: false,
+                    });
+                  }
                 },
               );
             }

@@ -1,6 +1,6 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // redux
@@ -14,26 +14,17 @@ import './Footer.scss';
 
 
 type Props = {
-  viewHistory: PropTypes.bool.isRequired,
-  history: PropTypes.object,
-  labbookName: PropTypes.string,
+  viewHistory: bool,
+  history: Object,
+  labbookName: string,
 }
 
 class Footer extends Component<Props> {
-  props: Props;
-
   /**
     subscribe to store to update state
   */
   componentDidMount() {
     window.addEventListener('resize', this._resize);
-  }
-
-  /**
-    unsubscribe from event listeners
-  */
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._resize);
   }
 
   componentDidUpdate() {
@@ -58,6 +49,13 @@ class Footer extends Component<Props> {
       clearTimeout(this.timeout);
       this.timeout = null;
     }
+  }
+
+  /**
+    unsubscribe from event listeners
+  */
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._resize);
   }
 
   /**

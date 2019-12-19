@@ -45,7 +45,24 @@ class HubProjectContainer(ContainerOperations):
         Raises:
             ContainerBuildException if container build fails.
         """
-        logger.info(f"HubProjectContainer.build_image()")
+        # Handle the case where the feedback callback isn't set by logging the messages instead
+        def _dummy_feedback(msg: str) -> None:
+            logger.info(f"hub_container.build_image feedback: {msg}")
+
+        if not feedback_callback:
+            feedback_callback = _dummy_feedback
+
+        if self.check_cached_hash(self.image_tag, self.env_dir) == 'match':
+            if self.image_available():
+                # No need to build!
+                logger.info(f"Reusing Docker image for {str(self.labbook)}")
+                feedback_callback(f"No environment changes detected. Reusing existing image.")
+                return
+
+        feedback_callback(f"Starting Project container build. Please wait.\n\n Note, build output is not yet available "
+                          f"when running in Gigantum Hub. If you need to debug an environment configuration and "
+                          f"require the build output, you must run the Client locally.")
+
         url = f"{self._launch_service}/v1/projectbuild"
         data = {"client_id": self._client_id,
                 "project_id": None,
@@ -59,16 +76,20 @@ class HubProjectContainer(ContainerOperations):
 
         # Wait for build completion
         start_time = time.time()
+        build_timeout_seconds = self.labbook.client_config.config['container']['build_timeout']
         while True:
             time_elapsed = time.time() - start_time
-            if time_elapsed > 900:
+            if time_elapsed > int(build_timeout_seconds):
+                feedback_callback("Container build timed out. If this problem persists, contact support@gigantum.com")
                 raise ContainerException(f"Timed out building project in launch service:"
                                          f" {response.status_code} : {response.json()}")
-            resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}/projectbuild")
+            resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/"
+                                f"project/{self.labbook.name}/projectbuild")
             if resp.status_code == 200:
                 logger.info(f"HubProjectContainer.build_image() in progress: {resp.json()}")
                 status = resp.json()["state"]
                 if status == "COMPLETE":
+                    feedback_callback("Container build complete")
                     return None
             elif resp.status_code != 304:
                 # back off if the server is throwing errors
@@ -231,16 +252,11 @@ class HubProjectContainer(ContainerOperations):
         """
         logger.debug(f"HubProjectContainer.exec_command()")
         url = f"{self._launch_service}/v1/exec/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
-        headers = {
-            'Content-Type': "application/json",
-            'Cache-Control': "no-cache",
-        }
         data = {
             "cmd": command,
             "detach": not get_results
         }
-        json_data = json.dumps(data)
-        response = requests.post(url, data=json_data, headers=headers)
+        response = requests.post(url, json=data)
 
         if response.status_code != 200:
             logger.error(f"Failed to exec into project container {self._client_id}:{self.labbook.owner}/{self.labbook.name}.")
@@ -258,7 +274,7 @@ class HubProjectContainer(ContainerOperations):
         """Get the list of environment variables from the container
         Args:
             container_name: an optional container name (otherwise, will use self.image_tag)
-        
+
         Returns:
             A list of strings like 'VAR=value'
         """
@@ -320,16 +336,6 @@ class HubProjectContainer(ContainerOperations):
         logger.info(f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
         return hostname
 
-    # TODO #1063 - update MITMproxy and related code so it no longer needs this logic
-    def container_list(self, ancestor: Optional[str]) -> List[str]:
-        """Return a list of containers, optionally only those that are based on `ancestor`
-
-        Args:
-            ancestor: the name of an image or container this container is derived from
-        """
-        logger.info(f"HubProjectContainer.container_list")
-        raise NotImplemented
-
     def start_project_container(self):
         """Start the Docker container for the Project connected to this instance.
 
@@ -345,3 +351,52 @@ class HubProjectContainer(ContainerOperations):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
         self.run_container()
+
+    def open_ports(self, port_list: List[int]) -> None:
+        """A method to dynamically open ports to a running container. Locally this isn't really needed, but in the hub
+        it is required
+
+        Args:
+            port_list: list of ports to open
+
+        Returns:
+            None
+        """
+        url = f"{self._launch_service}/v1/project"
+
+        data = {
+            "client_id": self._client_id,
+            "project_namespace": self.labbook.owner,
+            "project_name": self.labbook.name,
+            "ports": port_list
+        }
+
+        response = requests.put(url, data=json.dumps(data))
+        if response.status_code != 200:
+            raise ContainerException(f"Failed to opened ports {port_list} for {self.labbook.owner}/{self.labbook.name}"
+                                     f":: {response.status_code} :: {response.json()}")
+
+        logger.info(f"Opened ports {port_list} for {self.labbook.owner}/{self.labbook.name} dynamically.")
+
+    def configure_dev_tool(self, dev_tool: str) -> None:
+        """A method to configure a dev tool if needed. This is to be inserted right before starting the tool process,
+        so it lets you configure things after the giguser is created and everything is set up, but before the dev
+        tool process starts. This method exists here, because projects running in different contexts (e.g. hub, local)
+        may require different configuration.
+
+        Args:
+            dev_tool: dev tool to configure (i.e jupyterlab, notebook, rstudio)
+
+        Returns:
+            None
+        """
+        if dev_tool == "jupyterlab" or dev_tool == "notebook":
+            self.exec_command("mkdir -p /home/giguser/.jupyter/custom/", get_results=True)
+            cmd = "echo \"define(['base/js/namespace'],function(Jupyter){Jupyter._target='_self';});\" >> /home/giguser/.jupyter/custom/custom.js"
+            self.exec_command(cmd, get_results=True)
+
+        elif dev_tool == "rstudio":
+            # No configuration needed for rstudio
+            pass
+        else:
+            raise ValueError(f"Unsupported development tool type '{dev_tool}' when trying to configure pre-launch.")

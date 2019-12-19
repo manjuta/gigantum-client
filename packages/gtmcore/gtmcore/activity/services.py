@@ -53,7 +53,6 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
     dev_env_monitors = redis_conn.keys("dev_env_monitor:*")
 
     # Clean up after Lab Books that have "closed" by checking if the container is running
-
     for key in dev_env_monitors:
         if key:
             key_str = key.decode()
@@ -66,7 +65,7 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
 
         container_name = redis_conn.hget(key, 'container_name')
         if container_name:
-            container_info = container_for_context(username)
+            container_info = container_for_context(username, labbook=labbook)
             if container_info.query_container(container_name.decode()) != 'running':
                 # Container isn't running, clean up
                 logger.warn("Shutting down zombie Activity Monitoring for {}.".format(key_str))

@@ -232,13 +232,24 @@ class ClientBuilder(object):
 
                 ext_proxy_port = base_data['proxy']["external_proxy_port"]
                 api_port = base_data['proxy']['api_port']
+                context = base_data['container']['context']
+                if context == "hub":
+                    honeycomb_block = f"""\n
+[program:honeytail]
+command=/usr/bin/honeytail -c /etc/honeytail/honeytail.conf --file=/mnt/gigantum/.labmanager/logs/labmanager.log --parser=json --writekey={docker_args["HONEYCOMB_WRITE_KEY"]} --dataset=client-logs
+autostart=true
+autorestart=true
+priority=10"""
+                else:
+                    honeycomb_block = "\n"
 
                 dest.write(f"""{supervisor_data}\n\n
 [program:chp]
 command=configurable-http-proxy --ip=0.0.0.0 --port={ext_proxy_port} --api-port={api_port} --default-target='http://localhost:10002'
 autostart=true
 autorestart=true
-priority=0""")
+priority=0
+{honeycomb_block}""")
 
         # Image Labels
         labels = {'com.gigantum.app': 'client',

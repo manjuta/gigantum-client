@@ -115,6 +115,7 @@ export default class ActivityCard extends Component {
       height: `${expandedBarHeight}px`,
       margin: `${margin}px 0 0 0`,
     };
+    const firstInitial = props.edge.node.username.charAt(0).toUpperCase();
 
     if (props.isFirstCard && props.attachedCluster) {
       expandedStyle.top = '2px';
@@ -154,7 +155,7 @@ export default class ActivityCard extends Component {
                   {this._getTimeOfDay(props.edge.node.timestamp)}
                 </p>
 
-                <div className="ActivityCard__user" />
+                <div className="ActivityCard__user">{firstInitial}</div>
               </div>
 
               <h6 className="ActivityCard__commit-message">

@@ -59,6 +59,7 @@ export default class User extends Component {
   render() {
     const { state } = this;
     const baseURL = 'gigantum.com';
+    const firstInitial = state.username.charAt(0).toUpperCase();
     // declare css here
     const usernameCSS = classNames({
       User__name: true,
@@ -80,7 +81,7 @@ export default class User extends Component {
         className="User"
         key="user"
       >
-        <div className="User__image" />
+        <div className="User__image">{firstInitial}</div>
         <h6
           id="username"
           onClick={() => { this._toggleDropdown(); }}

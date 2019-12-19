@@ -162,15 +162,24 @@ def cloud_actions(args):
                       "config_override_file": os.path.join("resources", "client",
                                                            "cloud-config-override.yaml")}
 
+
+        try:
+            honeycomb_write_key = os.environ["HONEYCOMB_WRITE_KEY"]
+        except KeyError:
+            print("Honeycomb write key not found in environment. Aborting.")
+            sys.exit(1)
+
         docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
                        "NGINX_UI_CONFIG": "resources/client/nginx_ui-cloud.conf",
                        "NGINX_API_CONFIG": "resources/client/nginx_api.conf",
-                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
+                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord-cloud.conf"),
                        "ENTRYPOINT_FILE": "resources/client/entrypoint-cloud.sh",
-                       "UI_BUILD_SCRIPT": "resources/docker/ui_build_script_hub.sh"}
-
+                       "UI_BUILD_SCRIPT": "resources/docker/ui_build_script_hub.sh",
+                       "HONEYTAIL_INSTALLER": "resources/client/honeytail-installer-cloud.sh",
+                       "HONEYCOMB_WRITE_KEY": honeycomb_write_key
+                       }
+        
         builder.write_empty_testing_requirements_file()
-
         builder.build_image(no_cache=args.no_cache, build_args=build_args, docker_args=docker_args)
 
         # Print Name of image
@@ -229,7 +238,7 @@ def developer_actions(args):
 
         if config.get("is_backend") is True:
             build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_backend.conf")
-            docker_args["NGINX_UI_CONFIG"] = "resources/client/nginx_ui.conf"
+            docker_args["NGINX_UI_CONFIG"] = "resources/client/nginx_ui-local.conf"
         else:
             build_args["supervisor_file"] = os.path.join("resources", "developer", "supervisord_frontend.conf")
             docker_args["NGINX_API_CONFIG"] = "resources/client/nginx_api.conf"

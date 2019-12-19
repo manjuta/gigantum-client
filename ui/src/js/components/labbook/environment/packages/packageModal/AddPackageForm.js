@@ -1,14 +1,21 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 // componenets
 import Dropdown from 'Components/common/Dropdown';
 // assets
 import './AddPackageForm.scss';
 
-export default class AddPackageForm extends Component {
+type Props = {
+  defaultManager: string,
+  base: {
+    packageManagers: Array,
+  },
+  queuePackage: Function,
+}
 
+export default class AddPackageForm extends Component<Props> {
   state = {
     selectedManager: this.props.defaultManager,
     packageName: '',
@@ -157,9 +164,10 @@ export default class AddPackageForm extends Component {
   *  @return {}
   */
   _sendQueuePackage = () => {
-    const { props, state } = this;
+    const { state } = this;
+    const { queuePackage } = this.props;
     const versionObject = state.version ? { version: state.version } : {};
-    props.queuePackage({
+    queuePackage({
       manager: state.selectedManager,
       package: state.packageName,
       ...versionObject,

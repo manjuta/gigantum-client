@@ -20,6 +20,7 @@
 from logging import Formatter
 import json
 import traceback
+import os
 
 
 class JsonFormatter(Formatter):
@@ -45,6 +46,7 @@ class JsonFormatter(Formatter):
             'exc_text': repr(record.exc_text),
             'exc_info': exc_info,
             'stack_info': repr(record.stack_info),
-            'lineno': record.lineno
+            'lineno': record.lineno,
+            'client_id': os.getenv('GIGANTUM_CLIENT_ID', "")
         }
         return json.dumps(d)

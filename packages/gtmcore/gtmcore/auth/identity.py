@@ -100,11 +100,11 @@ class IdentityManager(metaclass=abc.ABCMeta):
         if not id_token:
             raise ValueError("Cannot check first login without a valid id_token")
 
-        if self.config.config['core']['import_demo_on_first_login']:
-            user_dir = os.path.join(working_directory, username)
+        user_dir = os.path.join(working_directory, username)
 
-            # Check if the user has already logged into this instance
-            if not os.path.exists(user_dir):
+        # Check if the user has already logged into this instance
+        if not os.path.exists(user_dir):
+            if self.config.config['core']['import_demo_on_first_login']:
                 # Create user dir
                 pathlib.Path(os.path.join(working_directory, username, username, 'labbooks')).mkdir(parents=True,
                                                                                                     exist_ok=True)
@@ -121,7 +121,6 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 }
                 build_img_metadata = {
                     'method': 'build_image',
-                    # TODO - we need labbook key but labbook is not available...
                     'labbook': f"{username}|{username}|{demo_lb.name}"
                 }
                 dispatcher = Dispatcher()
@@ -131,11 +130,10 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 logger.info(f"Adding job {build_image_job_key} to build "
                             f"Docker image for labbook `{demo_lb.name}`")
 
-                # Add user to backend if needed
-                remote_config = self.config.get_remote_configuration()
-
-                check_and_add_user(hub_api=remote_config['hub_api'],
-                                   access_token=access_token, id_token=id_token)
+            # Add user to backend if needed
+            remote_config = self.config.get_remote_configuration()
+            check_and_add_user(hub_api=remote_config['hub_api'],
+                               access_token=access_token, id_token=id_token)
 
     def _get_jwt_public_key(self, id_token: str) -> Optional[Dict[str, str]]:
         """Method to get the public key for JWT signing
@@ -275,9 +273,35 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 raise AuthenticationError({"code": "token_expired",
                                            "description": "token is expired"}, 401)
             except jwt.JWTClaimsError as err:
-                raise AuthenticationError({"code": "invalid_claims",
-                                           "description":
-                                               "incorrect claims, please check the audience and issuer"}, 401)
+                # Two-stage provider domain update. Can be removed after the second stage has been deployed
+                if err.args[0] == 'Invalid issuer':
+                    # There was a problem with the issuer of the token. Assume issuer has been moved into the
+                    # gigantum.com domain to remove 3rd party cookie issues and try again.
+                    try:
+                        if limited_validation is False:
+                            payload = jwt.decode(token, self.rsa_key,
+                                                 algorithms=self.config.config['auth']['signing_algorithm'],
+                                                 audience=audience,
+                                                 issuer="https://auth.gigantum.com/",
+                                                 access_token=access_token,
+                                                 options={"verify_at_hash": self.validate_at_hash_claim})
+                        else:
+                            payload = jwt.decode(token, self.rsa_key,
+                                                 algorithms=self.config.config['auth']['signing_algorithm'],
+                                                 audience=audience,
+                                                 issuer="https://auth.gigantum.com/",
+                                                 options={"verify_exp": False,
+                                                          "verify_at_hash": False})
+
+                        return payload
+
+                    except Exception:
+                        raise AuthenticationError({"code": "invalid_header",
+                                                   "description": "Unable to validate authentication token."}, 400)
+                else:
+                    raise AuthenticationError({"code": "invalid_claims",
+                                               "description":
+                                                   "incorrect claims, please check the audience and issuer"}, 401)
             except Exception:
                 raise AuthenticationError({"code": "invalid_header",
                                            "description": "Unable to parse authentication token."}, 400)
