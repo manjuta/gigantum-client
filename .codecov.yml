@@ -12,29 +12,29 @@ coverage:
       core:
         threshold: 1
         paths:
-        - packages/gtmcore/*
+        - packages/gtmcore/**
       api:
         threshold: 1
         paths:
-        - packages/gtmapi/*
+        - packages/gtmapi/**
     patch:
       core:
         threshold: 9
         paths:
-        - packages/gtmcore/*
+        - packages/gtmcore/**
       api:
         threshold: 9
         paths:
-        - packages/gtmapi/*
+        - packages/gtmapi/**
     changes: no
 
 flags:
   core:
     paths:
-      - packages/gtmcore/*
+      - packages/gtmcore/**
   api:
     paths:
-      - packages/gtmapi/*
+      - packages/gtmapi/**
 
 ignore:
   - "packages/gtmapi/lmsrvlabbook/tests/snapshots"  # ignore snapshot files as they don't really go towards coverage
