@@ -47,7 +47,7 @@ export default function PublishLabbookMutation(
     error: false,
     messageBody: [{ message: startMessage }],
   };
-  setMultiInfoMessage(messageData);
+  setMultiInfoMessage(owner, labbookName, messageData);
   commitMutation(
     environment,
     {
@@ -55,7 +55,7 @@ export default function PublishLabbookMutation(
       variables,
       onCompleted: (response, error) => {
         if (error) {
-          setErrorMessage('An error occurred while publishing this Project', error);
+          setErrorMessage(owner, labbookName, 'An error occurred while publishing this Project', error);
           console.log(error);
         }
 
@@ -65,6 +65,9 @@ export default function PublishLabbookMutation(
       updater: (store, response) => {
         if (response) {
           const footerData = {
+            owner,
+            name: labbookName,
+            sectionType: 'labbook',
             result: response,
             type: 'publishLabbook',
             key: 'jobKey',
@@ -73,7 +76,7 @@ export default function PublishLabbookMutation(
             failureCall,
             id,
           };
-          FooterUtils.getJobStatus(footerData);
+          FooterUtils.getJobStatus(owner, labbookName, footerData);
         }
       },
     },

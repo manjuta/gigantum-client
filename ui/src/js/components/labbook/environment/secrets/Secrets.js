@@ -1,15 +1,23 @@
 // vendor
 import React, { Component } from 'react';
 import { createPaginationContainer, graphql } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
-// store
-
 // components
 import SecretsCard from './SecretsCard';
 // utils
 import SecretsMutations from './utils/SecretsMutations';
 
-class Secrets extends Component {
+
+type Props = {
+  environmentId: string,
+  environment: {
+    secretsFileMapping: Array,
+  },
+  name: string,
+  owner: string,
+  relay: Object,
+}
+
+class Secrets extends Component<Props> {
   state = {
     secretsMutations: new SecretsMutations({
       name: this.props.name,
@@ -19,7 +27,13 @@ class Secrets extends Component {
   }
 
   render() {
-    const { props, state } = this;
+    const { secretsMutations } = this.state;
+    const {
+      environment,
+      name,
+      owner,
+      relay,
+    } = this.props;
     return (
       <div className="Secrets">
         <div className="Environment__headerContainer">
@@ -28,7 +42,8 @@ class Secrets extends Component {
           </h4>
         </div>
         <div className="Secrets__sub-header">
-          Sensitive Files are stored locally and copied into your Project container at runtime. They are not uploaded when syncing.
+          Sensitive Files are stored locally and copied into your Project container at runtime.
+          They are not uploaded when syncing.
           {' '}
           <a
             href="https://docs.gigantum.com/docs/managing-secrets"
@@ -40,9 +55,11 @@ class Secrets extends Component {
         </div>
         <div className="grid">
           <SecretsCard
-            relay={props.relay}
-            secrets={props.environment.secretsFileMapping}
-            secretsMutations={state.secretsMutations}
+            name={name}
+            owner={owner}
+            relay={relay}
+            secrets={environment.secretsFileMapping}
+            secretsMutations={secretsMutations}
           />
         </div>
       </div>
@@ -88,7 +105,7 @@ export default createPaginationContainer(
     },
     getVariables(props, { count }) {
       const { length } = props.environment.secretsFileMapping.edges;
-      const { labbookName, owner } = store.getState().routes;
+      const { name, owner } = props;
 
       const lastEdge = props.environment.secretsFileMapping.edges[length - 1];
       const cursor = lastEdge ? lastEdge.cursor : null;
@@ -98,7 +115,7 @@ export default createPaginationContainer(
       return {
         first,
         cursor,
-        name: labbookName,
+        name,
         owner,
         hasNext,
         // in most cases, for variables other than connection filters like

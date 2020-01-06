@@ -1,6 +1,6 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // mutations
 import ChangeLabbookBaseMutation from 'Mutations/ChangeLabbookBaseMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
@@ -14,8 +14,9 @@ import SelectBase from './create/SelectBase';
 import './SelectBaseModal.scss';
 
 /**
-    @param {name, owner}
-    builds docker iamge of labbook
+  @param {string} name
+  @param {string} owner
+  builds docker image of labbook
 */
 const buildImage = (name, owner) => {
   BuildImageMutation(
@@ -25,13 +26,19 @@ const buildImage = (name, owner) => {
     (response, error) => {
       if (error) {
         console.error(error);
-        setErrorMessage(`ERROR: Failed to build ${name}`, error);
+        setErrorMessage(owner, name, `ERROR: Failed to build ${name}`, error);
       }
     },
   );
+};
+
+type Props = {
+  owner: string,
+  name: string,
+  toggleModal: Function,
 }
 
-export default class SelectBaseModal extends Component {
+class SelectBaseModal extends Component<Props> {
   state = {
     repository: '',
     componentId: '',
@@ -80,11 +87,11 @@ export default class SelectBaseModal extends Component {
       sets name and description to state for change base mutation
   */
   _changeBaseMutation = () => {
-    const { props } = this;
     const {
       owner,
       name,
-    } = props;
+      toggleModal,
+    } = this.props;
     const {
       repository,
       componentId,
@@ -106,7 +113,7 @@ export default class SelectBaseModal extends Component {
       revision,
       (response, error) => {
         if (error) {
-          setErrorMessage('An error occured while trying to change bases.', error);
+          setErrorMessage(owner, name, 'An error occured while trying to change bases.', error);
 
           this.setState({
             changeBaseButtonState: 'error',
@@ -122,13 +129,12 @@ export default class SelectBaseModal extends Component {
           });
 
           setTimeout(() => {
-
             buildImage(name, owner);
 
             this.setState({
               changeBaseButtonState: '',
             }, () => {
-              props.toggleModal();
+              toggleModal();
               document.getElementById('modal__cover').classList.add('hidden');
               document.getElementById('loader').classList.add('hidden');
             });
@@ -139,11 +145,12 @@ export default class SelectBaseModal extends Component {
   }
 
   render() {
-    const { props, state } = this;
+    const { changeBaseButtonState, continueDisabled } = this.state;
+    const { toggleModal } = this.props;
     return (
       <Modal
         size="large-long"
-        handleClose={() => props.toggleModal()}
+        handleClose={() => toggleModal()}
         header="Select a Base"
         preHeader="Modifying Environment"
         noPadding
@@ -157,24 +164,26 @@ export default class SelectBaseModal extends Component {
             />
             <div className="SelectBaseModal__buttons flex justify--right">
               <button
-                onClick={() => { props.toggleModal() }}
+                onClick={() => { toggleModal(); }}
                 className="Btn--flat"
                 type="button"
               >
                 Cancel
               </button>
               <ButtonLoader
-                buttonState={state.changeBaseButtonState}
+                buttonState={changeBaseButtonState}
                 buttonText="Change Base"
                 className="Btn--last"
                 params={{}}
-                buttonDisabled={state.continueDisabled}
+                buttonDisabled={continueDisabled}
                 clicked={this._changeBaseMutation}
               />
             </div>
           </div>
         )}
       />
-    )
+    );
   }
 }
+
+export default SelectBaseModal;

@@ -16,7 +16,7 @@ import MutlithreadUploader from 'JS/utils/MultithreadUploader';
 *
 * @return {Array}
 */
-const removeExcludedFiles = (files) => {
+const removeExcludedFiles = (files, owner, name) => {
   const filesNotAllowedList = [];
   const newFileArray = files.filter((fileItem) => {
     const extension = fileItem.file.name
@@ -34,7 +34,7 @@ const removeExcludedFiles = (files) => {
 
   if (filesNotAllowedList.length > 0) {
     const filesNotAllowed = filesNotAllowedList.join(', ');
-    setWarningMessage(`The following files are not allowed ${filesNotAllowed}`);
+    setWarningMessage(owner, name, `The following files are not allowed ${filesNotAllowed}`);
   }
 
   return newFileArray;
@@ -46,7 +46,7 @@ const removeExcludedFiles = (files) => {
 *
 * @return {Array}
 */
-const flattenFiles = (files) => {
+const flattenFiles = (files, owner, name) => {
   const flattenedFiles = [];
 
   /**
@@ -83,7 +83,7 @@ const flattenFiles = (files) => {
 
   recursiveFlatten(files);
 
-  const prunedFiles = removeExcludedFiles(flattenedFiles);
+  const prunedFiles = removeExcludedFiles(flattenedFiles, owner, name);
   return prunedFiles;
 };
 
@@ -139,12 +139,17 @@ const checkFileSize = (files, promptType) => {
   return { fileSizeNotAllowed, fileSizePrompt, filesAllowed };
 };
 
-const uploadDirContent = (dndItem, props, monitor, callback) => {
+const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
   let path;
+
+  const {
+    owner,
+    labbookName,
+  } = mutationData;
 
   dndItem.dirContent.then((fileList) => {
     if (fileList.length > 0) {
-      const files = flattenFiles(fileList);
+      const files = flattenFiles(fileList, owner, labbookName);
       let key = props.fileData ? props.fileData.edge.node.key : '';
       key = props.fileKey ? props.fileKey : key;
       path = key === '' ? '' : key.substr(0, key.lastIndexOf('/') || key.length);
@@ -159,7 +164,7 @@ const uploadDirContent = (dndItem, props, monitor, callback) => {
       }
 
       if (item && item.files && props.browserProps.createFiles) {
-        const files = flattenFiles(item.files);
+        const files = flattenFiles(item.files, owner, labbookName);
         callback(files, `${path}/`);
       }
     }
@@ -187,7 +192,7 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
       if (fileSizeData.fileSizeNotAllowed.length > 0) {
         const fileToolarge = fileSizeData.fileSizeNotAllowed.map(file => file.entry.fullPath);
         const fileListAsString = fileToolarge.join(', ');
-        setWarningMessage(`The following files are too large to upload to this section ${fileListAsString}`);
+        setWarningMessage(owner, labbookName, `The following files are too large to upload to this section ${fileListAsString}`);
       } else {
         const navigateConfirm = (evt) => {
           evt.preventDefault();
@@ -263,7 +268,7 @@ const prepareUpload = (dndItem, props, monitor, mutationData, component) => {
       handleCallback(filesTemp, path, mutationData, component);
     };
 
-    uploadDirContent(dndItem, props, monitor, callback);
+    uploadDirContent(dndItem, props, monitor, callback, mutationData);
   } else {
     const callback = (filesTemp) => {
       handleCallback(filesTemp, '', mutationData, component);

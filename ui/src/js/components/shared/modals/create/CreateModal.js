@@ -19,7 +19,7 @@ import './CreateModal.scss';
 
 /**
   @param {string} name
-  @param {owner} name
+  @param {string} owner
   builds docker iamge of labbook
 */
 const buildImage = (name, owner) => {
@@ -30,14 +30,46 @@ const buildImage = (name, owner) => {
     (response, error) => {
       if (error) {
         console.error(error);
-        setErrorMessage(`ERROR: Failed to build ${name}`, error);
+        setErrorMessage(owner, name, `ERROR: Failed to build ${name}`, error);
       }
     },
   );
 };
 
-export default class CreateModal extends Component {
+
+/**
+  @param {Object} currentComponent
+  builds docker iamge of labbook
+  @return {string}
+*/
+const getModalSize = (currentComponent) => {
+  const modalSize = ((currentComponent.header === 'Select A Type')
+    || (currentComponent.header === 'Select A Base'))
+    ? 'large-long'
+    : 'large';
+
+  return modalSize;
+};
+
+
+type Props = {
+  auth: Object,
+  datasets: {
+    name: string,
+    owner: string,
+  },
+  history: {
+    location: {
+      hash: string,
+      pathname: string,
+    },
+    replace: Function,
+  }
+}
+
+class CreateModal extends Component<Props> {
   state = {
+    owner: localStorage.getItem('username'),
     name: '',
     description: '',
     repository: '',
@@ -51,13 +83,13 @@ export default class CreateModal extends Component {
   };
 
   componentDidMount = () => {
-    const { props } = this;
-    const values = queryString.parse(props.history.location.hash.slice(1));
+    const { history } = this.props;
+    const values = queryString.parse(history.location.hash.slice(1));
     if (values.createNew) {
       delete values.createNew;
     }
     const stringifiedValues = queryString.stringify(values);
-    props.history.replace(`${props.history.location.pathname}#${stringifiedValues}`);
+    history.replace(`${history.location.pathname}#${stringifiedValues}`);
   }
 
 
@@ -112,16 +144,21 @@ export default class CreateModal extends Component {
     gets selected id and triggers continueSave function using refs
   */
   _continueSave = ({ isSkip, text }) => {
-    const { props, state } = this;
-    const componentId = state.selectedComponentId;
+    const { datasets } = this.props;
+    const { selectedComponentId } = this.state;
 
-    if (props.datasets) {
-      this[componentId].continueSave(isSkip);
+    if (datasets) {
+      this[selectedComponentId].continueSave(isSkip);
     } else {
-      this[componentId].continueSave(isSkip);
-      this.setState({ continueDisabled: true });
+      this[selectedComponentId].continueSave(isSkip);
+
       if (text === 'Create Labbook') {
-        this.setState({ modalBlur: true });
+        this.setState({
+          modalBlur: true,
+          continueDisabled: true,
+        });
+      } else {
+        this.setState({ continueDisabled: true });
       }
     }
   }
@@ -132,19 +169,19 @@ export default class CreateModal extends Component {
     sets name and description to state for create labbook mutation
   */
   _createLabbookCallback = (name, description) => {
-    const { props } = this;
+    const { datasets } = this.props;
 
     this.setState({
       name,
       description,
     }, () => {
-      if (props.datasets) {
+      if (datasets) {
         this._toggleDisabledContinue(true);
         this._createDatasetMutation();
       }
     });
 
-    if (!props.datasets) {
+    if (!datasets) {
       this._setComponent('selectBase');
     }
   }
@@ -189,6 +226,7 @@ export default class CreateModal extends Component {
   _createLabbookMutation = () => {
     const self = this;
     const {
+      owner,
       name,
       description,
       repository,
@@ -212,7 +250,7 @@ export default class CreateModal extends Component {
       revision,
       (response, error) => {
         if (error) {
-          setErrorMessage(`An error occured while trying to create Project '${name}'.`, error);
+          setErrorMessage(owner, name, `An error occured while trying to create Project '${name}'.`, error);
           document.getElementById('modal__cover').classList.add('hidden');
           document.getElementById('loader').classList.add('hidden');
           this.setState({
@@ -226,11 +264,8 @@ export default class CreateModal extends Component {
             });
           }, 2000);
         } else {
-          const { owner, name } = response.createLabbook.labbook;
           localStorage.setItem('latest_base', componentId);
-          this.setState({
-            createLabbookButtonState: 'finished',
-          });
+          this.setState({ createLabbookButtonState: 'finished' });
 
           setTimeout(() => {
             buildImage(name, owner);
@@ -255,6 +290,7 @@ export default class CreateModal extends Component {
   _createDatasetMutation = () => {
     const self = this;
     const {
+      owner,
       name,
       description,
     } = this.state;
@@ -269,28 +305,22 @@ export default class CreateModal extends Component {
       'gigantum_object_v1',
       (response, error) => {
         if (error) {
-          setErrorMessage(`An error occured while trying to create Dataset '${name}'.`, error);
+          setErrorMessage(owner, name, `An error occured while trying to create Dataset '${name}'.`, error);
           this.setState({
             modalBlur: false,
             createLabbookButtonState: 'error',
           });
 
           setTimeout(() => {
-            this.setState({
-              createLabbookButtonState: '',
-            });
+            this.setState({ createLabbookButtonState: '' });
           }, 2000);
         } else {
-          const { owner } = response.createDataset.dataset;
-
           this.setState({
             createLabbookButtonState: 'finished',
           });
 
           setTimeout(() => {
-            this.setState({
-              createLabbookButtonState: '',
-            }, () => {
+            this.setState({ createLabbookButtonState: '' }, () => {
               self.props.history.push(`../datasets/${owner}/${name}`);
             });
           }, 2000);
@@ -305,8 +335,15 @@ export default class CreateModal extends Component {
    * @return {}
    */
   _currentComponent = () => {
-    const { props, state } = this;
-    switch (state.selectedComponentId) {
+    const { props } = this;
+    const { selectedComponentId } = this.state;
+    const {
+      auth,
+      datasets,
+      history,
+    } = this.props;
+
+    switch (selectedComponentId) {
       case 'createLabbook':
         return {
           component:
@@ -315,12 +352,12 @@ export default class CreateModal extends Component {
               createLabbookCallback={this._createLabbookCallback}
               toggleDisabledContinue={this._toggleDisabledContinue}
               setButtonState={this._setButtonState}
-              history={props.history}
+              history={history}
               hideModal={this._hideModal}
-              auth={props.auth}
-              datasets={props.datasets}
+              auth={auth}
+              datasets={datasets}
             />),
-          header: props.datasets ? 'Create Dataset' : 'Create Project',
+          header: datasets ? 'Create Dataset' : 'Create Project',
         };
 
       case 'selectBase':
@@ -332,10 +369,10 @@ export default class CreateModal extends Component {
             toggleDisabledContinue={this._toggleDisabledContinue}
             createLabbookMutation={this._createLabbookMutation}
             createDatasetMutation={this._createDatasetMutation}
-            datasets={props.datasets}
+            datasets={datasets}
           />),
-          header: props.datasets ? 'Select A Type' : 'Select A Base',
-          preHeader: props.datasets ? 'Create Dataset' : 'Create Project',
+          header: datasets ? 'Select A Type' : 'Select A Base',
+          preHeader: datasets ? 'Create Dataset' : 'Create Project',
         };
       default:
         return {
@@ -345,9 +382,9 @@ export default class CreateModal extends Component {
             createLabbookCallback={this._createLabbookCallback}
             toggleDisabledContinue={this._toggleDisabledContinue}
             setButtonState={this._setButtonState}
-            history={props.history}
+            history={history}
             hideModal={this._hideModal}
-            auth={props.auth}
+            auth={auth}
           />),
           header: 'Create Project',
         };
@@ -355,21 +392,27 @@ export default class CreateModal extends Component {
   }
 
   render() {
-    const { props, state } = this;
+    // destructuring here
+    const { datasets } = this.props;
+    const {
+      modalBlur,
+      modalVisible,
+      createLabbookButtonState,
+      selectedComponentId,
+      continueDisabled,
+    } = this.state;
+    // other variables
     const currentComponent = this._currentComponent();
     const modalBody = currentComponent.component;
-    const modalSize = ((currentComponent.header === 'Select A Type')
-      || (currentComponent.header === 'Select A Base'))
-      ? 'large-long'
-      : 'large';
+    const modalSize = getModalSize(currentComponent);
     // declare css
     const loaderCSS = classNames({
-      hidden: !state.modalBlur,
+      hidden: !modalBlur,
     });
 
     return (
       <div>
-        { state.modalVisible
+        { modalVisible
           && (
             <Modal
               size={modalSize}
@@ -385,13 +428,13 @@ export default class CreateModal extends Component {
 
                   <CreateNav
                     self={this}
-                    createLabbookButtonState={state.createLabbookButtonState}
-                    selectedComponentId={state.selectedComponentId}
-                    continueDisabled={state.continueDisabled}
+                    createLabbookButtonState={createLabbookButtonState}
+                    selectedComponentId={selectedComponentId}
+                    continueDisabled={continueDisabled}
                     setComponent={this._setComponent}
                     hideModal={this._hideModal}
                     continueSave={this._continueSave}
-                    isDataset={props.datasets}
+                    isDataset={datasets}
                   />
                 </div>
               )}
@@ -399,8 +442,10 @@ export default class CreateModal extends Component {
           )
         }
 
-        { state.modalBlur && <Loader className={loaderCSS} /> }
+        { modalBlur && <Loader className={loaderCSS} /> }
       </div>
     );
   }
 }
+
+export default CreateModal;

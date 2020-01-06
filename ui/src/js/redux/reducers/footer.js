@@ -1,7 +1,10 @@
+// @flow
+// vendor
 import uuidv4 from 'uuid/v4';
+// constants
 import * as types from 'JS/redux/constants/constants';
 
-const messageStackHistory = window.sessionStorage.getItem('messageStackHistory')
+const messageStackHistoryInit = window.sessionStorage.getItem('messageStackHistory')
   ? JSON.parse(window.sessionStorage.getItem('messageStackHistory'))
   : [];
 
@@ -15,7 +18,7 @@ export default (state = {
   uploadError: false,
   success: false,
   labbookName: '',
-  messageStackHistory,
+  messageStackHistory: messageStackHistoryInit,
   messageStack: [],
   uploadStack: [],
   fileCount: 0,
@@ -39,8 +42,9 @@ export default (state = {
 
   if (action.type === types.ERROR_MESSAGE) {
     const id = uuidv4();
-    const messageStack = state.messageStack;
-    let messageStackHistory = state.messageStackHistory;
+    const { owner, name } = action.payload;
+    const { messageStack } = state;
+    let { messageStackHistory } = state;
 
 
     const message = {
@@ -53,6 +57,8 @@ export default (state = {
       messageBody: action.payload.messageBody
         ? action.payload.messageBody
         : [],
+      owner,
+      name,
     };
 
     messageStack.unshift(message);
@@ -75,8 +81,9 @@ export default (state = {
     };
   } if (action.type === types.INFO_MESSAGE) { // this is for only updating a single message
     const id = uuidv4();
-    const messageStack = state.messageStack;
-    let messageStackHistory = state.messageStackHistory;
+    const { owner, name } = action.payload;
+    const { messageStack } = state;
+    let { messageStackHistory } = state;
 
 
     const message = {
@@ -90,6 +97,8 @@ export default (state = {
       isMultiPart: false,
       messageBodyOpen: false,
       date,
+      owner,
+      name,
     };
 
     messageStack.unshift(message);
@@ -113,8 +122,9 @@ export default (state = {
     };
   } if (action.type === types.WARNING_MESSAGE) { // this is for only updating a single message
     const id = uuidv4();
-    const messageStack = state.messageStack;
-    let messageStackHistory = state.messageStackHistory;
+    const { owner, name } = action.payload;
+    const { messageStack } = state;
+    let { messageStackHistory } = state;
 
     const message = {
       message: action.payload.message,
@@ -126,6 +136,8 @@ export default (state = {
         : [],
       messageBodyOpen: false,
       date,
+      owner,
+      name,
     };
 
     messageStack.unshift(message);
@@ -156,7 +168,8 @@ export default (state = {
       }
     });
 
-    const messageListOpen = (state.viewHistory && state.messageListOpen) || (!state.viewHistory && (messageStack.length > 0));
+    const messageListOpen = (state.viewHistory && state.messageListOpen)
+      || (!state.viewHistory && (messageStack.length > 0));
     const lastIndex = messageStack.length - 1;
 
     return {
@@ -177,7 +190,7 @@ export default (state = {
       progessBarPercentage: action.payload.percentage,
     };
 
-    const uploadStack = state.uploadStack;
+    const { uploadStack } = state;
     uploadStack.push(message);
 
     return {
@@ -198,10 +211,13 @@ export default (state = {
       viewHistory: false,
     };
   } if (action.type === types.UPLOAD_MESSAGE_UPDATE) {
+    const { owner, name } = action.payload;
     const message = {
       message: action.payload.uploadMessage,
       id: action.payload.id,
       progessBarPercentage: action.payload.progessBarPercentage,
+      owner,
+      name,
     };
 
     const uploadStack = state.uploadStack.map((messageItem) => {
@@ -305,12 +321,12 @@ export default (state = {
       messageListOpen: false,
     };
   } if (action.type === types.MULTIPART_INFO_MESSAGE) {
-    let messageStackHistory = state.messageStackHistory;
-    const messageStack = state.messageStack;
+    const { owner, name } = action.payload;
+    const { messageStack } = state;
+    let { messageStackHistory, messageListOpen } = state;
     let previousHistoryIndex = 0;
     let previousIndex = 0;
     let messageBodyOpen = false;
-    let messageListOpen = state.messageListOpen;
 
     const doesMessageExist = messageStack.filter((message, index) => {
       if (message.id === action.payload.id) {
@@ -340,10 +356,16 @@ export default (state = {
         messageListOpen = false;
       }
     } else {
-      messageListOpen = action.payload.messageListOpen === undefined || action.payload.messageListOpen;
+      messageListOpen = (action.payload.messageListOpen === undefined)
+        || action.payload.messageListOpen;
     }
 
-    const buildProgress = action.payload.buildProgress && (action.payload.message.indexOf('Using cached image') === -1);
+    const buildProgress = action.payload.buildProgress
+      && (action.payload.message.indexOf('Using cached image') === -1);
+    const dismissed = (doesHistoryMessageExist.length > 0)
+      ? doesHistoryMessageExist[0].dismissed
+      : false;
+
     const message = {
       message: action.payload.message,
       id: action.payload.id,
@@ -358,10 +380,11 @@ export default (state = {
       error: action.payload.error,
       messageBodyOpen,
       buildProgress,
-      dismissed: (doesHistoryMessageExist.length > 0) ? doesHistoryMessageExist[0].dismissed : false,
+      dismissed,
       date,
+      owner,
+      name,
     };
-
 
     if (doesMessageExist.length > 0) {
       messageStack.splice(previousIndex, 1, message);
@@ -389,7 +412,9 @@ export default (state = {
       success: true,
       error: action.payload.error,
       messageListOpen,
-      viewHistory: ((doesHistoryMessageExist.length > 0) && doesHistoryMessageExist[0].dismissed && state.viewHistory),
+      viewHistory: ((doesHistoryMessageExist.length > 0)
+        && doesHistoryMessageExist[0].dismissed
+        && state.viewHistory),
     };
   } if (action.type === types.RESET_FOOTER_STORE) {
     return {
@@ -406,8 +431,10 @@ export default (state = {
       viewHistory: false,
     };
   } if (action.type === types.UPDATE_MESSAGE_STACK_ITEM_VISIBILITY) {
-    const messageStack = state.messageStack;
-    messageStack[action.payload.index].messageBodyOpen = !messageStack[action.payload.index].messageBodyOpen;
+    const { messageStack } = state;
+    const { index } = action.payload;
+
+    messageStack[index].messageBodyOpen = !messageStack[index].messageBodyOpen;
 
     return {
       ...state,
@@ -420,6 +447,7 @@ export default (state = {
 
     messageStackItem.messageBodyOpen = !messageStackItem.messageBodyOpen;
     newMessageStackHistory[action.payload.index] = messageStackItem;
+
     newMessageStackHistory = newMessageStackHistory.map((message, index) => {
       if (index === action.payload.index) {
         return message;
@@ -431,7 +459,7 @@ export default (state = {
 
     return {
       ...state,
-      messageStackHistory,
+      messageStackHistory: newMessageStackHistory,
       uuid: uuidv4(),
     };
   } if (action.type === types.RESIZE_FOOTER) {

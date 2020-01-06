@@ -50,7 +50,7 @@ export default function AddCollaboratorMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage(`ERROR: Could not add Collaborator ${username}`, error);
+          setErrorMessage(owner, labbookName, `ERROR: Could not add Collaborator ${username}`, error);
         }
         callback(response, error);
       },

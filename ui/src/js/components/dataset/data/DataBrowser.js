@@ -44,12 +44,12 @@ export default createPaginationContainer(
       };
     },
     getVariables(props, { count, cursor }, fragmentVariables) {
-      const { owner, labbookName } = store.getState().routes;
+      const { owner, name } = props;
       return {
         first: count,
         cursor,
         owner,
-        name: labbookName,
+        name,
       };
     },
     query: graphql`

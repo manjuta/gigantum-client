@@ -60,7 +60,7 @@ const FooterUtils = {
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
-  getJobStatus: (footerData) => {
+  getJobStatus: (owner, name, footerData) => {
 
     const {
       result,
@@ -121,7 +121,7 @@ const FooterUtils = {
                   messageListOpen: !hideFooter,
                   buildProgress: type === 'buildImage',
                 };
-                setMultiInfoMessage(messageData);
+                setMultiInfoMessage(owner, name, messageData);
               }
               refetch();
             // executes when job status has completed
@@ -136,7 +136,7 @@ const FooterUtils = {
                 buildProgress: type === 'buildImage',
               };
 
-              setMultiInfoMessage(messageData);
+              setMultiInfoMessage(owner, name, messageData);
               hideModal();
 
               if (footerCallback && footerCallback.finished) {
@@ -175,7 +175,7 @@ const FooterUtils = {
                 messageBody: [{ message: errorHTML }],
                 buildProgress: type === 'buildImage',
               };
-              setMultiInfoMessage(messageData);
+              setMultiInfoMessage(owner, name, messageData);
             } else {
               // refetch status data not ready
               refetch();
@@ -186,7 +186,12 @@ const FooterUtils = {
           }
         });
       } else {
-        setErrorMessage('There was an error fetching job status.', [{ message: 'Callback error from the API' }]);
+        setErrorMessage(
+          owner,
+          name,
+          'There was an error fetching job status.',
+          [{ message: 'Callback error from the API' }],
+        );
       }
     };
 
@@ -210,7 +215,7 @@ const FooterUtils = {
       *  updates footer with a message
       *  @return {}
       */
-    const fetchStatus = (data) => {
+    const fetchStatus = (owner, name, data) => {
       const {
         backgroundJobKey,
       } = data;

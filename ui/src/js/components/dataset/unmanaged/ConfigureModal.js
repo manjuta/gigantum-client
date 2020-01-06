@@ -9,8 +9,16 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 import Modal from 'Components/common/Modal';
 import ButtonLoader from 'Components/common/ButtonLoader';
 
+type Props = {
+  dataset: {
+    backendIsConfigured: bool,
+    owner: string,
+    name: string,
+  },
+  history: Object,
+}
 
-class ConfigureModal extends Component {
+class ConfigureModal extends Component<Props> {
   state = {
     buttonState: '',
     configValues: new Map(),
@@ -65,6 +73,7 @@ class ConfigureModal extends Component {
   */
   _configureDatasetCallback = (response, error, confirm) => {
     const configureDataset = response && response.configureDataset;
+    const { owner, name } = this.props.dataset;
 
     if (error) {
       console.log(error);
@@ -73,10 +82,8 @@ class ConfigureModal extends Component {
       setTimeout(() => {
         this.setState({ buttonState: '' });
       }, 2000);
-
     } else if (configureDataset.errorMessage) {
-
-      setErrorMessage('Failed to configure Dataset', [{ message: configureDataset.errorMessage }]);
+      setErrorMessage(owner, name, 'Failed to configure Dataset', [{ message: configureDataset.errorMessage }]);
 
       this.setState({
         buttonState: 'error',
@@ -86,19 +93,18 @@ class ConfigureModal extends Component {
       setTimeout(() => {
         this.setState({ buttonState: '' });
       }, 2000);
-
-    } else if (configureDataset.isConfigured
-        && !configureDataset.shouldConfirm
-        && !configureDataset.backgroundJobKey) {
-
+    } else if (
+      configureDataset.isConfigured
+      && !configureDataset.shouldConfirm
+      && !configureDataset.backgroundJobKey
+    ) {
       this._configureDataset(true);
-
-    } else if (configureDataset.isConfigured
-        && configureDataset.shouldConfirm
-        && !confirm) {
-
+    } else if (
+      configureDataset.isConfigured
+      && configureDataset.shouldConfirm
+      && !confirm
+    ) {
       this.setState({ confirmMessage: configureDataset.confirmMessage });
-
     } else if (confirm) {
       this.setState({ buttonState: 'finished' });
 
@@ -118,7 +124,7 @@ class ConfigureModal extends Component {
   _configureDataset = (confirm = null) => {
     const { configValues } = this.state;
     const { dataset } = this.props;
-    const { labbookName, owner } = store.getState().routes;
+    const { name, owner } = dataset;
     const successCall = () => {};
     const failureCall = () => {
       if (this.closeModal) {
@@ -144,7 +150,7 @@ class ConfigureModal extends Component {
 
     ConfigureDatasetMutation(
       owner,
-      labbookName,
+      name,
       parameters,
       confirm,
       successCall,

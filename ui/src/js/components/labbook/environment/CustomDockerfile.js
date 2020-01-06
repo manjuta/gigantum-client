@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -16,7 +17,13 @@ import config from 'JS/config';
 // assets
 import './CustomDockerfile.scss';
 
-export default class CustomDockerfile extends Component {
+type Props = {
+  buildCallback: Function,
+  dockerfile: string,
+  isLocked: bool,
+}
+
+class CustomDockerfile extends Component<Props> {
   state = {
     originalDockerfile: this.props.dockerfile,
     dockerfileContent: this.props.dockerfile,
@@ -42,16 +49,23 @@ export default class CustomDockerfile extends Component {
   *  updates docker file
   *  @return {}
   */
-  _saveDockerfile() {
+  _saveDockerfile = () => {
+    const {
+      buildCallback,
+      isLocked,
+      owner,
+      name,
+    } = props;
     const { props, state } = this;
     const { status } = store.getState().containerStatus;
-    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !props.isLocked;
-    const { owner, labbookName } = store.getState().routes;
+    const canEditEnvironment = config.containerStatus.canEditEnvironment(status)
+      && !isLocked;
+
 
     if (navigator.onLine) {
       if (canEditEnvironment) {
         const validDictionary = new Set(['LABEL', 'RUN', 'ENV', '#']);
-        const splitDockerSnippet = this.state.dockerfileContent.split(/\n|\\n/);
+        const splitDockerSnippet = state.dockerfileContent.split(/\n|\\n/);
         let valid = true;
         splitDockerSnippet.forEach((snippetLine, index) => {
           const firstVal = snippetLine.split(' ')[0];
@@ -63,7 +77,11 @@ export default class CustomDockerfile extends Component {
             isPreviousLineExtended = strippedSpaces[strippedSpaces.length - 1] === '\\';
           }
 
-          if ((firstVal.length && !validDictionary.has(firstVal.toUpperCase()) && firstVal[0] !== '#') && !isPreviousLineExtended) {
+          if (
+            (firstVal.length
+            && !validDictionary.has(firstVal.toUpperCase()) && (firstVal[0] !== '#'))
+            && !isPreviousLineExtended
+          ) {
             valid = false;
           }
         });
@@ -73,27 +91,40 @@ export default class CustomDockerfile extends Component {
 
           AddCustomDockerMutation(
             owner,
-            labbookName,
-            this.state.dockerfileContent,
+            name,
+            state.dockerfileContent,
             (res, error) => {
               if (error) {
                 console.log(error);
-                setErrorMessage('Dockerfile was not set: ', error);
+                setErrorMessage(owner, name, 'Dockerfile was not set: ', error);
                 this.setState({ savingDockerfile: false });
               } else {
-                props.buildCallback();
-                this.setState({ editingDockerfile: false, lastSavedDockerfileContent: this.state.dockerfileContent, savingDockerfile: false });
+                buildCallback();
+                this.setState({
+                  editingDockerfile: false,
+                  lastSavedDockerfileContent: state.dockerfileContent,
+                  savingDockerfile: false,
+                });
               }
             },
           );
         } else {
-          setWarningMessage('Invalid command entered. Commands must begin with: LABEL, RUN, ENV, or #');
+          setWarningMessage(
+            owner,
+            name,
+            'Invalid command entered. Commands must begin with: LABEL, RUN, ENV, or #',
+          );
         }
       } else {
         setContainerMenuWarningMessage('Stop Project before editing the environment. \n Be sure to save your changes.');
       }
     } else {
-      setErrorMessage('Cannot remove package at this time.', [{ message: 'An internet connection is required to modify the environment.' }]);
+      setErrorMessage(
+        owner,
+        name,
+        'Cannot remove package at this time.',
+        [{ message: 'An internet connection is required to modify the environment.' }],
+      );
     }
   }
 
@@ -102,9 +133,11 @@ export default class CustomDockerfile extends Component {
   *  sets constainer to edit mode if user can edit environment.
   *  @return {}
   */
-  _editDockerfile() {
+  _editDockerfile = () => {
+    const { isLocked } = this.props;
     const { status } = store.getState().containerStatus;
-    const canEditEnvironment = config.containerStatus.canEditEnvironment(status) && !this.props.isLocked;
+    const canEditEnvironment = config.containerStatus.canEditEnvironment(status)
+      && !isLocked;
     if (canEditEnvironment) {
       this.setState({ editingDockerfile: true });
     } else {
@@ -112,22 +145,51 @@ export default class CustomDockerfile extends Component {
     }
   }
 
+  /**
+  *  @param {object} evt
+  *  sets dockeFileContent in state
+  *  @return {}
+  */
+  _updateDockerFileContent = (evt) => {
+    this.setState({ dockerfileContent: evt.target.value });
+  }
+
+  /**
+  *  @param {} -
+  *  cancels docker editing
+  *  @return {}
+  */
+  _cancelDockerUpdate = () => {
+    this.setState((state) => {
+      const dockerfileContent = state.lastSavedDockerfileContent;
+      return ({
+        editingDockerfile: false,
+        dockerfileContent,
+      });
+    });
+  }
+
 
   render() {
-    const { props, state } = this;
-    const renderedContent = state.dockerfileContent
-      ? `\`\`\`\n${state.dockerfileContent}\n\`\`\``
+    const { isLocked } = this.props;
+    const {
+      dockerfileContent,
+      editingDockerfile,
+      savingDockerfile,
+    } = this.state;
+    const renderedContent = dockerfileContent
+      ? `\`\`\`\n${dockerfileContent}\n\`\`\``
       : 'No commands provided.';
-
+    const textDefault = (dockerfileContent !== null) ? dockerfileContent : '';
     // declare css here
     const dockerfileCSS = classNames({
       'column-1-span-11': true,
-      empty: !this.state.dockerfileContent,
+      empty: !dockerfileContent,
     });
     const editDockerfileButtonCSS = classNames({
       'Btn Btn--feature Btn--feature Btn__edit Btn__edit--featurePosition absolute--important': true,
-      hidden: state.editingDockerfile,
-      'Tooltip-data': props.isLocked,
+      hidden: editingDockerfile,
+      'Tooltip-data': isLocked,
     });
 
     return (
@@ -144,7 +206,10 @@ export default class CustomDockerfile extends Component {
 
         <div className="CustomDockerfile__sub-header">
 
-          <p>Add commands below to modify your environment. Note: Docker instructions are executed after packages are installed.</p>
+          <p>
+            Add commands below to modify your environment.
+            Note: Docker instructions are executed after packages are installed.
+          </p>
 
           <div className="CustomDockerfile--code-snippet flex">
             <p>For example, to install a pip package from a Github repo add:</p>
@@ -163,64 +228,56 @@ export default class CustomDockerfile extends Component {
               <span>Edit Dockerfile</span>
             </button>
             {
-              this.state.editingDockerfile
-                ? (
-                  <Fragment>
+              editingDockerfile
+              && (
+                <Fragment>
 
-                    <textarea
-                      className="CustomDockerfile__textarea"
-                      type="text"
-                      onChange={(evt) => { this.setState({ dockerfileContent: evt.target.value }); }}
-                      placeholder="Enter dockerfile commands here"
-                      defaultValue={state.dockerfileContent ? state.dockerfileContent : ''}
-                    />
+                  <textarea
+                    className="CustomDockerfile__textarea"
+                    type="text"
+                    onChange={(evt) => { this._updateDockerFileContent(evt); }}
+                    placeholder="Enter dockerfile commands here"
+                    defaultValue={textDefault}
+                  />
 
-                    <div className="CustomDockerfile__buttonContainer">
+                  <div className="CustomDockerfile__buttonContainer">
 
-                      <div className="column-1-span-2">
+                    <div className="column-1-span-2">
 
-                        <button
-                          className="CustomDockerfile__content-cancel-button Btn--flat"
-                          onClick={() => this.setState({
-                            editingDockerfile: false,
-                            dockerfileContent: state.lastSavedDockerfileContent,
-                          })}
-                          type="button"
-                        >
-                          Cancel
-                        </button>
+                      <button
+                        className="CustomDockerfile__content-cancel-button Btn--flat"
+                        onClick={() => { this._cancelDockerUpdate(); }}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
 
-                        <button
-                          className="CustomDockerfile__content-save-button"
-                          disabled={state.savingDockerfile}
-                          onClick={() => this._saveDockerfile()}
-                          type="button"
-                        >
-                          Save
-                        </button>
-
-                      </div>
+                      <button
+                        className="CustomDockerfile__content-save-button"
+                        disabled={savingDockerfile}
+                        onClick={() => this._saveDockerfile()}
+                        type="button"
+                      >
+                        Save
+                      </button>
 
                     </div>
 
-                  </Fragment>
-                )
+                  </div>
+                </Fragment>
+              )
+            }
 
-                : (
-                  <Fragment>
-
-                    <div className={dockerfileCSS}>
-
-                      <ReactMarkdown
-                        renderers={{ code: codeProps => <CodeBlock {...codeProps} language="dockerfile" /> }}
-                        className="ReactMarkdown"
-                        source={renderedContent}
-                      />
-
-                    </div>
-
-                  </Fragment>
-                )
+            { !editingDockerfile
+              && (
+                <div className={dockerfileCSS}>
+                  <ReactMarkdown
+                    renderers={{ code: codeProps => <CodeBlock {...codeProps} language="dockerfile" /> }}
+                    className="ReactMarkdown"
+                    source={renderedContent}
+                  />
+                </div>
+              )
             }
 
           </div>
@@ -229,3 +286,6 @@ export default class CustomDockerfile extends Component {
     );
   }
 }
+
+
+export default CustomDockerfile;

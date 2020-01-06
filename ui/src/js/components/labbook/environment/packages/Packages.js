@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import { createPaginationContainer, graphql } from 'react-relay';
 // store
-import store from 'JS/redux/store';
 import { setBuildingState } from 'JS/redux/actions/labbook/labbook';
 // components
 import Tooltip from 'Components/common/Tooltip';
@@ -156,8 +155,7 @@ export default createPaginationContainer(
     },
     getVariables(props, { count }) {
       const { length } = props.environment.packageDependencies.edges;
-      const { labbookName, owner } = store.getState().routes;
-
+      const { name, owner } = props;
       const lastEdge = props.environment.packageDependencies.edges[length - 1];
       const cursor = lastEdge ? lastEdge.cursor : null;
       const hasNext = !props.environment.packageDependencies.pageInfo.hasNextPage;
@@ -166,7 +164,7 @@ export default createPaginationContainer(
       return {
         first,
         cursor,
-        name: labbookName,
+        name,
         owner,
         hasNext,
         skipPackages: true,

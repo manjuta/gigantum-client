@@ -14,7 +14,33 @@ import DatasetsCommits from './DatasetsCommits';
 // assets
 import './DatasetCard.scss';
 
-export default class DatasetCard extends Component {
+type Props = {
+  checkLocal: boolean,
+  dataset: {
+    name: string,
+    owner: string,
+    commitsBehind: Number,
+    overview: {
+      numFiles: Number,
+      totalBytes: Number,
+      localBytes: Number,
+    }
+  },
+  formattedFiles: {
+    children: Array,
+  },
+  isLocked: boolean,
+  isLocal: boolean,
+  owner: string,
+  name: string,
+  mutationData: Object,
+  mutations: {
+    downloadDatasetFiles: Function,
+  },
+  section: string,
+}
+
+class DatasetCard extends Component<Props> {
   state = {
     expanded: false,
     unlinkPopupVisible: false,
@@ -42,19 +68,21 @@ export default class DatasetCard extends Component {
   *  @return {}
   */
   _modifyDatasetLink = (evt, action) => {
-    const { props } = this;
-    const labbookOwner = props.owner;
-    const labbookName = props.name;
-    const datasetOwner = props.dataset.owner;
-    const datasetName = props.dataset.name;
+    const {
+      owner,
+      name,
+      dataset,
+    } = this.props;
+    const datasetOwner = dataset.owner;
+    const datasetName = dataset.name;
     const popupReference = action === 'unlink' ? action : 'commits';
     const footerReference = action === 'unlink' ? action : 'update';
     this.setState({ [`${popupReference}Pending`]: true });
     this._togglePopup(evt, false, popupReference);
 
     ModifyDatasetLinkMutation(
-      labbookOwner,
-      labbookName,
+      owner,
+      name,
       datasetOwner,
       datasetName,
       action,
@@ -62,9 +90,9 @@ export default class DatasetCard extends Component {
       (response, error) => {
         if (error) {
           this.setState({ [`${popupReference}Pending`]: false });
-          setErrorMessage(`Unable to ${action} dataset`, error);
+          setErrorMessage(owner, name, `Unable to ${action} dataset`, error);
         } else {
-          setInfoMessage(`Dataset ${datasetName} has been succesfully ${footerReference}ed`);
+          setInfoMessage(owner, name, `Dataset ${datasetName} has been succesfully ${footerReference}ed`);
         }
       },
     );
@@ -76,16 +104,19 @@ export default class DatasetCard extends Component {
   *  @return {}
   */
   _downloadDataset = () => {
-    const { props } = this;
-    const labbookOwner = props.owner;
-    const labbookName = props.name;
-    const { owner } = props.dataset;
-    const datasetName = props.dataset.name;
-    const data = {
-      labbookOwner,
-      datasetName,
-      labbookName,
+    const {
+      dataset,
       owner,
+      name,
+      mutations,
+    } = this;
+    const datasetOwner = dataset;
+    const datasetName = dataset.name;
+    const data = {
+      labbookOwner: owner,
+      datasetName,
+      labbookName: name,
+      owner: datasetOwner,
       allKeys: true,
     };
 
@@ -101,7 +132,7 @@ export default class DatasetCard extends Component {
       }
     };
     this.setState({ downloadPending: true });
-    props.mutations.downloadDatasetFiles(data, callback);
+    mutations.downloadDatasetFiles(data, callback);
   }
 
   /**
@@ -113,45 +144,67 @@ export default class DatasetCard extends Component {
   */
   _togglePopup = (evt, popupVisible, popupType) => {
     if (!popupVisible) {
-      evt.stopPropagation(); // only stop propagation when closing popup, other menus won't close on click if propagation is stopped
+      evt.stopPropagation();
+      /**
+       only stop propagation when closing popup, other menus won't close
+       on click if propagation is stopped
+      */
     }
     this.setState({ [`${popupType}PopupVisible`]: popupVisible });
   }
 
   render() {
-    const { props, state } = this;
-    const { commitsBehind } = props.dataset;
-    const numFilesText = `${props.dataset.overview.numFiles} file${(props.dataset.overview.numFiles === 1) ? '' : 's'}`;
-    const sizeText = config.humanFileSize(props.dataset.overview.totalBytes);
-    const unlinkDisabled = props.isLocked || state.unlinkPending;
-    const downloadDisabled = props.isLocked || state.downloadPending || props.isLocal;
-    const onDiskBytes = props.dataset.overview.localBytes;
+    const {
+      checkLocal,
+      dataset,
+      formattedFiles,
+      isLocked,
+      isLocal,
+      mutations,
+      mutationData,
+      section,
+    } = this.props;
+    const {
+      commitsPending,
+      expanded,
+      downloadPending,
+      unlinkPending,
+      unlinkPopupVisible,
+    } = this.state;
+    const { commitsBehind } = dataset;
+    const numFilesText = `${dataset.overview.numFiles} file${(dataset.overview.numFiles === 1)
+      ? ''
+      : 's'}`;
+    const sizeText = config.humanFileSize(dataset.overview.totalBytes);
+    const unlinkDisabled = isLocked || unlinkPending;
+    const downloadDisabled = isLocked || downloadPending || isLocal;
+    const onDiskBytes = dataset.overview.localBytes;
     const onDiskFormatted = config.humanFileSize(onDiskBytes);
-    const toDownloadBytes = props.dataset.overview.totalBytes - props.dataset.overview.localBytes;
+    const toDownloadBytes = dataset.overview.totalBytes - dataset.overview.localBytes;
     const toDownloadFormatted = config.humanFileSize(toDownloadBytes);
-    const downloadAllText = props.isLocal ? 'Downloaded' : 'Download All';
-    const showCommits = (commitsBehind > 0) || ((commitsBehind === null) && window.navigator.onLine);
+    const downloadAllText = isLocal ? 'Downloaded' : 'Download All';
+    const showCommits = (commitsBehind > 0)
+      || ((commitsBehind === null) && window.navigator.onLine);
     // declare css here
     const chevronCSS = classNames({
       DatasetCard__chevron: true,
-      'DatasetCard__chevron--expanded': state.expanded,
-      'DatasetCard__chevron--collapsed': !state.expanded,
+      'DatasetCard__chevron--expanded': expanded,
+      'DatasetCard__chevron--collapsed': !expanded,
     });
     const unlinkPopupCSS = classNames({
       DatasetCard__popup: true,
-      hidden: !state.unlinkPopupVisible || props.isLocked,
+      hidden: !unlinkPopupVisible || isLocked,
       Tooltip__message: true,
     });
     const unlinkCSS = classNames({
       'Btn Btn__FileBrowserAction Btn__FileBrowserAction--unlink': true,
-      'Btn__FileBrowserAction--loading': state.unlinkPending,
-
+      'Btn__FileBrowserAction--loading': unlinkPending,
     });
     const downloadCSS = classNames({
       'Btn Btn__FileBrowserAction': true,
-      'Btn__FileBrowserAction--downloaded Tooltip-data': props.isLocal,
-      'Btn__FileBrowserAction--download': !props.isLocal,
-      'Btn__FileBrowserAction--loading': state.downloadPending,
+      'Btn__FileBrowserAction--downloaded Tooltip-data': isLocal,
+      'Btn__FileBrowserAction--download': !isLocal,
+      'Btn__FileBrowserAction--loading': downloadPending,
     });
     const progressCSS = classNames({
       'flex flex--column flex-1 DatasetCard__progress': true,
@@ -161,8 +214,9 @@ export default class DatasetCard extends Component {
     return (
       <div className="DatasetCard Card">
         <div
+          role="presentation"
           className="DatasetCard__summary flex justify--space-between"
-          onClick={evt => this._toggleExpanded(evt, !state.expanded)}
+          onClick={evt => this._toggleExpanded(evt, !expanded)}
         >
           <div className={chevronCSS} />
           <div className="DatasetCard__info flex flex-1">
@@ -170,11 +224,11 @@ export default class DatasetCard extends Component {
             <div className="flex flex--column justify--space-between">
               <Link
                 className="DatasetCard__name"
-                to={`/datasets/${props.dataset.owner}/${props.dataset.name}`}
+                to={`/datasets/${dataset.owner}/${dataset.name}`}
               >
-                {props.dataset.name}
+                {dataset.name}
               </Link>
-              <div className="DatasetCard__owner">{`by ${props.dataset.owner}`}</div>
+              <div className="DatasetCard__owner">{`by ${dataset.owner}`}</div>
               <div className="DatasetCard__details flex justify--space-between">
                 <span>{sizeText}</span>
                 <span>{numFilesText}</span>
@@ -184,7 +238,7 @@ export default class DatasetCard extends Component {
           <div className={progressCSS}>
             <progress
               value={onDiskBytes}
-              max={props.dataset.overview.totalBytes}
+              max={dataset.overview.totalBytes}
             />
             <div className="flex justify--space-between">
               <div className="DatasetCard__onDisk flex flex--column">
@@ -239,24 +293,24 @@ export default class DatasetCard extends Component {
             </button>
           </div>
         </div>
-        { state.expanded
+        { expanded
           && (
             <DatasetBody
-              files={props.formattedFiles.children}
-              mutationData={props.mutationData}
-              checkLocal={props.checkLocal}
-              downloadPending={state.downloadPending}
-              mutations={props.mutations}
-              section={props.section}
+              files={formattedFiles.children}
+              mutationData={mutationData}
+              checkLocal={checkLocal}
+              downloadPending={downloadPending}
+              mutations={mutations}
+              section={section}
             />
           )
         }
         { showCommits
           && (
             <DatasetsCommits
-              commitsPending={state.commitsPending}
-              commitsBehind={props.dataset.commitsBehind}
-              isLocked={props.isLocked}
+              commitsPending={commitsPending}
+              commitsBehind={dataset.commitsBehind}
+              isLocked={isLocked}
               modifiyDatasetLink={this._modifyDatasetLink}
             />
           )
@@ -265,3 +319,5 @@ export default class DatasetCard extends Component {
     );
   }
 }
+
+export default DatasetCard;

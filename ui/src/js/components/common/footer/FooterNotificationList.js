@@ -100,6 +100,8 @@ export default class FooterNotificationList extends Component<Props> {
                   key={messageItem.id}
                   messageItem={messageItem}
                   selectedBuildId={state.selectedBuildId}
+                  owner={messageItem.owner}
+                  name={messageItem.name}
                   setBuildId={this._setBuildId}
                   updateOpenCount={this._updateOpenCount}
                 />

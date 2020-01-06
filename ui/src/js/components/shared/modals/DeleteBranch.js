@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component, Fragment } from 'react';
 // components
@@ -9,7 +10,16 @@ import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
 // assets
 import './DeleteBranch.scss';
 
-export default class DeleteBranch extends Component {
+type Props = {
+  branchName: string,
+  cleanBranchName: string,
+  labbookName: string,
+  labbookId: string,
+  owner: string,
+  toggleModal: Function,
+}
+
+export default class DeleteBranch extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,15 +44,16 @@ export default class DeleteBranch extends Component {
   *  @return {}
   */
   _deleteBranch() {
-    this.props.toggleModal('deleteModalVisible');
     const {
       owner,
       labbookName,
       labbookId,
       branchName,
       cleanBranchName,
+      toggleModal,
     } = this.props;
 
+    toggleModal('deleteModalVisible');
 
     DeleteExperimentalBranchMutation(
       owner,
@@ -51,21 +62,27 @@ export default class DeleteBranch extends Component {
       labbookId,
       (response, error) => {
         if (error) {
-          setErrorMessage(`There was a problem deleting ${cleanBranchName}`, error);
+          setErrorMessage(owner, labbookName, `There was a problem deleting ${cleanBranchName}`, error);
         } else {
-          setInfoMessage(`Deleted ${cleanBranchName} successfully`);
+          setInfoMessage(owner, labbookName, `Deleted ${cleanBranchName} successfully`);
         }
       },
     );
   }
 
   render() {
-    const { owner, cleanBranchName } = this.props;
+    const {
+      owner,
+      cleanBranchName,
+      toggleModal,
+    } = this.props;
+    const { eneteredBranchName } = this.state;
+    const deleteDisabled = cleanBranchName !== eneteredBranchName;
 
     return (
 
       <Modal
-        handleClose={() => this.props.toggleModal('deleteModalVisible')}
+        handleClose={() => toggleModal('deleteModalVisible')}
         size="medium"
         header="Delete Branch"
         icon="delete"
@@ -90,7 +107,8 @@ export default class DeleteBranch extends Component {
             />
             <div className="DeleteBranch__buttonContainer">
               <button
-                disabled={cleanBranchName !== this.state.eneteredBranchName}
+                type="button"
+                disabled={deleteDisabled}
                 onClick={() => this._deleteBranch()}
               >
                 Confirm

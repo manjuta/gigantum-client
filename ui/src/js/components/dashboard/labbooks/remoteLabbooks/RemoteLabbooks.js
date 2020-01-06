@@ -4,7 +4,6 @@ import {
   createPaginationContainer,
   graphql,
 } from 'react-relay';
-import { boundMethod } from 'autobind-decorator';
 // components
 import RemoteLabbookPanel from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
 import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
@@ -180,12 +179,12 @@ class RemoteLabbooks extends Component {
                 remoteId={state.deleteData.remoteId}
                 remoteConnection="RemoteLabbooks_remoteLabbooks"
                 toggleModal={this._toggleDeleteModal}
-                remoteOwner={state.deleteData.remoteOwner}
-                remoteLabbookName={state.deleteData.remoteLabbookName}
+                owner={state.deleteData.remoteOwner}
+                name={state.deleteData.remoteLabbookName}
                 existsLocally={state.deleteData.existsLocally}
-                remoteDelete
                 remoteUrl={state.deleteData.remoteUrl}
                 history={props.history}
+                remoteDelete
               />
             )
         }

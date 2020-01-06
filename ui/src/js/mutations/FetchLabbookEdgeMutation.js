@@ -25,8 +25,6 @@ mutation FetchLabbookEdgeMutation($input: FetchLabbookEdgeInput!, $first: Int!, 
 }
 `;
 
-const tempID = 0;
-
 
 export default function FetchLabbookEdgeMutation(
   owner,
@@ -55,7 +53,7 @@ export default function FetchLabbookEdgeMutation(
     variables,
     onCompleted: (response, error) => {
       if (error) {
-        setErrorMessage('An error occurred while refetching data', error);
+        setErrorMessage(owner, labbookName, 'An error occurred while refetching data', error);
         console.log(error);
       }
       callback(error);

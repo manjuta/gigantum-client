@@ -72,7 +72,7 @@ class DeleteDataset extends Component<Props> {
         this.setState({ deletePending: false });
 
         if (error) {
-          setErrorMessage(`The was a problem deleting ${name}`, error);
+          setErrorMessage(owner, name, `The was a problem deleting ${name}`, error);
           this.setState({ deleteDatasetButtonState: 'error' });
 
           setTimeout(() => {
@@ -88,7 +88,7 @@ class DeleteDataset extends Component<Props> {
             }
           }, 1000);
         } else if (deleteRemote) {
-          setInfoMessage(`${name} has been remotely deleted`);
+          setInfoMessage(owner, name, `${name} has been remotely deleted`);
 
           this.setState({ deleteDatasetButtonState: 'finished' });
           setTimeout(() => {
@@ -105,7 +105,7 @@ class DeleteDataset extends Component<Props> {
             }
           }, 1000);
         } else {
-          setInfoMessage(`${name} has been deleted`);
+          setInfoMessage(owner, name, `${name} has been deleted`);
           this.setState({ deleteDatasetButtonState: 'finished' });
           setTimeout(() => {
             history.replace('/datasets/local');
@@ -148,7 +148,7 @@ class DeleteDataset extends Component<Props> {
         this._handleDatasetDelete(name, owner, false, true);
       }
     } else {
-      setWarningMessage('Names do not match');
+      setWarningMessage(owner, name, 'Names do not match');
     }
   }
 

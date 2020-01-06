@@ -99,7 +99,7 @@ export default function MoveLabbookFileMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage(`ERROR: Could not Move labbook file ${srcPath}`, error);
+          setErrorMessage(owner, labbookName, `ERROR: Could not Move labbook file ${srcPath}`, error);
         }
         callback(response, error);
       },

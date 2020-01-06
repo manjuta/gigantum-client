@@ -64,7 +64,7 @@ class Dataset extends Component {
   constructor(props) {
     super(props);
     const { name, owner } = props.dataset;
-    localStorage.setItem('owner', store.getState().routes.owner);
+    localStorage.setItem('owner', owner);
 
     setCallbackRoute(props.location.pathname);
 

@@ -1,4 +1,3 @@
-import { DragSource } from 'react-dnd';
 // store
 import store from 'JS/redux/store';
 // utilities
@@ -86,12 +85,12 @@ const dragSource = {
               parentId,
               connection,
               section,
+              owner,
+              name,
             } = props;
-            const { owner, labbookName } = store.getState().routes;
-
             const mutationData = {
               owner,
-              labbookName,
+              name,
               parentId,
               connection,
               section,
@@ -129,7 +128,11 @@ const targetSource = {
     // TODO: clean up this code, some of this logic is being duplicated. make better use of functions
     const dndItem = monitor.getItem();
     const { section } = props.section ? props : props.mutationData;
-    const promptType = props.section ? props.section : ((props.mutationData) && (props.mutationData.section)) ? props.mutationData.section : '';
+    const promptType = props.section
+      ? props.section
+      : ((props.mutationData) && (props.mutationData.section))
+        ? props.mutationData.section
+        : '';
     let newPath;
     let fileKey;
     // non root folder drop
@@ -151,12 +154,13 @@ const targetSource = {
         parentId,
         connection,
         section,
+        owner,
+        name,
       } = props;
-      const { owner, labbookName } = store.getState().routes;
 
       const mutationData = {
         owner,
-        labbookName,
+        name,
         parentId,
         connection,
         section,
@@ -216,12 +220,13 @@ const targetSource = {
               parentId,
               connection,
               section,
+              owner,
+              name,
             } = props;
-            const { owner, labbookName } = store.getState().routes;
 
             const mutationData = {
               owner,
-              labbookName,
+              name,
               parentId,
               connection,
               section,

@@ -41,14 +41,25 @@ const buildImage = (name, owner) => {
     (response, error) => {
       if (error) {
         console.error(error);
-        setErrorMessage(`ERROR: Failed to build ${name}`, error);
+        setErrorMessage(owner, name, `ERROR: Failed to build ${name}`, error);
       }
     },
   );
 };
 
 
-class Base extends Component {
+type Props = {
+  environment: {
+    base: Object,
+  },
+  isLocked: bool,
+  baseLatestRevision: string,
+  overview: Object,
+  owner: string,
+  name: string,
+};
+
+class Base extends Component<Props> {
   state = {
     baseModalVisible: false,
     forceUpdateDisabled: false,
@@ -63,12 +74,12 @@ class Base extends Component {
     const {
       owner,
       name,
+      baseLatestRevision,
     } = props;
     const {
       repository,
       componentId,
     } = props.environment.base;
-    const revision = props.baseLatestRevision;
 
     this.setState({ forceUpdateDisabled: true });
 
@@ -77,19 +88,18 @@ class Base extends Component {
       name,
       repository,
       componentId,
-      revision,
+      baseLatestRevision,
       (response, error) => {
         this.setState({ forceUpdateDisabled: false });
         if (error) {
-          setErrorMessage('An error occured while trying to change bases.', error);
+          setErrorMessage(owner, name, 'An error occured while trying to change bases.', error);
         } else {
-          setInfoMessage('Updated Base successfully. Rebuilding environment. Pleae wait...');
+          setInfoMessage(owner, name, 'Updated Base successfully. Rebuilding environment. Pleae wait...');
           buildImage(name, owner);
         }
       },
     );
   }
-
 
   /**
     @param {boolean} baseModalVisible
@@ -100,18 +110,27 @@ class Base extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const { base } = props.environment;
-    const isUpToDate = props.baseLatestRevision === base.revision;
-    const { defaultTooltip, upToDateTooltip } = getTooltip(props.isLocked, isUpToDate);
+    const { state } = this;
+    const {
+      environment,
+      isLocked,
+      baseLatestRevision,
+      overview,
+      owner,
+      name,
+    } = this.props;
+    const { base } = environment;
+    const isUpToDate = baseLatestRevision === base.revision;
+    const { defaultTooltip, upToDateTooltip } = getTooltip(isLocked, isUpToDate);
+    const disableUpdateButton = isUpToDate || isLocked || state.forceUpdateDisabled;
     // declare css here
     const changeButtonCSS = classNames({
       'Btn Btn__base Btn__base--change Btn--action': true,
-      'Tooltip-data Tooltip-data--auto': props.isLocked,
+      'Tooltip-data Tooltip-data--auto': isLocked,
     });
     const updateButtonCSS = classNames({
       'Btn Btn__base Btn__base--update Btn--action': true,
-      'Tooltip-data Tooltip-data--auto': (isUpToDate || props.isLocked) && !state.forceUpdateDisabled,
+      'Tooltip-data Tooltip-data--auto': (isUpToDate || isLocked) && !state.forceUpdateDisabled,
       'Btn__base--loading': state.forceUpdateDisabled,
 
     });
@@ -161,27 +180,27 @@ class Base extends Component {
               </div>
 
               {
-                (props.overview) && <PackageCount overview={props.overview} />
+                (overview) && <PackageCount overview={overview} />
               }
               {
                 state.baseModalVisible
                 && (
                 <SelectBaseModal
-                  owner={props.owner}
-                  name={props.name}
+                  owner={owner}
+                  name={name}
                   toggleModal={() => this._toggleBaseModal(false)}
                 />
                 )
               }
               {
-                !props.overview
+                !overview
                 && (
                 <div className="Base__actions flex flex--column justify--center">
                   <button
                     className={changeButtonCSS}
                     type="button"
                     data-tooltip={defaultTooltip}
-                    disabled={props.isLocked}
+                    disabled={isLocked}
                     onClick={() => this._toggleBaseModal(true)}
                   >
                     Change
@@ -189,7 +208,7 @@ class Base extends Component {
                   <button
                     className={updateButtonCSS}
                     data-tooltip={upToDateTooltip}
-                    disabled={isUpToDate || props.isLocked || state.forceUpdateDisabled}
+                    disabled={disableUpdateButton}
                     onClick={() => this._updateBaseMutation()}
                     type="button"
                   >

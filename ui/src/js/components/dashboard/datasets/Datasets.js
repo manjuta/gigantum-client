@@ -528,10 +528,12 @@ class Datasets extends Component {
           }
         </div>
       );
-    } if (props.datasetList === null) {
+    }
+
+    if (props.datasetList === null) {
       UserIdentity.getUserIdentity().then((response) => {
         if (response.data && response.data.userIdentity.isSessionValid) {
-          setErrorMessage('Failed to fetch Datasets.', [{ message: 'There was an error while fetching Datasets. This likely means you have a corrupted Dataset directory.' }]);
+          setErrorMessage(null, null, 'Failed to fetch Datasets.', [{ message: 'There was an error while fetching Datasets. This likely means you have a corrupted Dataset directory.' }]);
           return (
             <div className="Datasets__fetch-error">
                 There was an error attempting to fetch Datasets.
@@ -561,7 +563,6 @@ const mapStateToProps = state => ({
   filterText: state.datasetListing.filterText,
 });
 
-const mapDispatchToProps = dispatch => ({
-});
+const mapDispatchToProps = () => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Datasets);

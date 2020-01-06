@@ -1,13 +1,16 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 // components
 import Modal from 'Components/common/Modal';
 import BuildProgress from 'Components/common/BuildProgress';
 import AddPackages from './AddPackages';
-// assets
-// import './PackageBody.scss';
 
-export default class PackageModal extends Component {
+type Props = {
+  togglePackageModal: Function
+}
+
+export default class PackageModal extends Component<Props> {
   state = {
     buildId: null,
   }
@@ -21,35 +24,26 @@ export default class PackageModal extends Component {
   }
 
   render() {
-    const { props } = this;
+    const { togglePackageModal } = this.props;
+    const { buildId } = this.state;
     return (
       <Modal
         size="large-full"
-        handleClose={() => props.togglePackageModal(false)}
+        handleClose={() => togglePackageModal(false)}
         renderContent={() => {
-          const { state } = this;
-          if (!state.buildId) {
+          if (!buildId) {
             return (
               <AddPackages
-                toggleModal={props.togglePackageModal}
-                base={props.base}
-                packages={props.packages}
-                packageMutations={props.packageMutations}
-                buildCallback={props.buildCallback}
-                setBuildingState={props.setBuildingState}
+                {...this.props}
                 setBuildId={this._setBuildId}
-                name={props.name}
-                owner={props.owner}
               />
             );
           }
           return (
             <BuildProgress
+              {...this.props}
               headerText="Installing Packages"
-              toggleModal={props.togglePackageModal}
-              buildId={state.buildId}
-              name={props.name}
-              owner={props.owner}
+              buildId={buildId}
             />
           );
         }}

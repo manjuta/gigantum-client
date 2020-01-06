@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
@@ -7,38 +8,71 @@ import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/act
 // assets
 import './DevTools.scss';
 
-class DevTools extends Component {
+const setSelectedDevTool = (self) => {
+  const { labbook } = self.props;
+  const { owner, name, environment } = labbook;
+  const defaultFromApi = environment.base
+    ? environment.base.developmentTools[0]
+    : 'jupyterlab';
+  const devToolConfig = localStorage.getItem('devToolConfig')
+    ? JSON.parse(localStorage.getItem('devToolConfig'))
+    : {};
+
+  if (devToolConfig._timestamps && devToolConfig._timestamps[0]) {
+    const oldestConfig = devToolConfig._timestamps[0].time;
+    const timeStampedOwner = devToolConfig._timestamps[0].owner;
+    const timeStampedName = devToolConfig._timestamps[0].name;
+    const threeMonthsAgo = (new Date()).setMonth(new Date().getMonth() - 3);
+    if (threeMonthsAgo > oldestConfig) {
+      if (devToolConfig[timeStampedOwner] && devToolConfig[timeStampedOwner][timeStampedName]) {
+        delete devToolConfig[timeStampedOwner][timeStampedName];
+      }
+      if (devToolConfig[timeStampedOwner] && Object.keys(devToolConfig[timeStampedOwner]).length === 0) {
+        delete devToolConfig[timeStampedOwner];
+      }
+      devToolConfig._timestamps.shift();
+      localStorage.setItem('devToolConfig', JSON.stringify(devToolConfig));
+    }
+  }
+  if (devToolConfig[owner] && devToolConfig[owner][name]) {
+    const { developmentTools } = environment.base;
+    const devToolExists = developmentTools.indexOf(devToolConfig[owner][name]) > -1;
+    if (devToolExists) {
+      return devToolConfig[owner][name];
+    }
+    delete devToolConfig[owner][name];
+    localStorage.setItem('devToolConfig', JSON.stringify(devToolConfig));
+  }
+  return defaultFromApi;
+};
+
+
+type Props = {
+  containerMutations: {
+    startContainer: Function,
+    startDevTool: Function,
+  },
+  containerStatus: string,
+  creationDateUtc: string,
+  imageStatus: string,
+  isBuilding: boolean,
+  isExporting: boolean,
+  isPublishing: boolean,
+  isSyncing: boolean,
+  labbook: {
+    name: string,
+    owner: string,
+    environment: {
+      base: {
+        developmentTools: Array,
+      }
+    }
+  },
+}
+
+class DevTools extends Component<Props> {
   state = {
-    selectedDevTool: (() => {
-      const { owner, name } = this.props.labbook;
-      const defaultFromApi = this.props.labbook.environment.base ? this.props.labbook.environment.base.developmentTools[0] : 'jupyterlab';
-      const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};
-      if (devToolConfig._timestamps && devToolConfig._timestamps[0]) {
-        const oldestConfig = devToolConfig._timestamps[0].time;
-        const timeStampedOwner = devToolConfig._timestamps[0].owner;
-        const timeStampedName = devToolConfig._timestamps[0].name;
-        const threeMonthsAgo = (new Date()).setMonth(new Date().getMonth() - 3);
-        if (threeMonthsAgo > oldestConfig) {
-          if (devToolConfig[timeStampedOwner] && devToolConfig[timeStampedOwner][timeStampedName]) {
-            delete devToolConfig[timeStampedOwner][timeStampedName];
-          }
-          if (devToolConfig[timeStampedOwner] && Object.keys(devToolConfig[timeStampedOwner]).length === 0) {
-            delete devToolConfig[timeStampedOwner];
-          }
-          devToolConfig._timestamps.shift();
-          localStorage.setItem('devToolConfig', JSON.stringify(devToolConfig));
-        }
-      }
-      if (devToolConfig[owner] && devToolConfig[owner][name]) {
-        const devToolExists = this.props.labbook.environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1;
-        if (devToolExists) {
-          return devToolConfig[owner][name];
-        }
-        delete devToolConfig[owner][name];
-        localStorage.setItem('devToolConfig', JSON.stringify(devToolConfig));
-      }
-      return defaultFromApi;
-    })(),
+    selectedDevTool: setSelectedDevTool(this),
     showDevList: false,
   }
 
@@ -46,11 +80,14 @@ class DevTools extends Component {
     const { owner, name, environment } = props.labbook;
     const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};
     if (devToolConfig[owner] && devToolConfig[owner][name]) {
-      const selectedDevTool = (environment.base.developmentTools.indexOf(devToolConfig[owner][name]) > -1) ? devToolConfig[owner][name] : environment.base.developmentTools[0];
+      const { developmentTools } = environment.base;
+      const selectedDevTool = (developmentTools.indexOf(devToolConfig[owner][name]) > -1)
+        ? devToolConfig[owner][name]
+        : developmentTools[0];
       return {
         ...state,
         selectedDevTool,
-      }
+      };
     }
 
     return {
@@ -78,13 +115,15 @@ class DevTools extends Component {
   }
 
   /**
-  *  @param {Object} evt
+  *  @param {}
   *  upodates state if the conditions are met
   *  @return {}
   */
-  _toggleDevtoolMenu = (evt) => {
-    const { state } = this;
-    this.setState({ showDevList: !state.showDevList });
+  _toggleDevtoolMenu = () => {
+    this.setState((state) => {
+      const showDevList = !state.showDevList;
+      return { showDevList };
+    });
   }
 
   /**
@@ -94,10 +133,20 @@ class DevTools extends Component {
   *  @return {}
   */
   _openDevToolMuation = (developmentTool) => {
-    const { props } = this;
-    const { containerStatus, imageStatus } = props;
-    const { owner, name } = props.labbook;
-    const labbookCreationDate = Date.parse(`${this.props.creationDateUtc}Z`);
+    const {
+      creationDateUtc,
+      containerMutations,
+      containerStatus,
+      imageStatus,
+      labbook,
+      isBuilding,
+      isExporting,
+      isPublishing,
+      isSyncing,
+    } = this.props;
+
+    const { owner, name } = labbook;
+    const labbookCreationDate = Date.parse(`${creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
     const timeDifferenceMS = timeNow - labbookCreationDate;
 
@@ -109,44 +158,50 @@ class DevTools extends Component {
     status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
     status = ((imageStatus === 'DOES_NOT_EXIST') || (imageStatus === 'BUILD_IN_PROGRESS')) && (timeDifferenceMS < 15000) ? 'Building' : status;
 
-    if (((status !== 'Stopped') && (status !== 'Running')) || (props.isExporting || props.isPublishing || props.isSyncing || props.isBuilding)) {
-      setWarningMessage('Could not launch development environment as the project is not ready.');
+    if (
+      ((status !== 'Stopped') && (status !== 'Running'))
+      || (isExporting || isPublishing || isSyncing || isBuilding)
+    ) {
+      setWarningMessage(owner, name, 'Could not launch development environment as the project is not ready.');
     } else if (status === 'Stopped') {
-      setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
+      setInfoMessage(owner, name, 'Starting Project container. When done working, click Stop to shutdown the container.');
       setMergeMode(owner, name, false, false);
       updateTransitionState(owner, name, 'Starting');
 
-      props.containerMutations.startContainer({ devTool: developmentTool }, (response, error) => {
-        if (error) {
-          setErrorMessage('Error Starting Dev tool', error);
-        }
-
-        if (response.startDevTool) {
-          tabName = `${developmentTool}-${owner}-${name}`;
-          let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-          if (developmentTool === 'notebook') {
-            if (path.includes('/lab/tree')) {
-              path = path.replace('/lab/tree', '/tree');
-            } else {
-              path = `${path}/tree/code`;
-            }
+      containerMutations.startContainer(
+        { devTool: developmentTool },
+        (response, error) => {
+          if (error) {
+            setErrorMessage(owner, name, 'Error Starting Dev tool', error);
           }
 
-          window[tabName] = window.open(path, tabName);
-        }
-      });
+          if (response.startDevTool) {
+            tabName = `${developmentTool}-${owner}-${name}`;
+            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+            if (developmentTool === 'notebook') {
+              if (path.includes('/lab/tree')) {
+                path = path.replace('/lab/tree', '/tree');
+              } else {
+                path = `${path}/tree/code`;
+              }
+            }
+
+            window[tabName] = window.open(path, tabName);
+          }
+        },
+      );
     } else if (window[tabName] && !window[tabName].closed) {
       window[tabName].focus();
     } else {
       const data = { devTool: developmentTool };
-      setInfoMessage(`Starting ${developmentTool}, make sure to allow popups.`);
+      setInfoMessage(owner, name, `Starting ${developmentTool}, make sure to allow popups.`);
       if (process.env.BUILD_TYPE === 'cloud') {
         const hostname = window.location.hostname.replace('client.', '');
         const { protocol } = window.location;
         const path = `${protocol}//${hostname}/client/${owner}/${name}/${developmentTool}`;
         window[tabName] = window.open(path, tabName);
       } else {
-        props.containerMutations.startDevTool(
+        containerMutations.startDevTool(
           data,
           (response, error) => {
             if (response.startDevTool) {
@@ -158,13 +213,13 @@ class DevTools extends Component {
                 } else {
                   path = `${path}/tree/code`;
                 }
-              }
 
-              window[tabName] = window.open(path, tabName);
+                window[tabName] = window.open(path, tabName);
+              }
             }
 
             if (error) {
-              setErrorMessage('Error Starting Dev tool', error);
+              setErrorMessage(owner, name, 'Error Starting Dev tool', error);
             }
           },
         );
@@ -178,9 +233,11 @@ class DevTools extends Component {
   *  @return {}
   */
   _selectDevTool = (developmentTool) => {
-    const { props } = this;
-    const { owner, name } = props.labbook;
-    const devToolConfig = localStorage.getItem('devToolConfig') ? JSON.parse(localStorage.getItem('devToolConfig')) : {};
+    const { labbook } = this.props;
+    const { owner, name } = labbook;
+    const devToolConfig = localStorage.getItem('devToolConfig')
+      ? JSON.parse(localStorage.getItem('devToolConfig'))
+      : {};
     const ownerObject = devToolConfig[owner] || {};
     const newObject = {
       [owner]: {
@@ -201,17 +258,19 @@ class DevTools extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const devTools = props.labbook.environment.base
-      ? props.labbook.environment.base.developmentTools : [];
-
+    const { labbook } = this.props;
+    const { selectedDevTool, showDevList } = this.state;
+    const devTools = labbook.environment.base
+      ? labbook.environment.base.developmentTools
+      : [];
+    // declare css here
     const devtToolMenuCSS = classNames({
       'DevTools__dropdown-menu': true,
-      hidden: !state.showDevList,
+      hidden: !showDevList,
     });
     const buttonDropdownCSS = classNames({
       'DevTools__btn DevTools__btn--dropdown': true,
-      'DevTools__btn--open': state.showDevList,
+      'DevTools__btn--open': showDevList,
     });
 
     return (
@@ -220,10 +279,10 @@ class DevTools extends Component {
           <button
             type="submit"
             className="DevTools__btn DevTools__btn--launch Btn--columns Btn-last"
-            onClick={() => { this._openDevToolMuation(state.selectedDevTool); }}
+            onClick={() => { this._openDevToolMuation(selectedDevTool); }}
           >
             <div className="Btn--label">Launch:</div>
-            <div className="Btn--text">{state.selectedDevTool}</div>
+            <div className="Btn--text">{selectedDevTool}</div>
           </button>
 
           <button
@@ -243,11 +302,12 @@ class DevTools extends Component {
                 devTools.map((developmentTool) => {
                   const devToolsCss = classNames({
                     DevTools__item: true,
-                    'DevTools__item--selected': (developmentTool === state.selectedDevTool),
+                    'DevTools__item--selected': (developmentTool === selectedDevTool),
                   });
 
                   return (
                     <li
+                      role="presentation"
                       key={developmentTool}
                       className={devToolsCss}
                       onClick={() => this._selectDevTool(developmentTool)}

@@ -21,10 +21,27 @@ import store from 'JS/redux/store';
 import './VisibilityModal.scss';
 
 type Props = {
+  auth: {
+    renewToken: Function,
+  },
+  buttonText: string,
+  checkSessionIsValid: Function,
+  header: string,
+  labbookId: string,
+  modalStateValue: Object,
+  name: string,
+  owner: string,
+  remoteUrl: string,
+  resetState: Function,
+  resetPublishState: Function,
+  setRemoteSession: Function,
+  setPublishingState: Function,
+  sectionType: string,
+  toggleModal: Function,
   visibility: bool,
 }
 
-export default class PublishModal extends Component<Props> {
+class VisibilityModal extends Component<Props> {
   state = {
     isPublic: (this.props.visibility === 'public'),
   }
@@ -50,19 +67,25 @@ export default class PublishModal extends Component<Props> {
     const self = this;
     const visibility = state.isPublic ? 'public' : 'private';
     const {
+      auth,
+      checkSessionIsValid,
+      modalStateValue,
       owner,
       name,
-    } = props;
+      resetState,
+      sectionType,
+      toggleModal,
+    } = this.props;
 
-    props.toggleModal(props.modalStateValue);
+    toggleModal(modalStateValue);
 
 
-    props.checkSessionIsValid().then((response) => {
+    checkSessionIsValid().then((response) => {
       if (navigator.onLine) {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
             if (props.visibility !== visibility) {
-              if (props.sectionType === 'labbook') {
+              if (sectionType === 'labbook') {
                 SetVisibilityMutation(
                   owner,
                   name,
@@ -70,9 +93,9 @@ export default class PublishModal extends Component<Props> {
                   (visibilityResponse, error) => {
                     if (error) {
                       console.log(error);
-                      setErrorMessage('Visibility change failed', error);
+                      setErrorMessage(owner, name, 'Visibility change failed', error);
                     } else {
-                      setInfoMessage(`Visibility changed to ${visibility}`);
+                      setInfoMessage(owner, name, `Visibility changed to ${visibility}`);
                     }
                   },
                 );
@@ -84,24 +107,24 @@ export default class PublishModal extends Component<Props> {
                   (visibilityResponse, error) => {
                     if (error) {
                       console.log(error);
-                      setErrorMessage('Visibility change failed', error);
+                      setErrorMessage(owner, name, 'Visibility change failed', error);
                     } else {
-                      setInfoMessage(`Visibility changed to ${visibility}`);
+                      setInfoMessage(owner, name, `Visibility changed to ${visibility}`);
                     }
                   },
                 );
               }
             }
           } else {
-            props.auth.renewToken(true, () => {
-              props.resetState();
+            auth.renewToken(true, () => {
+              resetState();
             }, () => {
               self._changeVisibility();
             });
           }
         }
       } else {
-        props.resetState();
+        resetState();
       }
     });
   }
@@ -116,44 +139,53 @@ export default class PublishModal extends Component<Props> {
     const id = uuidv4();
     const self = this;
     const {
+      auth,
+      checkSessionIsValid,
       owner,
       name,
       labbookId,
-    } = props;
+      remoteUrl,
+      resetState,
+      resetPublishState,
+      sectionType,
+      setPublishingState,
+      setRemoteSession,
+      toggleModal,
+    } = this.props;
 
-    props.toggleModal();
+    toggleModal();
 
-    props.checkSessionIsValid().then((response) => {
+    checkSessionIsValid().then((response) => {
       if (navigator.onLine) {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
             if (store.getState().containerStatus.status !== 'Running') {
-              props.resetPublishState(true);
+              resetPublishState(true);
 
-              if (!props.remoteUrl) {
-                props.setPublishingState(owner, name, true);
+              if (!remoteUrl) {
+                setPublishingState(owner, name, true);
 
                 const failureCall = () => {
-                  props.setPublishingState(owner, name, false);
-                  props.resetPublishState(false);
+                  setPublishingState(owner, name, false);
+                  resetPublishState(false);
                 };
 
                 const successCall = () => {
-                  props.setPublishingState(owner, name, false);
-                  props.resetPublishState(false);
+                  setPublishingState(owner, name, false);
+                  resetPublishState(false);
                   // self.props.remountCollab();
                   const messageData = {
                     id,
-                    message: `Added remote https://gigantum.com/${props.owner}/${props.name}`,
+                    message: `Added remote https://gigantum.com/${owner}/${name}`,
                     isLast: true,
                     error: false,
                   };
-                  setMultiInfoMessage(messageData);
+                  setMultiInfoMessage(owner, name, messageData);
 
-                  props.setRemoteSession();
+                  setRemoteSession();
                 };
 
-                if (props.sectionType === 'labbook') {
+                if (sectionType === 'labbook') {
                   PublishLabbookMutation(
                     owner,
                     name,
@@ -184,15 +216,15 @@ export default class PublishModal extends Component<Props> {
               }
             }
           } else {
-            props.auth.renewToken(true, () => {
-              props.resetState();
+            auth.renewToken(true, () => {
+              resetState();
             }, () => {
               self._publishLabbook();
             });
           }
         }
       } else {
-        props.resetState();
+        resetState();
       }
     });
   }
@@ -203,8 +235,8 @@ export default class PublishModal extends Component<Props> {
   *  @return {}
   */
   _modifyVisibility = () => {
-    const { props } = this;
-    if (props.header === 'Publish') {
+    const { header } = this.props;
+    if (header === 'Publish') {
       this._publishLabbook();
     } else {
       this._changeVisibility();
@@ -213,15 +245,23 @@ export default class PublishModal extends Component<Props> {
 
 
   render() {
-    const { props, state } = this;
-    const publishStatement = props.header === 'Publish' ? 'Once published, the Project will be visible in the Gigantum Hub tab on the Projects listing Page.' : '';
+    const {
+      buttonText,
+      header,
+      modalStateValue,
+      toggleModal,
+      visibility,
+    } = this.props;
+    const { isPublic } = this.state;
+    const publishStatement = header === 'Publish' ? 'Once published, the Project will be visible in the Gigantum Hub tab on the Projects listing Page.' : '';
     const message = `You are about to change the visibility of the Project. ${publishStatement}`;
+
     return (
       <Modal
-        header={props.header}
-        handleClose={() => props.toggleModal(props.modalStateValue)}
+        header={header}
+        handleClose={() => toggleModal(modalStateValue)}
         size="large"
-        icon={props.visibility}
+        icon={visibility}
         renderContent={() => (
           <div className="VisibilityModal">
             <div>
@@ -235,7 +275,7 @@ export default class PublishModal extends Component<Props> {
                   htmlFor="publish_private"
                 >
                   <input
-                    defaultChecked={(props.visibility === 'private') || !state.isPublic}
+                    defaultChecked={(visibility === 'private') || !isPublic}
                     type="radio"
                     name="publish"
                     id="publish_private"
@@ -255,7 +295,7 @@ export default class PublishModal extends Component<Props> {
                   htmlFor="publish_public"
                 >
                   <input
-                    defaultChecked={props.visibility === 'public'}
+                    defaultChecked={visibility === 'public'}
                     name="publish"
                     type="radio"
                     id="publish_public"
@@ -274,7 +314,7 @@ export default class PublishModal extends Component<Props> {
               <button
                 type="submit"
                 className="Btn--flat"
-                onClick={() => { props.toggleModal(props.modalStateValue); }}
+                onClick={() => { toggleModal(modalStateValue); }}
               >
                 Cancel
               </button>
@@ -283,7 +323,7 @@ export default class PublishModal extends Component<Props> {
                 className="Btn--last"
                 onClick={() => { this._modifyVisibility(); }}
               >
-                {props.buttonText}
+                {buttonText}
               </button>
             </div>
 
@@ -294,3 +334,5 @@ export default class PublishModal extends Component<Props> {
     );
   }
 }
+
+export default VisibilityModal;

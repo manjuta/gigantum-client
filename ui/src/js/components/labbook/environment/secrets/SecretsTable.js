@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
@@ -8,7 +9,17 @@ import SecretsPresent from './SecretsPresent';
 // assets
 import './SecretsTable.scss';
 
-export default class SecretsTable extends Component {
+type Props = {
+  secrets: {
+    edges: Array<Object>,
+  },
+  secretsMutations: {
+    deleteSecret: Function,
+    uploadSecret: Function,
+  }
+}
+
+class SecretsTable extends Component<Props> {
   state = {
     tooltipVisible: false,
     editedSecrets: new Set(),
@@ -35,13 +46,13 @@ export default class SecretsTable extends Component {
     * @return {}
   */
   _editSecret = (filename) => {
-    const { state } = this;
-    const newEditedSecrets = new Set(state.editedSecrets);
-    const newAddedFiles = new Map(state.addedFiles);
+    const { addedFiles, editedSecrets } = this.state;
+    const newEditedSecrets = new Set(editedSecrets);
+    const newAddedFiles = new Map(addedFiles);
 
     if (newEditedSecrets.has(filename)) {
       newEditedSecrets.delete(filename);
-      newAddedFiles.delete(filename)
+      newAddedFiles.delete(filename);
     } else {
       newEditedSecrets.add(filename);
     }
@@ -54,8 +65,8 @@ export default class SecretsTable extends Component {
   * sets file in state
   */
   _setFile = (filename, file) => {
-    const { state } = this;
-    const newAddedFiles = new Map(state.addedFiles);
+    const { addedFiles } = this.state;
+    const newAddedFiles = new Map(addedFiles);
     newAddedFiles.set(filename, file);
     this.setState({ addedFiles: newAddedFiles });
   }
@@ -68,8 +79,10 @@ export default class SecretsTable extends Component {
   *  @calls {props.secretsMutations.deleteSecret}
   */
   _replaceFile = (filename, id, isPresent) => {
-    const { props, state } = this;
-    let file = state.addedFiles.get(filename);
+    const { addedFiles } = this.state;
+    const { secretsMutations } = this.props;
+
+    let file = addedFiles.get(filename);
     file = new File([file], filename, { type: file.type });
     const uploadData = {
       file,
@@ -84,18 +97,21 @@ export default class SecretsTable extends Component {
     };
     if (isPresent) {
       const removeCallback = () => {
-        props.secretsMutations.uploadSecret(uploadData);
+        secretsMutations.uploadSecret(uploadData);
       };
-      props.secretsMutations.deleteSecret(data, removeCallback);
+      secretsMutations.deleteSecret(data, removeCallback);
     } else {
-      props.secretsMutations.uploadSecret(uploadData);
+      secretsMutations.uploadSecret(uploadData);
     }
     this._editSecret(filename);
   }
 
   render() {
-    const { props, state } = this;
-    const secrets = (props.secrets && props.secrets.edges) ? props.secrets.edges : [];
+    const { addedFiles, editedSecrets, tooltipVisible } = this.state;
+    const { secrets } = this.props;
+    const secretsArray = (secrets && secrets.edges)
+      ? secrets.edges
+      : [];
 
     return (
       <div className="Table Table--padded">
@@ -106,8 +122,8 @@ export default class SecretsTable extends Component {
         </div>
         <div className="Table__Body">
           {
-            secrets.map(({ node }) => {
-              const isEditing = state.editedSecrets.has(node.filename);
+            secretsArray.map(({ node }) => {
+              const isEditing = editedSecrets.has(node.filename);
               const nameCSS = classNames({
                 'SecretsTable__row-file flex-1 break-word': true,
                 'SecretsTable__row-file--missing': !node.isPresent,
@@ -125,7 +141,7 @@ export default class SecretsTable extends Component {
                         <SecretsPresent
                           setTooltipVisible={this._setTooltipVisible}
                           node={node}
-                          tooltipVisible={state.tooltipVisible}
+                          tooltipVisible={tooltipVisible}
                         />
                       )
                     }
@@ -138,7 +154,7 @@ export default class SecretsTable extends Component {
                       && (
                         <SecretsEditing
                           node={node}
-                          addedFiles={state.addedFiles}
+                          addedFiles={addedFiles}
                           setFile={this._setFile}
                           replaceFile={this._replaceFile}
                           editSecret={this._editSecret}
@@ -152,7 +168,7 @@ export default class SecretsTable extends Component {
                   <div className="SecretsTable__row-actions">
                     <SecretsAction
                       {...node}
-                      {...props}
+                      {...this.props}
                       editSecret={this._editSecret}
                       isEditing={isEditing}
                     />
@@ -162,7 +178,7 @@ export default class SecretsTable extends Component {
             })
 
           }
-          { (secrets.length === 0)
+          { (secretsArray.length === 0)
             && <p className="text-center">No secrets have been added to this project</p>
           }
         </div>
@@ -170,3 +186,5 @@ export default class SecretsTable extends Component {
     );
   }
 }
+
+export default SecretsTable;

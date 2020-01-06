@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import { NativeTypes } from 'react-dnd-html5-backend';
@@ -8,7 +9,15 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 // assets
 import './Requirements.scss';
 
-class Requirements extends Component {
+type Props = {
+  connectDropTarget: Function,
+  isOver: bool,
+  name: string,
+  owner: string,
+  queuePackage: Function,
+}
+
+class Requirements extends Component<Props> {
   state = {
     rejectedPackages: [],
     droppedFile: null,
@@ -21,15 +30,23 @@ class Requirements extends Component {
   *  @return {}
   */
   _parseFile = (file) => {
-    const { props, state } = this;
+    const {
+      name,
+      owner,
+      queuePackage,
+    } = this.props;
+    const { droppedFile } = this.state;
     const self = this;
     const reader = new FileReader();
-    if (!state.droppedFile) {
+
+    if (!droppedFile) {
       if (file.type === 'text/plain') {
         this.setState({ droppedFile: file.name, fileParsing: true });
+
         reader.onload = (evt) => {
           const rejectedPackages = [];
           const packages = evt.target.result.split('\n').filter(line => (line[0] !== '#') && (line !== ''));
+
           packages.forEach((pkg) => {
             const trimmedPackage = pkg.trim();
             const splitPackage = trimmedPackage.split('==');
@@ -41,34 +58,44 @@ class Requirements extends Component {
                 package: splitPackage[0],
                 version: splitPackage[1],
               };
-              props.queuePackage(packageData);
+              queuePackage(packageData);
             }
-            self.setState({ rejectedPackages, droppedFile: file.name, fileParsing: false });
+            self.setState({
+              rejectedPackages,
+              droppedFile: file.name,
+              fileParsing: false,
+            });
           });
         };
         reader.readAsText(file);
       } else {
-        setErrorMessage('Requirements file must be a text file');
+        setErrorMessage(owner, name, 'Requirements file must be a text file');
       }
     }
   }
 
   render() {
-    const { props, state } = this;
-    const subText = props.isOver ? '' : 'or';
+    const { isOver, connectDropTarget } = this.props;
+    const {
+      droppedFile,
+      fileParsing,
+      rejectedPackages,
+    } = this.state;
+    const subText = isOver ? '' : 'or';
     // declare css here
     const dropBoxCSS = classNames({
       'Dropbox flex flex--column align-items--center': true,
-      'Dropbox--hovered': props.isOver,
+      'Dropbox--hovered': isOver,
     });
     const fileDroppedCSS = classNames({
       'Requirements__dropped-file Card Card--no-hover Card--requirements': true,
-      'Requirements__dropped-file--loading': state.fileParsing,
+      'Requirements__dropped-file--loading': fileParsing,
     });
-    return props.connectDropTarget(
+
+    return connectDropTarget(
       <div className="Requirements__file flex justify--center">
         {
-          !state.droppedFile
+          !droppedFile
           && (
           <div
             className={dropBoxCSS}
@@ -79,7 +106,7 @@ class Requirements extends Component {
               {subText}
             </div>
             {
-              !props.isOver
+              !isOver
               && (
               <label
                 htmlFor="requirements_upload"
@@ -103,18 +130,18 @@ class Requirements extends Component {
           )
         }
         {
-          state.droppedFile
+          droppedFile
           && (
           <div className={fileDroppedCSS}>
             <div className="Requirements__file-name">
-              {state.droppedFile}
+              {droppedFile}
             </div>
             {
-              state.rejectedPackages.length > 0 && (
+              rejectedPackages.length > 0 && (
               <div className="Requirements__rejectedPackages">
                 The following packages could not be installed:
                 {
-                  state.rejectedPackages.map(rejectedPackage => (
+                  rejectedPackages.map(rejectedPackage => (
                     <div
                       className="Requirements__rejected-package"
                       key={rejectedPackage}

@@ -1,9 +1,9 @@
 // vendor
 import React, { Component } from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
-import store from 'JS/redux/store';
-import environment from 'JS/createRelayEnvironment';
 import classNames from 'classnames';
+// environment
+import environment from 'JS/createRelayEnvironment';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // mutations
@@ -55,7 +55,14 @@ export const LinkModalQuery = graphql`
       }
   }`;
 
-export default class LinkModal extends Component {
+type Props = {
+  closeLinkModal: string,
+  linkedDatasets: Array<Object>,
+  name: string,
+  owner: string,
+}
+
+class LinkModal extends Component<Props> {
   state = {
     selectedDataset: null,
     buttonState: '',
@@ -71,9 +78,9 @@ export default class LinkModal extends Component {
   }
 
   /**
-        @param {object} datasets
-        determines filter criteria for dataset types
-        @return {object} filters
+    @param {object} datasets
+    determines filter criteria for dataset types
+    @return {object} filters
     */
   _createFilters = (datasets) => {
     const filters = {
@@ -95,19 +102,27 @@ export default class LinkModal extends Component {
     * triggers link datraset mutation
   */
   _linkDataset = () => {
-    const { props, state } = this;
-    const { owner, labbookName } = store.getState().routes;
+    const {
+      selectedDataset,
+      selectedUrl,
+    } = this.state;
+    const {
+      owner,
+      name,
+      closeLinkModal,
+    } = this.props;
+
     this.setState({ buttonState: 'loading' });
     ModifyDatasetLinkMutation(
       owner,
-      labbookName,
-      state.selectedDataset.owner,
-      state.selectedDataset.name,
+      name,
+      selectedDataset.owner,
+      selectedDataset.name,
       'link',
-      state.selectedUrl || null,
+      selectedUrl || null,
       (response, error) => {
         if (error) {
-          setErrorMessage('Unable to link dataset', error);
+          setErrorMessage(owner, name, 'Unable to link dataset', error);
           this.setState({ buttonState: 'error' });
           setTimeout(() => {
             this.setState({ buttonState: '' });
@@ -115,7 +130,7 @@ export default class LinkModal extends Component {
         } else {
           this.setState({ buttonState: 'finished' });
           setTimeout(() => {
-            props.closeLinkModal();
+            closeLinkModal();
           }, 2000);
         }
       },
@@ -127,12 +142,17 @@ export default class LinkModal extends Component {
     * sets update selected state
   */
   _updateSelected = (edge) => {
+    const {
+      defaultRemote,
+      name,
+      owner,
+    } = edge.node;
     this.setState({
       selectedDataset: {
-        owner: edge.node.owner,
-        name: edge.node.name,
+        owner,
+        name,
       },
-      selectedUrl: edge.node.defaultRemote,
+      selectedUrl: defaultRemote,
     });
   }
 
@@ -142,6 +162,7 @@ export default class LinkModal extends Component {
   */
   _filterDatasets = (datasets) => {
     const { tags } = this.state;
+
     return datasets.filter(({ node }) => {
       const lowercaseDescription = node.description.toLowerCase();
       const lowercaseName = node.name.toLowerCase();
@@ -166,11 +187,18 @@ export default class LinkModal extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const { linkedDatasets } = props;
+    const {
+      buttonState,
+      selectedDataset,
+      tags,
+    } = this.state;
+    const {
+      closeLinkModal,
+      linkedDatasets,
+    } = this.props;
     return (
       <Modal
-        handleClose={() => props.closeLinkModal()}
+        handleClose={() => closeLinkModal()}
         size="large-long"
         noPadding
         noPaddingModal
@@ -214,7 +242,7 @@ export default class LinkModal extends Component {
                     return (
                       <div className="LinkModal__container">
                         <AdvancedSearch
-                          tags={state.tags}
+                          tags={tags}
                           setTags={this._setTags}
                           filterCategories={filterCategories}
                           withoutContext
@@ -234,10 +262,11 @@ export default class LinkModal extends Component {
                                   key={node.id}
                                   onClick={() => { this._updateSelected(edge); }}
                                   className="LinkModal__wrapper"
+                                  role="presentation"
                                 >
                                   <LinkCard
                                     node={node}
-                                    selectedDataset={state.selectedDataset}
+                                    selectedDataset={selectedDataset}
                                   />
                                 </div>
                               );
@@ -254,17 +283,17 @@ export default class LinkModal extends Component {
             <div className="Link__buttonContainer">
               <button
                 className="Btn--flat"
-                onClick={() => props.closeLinkModal()}
+                onClick={() => closeLinkModal()}
                 type="button"
               >
                 Cancel
               </button>
               <ButtonLoader
-                buttonState={state.buttonState}
+                buttonState={buttonState}
                 buttonText="Link Dataset"
                 className="Btn Btn--last"
                 params={{}}
-                buttonDisabled={!state.selectedDataset}
+                buttonDisabled={!selectedDataset}
                 clicked={this._linkDataset}
               />
             </div>
@@ -275,3 +304,5 @@ export default class LinkModal extends Component {
     );
   }
 }
+
+export default LinkModal;

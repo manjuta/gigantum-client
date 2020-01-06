@@ -55,7 +55,7 @@ export default function DownloadDatasetFilesMutation(
     variables,
     onCompleted: (response, error) => {
       if (error) {
-        setErrorMessage('There was a problem downloading Dataset files', error);
+        setErrorMessage(labbookOwner, labbookName, 'There was a problem downloading Dataset files', error);
         console.log(error);
       }
       const footerData = {
@@ -67,7 +67,7 @@ export default function DownloadDatasetFilesMutation(
         failureCall,
       };
 
-      FooterUtils.getJobStatus(footerData);
+      FooterUtils.getJobStatus(datasetOwner, datasetName, footerData);
 
       callback(error);
     },

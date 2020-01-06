@@ -48,7 +48,7 @@ export default function DeleteDatasetCollaboratorMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage(`Error: Could not add Collaborator ${username}`, error);
+          setErrorMessage(owner, datasetName, `Error: Could not add Collaborator ${username}`, error);
         }
         callback(response, error);
       },

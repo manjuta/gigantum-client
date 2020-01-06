@@ -63,7 +63,9 @@ export default function DeleteRemoteDatasetMutation(
         callback(response, error);
       },
       updater: (store, response) => {
-        sharedUpdater(store, parentID, nodeID, connection);
+        if (response.deleteDataset !== null) {
+          sharedUpdater(store, parentID, nodeID, connection);
+        }
       },
     },
   );

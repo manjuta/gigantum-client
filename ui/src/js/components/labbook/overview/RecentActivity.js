@@ -134,7 +134,7 @@ export default class RecentActivity extends Component {
     returns formated date
     @return {string}
   */
-  _getDate(edge) {
+  _getDate = (edge) => {
     const date = new Date(edge.timestamp);
     return Moment((date)).format('hh:mm a');
   }
@@ -143,11 +143,11 @@ export default class RecentActivity extends Component {
     @param {String} section
     handles redirect and scrolling to top
   */
-  _handleRedirect(section) {
-    const { owner, labbookName } = store.getState().routes;
+  _handleRedirect = (section) => {
+    const { owner, name } = this.props;
     const { props } = this;
     props.scrollToTop();
-    props.history.push(`/projects/${owner}/${labbookName}/${section}`);
+    props.history.push(`/projects/${owner}/${name}/${section}`);
   }
 
   render() {

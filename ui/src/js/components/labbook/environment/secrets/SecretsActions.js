@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
@@ -6,7 +7,20 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 // assets
 import './SecretsActions.scss';
 
-export default class SecretsAction extends Component {
+type Props = {
+  editSecret: Function,
+  filename: string,
+  isEditing: boolean,
+  id: string,
+  name: string,
+  owner: string,
+  secretsMutations: {
+    removeSecret: Function,
+    deleteSecret: Function,
+  }
+}
+
+class SecretsAction extends Component<Props> {
   state = {
     popupVisible: false,
   }
@@ -17,23 +31,29 @@ export default class SecretsAction extends Component {
   *  @return {}
   */
   _deleteSecret = () => {
-    const { props } = this;
+    const {
+      filename,
+      id,
+      name,
+      owner,
+      secretsMutations,
+    } = this.props;
     const data = {
-      filename: props.filename,
-      id: props.id,
+      filename,
+      id,
     };
 
     const deleteCallback = (response, error) => {
       if (error) {
-        setErrorMessage('An error occured while attempting to delete secrets file', error);
+        setErrorMessage(owner, name, 'An error occured while attempting to delete secrets file', error);
       }
     };
 
     const removeCallback = () => {
-      props.secretsMutations.removeSecret(data, deleteCallback);
+      secretsMutations.removeSecret(data, deleteCallback);
     };
 
-    props.secretsMutations.deleteSecret(data, removeCallback);
+    secretsMutations.deleteSecret(data, removeCallback);
   }
 
   /**
@@ -54,10 +74,15 @@ export default class SecretsAction extends Component {
   }
 
   render() {
-    const { state, props } = this;
+    const {
+      editSecret,
+      filename,
+      isEditing,
+    } = this.props;
+    const { popupVisible } = this.state;
     const popupCSS = classNames({
       SecretsActions__popup: true,
-      hidden: !state.popupVisible || props.isEditing,
+      hidden: !popupVisible || isEditing,
       Tooltip__message: true,
     });
     return (
@@ -67,7 +92,7 @@ export default class SecretsAction extends Component {
             className="Btn Btn--medium Btn--noMargin Btn--round Btn__delete-secondary Btn__delete-secondary--medium"
             type="button"
             onClick={(evt) => { this._togglePopup(evt, true); }}
-            disabled={props.isEditing}
+            disabled={isEditing}
           />
           <div className={popupCSS}>
             <div className="Tooltip__pointer" />
@@ -89,9 +114,11 @@ export default class SecretsAction extends Component {
         <button
           className="Btn Btn--medium Btn--noMargin Btn--round Btn__edit-secondary Btn__edit-secondary--medium"
           type="button"
-          onClick={() => props.editSecret(props.filename)}
+          onClick={() => editSecret(filename)}
         />
       </div>
     );
   }
 }
+
+export default SecretsAction;

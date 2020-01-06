@@ -1,32 +1,64 @@
 // vendor
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import classNames from 'classnames';
-// config
-import Config from 'JS/config';
 // components
-import Tooltip from 'Components/common/Tooltip';
-import ErrorBoundary from 'Components/common/ErrorBoundary';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Collaborators from './collaborators/Collaborators';
 import ActionsMenu from './actionsMenu/ActionsMenu';
 
 import './ActionsSection.scss';
 
-class ActionsSection extends Component {
+type Props = {
+  isSticky: boolean,
+}
+
+class ActionsSection extends Component<Props> {
+  state = {
+    showLoginPrompt: false,
+  }
+
+  /**
+   * @param {} -
+   * sets login prompt to true
+   * @return {}
+   */
+  _showLoginPrompt = () => {
+    this.setState({ showLoginPrompt: true });
+  }
+
+  /**
+   * @param {} -
+   * sets login prompt to false
+   * @return {}
+   */
+  _closeLoginPromptModal = () => {
+    this.setState({ showLoginPrompt: false });
+  }
+
   render() {
-    const { props } = this;
-
-
+    const { isSticky } = this.props;
+    const { showLoginPrompt } = this.state;
+    // declare css here
     const actionsSectionCSS = classNames({
       ActionsSection: true,
-      hidden: props.isSticky,
+      hidden: isSticky,
     });
 
     return (
 
       <div className={actionsSectionCSS}>
-        <Collaborators {...props} />
-        <ActionsMenu {...props} />
+        <Collaborators
+          {...this.props}
+          showLoginPrompt={this._showLoginPrompt}
+        />
+        <ActionsMenu
+          {...this.props}
+          showLoginPrompt={this._showLoginPrompt}
+        />
+
+        { showLoginPrompt
+         && <LoginPrompt closeModal={this._closeLoginPromptModal} />
+        }
       </div>
     );
   }

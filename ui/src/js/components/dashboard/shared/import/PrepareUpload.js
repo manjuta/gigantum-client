@@ -18,7 +18,7 @@ import MutlithreadUploader from 'JS/utils/MultithreadUploader';
   * removes files not allowed for upload
   * @return {array}
 */
-const removeExcludedFiles = (files) => {
+const removeExcludedFiles = (files, owner, name) => {
   const filesNotAllowedList = [];
   const newFileArray = files.filter((fileItem) => {
     const extension = fileItem.file.name
@@ -36,7 +36,7 @@ const removeExcludedFiles = (files) => {
 
   if (filesNotAllowedList.length > 0) {
     const filesNotAllowed = filesNotAllowedList.join(', ');
-    setWarningMessage(`The following files are not allowed ${filesNotAllowed}`);
+    setWarningMessage(owner, name, `The following files are not allowed ${filesNotAllowed}`);
   }
 
   return newFileArray;
@@ -65,7 +65,7 @@ const prepareUpload = (file, typeOfUpload, buildImage, state, history) => {
         name: file.name,
       },
     },
-  ]);
+  ], owner, name);
 
 
   const uploadInstance = new MutlithreadUploader({

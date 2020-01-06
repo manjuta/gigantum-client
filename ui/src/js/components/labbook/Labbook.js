@@ -82,7 +82,30 @@ const determineIsLocked = (props) => {
   );
 };
 
-class Labbook extends Component {
+
+type Props = {
+  auth: {
+    isAuthenticated: Function,
+  },
+  diskLow: boolean,
+  labbook: {
+    activeBranchName: string,
+    branches: Array<Object>,
+    canManageCollaborators: boolean,
+    collaborators: Array<Object>,
+    id: string,
+    name: string,
+    owner: string,
+  },
+  location: {
+    pathname: string,
+  },
+  relay: {
+    refetch: Function,
+  },
+}
+
+class Labbook extends Component<Props> {
   state = {
     isLocked: determineIsLocked(this.props),
     collaborators: this.props.labbook.collaborators,
@@ -118,7 +141,7 @@ class Labbook extends Component {
     const propBranches = nextProps.labbook && nextProps.labbook.branches
       ? nextProps.labbook.branches
       : [];
-    const stateBranches = state.branches;
+    const stateBranches = state.branches || [];
     const branchMap = new Map();
     const mergedBranches = [];
     const newDeletedBranches = state.deletedBranches.slice();
@@ -129,7 +152,6 @@ class Labbook extends Component {
         branchMap.set(branch.id, branch);
       }
     });
-
     stateBranches.forEach((branch) => {
       if (branchMap.has(branch.id)) {
         const itemReference = branchMap.get(branch.id);
@@ -227,7 +249,7 @@ class Labbook extends Component {
     window.removeEventListener('click', this._branchViewClickedOff);
   }
 
-/**
+  /**
   @param {}
   cancels refetch packages
   */
@@ -503,7 +525,7 @@ class Labbook extends Component {
                 migrateComplete: true,
                 buttonState: 'finished',
               });
-              setInfoMessage('Project migrated successfully');
+              setInfoMessage(owner, name, 'Project migrated successfully');
               setTimeout(() => {
                 this.setState({ buttonState: '' });
               }, 2000);
@@ -825,6 +847,8 @@ class Labbook extends Component {
                         isPublishing={isPublishing}
                         scrollToTop={scrollToTop}
                         sectionType="labbook"
+                        owner={owner}
+                        name={name}
                       />
                     </ErrorBoundary>
                   )}
@@ -852,6 +876,8 @@ class Labbook extends Component {
                             isPublishing={isPublishing}
                             scrollToTop={scrollToTop}
                             sectionType="labbook"
+                            owner={owner}
+                            name={name}
                           />
                         </ErrorBoundary>
                       )}

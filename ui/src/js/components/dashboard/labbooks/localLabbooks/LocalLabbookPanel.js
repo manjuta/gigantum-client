@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import Highlighter from 'react-highlight-words';
@@ -13,16 +14,29 @@ import store from 'JS/redux/store';
 // assets
 import './LocalLabbookPanel.scss';
 
+type Props = {
+  edge: {
+    node: {
+      name: string,
+      owner: string,
+      description: string,
+      creationDateUtc: string,
+      modifiedOnUtc: string,
+    }
+  },
+  goToLabbook: Function,
+  visibility: string,
+};
+
 /**
 *  labbook panel is to only render the edge passed to it
 */
-
-export default class LocalLabbookPanel extends Component {
+class LocalLabbookPanel extends Component<Props> {
   state = {
     exportPath: '',
     status: 'loading',
     textStatus: '',
-    labbookName: this.props.edge.node.name,
+    name: this.props.edge.node.name,
     owner: this.props.edge.node.owner,
     cssClass: 'loading',
   };
@@ -61,6 +75,7 @@ export default class LocalLabbookPanel extends Component {
   * adds a scoll listener to trigger pagination
   */
   _stopStartContainer = (evt, status) => {
+    const { owner, name } = this.state;
     evt.preventDefault();
     evt.stopPropagation();
     evt.nativeEvent.stopImmediatePropagation();
@@ -69,9 +84,9 @@ export default class LocalLabbookPanel extends Component {
     } else if (status === 'Running') {
       this._stopContainerMutation();
     } else if (status === 'loading') {
-      setInfoMessage('Container status is still loading. The status will update when it is available.');
+      setInfoMessage(owner, name, 'Container status is still loading. The status will update when it is available.');
     } else if (status === 'Building') {
-      setInfoMessage('Container is still building and the process may not be interrupted.');
+      setInfoMessage(owner, name, 'Container is still building and the process may not be interrupted.');
     } else {
       this._rebuildContainer();
     }
@@ -83,19 +98,20 @@ export default class LocalLabbookPanel extends Component {
   */
   _startContainerMutation = () => {
     const self = this;
+    const { owner, name } = this.state;
 
-    const { owner, labbookName } = this.state;
-    setInfoMessage(`Starting ${labbookName} container`);
+    setInfoMessage(owner, name, `Starting ${name} container`);
+
     this.setState({ status: 'Starting', textStatus: 'Starting' });
 
     StartContainerMutation(
       owner,
-      labbookName,
+      name,
       (response, error) => {
         if (error) {
-          setErrorMessage(`There was a problem starting ${this.state.labbookName}, go to Project and try again`, error);
+          setErrorMessage(owner, name, `There was a problem starting ${name}, go to Project and try again`, error);
         } else {
-          self.props.history.replace(`../../projects/${owner}/${labbookName}`);
+          self.props.history.replace(`../../projects/${owner}/${name}`);
         }
       },
     );
@@ -106,19 +122,19 @@ export default class LocalLabbookPanel extends Component {
   * stops labbbok conatainer
   */
   _stopContainerMutation = () => {
-    const { owner, labbookName } = this.state;
+    const { owner, name } = this.state;
 
     const self = this;
-    setInfoMessage(`Stopping ${labbookName} container`);
+    setInfoMessage(owner, name, `Stopping ${name} container`);
     this.setState({ status: 'Stopping', textStatus: 'Stopping' });
 
     StopContainerMutation(
       owner,
-      labbookName,
+      name,
       (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage(`There was a problem stopping ${this.state.labbookName} container`, error);
+          setErrorMessage(owner, name, `There was a problem stopping ${name} container`, error);
           self.setState({ textStatus: 'Running', status: 'Running' });
         } else {
           // this.setState({ status: 'Stopped', textStatus: 'Stopped' });
@@ -154,8 +170,15 @@ export default class LocalLabbookPanel extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const { edge } = props;
+    const { state } = this;
+    const { edge, goToLabbook, visibility } = this.props;
+    const {
+      name,
+      owner,
+      description,
+      creationDateUtc,
+      modifiedOnUtc,
+    } = edge.node;
     const {
       status,
       textStatus,
@@ -169,18 +192,18 @@ export default class LocalLabbookPanel extends Component {
 
     return (
       <Link
-        to={`/projects/${edge.node.owner}/${edge.node.name}`}
-        onClick={() => props.goToLabbook(edge.node.name, edge.node.owner)}
-        key={`local${edge.node.name}`}
+        to={`/projects/${owner}/${name}`}
+        onClick={() => goToLabbook(name, owner)}
+        key={`local${name}`}
         className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
       >
 
         <div className="LocalLabbooks__row--icons">
-          { !(props.visibility === 'local')
+          { !(visibility === 'local')
             && (
             <div
-              data-tooltip={`${props.visibility}`}
-              className={`Tooltip-Listing LocalLabbookPanel__${props.visibility} Tooltip-data Tooltip-data--small`}
+              data-tooltip={`${visibility}`}
+              className={`Tooltip-Listing LocalLabbookPanel__${visibility} Tooltip-data Tooltip-data--small`}
             />
             )
           }
@@ -188,6 +211,8 @@ export default class LocalLabbookPanel extends Component {
           <div className="LocalLabbooks__containerStatus">
 
             <div
+              role="presentation"
+              type="button"
               data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
               onClick={evt => this._stopStartContainer(evt, cssClass)}
               onMouseOver={evt => this._updateTextStatusOver(evt, true, status)}
@@ -209,8 +234,9 @@ export default class LocalLabbookPanel extends Component {
           <div>
 
             <h5
+              role="presentation"
               className="LocalLabbooks__panel-title"
-              onClick={() => this.props.goToLabbook(edge.node.name, edge.node.owner)}
+              onClick={() => goToLabbook(name, owner)}
             >
 
               <Highlighter
@@ -218,35 +244,35 @@ export default class LocalLabbookPanel extends Component {
                 searchWords={[store.getState().labbookListing.filterText]}
                 autoEscape={false}
                 caseSensitive={false}
-                textToHighlight={edge.node.name}
+                textToHighlight={name}
               />
 
             </h5>
 
           </div>
 
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{edge.node.owner}</p>
+          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{owner}</p>
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata">
             <span className="bold">Created:</span>
             {' '}
-            {Moment(edge.node.creationDateUtc).format('MM/DD/YY')}
+            {Moment(creationDateUtc).format('MM/DD/YY')}
           </p>
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata">
             <span className="bold">Modified:</span>
             {' '}
-            {Moment(edge.node.modifiedOnUtc).fromNow()}
+            {Moment(modifiedOnUtc).fromNow()}
           </p>
 
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description">
             {
-              edge.node.description && edge.node.description.length
+              description && description.length
                 ? (
                   <Highlighter
                     highlightClassName="LocalLabbooks__highlighted"
                     searchWords={[store.getState().labbookListing.filterText]}
                     autoEscape={false}
                     caseSensitive={false}
-                    textToHighlight={edge.node.description}
+                    textToHighlight={description}
                   />
                 )
                 : (
@@ -260,3 +286,5 @@ export default class LocalLabbookPanel extends Component {
     );
   }
 }
+
+export default LocalLabbookPanel;
