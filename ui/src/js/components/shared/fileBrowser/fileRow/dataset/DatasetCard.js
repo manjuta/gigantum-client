@@ -109,8 +109,8 @@ class DatasetCard extends Component<Props> {
       owner,
       name,
       mutations,
-    } = this;
-    const datasetOwner = dataset;
+    } = this.props;
+    const datasetOwner = dataset.owner;
     const datasetName = dataset.name;
     const data = {
       labbookOwner: owner,

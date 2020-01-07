@@ -264,7 +264,6 @@ class FileBrowserMutations {
       name,
     } = this.state;
     const { transactionId } = store.getState().fileBrowser;
-
     CompleteBatchUploadTransactionMutation(
       connection,
       owner,
