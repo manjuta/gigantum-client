@@ -143,7 +143,7 @@ class Branches extends Component<Props> {
   _selectBranchname = (evt, newSelectedBranchname) => {
     const { selectedBranchname } = this.state;
     if (selectedBranchname !== newSelectedBranchname) {
-      this.setState({ selectedBranchname });
+      this.setState({ selectedBranchname: newSelectedBranchname });
     }
   }
 
@@ -475,7 +475,6 @@ class Branches extends Component<Props> {
       'Branches__dropdown-menu': state.syncMenuVisible && !props.disableDropdown,
       hidden: !state.syncMenuVisible,
     });
-
     return (
       <div className="Branches__actions-section">
         {

@@ -228,7 +228,7 @@ const FooterUtils = {
           if ((jobStatus.status === 'started')
             || (jobStatus.status === 'queued')) {
             setTimeout(() => {
-              fetchStatus({ backgroundJobKey });
+              fetchStatus(owner, name, { backgroundJobKey });
 
               if (metaData.feedback === undefined) {
                 setUploadMessageUpdate(
@@ -265,8 +265,9 @@ const FooterUtils = {
     };
 
     const data = { backgroundJobKey: completeDatasetUploadTransaction.backgroundJobKey };
+    const { name, owner } = variables;
     // trigger fetch
-    fetchStatus(data);
+    fetchStatus(name, owner, data);
   },
 };
 

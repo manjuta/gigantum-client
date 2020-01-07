@@ -103,7 +103,7 @@ class DatasetActionsMenu extends Component<Props> {
    */
   _downloadFile = (isLocal) => {
     // TODO break up this function
-    const { props, state } = this;
+    const { state } = this;
     const {
       edge,
       folder,
@@ -144,7 +144,6 @@ class DatasetActionsMenu extends Component<Props> {
         let { key, datasetName } = edge.node;
         let datasetOwner = edge.node.owner;
         const splitKey = key.split('/');
-
         if (section === 'data') {
           datasetOwner = owner;
           datasetName = name;

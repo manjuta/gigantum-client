@@ -116,7 +116,7 @@ class DatasetCard extends Component<Props> {
       labbookOwner: owner,
       datasetName,
       labbookName: name,
-      owner: datasetOwner,
+      datasetOwner,
       allKeys: true,
     };
 

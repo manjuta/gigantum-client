@@ -33,16 +33,15 @@ class FileBrowserMutations {
     const {
       keys,
       allKeys,
-      owner,
+      datasetOwner,
       datasetName,
       labbookName,
       labbookOwner,
       successCall,
       failureCall,
     } = data;
-
     DownloadDatasetFilesMutation(
-      owner,
+      datasetOwner,
       datasetName,
       labbookName,
       labbookOwner,
