@@ -115,26 +115,27 @@
   }
   .Tooltip__pointer{
     top: -6px;
-    right: -18px;
+    right: -25px;
   }
   .Tooltip__message{
     top: 5px;
-    right: -20px;
+    right: -28px;
   }
 }
 
 .Tooltip.descriptionOverview{
   .Tooltip__toggle{
-    top: -20px;
-    right: -18px;
+    top: -24px;
+    left: -15px;
+    z-index: index($elements, popup) + 2;
   }
   .Tooltip__pointer{
-    top: 0px;
-    right: -22px;
+    top: -5px;
+    left: -17px;
   }
   .Tooltip__message{
-    top: 10px;
-    right: -50px;
+    top: 6px;
+    left: -19px;
   }
 }
 
@@ -226,30 +227,30 @@
 
 .Tooltip.labbookListing{
   .Tooltip__toggle{
-    right: 20px;
-    bottom: 60px;
+    right: 8px;
+    bottom: 22px;
   }
   .Tooltip__pointer{
-    right: 14px;
-    bottom: 38px;
+    right: 3px;
+    bottom: 0px;
   }
   .Tooltip__message{
-    top: -38px;
-    left: 10px;
+    top: 0px;
+    left: 50px;
   }
 }
 
 .Tooltip.datasetsTooltip{
   .Tooltip__toggle{
-    right: 20px;
-    bottom: 60px;
+    right: 8px;
+    bottom: 22px;
   }
   .Tooltip__pointer{
-    right: 14px;
-    bottom: 38px;
+    right: 2px;
+    bottom: 1px;
   }
   .Tooltip__message{
-    bottom: -14px;
+    bottom: -51px;
     left: 10px;
   }
 }

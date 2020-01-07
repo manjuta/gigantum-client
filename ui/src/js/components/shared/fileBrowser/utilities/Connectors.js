@@ -122,6 +122,14 @@ const targetSource = {
     const item = monitor.getItem();
     const { uploading } = store.getState().fileBrowser;
     const mouseoverAllowed = !uploading && (!(props.section === 'data' && !item.isLocal) || (!item.fileData));
+    if (props
+      && props.fileData && item.fileData
+      && props.fileData.edge && item.fileData.edge
+      && props.fileData.edge.node && item.fileData.edge.node
+      && props.fileData.edge.node.key.startsWith(item.fileData.edge.node.key)
+    ) {
+      return false;
+    }
     return monitor.isOver({ shallow: true }) && mouseoverAllowed && !props.lockFileBrowser;
   },
   drop(props, monitor, component) {
@@ -276,7 +284,7 @@ function targetCollect(connect, monitor) {
     }
     newLastTarget = targets[targets.length - 1];
     // check if current targe is over last target
-    isOver = (currentTargetId === newLastTarget.monitor.targetId);
+    isOver = (currentTargetId === newLastTarget.monitor.targetId) && canDrop;
   } else {
     isOver = false;
   }

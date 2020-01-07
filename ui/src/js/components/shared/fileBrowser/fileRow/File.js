@@ -167,54 +167,56 @@ class File extends Component<Props> {
     *  launches dev tool to appropriate file
     */
   _openDevTool = (devTool, forceStart) => {
-    const { props } = this;
-    const { owner, name } = props;
-    const status = props.containerStatus;
-    const tabName = `${devTool}-${owner}-${name}`;
+    if (process.env.BUILD_TYPE !== 'cloud') {
+      const { props } = this;
+      const { owner, name } = props;
+      const status = props.containerStatus;
+      const tabName = `${devTool}-${owner}-${name}`;
 
-    if ((status !== 'NOT_RUNNING') && (status !== 'RUNNING')) {
-      setWarningMessage(owner, name, 'Could not launch development environment as the project is not ready.');
-    } else if (status === 'NOT_RUNNING' && !forceStart) {
-      setInfoMessage(owner, name, 'Starting Project container. When done working, click Stop to shutdown the container.');
-      updateTransitionState(owner, name, 'Starting');
-      setMergeMode(owner, name, false, false);
+      if ((status !== 'NOT_RUNNING') && (status !== 'RUNNING')) {
+        setWarningMessage(owner, name, 'Could not launch development environment as the project is not ready.');
+      } else if (status === 'NOT_RUNNING' && !forceStart) {
+        setInfoMessage(owner, name, 'Starting Project container. When done working, click Stop to shutdown the container.');
+        updateTransitionState(owner, name, 'Starting');
+        setMergeMode(owner, name, false, false);
 
-      StartContainerMutation(
-        owner,
-        name,
-        (response, error) => {
-          if (error) {
-            setErrorMessage(owner, name, `There was a problem starting ${name} container`, error);
-          } else {
-            this._openDevTool(devTool, true);
-          }
-        },
-      );
-    } else {
-      setInfoMessage(owner, name, `Starting ${devTool}, make sure to allow popups.`);
-      StartDevToolMutation(
-        owner,
-        name,
-        devTool,
-        (response, error) => {
-          if (response.startDevTool) {
-            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-            if (path.includes(`/lab/tree/${props.section}`)) {
-              path = path.replace(`/lab/tree/${props.section}`, `/lab/tree/${props.section}/${props.fileData.edge.node.key}`);
-            } else if (props.fileData.edge.node.key.indexOf('.Rmd') === -1) {
-              path = `${path}/lab/tree/${props.section}/${props.fileData.edge.node.key}`;
+        StartContainerMutation(
+          owner,
+          name,
+          (response, error) => {
+            if (error) {
+              setErrorMessage(owner, name, `There was a problem starting ${name} container`, error);
+            } else {
+              this._openDevTool(devTool, true);
+            }
+          },
+        );
+      } else {
+        setInfoMessage(owner, name, `Starting ${devTool}, make sure to allow popups.`);
+        StartDevToolMutation(
+          owner,
+          name,
+          devTool,
+          (response, error) => {
+            if (response.startDevTool) {
+              let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+              if (path.includes(`/lab/tree/${props.section}`)) {
+                path = path.replace(`/lab/tree/${props.section}`, `/lab/tree/${props.section}/${props.fileData.edge.node.key}`);
+              } else if (props.fileData.edge.node.key.indexOf('.Rmd') === -1) {
+                path = `${path}/lab/tree/${props.section}/${props.fileData.edge.node.key}`;
+              }
+
+              window[tabName] = window.open(path, tabName);
+              window[tabName].close();
+              window[tabName] = window.open(path, tabName);
             }
 
-            window[tabName] = window.open(path, tabName);
-            window[tabName].close();
-            window[tabName] = window.open(path, tabName);
-          }
-
-          if (error) {
-            setErrorMessage(owner, name, 'Error Starting Dev tool', error);
-          }
-        },
-      );
+            if (error) {
+              setErrorMessage(owner, name, 'Error Starting Dev tool', error);
+            }
+          },
+        );
+      }
     }
   }
 

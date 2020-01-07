@@ -1,5 +1,11 @@
 @import '~Styles/_imports.scss';
 
+@keyframes drag_style {
+  0% {visibility: hidden}
+  99% {visibility: hidden}
+  100% {visibility: auto}
+}
+
 .Folder {
   &--highlight {
     background-color: rgba(0, 126, 168, 0.5);
@@ -11,6 +17,13 @@
   }
   &--background {
     background: $white;
+  }
+  &--dragging{
+    &:active {
+      .Folder__child {
+        animation: drag_style .01s;
+      }
+    }
   }
 }
 
@@ -33,6 +46,8 @@
     }
     &--canDrag {
       cursor: copy !important;
+      height: 50px;
+      overflow: hidden;
     }
 
 
