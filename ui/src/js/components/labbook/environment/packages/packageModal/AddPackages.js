@@ -29,7 +29,7 @@ type Props ={
   owner: string,
   name: string,
   base: Object,
-  toggleModal: Function,
+  togglePackageModal: Function,
   packages: Array,
   buildCallback: Function,
   setBuildId: Function,
@@ -230,7 +230,7 @@ class AddPackages extends Component<Props> {
       owner,
       name,
       base,
-      toggleModal,
+      togglePackageModal,
       packages,
       buildCallback,
     } = this.props;
@@ -298,7 +298,7 @@ class AddPackages extends Component<Props> {
             queuePackage={this._queuePackage}
             packageQueue={packageQueue}
             disableInstall={disableInstall}
-            toggleModal={toggleModal}
+            toggleModal={togglePackageModal}
             installPackages={this._installPackages}
             removePackageFromQueue={this._removePackageFromQueue}
             buildCallback={buildCallback}
