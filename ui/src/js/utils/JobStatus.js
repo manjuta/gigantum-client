@@ -18,9 +18,8 @@ const jobStatusQuery = graphql`
   }
 `;
 
-
 const JobStatus = {
-  getJobStatus: (jobKey) => {
+  getJobStatus: (owner, name, jobKey) => {
     const variables = { jobKey };
     return new Promise((resolve, reject) => {
       const fetchData = () => {

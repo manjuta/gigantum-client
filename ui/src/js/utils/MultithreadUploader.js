@@ -513,7 +513,7 @@ export default class MultithreadUploader {
           key: 'importJobKey',
           callback: this.finishedCallback,
         };
-        FooterUtils.getJobStatus(owner, labbookName, footerData);
+        FooterUtils.getJobStatus(owner, name, footerData);
       }
     }
 
