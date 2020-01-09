@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, current_app
 from flask_cors import CORS, cross_origin
 import redis
 
 from lmsrvcore import telemetry
 from lmsrvcore.auth.user import get_logged_in_author, get_logged_in_username
-from gtmcore.configuration import Configuration
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
 
@@ -30,7 +29,7 @@ def check_projects():
 
     try:
         username = get_logged_in_username()
-        return jsonify(telemetry.check_projects(Configuration(), username))
+        return jsonify(telemetry.check_projects(current_app.config['LABMGR_CONFIG'], username))
     except Exception as e:
         logger.error(e)
         return jsonify({'error': 'Cannot load username from request.'})
@@ -41,7 +40,7 @@ def check_projects():
 @cross_origin(headers=["Content-Type", "Authorization"], max_age=7200)
 def ping():
     """Unauthorized endpoint for validating the API is up"""
-    config = Configuration()
+    config = current_app.config['LABMGR_CONFIG']
     app_name, built_on, revision = config.config['build_info'].split(' :: ')
     return jsonify({
         "application": app_name,
@@ -60,7 +59,7 @@ def version():
 
     TODO! By August 2019, remove the .route(f'/version/') route.
     """
-    config = Configuration()
+    config = current_app.config['LABMGR_CONFIG']
     app_name, built_on, revision = config.config['build_info'].split(' :: ')
     return jsonify({
         "application": app_name,

@@ -6,7 +6,6 @@ import os
 from gtmcore.dataset import Dataset
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
-from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 from gtmcore.workflows import DatasetWorkflow, MergeOverride
@@ -185,7 +184,7 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
             raise ValueError(f"Unknown permission set: {permissions}")
 
         # Add collaborator to remote service
-        config = Configuration()
+        config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
         # Extract valid Bearer and ID tokens
@@ -231,7 +230,7 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
                                         author=get_logged_in_author())
 
         # Get remote server configuration
-        config = Configuration()
+        config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
         # Extract valid Bearer and ID tokens
@@ -262,7 +261,7 @@ class ExportDataset(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, dataset_name, client_mutation_id=None):
         username = get_logged_in_username()
-        working_directory = Configuration().config['git']['working_directory']
+        working_directory = flask.current_app.config['LABMGR_CONFIG'].config['git']['working_directory']
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
 

@@ -19,6 +19,7 @@
 # SOFTWARE.
 from flask import Flask
 from flask import Blueprint
+from flask import current_app
 from flask_graphql import GraphQLView
 import graphene
 
@@ -28,6 +29,7 @@ from gtmcore.configuration import Configuration
 
 
 # Load config data for the LabManager instance
+# There may not be a flask application running yet
 config = Configuration()
 
 # Create Blueprint
@@ -43,12 +45,10 @@ labbook_service.add_url_rule('/labbook/',
 # If running blueprint script directly, spin a dev server
 if __name__ == '__main__':
 
-    # Load config data for the LabManager instance
-    config = Configuration()
-
     # Create Flask app and configure
     app = Flask("lmsrvlabbook")
     app.config['DEBUG'] = config.config["flask"]["DEBUG"]
+    app.config["LABMGR_CONFIG"] = config
 
     # Register service
     app.register_blueprint(labbook_service)

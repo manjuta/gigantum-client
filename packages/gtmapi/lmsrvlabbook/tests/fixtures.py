@@ -112,8 +112,8 @@ def fixture_working_dir():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
@@ -154,8 +154,8 @@ def fixture_working_dir_lfs_disabled():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
@@ -196,8 +196,8 @@ def fixture_working_dir_env_repo_scoped():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
@@ -269,8 +269,8 @@ def fixture_working_dir_populated_scoped():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
@@ -343,8 +343,8 @@ def fixture_working_dir_dataset_populated_scoped():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
@@ -397,8 +397,8 @@ def fixture_single_dataset():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
@@ -434,8 +434,8 @@ def build_image_for_jupyterlab():
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)

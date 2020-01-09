@@ -47,8 +47,8 @@ def mock_create_labbooks(fixture_working_dir):
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
     with patch.object(Configuration, 'find_default_config', lambda self: config_file):
         app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
         with app.app_context():
             flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
             client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware],

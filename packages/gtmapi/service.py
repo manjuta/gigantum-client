@@ -29,7 +29,7 @@ else:
 random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration()
-app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
 # Set Debug mode
 app.config['DEBUG'] = config.config["flask"]["DEBUG"]
@@ -38,12 +38,12 @@ app.register_blueprint(blueprint.complete_labbook_service)
 # Configure CHP
 try:
     # /api by default
-    api_prefix = app.config["LABMGR_CONFIG"].config['proxy']["labmanager_api_prefix"]
+    api_prefix = config.config['proxy']["labmanager_api_prefix"]
 
     # CHP interface params
-    apparent_proxy_port = app.config["LABMGR_CONFIG"].config['proxy']["apparent_proxy_port"]
-    api_port = app.config["LABMGR_CONFIG"].config['proxy']['api_port']
-    proxy_router = ProxyRouter.get_proxy(app.config["LABMGR_CONFIG"].config['proxy'])
+    apparent_proxy_port = config.config['proxy']["apparent_proxy_port"]
+    api_port = config.config['proxy']['api_port']
+    proxy_router = ProxyRouter.get_proxy(config.config['proxy'])
 
     if config.is_hub_client:
         # Use full route prefix, including run/<client_id> if running in the Hub
@@ -157,20 +157,20 @@ if config.config["lock"]["reset_on_start"]:
     reset_all_locks(config.config['lock'])
 
 # Create local data (for local dataset types) dir if it doesn't exist
-local_data_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_directory'], 'local_data')
+local_data_dir = os.path.join(config.config['git']['working_directory'], 'local_data')
 if os.path.isdir(local_data_dir) is False:
     os.makedirs(local_data_dir, exist_ok=True)
     logger.info(f'Created `local_data` dir for Local Filesystem Dataset Type: {local_data_dir}')
 
 # Create certificates file directory for custom CA certificate support.
-certificate_dir = os.path.join(app.config["LABMGR_CONFIG"].config['git']['working_directory'], 'certificates')
+certificate_dir = os.path.join(config.config['git']['working_directory'], 'certificates')
 if os.path.isdir(certificate_dir) is False:
     os.makedirs(certificate_dir, exist_ok=True)
     logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
 
 
 # make sure temporary upload directory exists and is empty
-tempdir = Configuration().upload_dir
+tempdir = config.upload_dir
 if os.path.exists(tempdir):
     shutil.rmtree(tempdir)
     logger.info(f'Cleared upload temp dir: {tempdir}')

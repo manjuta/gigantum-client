@@ -14,6 +14,7 @@ from lmsrvlabbook.api import LabbookQuery, LabbookMutations
 # ** This blueprint is the combined full LabBook service with all components served together from a single schema ** #
 
 # Load config data for the LabManager instance
+# There is no flask application running yet
 config = Configuration()
 
 # Create Blueprint
