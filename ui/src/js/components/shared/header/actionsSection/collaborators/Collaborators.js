@@ -9,6 +9,8 @@ import environment from 'JS/createRelayEnvironment';
 // store
 import store from 'JS/redux/store';
 import { setCollaborators, setCanManageCollaborators } from 'JS/redux/actions/shared/collaborators/collaborators';
+// queries
+import UserIdentity from 'JS/Auth/UserIdentity';
 // components
 import CollaboratorsModal from './modal/CollaboratorsModal';
 // assets
@@ -67,8 +69,18 @@ class CollaboratorButton extends Component<Props> {
   state = {
     collaboratorModalVisible: false,
     canClickCollaborators: false,
-    sessionValid: false,
+    sessionValid: null,
   };
+
+  componentDidMount = () => {
+    UserIdentity.getUserIdentity().then((res) => {
+      if (res.data && res.data.userIdentity && res.data.userIdentity.isSessionValid) {
+        this.setState({ sessionValid: true });
+      } else {
+        this.setState({ sessionValid: false });
+      }
+    });
+  }
 
   static getDerivedStateFromProps(nextProps, nextState) {
     if (nextProps.menuOpen) {
@@ -161,11 +173,13 @@ class CollaboratorButton extends Component<Props> {
     const self = this;
     const {
       collaboratorModalVisible,
+      sessionValid,
     } = this.state;
     const {
       showLoginPrompt,
       sectionType,
     } = this.props;
+    const sessionChecked = sessionValid !== null;
     // either labbook or dataset
     // get section from props
 
@@ -184,7 +198,7 @@ class CollaboratorButton extends Component<Props> {
         render={(response) => {
           const { props } = response;
 
-          if (props) {
+          if (props && sessionChecked) {
             const section = (sectionType === 'dataset')
               ? props.dataset
               : props.labbook;
@@ -243,7 +257,7 @@ class CollaboratorButton extends Component<Props> {
                 }
               </div>
             );
-          } if (collaborators !== null) {
+          } if (collaborators !== null && sessionChecked) {
             const collaboratorFilteredArr = getCollaboratorFiltered(collaborators, owner);
             const collaboratorNames = self._getCollaboratorList(
               collaborators,
