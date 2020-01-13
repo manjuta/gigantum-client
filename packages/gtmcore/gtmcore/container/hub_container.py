@@ -60,18 +60,18 @@ class HubProjectContainer(ContainerOperations):
                 # No need to build, this is the first time this project is being built in this instance of a client and
                 # it already exists in the registry!
                 logger.info(f"Docker image for {str(self.labbook)} already exists in the registry")
-                feedback_callback(f"Reusing existing image in registry.")
+                feedback_callback(f"Reusing existing image in registry.\n")
                 return
         elif cache_state == 'match':
             if self.image_available():
                 # No need to build!
                 logger.info(f"Reusing Docker image for {str(self.labbook)}")
-                feedback_callback(f"No environment changes detected. Reusing existing image.")
+                feedback_callback(f"No environment changes detected. Reusing existing image.\n")
                 return
 
         feedback_callback(f"Starting Project container build. Please wait.\n\n Note, build output is not yet available "
                           f"when running in Gigantum Hub. If you need to debug an environment configuration and "
-                          f"require the build output, you must run the Client locally.\n\n")
+                          f"require the build output, you must run the Client locally.\n")
 
         url = f"{self._launch_service}/v1/projectbuild"
         data = {"client_id": self._client_id,
@@ -90,7 +90,7 @@ class HubProjectContainer(ContainerOperations):
         while True:
             time_elapsed = time.time() - start_time
             if time_elapsed > int(build_timeout_seconds):
-                feedback_callback("Container build timed out. If this problem persists, contact support@gigantum.com")
+                feedback_callback("Container build timed out. If this problem persists, contact support@gigantum.com\n")
                 raise ContainerException(f"Timed out building project in launch service:"
                                          f" {response.status_code} : {response.json()}")
             resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/"
@@ -99,13 +99,13 @@ class HubProjectContainer(ContainerOperations):
                 logger.info(f"HubProjectContainer.build_image() in progress: {resp.json()}")
                 status = resp.json()["state"]
                 if status == "COMPLETE":
-                    feedback_callback("Container build complete")
+                    feedback_callback("Container build complete\n")
                     return None
                 elif status == "ERROR":
                     feedback_callback(f"Failed to build the Project image, most likely due to the Project's"
                                       f" environment configuration. Since build output is not yet available when"
                                       f" running in Gigantum Hub, try to build the Project locally to view"
-                                      f" the build output and fix any issues.")
+                                      f" the build output and fix any issues.\n")
                     raise ContainerException(f"Failed to build the Project image, most likely due to the Project's"
                                              f" environment configuration.")
             elif resp.status_code != 304:

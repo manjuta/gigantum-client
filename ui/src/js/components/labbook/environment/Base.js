@@ -92,9 +92,9 @@ class Base extends Component<Props> {
       (response, error) => {
         this.setState({ forceUpdateDisabled: false });
         if (error) {
-          setErrorMessage(owner, name, 'An error occured while trying to change bases.', error);
+          setErrorMessage(owner, name, 'An error occurred while trying to change bases.', error);
         } else {
-          setInfoMessage(owner, name, 'Updated Base successfully. Rebuilding environment. Pleae wait...');
+          setInfoMessage(owner, name, 'Updated Base successfully. Rebuilding environment. Please wait...');
           buildImage(name, owner);
         }
       },
