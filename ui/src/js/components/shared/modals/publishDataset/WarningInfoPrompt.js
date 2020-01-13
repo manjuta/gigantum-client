@@ -27,7 +27,7 @@ class WarningInfoPrompt extends Component {
     const moreInfoText = state.moreInfo ? 'Hide' : 'More Info';
 
     return (
-      <div class="PublishDatasetsModal">
+      <div className="PublishDatasetsModal">
         <div className="PublishDatasetsModal__container">
           <div className="PublishDatasetsModal__header-text">
             <p>This Project is linked to unpublished (local-only) Datasets</p>

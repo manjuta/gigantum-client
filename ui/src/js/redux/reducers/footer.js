@@ -368,6 +368,7 @@ export default (state = {
 
     const message = {
       message: action.payload.message,
+      status: action.payload.status,
       id: action.payload.id,
       className: action.payload.error
         ? 'FooterMessage--error'

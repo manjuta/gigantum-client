@@ -1,6 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import { boundMethod } from 'autobind-decorator';
 // components
 import Modal from 'Components/common/Modal';
 import BuildProgress from 'Components/common/BuildProgress';

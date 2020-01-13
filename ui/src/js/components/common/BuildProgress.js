@@ -112,19 +112,24 @@ class BuildProgress extends Component {
     const footerMessage = messageStackHistory.filter(message => message.id === buildId);
 
     if (footerMessage[0] && footerMessage[0].messageBody) {
-      const { message } = footerMessage[0].messageBody[0];
+      const { message, status } = footerMessage[0].messageBody[0];
       const regex = /(Step [0-9]+\/[0-9]+)/g;
       const percentRegex = /[0-9]+\/[0-9]+/;
       const matches = message.match(regex);
       const lastMatchPct = matches ? matches[matches.length - 1].match(percentRegex)[0].split('/') : [];
       const { error } = footerMessage[0];
+
       const regexMessage = message.replace(regex, '<span style="color:#fcd430">$1</span>')
           // \r\n should be treated as a regular newline
           .replace(/\r\n/g, '\n')
           // Get rid of anything on a line before a carriage return
           // Using a group because Firefox still doesn't support ES2018 negative look-behind
           .replace(/(\n|^)[^\n]*\r/g, '$1');
-      if ((lastMatchPct[0] === lastMatchPct[1]) && !props.keepOpen && matches) {
+
+      if (
+        ((process.env.BUILD_TYPE === 'cloud') && !props.keepOpen && (status === 'finished'))
+        || ((lastMatchPct[0] === lastMatchPct[1]) && !props.keepOpen && matches)
+      ) {
         setTimeout(() => {
           if (this.mounted) {
             props.toggleModal(false);

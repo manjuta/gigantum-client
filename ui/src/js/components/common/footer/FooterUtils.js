@@ -117,6 +117,7 @@ const FooterUtils = {
                   message,
                   isLast: false,
                   error: false,
+                  status: response.data.jobStatus.status,
                   messageBody: [{ message: html }],
                   messageListOpen: !hideFooter,
                   buildProgress: type === 'buildImage',
@@ -132,6 +133,7 @@ const FooterUtils = {
                 message,
                 isLast: true,
                 error: null,
+                status: response.data.jobStatus.status,
                 messageBody: [{ message: html }],
                 buildProgress: type === 'buildImage',
               };
@@ -171,6 +173,7 @@ const FooterUtils = {
                 id: responseId,
                 message: errorMessage,
                 isLast: true,
+                status: response.data.jobStatus.status,
                 error: true,
                 messageBody: [{ message: errorHTML }],
                 buildProgress: type === 'buildImage',
@@ -190,7 +193,7 @@ const FooterUtils = {
           owner,
           name,
           'There was an error fetching job status.',
-          [{ message: 'Callback error from the API' }],
+          [{ message: 'Callback error from the API', status: 'failed' }],
         );
       }
     };

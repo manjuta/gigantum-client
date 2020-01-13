@@ -125,7 +125,7 @@ class FooterMessage extends PureComponent<Props> {
             <BuildModal
               setBuildId={setBuildId}
               buildId={selectedBuildId}
-              keepOpen={messageItem.isLast}
+              keepOpen={true}
               owner={owner}
               name={name}
             />

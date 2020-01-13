@@ -304,7 +304,6 @@ class BranchMenu extends Component<Props> {
         name: section.name,
       }).then((res) => {
         const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
-
         if (localDatasets.length === 0) {
           this.setState((state) => {
             const publishModalVisible = !state.publishModalVisible;

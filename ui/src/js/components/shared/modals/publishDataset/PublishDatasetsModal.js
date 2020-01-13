@@ -478,7 +478,7 @@ class PublishDatasetsModal extends Component<Props> {
     return (
       <Modal
         header={header}
-        handleClose={this._handleClose()}
+        handleClose={this._handleClose}
         size="large"
         icon="dataset"
         renderContent={() => (
