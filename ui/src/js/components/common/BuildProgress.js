@@ -118,7 +118,12 @@ class BuildProgress extends Component {
       const matches = message.match(regex);
       const lastMatchPct = matches ? matches[matches.length - 1].match(percentRegex)[0].split('/') : [];
       const { error } = footerMessage[0];
-
+      const regexMessage = message.replace(regex, '<span style="color:#fcd430">$1</span>')
+          // \r\n should be treated as a regular newline
+          .replace(/\r\n/g, '\n')
+          // Get rid of anything on a line before a carriage return
+          // Using a group because Firefox still doesn't support ES2018 negative look-behind
+          .replace(/(\n|^)[^\n]*\r/g, '$1');
       if ((lastMatchPct[0] === lastMatchPct[1]) && !props.keepOpen && matches) {
         setTimeout(() => {
           if (this.mounted) {
@@ -129,7 +134,7 @@ class BuildProgress extends Component {
 
       return {
         percentageComplete: matches ? `${Math.round((lastMatchPct[0] / lastMatchPct[1]) * 100)}%` : '',
-        message: message.replace(regex, '<span style="color:#fcd430">$1</span>'),
+        message: regexMessage,
         isComplete: matches && (lastMatchPct[0] === lastMatchPct[1]),
         error,
       };

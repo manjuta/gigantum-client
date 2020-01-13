@@ -91,10 +91,10 @@ class LocalProjectContainer(ContainerOperations):
                 ldict = json.loads(line)
                 # TODO #1068 Ideally we wouldn't strip control characters here. It seems there's still work needed - perhaps in
                 #  the front end so that raw strings are printed (for now, e.g., they get extra newlines).
-                stream = (ldict.get("stream") or "").strip()
+                stream = (ldict.get("stream") or "")
                 if feedback_callback:
                     feedback_callback(stream)
-                status = (ldict.get("status") or "").strip()
+                status = (ldict.get("status") or "")
                 if feedback_callback:
                     feedback_callback(status)
 
