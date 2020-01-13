@@ -260,9 +260,12 @@ class DevTools extends Component<Props> {
   render() {
     const { labbook } = this.props;
     const { selectedDevTool, showDevList } = this.state;
-    const devTools = labbook.environment.base
+    let devTools = labbook.environment.base
       ? labbook.environment.base.developmentTools
       : [];
+    devTools = devTools.filter(tool => !(tool === 'rstudio' && process.env.BUILD_TYPE === 'cloud'));
+    const disableLaunch = process.env.BUILD_TYPE === 'cloud'
+      && selectedDevTool === 'rstudio';
     // declare css here
     const devtToolMenuCSS = classNames({
       'DevTools__dropdown-menu': true,
@@ -272,14 +275,20 @@ class DevTools extends Component<Props> {
       'DevTools__btn DevTools__btn--dropdown': true,
       'DevTools__btn--open': showDevList,
     });
+    const launchCSS = classNames({
+      'DevTools__btn DevTools__btn--launch Btn--columns Btn-last': true,
+      'Tooltip-data': disableLaunch,
+    });
 
     return (
       <div className="DevTools">
         <div className="DevTools__flex">
           <button
             type="submit"
-            className="DevTools__btn DevTools__btn--launch Btn--columns Btn-last"
+            className={launchCSS}
             onClick={() => { this._openDevToolMuation(selectedDevTool); }}
+            disabled={disableLaunch}
+            data-tooltip="Rstudio launching is currently only available using Gigantum Desktop"
           >
             <div className="Btn--label">Launch:</div>
             <div className="Btn--text">{selectedDevTool}</div>
