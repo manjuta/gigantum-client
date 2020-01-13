@@ -1,8 +1,9 @@
 import json
 import os
 import time
-from typing import Optional, Callable, List, Dict
+from typing import Optional, Callable, List, Dict, Tuple
 import requests
+import urllib.parse
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
@@ -53,7 +54,15 @@ class HubProjectContainer(ContainerOperations):
         if not feedback_callback:
             feedback_callback = _dummy_feedback
 
-        if self.check_cached_hash(self.image_tag, self.env_dir) == 'match':
+        cache_state = self.check_cached_hash(self.image_tag, self.env_dir)
+        if cache_state == 'not cached':
+            if self.image_available():
+                # No need to build, this is the first time this project is being built in this instance of a client and
+                # it already exists in the registry!
+                logger.info(f"Docker image for {str(self.labbook)} already exists in the registry")
+                feedback_callback(f"Reusing existing image in registry.")
+                return
+        elif cache_state == 'match':
             if self.image_available():
                 # No need to build!
                 logger.info(f"Reusing Docker image for {str(self.labbook)}")
@@ -62,7 +71,7 @@ class HubProjectContainer(ContainerOperations):
 
         feedback_callback(f"Starting Project container build. Please wait.\n\n Note, build output is not yet available "
                           f"when running in Gigantum Hub. If you need to debug an environment configuration and "
-                          f"require the build output, you must run the Client locally.")
+                          f"require the build output, you must run the Client locally.\n\n")
 
         url = f"{self._launch_service}/v1/projectbuild"
         data = {"client_id": self._client_id,
@@ -92,6 +101,13 @@ class HubProjectContainer(ContainerOperations):
                 if status == "COMPLETE":
                     feedback_callback("Container build complete")
                     return None
+                elif status == "ERROR":
+                    feedback_callback(f"Failed to build the Project image, most likely due to the Project's"
+                                      f" environment configuration. Since build output is not yet available when"
+                                      f" running in Gigantum Hub, try to build the Project locally to view"
+                                      f" the build output and fix any issues.")
+                    raise ContainerException(f"Failed to build the Project image, most likely due to the Project's"
+                                             f" environment configuration.")
             elif resp.status_code != 304:
                 # back off if the server is throwing errors
                 time.sleep(5)
@@ -117,14 +133,14 @@ class HubProjectContainer(ContainerOperations):
             True if we've gotten an Image ID stored.
         """
         logger.debug(f"HubProjectContainer.image_available()")
-        url = f"{self._launch_service}/v1/image_exists/{self.labbook.owner}/{self.labbook.name}"
+        url = f"{self._launch_service}/v1/image_exists/{self.username}/{self.labbook.owner}/{self.labbook.name}"
         try:
             response = requests.get(url)
         except requests.ConnectionError:
-            logger.Error("Couldn't connect to {url}.")
+            logger.error(f"Couldn't connect to {url}.")
             return False
         if response.status_code != 200:
-            logger.error("Couldn't determine if image exists.")
+            logger.error(f"Couldn't determine if image exists: {response.content}.")
             return False
         existsRaw = response.json()["exists"]
         return True if existsRaw == "true" else False
@@ -136,7 +152,7 @@ class HubProjectContainer(ContainerOperations):
 
         The container should be reachable from the Client network.
 
-        WARNING - wait_for_output by design may lead to an infinite loop. Be careful!
+        WARNING - wait_for_output by design may lead to an infinite loop.
 
         Args:
             cmd: override the default cmd for the image
@@ -159,12 +175,73 @@ class HubProjectContainer(ContainerOperations):
                 "project_name": self.labbook.name,
                 "volumes": volumes
                 }
+
+        if image_name is not None:
+            # If a custom image name is provided, use that. Currently, if the image name starts with "gigantum", the
+            # launch service will call out to DockerHub (e.g. to get our bases). If not, it will look in our registry.
+            data['image_name'] = image_name
+
         response = requests.post(url, json=data)
         if response.status_code != 200:
             raise ContainerException(f"Failed to start container in launch service:"
                                      f" {response.status_code} : {response.json()}")
 
-        return None
+        for _ in range(15):
+            # Query for the container status, setting "container_name" if running a non-project container (image_name
+            # has been explicitly set. Otherwise, if image_name is none default project container will be checked.
+            if self.query_container(container_name=image_name) == "running":
+                if cmd is not None and wait_for_output is True:
+                    # You are running a container to grab the output of a command. Here we simulate local behavior
+                    # by execing and then shutting the container down.
+                    result = None
+                    try:
+                        # Give the k8s reconciler a bit of a cushion so everything is consistent.
+                        time.sleep(2)
+                        result = self.exec_command(cmd, container_name=image_name, get_results=True)
+                    except Exception as err:
+                        logger.exception(f"An error occurred while trying to exec into {image_name}: {err}",
+                                         exc_info=True)
+                    finally:
+                        self.stop_container(container_name=image_name)
+                        # Give the k8s reconciler a bit of a cushion so everything is consistent.
+                        time.sleep(2)
+                        if result is None:
+                            raise ContainerException(f"An error occurred while trying to exec into {image_name}")
+
+                    return result
+                elif wait_for_output is True:
+                    raise ContainerException("When running in the Hub, you must provide a command if waiting for "
+                                             "container output.")
+                else:
+                    # Started container and detaching
+                    return None
+            else:
+                time.sleep(2)
+
+        raise ContainerException(f"Failed to start container within 30 seconds")
+
+    def _parse_container_name(self, container_name: Optional[str] = None) -> Tuple[str, str]:
+        """Helper method to parse the container name into variables that Launch service can use. We do this to
+        keep function prototypes consistent between local and hub implementations.
+
+        Args:
+            container_name: string indicating the non-project container image (if applicable)
+
+        Returns:
+            tuple
+        """
+        if container_name is not None:
+            if "gigantum/" in container_name:
+                namespace, project = container_name.split('/')
+                # We add a colon to the end because of some crazy bug in the google grpc-http proxy library used in
+                # the launch service. Pointers to relevant issues can be found there.
+                project = urllib.parse.quote(project + ":")
+                return namespace, project
+
+        # Return the default container information, if a specific non-default project container is provided
+        if not self.labbook.owner:
+            raise ContainerException("Project owner must be set to perform container operations.")
+        return self.labbook.owner, self.labbook.name
 
     def stop_container(self, container_name: Optional[str] = None) -> bool:
         """ Stop the given labbook.
@@ -175,17 +252,18 @@ class HubProjectContainer(ContainerOperations):
             A boolean indicating whether the container was successfully stopped (False implies no container
             was running).
         """
-        logger.debug(f"HubProjectContainer.stop_container()")
-        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
+        namespace, project = self._parse_container_name(container_name)
+
+        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{namespace}/project/{project}"
         response = requests.delete(url)
         if response.status_code != 200:
             logger.error(f"hub_container.stop_container(), response status: {response.status_code}")
             raise ContainerException(f"Failed to stop Project container.")
 
         logger.debug(f"Project state: {response.json()}")
-        projectCRPhase = response.json()["state"]
+        project_cr_phase = response.json()["state"]
 
-        if projectCRPhase == "STOPPED":
+        if project_cr_phase == "STOPPED":
             return True
 
         return False
@@ -202,8 +280,8 @@ class HubProjectContainer(ContainerOperations):
             string state = 3;
         }
         """
-        logger.debug(f"HubProjectContainer.query_container()")
-        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/project/{self.labbook.name}"
+        namespace, project = self._parse_container_name(container_name)
+        url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{namespace}/project/{project}"
 
         project_cr_phase = None
         for cnt in range(10):
@@ -211,33 +289,33 @@ class HubProjectContainer(ContainerOperations):
                 response = requests.get(url)
                 if response.status_code == 200:
                     logger.debug(f"Project state: {response.json()}")
-                    project_cr_phase = response.json()["state"]
+                    project_cr_phase = response.json().get("state")
                     break
                 elif response.status_code == 404:
                     return None
                 else:
-                    logger.info(f"Fetching Project state not yet ready: {response.status_code} : {response.json()}")
+                    logger.info(f"Fetching Project state not yet ready: {response.status_code} : {response.content}")
             except requests.exceptions.ConnectionError:
                 pass
 
             time.sleep(1)
 
         if not project_cr_phase:
-            logger.error(f"Failed to fetch container status after retries.")
+            logger.error(f"Failed to fetch container status after 10 seconds.")
             return None
 
         if project_cr_phase == "PENDING":
             return "created"
-        if project_cr_phase == "BUILDING":
+        elif project_cr_phase == "BUILDING":
             return "created"
-        if project_cr_phase == "BUILT":
+        elif project_cr_phase == "BUILT":
             return "created"
-        if project_cr_phase == "RUNNING":
+        elif project_cr_phase == "RUNNING":
             return "running"
-        if project_cr_phase == "STOPPED":
+        elif project_cr_phase == "STOPPED":
             return "exited"
-
-        return None
+        else:
+            return None
 
     def exec_command(self, command: str, container_name: Optional[str] = None, get_results=False,
                      **kwargs) -> Optional[str]:
@@ -253,8 +331,8 @@ class HubProjectContainer(ContainerOperations):
             If get_results is True (or unspecified), a str with output of the command.
             Otherwise, None.
         """
-        logger.debug(f"HubProjectContainer.exec_command()")
-        url = f"{self._launch_service}/v1/exec/{self._client_id}/{self.labbook.owner}/{self.labbook.name}"
+        namespace, project = self._parse_container_name(container_name)
+        url = f"{self._launch_service}/v1/exec/{self._client_id}/{namespace}/{project}"
         data = {
             "cmd": command,
             "detach": not get_results
@@ -262,7 +340,7 @@ class HubProjectContainer(ContainerOperations):
         response = requests.post(url, json=data)
 
         if response.status_code != 200:
-            logger.error(f"Failed to exec into project container {self._client_id}:{self.labbook.owner}/{self.labbook.name}.")
+            logger.error(f"Failed to exec into project container {self._client_id}:{namespace}/{project}.")
             return None
 
         if get_results:
@@ -291,7 +369,7 @@ class HubProjectContainer(ContainerOperations):
         envvars = ['='.join(kv) for kv in env]
         return envvars
 
-    def query_container_ip(self, container_name: Optional[str] = None) -> str:
+    def query_container_ip(self, container_name: Optional[str] = None) -> Optional[str]:
         """Query the given container's IP address. Defaults to the Project container for this instance.
 
         Args:
@@ -300,6 +378,10 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             IP address as string
         """
+        if container_name is not None:
+            # Currently not supported. Will be added during MITM integration
+            return None
+
         url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:

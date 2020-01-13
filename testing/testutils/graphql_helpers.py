@@ -223,7 +223,7 @@ def delete_dataset(owner_name, project_name, delete_local=True, delete_remote=Tr
     }
     """
     var = {'owner': owner_name, 'name': project_name, 'local': delete_local,
-           'remote': delete_remote,'clientMutationId':mutation}
+           'remote': delete_remote, 'clientMutationId': mutation}
     result = query(delete_remote_query, var)
 
     if 'errors' in result:

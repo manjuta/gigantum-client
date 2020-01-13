@@ -21,8 +21,9 @@ def test_use_mine_merge_conflict_project(driver: selenium.webdriver, *args, **kw
     # Owner resolves the merge conflict with 'Use Mine'
     cloud_project_elts = testutils.CloudProjectElements(driver)
     cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    time.sleep(2)
     cloud_project_elts.merge_conflict_use_mine_button.click()
-    cloud_project_elts.merge_conflict_modal.wait_to_disappear()
+    cloud_project_elts.merge_conflict_modal.wait_to_disappear(nsec=20)
     project_control_elts = testutils.ProjectControlElements(driver)
     waiting_start = time.time()
     while "Sync complete" not in project_control_elts.footer_notification_message.find().text:
@@ -54,8 +55,9 @@ def test_use_theirs_merge_conflict_project(driver: selenium.webdriver, *args, **
     # Owner uploads file, syncs, and resolves the merge conflict with "use theirs"
     cloud_project_elts = testutils.CloudProjectElements(driver)
     cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    time.sleep(2)
     cloud_project_elts.merge_conflict_use_theirs_button.click()
-    cloud_project_elts.merge_conflict_modal.wait_to_disappear()
+    cloud_project_elts.merge_conflict_modal.wait_to_disappear(nsec=20)
     project_control_elts = testutils.ProjectControlElements(driver)
     waiting_start = time.time()
     while "Sync complete" not in project_control_elts.footer_notification_message.find().text:
@@ -90,8 +92,9 @@ def test_abort_merge_conflict_project(driver: selenium.webdriver, *args, **kwarg
     git_get_log_command_1 = Popen(['git', 'log', '--pretty=format%H'], cwd=project_path, stdout=PIPE, stderr=PIPE)
     before_merge_conflict_resolve_stdout = git_get_log_command_1.stdout.readline().decode('utf-8').strip()
     cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    time.sleep(2)
     cloud_project_elts.merge_conflict_abort_button.click()
-    cloud_project_elts.merge_conflict_modal.wait_to_disappear()
+    cloud_project_elts.merge_conflict_modal.wait_to_disappear(nsec=20)
 
     # Check that merge conflict resolves to "abort"
     git_get_log_command_2 = Popen(['git', 'log', '--pretty=format%H'], cwd=project_path, stdout=PIPE, stderr=PIPE)

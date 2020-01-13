@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 
 import selenium
 
@@ -65,7 +66,9 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     assert "fatal" in del_cloud_project_stderr, f"Expected to not see a remote set for project {project_title}, " \
                                                 f"but got {del_cloud_project_stderr}"
 
-    # Assert project does not exist in cloud tab
+    # Assert project does not exist in cloud tab (NOTE: For this to work you must have at least 1 cloud project in
+    # your first test user account!)
+    time.sleep(2)
     first_cloud_project = cloud_project_elts.first_cloud_project.find().text
 
     assert project_title != first_cloud_project, \

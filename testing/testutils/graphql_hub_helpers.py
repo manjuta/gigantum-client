@@ -18,7 +18,7 @@ def repository_exists(namespace: str, repository_name: str, api_url: Optional[st
         bool
     """
     if not api_url:
-        api_url = 'https://gtm-dev.cloud/api/v1/'
+        api_url = 'https://gigantum.com/api/v1/'
 
     # Set headers
     if not os.environ.get('ID_TOKEN'):

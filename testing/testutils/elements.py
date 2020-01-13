@@ -31,7 +31,7 @@ class CssElement:
         """Immediately try to find and click the element."""
         return self.find().click()
 
-    def wait_to_appear(self, nsec: int = 10):
+    def wait_to_appear(self, nsec: int = 20):
         """Wait until the element appears."""
         t0 = time.time()
         try:
@@ -743,11 +743,11 @@ class FileBrowserElements(UiComponent):
         self.link_dataset_card_button.wait_to_appear().click()
         project_control_elts = ProjectControlElements(self.driver)
         try:
-            project_control_elts.close_footer_notification_button.wait_to_appear(5).click()
+            project_control_elts.close_footer_notification_button.wait_to_appear(10).click()
         except:
             pass
         self.confirm_link_dataset_button.wait_to_appear().click()
-        self.link_dataset_modal.wait_to_disappear()
+        self.link_dataset_modal.wait_to_disappear(nsec=20)
 
 
 class BranchElements(UiComponent):
@@ -912,7 +912,7 @@ class CloudProjectElements(UiComponent):
 
     @property
     def import_first_cloud_project_button(self):
-        return CssElement(self.driver,".Card:nth-child(1) .Btn__dashboard--cloud-download")
+        return CssElement(self.driver, ".Card:nth-child(1) .Btn__dashboard--cloud-download")
 
     @property
     def project_overview_project_title(self):
@@ -940,7 +940,7 @@ class CloudProjectElements(UiComponent):
         self.publish_project_button.wait_to_appear().click()
         self.publish_confirm_button.wait_to_appear().click()
         project_control = ProjectControlElements(self.driver)
-        project_control.container_status_publishing.wait_to_appear(30)
+        project_control.container_status_publishing.wait_to_appear(60)
         project_control.container_status_stopped.wait_to_appear(30)
         # Time sleep necessary or cloud project does not appear in cloud tab
         # Once the new cloud platform is up, this can be removed
@@ -951,7 +951,7 @@ class CloudProjectElements(UiComponent):
         logging.info(f"Syncing cloud project {project_title}")
         self.sync_cloud_project_button.wait_to_appear().click()
         project_control = ProjectControlElements(self.driver)
-        project_control.container_status_syncing.wait_to_appear(30)
+        project_control.container_status_syncing.wait_to_appear(60)
         project_control.container_status_stopped.wait_to_appear(30)
 
     def delete_cloud_project(self, project_title):
@@ -1068,7 +1068,7 @@ class DatasetElements(UiComponent):
         """Publish a dataset as private."""
         logging.info(f"Publishing dataset {dataset_title} to cloud")
         cloud_project_elts = CloudProjectElements(self.driver)
-        cloud_project_elts.publish_project_button.wait_to_appear().click()
+        cloud_project_elts.publish_project_button.wait_to_appear(nsec=20).click()
         cloud_project_elts.publish_confirm_button.wait_to_appear().click()
         project_control_elts = ProjectControlElements(self.driver)
         waiting_start = time.time()
@@ -1081,10 +1081,11 @@ class DatasetElements(UiComponent):
     def publish_private_project_with_unpublished_linked_dataset(self, username, project_title, dataset_title):
         """Publish a project with an unpublished linked dataset as private."""
         cloud_project_elts = CloudProjectElements(self.driver)
-        cloud_project_elts.publish_project_button.wait_to_appear().click()
+        cloud_project_elts.publish_project_button.wait_to_appear(nsec=20).click()
         logging.info(f"Publishing project {project_title} with unpublished linked dataset {dataset_title} "
                      f"as private to cloud")
-        self.publish_project_linked_dataset_button.wait_to_appear().click()
+        time.sleep(60)
+        self.publish_project_linked_dataset_button.wait_to_appear(nsec=20).click()
         self.publish_project_linked_dataset_private_button.wait_to_appear().click()
         self.driver.find_element_by_css_selector(f".Radio input[id='{username}/{dataset_title}_private'] "
                                                  f"+ span b").click()

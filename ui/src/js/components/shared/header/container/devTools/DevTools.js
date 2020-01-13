@@ -195,35 +195,29 @@ class DevTools extends Component<Props> {
     } else {
       const data = { devTool: developmentTool };
       setInfoMessage(owner, name, `Starting ${developmentTool}, make sure to allow popups.`);
-      if (process.env.BUILD_TYPE === 'cloud') {
-        const hostname = window.location.hostname.replace('client.', '');
-        const { protocol } = window.location;
-        const path = `${protocol}//${hostname}/client/${owner}/${name}/${developmentTool}`;
-        window[tabName] = window.open(path, tabName);
-      } else {
-        containerMutations.startDevTool(
-          data,
-          (response, error) => {
-            if (response.startDevTool) {
-              tabName = `${developmentTool}-${owner}-${name}`;
-              let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-              if (developmentTool === 'notebook') {
-                if (path.includes('/lab/tree')) {
-                  path = path.replace('/lab/tree', '/tree');
-                } else {
-                  path = `${path}/tree/code`;
-                }
 
-                window[tabName] = window.open(path, tabName);
+      containerMutations.startDevTool(
+        data,
+        (response, error) => {
+          if (response.startDevTool) {
+            tabName = `${developmentTool}-${owner}-${name}`;
+            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+            if (developmentTool === 'notebook') {
+              if (path.includes('/lab/tree')) {
+                path = path.replace('/lab/tree', '/tree');
+              } else {
+                path = `${path}/tree/code`;
               }
             }
 
-            if (error) {
-              setErrorMessage(owner, name, 'Error Starting Dev tool', error);
-            }
-          },
-        );
-      }
+            window[tabName] = window.open(path, tabName);
+          }
+
+          if (error) {
+            setErrorMessage(owner, name, 'Error Starting Dev tool', error);
+          }
+        },
+      );
     }
   }
 
