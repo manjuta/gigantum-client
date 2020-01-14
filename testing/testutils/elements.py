@@ -47,7 +47,7 @@ class CssElement:
                 raise e
         return self.find()
 
-    def wait_to_disappear(self, nsec: int = 10):
+    def wait_to_disappear(self, nsec: int = 20):
         """Wait until the element disappears."""
         t0 = time.time()
         try:
@@ -193,7 +193,7 @@ class ImportProjectElements(UiComponent):
         self.project_url_input.find().send_keys(project_url)
         project_control = ProjectControlElements(self.driver)
         self.import_project_button.wait_to_appear().click()
-        project_control.container_status_building.wait_to_appear(15)
+        project_control.container_status_building.wait_to_appear(20)
         project_control.container_status_stopped.wait_to_appear(500)
 
     def import_project_via_zip_file_drag_and_drop(self, file_path):
@@ -207,7 +207,7 @@ class ImportProjectElements(UiComponent):
         file_input.send_keys(file_path)
         self.import_project_button.wait_to_appear().click()
         project_control = ProjectControlElements(self.driver)
-        project_control.container_status_building.wait_to_appear(15)
+        project_control.container_status_building.wait_to_appear(20)
         project_control.container_status_stopped.wait_to_appear(500)
 
 
@@ -1091,8 +1091,8 @@ class DatasetElements(UiComponent):
                                                  f"+ span b").click()
         self.publish_project_linked_dataset_button.click()
         project_control_elts = ProjectControlElements(self.driver)
-        project_control_elts.container_status_publishing.wait_to_appear(60)
-        project_control_elts.container_status_stopped.wait_to_appear(60)
+        project_control_elts.container_status_publishing.wait_to_appear(180)
+        project_control_elts.container_status_stopped.wait_to_appear(180)
         # Time sleep necessary or cloud project does not appear in cloud tab
         # Once the new cloud platform is up, this can be removed
         time.sleep(15)

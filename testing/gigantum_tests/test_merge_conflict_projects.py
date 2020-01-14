@@ -91,7 +91,7 @@ def test_abort_merge_conflict_project(driver: selenium.webdriver, *args, **kwarg
     project_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username, 'labbooks', project_title)
     git_get_log_command_1 = Popen(['git', 'log', '--pretty=format%H'], cwd=project_path, stdout=PIPE, stderr=PIPE)
     before_merge_conflict_resolve_stdout = git_get_log_command_1.stdout.readline().decode('utf-8').strip()
-    cloud_project_elts.merge_conflict_modal.wait_to_appear(20)
+    cloud_project_elts.merge_conflict_modal.wait_to_appear(30)
     time.sleep(2)
     cloud_project_elts.merge_conflict_abort_button.click()
     cloud_project_elts.merge_conflict_modal.wait_to_disappear(nsec=20)

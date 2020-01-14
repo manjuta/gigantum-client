@@ -55,14 +55,7 @@ class HubProjectContainer(ContainerOperations):
             feedback_callback = _dummy_feedback
 
         cache_state = self.check_cached_hash(self.image_tag, self.env_dir)
-        if cache_state == 'not cached':
-            if self.image_available():
-                # No need to build, this is the first time this project is being built in this instance of a client and
-                # it already exists in the registry!
-                logger.info(f"Docker image for {str(self.labbook)} already exists in the registry")
-                feedback_callback(f"Reusing existing image in registry.\n")
-                return
-        elif cache_state == 'match':
+        if cache_state == 'match':
             if self.image_available():
                 # No need to build!
                 logger.info(f"Reusing Docker image for {str(self.labbook)}")
