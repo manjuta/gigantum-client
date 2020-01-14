@@ -116,6 +116,7 @@ class DatasetActionsMenu extends Component<Props> {
       section,
       setFolderIsDownloading,
     } = this.props;
+
     UserIdentity.getUserIdentity().then((response) => {
       const isSessionValid = response.data && response.data.userIdentity
         && response.data.userIdentity.isSessionValid;
@@ -159,7 +160,7 @@ class DatasetActionsMenu extends Component<Props> {
 
         if (section === 'data') {
           data = {
-            owner: datasetOwner,
+            datasetOwner,
             datasetName,
           };
         } else {
@@ -199,7 +200,6 @@ class DatasetActionsMenu extends Component<Props> {
             this.setState({ fileDownloading: false });
           }
         };
-
         mutations.downloadDatasetFiles(data, callback);
       } else if (!isSessionValid) {
         this.setState({ showSessionValidMessage: true });

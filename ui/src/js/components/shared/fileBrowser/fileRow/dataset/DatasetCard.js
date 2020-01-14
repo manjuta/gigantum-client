@@ -119,7 +119,6 @@ class DatasetCard extends Component<Props> {
       datasetOwner,
       allKeys: true,
     };
-
     data.successCall = () => {
       this.setState({ downloadPending: false });
     };

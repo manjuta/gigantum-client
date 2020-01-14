@@ -321,7 +321,7 @@ class FileBrowser extends Component {
     if (!state.downloadingAll && !allFilesLocal) {
       const { owner, name } = this.props;
       const data = {
-        owner,
+        datasetOwner: owner,
         datasetName: name,
         allKeys: true,
       };
