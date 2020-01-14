@@ -143,7 +143,7 @@ class RemoteLabbookPanel extends Component<Props> {
               failureCall,
               (response, error) => {
                 if (error) {
-                  failurecall(error);
+                  failureCall(error);
                 }
                 self.setState({ isImporting: false });
               },

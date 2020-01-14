@@ -562,6 +562,7 @@ class Labbook extends Component<Props> {
     updates branchOpen state
   */
   _toggleBranchesView = (branchesOpen, mergeFilter) => {
+    const { props } = this;
     const { owner, name } = props[props.sectionType];
     if (store.getState().containerStatus.status !== 'Running') {
       setMergeMode(owner, name, branchesOpen, mergeFilter);

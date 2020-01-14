@@ -160,6 +160,7 @@ class ConfigureModal extends Component<Props> {
   }
 
   render() {
+    const { dataset } = this.props;
     const { state } = this;
     const someFieldsFilled = (this.state.configValues.size > 0);
 

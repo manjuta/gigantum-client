@@ -551,6 +551,7 @@ class BranchMenu extends Component<Props> {
   */
   _handleSyncButton = (pullOnly, allowSync, allowSyncPull, passedSuccessCall) => {
     // TODO refactor this function
+
     const {
       defaultRemote,
       section,
@@ -558,6 +559,7 @@ class BranchMenu extends Component<Props> {
       setBranchUptodate,
       setSyncingState,
     } = this.props;
+    const { owner } = section;
     const { isDataset } = this.state;
     const { buildImage } = this.state.branchMutations;
 
