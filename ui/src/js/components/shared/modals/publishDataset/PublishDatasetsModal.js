@@ -201,7 +201,7 @@ class PublishDatasetsModal extends Component<Props> {
       },
     ).then((result) => {
       const linkData = {
-        owner,
+        datasetOwner: owner,
         datasetName: name,
         linkType: 'link',
         remote: result.data.dataset.defaultRemote,
@@ -253,7 +253,7 @@ class PublishDatasetsModal extends Component<Props> {
 
 
     const linkData = {
-      owner,
+      datasetOwner: owner,
       datasetName: name,
       linkType: 'unlink',
       remote: null,
