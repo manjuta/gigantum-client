@@ -44,7 +44,7 @@ export default function BuildImageMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('ERROR: Project failed to build:', error);
+          setErrorMessage(owner, labbookName, 'ERROR: Project failed to build:', error);
         }
         const footerData = {
           id: (buildData && buildData.overrideId) || id,
@@ -54,7 +54,7 @@ export default function BuildImageMutation(
           footerCallback,
           hideFooter: buildData && buildData.hideFooter,
         };
-        FooterUtils.getJobStatus(footerData);
+        FooterUtils.getJobStatus(owner, labbookName, footerData);
         callback(response, error, id);
       },
       onError: err => console.error(err),

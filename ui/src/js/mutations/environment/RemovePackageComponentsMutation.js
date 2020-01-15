@@ -71,7 +71,7 @@ export default function RemovePackageComponentsMutation(
       config,
       onCompleted: (response, error) => {
         if (error) {
-          setErrorMessage('ERROR: Packages failed to delete', error);
+          setErrorMessage(owner, labbookName, 'ERROR: Packages failed to delete', error);
         }
         callback(response, error);
       },

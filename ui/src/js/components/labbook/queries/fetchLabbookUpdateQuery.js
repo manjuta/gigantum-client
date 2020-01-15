@@ -1,3 +1,6 @@
+// vendor
+import { graphql } from 'react-relay';
+
 const labbookUpdatesQuery = graphql`
   query fetchLabbookUpdateQuery($name: String!, $owner: String!){
   labbook(name: $name, owner: $owner){

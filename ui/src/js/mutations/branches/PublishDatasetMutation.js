@@ -46,7 +46,7 @@ export default function PublishDatasetMutation(
     error: false,
     messageBody: [{ message: startMessage }],
   };
-  setMultiInfoMessage(messageData);
+  setMultiInfoMessage(owner, datasetName, messageData);
   commitMutation(
     environment,
     {
@@ -54,7 +54,7 @@ export default function PublishDatasetMutation(
       variables,
       onCompleted: (response, error) => {
         if (error) {
-          setErrorMessage('An error occurred while publishing this Dataset', error);
+          setErrorMessage(owner, datasetName, 'An error occurred while publishing this Dataset', error);
           console.log(error);
         }
 
@@ -64,6 +64,9 @@ export default function PublishDatasetMutation(
       updater: (store, response) => {
         if (response) {
           const footerData = {
+            owner,
+            name: datasetName,
+            sectionType: 'dataset',
             result: response,
             type: 'publishDataset',
             key: 'jobKey',
@@ -72,7 +75,7 @@ export default function PublishDatasetMutation(
             failureCall,
             id,
           };
-          FooterUtils.getJobStatus(footerData);
+          FooterUtils.getJobStatus(owner, datasetName, footerData);
         }
       },
     },

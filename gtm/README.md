@@ -21,8 +21,8 @@ recommended that you create a virtualenv to install `gtm`.
 
 1. Install Docker
 
-   The `gtm` tool requires Docker on your host machine to build and launch
-   images. Follow Docker's instructions for your OS.
+   The `gtm` tool requires Docker and Docker Compose on your host machine to
+   build and launch images. Follow Docker's instructions for your OS.
 
 2. Install Git LFS
    

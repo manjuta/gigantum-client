@@ -334,6 +334,7 @@ export default class ImportModule extends Component {
               document.getElementById('modal__cover').classList.remove('hidden');
               document.getElementById('loader').classList.remove('hidden');
               this.setState({ showImportModal: false });
+              this._clearState();
             } else {
 
               props.auth.renewToken(true, () => {
@@ -521,6 +522,7 @@ export default class ImportModule extends Component {
           },
         });
       } else if (response) {
+        this._clearState();
         store.dispatch({
           type: 'MULTIPART_INFO_MESSAGE',
           payload: {

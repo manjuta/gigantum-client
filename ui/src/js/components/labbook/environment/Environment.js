@@ -30,7 +30,7 @@ const buildImage = (owner, name, buildData, callback) => {
     buildData,
     (response, error, id) => {
       if (error) {
-        setErrorMessage(`${name} failed to build`, error);
+        setErrorMessage(owner, name, `${name} failed to build`, error);
       }
       if (callback) {
         callback(response, error, id);
@@ -41,8 +41,28 @@ const buildImage = (owner, name, buildData, callback) => {
   );
 };
 
+type Props = {
+  owner: string,
+  name: string,
+  labbook: {
+    environment: {
+      id: string,
+      base: {
+         id: string,
+      }
+    }
+  },
+  containerStatus: string,
+  advancedVisible: bool,
+  isLocked: bool,
+  overview: Object,
+  packageLatestVersions: string,
+  packageLatestRefetch: string,
+  cancelRefetch: bool,
+  advancedVisible: bool,
+}
 
-class Environment extends Component {
+class Environment extends Component<Props> {
   componentDidMount() {
     const { props } = this;
     props.refetch('environment');
@@ -70,7 +90,7 @@ class Environment extends Component {
         (response, error) => {
           if (error) {
             console.log(error);
-            setErrorMessage(`Problem stopping ${name}`, error);
+            setErrorMessage(owner, name, `Problem stopping ${name}`, error);
           } else {
             buildImage(
               owner,
@@ -92,17 +112,28 @@ class Environment extends Component {
   }
 
   render() {
-    const { props } = this;
-    const isLocked = props.isLocked || !navigator.onLine;
+    const {
+      advancedVisible,
+      labbook,
+      containerStatus,
+      isLocked,
+      owner,
+      name,
+      overview,
+      packageLatestVersions,
+      packageLatestRefetch,
+      cancelRefetch,
+    } = this.props;
+    const isLockedOnline = isLocked && !navigator.onLine;
     // declare css here
     const advancedCSS = classNames({
       'Btn Btn__advanced Btn--action Btn--noShadow': true,
-      'Btn__advanced--expanded': props.advancedVisible,
-      'Btn__advanced--collapsed': !props.advancedVisible,
+      'Btn__advanced--expanded': advancedVisible,
+      'Btn__advanced--collapsed': !advancedVisible,
     });
 
-    if (props.labbook && props.labbook.environment && props.labbook.environment.id) {
-      const { environment } = props.labbook;
+    if (labbook && labbook.environment && labbook.environment.id) {
+      const { environment } = labbook;
       const { base } = environment;
       return (
         <div className="Environment">
@@ -118,39 +149,39 @@ class Environment extends Component {
               baseLatestRevision={environment.baseLatestRevision}
               environmentId={environment.id}
               editVisible
-              containerStatus={props.containerStatus}
+              containerStatus={containerStatus}
               setComponent={this._setComponent}
               buildCallback={this._buildCallback}
               blockClass="Environment"
               base={base}
-              isLocked={isLocked}
-              owner={props.owner}
-              name={props.name}
+              isLocked={isLockedOnline}
+              owner={owner}
+              name={name}
             />
           </ErrorBoundary>
           <ErrorBoundary type="packageDependenciesError" key="packageDependencies">
             <Packages
-              componentRef={ref => this.packageDependencies = ref}
-              owner={props.owner}
-              name={props.name}
-              environment={props.labbook.environment}
-              environmentId={props.labbook.environment.id}
-              labbookId={props.labbook.id}
-              containerStatus={props.containerStatus}
+              componentRef={(ref) => { this.packageDependencies = ref; }}
+              owner={owner}
+              name={name}
+              environment={labbook.environment}
+              environmentId={labbook.environment.id}
+              labbookId={labbook.id}
+              containerStatus={containerStatus}
               setComponent={this._setComponent}
               buildCallback={this._buildCallback}
-              overview={props.overview}
+              overview={overview}
               base={base}
               isLocked={isLocked}
-              packageLatestVersions={props.packageLatestVersions}
-              packageLatestRefetch={props.packageLatestRefetch}
-              cancelRefetch={props.cancelRefetch}
+              packageLatestVersions={packageLatestVersions}
+              packageLatestRefetch={packageLatestRefetch}
+              cancelRefetch={cancelRefetch}
             />
           </ErrorBoundary>
           <div className="flex justify--center align-items--center relative column-1-span-12">
             <button
               className={advancedCSS}
-              onClick={() => toggleAdvancedVisible(!props.advancedVisible)}
+              onClick={() => toggleAdvancedVisible(!advancedVisible)}
               type="button"
             >
               Advanced Configuration Settings
@@ -158,20 +189,22 @@ class Environment extends Component {
             </button>
           </div>
           {
-            props.advancedVisible
+            advancedVisible
             && (
               <div>
                 <CustomDockerfile
-                  dockerfile={props.labbook.environment.dockerSnippet}
+                  dockerfile={labbook.environment.dockerSnippet}
                   buildCallback={this._buildCallback}
-                  isLocked={isLocked}
+                  isLocked={isLockedOnline}
+                  owner={owner}
+                  name={name}
                 />
                 <Secrets
-                  environment={props.labbook.environment}
-                  environmentId={props.labbook.environment.id}
-                  owner={props.owner}
-                  name={props.name}
-                  isLocked={isLocked}
+                  environment={labbook.environment}
+                  environmentId={labbook.environment.id}
+                  owner={owner}
+                  name={name}
+                  isLocked={isLockedOnline}
                 />
               </div>
             )

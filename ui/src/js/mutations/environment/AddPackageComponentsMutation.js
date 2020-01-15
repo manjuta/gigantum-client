@@ -110,7 +110,7 @@ export default function AddPackageComponentsMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('ERROR: Packages failed to delete', error);
+          setErrorMessage(owner, labbookName, 'ERROR: Packages failed to delete', error);
         }
         callback(response, error);
       },

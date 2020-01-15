@@ -5,7 +5,6 @@ import flask
 import requests
 
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.configuration import Configuration
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
@@ -258,7 +257,7 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
                 raise ValueError("A valid session is required for this operation and tokens are missing.")
 
             # Get remote server configuration
-            config = Configuration()
+            config = flask.current_app.config['LABMGR_CONFIG']
             remote_config = config.get_remote_configuration()
 
             # Perform delete operation
@@ -295,7 +294,8 @@ class ExportLabbook(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
         username = get_logged_in_username()
-        working_directory = Configuration().config['git']['working_directory']
+        config = flask.current_app.config['LABMGR_CONFIG']
+        working_directory = config.config['git']['working_directory']
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 

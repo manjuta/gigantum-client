@@ -17,7 +17,22 @@ import Loader from 'Components/common/Loader';
 // assets
 import './RemoteDatasetsPanel.scss';
 
-export default class RemoteDatasetPanel extends Component {
+type Props = {
+  auth: {
+    renewToken: Function,
+  },
+  existsLocally: boolean,
+  edge: {
+    node: {
+      importUrl: string,
+      name: string,
+      owner: string,
+    }
+  },
+  toggleDeleteModal: Function,
+};
+
+class RemoteDatasetPanel extends Component<Props> {
   state = {
     isImporting: false,
     showLoginPrompt: false,
@@ -43,22 +58,26 @@ export default class RemoteDatasetPanel extends Component {
           console.error(error);
           const messageData = {
             id,
+            owner,
+            name: datasetName,
             message: 'ERROR: Could not import remote Dataset',
             isLast: null,
             error: true,
             messageBody: error,
           };
-          setMultiInfoMessage(messageData);
+          setMultiInfoMessage(owner, datasetName, messageData);
         } else if (response) {
           const { newDatasetEdge } = response.importRemoteDataset;
           const { name } = newDatasetEdge.node;
           const messageData = {
             id,
+            owner,
+            name,
             message: `Successfully imported remote Dataset ${name}`,
             isLast: true,
             error: false,
           };
-          setMultiInfoMessage(messageData);
+          setMultiInfoMessage(owner, datasetName, messageData);
 
           props.history.replace(`/datasets/${owner}/${name}`);
         }
@@ -72,9 +91,9 @@ export default class RemoteDatasetPanel extends Component {
     *  @return {}
   */
   _importDataset = (owner, datasetName) => {
-    const { props } = this;
+    const { auth, edge } = this.props;
     const id = uuidv4();
-    const remote = props.edge.node.importUrl;
+    const remote = edge.node.importUrl;
 
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
@@ -87,10 +106,10 @@ export default class RemoteDatasetPanel extends Component {
               isLast: false,
               error: false,
             };
-            setMultiInfoMessage(messageData);
+            setMultiInfoMessage(owner, datasetName, messageData);
             this._handleImportDataset(owner, datasetName, remote);
           } else {
-            props.auth.renewToken(true, () => {
+            auth.renewToken(true, () => {
               this.setState({ showLoginPrompt: true });
             }, () => {
               this._importDataset(owner, datasetName);
@@ -142,31 +161,32 @@ export default class RemoteDatasetPanel extends Component {
   * which passes parameters to the DeleteDataset component
   */
   _handleDelete = (edge) => {
-    const { props } = this;
+    const { auth, existsLocally, toggleDeleteModal } = this.props;
     if (localStorage.getItem('username') !== edge.node.owner) {
-      setWarningMessage('You can only delete remote Datasets that you have created.');
+      const { owner, name } = edge.node;
+      setWarningMessage(owner, name, 'You can only delete remote Datasets that you have created.');
     } else {
       UserIdentity.getUserIdentity().then((response) => {
         if (navigator.onLine) {
           if (response.data) {
             if (response.data.userIdentity.isSessionValid) {
-              props.toggleDeleteModal({
+              toggleDeleteModal({
                 remoteId: edge.node.id,
                 remoteOwner: edge.node.owner,
                 remoteDatasetName: edge.node.name,
-                existsLocally: props.existsLocally,
+                existsLocally,
                 remoteUrl: edge.node.remoteUrl,
               });
             } else {
-              props.auth.renewToken(true, () => {
+              auth.renewToken(true, () => {
                 this.setState({ showLoginPrompt: true });
               }, () => {
-                props.toggleDeleteModal({
+                toggleDeleteModal({
                   remoteId: edge.node.id,
                   remoteOwner: edge.node.owner,
                   remoteUrl: edge.node.remoteUrl,
                   remoteDatasetName: edge.node.name,
-                  existsLocally: props.existsLocally,
+                  existsLocally,
                 });
               });
             }
@@ -179,14 +199,20 @@ export default class RemoteDatasetPanel extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const { edge } = props;
+    const {
+      isImporting,
+      showLoginPrompt,
+    } = this.state;
+    const {
+      edge,
+      existsLocally,
+    } = this.props;
     const deleteTooltipText = localStorage.getItem('username') !== edge.node.owner ? 'Only owners and admins can delete a remote Dataset' : '';
-    const deleteDisabled = state.isImporting || (localStorage.getItem('username') !== edge.node.owner);
+    const deleteDisabled = isImporting || (localStorage.getItem('username') !== edge.node.owner);
     // declare css here
     const descriptionCss = classNames({
       'RemoteDatasets__row RemoteDatasets__row--text': true,
-      blur: state.isImporting,
+      blur: isImporting,
     });
     const deleteCSS = classNames({
       'Btn__dashboard Btn--action': true,
@@ -208,7 +234,7 @@ export default class RemoteDatasetPanel extends Component {
               />
             )
           }
-          { props.existsLocally
+          { existsLocally
             ? (
               <button
                 type="button"
@@ -222,7 +248,7 @@ export default class RemoteDatasetPanel extends Component {
             : (
               <button
                 type="button"
-                disabled={state.isImporting}
+                disabled={isImporting}
                 className="Btn__dashboard Btn--action Btn__dashboard--cloud-download"
                 onClick={() => this._importDataset(edge.node.owner, edge.node.name)}
               >
@@ -283,14 +309,16 @@ export default class RemoteDatasetPanel extends Component {
           </p>
         </div>
 
-        { state.isImporting
+        { isImporting
           && <div className="RemoteDatasets__loader"><Loader /></div>
         }
 
-        { state.showLoginPrompt
+        { showLoginPrompt
           && <LoginPrompt closeModal={this._closeLoginPromptModal} />
         }
       </div>
     );
   }
 }
+
+export default RemoteDatasetPanel;

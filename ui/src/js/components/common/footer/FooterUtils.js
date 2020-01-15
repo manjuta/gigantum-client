@@ -60,7 +60,7 @@ const FooterUtils = {
    *  iterate value of index within the bounds of the array size
    *  @return {}
    */
-  getJobStatus: (footerData) => {
+  getJobStatus: (owner, name, footerData) => {
 
     const {
       result,
@@ -117,11 +117,12 @@ const FooterUtils = {
                   message,
                   isLast: false,
                   error: false,
+                  status: response.data.jobStatus.status,
                   messageBody: [{ message: html }],
                   messageListOpen: !hideFooter,
                   buildProgress: type === 'buildImage',
                 };
-                setMultiInfoMessage(messageData);
+                setMultiInfoMessage(owner, name, messageData);
               }
               refetch();
             // executes when job status has completed
@@ -132,11 +133,12 @@ const FooterUtils = {
                 message,
                 isLast: true,
                 error: null,
+                status: response.data.jobStatus.status,
                 messageBody: [{ message: html }],
                 buildProgress: type === 'buildImage',
               };
 
-              setMultiInfoMessage(messageData);
+              setMultiInfoMessage(owner, name, messageData);
               hideModal();
 
               if (footerCallback && footerCallback.finished) {
@@ -171,11 +173,12 @@ const FooterUtils = {
                 id: responseId,
                 message: errorMessage,
                 isLast: true,
+                status: response.data.jobStatus.status,
                 error: true,
                 messageBody: [{ message: errorHTML }],
                 buildProgress: type === 'buildImage',
               };
-              setMultiInfoMessage(messageData);
+              setMultiInfoMessage(owner, name, messageData);
             } else {
               // refetch status data not ready
               refetch();
@@ -186,7 +189,12 @@ const FooterUtils = {
           }
         });
       } else {
-        setErrorMessage('There was an error fetching job status.', [{ message: 'Callback error from the API' }]);
+        setErrorMessage(
+          owner,
+          name,
+          'There was an error fetching job status.',
+          [{ message: 'Callback error from the API', status: 'failed' }],
+        );
       }
     };
 
@@ -210,7 +218,7 @@ const FooterUtils = {
       *  updates footer with a message
       *  @return {}
       */
-    const fetchStatus = (data) => {
+    const fetchStatus = (owner, name, data) => {
       const {
         backgroundJobKey,
       } = data;
@@ -223,7 +231,7 @@ const FooterUtils = {
           if ((jobStatus.status === 'started')
             || (jobStatus.status === 'queued')) {
             setTimeout(() => {
-              fetchStatus({ backgroundJobKey });
+              fetchStatus(owner, name, { backgroundJobKey });
 
               if (metaData.feedback === undefined) {
                 setUploadMessageUpdate(
@@ -260,8 +268,9 @@ const FooterUtils = {
     };
 
     const data = { backgroundJobKey: completeDatasetUploadTransaction.backgroundJobKey };
+    const { name, owner } = variables;
     // trigger fetch
-    fetchStatus(data);
+    fetchStatus(name, owner, data);
   },
 };
 

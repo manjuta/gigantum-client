@@ -99,7 +99,7 @@ export default function MoveDatasetFileMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage(`ERROR: Could not Move dataset file ${srcPath}`, error);
+          setErrorMessage(datasetOwner, datasetName, `ERROR: Could not Move dataset file ${srcPath}`, error);
         }
         callback(response, error);
       },

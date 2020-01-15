@@ -5,14 +5,58 @@ import * as types from 'JS/redux/constants/constants';
  * actions
  */
 export const setErrorMessage = (
+  owner,
+  name,
   message,
   messageBody,
-) => dispatcher(types.ERROR_MESSAGE, { message, messageBody });
+) => dispatcher(
+  types.ERROR_MESSAGE,
+  {
+    owner,
+    name,
+    message,
+    messageBody,
+  },
+);
 
-export const setWarningMessage = message => dispatcher(types.WARNING_MESSAGE, { message });
-export const setInfoMessage = message => dispatcher(types.INFO_MESSAGE, { message });
+export const setWarningMessage = (
+  owner,
+  name,
+  message,
+) => dispatcher(
+  types.WARNING_MESSAGE,
+  {
+    owner,
+    name,
+    message,
+  },
+);
 
-export const setMultiInfoMessage = messageData => dispatcher(types.MULTIPART_INFO_MESSAGE, messageData);
+export const setInfoMessage = (
+  owner,
+  name,
+  message,
+) => dispatcher(
+  types.INFO_MESSAGE,
+  {
+    owner,
+    name,
+    message,
+  },
+);
+
+export const setMultiInfoMessage = (
+  owner,
+  name,
+  messageData,
+) => {
+  messageData.owner = owner;
+  messageData.name = name;
+  dispatcher(
+    types.MULTIPART_INFO_MESSAGE,
+    messageData,
+  );
+};
 
 // upload bar
 export const setUploadMessageSetter = (

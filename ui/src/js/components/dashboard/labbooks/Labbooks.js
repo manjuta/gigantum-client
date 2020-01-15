@@ -36,7 +36,6 @@ class Labbooks extends Component {
 
     this.state = {
       labbookModalVisible: false,
-      oldLabbookName: '',
       newLabbookName: '',
       renameError: '',
       showNamingError: false,
@@ -65,7 +64,7 @@ class Labbooks extends Component {
     if ((props.labbookList === null) && !props.loading) {
       UserIdentity.getUserIdentity().then((response) => {
         if (response.data && response.data.userIdentity.isSessionValid) {
-          setErrorMessage('Failed to fetch Projects.', [{ message: 'There was an error while fetching Projects. This likely means you have a corrupted Project directory.' }]);
+          setErrorMessage(null, null, 'Failed to fetch Projects.', [{ message: 'There was an error while fetching Projects. This likely means you have a corrupted Project directory.' }]);
           return;
         }
         props.auth.login();
@@ -169,22 +168,20 @@ class Labbooks extends Component {
   }
 
   /**
-    *  @param {string} labbookName - inputs a labbook name
+    *  @param {string} name - inputs a labbook name
     *  routes to that labbook
   */
-  _goToLabbook = (labbookName, owner) => {
-    this.setState({ labbookName, owner });
+  _goToLabbook = (name, owner) => {
+    this.setState({ name, owner });
   }
 
   /**
-    *  @param {string} labbookName
+    *  @param {} -
     *  closes labbook modal and resets state to initial state
   */
-  _closeLabbook = (labbookName) => {
+  _closeLabbook = () => {
     this.setState({
       labbookModalVisible: false,
-      oldLabbookName: '',
-      newLabbookName: '',
       showNamingError: false,
     });
   }
@@ -197,7 +194,6 @@ class Labbooks extends Component {
     const isValid = Validation.labbookName(evt.target.value);
     if (isValid) {
       this.setState({
-        newLabbookName: evt.target.value,
         showNamingError: false,
       });
     } else {
@@ -576,6 +572,6 @@ const mapStateToProps = state => ({
   filterText: state.labbookListing.filterText,
 });
 
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = () => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Labbooks);

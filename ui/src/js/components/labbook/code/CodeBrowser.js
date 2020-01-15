@@ -2,8 +2,6 @@
 import { createPaginationContainer, graphql } from 'react-relay';
 // component
 import SectionBrowser from 'Components/shared/filesShared/sectionBrowser/SectionBrowser';
-// store
-import store from 'JS/redux/store';
 
 export default createPaginationContainer(
   SectionBrowser,
@@ -43,14 +41,13 @@ export default createPaginationContainer(
         first: totalCount,
       };
     },
-    getVariables(props, { count, cursor }, fragmentVariables) {
-      const { owner, labbookName } = store.getState().routes;
-
+    getVariables(props, { count, cursor }) {
+      const { owner, name } = props;
       return {
         first: count,
         cursor,
         owner,
-        name: labbookName,
+        name,
       };
     },
     query: graphql`

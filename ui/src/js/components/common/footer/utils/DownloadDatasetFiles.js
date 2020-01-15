@@ -5,20 +5,20 @@ export default {
     const isLabbookSection = metaDataArr[3] === 'LINKED';
     if (!isLabbookSection) {
       const owner = metaDataArr[1];
-      const labbookName = metaDataArr[2];
+      const name = metaDataArr[2];
       mutations.FetchDatasetFilesMutation(
         owner,
-        labbookName,
+        name,
         () => {
           successCall();
         },
       );
     } else {
       const owner = metaDataArr[1];
-      const labbookName = metaDataArr[2];
+      const name = metaDataArr[2];
       mutations.FetchLabbookDatasetFilesMutation(
         owner,
-        labbookName,
+        name,
         () => {
           successCall();
         },
@@ -34,20 +34,20 @@ export default {
     const isLabbookSection = metaDataArr[3] === 'LINKED';
     if (!isLabbookSection) {
       const owner = metaDataArr[1];
-      const labbookName = metaDataArr[2];
+      const name = metaDataArr[2];
       mutations.FetchDatasetFilesMutation(
         owner,
-        labbookName,
+        name,
         () => {
           failureCall(response.data.jobStatus.failureMessage);
         },
       );
     } else {
       const owner = metaDataArr[1];
-      const labbookName = metaDataArr[2];
+      const name = metaDataArr[2];
       mutations.FetchLabbookDatasetFilesMutation(
         owner,
-        labbookName,
+        name,
         () => {
           failureCall(response.data.jobStatus.failureMessage);
         },

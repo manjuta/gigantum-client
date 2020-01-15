@@ -1,7 +1,6 @@
 from typing import Optional
 import flask
 from gtmcore.workflows.gitlab import GitLabManager
-from gtmcore.configuration import Configuration
 from lmsrvcore.auth.user import get_logged_in_username
 
 
@@ -15,7 +14,7 @@ def configure_git_credentials(remote_name: Optional[str] = None) -> GitLabManage
 
     """
     # Get remote server configuration
-    config = Configuration()
+    config = flask.current_app.config['LABMGR_CONFIG']
     remote_config = config.get_remote_configuration(remote_name)
 
     # Extract valid Bearer and ID tokens

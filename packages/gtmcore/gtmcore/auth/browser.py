@@ -98,6 +98,11 @@ class BrowserIdentityManager(IdentityManager):
         Returns:
             None
         """
+        # Remove Git credentials file
+        git_credentials_file = os.path.expanduser('~/.git-credentials')
+        if os.path.exists(git_credentials_file):
+            os.remove(git_credentials_file)
+
         self.user = None
         self.rsa_key = None
         logger.info("Logout complete.")

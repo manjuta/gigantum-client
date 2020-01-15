@@ -18,7 +18,7 @@ class FileBrowserMutations {
   /**
     * @param {Object} props
     *        {string} props.owner
-    *        {string} props.labbookName
+    *        {string} props.name
     *        {string} props.section
     *        {string} props.connection
     *        {string} props.favoriteConnection
@@ -33,16 +33,15 @@ class FileBrowserMutations {
     const {
       keys,
       allKeys,
-      owner,
+      datasetOwner,
       datasetName,
       labbookName,
       labbookOwner,
       successCall,
       failureCall,
     } = data;
-
     DownloadDatasetFilesMutation(
-      owner,
+      datasetOwner,
       datasetName,
       labbookName,
       labbookOwner,
@@ -68,7 +67,7 @@ class FileBrowserMutations {
     const {
       connection,
       owner,
-      labbookName,
+      name,
       parentId,
       section,
     } = this.state;
@@ -76,32 +75,32 @@ class FileBrowserMutations {
       MakeLabbookDirectoryMutation(
         connection,
         owner,
-        labbookName,
+        name,
         parentId,
         key,
         section,
         (response, error) => {
           if (error) {
             console.error(error);
-            setErrorMessage(`ERROR: could not create ${key}`, error);
+            setErrorMessage(owner, name, `ERROR: could not create ${key}`, error);
           }
           callback(response, error);
         },
       );
     } else {
-      setIsProcessing(owner, labbookName, true);
+      setIsProcessing(owner, name, true);
       MakeDatasetDirectoryMutation(
         connection,
         owner,
-        labbookName,
+        name,
         parentId,
         `${key}/`,
         (response, error) => {
           if (error) {
             console.error(error);
-            setErrorMessage(`ERROR: could not create ${key}`, error);
+            setErrorMessage(owner, name, `ERROR: could not create ${key}`, error);
           }
-          setTimeout(() => setIsProcessing(owner, labbookName, false), 1100);
+          setTimeout(() => setIsProcessing(owner, name, false), 1100);
           callback(response, error);
         },
       );
@@ -126,18 +125,18 @@ class FileBrowserMutations {
     const {
       connection,
       owner,
-      labbookName,
+      name,
       section,
       parentId,
     } = this.state;
 
     const { key } = edge.node;
 
-    setIsProcessing(owner, labbookName, true);
+    setIsProcessing(owner, name, true);
     MoveDatasetFileMutation(
       connection,
       owner,
-      labbookName,
+      name,
       parentId,
       edge,
       key,
@@ -145,7 +144,7 @@ class FileBrowserMutations {
       section,
       removeIds,
       (response, error) => {
-        setTimeout(() => setIsProcessing(owner, labbookName, false), 1100);
+        setTimeout(() => setIsProcessing(owner, name, false), 1100);
         callback(response, error);
       },
     );
@@ -169,7 +168,7 @@ class FileBrowserMutations {
     const {
       connection,
       owner,
-      labbookName,
+      name,
       section,
       parentId,
     } = this.state;
@@ -179,7 +178,7 @@ class FileBrowserMutations {
     MoveLabbookFileMutation(
       connection,
       owner,
-      labbookName,
+      name,
       parentId,
       edge,
       key,
@@ -207,7 +206,7 @@ class FileBrowserMutations {
     const {
       connection,
       owner,
-      labbookName,
+      name,
       parentId,
       section,
     } = this.state;
@@ -216,7 +215,7 @@ class FileBrowserMutations {
       DeleteLabbookFilesMutation(
         connection,
         owner,
-        labbookName,
+        name,
         parentId,
         filePaths,
         section,
@@ -225,17 +224,17 @@ class FileBrowserMutations {
           if (error) {
             console.error(error);
             const keys = filePaths.join(' ');
-            setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
+            setErrorMessage(owner, name, `ERROR: could not delete folders ${keys}`, error);
           }
         },
       );
     } else {
-      setIsProcessing(owner, labbookName, true);
+      setIsProcessing(owner, name, true);
 
       DeleteDatasetFilesMutation(
         connection,
         owner,
-        labbookName,
+        name,
         parentId,
         filePaths,
         section,
@@ -244,9 +243,9 @@ class FileBrowserMutations {
           if (error) {
             console.error(error);
             const keys = filePaths.join(' ');
-            setErrorMessage(`ERROR: could not delete folders ${keys}`, error);
+            setErrorMessage(owner, name, `ERROR: could not delete folders ${keys}`, error);
           }
-          setTimeout(() => setIsProcessing(owner, labbookName, false), 1100);
+          setTimeout(() => setIsProcessing(owner, name, false), 1100);
         },
       );
     }
@@ -261,14 +260,13 @@ class FileBrowserMutations {
     const {
       connection,
       owner,
-      labbookName,
+      name,
     } = this.state;
     const { transactionId } = store.getState().fileBrowser;
-
     CompleteBatchUploadTransactionMutation(
       connection,
       owner,
-      labbookName,
+      name,
       true,
       false,
       transactionId,
@@ -285,7 +283,7 @@ class FileBrowserMutations {
   updateUnmanagedDataset(data, callback) {
     const {
       owner,
-      labbookName,
+      name,
     } = this.state;
 
     const {
@@ -295,7 +293,7 @@ class FileBrowserMutations {
 
     UpdateUnmanagedDatasetMutation(
       owner,
-      labbookName,
+      name,
       fromLocal,
       fromRemote,
       callback,
@@ -310,12 +308,12 @@ class FileBrowserMutations {
   verifyDataset(data, callback) {
     const {
       owner,
-      labbookName,
+      name,
     } = this.state;
 
     VerifyDatasetMutation(
       owner,
-      labbookName,
+      name,
       (response, error) => {},
     );
   }

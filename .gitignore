@@ -116,5 +116,6 @@ testing/testutils/.DS_Store
 testing/testmaterial
 /packages/gtmcore/gtmcore/auth/tests/auth_config.json
 testing/outputs/
+testing/chromedriver.exe
 
 .vscode/

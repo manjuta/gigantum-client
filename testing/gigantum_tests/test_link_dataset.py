@@ -82,7 +82,8 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
 
     finally:
         # Clean up
-        graphql_helpers.delete_dataset(username, dataset_title)
+        graphql_helpers.delete_dataset(username, dataset_title, delete_local=False, delete_remote=True)
+        graphql_helpers.delete_dataset(username, dataset_title, delete_local=True, delete_remote=False)
 
 
 def test_link_published_dataset_then_publish_project(driver: selenium.webdriver, *args, **kwargs):
@@ -119,6 +120,7 @@ def test_link_published_dataset_then_publish_project(driver: selenium.webdriver,
             f"Dataset {dataset_title} was not linked successfully to project {project_title}"
 
         # Publish the project as private and add same collaborator (read permissions)
+        time.sleep(3)
         cloud_project_elts.publish_private_project(project_title)
         collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
         side_bar_elts = testutils.SideBarElements(driver)
@@ -156,4 +158,5 @@ def test_link_published_dataset_then_publish_project(driver: selenium.webdriver,
 
     finally:
         # Clean up
-        graphql_helpers.delete_dataset(username, dataset_title)
+        graphql_helpers.delete_dataset(username, dataset_title, delete_local=False, delete_remote=True)
+        graphql_helpers.delete_dataset(username, dataset_title, delete_local=True, delete_remote=False)

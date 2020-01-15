@@ -4,7 +4,6 @@ import base64
 import math
 import flask
 from gtmcore.activity import ActivityStore
-from gtmcore.configuration import Configuration
 
 from lmsrvcore.caching import DatasetCacheController
 from lmsrvcore.auth.user import get_logged_in_username
@@ -161,7 +160,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
 
         """
         # Get remote server configuration
-        config = Configuration()
+        config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
         # Extract valid Bearer and ID tokens
@@ -413,7 +412,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     @staticmethod
     def helper_resolve_visibility(dataset, info):
         # Get remote server configuration
-        config = Configuration()
+        config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
         # Extract valid Bearer and ID tokens

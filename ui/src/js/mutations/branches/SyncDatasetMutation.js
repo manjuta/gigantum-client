@@ -50,7 +50,7 @@ export default function SyncDatasetMutation(
     error: false,
     messageBody: [{ message: startMessage }],
   };
-  setMultiInfoMessage(messageData);
+  setMultiInfoMessage(owner, datasetName, messageData);
   if (overrideMethod) {
     variables.input.overrideMethod = overrideMethod;
   }
@@ -70,6 +70,9 @@ export default function SyncDatasetMutation(
       updater: (store, response) => {
         if (response) {
           const footerData = {
+            owner,
+            name: datasetName,
+            sectionType: 'dataset',
             result: response,
             type: 'syncDataset',
             key: 'jobKey',
@@ -78,7 +81,7 @@ export default function SyncDatasetMutation(
             failureCall,
             id,
           };
-          FooterUtils.getJobStatus(footerData);
+          FooterUtils.getJobStatus(owner, datasetName, footerData);
         }
       },
     },

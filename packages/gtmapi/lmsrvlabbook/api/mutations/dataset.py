@@ -4,7 +4,6 @@ import os
 import flask
 import requests
 
-from gtmcore.configuration import Configuration
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
@@ -354,7 +353,7 @@ class DeleteDataset(graphene.ClientIDMutation):
                 ds.backend.delete_contents(ds)
 
             # Get remote server configuration
-            config = Configuration()
+            config = flask.current_app.config['LABMGR_CONFIG']
             remote_config = config.get_remote_configuration()
 
             # Delete the repository

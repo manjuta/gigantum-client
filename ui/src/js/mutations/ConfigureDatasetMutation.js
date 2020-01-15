@@ -2,6 +2,7 @@ import {
   commitMutation,
   graphql,
 } from 'react-relay';
+import uuidv4 from 'uuid/v4';
 import environment from 'JS/createRelayEnvironment';
 
 import FooterUtils from 'Components/common/footer/FooterUtils';
@@ -29,9 +30,6 @@ mutation ConfigureDatasetMutation($input: ConfigureDatasetInput!){
 }
 `;
 
-let tempID = 0;
-
-
 export default function ConfigureDatasetMutation(
   datasetOwner,
   datasetName,
@@ -51,7 +49,7 @@ export default function ConfigureDatasetMutation(
   if (confirm !== null) {
     variables.input.confirm = confirm;
   }
-
+  const id = uuidv4();
   commitMutation(environment, {
     mutation,
     variables,
@@ -61,7 +59,19 @@ export default function ConfigureDatasetMutation(
       }
       callback(response, error);
       if (response.configureDataset && response.configureDataset.backgroundJobKey) {
-        FooterUtils.getJobStatus(response, 'configureDataset', 'backgroundJobKey', successCall, failureCall);
+        const footerData = {
+          owner: datasetOwner,
+          name: datasetName,
+          sectionType: 'labbook',
+          result: response,
+          type: 'configureDataset',
+          key: 'backgroundJobKey',
+          successCall,
+          failureCall,
+          id,
+          hideFooter: true,
+        };
+        FooterUtils.getJobStatus(datasetOwner, datasetName, footerData);
       }
     },
     onError: err => console.error(err),

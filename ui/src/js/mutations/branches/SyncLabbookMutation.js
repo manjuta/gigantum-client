@@ -54,7 +54,7 @@ export default function SyncLabbookMutation(
     error: false,
     messageBody: [{ message: startMessage }],
   };
-  setMultiInfoMessage(messageData);
+  setMultiInfoMessage(owner, labbookName, messageData);
 
   commitMutation(
     environment,
@@ -72,6 +72,9 @@ export default function SyncLabbookMutation(
       updater: (store, response) => {
         if (response) {
           const footerData = {
+            owner,
+            name: labbookName,
+            sectionType: 'labbook',
             result: response,
             type: 'syncLabbook',
             key: 'jobKey',
@@ -81,7 +84,7 @@ export default function SyncLabbookMutation(
             id,
           };
 
-          FooterUtils.getJobStatus(footerData);
+          FooterUtils.getJobStatus(owner, labbookName, footerData);
         }
       },
     },

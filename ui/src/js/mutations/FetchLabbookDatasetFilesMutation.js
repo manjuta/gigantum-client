@@ -32,8 +32,6 @@ mutation FetchLabbookDatasetFilesMutation($input: FetchLabbookEdgeInput!){
 }
 `;
 
-const tempID = 0;
-
 
 export default function FetchLabbookDatasetFilesMutation(
   owner,
@@ -52,7 +50,7 @@ export default function FetchLabbookDatasetFilesMutation(
     onCompleted: (response, error) => {
       if (error) {
         console.log(error);
-        setErrorMessage('An error occurred while refetching data', error);
+        setErrorMessage(owner, labbookName, 'An error occurred while refetching data', error);
       }
       callback(error);
     },

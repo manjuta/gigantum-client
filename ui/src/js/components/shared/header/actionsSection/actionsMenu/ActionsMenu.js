@@ -1,5 +1,6 @@
+// @flow
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 import uuidv4 from 'uuid/v4';
 import { connect } from 'react-redux';
@@ -34,46 +35,44 @@ import DeleteDataset from 'Components/shared/modals/DeleteDataset';
 // assets
 import './ActionsMenu.scss';
 
-class ActionsMenu extends Component {
-  constructor(props) {
-    super(props);
+type Props = {
+  auth: {
+    renewToken: Function,
+  },
+  defaultRemote: string,
+  description: string,
+  history: Object,
+  isExporting: boolean,
+  isLocked: bool,
+  name: string,
+  owner: string,
+  remoteUrl: string,
+  sectionType: string,
+  setExportingState: Function,
+  setSyncingState: Function,
+  toggleBranchesView: Function,
+  visibility: string,
+};
 
-    const { owner, labbookName } = store.getState().routes;
 
-    this.state = {
-      addNoteEnabled: false,
-      isValid: true,
-      createBranchVisible: false,
-      showLoginPrompt: false,
-      exporting: false,
-      deleteModalVisible: false,
-      remoteUrl: props.remoteUrl,
-      publishDisabled: false,
-      justOpened: true,
-      setPublic: false,
-      syncWarningVisible: false,
-      publishWarningVisible: false,
-      visibilityModalVisible: false,
-      owner,
-      labbookName,
-    };
-
-    this._toggleMenu = this._toggleMenu.bind(this);
-    this._closeMenu = this._closeMenu.bind(this);
-    this._toggleModal = this._toggleModal.bind(this);
-    this._mergeFilter = this._mergeFilter.bind(this);
-    this._sync = this._sync.bind(this);
-    this._closeLoginPromptModal = this._closeLoginPromptModal.bind(this);
-    this._exportLabbook = this._exportLabbook.bind(this);
-    this._switchBranch = this._switchBranch.bind(this);
-
-    this._handleToggleModal = this._handleToggleModal.bind(this);
-
-    this._resetState = this._resetState.bind(this);
-    this._resetPublishState = this._resetPublishState.bind(this);
-    this._setRemoteSession = this._setRemoteSession.bind(this);
-    this._showContainerMenuMessage = this._showContainerMenuMessage.bind(this);
-  }
+class ActionsMenu extends Component<Props> {
+  state = {
+    addNoteEnabled: false,
+    isValid: true,
+    createBranchVisible: false,
+    showLoginPrompt: false,
+    exporting: false,
+    deleteModalVisible: false,
+    publishDisabled: false,
+    justOpened: true,
+    setPublic: false,
+    syncWarningVisible: false,
+    publishWarningVisible: false,
+    visibilityModalVisible: false,
+    remoteUrl: this.props.remoteUrl,
+    owner: this.props.owner,
+    name: this.props.owner,
+  };
 
 
   /**
@@ -94,19 +93,32 @@ class ActionsMenu extends Component {
     @param {event} evt
     closes menu
   */
-  _closeMenu(evt) {
-    const isActionsMenu = (evt.target.className.indexOf('ActionsMenu') > -1) || (evt.target.className.indexOf('CollaboratorsModal') > -1) || (evt.target.className.indexOf('ActionsMenu__message') > -1)
-    || (evt.target.className.indexOf('TrackingToggle') > -1);
+  _closeMenu = (evt) => {
+    const {
+      menuOpen,
+      syncWarningVisible,
+      publishWarningVisible,
+    } = this.state;
+    const isActionsMenu = (evt.target.className.indexOf('ActionsMenu') > -1)
+      || (evt.target.className.indexOf('CollaboratorsModal') > -1)
+      || (evt.target.className.indexOf('ActionsMenu__message') > -1)
+      || (evt.target.className.indexOf('TrackingToggle') > -1);
 
-    if (!isActionsMenu && this.state.menuOpen) {
+    if (!isActionsMenu && menuOpen) {
       this.setState({ menuOpen: false, justOpened: true });
     }
 
-    if ((evt.target.className.indexOf('ActionsMenu__btn--sync') === -1) && this.state.syncWarningVisible) {
+    if (
+      (evt.target.className.indexOf('ActionsMenu__btn--sync') === -1)
+      && syncWarningVisible
+    ) {
       this.setState({ syncWarningVisible: false });
     }
 
-    if ((evt.target.className.indexOf('ActionsMenu__btn--remote') === -1) && this.state.publishWarningVisible) {
+    if (
+      (evt.target.className.indexOf('ActionsMenu__btn--remote') === -1)
+      && publishWarningVisible
+    ) {
       this.setState({ publishWarningVisible: false });
     }
   }
@@ -115,9 +127,12 @@ class ActionsMenu extends Component {
     @param {string} value
     sets state on createBranchVisible and toggles modal cover
   */
-  _toggleModal(value) {
-    this.setState({
-      [value]: !this.state[value],
+  _toggleModal = (value) => {
+    this.setState((state) => {
+      const inverseValue = !state[value];
+      return {
+        [value]: inverseValue,
+      };
     });
   }
 
@@ -126,8 +141,11 @@ class ActionsMenu extends Component {
   *  toggles open menu state
   *  @return {string}
   */
-  _toggleMenu() {
-    this.setState({ menuOpen: !this.state.menuOpen });
+  _toggleMenu = () => {
+    this.setState((state) => {
+      const menuOpen = !state.menuOpen;
+      return ({ menuOpen });
+    });
 
     if (!this.state.menuOpen) {
       setTimeout(() => {
@@ -143,7 +161,7 @@ class ActionsMenu extends Component {
   *  remounts collaborators by updating key
   *  @return {}
   */
-  _remountCollab() {
+  _remountCollab = () => {
     this.setState({ collabKey: uuidv4() });
   }
 
@@ -152,12 +170,12 @@ class ActionsMenu extends Component {
   *  displays container menu message
   *  @return {}
   */
-  _showContainerMenuMessage(action, containerRunning) {
+  _showContainerMenuMessage = (action, containerRunning) => {
     const dispatchMessage = containerRunning ? `Stop Project before ${action}. \n Be sure to save your changes.` : `Project is ${action}. \n Please do not refresh the page.`;
 
     this.setState({ menuOpen: false });
 
-    this.props.setContainerMenuWarningMessage(dispatchMessage);
+    setContainerMenuWarningMessage(dispatchMessage);
   }
 
   /**
@@ -165,18 +183,31 @@ class ActionsMenu extends Component {
   *  pushes code to remote
   *  @return {string}
   */
-  _sync(pullOnly) {
-    const { props } = this;
-    if (props.isExporting) {
+  _sync = (pullOnly) => {
+    const {
+      auth,
+      owner,
+      name,
+      isExporting,
+      setSyncingState,
+      sectionType,
+    } = this.props;
+
+    if (isExporting) {
       this.setState({ syncWarningVisible: true });
     } else {
-      const status = store.getState().containerStatus.status;
+      const { status } = store.getState().containerStatus;
       this.setState({ pullOnly });
-      if (this.state.owner !== 'gigantum-examples') {
+
+      if (owner !== 'gigantum-examples') {
         this.setState({ menuOpen: false });
       }
 
-      if ((status === 'Stopped') || (status === 'Rebuild') || props.sectionType !== 'labbook') {
+      if (
+        (status === 'Stopped')
+        || (status === 'Rebuild')
+        || (sectionType !== 'labbook')
+      ) {
         const id = uuidv4();
         const self = this;
 
@@ -185,30 +216,30 @@ class ActionsMenu extends Component {
             if (response.data && response.data.userIdentity) {
               if (response.data.userIdentity.isSessionValid) {
                 const failureCall = (errorMessage) => {
-                  props.setSyncingState(false);
+                  setSyncingState(false);
                   if (errorMessage.indexOf('Merge conflict') > -1) {
                     self._toggleSyncModal();
                   }
                 };
 
                 const successCall = () => {
-                  props.setSyncingState(false);
-                  if (props.sectionType === 'labbook') {
+                  setSyncingState(false);
+                  if (sectionType === 'labbook') {
                     BuildImageMutation(
-                      this.state.owner,
-                      this.state.labbookName,
+                      owner,
+                      name,
                       false,
                       (response, error) => {
                         if (error) {
                           console.error(error);
                           const messageData = {
                             id,
-                            message: `ERROR: Failed to build ${this.state.labookName}`,
+                            message: `ERROR: Failed to build ${name}`,
                             isLast: null,
                             error: true,
                             messageBody: error,
                           };
-                          setMultiInfoMessage(messageData);
+                          setMultiInfoMessage(owner, name, messageData);
                         }
                       },
                     );
@@ -216,16 +247,21 @@ class ActionsMenu extends Component {
 
                   setContainerMenuVisibility(false);
                 };
-                if (props.sectionType === 'labbook') {
-                  LinkedLocalDatasetsQuery.getLocalDatasets({ owner: this.state.owner, name: this.state.labbookName }).then((res) => {
-                    const localDatasets = res.data && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
+                if (sectionType === 'labbook') {
+                  LinkedLocalDatasetsQuery.getLocalDatasets({
+                    owner,
+                    name,
+                  }).then((res) => {
+                    const localDatasets = res.data
+                      && res.data.labbook.linkedDatasets.filter(linkedDataset => linkedDataset.defaultRemote && linkedDataset.defaultRemote.slice(0, 4) !== 'http');
+
                     if (localDatasets.length === 0) {
-                      props.setSyncingState(true);
+                      setSyncingState(true);
 
                       this._showContainerMenuMessage('syncing');
                       SyncLabbookMutation(
-                        this.state.owner,
-                        this.state.labbookName,
+                        owner,
+                        name,
                         null,
                         pullOnly,
                         successCall,
@@ -237,16 +273,23 @@ class ActionsMenu extends Component {
                         },
                       );
                     } else {
-                      this.setState({ localDatasets, publishDatasetsModalVisible: !this.state.publishDatasetsModalVisible, publishDatasetsModalAction: 'Sync' });
+                      this.setState((state) => {
+                        const publishDatasetsModalVisible = !state.publishDatasetsModalVisible;
+                        return {
+                          localDatasets,
+                          publishDatasetsModalVisible,
+                          publishDatasetsModalAction: 'Sync',
+                        };
+                      });
                     }
                   });
                 } else {
-                  props.setSyncingState(true);
+                  setSyncingState(true);
 
                   this._showContainerMenuMessage('syncing');
                   SyncDatasetMutation(
-                    this.state.owner,
-                    this.state.labbookName,
+                    owner,
+                    name,
                     false,
                     successCall,
                     failureCall,
@@ -258,7 +301,7 @@ class ActionsMenu extends Component {
                   );
                 }
               } else {
-                props.auth.renewToken(true, () => {
+                auth.renewToken(true, () => {
                   self.setState({ showLoginPrompt: true });
                 }, () => {
                   self._sync(pullOnly);
@@ -272,7 +315,7 @@ class ActionsMenu extends Component {
       } else {
         this.setState({ menuOpen: false });
 
-        props.setContainerMenuWarningMessage('Stop Project before syncing. \n Be sure to save your changes.');
+        setContainerMenuWarningMessage('Stop Project before syncing. \n Be sure to save your changes.');
       }
     }
   }
@@ -282,12 +325,12 @@ class ActionsMenu extends Component {
   *  shows collaborators warning if user is not owner
   *  @return {}
   */
-  _showCollaboratorsWarning() {
-    const { owner } = store.getState().routes;
+  _showCollaboratorsWarning = () => {
+    const { owner, name } = this.props;
     const username = localStorage.getItem('username');
 
     if (owner !== username) {
-      setWarningMessage(`Only ${owner} can add and remove collaborators in this labbook.`);
+      setWarningMessage(owner, name, `Only ${owner} can add and remove collaborators in this labbook.`);
     }
   }
 
@@ -296,7 +339,7 @@ class ActionsMenu extends Component {
   *  returns UserIdentityQeury promise
   *  @return {promise}
   */
-  _checkSessionIsValid() {
+  _checkSessionIsValid = () => {
     return (UserIdentity.getUserIdentity());
   }
 
@@ -305,7 +348,7 @@ class ActionsMenu extends Component {
   *  closes login prompt modal
   *  @return {}
   */
-  _closeLoginPromptModal() {
+  _closeLoginPromptModal = () => {
     this.setState({ showLoginPrompt: false });
   }
 
@@ -314,13 +357,17 @@ class ActionsMenu extends Component {
   *  copies remote
   *  @return {}
   */
-  _copyRemote() {
+  _copyRemote = () => {
+    const {
+      owner,
+      name,
+    } = this.state;
     const copyText = document.getElementById('ActionsMenu-copy');
     copyText.select();
 
     document.execCommand('Copy');
 
-    setInfoMessage(`${copyText.value} copied!`);
+    setInfoMessage(owner, name, `${copyText.value} copied!`);
   }
 
   /**
@@ -329,29 +376,31 @@ class ActionsMenu extends Component {
   *  updates footer with a message
   *  @return {}
   */
-  _jobStatus(jobKey) {
-    const self = this;
+  _jobStatus = (jobKey) => {
     const {
+      setExportingState,
       owner,
-      labbookName,
-    } = self.state;
-    JobStatus.getJobStatus(jobKey).then((data) => {
-      this.props.setExportingState(false);
-      updateTransitionState(owner, labbookName, '');
+      name,
+    } = this.props;
+
+    JobStatus.getJobStatus(owner, name, jobKey).then((data) => {
+      setExportingState(false);
+      updateTransitionState(owner, name, '');
+
       if (data.jobStatus.result) {
-        setInfoMessage(`Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
+        setInfoMessage(owner, name, `Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
       }
 
       this.setState({ exporting: false });
     }).catch((error) => {
-      updateTransitionState(owner, labbookName, '');
+      updateTransitionState(owner, name, '');
       console.log(error);
 
-      this.props.setExportingState(false);
+      setExportingState(false);
 
       const errorArray = [{ message: 'Export failed.' }];
 
-      setErrorMessage(`${this.state.labbookName} failed to export `, errorArray);
+      setErrorMessage(owner, name, `${name} failed to export `, errorArray);
 
       this.setState({ exporting: false });
     });
@@ -363,50 +412,54 @@ class ActionsMenu extends Component {
   *  @return {}
   */
   _exportLabbook = () => {
-    const { props } = this;
     const {
+      sectionType,
+      setExportingState,
       owner,
-      labbookName,
-    } = this.state;
-    if (!props.isLocked) {
-      this.setState({ exporting: true, menuOpen: false });
+      name,
+      isLocked,
+    } = this.props;
 
-      const exportType = (this.props.sectionType === 'dataset') ? 'Dataset' : 'Project';
+    if (!isLocked) {
+      this.setState({
+        exporting: true,
+        menuOpen: false,
+      });
+      const exportType = (sectionType === 'dataset') ? 'Dataset' : 'Project';
 
-      setInfoMessage(`Exporting ${labbookName} ${exportType}`);
+      setInfoMessage(owner, name, `Exporting ${name} ${exportType}`);
+      updateTransitionState(owner, name, 'Exporting');
 
-      updateTransitionState(owner, labbookName, 'Exporting');
-
-      this.props.setExportingState(true);
-      if (this.props.sectionType !== 'dataset') {
+      setExportingState(true);
+      if (sectionType !== 'dataset') {
         ExportLabbookMutation(
           owner,
-          labbookName,
+          name,
           (response, error) => {
             if (response.exportLabbook) {
               this._jobStatus(response.exportLabbook.jobKey);
             } else {
               console.log(error);
 
-              this.props.setExportingState(false);
+              setExportingState(false);
 
-              setErrorMessage('Export Failed', error);
+              setErrorMessage(owner, name, 'Export Failed', error);
             }
           },
         );
       } else {
         ExportDatasetMutation(
           owner,
-          labbookName,
+          name,
           (response, error) => {
             if (response.exportDataset) {
               this._jobStatus(response.exportDataset.jobKey);
             } else {
               console.log(error);
 
-              this.props.setExportingState(false);
+              setExportingState(false);
 
-              setErrorMessage('Export Failed', error);
+              setErrorMessage(owner, name, 'Export Failed', error);
             }
           },
         );
@@ -421,8 +474,13 @@ class ActionsMenu extends Component {
   *  toggle stat and modal visibility
   *  @return {}
   */
-  _toggleDeleteModal() {
-    this.setState({ deleteModalVisible: !this.state.deleteModalVisible });
+  _toggleDeleteModal = () => {
+    this.setState((state) => {
+      const deleteModalVisible = !state.deleteModalVisible;
+      return {
+        deleteModalVisible,
+      };
+    });
   }
 
   /**
@@ -430,9 +488,10 @@ class ActionsMenu extends Component {
   *  sets menu
   *  @return {}
   */
-  _mergeFilter() {
+  _mergeFilter = () => {
+    const { toggleBranchesView } = this.props;
     if (store.getState().containerStatus.status !== 'Running') {
-      this.props.toggleBranchesView(true, true);
+      toggleBranchesView(true, true);
 
       this.setState({ menuOpen: false });
 
@@ -447,13 +506,14 @@ class ActionsMenu extends Component {
   *  sets menu
   *  @return {}
   */
-  _switchBranch() {
-    const status = store.getState().containerStatus.status;
+  _switchBranch = () => {
+    const { toggleBranchesView } = this.props;
+    const { status } = store.getState().containerStatus;
 
     if (status !== 'Running') {
       window.scrollTo(0, 0);
 
-      this.props.toggleBranchesView(true, false);
+      toggleBranchesView(true, false);
 
       this.setState({ menuOpen: false });
     } else {
@@ -466,7 +526,7 @@ class ActionsMenu extends Component {
   *  passes modal to toggleModal if container is not running
   *  @return {}
   */
-  _handleToggleModal(modal) {
+  _handleToggleModal = (modal) => {
     let action = '';
 
     if (store.getState().containerStatus.status !== 'Running') {
@@ -489,7 +549,7 @@ class ActionsMenu extends Component {
   *  resets state after publish
   *  @return {}
   */
-  _resetState() {
+  _resetState = () => {
     this.setState({
       remoteUrl: '',
       showLoginPrompt: true,
@@ -501,7 +561,7 @@ class ActionsMenu extends Component {
   *  resets state after publish
   *  @return {}
   */
-  _resetPublishState(publishDisabled) {
+  _resetPublishState = (publishDisabled) => {
     this.setState({
       menuOpen: false,
       publishDisabled,
@@ -513,83 +573,99 @@ class ActionsMenu extends Component {
   *  resets state after publish
   *  @return {}
   */
-  _setRemoteSession() {
+  _setRemoteSession = () => {
+    const { owner, name } = this.props;
     this.setState({
       addedRemoteThisSession: true,
-      remoteUrl: `https://gigantum.com/${this.state.owner}/${this.state.labbookName}`,
+      remoteUrl: `https://gigantum.com/${owner}/${name}`,
     });
   }
 
 
   render() {
-    const { props, state } = this;
-    const { labbookName, owner } = state;
+    const {
+      name,
+      owner,
+      sectionType,
+      defaultRemote,
+      history,
+      auth,
+      visibility,
+      description,
+      isLocked,
+    } = this.props;
+    const {
+      menuOpen,
+      showLoginPrompt,
+      deleteModalVisible,
+      visibilityModalVisible,
+      remoteUrl,
+      justOpened,
+      exporting,
+    } = this.state;
+    const deleteText = (sectionType === 'labbook') ? 'Delete Project' : 'Delete Dataset';
+    // declare css here
     const branchMenuCSS = classNames({
-      'ActionsMenu__menu--animation': state.justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
-      hidden: !state.menuOpen,
+      'ActionsMenu__menu--animation': justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
+      hidden: !menuOpen,
       'ActionsMenu__menu box-shadow': true,
     });
-
-    const exportButtonCSS = classNames({
-      'ActionsMenu__btn--flat': true,
-      'Tooltip-data': props.isLocked,
-    });
-
-    const deleteText = props.sectionType === 'labbook' ? 'Delete Project' : 'Delete Dataset';
 
     return (
       <div className="ActionsMenu flex flex--column'">
 
-        {
-          state.showLoginPrompt
-
-          && <LoginPrompt closeModal={this._closeLoginPromptModal} />
+        { showLoginPrompt
+          && (
+            <LoginPrompt closeModal={this._closeLoginPromptModal} />
+          )
         }
-        {
-          (state.deleteModalVisible && (props.sectionType === 'labbook'))
+
+        { (deleteModalVisible && (sectionType === 'labbook'))
           && (
             <DeleteLabbook
               handleClose={() => this._toggleDeleteModal()}
-              remoteAdded={props.defaultRemote}
-              history={props.history}
+              remoteAdded={defaultRemote}
+              history={history}
+              name={name}
+              owner={owner}
+              remoteDelete={false}
             />
           )
         }
-        {
-          (state.deleteModalVisible && !(props.sectionType === 'labbook'))
+
+        { (deleteModalVisible && (sectionType === 'dataset'))
           && (
             <DeleteDataset
               handleClose={() => this._toggleDeleteModal()}
-              remoteAdded={props.defaultRemote}
-              history={props.history}
-              owner={state.owner}
-              name={state.labbookName}
+              remoteAdded={defaultRemote}
+              history={history}
+              name={name}
+              owner={owner}
             />
           )
         }
-        {
-          state.visibilityModalVisible
 
+        { visibilityModalVisible
           && (
           <VisibilityModal
-            sectionType={props.sectionType}
-            owner={state.owner}
-            name={state.labbookName}
-            auth={props.auth}
+            sectionType={sectionType}
+            owner={owner}
+            name={name}
+            auth={auth}
             toggleModal={this._toggleModal}
             buttonText="Save"
             header="Change Visibility"
             modalStateValue="visibilityModalVisible"
             checkSessionIsValid={this._checkSessionIsValid}
             resetState={this._resetState}
-            visibility={props.visibility}
+            visibility={visibility}
           />
           )
         }
 
         <CreateBranch
-          description={props.description}
-          modalVisible={state.createBranchVisible}
+          description={description}
+          modalVisible={this.state.createBranchVisible}
           toggleModal={this._toggleModal}
         />
 
@@ -605,9 +681,9 @@ class ActionsMenu extends Component {
 
             <li className="ActionsMenu__item ActionsMenu__item--export">
               <button
-                onClick={() => this._exportLabbook()}
-                disabled={state.exporting || props.isLocked}
-                className={exportButtonCSS}
+                onClick={evt => this._exportLabbook(evt)}
+                disabled={exporting || isLocked}
+                className="ActionsMenu__btn--flat"
                 type="button"
                 data-tooltip="Cannot export Project while in use"
               >
@@ -627,21 +703,21 @@ class ActionsMenu extends Component {
               <button
                 onClick={() => this._toggleDeleteModal()}
                 className="ActionsMenu__btn--flat"
+                type="button"
               >
                 {deleteText}
               </button>
 
             </li>
 
-            {
-              props.defaultRemote
-
+            { defaultRemote
               && (
-              <li className={`ActionsMenu__item ActionsMenu__item--visibility-${props.visibility}`}>
+              <li className={`ActionsMenu__item ActionsMenu__item--visibility-${visibility}`}>
 
                 <button
-                  onClick={evt => this._toggleModal('visibilityModalVisible')}
+                  onClick={() => this._toggleModal('visibilityModalVisible')}
                   className="ActionsMenu__btn--flat"
+                  type="button"
                 >
                   Change Visibility
                 </button>
@@ -649,8 +725,7 @@ class ActionsMenu extends Component {
               </li>
               )
             }
-            {
-              (state.remoteUrl || props.defaultRemote)
+            { (remoteUrl || defaultRemote)
               && (
               <li className="ActionsMenu__item ActionsMenu__item--copy">
                 <div className="ActionsMenu__item--label">Get Share URL</div>
@@ -659,13 +734,14 @@ class ActionsMenu extends Component {
                   <input
                     id="ActionsMenu-copy"
                     className="ActionsMenu__input"
-                    defaultValue={`gigantum.com/${state.owner}/${state.labbookName}`}
+                    defaultValue={`gigantum.com/${owner}/${name}`}
                     type="text"
                   />
 
                   <button
                     onClick={() => this._copyRemote()}
                     className="ActionsMenu__btn--copy fa fa-clone"
+                    type="button"
                   />
                 </div>
               </li>
@@ -683,9 +759,9 @@ class ActionsMenu extends Component {
   }
 }
 
-const mapStateToProps = (state, ownProps) => state.packageDependencies;
+const mapStateToProps = state => state.packageDependencies;
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = () => ({
   setContainerMenuWarningMessage,
 });
 

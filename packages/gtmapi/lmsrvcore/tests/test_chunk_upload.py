@@ -1,10 +1,12 @@
 import pytest
 import graphene
 import os
+from flask import Flask
 
 from lmsrvcore.tests.fixtures import fixture_working_dir_with_cached_user
 from lmsrvcore.api.mutations import ChunkUploadMutation
 from gtmcore.configuration import Configuration
+from gtmcore.auth.identity import get_identity_manager
 
 
 class MyMutation(graphene.relay.ClientIDMutation, ChunkUploadMutation):
@@ -19,8 +21,15 @@ class MyMutation(graphene.relay.ClientIDMutation, ChunkUploadMutation):
 class TestChunkUpload(object):
     def test_get_temp_filename(self):
         """Test getting the filename"""
-        mut = MyMutation()
-        assert mut.get_temp_filename("asdf", "1234.txt") == os.path.join(Configuration().upload_dir, "asdf-1234.txt")
+        app = Flask("lmsrvlabbook")
+
+        # Load configuration class into the flask application
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+
+        with app.app_context():
+            mut = MyMutation()
+            assert mut.get_temp_filename("asdf", "1234.txt") == os.path.join(Configuration().upload_dir, "asdf-1234.txt")
 
     def test_get_safe_filename(self):
         """Test getting safe filenames"""

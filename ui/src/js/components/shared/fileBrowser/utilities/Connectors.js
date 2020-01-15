@@ -1,4 +1,3 @@
-import { DragSource } from 'react-dnd';
 // store
 import store from 'JS/redux/store';
 // utilities
@@ -86,12 +85,12 @@ const dragSource = {
               parentId,
               connection,
               section,
+              owner,
+              name,
             } = props;
-            const { owner, labbookName } = store.getState().routes;
-
             const mutationData = {
               owner,
-              labbookName,
+              name,
               parentId,
               connection,
               section,
@@ -123,13 +122,25 @@ const targetSource = {
     const item = monitor.getItem();
     const { uploading } = store.getState().fileBrowser;
     const mouseoverAllowed = !uploading && (!(props.section === 'data' && !item.isLocal) || (!item.fileData));
+    if (props
+      && props.fileData && item.fileData
+      && props.fileData.edge && item.fileData.edge
+      && props.fileData.edge.node && item.fileData.edge.node
+      && props.fileData.edge.node.key.startsWith(item.fileData.edge.node.key)
+    ) {
+      return false;
+    }
     return monitor.isOver({ shallow: true }) && mouseoverAllowed && !props.lockFileBrowser;
   },
   drop(props, monitor, component) {
     // TODO: clean up this code, some of this logic is being duplicated. make better use of functions
     const dndItem = monitor.getItem();
     const { section } = props.section ? props : props.mutationData;
-    const promptType = props.section ? props.section : ((props.mutationData) && (props.mutationData.section)) ? props.mutationData.section : '';
+    const promptType = props.section
+      ? props.section
+      : ((props.mutationData) && (props.mutationData.section))
+        ? props.mutationData.section
+        : '';
     let newPath;
     let fileKey;
     // non root folder drop
@@ -151,12 +162,13 @@ const targetSource = {
         parentId,
         connection,
         section,
+        owner,
+        name,
       } = props;
-      const { owner, labbookName } = store.getState().routes;
 
       const mutationData = {
         owner,
-        labbookName,
+        name,
         parentId,
         connection,
         section,
@@ -216,12 +228,13 @@ const targetSource = {
               parentId,
               connection,
               section,
+              owner,
+              name,
             } = props;
-            const { owner, labbookName } = store.getState().routes;
 
             const mutationData = {
               owner,
-              labbookName,
+              name,
               parentId,
               connection,
               section,
@@ -271,7 +284,7 @@ function targetCollect(connect, monitor) {
     }
     newLastTarget = targets[targets.length - 1];
     // check if current targe is over last target
-    isOver = (currentTargetId === newLastTarget.monitor.targetId);
+    isOver = (currentTargetId === newLastTarget.monitor.targetId) && canDrop;
   } else {
     isOver = false;
   }

@@ -50,7 +50,28 @@ const getBranches = (props) => {
   return branches;
 };
 
-class Header extends Component {
+type Props = {
+  branchName: string,
+  branchesOpen: string,
+  dataset: {
+    name: string,
+    owner: string,
+  },
+  diskLow: boolean,
+  isDeprecated: boolean,
+  isExporting: boolean,
+  isPublishing: boolean,
+  isSticky: boolean,
+  isSyncing: boolean,
+  labbook: {
+    name: string,
+    owner: string,
+  },
+  modalVisible: boolean,
+  sectionType: string,
+};
+
+class Header extends Component<Props> {
   /** *******************
    * child functions
    *

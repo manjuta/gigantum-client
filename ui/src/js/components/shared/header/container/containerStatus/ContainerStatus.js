@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
@@ -15,7 +16,30 @@ import Tooltip from 'Components/common/Tooltip';
 // assets
 import './ContainerStatus.scss';
 
-class ContainerStatus extends Component {
+type Props = {
+  containerMenuOpen: boolean,
+  containerMutations: {
+    buildImage: Function,
+    cancelBuild: Function,
+    startContainer: Function,
+    stopContainer: Function,
+  },
+  containerStatus: string,
+  creationDateUtc: string,
+  imageStatus: string,
+  isBuilding: boolean,
+  isLocked: boolean,
+  isLookingUpPackages: boolean,
+  isSyncing: boolean,
+  isPublishing: boolean,
+  labbookId: string,
+  labbook: {
+    name: string,
+    owner: string,
+  },
+}
+
+class ContainerStatus extends Component<Props> {
   state = {
     status: '',
     isMouseOver: false,
@@ -24,7 +48,6 @@ class ContainerStatus extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, state) {
-    const { name } = nextProps.labbook;
     const displayTransitionState = nextProps.transitionState
       && nextProps.transitionState.length;
     const status = displayTransitionState
@@ -42,18 +65,22 @@ class ContainerStatus extends Component {
   *  @return {string}
   */
   componentDidMount() {
-    const { props } = this;
+    const {
+      containerStatus,
+      imageStatus,
+      labbookId,
+    } = this.props;
     const status = this._getContainerStatusText({
-      containerStatus: props.containerStatus,
-      imageStatus: props.imageStatus,
+      containerStatus,
+      imageStatus,
     });
-    const hasLabbookId = store.getState().overview.containerStates[props.labbookId];
+    const hasLabbookId = store.getState().overview.containerStates[labbookId];
 
     if (hasLabbookId) {
-      const storeStatus = store.getState().overview.containerStates[props.labbookId];
+      const storeStatus = store.getState().overview.containerStates[labbookId];
 
       if (storeStatus !== status) {
-        props.setContainerState(props.labbookId, status);
+        setContainerState(labbookId, status);
       }
     }
 
@@ -76,23 +103,29 @@ class ContainerStatus extends Component {
    *
   */
   _closePopupMenus = (evt) => {
-    const { props, state } = this;
+    const {
+      containerMenuOpen,
+    } = this.props;
+    const {
+      pluginsMenu,
+      showDevList,
+    } = this.state;
     // TODO fix this implementation, this is not sustainable.
     const containerMenuClicked = evt.target.getAttribute('data-container-popup') === 'true';
 
     if (!containerMenuClicked
-    && props.containerMenuOpen) {
-      props.setContainerMenuVisibility(false);
+    && containerMenuOpen) {
+      setContainerMenuVisibility(false);
     }
 
     const pluginsMenuClicked = (evt.target.className.indexOf('ContainerStatus__plugins') > -1);
-    if (!pluginsMenuClicked && state.pluginsMenu) {
+    if (!pluginsMenuClicked && pluginsMenu) {
       this.setState({
         pluginsMenu: false,
       });
     }
 
-    if (state.showDevList && evt.target.className.indexOf('ContainerStatus__expand-tools') === -1) {
+    if (showDevList && evt.target.className.indexOf('ContainerStatus__expand-tools') === -1) {
       this.setState({ showDevList: false });
     }
   }
@@ -102,7 +135,7 @@ class ContainerStatus extends Component {
     set containerStatus secondsElapsed state by iterating
     @return {string}
   */
-  _checkJupyterStatus = (devTool) => {
+  _checkJupyterStatus = () => {
     // update this when juphyter can accept cors
 
     setTimeout(() => {
@@ -116,34 +149,62 @@ class ContainerStatus extends Component {
     @return {string}
   */
   _getContainerStatusText = ({ containerStatus, imageStatus }) => {
-    const { props, state } = this;
-    const labbookCreationDate = Date.parse(`${props.creationDateUtc}Z`);
+    const {
+      creationDateUtc,
+      isBuilding,
+    } = this.props;
+    const {
+      attemptingRebuild,
+    } = this.state;
+    const { state } = this;
+
+    const labbookCreationDate = Date.parse(`${creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
     const timeDifferenceMS = timeNow - labbookCreationDate;
 
-    let status = (containerStatus === 'RUNNING') ? 'Running' : containerStatus;
-    status = (containerStatus === 'NOT_RUNNING') ? 'Stopped' : status;
-    status = (imageStatus === 'BUILD_IN_PROGRESS' || imageStatus === 'BUILD_QUEUED') ? 'Building' : status;
-    status = (imageStatus === 'BUILD_FAILED') ? 'Rebuild' : status;
-    status = (imageStatus === 'DOES_NOT_EXIST') ? 'Rebuild' : status;
-    status = ((imageStatus === 'DOES_NOT_EXIST') || props.isBuilding || (imageStatus === 'BUILD_IN_PROGRESS')) && (timeDifferenceMS < 15000) ? 'Building' : status;
+    let status = (containerStatus === 'RUNNING')
+      ? 'Running'
+      : containerStatus;
+    status = (containerStatus === 'NOT_RUNNING')
+      ? 'Stopped'
+      : status;
+    status = (imageStatus === 'BUILD_IN_PROGRESS' || imageStatus === 'BUILD_QUEUED')
+      ? 'Building'
+      : status;
+    status = (imageStatus === 'BUILD_FAILED')
+      ? 'Rebuild'
+      : status;
+    status = (imageStatus === 'DOES_NOT_EXIST')
+      ? 'Rebuild'
+      : status;
+    status = (
+      (imageStatus === 'DOES_NOT_EXIST')
+      || isBuilding
+      || (imageStatus === 'BUILD_IN_PROGRESS'))
+      && (timeDifferenceMS < 15000)
+      ? 'Building'
+      : status;
 
-    status = ((status === 'Stopped') && (state.status === 'Starting')) ? 'Starting' : status;
-    status = ((status === 'Running') && (state.status === 'Stopping')) ? 'Stopping' : status;
+    status = ((status === 'Stopped') && (state.status === 'Starting'))
+      ? 'Starting'
+      : status;
+    status = ((status === 'Running') && (state.status === 'Stopping'))
+      ? 'Stopping'
+      : status;
 
     if (store.getState().containerStatus.status !== status) {
-      props.setContainerStatus(status);
+      setContainerStatus(status);
     }
 
-    if ((status === 'Stopped') && state.attemptingRebuild) {
+    if ((status === 'Stopped') && attemptingRebuild) {
       this.setState({ attemptingRebuild: false });
       this._startContainerMutation(false);
-    } else if (status === 'Rebuild' && state.attemptingRebuild) {
+    } else if ((status === 'Rebuild') && attemptingRebuild) {
       this.setState({ attemptingRebuild: false });
     }
 
     if ((status) && (status !== 'Stopped') && (status !== 'Rebuild')) {
-      props.setCloseEnvironmentMenus();
+      setCloseEnvironmentMenus();
       setPackageMenuVisible(false);
     }
     let cssClass = status;
@@ -158,12 +219,13 @@ class ContainerStatus extends Component {
     triggers stop container mutation
   */
   _stopContainerMutation = () => {
-    const { props } = this;
+    const { containerMutations, labbook } = this.props;
+    const { name, owner } = labbook;
     const self = this;
 
-    props.setContainerMenuVisibility(false);
+    setContainerMenuVisibility(false);
 
-    props.containerMutations.stopContainer(
+    containerMutations.stopContainer(
       {},
       (response, error) => {
         self.setState({
@@ -172,7 +234,7 @@ class ContainerStatus extends Component {
         });
 
         if (error) {
-          props.setErrorMessage(`There was a problem stopping ${self.state.labbookName} container`, error);
+          setErrorMessage(owner, name, `There was a problem stopping ${name} container`, error);
         }
       },
     );
@@ -183,11 +245,11 @@ class ContainerStatus extends Component {
     triggers stop build mutation
   */
   _cancelBuildMutation = () => {
-    const { props } = this;
+    const { containerMutations } = this.props;
     const self = this;
 
-    props.setContainerMenuVisibility(false);
-    props.containerMutations.cancelBuild(
+    setContainerMenuVisibility(false);
+    containerMutations.cancelBuild(
       () => {
         setTimeout(() => {
           self.setState({
@@ -204,15 +266,17 @@ class ContainerStatus extends Component {
     triggers start container mutation
   */
   _startContainerMutation = (launchDevTool) => {
-    const { state, props } = this;
+    const { containerMutations, labbook } = this.props;
+    const { name, owner } = labbook;
+    const { selectedDevTool } = this.state;
     const self = this;
-    const data = launchDevTool ? { devTool: state.selectedDevTool } : {};
+    const data = launchDevTool ? { devTool: selectedDevTool } : {};
 
-    props.setCloseEnvironmentMenus();
+    setCloseEnvironmentMenus();
     setPackageMenuVisible(false);
-    props.setContainerMenuVisibility(false);
+    setContainerMenuVisibility(false);
 
-    props.containerMutations.startContainer(
+    containerMutations.startContainer(
       data,
       (response, error) => {
         self.setState({
@@ -221,12 +285,12 @@ class ContainerStatus extends Component {
         });
 
         if (error) {
-          props.setErrorMessage(`There was a problem starting ${this.state.labbookName} container`, error);
+          setErrorMessage(owner, name, `There was a problem starting ${name} container`, error);
           if (error[0].message.indexOf('404 Client Error') > -1) {
             self._rebuildContainer();
           }
         } else {
-          props.setCloseEnvironmentMenus();
+          setCloseEnvironmentMenus();
           setPackageMenuVisible(false);
         }
       },
@@ -240,10 +304,10 @@ class ContainerStatus extends Component {
     @return {string} newStatus
    */
   _containerAction = (status, cssStatus, evt) => {
-    const { props } = this;
-    const { owner, name } = props.labbook;
+    const { labbook, isLookingUpPackages } = this.props;
+    const { owner, name } = labbook;
 
-    if (!store.getState().labbook.isBuilding && !props.isLookingUpPackages) {
+    if (!store.getState().labbook.isBuilding && !isLookingUpPackages) {
       if (status === 'Stop') {
         updateTransitionState(owner, name, 'Stopping');
         this.setState({ contanerMenuRunning: false });
@@ -251,7 +315,7 @@ class ContainerStatus extends Component {
       } else if ((status === 'Start') && (cssStatus !== 'Rebuild')) {
         updateTransitionState(owner, name, 'Starting');
         this.setState({ contanerMenuRunning: false });
-        props.setMergeMode(owner, name, false, false);
+        setMergeMode(owner, name, false, false);
         this._startContainerMutation();
       } else if ((status === 'Start') || (status === 'Rebuild')) {
         this.setState({
@@ -261,7 +325,7 @@ class ContainerStatus extends Component {
         this._rebuildContainer(evt, status);
       }
     } else {
-      props.setContainerMenuWarningMessage('Can\'t start container when environment is being edited');
+      setContainerMenuWarningMessage('Can\'t start container when environment is being edited');
     }
 
     if ((status === 'Cancel')) {
@@ -300,23 +364,35 @@ class ContainerStatus extends Component {
     @return {string} newStatus
   */
   _getStatusText = (status) => {
-    const { props, state } = this;
+    const {
+      isBuilding,
+      isLookingUpPackages,
+      isSyncing,
+      isPublishing,
+    } = this.props;
+    const {
+      isMouseOver,
+    } = this.state;
+    const { state } = this;
     let newStatus = status;
 
-    newStatus = state.isMouseOver && (status === 'Running') ? 'Stop' : newStatus;
-    newStatus = state.isMouseOver && ((status === 'Stopped')
-      && !props.isLookingUpPackages) ? 'Start' : newStatus;
-    newStatus = state.isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
-    newStatus = state.isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
+    newStatus = isMouseOver && (status === 'Running') ? 'Stop' : newStatus;
+    newStatus = isMouseOver && ((status === 'Stopped') && !isLookingUpPackages)
+      ? 'Start'
+      : newStatus;
+    newStatus = isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
+    newStatus = isMouseOver && (status === 'Rebuild') ? 'Rebuild' : newStatus;
 
-    newStatus = props.isBuilding
-      ? 'Building' : props.isSyncing
-      ? 'Syncing' : props.isPublishing
-      ? 'Publishing' : newStatus;
-    newStatus = (state.isMouseOver && (props.isBuilding || status === 'Building'))
+    newStatus = isBuilding ? 'Building' : newStatus;
+    newStatus = isSyncing ? 'Syncing' : newStatus;
+    newStatus = isPublishing ? 'Publishing' : newStatus;
+    newStatus = (isMouseOver && (isBuilding || status === 'Building'))
       ? 'Cancel' : newStatus;
-    newStatus = ((newStatus === 'Building' || newStatus === 'Cancel') && (state.status === 'Canceling'))
-      ? 'Canceling' : newStatus;
+    newStatus = (
+      (newStatus === 'Building' || newStatus === 'Cancel')
+      && (state.status === 'Canceling'))
+      ? 'Canceling'
+      : newStatus;
 
     return newStatus;
   }
@@ -327,14 +403,14 @@ class ContainerStatus extends Component {
     @return {}
   */
   _rebuildContainer = () => {
-    const { props } = this;
+    const { containerMutations } = this.props;
     const data = { noCache: true };
 
-    props.setContainerMenuVisibility(false);
+    setContainerMenuVisibility(false);
 
     this.setState({ imageStatus: 'BUILD_IN_PROGRESS', attemptingRebuild: true });
 
-    props.containerMutations.buildImage(
+    containerMutations.buildImage(
       data,
       (response, error) => {
         if (error) {
@@ -345,31 +421,48 @@ class ContainerStatus extends Component {
   }
 
   render() {
+    const {
+      containerMenuOpen,
+      imageStatus,
+      isBuilding,
+      isLocked,
+      isLookingUpPackages,
+      isPublishing,
+      isSyncing,
+    } = this.props;
+    const {
+      isMouseOver,
+    } = this.state;
     const { props, state } = this;
-    const { constainerStatus, cssClass } = this._getContainerStatusText(props);
+    const { constainerStatus, cssClass } = this._getContainerStatusText(this.props);
     const key = 'setStatus';
     const excludeStatuses = ['Stopping', 'Starting', 'Publishing', 'Syncing'];
     const notExcluded = (excludeStatuses.indexOf(constainerStatus) === -1);
     const status = this._getStatusText(constainerStatus);
-
+    // declare css here
     const containerStatusCss = classNames({
-      'ContainerStatus__container-state--menu-open': props.containerMenuOpen,
-      'ContainerStatus__container-state': !props.containerMenuOpen,
-      [cssClass]: !props.isBuilding && !props.isSyncing && !props.isPublishing,
+      'ContainerStatus__container-state--menu-open': containerMenuOpen,
+      'ContainerStatus__container-state': !containerMenuOpen,
+      [cssClass]: !isBuilding && !isSyncing && !isPublishing,
       'Tooltip-data': (cssClass === 'Rebuild'),
-      Building: (props.isBuilding || props.imageStatus === 'BUILD_IN_PROGRESS' || props.imageStatus === 'BUILD_QUEUED') && state.status !== 'Canceling',
-      Canceling: state.status === 'Canceling' && ((props.isBuilding || props.imageStatus === 'BUILD_IN_PROGRESS' || props.imageStatus === 'BUILD_QUEUED')),
-      Syncing: props.isSyncing,
-      Publishing: props.isPublishing,
-      LookingUp: props.isLookingUpPackages,
-      'ContainerStatus__container-state--expanded': state.isMouseOver && notExcluded && !props.isBuilding && !(state.imageStatus === 'BUILD_IN_PROGRESS'),
-      'ContainerStatus__container-remove-pointer': !notExcluded || props.isSyncing || props.isPublishing || (props.isLocked && constainerStatus === 'Stopped'),
+      Building: (isBuilding || (imageStatus === 'BUILD_IN_PROGRESS')
+        || (imageStatus === 'BUILD_QUEUED'))
+        && state.status !== 'Canceling',
+      Canceling: (state.status === 'Canceling')
+        && ((props.isBuilding || (imageStatus === 'BUILD_IN_PROGRESS')
+        || props.imageStatus === 'BUILD_QUEUED')),
+      Syncing: isSyncing,
+      Publishing: isPublishing,
+      LookingUp: isLookingUpPackages,
+      'ContainerStatus__container-state--expanded': isMouseOver && notExcluded && !props.isBuilding && !(state.imageStatus === 'BUILD_IN_PROGRESS'),
+      'ContainerStatus__container-remove-pointer': !notExcluded || isSyncing || props.isPublishing || (isLocked && constainerStatus === 'Stopped'),
     });
 
     return (
       <div className="ContainerStatus flex flex--row">
 
         <div
+          role="presentation"
           data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
           onClick={evt => this._containerAction(status, cssClass, key)}
           key={key}
@@ -384,11 +477,11 @@ class ContainerStatus extends Component {
           </div>
         </div>
 
-        { props.containerMenuOpen
+        { containerMenuOpen
           && <div className="ContainerStatus__menu-pointer" />
         }
 
-        { props.containerMenuOpen
+        { containerMenuOpen
           && (
           <div className="ContainerStatus__button-menu" data-container-popup="true">
             { store.getState().environment.containerMenuWarning }

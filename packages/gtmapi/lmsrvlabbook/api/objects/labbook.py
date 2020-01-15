@@ -1,7 +1,6 @@
 import graphene
 import flask
 
-from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.inventory.branching import BranchManager
@@ -412,7 +411,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             info: The graphene info object for this requests
 
         """
-        config = Configuration()
+        config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
         # Extract valid Bearer and ID tokens
@@ -546,7 +545,7 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
     @staticmethod
     def helper_resolve_visibility(labbook, info):
         # Get remote server configuration
-        config = Configuration()
+        config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
         # Extract valid Bearer and ID tokens

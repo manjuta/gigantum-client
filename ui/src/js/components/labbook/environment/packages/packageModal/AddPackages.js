@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
@@ -24,7 +25,18 @@ const getDisableInstall = (state) => {
   return (lengthIsZero || lengthEqual);
 };
 
-export default class AddPackages extends Component {
+type Props ={
+  owner: string,
+  name: string,
+  base: Object,
+  togglePackageModal: Function,
+  packages: Array,
+  buildCallback: Function,
+  setBuildId: Function,
+  packageMutations: Object,
+};
+
+class AddPackages extends Component<Props> {
   state = {
     selectedEntryMethod: 'manual',
     packageQueue: [],
@@ -35,13 +47,21 @@ export default class AddPackages extends Component {
   *  installs packages in queue
   */
   _installPackages = () => {
-    const { props, state } = this;
-    const newPackages = state.packageQueue.slice();
-    const duplicates = {}
+    const {
+      packages,
+      setBuildId,
+      owner,
+      name,
+      packageMutations,
+      buildCallback,
+    } = this.props;
+    const { packageQueue } = this.state;
+
+    const newPackages = packageQueue.slice();
+    const duplicates = {};
     const seperatedNewPackages = {};
-    const { owner, name } = props;
     const buildCb = (response, error, id) => {
-      props.setBuildId(id);
+      setBuildId(id);
     };
 
     newPackages.forEach((newPackage) => {
@@ -56,7 +76,8 @@ export default class AddPackages extends Component {
     managers.forEach((manager) => {
       duplicates[manager] = [];
     });
-    props.packages.forEach((pkg) => {
+
+    packages.forEach((pkg) => {
       newPackages.forEach((newPkg) => {
         if ((pkg.manager === newPkg.manager)
           && (pkg.package === newPkg.package)) {
@@ -75,10 +96,10 @@ export default class AddPackages extends Component {
 
       const callback = (response) => {
         if (response && isLast) {
-          props.buildCallback(buildCb);
+          buildCallback(buildCb);
         }
       };
-      props.packageMutations.addPackages(data, callback);
+      packageMutations.addPackages(data, callback);
     });
   }
 
@@ -120,15 +141,21 @@ export default class AddPackages extends Component {
   *  @return {}
   */
   _queuePackage = (packageData, index) => {
-    const { state, props } = this;
-    const newPackageData = [packageData];
-    const newPackageQueue = state.packageQueue.slice();
-    const currentPackages = newPackageQueue.concat(props.packages);
-    const existingPackages = currentPackages.map((pkg) => {
-      return `${pkg.package}${pkg.version}`;
-    });
-    let currentPosition = (index !== undefined) ? index : newPackageQueue.length;
+    const {
+      name,
+      owner,
+      packages,
+    } = this.props;
+    const {
+      packageQueue,
+    } = this.state;
 
+    const newPackageData = [packageData];
+    const newPackageQueue = packageQueue.slice();
+    const currentPackages = newPackageQueue.concat(packages);
+    const existingPackages = currentPackages.map(pkg => `${pkg.package}${pkg.version}`);
+
+    let currentPosition = (index !== undefined) ? index : newPackageQueue.length;
     let overWriteExisiting = false;
 
     newPackageQueue.forEach((pkg, existingIndex) => {
@@ -156,7 +183,7 @@ export default class AddPackages extends Component {
     }
     this.setState({ packageQueue: newPackageQueue });
 
-    PackageLookup.query(props.name, props.owner, newPackageData).then((response) => {
+    PackageLookup.query(name, owner, newPackageData).then((response) => {
       const newState = this.state;
       const responsePackageQueue = newState.packageQueue.slice();
       if (response.errors) {
@@ -199,18 +226,27 @@ export default class AddPackages extends Component {
   }
 
   render() {
-    const { props, state } = this;
+    const {
+      owner,
+      name,
+      base,
+      togglePackageModal,
+      packages,
+      buildCallback,
+    } = this.props;
+    const { state } = this;
+    const { selectedEntryMethod, packageQueue } = state;
     const disableInstall = getDisableInstall(state);
     // declare css
     const manualEntryCSS = classNames({
       'AddPackages__header--manual flex-1': true,
       'AddPackages__header-title': true,
-      'AddPackages__header--selected': (state.selectedEntryMethod === 'manual'),
+      'AddPackages__header--selected': (selectedEntryMethod === 'manual'),
     });
     const fileEntryCSS = classNames({
       'AddPackages__header--file flex-1': true,
       'AddPackages__header-title': true,
-      'AddPackages__header--selected': (state.selectedEntryMethod === 'file'),
+      'AddPackages__header--selected': (selectedEntryMethod === 'file'),
     });
 
     return (
@@ -240,6 +276,8 @@ export default class AddPackages extends Component {
               (state.selectedEntryMethod === 'file') && (
                 <Requirements
                   queuePackage={this._queuePackage}
+                  owner={owner}
+                  name={name}
                 />
               )
             }
@@ -247,25 +285,31 @@ export default class AddPackages extends Component {
               (state.selectedEntryMethod === 'manual') && (
                 <AddPackageForm
                   queuePackage={this._queuePackage}
-                  defaultManager={props.base.packageManagers[0]}
-                  base={props.base}
-                  buildCallback={props.buildCallback}
+                  defaultManager={base.packageManagers[0]}
+                  base={base}
+                  buildCallback={buildCallback}
+                  owner={owner}
+                  name={name}
                 />
               )
             }
           </div>
           <PackageQueue
             queuePackage={this._queuePackage}
-            packageQueue={state.packageQueue}
+            packageQueue={packageQueue}
             disableInstall={disableInstall}
-            toggleModal={props.toggleModal}
+            toggleModal={togglePackageModal}
             installPackages={this._installPackages}
             removePackageFromQueue={this._removePackageFromQueue}
-            buildCallback={props.buildCallback}
-            existingPackages={props.packages}
+            buildCallback={buildCallback}
+            existingPackages={packages}
+            owner={owner}
+            name={name}
           />
         </div>
       </div>
     );
   }
 }
+
+export default AddPackages;

@@ -6,21 +6,41 @@ import AddSecret from './AddSecret';
 // assets
 import './SecretsCard.scss';
 
-export default class PackageCard extends PureComponent {
+type Props = {
+  name: string,
+  owner: string,
+  relay: Object,
+  secretsMutations: Object,
+  secrets: Object,
+}
+
+class PackageCard extends PureComponent<Props> {
   render() {
-    const { props } = this;
+    const {
+      name,
+      owner,
+      relay,
+      secretsMutations,
+      secrets,
+    } = this.props;
     return (
       <div className="SecretCard Card Card--auto Card--no-hover column-1-span-12 relative">
         <AddSecret
-          secretsMutations={props.secretsMutations}
-          relay={props.relay}
+          secretsMutations={secretsMutations}
+          relay={relay}
+          name={name}
+          owner={owner}
         />
         <SecretsTable
-          secretsMutations={props.secretsMutations}
-          secrets={props.secrets}
-          relay={props.relay}
+          secretsMutations={secretsMutations}
+          secrets={secrets}
+          relay={relay}
+          name={name}
+          owner={owner}
         />
       </div>
     );
   }
 }
+
+export default PackageCard;

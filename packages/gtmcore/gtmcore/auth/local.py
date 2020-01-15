@@ -134,12 +134,20 @@ class LocalIdentityManager(IdentityManager):
         Returns:
             None
         """
+        # Removed cached identity.
         data_file = os.path.join(self.auth_dir, 'cached_id_jwt')
         if os.path.exists(data_file):
             os.remove(data_file)
+
+        # Remove the public key. If it even happens to get updated, this is a path to automatically fix
         data_file = os.path.join(self.auth_dir, 'jwks.json')
         if os.path.exists(data_file):
             os.remove(data_file)
+
+        # Remove Git credentials file so you don't leak tokens between users.
+        git_credentials_file = os.path.expanduser('~/.git-credentials')
+        if os.path.exists(git_credentials_file):
+            os.remove(git_credentials_file)
 
         self.user = None
         self.rsa_key = None

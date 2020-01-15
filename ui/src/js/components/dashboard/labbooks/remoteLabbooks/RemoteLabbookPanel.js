@@ -17,10 +17,21 @@ import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 import Loader from 'Components/common/Loader';
 // assets
 import './RemoteLabbookPanel.scss';
-// config
-import config from 'JS/config';
 
-export default class RemoteLabbookPanel extends Component {
+type Props = {
+  auth: {
+    renewToken: Function,
+  },
+  edge: {
+    node: {
+      importUrl: string,
+    }
+  },
+  existsLocally: boolean,
+  toggleDeleteModal: Function,
+}
+
+class RemoteLabbookPanel extends Component<Props> {
   state = {
     isImporting: false,
     showLoginPrompt: false,
@@ -58,10 +69,10 @@ export default class RemoteLabbookPanel extends Component {
   */
   _importLabbook = (owner, labbookName) => {
     // TODO break up this function
-    const { props } = this;
+    const { auth, edge } = this.props;
     const self = this;
     const id = uuidv4();
-    const remote = props.edge.node.importUrl;
+    const remote = edge.node.importUrl;
 
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
@@ -74,16 +85,16 @@ export default class RemoteLabbookPanel extends Component {
               isLast: false,
               error: false,
             };
-            setMultiInfoMessage(messageData);
+            setMultiInfoMessage(owner, labbookName, messageData);
             const successCall = () => {
               this._clearState();
-              const messageData = {
+              const mulitMessageData = {
                 id,
                 message: `Successfully imported remote Project ${labbookName}`,
                 isLast: true,
                 error: false,
               };
-              setMultiInfoMessage(messageData);
+              setMultiInfoMessage(owner, labbookName, mulitMessageData);
 
 
               BuildImageMutation(
@@ -93,14 +104,16 @@ export default class RemoteLabbookPanel extends Component {
                 (response, error) => {
                   if (error) {
                     console.error(error);
-                    const messageData = {
+                    const buildMessageData = {
                       id,
+                      owner,
+                      name: labbookName,
                       message: `ERROR: Failed to build ${labbookName}`,
                       isLast: null,
                       error: true,
                       messageBody: error,
                     };
-                    setMultiInfoMessage(messageData);
+                    setMultiInfoMessage(owner, labbookName, buildMessageData);
                   }
                 },
               );
@@ -109,14 +122,16 @@ export default class RemoteLabbookPanel extends Component {
             };
             const failureCall = (error) => {
               this._clearState();
-              const messageData = {
+              const failureMessageData = {
                 id,
+                owner,
+                name: labbookName,
                 message: 'ERROR: Could not import remote Project',
                 isLast: null,
                 error: true,
                 messageBody: error,
               };
-              setMultiInfoMessage(messageData);
+              setMultiInfoMessage(owner, labbookName, failureMessageData);
             };
             self.setState({ isImporting: true });
 
@@ -128,13 +143,13 @@ export default class RemoteLabbookPanel extends Component {
               failureCall,
               (response, error) => {
                 if (error) {
-                  failurecall(error);
+                  failureCall(error);
                 }
                 self.setState({ isImporting: false });
               },
             );
           } else {
-            props.auth.renewToken(true, () => {
+            auth.renewToken(true, () => {
               this.setState({ showLoginPrompt: true });
             }, () => {
               this._importLabbook(owner, labbookName);
@@ -165,31 +180,32 @@ export default class RemoteLabbookPanel extends Component {
   */
   _handleDelete = (edge) => {
     // TODO: move toggleDeleteModal
-    const { props } = this;
+    const { auth, existsLocally, toggleDeleteModal } = this.props;
     if (localStorage.getItem('username') !== edge.node.owner) {
-      setWarningMessage('You can only delete remote Projects that you have created.');
+      const { owner, name } = edge.node;
+      setWarningMessage(owner, name, 'You can only delete remote Projects that you have created.');
     } else {
       UserIdentity.getUserIdentity().then((response) => {
         if (navigator.onLine) {
           if (response.data) {
             if (response.data.userIdentity.isSessionValid) {
-              props.toggleDeleteModal({
+              toggleDeleteModal({
                 remoteId: edge.node.id,
                 remoteUrl: edge.node.remoteUrl,
                 remoteOwner: edge.node.owner,
                 remoteLabbookName: edge.node.name,
-                existsLocally: props.existsLocally,
+                existsLocally,
               });
             } else {
-              props.auth.renewToken(true, () => {
+              auth.renewToken(true, () => {
                 this.setState({ showLoginPrompt: true });
               }, () => {
-                props.toggleDeleteModal({
+                toggleDeleteModal({
                   remoteId: edge.node.id,
                   remoteUrl: edge.node.remoteUrl,
                   remoteOwner: edge.node.owner,
                   remoteLabbookName: edge.node.name,
-                  existsLocally: props.existsLocally,
+                  existsLocally,
                 });
               });
             }
@@ -202,42 +218,40 @@ export default class RemoteLabbookPanel extends Component {
   }
 
 
- render() {
-   // variables declared here
-   const { props, state } = this;
-   const { edge } = props;
-   const deleteDisabled = state.isImporting || (localStorage.getItem('username') !== edge.node.owner);
-   const deleteTooltipText = (localStorage.getItem('username') !== edge.node.owner) ? 'Only owners and admins can delete a remote Project' : '';
+  render() {
+    // variables declared here
+    const { isImporting, showLoginPrompt } = this.state;
+    const { edge, existsLocally } = this.props;
+    const deleteDisabled = isImporting || (localStorage.getItem('username') !== edge.node.owner);
+    const deleteTooltipText = (localStorage.getItem('username') !== edge.node.owner) ? 'Only owners and admins can delete a remote Project' : '';
 
-   // css declared here
-   const descriptionCss = classNames({
-     'RemoteLabbooks__row RemoteLabbooks__row--text': true,
-     blur: state.isImporting,
-   });
-   const deleteCSS = classNames({
-     'Btn__dashboard Btn--action': true,
-     'Tooltip-data Tooltip-data--wide': localStorage.getItem('username') !== edge.node.owner,
-     'Btn__dashboard--delete': localStorage.getItem('username') === edge.node.owner,
-     'Btn__dashboard--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
-   });
+    // css declared here
+    const descriptionCss = classNames({
+      'RemoteLabbooks__row RemoteLabbooks__row--text': true,
+      blur: isImporting,
+    });
+    const deleteCSS = classNames({
+      'Btn__dashboard Btn--action': true,
+      'Tooltip-data Tooltip-data--wide': localStorage.getItem('username') !== edge.node.owner,
+      'Btn__dashboard--delete': localStorage.getItem('username') === edge.node.owner,
+      'Btn__dashboard--delete-disabled': localStorage.getItem('username') !== edge.node.owner,
+    });
 
-   return (
-     <div
-       key={edge.node.name}
-       className="Card Card--225 column-4-span-3 flex flex--column justify--space-between"
-     >
-       <div className="RemoteLabbooks__row RemoteLabbooks__row--icon">
-         {
-        !(edge.node.visibility === 'local')
-          && (
-          <div
-            data-tooltip={`${edge.node.visibility}`}
-            className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
-          />
-          )
-         }
-         {
-          props.existsLocally
+    return (
+      <div
+        key={edge.node.name}
+        className="Card Card--225 column-4-span-3 flex flex--column justify--space-between"
+      >
+        <div className="RemoteLabbooks__row RemoteLabbooks__row--icon">
+          { !(edge.node.visibility === 'local')
+            && (
+            <div
+              data-tooltip={`${edge.node.visibility}`}
+              className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
+            />
+            )
+          }
+          { existsLocally
             ? (
               <button
                 type="button"
@@ -251,56 +265,56 @@ export default class RemoteLabbookPanel extends Component {
             : (
               <button
                 type="button"
-                disabled={state.isImporting}
+                disabled={isImporting}
                 className="Btn__dashboard Btn--action Btn__dashboard--cloud-download"
                 onClick={() => this._importLabbook(edge.node.owner, edge.node.name)}
               >
               Import
               </button>
             )
-        }
-         <button
-           type="button"
-           className={deleteCSS}
-           data-tooltip={deleteTooltipText}
-           disabled={deleteDisabled}
-           onClick={() => this._handleDelete(edge)}
-         >
+          }
+
+          <button
+            type="button"
+            className={deleteCSS}
+            data-tooltip={deleteTooltipText}
+            disabled={deleteDisabled}
+            onClick={() => this._handleDelete(edge)}
+          >
            Delete
-         </button>
+          </button>
 
-       </div>
+        </div>
 
-       <div className={descriptionCss}>
+        <div className={descriptionCss}>
 
-         <div className="RemoteLabbooks__row RemoteLabbooks__row--title">
-           <h5 className="RemoteLabbooks__panel-title">
-             <Highlighter
-               highlightClassName="LocalLabbooks__highlighted"
-               searchWords={[store.getState().labbookListing.filterText]}
-               autoEscape={false}
-               caseSensitive={false}
-               textToHighlight={edge.node.name}
-             />
-           </h5>
+          <div className="RemoteLabbooks__row RemoteLabbooks__row--title">
+            <h5 className="RemoteLabbooks__panel-title">
+              <Highlighter
+                highlightClassName="LocalLabbooks__highlighted"
+                searchWords={[store.getState().labbookListing.filterText]}
+                autoEscape={false}
+                caseSensitive={false}
+                textToHighlight={edge.node.name}
+              />
+            </h5>
 
-         </div>
+          </div>
 
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
-           <span className="bold">Created:</span>
-           {' '}
-           {Moment(edge.node.creationDateUtc).format('MM/DD/YY')}
-         </p>
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
-           <span className="bold">Modified:</span>
-           {' '}
-           {Moment(edge.node.modifiedDateUtc).fromNow()}
-         </p>
+          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
+          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
+            <span className="bold">Created:</span>
+            {' '}
+            {Moment(edge.node.creationDateUtc).format('MM/DD/YY')}
+          </p>
+          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
+            <span className="bold">Modified:</span>
+            {' '}
+            {Moment(edge.node.modifiedDateUtc).fromNow()}
+          </p>
 
-         <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description">
-           {
-            (edge.node.description && edge.node.description.length)
+          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description">
+            { (edge.node.description && edge.node.description.length)
               ? (
                 <Highlighter
                   highlightClassName="LocalLabbooks__highlighted"
@@ -312,21 +326,23 @@ export default class RemoteLabbookPanel extends Component {
               )
               : 'No description provided'
            }
-         </p>
-       </div>
+          </p>
+        </div>
 
-       { state.isImporting
+        { isImporting
           && (
-          <div className="RemoteLabbooks__loader">
-            <Loader />
-          </div>
+            <div className="RemoteLabbooks__loader">
+              <Loader />
+            </div>
           )
         }
 
-       { state.showLoginPrompt
+        { showLoginPrompt
           && <LoginPrompt closeModal={this._closeLoginPromptModal} />
         }
-     </div>
-   );
- }
+      </div>
+    );
+  }
 }
+
+export default RemoteLabbookPanel;

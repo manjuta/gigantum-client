@@ -1,38 +1,63 @@
 // vendor
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
+// store
+import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
 import Tooltip from 'Components/common/Tooltip';
 // mutations
 import SetLabbookDescriptionMutation from 'Mutations/SetLabbookDescriptionMutation';
 import SetDatasetDescriptionMutation from 'Mutations/SetDatasetDescriptionMutation';
-// store
-import store from 'JS/redux/store';
 // assets
 import './Description.scss';
 
-export default class Description extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      editingDescription: false,
-      descriptionEdited: false,
-      descriptionText: props.description ? props.description.replace(/\n/g, ' ') : '',
-      lastSavedDescription: props.description ? props.description.replace(/\n/g, ' ') : '',
-      savingDescription: false,
-      hovered: false,
-      textareaWidth: '270px',
-      textareaHeight: '66px',
-    };
-    this._handleClick = this._handleClick.bind(this);
-    this._saveDescription = this._saveDescription.bind(this);
-    this._cancelDescription = this._cancelDescription.bind(this);
-  }
+
+/**
+* @param {string} description
+* gets descrtiption and removes \n
+* @return {string}
+*/
+const getDescription = (description) => {
+  const descriptionText = description
+    ? description.replace(/\n/g, ' ')
+    : '';
+
+  return descriptionText;
+};
+
+type Props = {
+  description: string,
+  dataset: {
+    id: string,
+  },
+  hovered: boolean,
+  labbook: {
+    id: string,
+  },
+  name: string,
+  owner: string,
+  sectionType: string,
+}
+
+class Description extends Component<Props> {
+  state = {
+    editingDescription: false,
+    descriptionEdited: false,
+    descriptionText: getDescription(this.props.description),
+    lastSavedDescription: getDescription(this.props.description),
+    savingDescription: false,
+    hovered: false,
+    textareaWidth: '270px',
+    textareaHeight: '66px',
+  };
 
   static getDerivedStateFromProps(nextProps, state) {
+    const descriptionText = state.descriptionEdited
+      ? state.descriptionText
+      : nextProps.description;
     return {
       ...state,
-      descriptionText: state.descriptionEdited ? state.descriptionText : nextProps.description,
+      descriptionText,
     };
   }
 
@@ -54,36 +79,41 @@ export default class Description extends Component {
     *  @param {event} evt
     handles click outside description
   */
-  _handleClick(evt) {
-    const { state } = this;
-    if ((evt.target.className.indexOf('Description') === -1) && state.editingDescription) {
+  _handleClick = (evt) => {
+    const { editingDescription } = this.state;
+    if (
+      (evt.target.className.indexOf('Description') === -1)
+      && editingDescription
+    ) {
       this._cancelDescription();
     }
   }
 
   /**
    @param {String} owner
-   @param {String} labbookName
+   @param {String} name
    calls mutation to save labbook description
    */
-  _saveLabbookDescription(owner, labbookName) {
-    const { props, state } = this;
-    const sectionId = props[props.sectionType].id;
+  _saveLabbookDescription = (owner, name) => {
+    const { descriptionText } = this.state;
+    const { sectionType } = this.props;
+    const sectionId = this.props[sectionType].id;
+
     SetLabbookDescriptionMutation(
       owner,
-      labbookName,
-      state.descriptionText,
+      name,
+      descriptionText,
       sectionId,
       (res, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('Description was not set: ', error);
+          setErrorMessage(owner, name, 'Description was not set: ', error);
         } else {
           this.setState({
             descriptionEdited: false,
             editingDescription: false,
             savingDescription: false,
-            lastSavedDescription: state.descriptionText.replace(/\n/g, ' '),
+            lastSavedDescription: descriptionText.replace(/\n/g, ' '),
           });
         }
       },
@@ -92,27 +122,29 @@ export default class Description extends Component {
 
   /**
    @param {String} owner
-   @param {String} labbookName
+   @param {String} name
    calls mutation to save dataset description
    */
-  _saveDatasetDescription(owner, labbookName) {
-    const { props, state } = this;
-    const sectionId = props[props.sectionType].id;
+  _saveDatasetDescription = (owner, name) => {
+    const { descriptionText } = this.state;
+    const { sectionType } = this.props;
+    const sectionId = this.props[sectionType].id;
+
     SetDatasetDescriptionMutation(
       owner,
-      labbookName,
-      state.descriptionText,
+      name,
+      descriptionText,
       sectionId,
       (res, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('Description was not set: ', error);
+          setErrorMessage(owner, name, 'Description was not set: ', error);
         } else {
           this.setState({
             descriptionEdited: false,
             editingDescription: false,
             savingDescription: false,
-            lastSavedDescription: state.descriptionText.replace(/\n/g, ' '),
+            lastSavedDescription: descriptionText.replace(/\n/g, ' '),
           });
         }
       },
@@ -123,14 +155,19 @@ export default class Description extends Component {
     *  @param {}
     *  fires setlabbookdescription mutation
   */
-  _saveDescription() {
-    const { props } = this;
-    const { owner, labbookName } = store.getState().routes;
+  _saveDescription = () => {
+    const {
+      owner,
+      name,
+      sectionType,
+    } = this.props;
+
     this.setState({ savingDescription: true });
-    if (props.sectionType === 'labbook') {
-      this._saveLabbookDescription(owner, labbookName);
+
+    if (sectionType === 'labbook') {
+      this._saveLabbookDescription(owner, name);
     } else {
-      this._saveDatasetDescription(owner, labbookName);
+      this._saveDatasetDescription(owner, name);
     }
   }
 
@@ -138,12 +175,12 @@ export default class Description extends Component {
     *  @param {}
     *  reverts description back to last save
   */
-  _cancelDescription() {
-    const { state } = this;
+  _cancelDescription = () => {
+    const { lastSavedDescription } = this.state;
     this.setState({
       descriptionEdited: false,
       editingDescription: false,
-      descriptionText: state.lastSavedDescription,
+      descriptionText: lastSavedDescription,
     });
   }
 
@@ -151,13 +188,18 @@ export default class Description extends Component {
     *  @param {}
     *  handles enabling description editing and sets textareaCSS
   */
-  _editingDescription() {
-    const { state } = this;
-    if (!state.editingDescription) {
+  _editingDescription = () => {
+    const { editingDescription } = this.state;
+    if (!editingDescription) {
       const element = document.getElementsByClassName('Description__container')[0];
       const width = element.offsetWidth - 30;
       const height = element.offsetHeight - 4;
-      this.setState({ editingDescription: true, textareaWidth: `${width}px`, textareaHeight: `${height}px` }, () => {
+      this.setState({
+        editingDescription: true,
+        textareaWidth: `${width}px`,
+        textareaHeight: `${height}px`,
+      },
+      () => {
         this.descriptionInput.focus();
       });
     }
@@ -167,26 +209,47 @@ export default class Description extends Component {
     *  @param {}
     *  handles enabling description editing and sets textareaCSS
   */
-  _updateDescrtipionText(evt) {
+  _updateDescrtipionText = (evt) => {
     this.setState({
       descriptionText: evt.target.value.replace(/\n/g, ' '),
       descriptionEdited: true,
     });
   }
 
-  render() {
-    const { props, state } = this;
-    const displayedText = state.descriptionText && state.descriptionText.length ? state.descriptionText : 'Add description...';
-    const defaultText = state.descriptionText ? state.descriptionText : '';
+  /**
+    *  @param {}
+    *  handles enabling description editing and sets textareaCSS
+  */
+  _textareaKeyDown = (evt) => {
+    if (evt.key === 'Enter') {
+      this.setState({ editingDescription: false });
+      this._saveDescription();
+    }
+  }
 
+  render() {
+    const stateHovered = this.state.hovered;
+    const {
+      hovered,
+    } = this.props;
+    const {
+      editingDescription,
+      descriptionText,
+      textareaHeight,
+    } = this.state;
+    const displayedText = descriptionText && descriptionText.length
+      ? descriptionText
+      : 'Add description...';
+    const defaultText = descriptionText || '';
+    // declare css here
     const descriptionCSS = classNames({
       Description__text: true,
-      empty: !state.descriptionText,
+      empty: !descriptionText,
     });
     const descriptionContainerCSS = classNames({
       Description__container: true,
-      'Description__container--hovered': state.hovered && !state.editingDescription,
-      'visibility-hidden': props.hovered,
+      'Description__container--hovered': stateHovered && !editingDescription,
+      'visibility-hidden': hovered,
     });
 
     return (
@@ -196,54 +259,57 @@ export default class Description extends Component {
           onMouseEnter={() => this.setState({ hovered: true })}
           onMouseLeave={() => this.setState({ hovered: false })}
           onClick={() => this._editingDescription()}
+          role="presentation"
         >
 
-          {
-                state.editingDescription
-                  ? (
-                    <Fragment>
-                      <textarea
-                        ref={(input) => { this.descriptionInput = input; }}
-                        maxLength="80"
-                        className="Description__input"
-                        type="text"
-                        onChange={(evt) => { this._updateDescrtipionText(evt); }}
-                        onKeyDown={(evt) => {
-                          if (evt.key === 'Enter') {
-                            this.setState({ editingDescription: false });
-                            this._saveDescription();
-                          }
-                        }}
-                        placeholder="Short description of Project"
-                        defaultValue={defaultText}
+          { editingDescription
+            ? (
+              <Fragment>
+                <textarea
+                  ref={(input) => { this.descriptionInput = input; }}
+                  maxLength="80"
+                  className="Description__input"
+                  type="text"
+                  onChange={(evt) => { this._updateDescrtipionText(evt); }}
+                  onKeyDown={(evt) => { this._textareaKeyDown(evt); }}
+                  placeholder="Short description of Project"
+                  defaultValue={defaultText}
+                />
+                <div
+                  className="Description__input-buttons"
+                  style={{ height: textareaHeight }}
+                >
+                  <button
+                    onClick={this._cancelDescription}
+                    className="Description__input-cancel Btn Btn--noMargin"
+                    type="button"
+                  />
+                  <button
+                    onClick={this._saveDescription}
+                    className="Description__input-save Btn Btn--noMargin"
+                    type="button"
+                  />
+                </div>
+              </Fragment>
+            )
+            : (
+              <p className={descriptionCSS}>
+                <span className="Description__text">{displayedText}</span>
+                { stateHovered
+                    && (
+                      <button
+                        className="Btn Btn__edit Btn__edit--DescriptionPosition Btn--medium Btn--noShadow absolute Btn--noMargin"
+                        type="button"
                       />
-                      <div
-                        className="Description__input-buttons"
-                        style={{ height: state.textareaHeight }}
-                      >
-                        <button
-                          onClick={this._cancelDescription}
-                          className="Description__input-cancel Btn Btn--noMargin"
-                        />
-                        <button
-                          onClick={this._saveDescription}
-                          className="Description__input-save Btn Btn--noMargin"
-                        />
-                      </div>
-                    </Fragment>
-                  )
-                  : (
-                    <p className={descriptionCSS}>
-                      <span className="Description__text">{displayedText}</span>
-                      { state.hovered
-                          && <button className="Btn Btn__edit Btn__edit--DescriptionPosition Btn--medium Btn--noShadow absolute Btn--noMargin" />
-                        }
-                    </p>
-                  )
-            }
+                    )
+                  }
+              </p>
+            )}
         </div>
         <Tooltip section="descriptionOverview" />
       </div>
     );
   }
 }
+
+export default Description;

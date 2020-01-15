@@ -18,14 +18,16 @@ const jobStatusQuery = graphql`
   }
 `;
 
-
 const JobStatus = {
-  getJobStatus: (jobKey) => {
+  getJobStatus: (owner, name, jobKey) => {
     const variables = { jobKey };
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
+      const fetchData = () => {
         fetchQuery(jobStatusQuery(), variables).then((response) => {
-          if (response.data.jobStatus.status === 'started' || response.data.jobStatus.status === 'queued') {
+          if (
+            (response.data.jobStatus.status === 'started')
+            || (response.data.jobStatus.status === 'queued')
+          ) {
             setTimeout(() => {
               fetchData();
             }, 250);
@@ -47,7 +49,7 @@ const JobStatus = {
     const variables = { jobKey };
 
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
+      const fetchData = () => {
         fetchQuery(jobStatusQuery(), variables).then((response) => {
           resolve(response);
         }).catch((error) => {

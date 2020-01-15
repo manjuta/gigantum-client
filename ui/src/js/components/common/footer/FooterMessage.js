@@ -2,8 +2,6 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import Moment from 'moment';
-// store
-import store from 'JS/redux/store';
 // components
 import BuildModal from 'Components/shared/modals/BuildModal';
 // assets
@@ -14,11 +12,12 @@ type Props = {
   selectedBuildId: string,
   setBuildId: Function,
   updateOpenCount: Function,
+  owner: string,
+  name: string,
 };
 
 
 class FooterMessage extends PureComponent<Props> {
-
   state = {
     messageBodyVisible: false,
   }
@@ -38,8 +37,9 @@ class FooterMessage extends PureComponent<Props> {
   }
 
   render() {
-    const { owner, labbookName } = store.getState().routes;
     const {
+      owner,
+      name,
       messageItem,
       selectedBuildId,
       setBuildId,
@@ -125,9 +125,9 @@ class FooterMessage extends PureComponent<Props> {
             <BuildModal
               setBuildId={setBuildId}
               buildId={selectedBuildId}
-              keepOpen={messageItem.isLast}
+              keepOpen={true}
               owner={owner}
-              name={labbookName}
+              name={name}
             />
           )
         }

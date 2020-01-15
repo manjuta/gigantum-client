@@ -38,7 +38,7 @@ export default function CancelBuildMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('ERROR: Failed to cancel build:', error);
+          setErrorMessage(owner, labbookName, 'ERROR: Failed to cancel build:', error);
         }
 
         callback(response, error);

@@ -43,7 +43,16 @@ export default function UpdateUnmanagedDatasetMutation(
         if (error) {
           console.log(error);
         }
-        FooterUtils.getJobStatus(response, 'updateUnmanagedDataset', 'backgroundJobKey');
+
+        const footerData = {
+          result: response,
+          type: 'updateUnmanagedDataset',
+          key: 'backgroundJobKey',
+          footerCallback: () => {},
+          successCall: () => {},
+          failureCall: () => {},
+        };
+        FooterUtils.getJobStatus(datasetOwner, datasetName, footerData);
         callback(response, error);
       },
       onError: err => console.error(err),

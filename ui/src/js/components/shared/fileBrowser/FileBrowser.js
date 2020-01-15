@@ -319,10 +319,10 @@ class FileBrowser extends Component {
     const { downloadDatasetFiles } = state.mutations;
 
     if (!state.downloadingAll && !allFilesLocal) {
-      const { owner, labbookName } = store.getState().routes;
+      const { owner, name } = this.props;
       const data = {
-        owner,
-        datasetName: labbookName,
+        datasetOwner: owner,
+        datasetName: name,
         allKeys: true,
       };
       data.successCall = () => {
@@ -402,12 +402,13 @@ class FileBrowser extends Component {
       parentId,
       connection,
       section,
+      owner,
+      name,
     } = this.props;
-    const { owner, labbookName } = store.getState().routes;
 
     return {
       owner,
-      labbookName,
+      name,
       parentId,
       connection,
       section,
@@ -859,7 +860,12 @@ class FileBrowser extends Component {
   render() {
     const { props, state } = this;
     const { files, mutationData } = state;
-    const { isOver, canDrop } = props;
+    const {
+      isOver,
+      canDrop,
+      name,
+      owner,
+    } = props;
     const { isSelected } = this._checkChildState();
     const allFilesLocal = checkLocalAll(files);
     const uploadPromptText = this._getFilePromptText();
@@ -925,11 +931,11 @@ class FileBrowser extends Component {
                   showLinkModal={this._showLinkModal}
                   isLocked={props.isLocked}
                   checkLocal={checkLocalIndividual}
-                  owner={props.owner}
-                  name={props.name}
                   mutationData={mutationData}
                   mutations={state.mutations}
                   section={props.section}
+                  name={name}
+                  owner={owner}
                 />
               </div>
             )
@@ -939,6 +945,8 @@ class FileBrowser extends Component {
               <LinkModal
                 closeLinkModal={() => this._showLinkModal(false)}
                 linkedDatasets={props.linkedDatasets || []}
+                name={name}
+                owner={owner}
               />
             )
           }
@@ -949,6 +957,8 @@ class FileBrowser extends Component {
                  userRejectsUpload={this._userRejectsUpload}
                  userAcceptsUpload={this._userAcceptsUpload}
                  uploadPromptText={uploadPromptText}
+                 name={name}
+                 owner={owner}
                />
              )
            }
@@ -968,6 +978,8 @@ class FileBrowser extends Component {
             allFilesLocal={allFilesLocal}
             section={props.section}
             mutations={state.mutations}
+            name={name}
+            owner={owner}
           />
 
           {
@@ -983,6 +995,8 @@ class FileBrowser extends Component {
                 section={props.section}
                 selectedCount={state.selectedCount}
                 popupVisible={state.popupVisible}
+                name={name}
+                owner={owner}
               />
             )
           }
@@ -1035,6 +1049,8 @@ class FileBrowser extends Component {
               mutations={state.mutations}
               setAddFolderVisible={visibility => this.setState({ addFolderVisible: visibility })}
               addFolderVisible={state.addFolderVisible}
+              name={name}
+              owner={owner}
             />
 
             { childrenKeys.map((file) => {
@@ -1077,6 +1093,8 @@ class FileBrowser extends Component {
                     checkLocal={checkLocalIndividual}
                     containerStatus={props.containerStatus}
                     refetch={this._refetch}
+                    name={name}
+                    owner={owner}
                   />
                 );
               } if (isFile) {
@@ -1100,6 +1118,8 @@ class FileBrowser extends Component {
                     updateChildState={this._updateChildState}
                     checkLocal={checkLocalIndividual}
                     containerStatus={props.containerStatus}
+                    name={name}
+                    owner={owner}
                   />
                 );
               }
@@ -1142,7 +1162,9 @@ class FileBrowser extends Component {
                         id="add_file"
                         className="hidden"
                         type="file"
-                        onChange={evt => this._uploadFiles(Array.prototype.slice.call(evt.target.files))}
+                        onChange={(evt) => {
+                          this._uploadFiles(Array.prototype.slice.call(evt.target.files));
+                        }}
                       />
                     </label>
                   </div>

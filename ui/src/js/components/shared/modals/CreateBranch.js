@@ -1,5 +1,5 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import dateFormat from 'dateformat';
 import Moment from 'moment';
 import classNames from 'classnames';
@@ -13,29 +13,70 @@ import validation from 'JS/utils/Validation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
-import store from 'JS/redux/store';
 // assets
 import './CreateBranch.scss';
 
-export default class CreateBranchModal extends Component {
+
+/**
+* @param {Object} props
+* gets description, text warning and text length from props, returns as an object
+* @ return {Object}
+*/
+const getBranchDescrtipion = (props) => {
+  let branchDescription;
+  const formatedTimestamp = props.selected
+    ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('M/DD/YY h:mm:ss A')
+    : '';
+
+  if (props.selected) {
+    branchDescription = `${props.selected.description}. ${props.selected.activeBranch} at ${formatedTimestamp}.`;
+  } else if (props.description) {
+    branchDescription = props.description;
+  } else {
+    branchDescription = '';
+  }
+  branchDescription = branchDescription.substr(0, 80);
+
+  const textLength = 80 - branchDescription.length;
+  const textWarning = (textLength > 20)
+    ? 'CreateBranch__warning--green'
+    : 'CreateBranch__warning--orange';
+
+
+  return {
+    textWarning,
+    branchDescription,
+    textLength,
+  };
+};
+
+type Props = {
+  modalVisible: boolean,
+  name: string,
+  owner: string,
+  selected: {
+    activeBranch: string,
+    activityNode: {
+      timestamp: Number,
+    },
+    description: string,
+  },
+  setBuildingState: Function,
+  toggleModal: Function,
+}
+
+class CreateBranchModal extends Component<Props> {
   constructor(props) {
     super(props);
-    let branchDescription = props.selected ? `${props.selected.description}. ${props.selected.activeBranch} at ${formatedTimestamp}.` : props.description ? props.description : '';
-    branchDescription = branchDescription.substr(0, 80);
-    const textLength = 80 - branchDescription.length;
 
-
-    const formatedCurrentTimestamp = Moment().format('M/DD/YY h:mm:ss A');
-
-
-    const formatedTimestamp = props.selected ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('M/DD/YY h:mm:ss A') : '';
-
-
-    const textWarning = textLength > 20 ? 'CreateBranch__warning--green' : 'CreateBranch__warning--orange';
+    const {
+      textWarning,
+      branchDescription,
+      textLength,
+    } = getBranchDescrtipion(props);
 
     this.state = {
       modalVisible: props.modalVisible,
-      showLoginPrompt: false,
       showError: false,
       branchName: '',
       createButtonClicked: false,
@@ -44,27 +85,29 @@ export default class CreateBranchModal extends Component {
       branchDescription,
       textLength,
     };
-
-    this._showModal = this._showModal.bind(this);
-    this._hideModal = this._hideModal.bind(this);
-    this._createNewBranch = this._createNewBranch.bind(this);
-    this._updateTextState = this._updateTextState.bind(this);
   }
 
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const { state } = this;
-    if (nextProps.modalVisible !== state.modalVisible) {
-      this.setState({ modalVisible: nextProps.modalVisible });
-    }
-
+  static getDerivedStateFromProps(nextProps, state) {
+    let { branchName } = state;
     if (nextProps.selected) {
-      const formattedTimestamp = Moment(Date.parse(nextProps.selected.activityNode.timestamp)).format('MMDDYY-HHmmss').toLowerCase();
-      const branchName = `${nextProps.selected.activeBranch}-at-${formattedTimestamp}`;
+      const { timestamp } = nextProps.selected.activityNode;
+      const formattedTimestamp = Moment(Date.parse(timestamp)).format('MMDDYY-HHmmss').toLowerCase();
+      branchName = `${nextProps.selected.activeBranch}-at-${formattedTimestamp}`;
       this.setState({ branchName });
     } else if (state.branchName && (typeof state.branchName === 'string') && (state.branchName.indexOf('rollback') > -1)) {
-      this.setState({ branchName: '' });
+      branchName = '';
     }
+
+    const modalVisible = (nextProps.modalVisible !== state.modalVisible)
+      ? nextProps.modalVisible
+      : state.modalVisible;
+
+    return {
+      ...state,
+      branchName,
+      modalVisible,
+    };
   }
 
   /**
@@ -72,7 +115,7 @@ export default class CreateBranchModal extends Component {
   *   shows modal by setting state
   *   @return {}
   */
-  _showModal() {
+  _showModal = () => {
     this.setState({ modalVisible: true });
   }
 
@@ -81,16 +124,16 @@ export default class CreateBranchModal extends Component {
   *   hides modal by stetting state
   *   @return {}
   */
-  _hideModal(inputsDisabled) {
-    const { props } = this;
+  _hideModal = (inputsDisabled) => {
+    const { toggleModal } = this.props;
     if (!inputsDisabled) {
       this.setState({
         branchName: '',
         modalVisible: false,
       });
 
-      if (props.toggleModal) {
-        props.toggleModal('createBranchVisible');
+      if (toggleModal) {
+        toggleModal('createBranchVisible');
       }
     }
   }
@@ -100,9 +143,11 @@ export default class CreateBranchModal extends Component {
   *   returns error text when a branch name is invalid
   *   @return {}
   */
-  _getErrorText() {
+  _getErrorText = () => {
     const { state } = this;
-    return state.errorType === 'send' ? 'Error: Last character cannot be a hyphen.' : 'Error: Branch name may only contain lowercase alphanumeric and `-`. (e.g. new-branch-name)';
+    return (state.errorType === 'send')
+      ? 'Error: Last character cannot be a hyphen.'
+      : 'Error: Branch name may only contain lowercase alphanumeric and `-`. (e.g. new-branch-name)';
   }
 
   /**
@@ -149,56 +194,49 @@ export default class CreateBranchModal extends Component {
   *   formats date for branch name
   *   @return {}
   */
-  _formattedISO(date) {
-    return dateFormat(date, 'isoDateTime').toLowerCase().replace(/:/g, '-');
-  }
+  _formattedISO = date => dateFormat(date, 'isoDateTime').toLowerCase().replace(/:/g, '-');
 
   /**
   *   @param {}
   *   triggers CreateExperimentalBranchMutation
   *   @return {}
   */
-  _createNewBranch() {
+  _createNewBranch = () => {
     const self = this;
-
-
-    const { state, props } = this;
-
-
-    const { owner, labbookName } = store.getState().routes;
-
-
-    const { branchName } = this.state;
-
-
-    const revision = props.selected ? props.selected.activityNode.commit : null;
-
+    const {
+      owner,
+      name,
+      selected,
+      setBuildingState,
+    } = this.props;
+    const { branchName, branchDescription } = this.state;
+    const revision = selected ? selected.activityNode.commit : null;
 
     this.setState({ buttonLoaderCreateBranch: 'loading' });
 
     CreateExperimentalBranchMutation(
       owner,
-      labbookName,
+      name,
       branchName,
       revision,
-      state.branchDescription,
+      branchDescription,
       (response, error) => {
         if (error) {
-          setErrorMessage('Problem Creating new branch', error);
+          setErrorMessage(owner, name, 'Problem Creating new branch', error);
 
           setTimeout(() => {
             this.setState({ buttonLoaderCreateBranch: 'error' });
           }, 1000);
         } else {
-          if (props.selected) {
-            props.setBuildingState(owner, labbookName, true);
+          if (selected) {
+            setBuildingState(owner, name, true);
             BuildImageMutation(
               owner,
-              labbookName,
+              name,
               false,
               (response, error) => {
                 if (error) {
-                  setErrorMessage(`${labbookName} failed to build`, error);
+                  setErrorMessage(owner, name, `${name} failed to build`, error);
                 }
 
                 return 'finished';
@@ -221,27 +259,43 @@ export default class CreateBranchModal extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const createDisabled = state.showError
-          || (state.branchName.length === 0)
-          || state.createButtonClicked;
-    const inputsDisabled = state.buttonLoaderCreateBranch !== '';
-    const branchNameTimestamp = props.selected ? Moment(Date.parse(props.selected.activityNode.timestamp)).format('MMDDYY-HHmmss').toLowerCase() : '';
-    const branchDefault = props.selected ? `${props.selected.activeBranch}-at-${branchNameTimestamp}` : '';
-    const textAreaDefault = state.branchDescription;
+    const { selected } = this.props;
+    const {
+      branchDescription,
+      branchName,
+      buttonLoaderCreateBranch,
+      createButtonClicked,
+      modalVisible,
+      showError,
+      textLength,
+      textWarning,
+    } = this.state;
+    const createDisabled = showError
+          || (branchName.length === 0)
+          || createButtonClicked;
+    const inputsDisabled = buttonLoaderCreateBranch !== '';
+    const branchNameTimestamp = selected
+      ? Moment(Date.parse(selected.activityNode.timestamp)).format('MMDDYY-HHmmss').toLowerCase()
+      : '';
+    const branchDefault = selected
+      ? `${selected.activeBranch}-at-${branchNameTimestamp}`
+      : '';
+    const textAreaDefault = branchDescription;
+    const branchModalTitle = selected ? 'Create Rollback Branch' : 'Create Branch';
+    const icon = selected ? 'rollback' : 'add';
+
+    // declare css here
     const inputCSS = classNames({
-      'CreateBranch__input--invalid': state.showError,
+      'CreateBranch__input--invalid': showError,
     });
     const errorCSS = classNames({
-      CreateBranch__error: state.showError,
-      hidden: !state.showError,
+      CreateBranch__error: showError,
+      hidden: !showError,
     });
-    const branchModalTitle = props.selected ? 'Create Rollback Branch' : 'Create Branch';
-    const icon = props.selected ? 'rollback' : 'add';
 
     return (
       <div>
-        { state.modalVisible
+        { modalVisible
           && (
           <Modal
             handleClose={() => { this._hideModal(inputsDisabled); }}
@@ -287,7 +341,7 @@ export default class CreateBranchModal extends Component {
                       defaultValue={textAreaDefault}
                     />
                   </label>
-                  <p className={`CreateBranch__warning ${state.textWarning}`}>{`${state.textLength} characters remaining`}</p>
+                  <p className={`CreateBranch__warning ${textWarning}`}>{`${textLength} characters remaining`}</p>
                 </div>
 
                 <div className="CreateBranch_nav">
@@ -303,8 +357,7 @@ export default class CreateBranchModal extends Component {
 
                     <ButtonLoader
                       className="Btn--last"
-                      ref="buttonLoaderCreateBranch"
-                      buttonState={state.buttonLoaderCreateBranch}
+                      buttonState={buttonLoaderCreateBranch}
                       buttonText="Create"
                       params={{}}
                       buttonDisabled={createDisabled}
@@ -323,3 +376,5 @@ export default class CreateBranchModal extends Component {
     );
   }
 }
+
+export default CreateBranchModal;

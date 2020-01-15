@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import Moment from 'moment';
@@ -8,7 +9,6 @@ import ReactTooltip from 'react-tooltip';
 // config
 import config from 'JS/config';
 // store
-import store from 'JS/redux/store';
 import { setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/actions/footer';
 // mutations
@@ -52,7 +52,44 @@ const getIsSelected = (props) => {
   return (isSelected || false);
 };
 
-class File extends Component {
+type Props = {
+  checkParent: Function,
+  connectDragSource: Function,
+  containerStatus: string,
+  fileData :{
+    edge: {
+      node: {
+        id: string,
+        isLocal: boolean,
+        key: string,
+        modifiedAt: string,
+        size: string,
+      },
+    },
+    index: boolean,
+  },
+  filename: string,
+  isDragging: boolean,
+  isDownloading: boolean,
+  mutationData: Object,
+  mutations: {
+    moveDatasetFile: Function,
+    moveLabbookFile: Function,
+  },
+  name: string,
+  owner: string,
+  parentDownloading: boolean,
+  readOnly: boolean,
+  section: string,
+  setFolderIsDownloading: Function,
+  setParentDragFalse: Function,
+  setParentDragTrue: Function,
+  setParentHoverState: Function,
+  style: Object,
+  updateChildState: Function,
+}
+
+class File extends Component<Props> {
   state = {
     isDragging: this.props.isDragging,
     isSelected: getIsSelected(this.props),
@@ -130,54 +167,56 @@ class File extends Component {
     *  launches dev tool to appropriate file
     */
   _openDevTool = (devTool, forceStart) => {
-    const { props } = this;
-    const { owner, labbookName } = store.getState().routes;
-    const status = props.containerStatus;
-    const tabName = `${devTool}-${owner}-${labbookName}`;
+    if (process.env.BUILD_TYPE !== 'cloud') {
+      const { props } = this;
+      const { owner, name } = props;
+      const status = props.containerStatus;
+      const tabName = `${devTool}-${owner}-${name}`;
 
-    if ((status !== 'NOT_RUNNING') && (status !== 'RUNNING')) {
-      setWarningMessage('Could not launch development environment as the project is not ready.');
-    } else if (status === 'NOT_RUNNING' && !forceStart) {
-      setInfoMessage('Starting Project container. When done working, click Stop to shutdown the container.');
-      updateTransitionState(owner, labbookName, 'Starting');
-      setMergeMode(owner, labbookName, false, false);
+      if ((status !== 'NOT_RUNNING') && (status !== 'RUNNING')) {
+        setWarningMessage(owner, name, 'Could not launch development environment as the project is not ready.');
+      } else if (status === 'NOT_RUNNING' && !forceStart) {
+        setInfoMessage(owner, name, 'Starting Project container. When done working, click Stop to shutdown the container.');
+        updateTransitionState(owner, name, 'Starting');
+        setMergeMode(owner, name, false, false);
 
-      StartContainerMutation(
-        owner,
-        labbookName,
-        (response, error) => {
-          if (error) {
-            setErrorMessage(`There was a problem starting ${labbookName} container`, error);
-          } else {
-            this._openDevTool(devTool, true);
-          }
-        },
-      );
-    } else {
-      setInfoMessage(`Starting ${devTool}, make sure to allow popups.`);
-      StartDevToolMutation(
-        owner,
-        labbookName,
-        devTool,
-        (response, error) => {
-          if (response.startDevTool) {
-            let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
-            if (path.includes(`/lab/tree/${props.section}`)) {
-              path = path.replace(`/lab/tree/${props.section}`, `/lab/tree/${props.section}/${props.fileData.edge.node.key}`);
-            } else if (props.fileData.edge.node.key.indexOf('.Rmd') === -1) {
-              path = `${path}/lab/tree/${props.section}/${props.fileData.edge.node.key}`;
+        StartContainerMutation(
+          owner,
+          name,
+          (response, error) => {
+            if (error) {
+              setErrorMessage(owner, name, `There was a problem starting ${name} container`, error);
+            } else {
+              this._openDevTool(devTool, true);
+            }
+          },
+        );
+      } else {
+        setInfoMessage(owner, name, `Starting ${devTool}, make sure to allow popups.`);
+        StartDevToolMutation(
+          owner,
+          name,
+          devTool,
+          (response, error) => {
+            if (response.startDevTool) {
+              let path = `${window.location.protocol}//${window.location.hostname}${response.startDevTool.path}`;
+              if (path.includes(`/lab/tree/${props.section}`)) {
+                path = path.replace(`/lab/tree/${props.section}`, `/lab/tree/${props.section}/${props.fileData.edge.node.key}`);
+              } else if (props.fileData.edge.node.key.indexOf('.Rmd') === -1) {
+                path = `${path}/lab/tree/${props.section}/${props.fileData.edge.node.key}`;
+              }
+
+              window[tabName] = window.open(path, tabName);
+              window[tabName].close();
+              window[tabName] = window.open(path, tabName);
             }
 
-            window[tabName] = window.open(path, tabName);
-            window[tabName].close();
-            window[tabName] = window.open(path, tabName);
-          }
-
-          if (error) {
-            setErrorMessage('Error Starting Dev tool', error);
-          }
-        },
-      );
+            if (error) {
+              setErrorMessage(owner, name, 'Error Starting Dev tool', error);
+            }
+          },
+        );
+      }
     }
   }
 
@@ -322,44 +361,58 @@ class File extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const { node } = props.fileData.edge;
-    const { index } = props.fileData;
-    const fileName = props.filename;
-    const cantDrag = !props.fileData.edge.node.isLocal && (props.section === 'data');
+    const {
+      newFileName,
+      renameEditMode,
+      isSelected,
+      hover,
+    } = this.state;
+    const {
+      connectDragSource,
+      readOnly,
+      fileData,
+      filename,
+      section,
+      isDragging,
+      style,
+    } = this.props;
+
+    const { node } = fileData.edge;
+    const { index } = fileData;
+    const cantDrag = !fileData.edge.node.isLocal && (section === 'data');
     const paddingLeft = 40 * index;
     const rowStyle = { paddingLeft: `${paddingLeft}px` };
     const {
       devTool,
       isNotebook,
       isRFile,
-    } = getDevTool(fileName);
+    } = getDevTool(filename);
     const isLaunchable = isNotebook || isRFile;
-    const addButtonDisabled = (state.newFileName === fileName);
+    const addButtonDisabled = (newFileName === filename);
     // declare css here
     const fileRowCSS = classNames({
       File__row: true,
-      'File__row--hover': state.hover,
-      'File__row--noDrag': props.isDragging && cantDrag,
-      'File__row--canDrag': props.isDragging && !cantDrag,
+      'File__row--hover': hover,
+      'File__row--noDrag': isDragging && cantDrag,
+      'File__row--canDrag': isDragging && !cantDrag,
     });
     const buttonCSS = classNames({
       CheckboxMultiselect: true,
-      CheckboxMultiselect__uncheck: !state.isSelected,
-      CheckboxMultiselect__check: state.isSelected,
+      CheckboxMultiselect__uncheck: !isSelected,
+      CheckboxMultiselect__check: isSelected,
     });
     const textIconsCSS = classNames({
       'File__cell File__cell--name': true,
-      hidden: state.renameEditMode,
+      hidden: renameEditMode,
     });
     const renameCSS = classNames({
       'File__cell File__cell--edit': true,
-      hidden: !state.renameEditMode,
+      hidden: !renameEditMode,
     });
 
     const file = (
       <div
-        style={props.style}
+        style={style}
         onMouseOver={(evt) => { this._setHoverState(evt, true); }}
         onMouseOut={(evt) => { this._setHoverState(evt, false); }}
         onMouseLeave={() => { this._mouseLeave(); }}
@@ -372,27 +425,27 @@ class File extends Component {
           style={rowStyle}
         >
           {
-            !props.readOnly
+            !readOnly
             && (
             <button
               type="button"
               className={buttonCSS}
-              onClick={(evt) => { this._setSelected(evt, !this.state.isSelected); }}
+              onClick={(evt) => { this._setSelected(evt, !isSelected); }}
             />
             )
           }
           <div className={textIconsCSS}>
 
-            <div className={`File__icon ${fileIconsJs.getClass(fileName)}`} />
+            <div className={`File__icon ${fileIconsJs.getClass(filename)}`} />
 
             <div
               className="File__text"
               role="presentation"
               onClick={() => this._validateFile(isLaunchable, devTool)}
-              data-tip={fileName}
+              data-tip={filename}
               data-for="Tooltip--file"
             >
-              {fileName}
+              {filename}
             </div>
             <ReactTooltip
               place="bottom"
@@ -407,14 +460,14 @@ class File extends Component {
               <input
                 draggable
                 ref={(input) => { this.reanmeInput = input; }}
-                value={state.newFileName}
+                value={newFileName}
                 type="text"
                 className="File__input"
                 maxLength="255"
                 onClick={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
                 onDragStart={(evt) => { evt.preventDefault(); evt.stopPropagation(); }}
                 onChange={(evt) => { this._updateFileName(evt); }}
-                onKeyDown={(evt) => { this._submitRename(evt, fileName); }}
+                onKeyDown={(evt) => { this._submitRename(evt, filename); }}
               />
             </div>
             <div className="flex justify-space-around">
@@ -442,31 +495,23 @@ class File extends Component {
 
           <div className="File__cell File__cell--menu">
             {
-              !props.readOnly
+              !readOnly
               && (
               <ActionsMenu
-                edge={props.fileData.edge}
-                mutationData={props.mutationData}
-                mutations={props.mutations}
+                edge={fileData.edge}
                 renameEditMode={this._renameEditMode}
-                section={props.section}
+                {...this.props}
               />
               )
             }
             {
-              (props.section === 'data')
+              (section === 'data')
               && (
               <DatasetActionsMenu
-                edge={props.fileData.edge}
-                section={props.section}
-                mutationData={props.mutationData}
-                mutations={props.mutations}
+                edge={fileData.edge}
                 renameEditMode={this._renameEditMode}
-                isDownloading={props.isDownloading}
-                parentDownloading={props.parentDownloading}
-                setFolderIsDownloading={props.setFolderIsDownloading}
-                isLocal={props.fileData.edge.node.isLocal}
-                isDragging={props.isDragging}
+                isLocal={fileData.edge.node.isLocal}
+                {...this.props}
               />
               )
             }
@@ -476,9 +521,9 @@ class File extends Component {
       </div>
     );
 
-    if (!props.readOnly) {
+    if (!readOnly) {
       return (
-        props.connectDragSource(file)
+        connectDragSource(file)
       );
     }
     return file;

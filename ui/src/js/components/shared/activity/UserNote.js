@@ -4,14 +4,22 @@ import { WithContext as ReactTags } from 'react-tag-input';
 // mutations
 import CreateUserNoteMutation from 'Mutations/CreateUserNoteMutation';
 import { setErrorMessage } from 'JS/redux/actions/footer';
-// store
-import store from 'JS/redux/store';
 // assets
 import './UserNote.scss';
 
 let simple;
 
-class UserNote extends Component {
+type Props = {
+  changeFullScreenState: Function,
+  datasetId: string,
+  labbookId: string,
+  name: string,
+  owner: string,
+  sectionType: string,
+  toggleUserNote: Function,
+}
+
+class UserNote extends Component<Props> {
   state = {
     tags: [],
     userSummaryText: '',
@@ -24,7 +32,7 @@ class UserNote extends Component {
     after component mounts apply simplemde to the dom element id:markdown
   */
   componentDidMount() {
-    const { props } = this;
+    const { changeFullScreenState } = this.props;
 
     import('simplemde').then((comp) => {
       if (document.getElementById('markDown')) {
@@ -37,11 +45,11 @@ class UserNote extends Component {
         const sideBySideButton = document.getElementsByClassName('fa-columns')[0];
 
         if (fullscreenButton) {
-          fullscreenButton.addEventListener('click', () => props.changeFullScreenState());
+          fullscreenButton.addEventListener('click', () => changeFullScreenState());
         }
 
         if (sideBySideButton) {
-          sideBySideButton.addEventListener('click', () => props.changeFullScreenState(true));
+          sideBySideButton.addEventListener('click', () => changeFullScreenState(true));
         }
       }
     });
@@ -52,37 +60,53 @@ class UserNote extends Component {
     calls CreateUserNoteMutation adds note to activity feed
   */
   _addNote = () => {
-    const { props, state } = this;
+    const { state } = this;
     const self = this;
     const tags = state.tags.map(tag => (tag.text));
-    const { name, owner } = props;
-    const { labbookId } = props;
+    const {
+      name,
+      owner,
+      sectionType,
+      labbookId,
+      datasetId,
+      toggleUserNote,
+    } = this.props;
+    const {
+      unsubmittedTag,
+      userSummaryText,
+    } = this.state;
 
-    if (state.unsubmittedTag.length) {
-      this._handleAddition({ id: state.unsubmittedTag, text: state.unsubmittedTag });
+    if (unsubmittedTag.length) {
+      this._handleAddition({
+        id: unsubmittedTag,
+        text: unsubmittedTag,
+      });
     }
 
 
-    this.setState({ addNoteDisabled: true, unsubmittedTag: '' });
+    this.setState({
+      addNoteDisabled: true,
+      unsubmittedTag: '',
+    });
 
     CreateUserNoteMutation(
-      props.sectionType,
+      sectionType,
       name,
-      state.userSummaryText,
+      userSummaryText,
       simple.value(),
       owner,
       [],
       tags,
-      labbookId || props.datasetId,
+      labbookId || datasetId,
       (response, error) => {
-        props.toggleUserNote(false);
+        toggleUserNote(false);
         self.setState({
           tags: [],
           userSummaryText: '',
           addNoteDisabled: false,
         });
         if (error) {
-          setErrorMessage('Unable to unlink dataset', error);
+          setErrorMessage(owner, name, 'Unable to unlink dataset', error);
         }
       },
     );
@@ -151,15 +175,15 @@ class UserNote extends Component {
 
 
    render() {
-     const { props, state } = this;
-     const { tags } = state;
-
+     const { toggleUserNote } = this.props;
+     const { addNoteDisabled, tags } = this.state;
      return (
        <div className="UserNote flex flex--column">
 
          <div
+           role="presentation"
            className="UserNote__close close"
-           onClick={() => props.toggleUserNote(false)}
+           onClick={() => toggleUserNote(false)}
          />
 
          <input
@@ -170,7 +194,7 @@ class UserNote extends Component {
          />
 
          <textarea
-           ref="markdown"
+           ref={(ref) => { this.markdown = ref; }}
            className="UserNote__summary"
            id="markDown"
          />
@@ -187,14 +211,14 @@ class UserNote extends Component {
            <button
              type="submit"
              className="Btn Btn--flat"
-             onClick={() => props.toggleUserNote(false)}
+             onClick={() => toggleUserNote(false)}
            >
              Cancel
            </button>
            <button
              type="submit"
              className="Btn Btn--last"
-             disabled={state.addNoteDisabled}
+             disabled={addNoteDisabled}
              onClick={() => { this._addNote(); }}
            >
              Add Note

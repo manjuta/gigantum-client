@@ -129,7 +129,7 @@ class AptPackageManager(PackageManager):
         """
         results = list()
         for package in package_list:
-            base_container = container_for_context(username)
+            base_container = container_for_context(username, labbook=labbook)
             result = base_container.run_container(cmd=f"apt-cache search {package}",
                                                   image_name=self.base_image_tag(labbook),
                                                   wait_for_output=True)

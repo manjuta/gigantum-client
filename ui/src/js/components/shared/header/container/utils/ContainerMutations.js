@@ -27,8 +27,6 @@ class ContainerMutations {
   startContainer(data, callback) {
     const self = this;
     const devTool = data.devTool;
-
-
     const { owner, name } = this.state;
 
     StartContainerMutation(
@@ -66,15 +64,22 @@ class ContainerMutations {
    */
   startDevTool(data, callback) {
     const { devTool } = data;
-
-
     const { owner, name } = this.state;
-    StartDevToolMutation(
-      owner,
-      name,
-      devTool,
-      callback,
-    );
+    const tabName = `${devTool}-${owner}-${name}`;
+
+    if (process.env.BUILD_TYPE === 'cloud') {
+      const hostname = window.location.hostname.replace('client.', '');
+      const { protocol } = window.location;
+      const path = `${protocol}//${hostname}/client/${owner}/${name}/${devTool}`;
+      window[tabName] = window.open(path, tabName);
+    } else {
+      StartDevToolMutation(
+        owner,
+        name,
+        devTool,
+        callback,
+      );
+    }
   }
 
 
@@ -86,11 +91,7 @@ class ContainerMutations {
    */
   buildImage(data, callback) {
     const { noCache } = data;
-
-
     const { owner, name } = this.state;
-
-
     const self = this;
     setBuildingState(owner, name, true);
     BuildImageMutation(

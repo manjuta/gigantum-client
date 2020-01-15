@@ -34,7 +34,7 @@ def prep_base(driver, base_button_check, skip_login=False):
     else:
         time.sleep(3)
     proj_name = create_project_without_base(driver)
-    time.sleep(5)
+    time.sleep(7)
     select_project_base(driver, base_button_check())
 
     # assert container status is stopped
@@ -100,7 +100,8 @@ def log_in(driver: selenium.webdriver, user_index: int = 0) -> str:
     """
     username, password = testutils.load_credentials(user_index=user_index)
 
-    driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/local#")
+    driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/local")
+    time.sleep(2)
     auth0_elts = elements.Auth0LoginElements(driver)
     auth0_elts.login_green_button.wait_to_appear().click()
     auth0_elts.auth0_lock_widget.wait_to_appear()
@@ -110,7 +111,7 @@ def log_in(driver: selenium.webdriver, user_index: int = 0) -> str:
         logging.info("Clicking 'Not your account?'")
         auth0_elts.not_your_account_button.wait_to_appear().click()
     auth0_elts.do_login(username, password)
-    time.sleep(3)
+    time.sleep(5)
     # Set the ID and ACCESS TOKENS -- Used as headers for GraphQL mutations
     access_token = driver.execute_script("return window.localStorage.getItem('access_token')")
     id_token = driver.execute_script("return window.localStorage.getItem('id_token')")

@@ -3,11 +3,11 @@ export default {
     const { response, successCall, mutations } = callbackData;
     const metaDataArr = JSON.parse(response.data.jobStatus.jobMetadata).labbook.split('|');
     const owner = metaDataArr[1];
-    const labbookName = metaDataArr[2];
-    successCall(owner, labbookName);
+    const name = metaDataArr[2];
+    successCall(owner, name);
     mutations.FetchLabbookEdgeMutation(
       owner,
-      labbookName,
+      name,
       (error) => {
         if (error) {
           console.error(error);

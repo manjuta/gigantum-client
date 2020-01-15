@@ -7,7 +7,6 @@ import subprocess
 import flask
 
 from gtmcore.logging import LMLogger
-from gtmcore.configuration import Configuration
 from gtmcore.files.lock import FileWriteLock
 
 logger = LMLogger.get_logger()
@@ -114,7 +113,7 @@ class ChunkUploadMutation(object):
     @staticmethod
     def get_temp_filename(upload_id, filename):
         """Method to generate the temporary filename"""
-        return os.path.join(Configuration().upload_dir,
+        return os.path.join(flask.current_app.config['LABMGR_CONFIG'].upload_dir,
                             "{}-{}".format(ChunkUploadMutation.py_secure_filename(upload_id),
                             ChunkUploadMutation.py_secure_filename(filename)))
 

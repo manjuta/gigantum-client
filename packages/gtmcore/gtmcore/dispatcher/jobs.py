@@ -281,12 +281,12 @@ def build_labbook_image(path: str, username: str, tag: Optional[str] = None, noc
             try:
                 if not line:
                     return
-                job.meta['feedback'] = (job.meta.get('feedback') or '') + line + '\n'
+                job.meta['feedback'] = (job.meta.get('feedback') or '') + line
                 job.save_meta()
             except Exception as e:
                 logger.error(e)
 
-        save_metadata_callback("Build task in queue")
+        save_metadata_callback("Build task in queue\n")
         container_ops = container_for_context(username, path=path, override_image_name=tag)
         container_ops.build_image(nocache=nocache, feedback_callback=save_metadata_callback)
 

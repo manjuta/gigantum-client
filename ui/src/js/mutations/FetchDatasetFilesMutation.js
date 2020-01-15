@@ -24,8 +24,6 @@ mutation FetchDatasetFilesMutation($input: FetchDatasetEdgeInput!){
 }
 `;
 
-const tempID = 0;
-
 
 export default function FetchDatasetFilesMutation(
   owner,
@@ -43,7 +41,7 @@ export default function FetchDatasetFilesMutation(
     variables,
     onCompleted: (response, error) => {
       if (error) {
-        setErrorMessage('An error occurred while refetching data', error);
+        setErrorMessage(owner, datasetName, 'An error occurred while refetching data', error);
       }
       callback(error);
     },

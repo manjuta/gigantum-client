@@ -5,7 +5,6 @@ import os
 import flask
 
 from gtmcore.logging import LMLogger
-from gtmcore.configuration import Configuration
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.environment import BaseRepository
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
@@ -57,7 +56,7 @@ class AppQueries(graphene.ObjectType):
     def resolve_build_info(self, info):
         """Return this LabManager build info (hash, build timestamp, etc)"""
         # TODO - CUDA version should possibly go in here
-        build_info = Configuration().config.get('build_info') \
+        build_info = flask.current_app.config['LABMGR_CONFIG'].config.get('build_info') \
                      or "Unable to retrieve version"
         return build_info
 
@@ -245,7 +244,7 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
             return False
 
         # Check if repository exists remotely
-        remote_config = Configuration().get_remote_configuration()
+        remote_config = flask.current_app.config['LABMGR_CONFIG'].get_remote_configuration()
         hub_api = None
         remote = None
         if remote_config:

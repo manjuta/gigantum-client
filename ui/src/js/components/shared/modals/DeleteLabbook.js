@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 // Mutations
@@ -7,68 +8,105 @@ import DeleteRemoteLabbookMutation from 'Mutations/DeleteRemoteLabbookMutation';
 import ButtonLoader from 'Components/common/ButtonLoader';
 import Modal from 'Components/common/Modal';
 // store
-import { setErrorMessage, setWarningMessage, setInfoMessage } from 'JS/redux/actions/footer';
-import store from 'JS/redux/store';
+import {
+  setErrorMessage,
+  setWarningMessage,
+  setInfoMessage,
+} from 'JS/redux/actions/footer';
 // assets
 import './DeleteLabbook.scss';
 
-export default class DeleteLabbook extends Component {
-  constructor(props) {
-  	super(props);
-  	this.state = {
-      labbookName: '',
-      deletePending: false,
-      deleteLabbookButtonState: '',
-    };
-    this._deleteLabbook = this._deleteLabbook.bind(this);
-  }
+type Props = {
+  name: string,
+  owner: string,
+  handleClose: Function,
+  remoteDelete: bool,
+  remoteId: string,
+  labbookListId: string,
+  remoteConnection: bool,
+  toggleModal: Function,
+  existsLocally: bool,
+  remoteAdded: bool,
+  history: Object,
+};
+
+export default class DeleteLabbook extends Component<Props> {
+  state = {
+    name: '',
+    deletePending: false,
+    deleteLabbookButtonState: '',
+  };
 
   /**
     @param {object} evt
-    sets state of labbookName
+    sets state of name
   */
-  _setLabbookName(evt) {
-    this.setState({ labbookName: evt.target.value });
+  _setLabbookName = (evt) => {
+    this.setState({ name: evt.target.value });
   }
 
   /**
     @param {}
     fires appropriate delete labbook mutation
   */
-  _deleteLabbook() {
-    const { labbookName, owner } = this.props.remoteDelete ? { labbookName: this.props.remoteLabbookName, owner: this.props.remoteOwner } : store.getState().routes;
+  _deleteLabbook = () => {
+    const {
+      name,
+      owner,
+      remoteDelete,
+      remoteId,
+      labbookListId,
+      remoteConnection,
+      toggleModal,
+      history,
+    } = this.props;
+    const { state } = this;
 
-    if (labbookName === this.state.labbookName) {
-      this.setState({ deletePending: true, deleteLabbookButtonState: 'loading' });
 
-      if (this.props.remoteDelete) {
+    if (name === state.name) {
+      this.setState({
+        deletePending: true,
+        deleteLabbookButtonState: 'loading',
+      });
+
+      if (remoteDelete) {
         DeleteRemoteLabbookMutation(
-          this.props.remoteLabbookName,
-          this.props.remoteOwner,
+          name,
+          owner,
           true,
-          this.props.remoteId,
-          this.props.labbookListId,
-          this.props.remoteConnection,
+          remoteId,
+          labbookListId,
+          remoteConnection,
           (response, error) => {
             this.setState({ deletePending: false });
 
             if (error) {
-              setErrorMessage(`The was a problem deleting ${labbookName}`, error);
+              setErrorMessage(owner, name, `The was a problem deleting ${name}`, error);
               this.setState({ deleteLabbookButtonState: 'error' });
               setTimeout(() => {
-                this.setState({ labbookName: '', deletePending: false, deleteLabbookButtonState: '' });
-                this.props.toggleModal();
+                this.setState({
+                  name: '',
+                  deletePending: false,
+                  deleteLabbookButtonState: '',
+                });
+
+                toggleModal();
 
                 if (document.getElementById('deleteInput')) {
                   document.getElementById('deleteInput').value = '';
                 }
               }, 1000);
             } else {
-              setInfoMessage(`${labbookName} has been remotely deleted`);
+              setInfoMessage(owner, name, `${name} has been remotely deleted`);
               this.setState({ deleteLabbookButtonState: 'finished' });
+
               setTimeout(() => {
-                this.setState({ labbookName: '', deletePending: false, deleteLabbookButtonState: '' });
-                this.props.toggleModal();
+                this.setState({
+                  name: '',
+                  deletePending: false,
+                  deleteLabbookButtonState: '',
+                });
+                toggleModal();
 
                 if (document.getElementById('deleteInput')) {
                   document.getElementById('deleteInput').value = '';
@@ -79,30 +117,30 @@ export default class DeleteLabbook extends Component {
         );
       } else {
         DeleteLabbookMutation(
-          labbookName,
+          name,
           owner,
           true,
           (response, error) => {
             this.setState({ deletePending: false });
 
             if (error) {
-              setErrorMessage(`The was a problem deleting ${labbookName}`, error);
+              setErrorMessage(owner, name, `The was a problem deleting ${name}`, error);
               this.setState({ deleteLabbookButtonState: 'error' });
               setTimeout(() => {
                 this.setState({ deleteLabbookButtonState: '' });
               }, 2000);
             } else {
-              setInfoMessage(`${labbookName} has been deleted`);
+              setInfoMessage(owner, name, `${name} has been deleted`);
               this.setState({ deleteLabbookButtonState: 'finished' });
               setTimeout(() => {
-                this.props.history.replace('../../projects/');
+                history.replace('../../projects/');
               }, 2000);
             }
           },
         );
       }
     } else {
-      setWarningMessage('Names do not match');
+      setWarningMessage(owner, name, 'Names do not match');
     }
   }
 
@@ -110,17 +148,23 @@ export default class DeleteLabbook extends Component {
     *  @param {}
     *  determines the warning text to be displayed to the user
   */
-  _getExplanationText() {
-    const { props } = this;
-    const { labbookName, owner } = store.getState().routes;
-    if (this.props.remoteDelete) {
-      if (this.props.existsLocally) {
+  _getExplanationText = () => {
+    const {
+      name,
+      owner,
+      remoteDelete,
+      existsLocally,
+      remoteAdded,
+    } = this.props;
+
+    if (remoteDelete) {
+      if (existsLocally) {
         return (
           <div>
             <p>
               This will delete
               {' '}
-              <b>{props.remoteLabbookName}</b>
+              <b>{name}</b>
               {' '}
               from the cloud.
             </p>
@@ -132,41 +176,49 @@ export default class DeleteLabbook extends Component {
         <p>
           This will delete
           {' '}
-          <b>{props.remoteLabbookName}</b>
+          <b>{name}</b>
           {' '}
           from the cloud. All data will be removed and can not be recovered.
         </p>
       );
-    } if (props.remoteAdded) {
+    } if (remoteAdded) {
       return (
         <div>
           <p>
             This will delete
             {' '}
-            <b>{labbookName}</b>
+            <b>{name}</b>
             {' '}
             from this Gigantum client.
           </p>
-          <p>{`You can still download it from gigantum.com/${owner}/${labbookName}.`}</p>
-        </div>);
+          <p>{`You can still download it from gigantum.com/${owner}/${name}.`}</p>
+        </div>
+      );
     }
     return (
       <p>
         This will delete
         {' '}
-        <b>{labbookName}</b>
+        <b>{name}</b>
         {' '}
         from this Gigantum instance. All data will be removed and can not be recovered.
-      </p>);
+      </p>
+    );
   }
 
   render() {
-    const deleteText = this.props.remoteDelete ? 'Delete Remote Project' : 'Delete Project';
-    const { labbookName } = this.props.remoteDelete ? { labbookName: this.props.remoteLabbookName } : store.getState().routes;
+    const {
+      name,
+      handleClose,
+      remoteDelete,
+    } = this.props;
+    const { state } = this;
+    const deleteText = remoteDelete ? 'Delete Remote Project' : 'Delete Project';
+
     return (
       <Modal
         header={deleteText}
-        handleClose={() => this.props.handleClose()}
+        handleClose={() => handleClose()}
         size="medium"
         icon="delete"
         renderContent={() => (
@@ -175,7 +227,7 @@ export default class DeleteLabbook extends Component {
 
             <input
               id="deleteInput"
-              placeholder={`Enter ${labbookName} to delete`}
+              placeholder={`Enter ${name} to delete`}
               onKeyUp={(evt) => { this._setLabbookName(evt); }}
               onChange={(evt) => { this._setLabbookName(evt); }}
               type="text"
@@ -183,17 +235,18 @@ export default class DeleteLabbook extends Component {
 
             <div className="DeleteProject__buttons">
               <button
+                type="button"
                 className="Btn Btn--flat"
-                onClick={() => this.props.handleClose()}
+                onClick={() => handleClose()}
               >
                 Cancel
               </button>
               <ButtonLoader
                 className="Btn Btn--wide Btn--last"
-                buttonState={this.state.deleteLabbookButtonState}
+                buttonState={state.deleteLabbookButtonState}
                 buttonText={deleteText}
                 params={{}}
-                buttonDisabled={this.state.deletePending || labbookName !== this.state.labbookName}
+                buttonDisabled={state.deletePending || name !== state.name}
                 clicked={this._deleteLabbook}
               />
             </div>

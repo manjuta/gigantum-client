@@ -47,8 +47,8 @@ def fixture_working_dir_with_cached_user():
         app = Flask("lmsrvlabbook")
 
         # Load configuration class into the flask application
-        app.config["LABMGR_CONFIG"] = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(Configuration())
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
         with app.app_context():
             # within this block, current_app points to app.

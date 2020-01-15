@@ -40,12 +40,6 @@ class RemoveUserIdentity(graphene.relay.ClientIDMutation):
         # Call the logout method to remove any locally stored data
         get_identity_manager_instance().logout()
 
-        # Remove user's git creds
-        git_cred_file = os.path.expanduser(os.path.join('~', '.git-credentials'))
-        if os.path.exists(git_cred_file):
-            os.remove(git_cred_file)
-            logger.info("Removed git credentials on logout")
-
         # Wipe current user from request context
         flask.g.user_obj = None
         flask.g.id_token = None

@@ -7,7 +7,6 @@ import classNames from 'classnames';
 import WriteLabbookReadmeMutation from 'Mutations/WriteLabbookReadmeMutation';
 import WriteDatasetReadmeMutation from 'Mutations/WriteDatasetReadmeMutation';
 // store
-import store from 'JS/redux/store';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
 import Base from 'Components/labbook/environment/Base';
@@ -30,19 +29,34 @@ let simple;
  */
 const checkOverflow = (element) => {
   const curOverflow = element.style.overflow;
+  const isOverflowing = element.clientWidth < element.scrollWidth
+     || element.clientHeight < element.scrollHeight;
+
   if (!curOverflow || curOverflow === 'visible') {
     element.style.overflow = 'hidden';
   }
-
-  const isOverflowing = element.clientWidth < element.scrollWidth
-   || element.clientHeight < element.scrollHeight;
 
   element.style.overflow = curOverflow;
 
   return isOverflowing;
 };
 
-export default class Overview extends Component {
+
+type Props = {
+  datasetType: string,
+  history: {
+    push: Function,
+  },
+  isManaged: boolean,
+  name: string,
+  owner: string,
+  sectionType: string,
+  refetch: Function,
+  scrollToTop: Function,
+}
+
+
+class Overview extends Component<Props> {
   state = {
     editingReadme: false,
     readmeExpanded: false,
@@ -56,9 +70,9 @@ export default class Overview extends Component {
     runs state check when component mounts
   */
   componentDidMount() {
-    const { props } = this;
+    const { refetch } = this.props;
     this._setExpand();
-    props.refetch('overview');
+    refetch('overview');
   }
 
   /*
@@ -66,10 +80,11 @@ export default class Overview extends Component {
   */
   componentDidUpdate() {
     this._setExpand();
-    const { props, state } = this;
-    const sectionProps = props[props.sectionType];
+    const { simpleExists } = this.state;
+    const { sectionType } = this.props;
+    const sectionProps = this.props[sectionType];
 
-    if (!state.simpleExists) {
+    if (!simpleExists) {
       if (document.getElementById('markDown')) {
         simple = new SimpleMDE({
           element: document.getElementById('markDown'),
@@ -84,14 +99,33 @@ export default class Overview extends Component {
         const sideBySideButton = document.getElementsByClassName('fa-columns')[0];
         // TODO move set state to functions
         if (fullscreenButton) {
-          fullscreenButton.addEventListener('click', () => this.setState({ editorFullscreen: !state.editorFullscreen }));
+          fullscreenButton.addEventListener('click', this._fullscreen);
         }
 
         if (sideBySideButton) {
-          sideBySideButton.addEventListener('click', () => this.setState({ editorFullscreen: true }));
+          sideBySideButton.addEventListener('click', this._openEditor);
         }
       }
     }
+  }
+
+  /**
+   @param {} -
+     sets to toggle fullscreen
+   */
+  _fullscreen = () => {
+    this.setState((state) => {
+      const editorFullscreen = !state.editorFullscreen;
+      return { editorFullscreen };
+    });
+  }
+
+  /**
+   @param {} -
+     sets to toggle fullscreen
+   */
+  _openEditor = () => {
+    this.setState({ editorFullscreen: true });
   }
 
   /**
@@ -108,7 +142,8 @@ export default class Overview extends Component {
    */
   _setExpand = () => {
     const { state } = this;
-    const element = Array.prototype.slice.call(document.getElementsByClassName('ReadmeMarkdown'))[0];
+    const element = document.getElementsByClassName('ReadmeMarkdown')[0];
+
     if (element && checkOverflow(element) && !state.overflowExists) {
       this.setState({ overflowExists: true });
     } else if (element && !checkOverflow(element) && state.overflowExists) {
@@ -129,7 +164,7 @@ export default class Overview extends Component {
     }
     this.setState({ readmeExpanded: !readmeExpanded });
 
-    this._setExpand()
+    this._setExpand();
   }
 
   /**
@@ -150,18 +185,18 @@ export default class Overview extends Component {
 
   /**
    @param {String} owner
-   @param {String} labbookName
+   @param {String} name
    calls mutation to save labbook readme
    */
-  _saveLabbookReadme = (owner, labbookName) => {
+  _saveLabbookReadme = (owner, name) => {
     WriteLabbookReadmeMutation(
       owner,
-      labbookName,
+      name,
       simple.value(),
       (res, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('Readme was not set: ', error);
+          setErrorMessage(owner, name, 'Readme was not set: ', error);
         } else {
           this.setState({ editingReadme: false, simpleExists: false });
         }
@@ -171,18 +206,18 @@ export default class Overview extends Component {
 
   /**
    @param {String} owner
-   @param {String} labbookName
+   @param {String} name
    calls mutation to save dataset readme
    */
-  _saveDatasetReadme = (owner, labbookName) => {
+  _saveDatasetReadme = (owner, name) => {
     WriteDatasetReadmeMutation(
       owner,
-      labbookName,
+      name,
       simple.value(),
       (res, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('Readme was not set: ', error);
+          setErrorMessage(owner, name, 'Readme was not set: ', error);
         } else {
           this.setState({ editingReadme: false, simpleExists: false });
         }
@@ -195,12 +230,16 @@ export default class Overview extends Component {
    handles calling mutation functions to save readme
    */
   _saveReadme = () => {
-    const { props } = this;
-    const { owner, labbookName } = store.getState().routes;
-    if (props.sectionType === 'labbook') {
-      this._saveLabbookReadme(owner, labbookName);
+    const {
+      owner,
+      name,
+      sectionType,
+    } = this.props;
+
+    if (sectionType === 'labbook') {
+      this._saveLabbookReadme(owner, name);
     } else {
-      this._saveDatasetReadme(owner, labbookName);
+      this._saveDatasetReadme(owner, name);
     }
   }
 
@@ -209,31 +248,54 @@ export default class Overview extends Component {
     handles redirect and scrolling to top
   */
   _handleRedirect = (section) => {
-    const { owner, labbookName } = store.getState().routes;
-    const { props } = this;
-    props.scrollToTop();
-    props.history.push(`/projects/${owner}/${labbookName}/${section}`);
+    const {
+      owner,
+      name,
+      history,
+      scrollToTop,
+    } = this.props;
+    scrollToTop();
+    history.push(`/projects/${owner}/${name}/${section}`);
   }
 
   render() {
-    const { props, state } = this;
-    const sectionProps = props[props.sectionType];
-    const isLabbook = (props.sectionType === 'labbook');
+    // destructure here
+    const {
+      datasetType,
+      name,
+      owner,
+      sectionType,
+      scrollToTop,
+      history,
+      isManaged,
+    } = this.props;
+    const {
+      editingReadme,
+      editorFullscreen,
+      overflowExists,
+      readmeExpanded,
+    } = this.state;
+    // declare variables here
+    const sectionProps = this.props[sectionType];
+    const isLabbook = (sectionType === 'labbook');
     const typeText = isLabbook ? 'Environment' : 'Type';
-    const showLoadMoreButton = state.overflowExists
-      || (state.readmeExpanded && !state.overflowExists);
-
+    const showLoadMoreButton = overflowExists
+      || (readmeExpanded && !overflowExists);
     const overViewComponent = (isLabbook && sectionProps.overview)
       ? (
         <RecentActivity
+          name={name}
+          owner={owner}
           recentActivity={sectionProps.overview.recentActivity}
-          scrollToTop={props.scrollToTop}
-          history={props.history}
+          scrollToTop={scrollToTop}
+          history={history}
         />
       )
       : (
         <Summary
-          isManaged={props.isManaged}
+          name={name}
+          owner={owner}
+          isManaged={isManaged}
           {...sectionProps.overview}
         />
       );
@@ -241,26 +303,26 @@ export default class Overview extends Component {
     // decalre css here
     const overviewCSS = classNames({
       Overview: true,
-      'Overview--fullscreen': state.editorFullscreen,
+      'Overview--fullscreen': editorFullscreen,
     });
     const readmeCSS = classNames({
       ReadmeMarkdown: true,
-      'ReadmeMarkdown--collapsed': !state.readmeExpanded,
-      'ReadmeMarkdown--expanded': state.readmeExpanded,
+      'ReadmeMarkdown--collapsed': !readmeExpanded,
+      'ReadmeMarkdown--expanded': readmeExpanded,
     });
     const overviewReadmeCSS = classNames({
-      'Overview__readme Readme Card Card--auto Card--no-hover column-1-span-12': !state.editingReadme,
-      hidden: state.editingReadme,
+      'Overview__readme Readme Card Card--auto Card--no-hover column-1-span-12': !editingReadme,
+      hidden: editingReadme,
     });
     const overviewReadmeButtonCSS = classNames({
       'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
-      hidden: state.editingReadme,
+      hidden: editingReadme,
     });
 
     const loadMoreCSS = classNames({
       'Btn Btn__expandadble': true,
-      'Btn__expandadble--expand': !state.readmeExpanded,
-      'Btn__expandadble--collapse': state.readmeExpanded,
+      'Btn__expandadble--expand': !readmeExpanded,
+      'Btn__expandadble--collapse': readmeExpanded,
     });
 
     if (sectionProps && sectionProps.overview) {
@@ -278,10 +340,10 @@ export default class Overview extends Component {
 
           </div>
 
-          { state.editingReadme
+          { editingReadme
             && (
               <ReadmeEdit
-                {...state}
+                {...this.state}
                 closeReadme={this._closeReadme}
                 saveReadme={this._saveReadme}
               />
@@ -304,7 +366,7 @@ export default class Overview extends Component {
                     renderers={{ code: props => <CodeBlock {...props} /> }}
                   />
 
-                  { (state.overflowExists && !state.readmeExpanded)
+                  { (overflowExists && !readmeExpanded)
                       && <div className="Overview__readme-fadeout" />
                   }
                   { showLoadMoreButton
@@ -314,7 +376,7 @@ export default class Overview extends Component {
                           <button
                             type="button"
                             className={loadMoreCSS}
-                            onClick={() => this._toggleReadme(state.readmeExpanded)}
+                            onClick={() => this._toggleReadme(readmeExpanded)}
                           />
                         </div>
                       </div>
@@ -323,14 +385,14 @@ export default class Overview extends Component {
                 </div>
               </div>
             )
-            : !state.editingReadme
+            : !editingReadme
               && (
-              <EmptyReadme
-                sectionType={props.sectionType}
-                editingReadme={state.editingReadme}
-                setEditingReadme={this._setEditingReadme}
-              />
-            )
+                <EmptyReadme
+                  sectionType={sectionType}
+                  editingReadme={editingReadme}
+                  setEditingReadme={this._setEditingReadme}
+                />
+              )
           }
 
           <div className="Overview__container">
@@ -352,7 +414,6 @@ export default class Overview extends Component {
                     <span>View Environment Details</span>
                   </button>
                   <Base
-                    ref="base"
                     environment={sectionProps.environment}
                     blockClass="Overview"
                     overview={sectionProps.overview}
@@ -364,8 +425,8 @@ export default class Overview extends Component {
             : (
               <div className="Overview__environment">
                 <Type
-                  type={props.datasetType}
-                  isManaged={props.isManaged}
+                  type={datasetType}
+                  isManaged={isManaged}
                 />
               </div>
             )
@@ -377,3 +438,5 @@ export default class Overview extends Component {
     return (<Loader />);
   }
 }
+
+export default Overview;

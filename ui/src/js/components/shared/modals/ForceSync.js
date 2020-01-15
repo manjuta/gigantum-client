@@ -7,12 +7,18 @@ import SyncDatasetMutation from 'Mutations/branches/SyncDatasetMutation';
 // component
 import Modal from 'Components/common/Modal';
 // store
-import store from 'JS/redux/store';
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 // assets
 import './ForceSync.scss';
 
-export default class ForceSync extends Component {
+type Props = {
+  owner: string,
+  name: string,
+  pullOnly: bool,
+  toggleSyncModal: Function,
+}
+
+export default class ForceSync extends Component<Props> {
   /**
   *  @param {}
   *  Triggers sync with the correct override method
@@ -21,7 +27,13 @@ export default class ForceSync extends Component {
   _forceSync(method) {
     const { props } = this;
     const id = uuidv4;
-    const { owner, labbookName } = store.getState().routes;
+    const {
+      owner,
+      name,
+      pullOnly,
+      toggleSyncModal,
+    } = this.props;
+
     if (props.sectionType === 'labbook') {
       const footerMessageData = {
         id,
@@ -29,25 +41,25 @@ export default class ForceSync extends Component {
         isLast: false,
         error: false,
       };
-      setMultiInfoMessage(footerMessageData);
+      setMultiInfoMessage(owner, name, footerMessageData);
 
       SyncLabbookMutation(
         owner,
-        labbookName,
+        name,
         method,
-        props.pullOnly,
+        pullOnly,
         () => {},
         () => {},
         (error) => {
           if (error) {
             const messageData = {
               id,
-              message: `Could not 'force' sync ${labbookName}`,
+              message: `Could not 'force' sync ${name}`,
               isLast: true,
               error: true,
               messageBody: error,
             };
-            setMultiInfoMessage(messageData);
+            setMultiInfoMessage(owner, name, messageData);
           }
         },
       );
@@ -58,37 +70,41 @@ export default class ForceSync extends Component {
         isLast: false,
         error: false,
       };
-      setMultiInfoMessage(footerMessageData);
+      setMultiInfoMessage(owner, name, footerMessageData);
 
       SyncDatasetMutation(
         owner,
-        labbookName,
+        name,
         method,
-        props.pullOnly,
+        pullOnly,
         () => {},
         () => {},
         (error) => {
           if (error) {
             const messageData = {
               id,
-              message: `Could not 'force' sync ${labbookName}`,
+              message: `Could not 'force' sync ${name}`,
               isLast: true,
               error: true,
               messageBody: error,
             };
-            setMultiInfoMessage(messageData);
+            setMultiInfoMessage(owner, name, messageData);
           }
         },
       );
     }
-    props.toggleSyncModal();
+
+    toggleSyncModal();
   }
 
   render() {
+    const {
+      toggleSyncModal,
+    } = this.props;
     return (
       <Modal
         header="Sync Conflict"
-        handleClose={() => this.props.toggleSyncModal()}
+        handleClose={() => toggleSyncModal()}
         size="medium"
         icon="sync"
         renderContent={() => (
@@ -99,9 +115,24 @@ export default class ForceSync extends Component {
               <p>Which changes would you like to use?</p>
             </div>
             <div className="ForceSync__buttonContainer">
-              <button onClick={() => { this._forceSync('ours'); }}>Use Mine</button>
-              <button onClick={() => { this._forceSync('theirs'); }}>Use Theirs</button>
-              <button onClick={() => { this.props.toggleSyncModal(); }}>Abort</button>
+              <button
+                onClick={() => { this._forceSync('ours'); }}
+                type="button"
+              >
+                Use Mine
+              </button>
+              <button
+                onClick={() => { this._forceSync('theirs'); }}
+                type="button"
+              >
+                Use Theirs
+              </button>
+              <button
+                onClick={() => { toggleSyncModal(); }}
+                type="button"
+              >
+                Abort
+              </button>
             </div>
           </Fragment>
         )

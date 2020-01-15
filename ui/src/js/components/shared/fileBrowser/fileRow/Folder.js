@@ -575,6 +575,7 @@ class Folder extends Component {
     });
     const folderCSS = classNames({
       Folder: true,
+      'Folder--dragging': props.isDragging,
       'Folder--highlight': isOver,
     });
     const renameCSS = classNames({

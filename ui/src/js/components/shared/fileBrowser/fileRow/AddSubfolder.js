@@ -165,6 +165,7 @@ class AddSubfolder extends Component {
               placeholder="Enter Folder Name"
               type="text"
               className="AddSubfolder__input"
+              maxLength="255"
               onKeyUp={(evt) => { this._updateFolderName(evt); }}
               data-click-id="addFolder"
             />

@@ -50,7 +50,7 @@ export default function MigrateProjectMutation(
       onCompleted: (response, error) => {
         if (error) {
           console.log(error);
-          setErrorMessage('ERROR: Could not migrate project', error);
+          setErrorMessage(owner, labbookName, 'ERROR: Could not migrate project', error);
         }
         callback(response, error);
       },
