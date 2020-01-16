@@ -236,7 +236,7 @@ class ClientBuilder(object):
                 if context == "hub":
                     honeycomb_block = f"""\n
 [program:honeytail]
-command=/usr/bin/honeytail -c /etc/honeytail/honeytail.conf --file=/mnt/gigantum/.labmanager/logs/labmanager.log --parser=json --writekey={docker_args["HONEYCOMB_WRITE_KEY"]} --dataset=client-logs
+command=/usr/bin/honeytail -c /etc/honeytail/honeytail.conf --file=/mnt/gigantum/.labmanager/logs/labmanager.log --parser=json --writekey={docker_args["HONEYCOMB_WRITE_KEY"]} --dataset={build_args['honeycomb_dataset']}
 autostart=true
 autorestart=true
 priority=10"""

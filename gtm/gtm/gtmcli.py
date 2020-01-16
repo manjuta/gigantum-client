@@ -157,11 +157,19 @@ def cloud_actions(args):
 
     if args.action == "build":
 
+        if args.stage == "dev":
+            config_override_file = os.path.join("resources", "client", "cloud-config-override-dev.yaml")
+            honeycomb_dataset = "client-logs"
+        elif args.stage == "prod":
+            config_override_file = os.path.join("resources", "client", "cloud-config-override-prod.yaml")
+            honeycomb_dataset = "client-logs-prod"
+        else:
+            raise ValueError(f"Unsupported stage when building cloud client: {args.stage}")
+
         build_args = {"build_dir": os.path.join("build", "cloud-client"),
                       "supervisor_file": os.path.join("resources", "client", "supervisord-cloud.conf"),
-                      "config_override_file": os.path.join("resources", "client",
-                                                           "cloud-config-override.yaml")}
-
+                      "config_override_file": config_override_file,
+                      "honeycomb_dataset": honeycomb_dataset}
 
         try:
             honeycomb_write_key = os.environ["HONEYCOMB_WRITE_KEY"]
@@ -365,6 +373,10 @@ def main():
                         default=False,
                         action='store_true',
                         help="Boolean indicating if docker cache should be ignored")
+    parser.add_argument("--stage", "-s",
+                        default="dev",
+                        metavar="<hub stage>",
+                        help="Hub stage to use when building the client for use in the cloud (dev or prod).")
     parser.add_argument("component",
                         choices=list(components.keys()),
                         metavar="component",
