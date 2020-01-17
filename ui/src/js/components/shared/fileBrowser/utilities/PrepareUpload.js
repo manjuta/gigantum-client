@@ -3,6 +3,7 @@ import config from 'JS/config';
 // store
 import {
   setUploadMessageUpdate,
+  setUploadMessageRemove,
   setWarningMessage,
 } from 'JS/redux/actions/footer';
 import {
@@ -93,7 +94,7 @@ const flattenFiles = (files, owner, name) => {
 *
 * @return {number} totalFiles
 */
-const checkFileSize = (files, promptType) => {
+const checkFileSize = (files, promptType, owner, labbookName) => {
   const tenMB = 10 * 1000 * 1000;
   const oneHundredMB = 10 * tenMB;
   const fiveHundredMB = oneHundredMB * 5;
@@ -102,6 +103,16 @@ const checkFileSize = (files, promptType) => {
   const fileSizePrompt = [];
   const fileSizeNotAllowed = [];
   let index = 0;
+
+  if (files.length > 10000) {
+    setFileBrowserLock(owner, labbookName, true);
+    return {
+      fileSizeNotAllowed,
+      fileSizePrompt,
+      filesAllowed,
+      tooManyFiles: true,
+    };
+  }
 
   function filesRecursionCount(file) {
     const fileSize = file.file.size;
@@ -131,12 +142,21 @@ const checkFileSize = (files, promptType) => {
 
     index += 1;
     if (files[index]) {
-      filesRecursionCount(files[index]);
+      try {
+        filesRecursionCount(files[index]);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
   filesRecursionCount(files[index]);
 
-  return { fileSizeNotAllowed, fileSizePrompt, filesAllowed };
+  return {
+    fileSizeNotAllowed,
+    fileSizePrompt,
+    filesAllowed,
+    tooManyFiles: false,
+  };
 };
 
 const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
@@ -182,11 +202,19 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
 */
 const handleCallback = (filesTemp, path, mutationData, component) => {
   if (filesTemp.length > 0) {
-    const fileSizeData = checkFileSize(filesTemp, mutationData.connection);
     const {
       labbookName,
       owner,
     } = mutationData;
+    const fileSizeData = checkFileSize(filesTemp, mutationData.connection, owner, labbookName);
+
+
+    if (fileSizeData.tooManyFiles) {
+      setUploadMessageRemove('Too many files', null, 0);
+      setWarningMessage(owner, labbookName, 'Exceeded upload limit, up to 10,000 files can be uploaded at once');
+      setFileBrowserLock(owner, labbookName, false);
+      return;
+    }
 
     const uploadCallback = (fileData) => {
       if (fileSizeData.fileSizeNotAllowed.length > 0) {
@@ -263,6 +291,12 @@ const uploadFromFileSelector = (dndItem, callback) => {
 * @return {number} totalFiles
 */
 const prepareUpload = (dndItem, props, monitor, mutationData, component) => {
+  const {
+    labbookName,
+    owner,
+  } = mutationData;
+  setFileBrowserLock(owner, labbookName, true);
+  setUploadMessageUpdate('Preparing file upload');
   if (dndItem.dirContent) {
     const callback = (filesTemp, path) => {
       handleCallback(filesTemp, path, mutationData, component);
