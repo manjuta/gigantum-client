@@ -7,6 +7,7 @@ import flask
 from gtmcore.logging import LMLogger
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.environment import BaseRepository
+from gtmcore.environment.repository import RepositoryLock
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
 from gtmcore.dataset.storage import get_storage_backend_descriptions
 from gtmcore.inventory.inventory import InventoryManager
@@ -183,6 +184,7 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
         """Return a dataset list object, which is just a container so the id is empty"""
         return DatasetList(id="")
 
+    @RepositoryLock()
     def resolve_available_bases(self, info, **kwargs):
         """Method to return a all graphene BaseImages that are available
 

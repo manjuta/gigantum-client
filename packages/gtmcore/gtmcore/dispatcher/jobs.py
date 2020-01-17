@@ -15,6 +15,8 @@ from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.inventory.branching import MergeConflict
 from gtmcore.inventory import Repository
 
+from gtmcore.environment import RepositoryManager
+from gtmcore.environment.repository import RepositoryLock
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
 
@@ -566,6 +568,41 @@ def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, datase
         logger.exception(err)
         raise
 
+def update_environment_repositories() -> None:
+    """Method to clone / update the environment repositories
+
+    Returns:
+        None
+    """
+    logger = LMLogger.get_logger()
+
+    lock = RepositoryLock()
+
+    try:
+        lock.acquire(failfast=True)
+    except:
+        logger.warn("Could not acquire repository lock, not updating")
+        return
+
+    logger.info("Cloning/Updating environment repositories.")
+
+    try:
+        erm = RepositoryManager()
+        update_successful = erm.update_repositories()
+        if update_successful:
+            logger.info("Indexing environment repositories.")
+            erm.index_repositories()
+            logger.info("Environment repositories updated and ready.")
+        else:
+            logger.info("Unable to update environment repositories at startup, most likely due to lack of internet access.")
+    except Exception as e:
+        # If there is an error don't release the lock, as the repositories are
+        # not in the expected state
+        logger.exception(e)
+        logger.critical("Not releasing repository lock, restart API service")
+        raise
+
+    lock.release()
 
 def index_labbook_filesystem():
     """To be implemented later. """

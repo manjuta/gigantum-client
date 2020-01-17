@@ -83,7 +83,7 @@ class TestConfiguration(object):
 
         assert 'core' in configuration.config
         assert 'team_mode' in configuration.config["core"]
-        assert configuration.config["core"]["team_mode"] is False
+        assert configuration.config["core"]["team_mode"] is True
         assert 'git' in configuration.config
         assert 'test' in configuration.config
         assert 'from' in configuration.config
@@ -142,6 +142,8 @@ class TestConfiguration(object):
                 assert conf.USER_LOCATION == yf.name
                 assert conf.user_config['container']['memory'] == 99
                 assert conf.config['container']['memory'] == 99
+                assert 'context' not in conf.user_config['container']
+                assert conf.config['container']['context'] == 'local'
 
                 # If we give an explicit config file, then we IGNORE any user overrides
                 conf2 = Configuration(mock_config_file[0])
