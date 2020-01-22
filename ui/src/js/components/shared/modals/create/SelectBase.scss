@@ -4,6 +4,15 @@
   height: calc(100% - 50px);
   color: $romanSilver;
   font-weight: 100;
+
+  &__message {
+    text-align: center;
+    padding: 15px 0;
+
+    &--error {
+      color: $orange;
+    }
+  }
 }
 
 .SelectBase__inner-container {

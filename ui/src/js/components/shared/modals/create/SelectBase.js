@@ -80,6 +80,44 @@ export default class SelectBase extends Component {
     viewedBase: null,
     viewingBase: false,
     tags: [],
+    time: 0,
+    message: '',
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(this._updateTime, 1000);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.time > 50) {
+      clearInterval(this.interval);
+    }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  /**
+    @param {object} edge
+    takes a base image edge
+    sets componest state for selectedBaseId and selectedBase
+  */
+  _updateTime = () => {
+    this.setState((state) => {
+      const time = state.time + 1;
+      let message = '';
+      message = time > 10 ? 'Please wait while Bases are updated' : message;
+      message = time > 50 ? 'There was a problem updating Bases. Verify your config file is setup correctly and you are connected to the internet. Restart Gigantum Client and try again. If the problem persists contact support@gigantum.com.' : message;
+      if (time > 50) {
+        clearInterval(this.interval);
+      }
+
+      return {
+        time,
+        message,
+      };
+    });
   }
 
   /**
@@ -90,8 +128,10 @@ export default class SelectBase extends Component {
   _selectBase = (node) => {
     const { props } = this;
 
-    this.setState({ selectedBase: node });
-    this.setState({ selectedBaseId: node.id });
+    this.setState({
+      selectedBase: node,
+      selectedBaseId: node.id,
+    });
     props.selectBaseCallback(node);
     props.toggleDisabledContinue(false);
   }
@@ -122,15 +162,16 @@ export default class SelectBase extends Component {
 
   render() {
     const { props, state } = this;
+    const { message, time } = state;
     const self = this;
     const variables = { first: 20 };
-
+    const mostRecent = localStorage.getItem('latest_base');
+    // declare css here
     const innerContainer = classNames({
       'SelectBase__inner-container': true,
       'SelectBase__inner-container--datasets': true,
       'SelectBase__inner-container--viewer': state.viewingBase,
     });
-    const mostRecent = localStorage.getItem('latest_base');
 
     return (
       <div className="SelectBase">
@@ -143,6 +184,19 @@ export default class SelectBase extends Component {
             const { error } = response;
             if (error) {
               return (<div>{error.message}</div>);
+            }
+
+            if ((message !== '') && (queryProps === null)) {
+              const messageCSS = classNames({
+                SelectBase__message: true,
+                'SelectBase__message--error': time > 50,
+              });
+              return (
+                <div>
+                  <Loader />
+                  <h4 className={messageCSS}>{message}</h4>
+                </div>
+              );
             }
 
             if (queryProps && !props.datasets) {
@@ -163,30 +217,31 @@ export default class SelectBase extends Component {
                     />
                     <div className={selecBaseImage}>
                       {
-                            filteredProjects.map(({ node }) => {
-                              const isMostRecent = mostRecent === node.componentId;
-                              const BaseWrapper = classNames({
-                                BaseSlide__wrapper: true,
-                                'BaseSlide__wrapper--recent': mostRecent === node.componentId,
-                                'BaseSlide__wrapper--popular': !mostRecent && node.componentId === 'python3-data-science',
-                              });
-                              return (
-                                <div
-                                  key={node.id}
-                                  className={BaseWrapper}
-                                >
-                                  { isMostRecent
-                                  && <div className="BaseSlide__mostRecent">RECENT</div>
-                                }
-                                  <BaseCard
-                                    key={`${node.id}_slide`}
-                                    node={node}
-                                    selectBase={self._selectBase}
-                                    selectedBaseId={state.selectedBaseId}
-                                  />
-                                </div>);
-                            })
-                          }
+                        filteredProjects.map(({ node }) => {
+                          const isMostRecent = mostRecent === node.componentId;
+                          const BaseWrapper = classNames({
+                            BaseSlide__wrapper: true,
+                            'BaseSlide__wrapper--recent': mostRecent === node.componentId,
+                            'BaseSlide__wrapper--popular': !mostRecent && node.componentId === 'python3-data-science',
+                          });
+                          return (
+                            <div
+                              key={node.id}
+                              className={BaseWrapper}
+                            >
+                              { isMostRecent
+                              && <div className="BaseSlide__mostRecent">RECENT</div>
+                            }
+                              <BaseCard
+                                key={`${node.id}_slide`}
+                                node={node}
+                                selectBase={self._selectBase}
+                                selectedBaseId={state.selectedBaseId}
+                              />
+                            </div>
+                          );
+                        })
+                        }
                     </div>
                   </div>
 
