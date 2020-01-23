@@ -11,6 +11,21 @@ import {
 } from 'JS/redux/actions/labbook/labbook';
 // utils
 import MutlithreadUploader from 'JS/utils/MultithreadUploader';
+
+
+/**
+* Updates redux store to clear loading data.
+* @param {String} owner
+* @param {String} name
+*
+* @return {}
+*/
+const clearFileUpload = (owner, name) => {
+  setUploadMessageRemove('', null, 0);
+  setWarningMessage(owner, name, 'All provided file types are not allowed or the provided directory is empty. Verify selection and try again.');
+  setFileBrowserLock(owner, name, false);
+};
+
 /**
 * Removes files that are not allowed to be uploaded to gigantum.
 * @param {Array} files
@@ -62,7 +77,10 @@ const flattenFiles = (files, owner, name) => {
     } else if (Array.isArray(filesArray.file) && (filesArray.file.length > 0)) {
       recursiveFlatten(filesArray.file);
     } else if (filesArray.entry) {
-      if (!Array.isArray(filesArray.file) || ((Array.isArray(filesArray.file)) && (filesArray.file.length > 0))) {
+      if (!Array.isArray(filesArray.file)
+        || ((Array.isArray(filesArray.file))
+        && (filesArray.file.length > 0))
+      ) {
         flattenedFiles.push({
           file: filesArray.file,
           entry: {
@@ -85,6 +103,10 @@ const flattenFiles = (files, owner, name) => {
   recursiveFlatten(files);
 
   const prunedFiles = removeExcludedFiles(flattenedFiles, owner, name);
+
+  if (prunedFiles.length === 0) {
+    clearFileUpload(owner, name);
+  }
   return prunedFiles;
 };
 
@@ -173,7 +195,6 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
       let key = props.fileData ? props.fileData.edge.node.key : '';
       key = props.fileKey ? props.fileKey : key;
       path = key === '' ? '' : key.substr(0, key.lastIndexOf('/') || key.length);
-
       callback(files, `${path}/`);
     } else if (dndItem.files && dndItem.files.length) {
       // handle dragged files
@@ -186,7 +207,11 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
       if (item && item.files && props.browserProps.createFiles) {
         const files = flattenFiles(item.files, owner, labbookName);
         callback(files, `${path}/`);
+      } else {
+        clearFileUpload(owner, labbookName);
       }
+    } else {
+      clearFileUpload(owner, labbookName);
     }
   });
 };
@@ -201,11 +226,12 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
 * @return {number} totalFiles
 */
 const handleCallback = (filesTemp, path, mutationData, component) => {
+  const {
+    labbookName,
+    owner,
+  } = mutationData;
+
   if (filesTemp.length > 0) {
-    const {
-      labbookName,
-      owner,
-    } = mutationData;
     const fileSizeData = checkFileSize(filesTemp, mutationData.connection, owner, labbookName);
 
 
@@ -257,6 +283,8 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
     } else {
       uploadCallback(fileSizeData);
     }
+  } else {
+    clearFileUpload(owner, labbookName)
   }
 };
 
@@ -297,6 +325,7 @@ const prepareUpload = (dndItem, props, monitor, mutationData, component) => {
   } = mutationData;
   setFileBrowserLock(owner, labbookName, true);
   setUploadMessageUpdate('Preparing file upload');
+
   if (dndItem.dirContent) {
     const callback = (filesTemp, path) => {
       handleCallback(filesTemp, path, mutationData, component);
