@@ -3,6 +3,7 @@ import graphene
 import flask
 import os
 
+from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord
 from gtmcore.dataset import Dataset
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
@@ -171,15 +172,18 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         # Here "username" refers to the intended recipient username.
         # Todo: it should probably be renamed here and in the frontend to "collaboratorUsername"
         logged_in_username = get_logged_in_username()
-        InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
-                                        author=get_logged_in_author())
+        ds = InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
+                                             author=get_logged_in_author())
 
         if permissions == 'readonly':
             perm = ProjectPermissions.READ_ONLY
+            perm_msg = "read-only"
         elif permissions == 'readwrite':
             perm = ProjectPermissions.READ_WRITE
+            perm_msg = "read & write"
         elif permissions == 'owner':
             perm = ProjectPermissions.OWNER
+            perm_msg = "administrator"
         else:
             raise ValueError(f"Unknown permission set: {permissions}")
 
@@ -193,6 +197,7 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         if not access_token or not id_token:
             raise ValueError("Deleting a remote Dataset requires a valid session.")
 
+        # Add / Update collaborator
         mgr = GitLabManager(remote_config['git_remote'],
                             remote_config['hub_api'],
                             access_token=access_token,
@@ -201,14 +206,26 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         existing_collabs = mgr.get_collaborators(owner, dataset_name)
 
         if username not in [n[1] for n in existing_collabs]:
+            collaborator_msg = f"Adding collaborator {username} with {perm_msg} permissions"
             logger.info(f"Adding user {username} to {owner}/{dataset_name}"
                         f"with permission {perm}")
             mgr.add_collaborator(owner, dataset_name, username, perm)
         else:
+            collaborator_msg = f"Updating collaborator {username} to {perm_msg} permissions"
             logger.warning(f"Changing permission of {username} on"
                            f"{owner}/{dataset_name} to {perm}")
             mgr.delete_collaborator(owner, dataset_name, username)
             mgr.add_collaborator(owner, dataset_name, username, perm)
+
+        # Add to activity feed
+        store = ActivityStore(ds)
+        ar = ActivityRecord(ActivityType.DATASET,
+                            message=collaborator_msg,
+                            linked_commit="no-linked-commit",
+                            importance=255)
+        store.create_activity_record(ar)
+
+        # Return response
         create_data = {"owner": owner,
                        "name": dataset_name}
 
@@ -226,8 +243,8 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, dataset_name, username, client_mutation_id=None):
         logged_in_username = get_logged_in_username()
-        InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
-                                        author=get_logged_in_author())
+        ds = InventoryManager().load_dataset(logged_in_username, owner, dataset_name,
+                                             author=get_logged_in_author())
 
         # Get remote server configuration
         config = flask.current_app.config['LABMGR_CONFIG']
@@ -245,6 +262,15 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
                             id_token=id_token)
         mgr.delete_collaborator(owner, dataset_name, username)
 
+        # Add to activity feed
+        store = ActivityStore(ds)
+        ar = ActivityRecord(ActivityType.DATASET,
+                            message=f"Removing collaborator {username}",
+                            linked_commit="no-linked-commit",
+                            importance=255)
+        store.create_activity_record(ar)
+
+        # Return response
         create_data = {"owner": owner,
                        "name": dataset_name}
 
