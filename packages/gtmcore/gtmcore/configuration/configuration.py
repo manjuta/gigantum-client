@@ -1,12 +1,30 @@
 import os
 import yaml
 
-from typing import (Any, Dict, Optional, Tuple)
+from typing import (Any, Dict, Optional, Tuple, Mapping, MutableMapping)
 from pkg_resources import resource_filename
 
 from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
+
+
+def deepupdate(destination: MutableMapping[str, Any], source: Mapping[str, Any]) -> None:
+    """An updated version of dict.update that will recursively merge sub-dictionaries
+    instead of replacing sub-dictionaries.
+
+    Args:
+        destination (MutableMapping[str, object]): Dictionary to update
+        source (Mapping[str, object]): Dictionary to update from
+    """
+    for k, v in source.items():
+        if type(v) == dict:
+            if k in destination:
+                deepupdate(destination[k], v)
+            else:
+                destination[k] = v
+        else:
+            destination[k] = v
 
 
 class Configuration(object):
@@ -30,7 +48,7 @@ class Configuration(object):
 
         # If a user config exists, take fields from that to override the default config.
         if os.path.exists(self.USER_LOCATION):
-            self.config.update(self.user_config)
+            deepupdate(self.config, self.user_config)
 
     @staticmethod
     def find_default_config() -> str:
@@ -126,9 +144,7 @@ class Configuration(object):
             # user overrides (This is used only in testing)
             return {}
         elif os.path.exists(self.USER_LOCATION):
-            with open(self.USER_LOCATION) as user_conf_file:
-                # If the config file is empty or only comments, we create an empty dict to allow `update()` to work
-                user_conf_data = yaml.safe_load(user_conf_file) or {}
+            user_conf_data = self._read_config_file(self.USER_LOCATION)
             return user_conf_data
         else:
             return {}
@@ -143,7 +159,8 @@ class Configuration(object):
             (dict)
         """
         with open(config_file, "rt") as cf:
-            data = yaml.safe_load(cf)
+            # If the config file is empty or only comments, we create an empty dict to allow `deepupdate()` to work
+            data = yaml.safe_load(cf) or {}
 
         # Check if there is a parent config file to inherit from
         if "from" in data.keys():
@@ -157,7 +174,8 @@ class Configuration(object):
 
                 # Load Parent data and add/overwrite keys as needed
                 parent_data = self._read_config_file(parent_config_file)
-                data.update(parent_data)
+                deepupdate(parent_data, data) # Update parent_data with current values from data
+                data = parent_data
 
         return data
 

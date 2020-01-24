@@ -365,7 +365,6 @@ export default (state = {
     const dismissed = (doesHistoryMessageExist.length > 0)
       ? doesHistoryMessageExist[0].dismissed
       : false;
-
     const message = {
       message: action.payload.message,
       status: action.payload.status,
@@ -406,6 +405,7 @@ export default (state = {
       ...state,
       id: action.payload.id,
       message: action.payload.message,
+      status: action.payload.status,
       isLast: action.payload.isLast,
       messageStack,
       messageStackHistory,

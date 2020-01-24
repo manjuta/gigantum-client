@@ -3,6 +3,7 @@ import config from 'JS/config';
 // store
 import {
   setUploadMessageUpdate,
+  setUploadMessageRemove,
   setWarningMessage,
 } from 'JS/redux/actions/footer';
 import {
@@ -10,6 +11,47 @@ import {
 } from 'JS/redux/actions/labbook/labbook';
 // utils
 import MutlithreadUploader from 'JS/utils/MultithreadUploader';
+
+
+/**
+* Updates redux store to clear loading data.
+* @param {String} owner
+* @param {String} name
+*
+* @return {}
+*/
+const clearFileUpload = (owner, name) => {
+  setUploadMessageRemove('', null, 0);
+  setWarningMessage(owner, name, 'All provided file types are not allowed or the provided directory is empty. Verify selection and try again.');
+  setFileBrowserLock(owner, name, false);
+};
+
+
+/**
+* Returns section and fileSize limit for given section
+* @param {Object} mutationData
+*
+* @return {}
+*/
+const getSectionLimit = (mutationData) => {
+  const { section } = mutationData;
+  const sectionText = section.charAt(0).toUpperCase() + section.slice(1, section.length);
+
+  if (section === 'code') {
+    const fileSizeLimit = '100MB';
+    return { section: sectionText, fileSizeLimit };
+  }
+
+  if ((section === 'input') || (section === 'output')) {
+    const fileSizeLimit = '500MB';
+    const sectionTextComplete = `${sectionText} Data`;
+    return { section: sectionTextComplete, fileSizeLimit };
+  }
+
+  const fileSizeLimit = '15GB';
+  return { section: sectionText, fileSizeLimit };
+};
+
 /**
 * Removes files that are not allowed to be uploaded to gigantum.
 * @param {Array} files
@@ -61,7 +103,10 @@ const flattenFiles = (files, owner, name) => {
     } else if (Array.isArray(filesArray.file) && (filesArray.file.length > 0)) {
       recursiveFlatten(filesArray.file);
     } else if (filesArray.entry) {
-      if (!Array.isArray(filesArray.file) || ((Array.isArray(filesArray.file)) && (filesArray.file.length > 0))) {
+      if (!Array.isArray(filesArray.file)
+        || ((Array.isArray(filesArray.file))
+        && (filesArray.file.length > 0))
+      ) {
         flattenedFiles.push({
           file: filesArray.file,
           entry: {
@@ -84,6 +129,10 @@ const flattenFiles = (files, owner, name) => {
   recursiveFlatten(files);
 
   const prunedFiles = removeExcludedFiles(flattenedFiles, owner, name);
+
+  if (prunedFiles.length === 0) {
+    clearFileUpload(owner, name);
+  }
   return prunedFiles;
 };
 
@@ -93,7 +142,7 @@ const flattenFiles = (files, owner, name) => {
 *
 * @return {number} totalFiles
 */
-const checkFileSize = (files, promptType) => {
+const checkFileSize = (files, promptType, owner, labbookName) => {
   const tenMB = 10 * 1000 * 1000;
   const oneHundredMB = 10 * tenMB;
   const fiveHundredMB = oneHundredMB * 5;
@@ -102,6 +151,16 @@ const checkFileSize = (files, promptType) => {
   const fileSizePrompt = [];
   const fileSizeNotAllowed = [];
   let index = 0;
+
+  if (files.length > 10000) {
+    setFileBrowserLock(owner, labbookName, true);
+    return {
+      fileSizeNotAllowed,
+      fileSizePrompt,
+      filesAllowed,
+      tooManyFiles: true,
+    };
+  }
 
   function filesRecursionCount(file) {
     const fileSize = file.file.size;
@@ -131,12 +190,21 @@ const checkFileSize = (files, promptType) => {
 
     index += 1;
     if (files[index]) {
-      filesRecursionCount(files[index]);
+      try {
+        filesRecursionCount(files[index]);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
   filesRecursionCount(files[index]);
 
-  return { fileSizeNotAllowed, fileSizePrompt, filesAllowed };
+  return {
+    fileSizeNotAllowed,
+    fileSizePrompt,
+    filesAllowed,
+    tooManyFiles: false,
+  };
 };
 
 const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
@@ -153,7 +221,6 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
       let key = props.fileData ? props.fileData.edge.node.key : '';
       key = props.fileKey ? props.fileKey : key;
       path = key === '' ? '' : key.substr(0, key.lastIndexOf('/') || key.length);
-
       callback(files, `${path}/`);
     } else if (dndItem.files && dndItem.files.length) {
       // handle dragged files
@@ -166,7 +233,11 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
       if (item && item.files && props.browserProps.createFiles) {
         const files = flattenFiles(item.files, owner, labbookName);
         callback(files, `${path}/`);
+      } else {
+        clearFileUpload(owner, labbookName);
       }
+    } else {
+      clearFileUpload(owner, labbookName);
     }
   });
 };
@@ -181,19 +252,30 @@ const uploadDirContent = (dndItem, props, monitor, callback, mutationData) => {
 * @return {number} totalFiles
 */
 const handleCallback = (filesTemp, path, mutationData, component) => {
+  const {
+    labbookName,
+    owner,
+  } = mutationData;
+
   if (filesTemp.length > 0) {
-    const fileSizeData = checkFileSize(filesTemp, mutationData.connection);
-    const {
-      labbookName,
-      owner,
-    } = mutationData;
+    const fileSizeData = checkFileSize(filesTemp, mutationData.connection, owner, labbookName);
+
+    if (fileSizeData.tooManyFiles) {
+      setUploadMessageRemove('Too many files', null, 0);
+      setWarningMessage(owner, labbookName, 'Exceeded upload limit, up to 10,000 files can be uploaded at once');
+      setFileBrowserLock(owner, labbookName, false);
+      return;
+    }
 
     const uploadCallback = (fileData) => {
       if (fileSizeData.fileSizeNotAllowed.length > 0) {
         const fileToolarge = fileSizeData.fileSizeNotAllowed.map(file => file.entry.fullPath);
         const fileListAsString = fileToolarge.join(', ');
-        setWarningMessage(owner, labbookName, `The following files are too large to upload to this section ${fileListAsString}`);
-      } else {
+        const { section, fileSizeLimit } = getSectionLimit(mutationData);
+        setWarningMessage(owner, labbookName, `The following files are too large to upload to this section ${fileListAsString}, ${section} has a limit of ${fileSizeLimit}`);
+      }
+
+      if (fileSizeData.filesAllowed.length > 0) {
         const navigateConfirm = (evt) => {
           evt.preventDefault();
           evt.returnValue = '';
@@ -217,6 +299,9 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
         uploadInstance.startUpload(finishedCallback);
         setFileBrowserLock(owner, labbookName, true);
         setUploadMessageUpdate(`Uploading ${fileData.filesAllowed.length} files, 0% complete`);
+      } else {
+        setUploadMessageRemove('', null, 0);
+        setFileBrowserLock(owner, labbookName, false);
       }
     };
 
@@ -229,6 +314,8 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
     } else {
       uploadCallback(fileSizeData);
     }
+  } else {
+    clearFileUpload(owner, labbookName);
   }
 };
 
@@ -249,7 +336,6 @@ const uploadFromFileSelector = (dndItem, callback) => {
     },
   }));
 
-
   callback(files);
 };
 
@@ -263,6 +349,13 @@ const uploadFromFileSelector = (dndItem, callback) => {
 * @return {number} totalFiles
 */
 const prepareUpload = (dndItem, props, monitor, mutationData, component) => {
+  const {
+    labbookName,
+    owner,
+  } = mutationData;
+  setFileBrowserLock(owner, labbookName, true);
+  setUploadMessageUpdate('Preparing file upload');
+
   if (dndItem.dirContent) {
     const callback = (filesTemp, path) => {
       handleCallback(filesTemp, path, mutationData, component);

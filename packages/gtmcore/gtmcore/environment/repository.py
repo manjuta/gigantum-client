@@ -1,9 +1,111 @@
 import os
 import pickle
-from typing import (Any, List, Dict)
+import functools
+from typing import (Any, Dict, List, Optional)
 from operator import itemgetter
 
+import redis_lock
+from redis import StrictRedis
+
+from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
+from gtmcore.exceptions import GigantumLockedException
+
+class RepositoryLock(object):
+    """Lock for base image repo fetching and indexing
+
+    Note: If there is a problem fetching the base image repositories this lock
+          is not released, preventing any code from accessing the repositories
+
+    Can be used as an object to manually acquire / release the lock
+    Can be used as a context manager to automatically acquire / release the lock
+    Can be used as a function decorator to automatically acquire / release the lock
+    """
+    def __init__(self, config_file: Optional[str] = None):
+        """
+        Args:
+            config_file (Optional[str]): Optional config file location if don't want to load from default location
+        """
+        self.client_config = Configuration(config_file)
+
+        self.key = "base_repository_updates"
+        self.lock_key = f'filesystem_lock|{self.key}'
+
+        self._lock_redis_client: Optional[StrictRedis] = None
+        self.lock: Optional[redis_lock.Lock] = None
+
+        self.logger = LMLogger.get_logger()
+
+    # Start Context Manager Methods
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.release()
+        return None
+
+    # End Context Manager Methods
+
+    # Start Decorator Methods
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            with self:
+                return func(*args, **kwargs)
+        inner.__wrapper__ = self # Allow unit tests to access the RepositoryLock instance
+        return inner
+
+    # End Decorator Methods
+
+    def acquire(self, failfast: Optional[bool] = False):
+        """Acquire the lock
+
+        Args:
+            failfast (Optional[bool]): Optional flag if the acquisition should
+                     block for a given time or should return immediately if the
+                     lock cannot be acquired
+
+        Raises:
+            GigantumLockedException: If the lock cannot be acquired and failfast is True
+            IOError: If the lock cannot be acquired after the configured timeout
+        """
+        config = self.client_config.config['lock']
+
+        # Get a redis client
+        if not self._lock_redis_client:
+            self._lock_redis_client = StrictRedis(host=config['redis']['host'],
+                                                  port=config['redis']['port'],
+                                                  db=config['redis']['db'])
+
+        # Get a lock object
+        self.lock = redis_lock.Lock(self._lock_redis_client, self.lock_key)
+
+        # Get the lock - blocking and timeout kw args can not
+        # be used simultaneously
+        if failfast:
+            lock_kwargs = {'blocking': False}
+        else:
+            lock_kwargs = {'timeout': config['timeout']}
+
+        if not self.lock.acquire(**lock_kwargs):
+            self.lock = None
+            if failfast:
+                raise GigantumLockedException("Cannot interrupt operation in progress")
+            else:
+                raise IOError(f"Could not acquire file system lock within {config['timeout']} seconds.")
+
+    def release(self):
+        """Release the lock"""
+        if self.lock:
+            try:
+                self.lock.release()
+            except redis_lock.NotAcquired as e:
+                # if you didn't get the lock and an error occurs, you probably won't be able to release, so log.
+                self.logger.error(e)
+            self.lock = None
 
 
 class BaseRepository(object):

@@ -112,7 +112,8 @@ class BuildProgress extends Component {
     const footerMessage = messageStackHistory.filter(message => message.id === buildId);
 
     if (footerMessage[0] && footerMessage[0].messageBody) {
-      const { message, status } = footerMessage[0].messageBody[0];
+      const { status } = footerMessage[0];
+      const { message } = footerMessage[0].messageBody[0];
       const regex = /(Step [0-9]+\/[0-9]+)/g;
       const percentRegex = /[0-9]+\/[0-9]+/;
       const matches = message.match(regex);

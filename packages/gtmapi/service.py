@@ -10,9 +10,10 @@ from confhttpproxy import ProxyRouter
 from flask import Flask, jsonify
 
 import rest_routes
+from gtmcore.dispatcher import Dispatcher
+from gtmcore.dispatcher.jobs import update_environment_repositories
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.environment import RepositoryManager
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager
 from gtmcore.labbook.lock import reset_all_locks
 
@@ -34,6 +35,14 @@ app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 # Set Debug mode
 app.config['DEBUG'] = config.config["flask"]["DEBUG"]
 app.register_blueprint(blueprint.complete_labbook_service)
+
+# Set starting flags
+# If flask is run in debug mode the service will restart when code is changed, and some tasks
+#   we only want to happen once (ON_FIRST_START)
+# The WERKZEUG_RUN_MAIN environmental variable is set only when running under debugging mode
+ON_FIRST_START = app.config['DEBUG'] == False or os.environ.get('WERKZEUG_RUN_MAIN') != 'true'
+ON_RESTART = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+
 
 # Configure CHP
 try:
@@ -95,37 +104,22 @@ def cleanup_git(response):
 # TEMPORARY KLUDGE
 
 
-logger.info("Cloning/Updating environment repositories.")
+if ON_FIRST_START:
+    # Empty container-container share dir as it is ephemeral
+    share_dir = os.path.join(os.path.sep, 'mnt', 'share')
+    logger.info("Emptying container-container share folder: {}.".format(share_dir))
+    try:
+        for item in os.listdir(share_dir):
+            item_path = os.path.join(share_dir, item)
+            if os.path.isfile(item_path):
+                os.unlink(item_path)
+            else:
+                shutil.rmtree(item_path)
+    except Exception as e:
+        logger.error(f"Failed to empty share folder: {e}.")
+        raise
 
-try:
-    erm = RepositoryManager()
-    update_successful = erm.update_repositories()
-    if update_successful:
-        logger.info("Indexing environment repositories.")
-        erm.index_repositories()
-        logger.info("Environment repositories updated and ready.")
-
-    else:
-        logger.info("Unable to update environment repositories at startup, most likely due to lack of internet access.")
-except Exception as e:
-    logger.error(e)
-    raise
-
-# Empty container-container share dir as it is ephemeral
-share_dir = os.path.join(os.path.sep, 'mnt', 'share')
-logger.info("Emptying container-container share folder: {}.".format(share_dir))
-try:
-    for item in os.listdir(share_dir):
-        item_path = os.path.join(share_dir, item)
-        if os.path.isfile(item_path):
-            os.unlink(item_path)
-        else:
-            shutil.rmtree(item_path)
-except Exception as e:
-    logger.error(f"Failed to empty share folder: {e}.")
-    raise
-
-post_save_hook_code = """
+    post_save_hook_code = """
 import subprocess, os
 def post_save_hook(os_path, model, contents_manager, **kwargs):
     try:
@@ -146,35 +140,40 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         print(e)
 
 """
-os.makedirs(os.path.join(share_dir, 'jupyterhooks'))
-with open(os.path.join(share_dir, 'jupyterhooks', '__init__.py'), 'w') as initpy:
-    initpy.write(post_save_hook_code)
+    os.makedirs(os.path.join(share_dir, 'jupyterhooks'))
+    with open(os.path.join(share_dir, 'jupyterhooks', '__init__.py'), 'w') as initpy:
+        initpy.write(post_save_hook_code)
 
 
-# Reset distributed lock, if desired
-if config.config["lock"]["reset_on_start"]:
-    logger.info("Resetting ALL distributed locks")
-    reset_all_locks(config.config['lock'])
+    # Reset distributed lock, if desired
+    if config.config["lock"]["reset_on_start"]:
+        logger.info("Resetting ALL distributed locks")
+        reset_all_locks(config.config['lock'])
 
-# Create local data (for local dataset types) dir if it doesn't exist
-local_data_dir = os.path.join(config.config['git']['working_directory'], 'local_data')
-if os.path.isdir(local_data_dir) is False:
-    os.makedirs(local_data_dir, exist_ok=True)
-    logger.info(f'Created `local_data` dir for Local Filesystem Dataset Type: {local_data_dir}')
+    # Create local data (for local dataset types) dir if it doesn't exist
+    local_data_dir = os.path.join(config.config['git']['working_directory'], 'local_data')
+    if os.path.isdir(local_data_dir) is False:
+        os.makedirs(local_data_dir, exist_ok=True)
+        logger.info(f'Created `local_data` dir for Local Filesystem Dataset Type: {local_data_dir}')
 
-# Create certificates file directory for custom CA certificate support.
-certificate_dir = os.path.join(config.config['git']['working_directory'], 'certificates')
-if os.path.isdir(certificate_dir) is False:
-    os.makedirs(certificate_dir, exist_ok=True)
-    logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
+    # Create certificates file directory for custom CA certificate support.
+    certificate_dir = os.path.join(config.config['git']['working_directory'], 'certificates')
+    if os.path.isdir(certificate_dir) is False:
+        os.makedirs(certificate_dir, exist_ok=True)
+        logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
 
 
-# make sure temporary upload directory exists and is empty
-tempdir = config.upload_dir
-if os.path.exists(tempdir):
-    shutil.rmtree(tempdir)
-    logger.info(f'Cleared upload temp dir: {tempdir}')
-os.makedirs(tempdir)
+    # make sure temporary upload directory exists and is empty
+    tempdir = config.upload_dir
+    if os.path.exists(tempdir):
+        shutil.rmtree(tempdir)
+        logger.info(f'Cleared upload temp dir: {tempdir}')
+    os.makedirs(tempdir)
+
+
+    # Start background startup tasks
+    d = Dispatcher()
+    d.dispatch_task(update_environment_repositories, persist=True)
 
 
 def main(debug=False) -> None:
