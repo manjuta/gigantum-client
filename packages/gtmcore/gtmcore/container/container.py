@@ -4,10 +4,7 @@ import time
 from abc import ABC, abstractmethod
 from typing import Optional, Callable, List, Dict, Any
 
-import requests
-
 from gtmcore.configuration import Configuration
-from gtmcore.exceptions import GigantumException
 from gtmcore.container.cuda import should_launch_with_cuda_support
 from gtmcore.dataset.cache import get_cache_manager_class
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
@@ -152,7 +149,8 @@ class ContainerOperations(ABC):
 
     @abstractmethod
     def run_container(self, cmd: Optional[str] = None, image_name: Optional[str] = None, environment: List[str] = None,
-                      volumes: Optional[Dict] = None, wait_for_output=False, container_name: Optional[str] = None, **run_args) \
+                      volumes: Optional[Dict] = None, wait_for_output=False, container_name: Optional[str] = None,
+                      **run_args) \
             -> Optional[str]:
         """ Start a Docker container, by default for the Project connected to this instance.
 
@@ -243,7 +241,6 @@ class ContainerOperations(ABC):
 
         self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
 
-
     @abstractmethod
     def stop_container(self, container_name: Optional[str] = None) -> bool:
         """ Stop a container, defaults to the Project container.
@@ -326,6 +323,7 @@ class ContainerOperations(ABC):
         Args:
             image_tag: the "key" where we'll use to look up / store environment hashes
             env_dir: a directory where we can find a gigantum environment specification
+            update_cache: Update the cache stored on the filesystem?
 
         Returns:
             'not cached', 'match', or 'changed'
@@ -450,6 +448,7 @@ class SidecarContainerOperations:
 
     def query_container_ip(self) -> Optional[str]:
         return self.primary_container.query_container_ip(self.sidecar_container_name)
+
 
 # We only want to hit the filesystem once to get this value (otherwise, we parse the config file for every container
 # operation). This is used ONLY in container_for_context() below. Context-specific logic should otherwise be contained
