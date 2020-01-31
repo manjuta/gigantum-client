@@ -10,32 +10,32 @@ SUPPORTED_GIT_INTERFACES = {'filesystem': ["gtmcore.gitlib.git_fs", "GitFilesyst
 
 
 def get_git_interface(config_dict):
-        """Factory method that instantiates a GitInterface implementation based on provided configuration information
+    """Factory method that instantiates a GitInterface implementation based on provided configuration information
 
-        Note: `backend` is a required key in config_dict that specifies the gitlib backend implementation to use.
+    Note: `backend` is a required key in config_dict that specifies the gitlib backend implementation to use.
 
-            Supported Implementations:
-                - "filesystem" - Provides an interface that works on any repo on the filesystem
+        Supported Implementations:
+            - "filesystem" - Provides an interface that works on any repo on the filesystem
 
-        Args:
-            config_dict(dict): Dictionary of configuration information
+    Args:
+        config_dict(dict): Dictionary of configuration information
 
-        Returns:
-            GitRepoInterface
-        """
+    Returns:
+        GitRepoInterface
+    """
 
-        if "backend" not in config_dict:
-            raise ValueError("You must specify the `backend` parameter to instantiate a GitInterface implementation")
+    if "backend" not in config_dict:
+        raise ValueError("You must specify the `backend` parameter to instantiate a GitInterface implementation")
 
-        if config_dict["backend"] not in SUPPORTED_GIT_INTERFACES:
-            raise ValueError("Unsupported `backend` parameter {}. Valid backends: {}".format(config_dict["backend"],
-                                                                                             ",".join(SUPPORTED_GIT_INTERFACES.keys())))
-        # If you are here OK to import class
-        backend_class = getattr(importlib.import_module(SUPPORTED_GIT_INTERFACES[config_dict["backend"]][0]),
-                                                        SUPPORTED_GIT_INTERFACES[config_dict["backend"]][1])
+    if config_dict["backend"] not in SUPPORTED_GIT_INTERFACES:
+        raise ValueError("Unsupported `backend` parameter {}. Valid backends: {}".format(config_dict["backend"],
+                                                                                         ",".join(SUPPORTED_GIT_INTERFACES.keys())))
+    # If you are here OK to import class
+    module_name, class_name = SUPPORTED_GIT_INTERFACES[config_dict["backend"]][0:2]
+    backend_class = getattr(importlib.import_module(module_name), class_name)
 
-        # Instantiate with the config dict and return to the user
-        return backend_class(config_dict)
+    # Instantiate with the config dict and return to the user
+    return backend_class(config_dict)
 
 
 class GitAuthor(object):
@@ -169,14 +169,14 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         raise NotImplemented
 
     @abc.abstractmethod
-    def clone(self, source, directory: Optional[str] = None):
+    def clone(self, source, directory: str, branch: Optional[str] = None, single_branch=False):
         """Clone a repo
 
         Args:
-            source (str): Git ssh or https string to clone
-
-        Returns:
-            None
+            source: Git ssh or https string to clone - should be a bare path, or include '/' as a final delimiter
+            directory: Directory to clone into
+            branch: The name of the desired branch to be checked out (defaults to master)
+            single_branch: Fetch ONLY the contents of the specified branch
         """
         raise NotImplemented
 
