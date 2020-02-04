@@ -26,8 +26,8 @@ def property_mocks_fixture():
 
 class TestGitLabManager(object):
     @responses.activate
-    def test_user_token(self, gitlab_mngr_fixture):
-        """test the user_token property"""
+    def test_repo_token(self, gitlab_mngr_fixture):
+        """test the repo_token property"""
         # Setup responses mock for this test
         responses.add(responses.POST, 'https://gigantum.com/api/v1',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
@@ -35,26 +35,26 @@ class TestGitLabManager(object):
         assert gitlab_mngr_fixture._gitlab_token is None
 
         # Get token
-        token = gitlab_mngr_fixture.user_token
+        token = gitlab_mngr_fixture.repo_token
         assert token == 'afaketoken'
         assert gitlab_mngr_fixture._gitlab_token == 'afaketoken'
 
         # Assert token is returned and set on second call and does not make a request
         responses.add(responses.POST, 'https://gigantum.com/api/v1',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'NOTTHERIGHTTOKEN'}}}, status=500)
-        assert token == gitlab_mngr_fixture.user_token
+        assert token == gitlab_mngr_fixture.repo_token
         assert token == 'afaketoken'
 
     @responses.activate
-    def test_user_token_error(self, gitlab_mngr_fixture):
-        """test the user_token property"""
+    def test_repo_token_error(self, gitlab_mngr_fixture):
+        """test the repo_token property"""
         # Setup responses mock for this test
         responses.add(responses.POST, 'https://gigantum.com/api/v1',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'NOTTHERIGHTTOKEN'}}}, status=500)
 
         # Make sure error is raised when getting the key fails and returns !=200
         with pytest.raises(GitLabException):
-            _ = gitlab_mngr_fixture.user_token
+            _ = gitlab_mngr_fixture.repo_token
 
     def test_repository_id(self):
         """test the repository_id property"""

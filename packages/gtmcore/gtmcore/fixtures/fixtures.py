@@ -104,7 +104,8 @@ def _MOCK_create_remote_repo2(repository, username: str, visibility, access_toke
     os.makedirs(working_dir, exist_ok=True)
     r = git.Repo.init(path=working_dir, bare=True)
     assert r.bare is True
-    repository.add_remote(remote_name="origin", url=working_dir)
+    # The repository URL should end with a '/' because that's how GitLab prefers it
+    repository.add_remote(remote_name="origin", url=working_dir + '/')
 
     # Push branches
     # TODO: @billvb - need to refactor this once new branch model is in effect.

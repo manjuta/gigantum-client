@@ -247,7 +247,7 @@ class DatasetList(graphene.ObjectType, interfaces=(graphene.relay.Node,)):
                                 "creation_date_utc": node["createdOnUtc"],
                                 "modified_date_utc": node["modifiedOnUtc"],
                                 "visibility": node["visibility"],
-                                "import_url": f"https://{remote_url}/{node['namespace']}/{node['repositoryName']}.git"
+                                "import_url": f"https://{remote_url}/{node['namespace']}/{node['repositoryName']}.git/"
                                }
 
                 edge_objs.append(RemoteDatasetConnection.Edge(node=RemoteDataset(**create_data),

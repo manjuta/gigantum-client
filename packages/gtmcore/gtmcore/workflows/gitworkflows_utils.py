@@ -5,6 +5,7 @@ import shutil
 import uuid
 from typing import Any, Optional, Callable
 
+from gtmcore.gitlib import RepoLocation
 from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
                              ActivityDetailType, ActivityDetailRecord, \
@@ -85,7 +86,11 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
         mgr.create_labbook(namespace=InventoryManager().query_owner(repository),
                            labbook_name=repository.name,
                            visibility=visibility)
-        repository.add_remote("origin", f"https://{remote_config['git_remote']}/{username}/{repository.name}.git")
+
+        # URL construction logic doesn't belong at the level of Git workflows, but it works for now
+        remote = RepoLocation(f"https://{remote_config['git_remote']}/{username}/{repository.name}",
+                              current_username=username)
+        repository.add_remote("origin", remote.remote_location)
     except Exception as e:
         raise GitLabRemoteError(e)
 

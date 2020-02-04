@@ -2,7 +2,6 @@ import base64
 import graphene
 import os
 import flask
-import requests
 
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord
 from gtmcore.inventory.inventory import InventoryManager

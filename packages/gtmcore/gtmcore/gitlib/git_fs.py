@@ -790,8 +790,10 @@ class GitFilesystem(GitRepoInterface):
         Returns:
             None
         """
-        if len(self.repo.remotes) > 0:
+        try:
             self.repo.remotes[remote].fetch(refspec)
+        except KeyError:
+            raise ValueError(f'{remote} is not a remote in the repository')
 
     def pull(self, refspec=None, remote="origin"):
         """Method fetch and integrate a remote
@@ -810,7 +812,7 @@ class GitFilesystem(GitRepoInterface):
 
         Args:
             remote_name(str): Name of the remote repository
-            refspec: ?
+            refspec: NOT CURRENTLY SUPPORTED (refspec is ordinarily a hash, branch, or tag)
             tags(bool): If true, push tags
 
         Returns:

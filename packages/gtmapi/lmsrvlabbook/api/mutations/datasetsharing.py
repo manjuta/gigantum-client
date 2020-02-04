@@ -3,8 +3,8 @@ import graphene
 import flask
 import os
 
+from gtmcore.gitlib import RepoLocation
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord
-from gtmcore.dataset import Dataset
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
@@ -115,7 +115,9 @@ class ImportRemoteDataset(graphene.relay.ClientIDMutation):
         # Configure git creds for user
         configure_git_credentials()
 
-        wf = DatasetWorkflow.import_from_remote(remote_url, username=get_logged_in_username())
+        current_username = get_logged_in_username()
+        remote = RepoLocation(remote_url, current_username)
+        wf = DatasetWorkflow.import_from_remote(remote, username=current_username)
         ds = wf.dataset
 
         import_owner = InventoryManager().query_owner(ds)

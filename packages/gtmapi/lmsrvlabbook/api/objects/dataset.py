@@ -446,11 +446,7 @@ class Dataset(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
         if remotes:
             url = [x['url'] for x in remotes if x['name'] == 'origin']
             if url:
-                url = url[0]
-                if "http" in url and url[-4:] != ".git":
-                    logger.warning(f"Fixing remote URL format: {dataset.name}: {url}")
-                    url = f"{url}.git"
-                return url
+                return url[0]
             else:
                 dataset.warning(f"There exist remotes in {str(dataset)}, but no origin found.")
         return None

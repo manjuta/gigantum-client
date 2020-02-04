@@ -4,7 +4,7 @@ import yaml
 import datetime
 import json
 
-from typing import (Dict, Optional, Union)
+from typing import (Optional, Union)
 
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema

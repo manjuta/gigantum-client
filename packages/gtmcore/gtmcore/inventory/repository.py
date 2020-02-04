@@ -63,7 +63,7 @@ class Repository(object):
             self.author = author
 
         # Repository Properties
-        self._root_dir: Optional[str] = None  # The root dir is the location of the labbook this instance represents
+        self._root_dir: Optional[str] = None  # The root dir is the location of the labbook or dataset this instance represents
         self._data: Dict[str, Any] = {}
         self._checkout_id: Optional[str] = None
 

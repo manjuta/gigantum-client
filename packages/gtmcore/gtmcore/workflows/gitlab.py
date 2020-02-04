@@ -127,7 +127,7 @@ class GitLabManager(object):
                 "Identity": self.id_token}
 
     @property
-    def user_token(self) -> Optional[str]:
+    def repo_token(self) -> Optional[str]:
         """Method to get the user's API token from the hub API"""
         if self._gitlab_token is None:
             # Get the token
@@ -167,7 +167,7 @@ class GitLabManager(object):
         """
         # Call API to get ID of the user
         response = requests.get(f"https://{self.remote_host}/api/v4/users?username={username}",
-                                headers={"PRIVATE-TOKEN": self.user_token},
+                                headers={"PRIVATE-TOKEN": self.repo_token},
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
             logger.error(f"Failed to query for user ID from username. Status Code: {response.status_code}")
@@ -198,7 +198,7 @@ class GitLabManager(object):
         # Call API to check for project
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                headers={"PRIVATE-TOKEN": self.user_token},
+                                headers={"PRIVATE-TOKEN": self.repo_token},
                                 timeout=REQUEST_TIMEOUT)
 
         if response.status_code == 200:
@@ -226,7 +226,7 @@ class GitLabManager(object):
         repo_id = self.get_repository_id(namespace, repository_name)
         update_data = {'visibility': visibility}
         response = requests.put(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                data=update_data, headers={"PRIVATE-TOKEN": self.user_token},
+                                data=update_data, headers={"PRIVATE-TOKEN": self.repo_token},
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
             msg = f"Could not set visibility for remote repository {namespace}/{repository_name} " \
@@ -250,7 +250,7 @@ class GitLabManager(object):
             """
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                headers={"PRIVATE-TOKEN": self.user_token},
+                                headers={"PRIVATE-TOKEN": self.repo_token},
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code == 200:
             return response.json()
@@ -295,7 +295,7 @@ class GitLabManager(object):
 
         # Call API to create project
         response = requests.post(f"https://{self.remote_host}/api/v4/projects",
-                                 headers={"PRIVATE-TOKEN": self.user_token},
+                                 headers={"PRIVATE-TOKEN": self.repo_token},
                                  json=data, timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 201:
@@ -321,7 +321,7 @@ class GitLabManager(object):
         # Call API to remove project
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                   headers={"PRIVATE-TOKEN": self.user_token},
+                                   headers={"PRIVATE-TOKEN": self.repo_token},
                                    timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 202:
@@ -348,7 +348,7 @@ class GitLabManager(object):
         # Call API to get all collaborators
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
-                                headers={"PRIVATE-TOKEN": self.user_token},
+                                headers={"PRIVATE-TOKEN": self.repo_token},
                                 timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 200:
@@ -383,7 +383,7 @@ class GitLabManager(object):
                 "access_level": role.value}
         repo_id = self.get_repository_id(namespace, labbook_name)
         response = requests.post(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
-                                 headers={"PRIVATE-TOKEN": self.user_token},
+                                 headers={"PRIVATE-TOKEN": self.repo_token},
                                  json=data,
                                  timeout=REQUEST_TIMEOUT)
 
@@ -417,7 +417,7 @@ class GitLabManager(object):
         # Call API to remove a collaborator
         repo_id = self.get_repository_id(namespace, labbook_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members/{user_id}",
-                                   headers={"PRIVATE-TOKEN": self.user_token},
+                                   headers={"PRIVATE-TOKEN": self.repo_token},
                                    timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 204:
@@ -457,6 +457,7 @@ class GitLabManager(object):
 
         return out, err
 
+    # TODO #1214: This can be cleanly replaced with the stdin approach to working with `git credential`
     def _check_if_git_credentials_configured(self, host: str, username: str) -> Optional[str]:
         """
 
@@ -527,6 +528,7 @@ class GitLabManager(object):
         else:
             return None
 
+    # TODO #1214: This can be cleanly replaced with the stdin approach to working with `git credential`
     def configure_git_credentials(self, host: str, username: str) -> None:
         """Method to configure the local git client's credentials
 
@@ -552,7 +554,7 @@ class GitLabManager(object):
                 child.expect("")
                 child.sendline(f"username={username}")
                 child.expect("")
-                child.sendline(f"password={self.user_token}")
+                child.sendline(f"password={self.repo_token}")
                 child.expect("")
                 child.sendline("")
                 child.expect(["", pexpect.EOF])
@@ -564,6 +566,7 @@ class GitLabManager(object):
 
             logger.info(f"Configured local git credentials for {host}")
 
+    # TODO #1214: This can be cleanly replaced with the stdin approach to working with `git credential`
     def clear_git_credentials(self, host: str) -> None:
         """Method to clear the local git client's credentials
 

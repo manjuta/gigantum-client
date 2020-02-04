@@ -285,7 +285,7 @@ class ModifyDatasetLink(graphene.relay.ClientIDMutation):
                     dataset_url = f"{ds.root_dir}/.git"
 
                 # Link the dataset to the labbook
-                ds = im.link_dataset_to_labbook(dataset_url, dataset_owner, dataset_name, lb)
+                ds = im.link_dataset_to_labbook(dataset_url, dataset_owner, dataset_name, lb, logged_in_username)
                 ds.namespace = dataset_owner
 
                 # Preload the dataloader

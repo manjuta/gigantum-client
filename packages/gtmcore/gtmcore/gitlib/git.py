@@ -1,6 +1,8 @@
 import abc
 import importlib
 from typing import Dict, List, Optional, Tuple
+from urllib import parse
+import re
 
 # Dictionary of supported implementations.
 # Key is the value to put in the config_dict["backend"].
@@ -53,6 +55,73 @@ class GitAuthor(object):
 
     def __str__(self):
         return "{} - {}".format(self.name, self.email)
+
+
+class RepoLocation:
+    """A class that maintains a URL to "real" network locations, with easy access to metadata"""
+
+    def __init__(self, requested_url: str, current_username: Optional[str]) -> None:
+        """Accept as broad a range of requested URLs as possible, convert to "real" location
+
+        Args:
+            requested_url: A URL we know how to deal with, can also be a local filesystem path. Because we tolerate this
+              ambiguity, we require an explicit schema (e.g., `https://`)
+            current_username: This will be encoded into the remote URL so git knows what token to use
+        """
+        # If given something like a filesystem path, that's what ends up in path (other elements are '')
+        parsed_url = parse.urlparse(requested_url)
+
+        # We currently always remove any existing username from the URL
+        if parsed_url.username:
+            username, domain = parsed_url.netloc.split('@')
+        else:
+            domain = parsed_url.netloc
+
+        if parsed_url.netloc:
+            if current_username:
+                self.netloc = f'{current_username}@{domain}'
+            else:
+                self.netloc = domain
+            # We strip this off so we can reliably add `.git/` below
+            self.base_path = re.sub('[.]git/?$', '', parsed_url.path)
+            self.host = domain
+        else:
+            self.netloc = ''
+            # If it's a filesystem path, we don't mess with it, except to remove final '/' and convert '\' to '/'
+            self.base_path = parsed_url.path.replace('\\', '/').rstrip('/')
+            # While this equivalence may seem odd, we do this so we can get info out of git config, determine Hub APIs,
+            #  and provide error messages
+            self.host = self.base_path
+
+        path_toks = self.base_path.split("/")
+        self.repo_name = path_toks[-1]
+        if len(path_toks) > 1:
+            self.owner = path_toks[-2]
+        else:
+            self.owner = ''
+
+        # We don't currently use these three final fields, but we avoid disrupting them just in case
+        self.params = parsed_url.params
+        self.query = parsed_url.query
+        self.fragment = parsed_url.fragment
+
+    @property
+    def remote_location(self) -> str:
+        """The final endpoint for our git remote (avoids redirects, etc.)"""
+        if self.netloc:
+            return parse.urlunparse(('https', self.netloc, self.base_path + '.git/',
+                                     self.params, self.query, self.fragment))
+        else:
+            # We assume this is a filesystem path
+            return self.base_path
+
+    @property
+    def owner_repo(self) -> str:
+        """For communicating with the user"""
+        if self.owner:
+            return f'{self.owner}/{self.repo_name}'
+        else:
+            return self.repo_name
 
 
 class GitRepoInterface(metaclass=abc.ABCMeta):
