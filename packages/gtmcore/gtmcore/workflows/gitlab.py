@@ -346,19 +346,30 @@ class GitLabManager(object):
             raise ValueError("Cannot get collaborators of a repository that does not exist")
 
         # Call API to get all collaborators
+        collaborators = list()
+        page = 1
+        per_page = 20
         repo_id = self.get_repository_id(namespace, repository_name)
-        response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
-                                headers={"PRIVATE-TOKEN": self.repo_token},
-                                timeout=REQUEST_TIMEOUT)
+        while True:
+            response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/"
+                                    f"members?page={page}&per_page={per_page}",
+                                    headers={"PRIVATE-TOKEN": self.repo_token},
+                                    timeout=REQUEST_TIMEOUT)
 
-        if response.status_code != 200:
-            logger.error("Failed to get remote repository collaborators")
-            logger.error(response.json())
-            raise ValueError("Failed to get remote repository collaborators")
-        else:
-            # Will load one of ProjectPermissions enum fields, else throwing value err
-            return [(x['id'], x['username'], ProjectPermissions(x['access_level']))
-                    for x in response.json()]
+            if response.status_code != 200:
+                logger.error(f"Failed to get remote repository collaborators for {repo_id}, page {page}")
+                logger.error(response.json())
+                raise ValueError("Failed to get remote repository collaborators")
+            else:
+                # Will load one of ProjectPermissions enum fields, else throwing value err
+                c = [(x['id'], x['username'], ProjectPermissions(x['access_level'])) for x in response.json()]
+                collaborators.extend(c)
+                page += 1
+
+                if len(c) < per_page:
+                    break
+
+        return collaborators
 
     def add_collaborator(self, namespace: str, labbook_name: str, username: str, role: ProjectPermissions) -> None:
         """Method to add a collaborator to a remote repository by username

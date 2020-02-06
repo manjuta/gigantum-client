@@ -411,27 +411,30 @@ class Labbook(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepositor
             info: The graphene info object for this requests
 
         """
-        config = flask.current_app.config['LABMGR_CONFIG']
-        remote_config = config.get_remote_configuration()
+        if self._collaborators is None:
+            config = flask.current_app.config['LABMGR_CONFIG']
+            remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer and ID tokens
-        access_token = flask.g.get('access_token', None)
-        id_token = flask.g.get('id_token', None)
-        if not access_token or not id_token:
-            raise ValueError("Deleting a remote Dataset requires a valid session.")
+            # Extract valid Bearer and ID tokens
+            access_token = flask.g.get('access_token', None)
+            id_token = flask.g.get('id_token', None)
+            if not access_token or not id_token:
+                raise ValueError("Deleting a remote Dataset requires a valid session.")
 
-        mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['hub_api'],
-                            access_token=access_token,
-                            id_token=id_token)
-        try:
-            self._collaborators = [Collaborator(owner=self.owner, name=self.name,
-                                                collaborator_username=c[1],
-                                                permission=ProjectPermissions(c[2]).name)
-                                   for c in mgr.get_collaborators(self.owner, self.name)]
-        except ValueError:
-            # If ValueError Raised, assume repo doesn't exist yet
-            self._collaborators = []
+            mgr = GitLabManager(remote_config['git_remote'],
+                                remote_config['hub_api'],
+                                access_token=access_token,
+                                id_token=id_token)
+            try:
+                self._collaborators = [Collaborator(owner=self.owner, name=self.name,
+                                                    collaborator_username=c[1],
+                                                    permission=ProjectPermissions(c[2]).name)
+                                       for c in mgr.get_collaborators(self.owner, self.name)]
+            except ValueError:
+                # If ValueError Raised, assume repo doesn't exist yet
+                self._collaborators = []
+        else:
+            return self._collaborators
 
     def helper_resolve_collaborators(self, labbook, info):
         """Helper method to fetch this labbook's collaborators and generate the resulting list of collaborators
