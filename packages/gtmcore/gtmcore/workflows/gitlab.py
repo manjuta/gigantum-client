@@ -289,7 +289,7 @@ class GitLabManager(object):
                 # We want all deconfliction done on client-side.
                 "merge_method": "ff",
                 "visibility": visibility,
-                "public_jobs": False,
+                "public_builds": False,
                 "request_access_enabled": False
                 }
 
