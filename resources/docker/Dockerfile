@@ -58,9 +58,15 @@ COPY $HONEYTAIL_INSTALLER /tmp/honeytail.sh
 # Super instruction to install all dependencies that need apt and clean up to minimize layer size
 RUN apt-get -y update && \
     # Install all apt packages
-    apt-get -y --no-install-recommends install nginx supervisor wget openssl python3 python3-pip python3-distutils \
-    gcc g++ gosu redis-server libjpeg-dev python3-setuptools python3-dev libdpkg-perl zip unzip libsnappy-dev \
+    apt-get -y --no-install-recommends install nginx supervisor wget openssl python3.7 python3-pip python3-distutils \
+    gcc g++ gosu redis-server libjpeg-dev python3-setuptools python3.7-dev libdpkg-perl zip unzip libsnappy-dev \
     curl make autoconf dh-autoreconf libcurl4-openssl-dev libexpat1-dev libz-dev && \
+    # Make sure correct Python version is used
+    # DP NOTE: pip will use whatever version python3 points to
+    ln -sf python3.7 /usr/bin/python3 && \
+    ln -sf python3.7-config /usr/bin/python3-config && \
+    ln -sf python3.7m /usr/bin/python3m && \
+    ln -sf python3.7m-config /usr/bin/python3m-config && \
     # Install Git from source to use OpenSSL for better enterprise network support.
     mkdir /tmp/gitbuild && cd /tmp/gitbuild && \
 	# Get the latest git tarball

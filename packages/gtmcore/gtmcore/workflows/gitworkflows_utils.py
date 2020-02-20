@@ -10,6 +10,7 @@ from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
                              ActivityDetailType, ActivityDetailRecord, \
                              ActivityAction
+from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.exceptions import GigantumException
 from gtmcore.labbook import LabBook
 from gtmcore.labbook.schemas import migrate_schema_to_current, \
@@ -211,15 +212,20 @@ def migrate_labbook_schema(labbook: LabBook) -> None:
     msg = f"Migrate schema to {CURRENT_LABBOOK_SCHEMA}"
     labbook.git.add(labbook.config_path)
     cmt = labbook.git.commit(msg, author=labbook.author, committer=labbook.author)
-    adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
+    adr = ActivityDetailRecord(ActivityDetailType.LABBOOK,
+                               show=True,
                                importance=100,
-                               action=ActivityAction.EDIT)
+                               action=ActivityAction.EDIT,
+                               data=TextData('plain', msg))
 
-    adr.add_value('text/plain', msg)
-    ar = ActivityRecord(ActivityType.LABBOOK, message=msg, show=True,
-                        importance=255, linked_commit=cmt.hexsha,
-                        tags=['schema', 'update', 'migration'])
-    ar.add_detail_object(adr)
+    ar = ActivityRecord(ActivityType.LABBOOK,
+                        message=msg,
+                        show=True,
+                        importance=255,
+                        linked_commit=cmt.hexsha,
+                        detail_objects=DetailRecordList([adr]),
+                        tags=ImmutableList(['schema', 'update', 'migration']))
+
     ars = ActivityStore(labbook)
     ars.create_activity_record(ar)
 

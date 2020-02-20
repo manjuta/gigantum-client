@@ -24,6 +24,7 @@ from gtmcore.inventory import Repository
 from gtmcore.dataset import storage
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
+from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.dataset import Manifest
 
 
@@ -558,14 +559,18 @@ class InventoryManager(object):
             dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
 
             # Create Activity Record
-            adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=0)
-            adr.add_value('text/plain', f"Created new Dataset: {username}/{dataset_name}")
+            adr = ActivityDetailRecord(ActivityDetailType.DATASET,
+                                       show=False,
+                                       importance=0,
+                                       data=TextData('plain', f"Created new Dataset: {username}/{dataset_name}"))
+
             ar = ActivityRecord(ActivityType.DATASET,
                                 message=f"Created new Dataset: {username}/{dataset_name}",
                                 show=True,
                                 importance=255,
-                                linked_commit=dataset.git.commit_hash)
-            ar.add_detail_object(adr)
+                                linked_commit=dataset.git.commit_hash,
+                                detail_objects=DetailRecordList([adr]))
+
             store = ActivityStore(dataset)
             store.create_activity_record(ar)
 
@@ -789,16 +794,19 @@ class InventoryManager(object):
         dataset_revision = ds.git.repo.head.commit.hexsha
 
         # Add Activity Record
-        adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.CREATE)
-        adr.add_value('text/markdown',
-                      f"Linked Dataset `{dataset_namespace}/{dataset_name}` to "
-                      f"project at revision `{dataset_revision}`")
+        adr = ActivityDetailRecord(ActivityDetailType.DATASET,
+                                   show=False,
+                                   action=ActivityAction.CREATE,
+                                   data=TextData('markdown', f"Linked Dataset `{dataset_namespace}/{dataset_name}` to "
+                                                             f"project at revision `{dataset_revision}`"))
+
         ar = ActivityRecord(ActivityType.DATASET,
                             message=f"Linked Dataset {dataset_namespace}/{dataset_name} to project.",
                             linked_commit=commit.hexsha,
-                            tags=["dataset"],
-                            show=True)
-        ar.add_detail_object(adr)
+                            tags=ImmutableList(["dataset"]),
+                            show=True,
+                            detail_objects=DetailRecordList([adr]))
+
         ars = ActivityStore(labbook)
         ars.create_activity_record(ar)
 
@@ -831,14 +839,18 @@ class InventoryManager(object):
         commit = labbook.git.commit("removing submodule ref")
 
         # Add Activity Record
-        adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.DELETE)
-        adr.add_value('text/markdown', f"Unlinked Dataset `{dataset_namespace}/{dataset_name}` from project")
+        adr = ActivityDetailRecord(ActivityDetailType.DATASET,
+                                  show=False,
+                                  action=ActivityAction.DELETE,
+                                  data=TextData('markdown', f"Unlinked Dataset `{dataset_namespace}/{dataset_name}` from project"))
+
         ar = ActivityRecord(ActivityType.DATASET,
                             message=f"Unlinked Dataset {dataset_namespace}/{dataset_name} from project.",
                             linked_commit=commit.hexsha,
-                            tags=["dataset"],
-                            show=True)
-        ar.add_detail_object(adr)
+                            tags=ImmutableList(["dataset"]),
+                            show=True,
+                            detail_objects=DetailRecordList([adr]))
+
         ars = ActivityStore(labbook)
         ars.create_activity_record(ar)
 
@@ -934,16 +946,19 @@ class InventoryManager(object):
             commit = labbook.git.commit("Updating submodule ref")
 
             # Add Activity Record
-            adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, action=ActivityAction.DELETE)
-            adr.add_value('text/markdown',
-                          f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to {latest_revision}")
+            adr = ActivityDetailRecord(ActivityDetailType.DATASET,
+                                       show=False,
+                                       action=ActivityAction.DELETE,
+                                       data=TextData('markdown', f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to {latest_revision}"))
+
             msg = f"Updated Dataset `{dataset_namespace}/{dataset_name}` link to version {latest_revision[0:8]}"
             ar = ActivityRecord(ActivityType.DATASET,
                                 message=msg,
                                 linked_commit=commit.hexsha,
-                                tags=["dataset"],
-                                show=True)
-            ar.add_detail_object(adr)
+                                tags=ImmutableList(["dataset"]),
+                                show=True,
+                                detail_objects=DetailRecordList([adr]))
+
             ars = ActivityStore(labbook)
             ars.create_activity_record(ar)
 

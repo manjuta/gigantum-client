@@ -295,16 +295,16 @@ class ActivityRecordObject(graphene.ObjectType, interfaces=(graphene.relay.Node,
                 self._load_activity_record(info)
 
             # Load detail objects from database
-            with self._activity_record.inspect_detail_objects() as details:
-                self.detail_objects = [ActivityDetailObject(id=f"{self._repository_type}&{self.owner}&{self.name}&{d.key}",
-                                                            owner=self.owner,
-                                                            name=self.name,
-                                                            _repository_type=self._repository_type,
-                                                            key=d.key,
-                                                            show=d.show,
-                                                            tags=d.tags,
-                                                            importance=d.importance,
-                                                            action=d.action,
-                                                            type=d.type) for d in details]
+            self.detail_objects = [ActivityDetailObject(id=f"{self._repository_type}&{self.owner}&{self.name}&{d.key}",
+                                                        owner=self.owner,
+                                                        name=self.name,
+                                                        _repository_type=self._repository_type,
+                                                        key=d.key,
+                                                        show=d.show,
+                                                        tags=d.tags,
+                                                        importance=d.importance,
+                                                        action=d.action,
+                                                        type=d.type)
+                                   for d in self._activity_record.detail_objects]
 
         return self.detail_objects

@@ -314,7 +314,8 @@ class RStudioServerMonitor(ActivityMonitor):
 
             try:
                 # Create note record
-                activity_commit = self.store_activity_record(commit, activity_record)
+                activity_record = self.store_activity_record(commit, activity_record)
+                activity_commit = activity_record.commit
                 logger.info(f"Created auto-generated activity record {activity_commit} in {time.time() - t_start} seconds")
             except Exception as e:
                 logger.error(f'Encountered fatal error generating activity record: {e}')

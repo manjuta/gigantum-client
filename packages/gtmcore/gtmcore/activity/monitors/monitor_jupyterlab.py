@@ -260,7 +260,8 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
             commit = self.commit_labbook()
 
             # Create note record
-            activity_commit = self.store_activity_record(commit, activity_record)
+            activity_record = self.store_activity_record(commit, activity_record)
+            activity_commit = activity_record.commit
 
             logger.info(f"Created auto-generated activity record {activity_commit} in {time.time() - t_start} seconds")
 

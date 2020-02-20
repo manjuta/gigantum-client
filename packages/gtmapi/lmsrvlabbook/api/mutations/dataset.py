@@ -13,6 +13,7 @@ from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.utilities import configure_git_credentials
 from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType, ActivityRecord, \
     ActivityDetailRecord
+from gtmcore.activity.utils import ImmutableDict, TextData, DetailRecordList, ImmutableList
 
 
 from lmsrvlabbook.api.objects.dataset import Dataset
@@ -414,14 +415,18 @@ class SetDatasetDescription(graphene.relay.ClientIDMutation):
             ds.git.add(os.path.join(ds.root_dir, '.gigantum/gigantum.yaml'))
             commit = ds.git.commit('Updating description')
 
-            adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=False)
-            adr.add_value('text/plain', f"Updated Dataset description: {description}")
+            adr = ActivityDetailRecord(ActivityDetailType.LABBOOK,
+                                       show=False,
+                                       data=TextData('plain',
+                                                     f"Updated Dataset description: {description}"))
+
             ar = ActivityRecord(ActivityType.LABBOOK,
                                 message="Updated Dataset description",
                                 linked_commit=commit.hexsha,
-                                tags=["dataset"],
-                                show=False)
-            ar.add_detail_object(adr)
+                                tags=ImmutableList(["dataset"]),
+                                show=False,
+                                detail_objects=DetailRecordList([adr]))
+
             ars = ActivityStore(ds)
             ars.create_activity_record(ar)
         return SetDatasetDescription(updated_dataset=Dataset(owner=owner, name=dataset_name))
