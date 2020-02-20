@@ -62,9 +62,8 @@ class HubProjectContainer(ContainerOperations):
                 feedback_callback(f"No environment changes detected. Reusing existing image.\n")
                 return
 
-        feedback_callback(f"Starting Project container build. Please wait.\n\n Note, build output is not yet available "
-                          f"when running in Gigantum Hub. If you need to debug an environment configuration and "
-                          f"require the build output, you must run the Client locally.\n")
+        build_feedback = f"Starting Project container build. Please wait.\n\n"
+        feedback_callback(build_feedback)
 
         url = f"{self._launch_service}/v1/projectbuild"
         data = {"client_id": self._client_id,
@@ -80,6 +79,7 @@ class HubProjectContainer(ContainerOperations):
         # Wait for build completion
         start_time = time.time()
         build_timeout_seconds = self.labbook.client_config.config['container']['build_timeout']
+        build_output = ""
         while True:
             time_elapsed = time.time() - start_time
             if time_elapsed > int(build_timeout_seconds):
@@ -101,6 +101,16 @@ class HubProjectContainer(ContainerOperations):
                                       f" the build output and fix any issues.\n")
                     raise ContainerException(f"Failed to build the Project image, most likely due to the Project's"
                                              f" environment configuration.")
+                else:
+                    # Request build output from the launch service
+                    feedback_pos = len(build_output)
+                    build_output_resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/"
+                                                     f"project/{self.labbook.name}/buildoutput")
+                    if build_output_resp.status_code == 200:
+                        build_output = build_output_resp.json().get("output", "")
+                        feedback_callback(build_output[feedback_pos:])
+                    else:
+                        logger.info(f"failed to get build output")
             elif resp.status_code != 304:
                 # back off if the server is throwing errors
                 time.sleep(5)
