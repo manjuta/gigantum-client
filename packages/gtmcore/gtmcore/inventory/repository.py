@@ -470,6 +470,14 @@ class Repository(object):
 
     def process_sweep_status(self, result_obj: ActivityRecord,
                              status: Dict[str, Any]) -> Tuple[ActivityRecord, int, int, int]:
+
+        detail_type: Dict[ActivityAction, ActivityDetailType] = {}
+        detail_msgs: Dict[ActivityAction, List[str]] = {
+            ActivityAction.CREATE: [],
+            ActivityAction.DELETE: [],
+            ActivityAction.EDIT: [],
+            ActivityAction.NOACTION: [],
+        }
         sections = []
         ncnt = 0
         for filename in status['untracked']:
@@ -477,16 +485,18 @@ class Repository(object):
             if ".git" in filename or ".gigantum" in filename:
                 continue
             activity_type, activity_detail_type, section = self.infer_section_from_relative_path(filename)
-            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255 - ncnt, 0),
-                                       action=ActivityAction.CREATE)
+
             sections.append(section)
             if section == self._default_activity_section:
                 msg = f"Created new file `{filename}` in the {self._default_activity_section}."
                 msg = f"{msg}Note, it is best practice to use the Code, Input, and Output sections exclusively."
             else:
                 msg = f"Created new {section} file `{filename}`"
-            adr = adr.add_value('text/markdown', msg)
-            result_obj = result_obj.add_detail_object(adr)
+
+            action = ActivityAction.CREATE
+            detail_type[action] = activity_detail_type
+            detail_msgs[action].append(msg)
+
             ncnt += 1
 
         # If all modifications were of same section
@@ -529,13 +539,14 @@ class Repository(object):
                 action = ActivityAction.NOACTION
                 mcnt += 1
 
-            adr = ActivityDetailRecord(activity_detail_type, show=False, importance=max(255 - mcnt, 0), action=action)
             if ".gitkeep" in filename:
                 directory_name, _ = filename.split('.gitkeep')
-                adr = adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} directory `{directory_name}`")
+                msg = f"{change[0].upper() + change[1:]} {section} directory `{directory_name}`"
             else:
-                adr = adr.add_value('text/markdown', f"{change[0].upper() + change[1:]} {section} file `{filename}`")
-            result_obj = result_obj.add_detail_object(adr)
+                msg = f"{change[0].upper() + change[1:]} {section} file `{filename}`"
+
+            detail_type[action] = activity_detail_type
+            detail_msgs[action].append(msg)
 
         modified_section_set = set(msections)
         if new_type == self._default_activity_type:
@@ -556,7 +567,13 @@ class Repository(object):
                 # Mismatch between new and modify or within modify, just use catchall LABBOOK or DATASET type
                 new_type = self._default_activity_type
 
-        result_obj = result_obj.update(activity_type=new_type)
+        adrs = [ActivityDetailRecord(detail_type[action],
+                                     show=False,
+                                     action=action,
+                                     data=TextData('markdown', '\n'.join(detail_msgs[action])))
+                for action in detail_type.keys() if len(detail_msgs[action]) > 0]
+        result_obj = result_obj.update(activity_type=new_type,
+                                       detail_objects=DetailRecordList(adrs))
 
         # Return additionally new file cnt (ncnt) and modified (mcnt)
         return result_obj, ncnt, mcnt, dcnt

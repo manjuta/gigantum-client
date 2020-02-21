@@ -83,11 +83,9 @@ class TestShims(object):
 
         assert new_count == 3
         assert modified_count == 0
-        assert len(ar.detail_objects) == 3
+        assert len(ar.detail_objects) == 1
         assert ar.type == ActivityType.CODE
         assert ar.detail_objects[0].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.CODE.value
         assert "Created" in ar.detail_objects[0].data['text/markdown']
 
     def test_process_sweep_status_new_input(self, mock_lb):
@@ -111,11 +109,9 @@ class TestShims(object):
 
         assert new_count == 3
         assert modified_count == 0
-        assert len(ar.detail_objects) == 3
+        assert len(ar.detail_objects) == 1
         assert ar.type == ActivityType.INPUT_DATA
         assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.INPUT_DATA.value
 
     def test_process_sweep_status_new_output(self, mock_lb):
         helper_write_file(mock_lb, 'output', 'f1.txt', 'cat')
@@ -138,11 +134,9 @@ class TestShims(object):
 
         assert new_count == 3
         assert modified_count == 0
-        assert len(ar.detail_objects) == 3
+        assert len(ar.detail_objects) == 1
         assert ar.type == ActivityType.OUTPUT_DATA
         assert ar.detail_objects[0].type.value == ActivityDetailType.OUTPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.OUTPUT_DATA.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.OUTPUT_DATA.value
 
     def test_process_sweep_status_modified_code(self, mock_lb):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
@@ -172,14 +166,10 @@ class TestShims(object):
         ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
-        assert len(ar.detail_objects) == 3
+        assert len(ar.detail_objects) == 1
         assert ar.type == ActivityType.CODE
         assert ar.detail_objects[0].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.CODE.value
         assert "Modified" in ar.detail_objects[0].data['text/markdown']
-        assert "Modified" in ar.detail_objects[1].data['text/markdown']
-        assert "Modified" in ar.detail_objects[2].data['text/markdown']
 
     def test_process_sweep_status_modified_input(self, mock_lb):
         helper_write_file(mock_lb, 'input', 'f1.txt', 'cat')
@@ -209,14 +199,10 @@ class TestShims(object):
         ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
-        assert len(ar.detail_objects) == 3
+        assert len(ar.detail_objects) == 1
         assert ar.type == ActivityType.INPUT_DATA
         assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.INPUT_DATA.value
         assert "Modified" in ar.detail_objects[0].data['text/markdown']
-        assert "Modified" in ar.detail_objects[1].data['text/markdown']
-        assert "Modified" in ar.detail_objects[2].data['text/markdown']
 
     def test_process_sweep_status_modified_output(self, mock_lb):
         helper_write_file(mock_lb, 'output', 'f1.txt', 'cat')
@@ -246,14 +232,10 @@ class TestShims(object):
         ar, new_count, modified_count, deleted_count = lb.process_sweep_status(ar, git_status)
 
         assert new_count == 0
-        assert len(ar.detail_objects) == 3
+        assert len(ar.detail_objects) == 1
         assert ar.type == ActivityType.OUTPUT_DATA
         assert ar.detail_objects[0].type.value == ActivityDetailType.OUTPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.OUTPUT_DATA.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.OUTPUT_DATA.value
         assert "Modified" in ar.detail_objects[0].data['text/markdown']
-        assert "Modified" in ar.detail_objects[1].data['text/markdown']
-        assert "Modified" in ar.detail_objects[2].data['text/markdown']
 
     def test_process_sweep_status_mixed_new_no_modified(self, mock_lb):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
@@ -266,13 +248,9 @@ class TestShims(object):
         assert new_count == 3
         assert modified_count == 0
         assert ar.type == ActivityType.LABBOOK
-        assert len(ar.detail_objects) == 3
-        assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.OUTPUT_DATA.value
+        assert len(ar.detail_objects) == 1
+        assert ar.detail_objects[0].type.value == ActivityDetailType.OUTPUT_DATA.value
         assert "Created" in ar.detail_objects[0].data['text/markdown']
-        assert "Created" in ar.detail_objects[1].data['text/markdown']
-        assert "Created" in ar.detail_objects[2].data['text/markdown']
 
     def test_process_sweep_status_no_new_mixed_modified(self, mock_lb):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
@@ -289,13 +267,9 @@ class TestShims(object):
         assert new_count == 0
         assert modified_count == 3
         assert ar.type == ActivityType.LABBOOK
-        assert len(ar.detail_objects) == 3
-        assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.OUTPUT_DATA.value
+        assert len(ar.detail_objects) == 1
+        assert ar.detail_objects[0].type.value == ActivityDetailType.OUTPUT_DATA.value
         assert "Modified" in ar.detail_objects[0].data['text/markdown']
-        assert "Modified" in ar.detail_objects[1].data['text/markdown']
-        assert "Modified" in ar.detail_objects[2].data['text/markdown']
 
     def test_process_sweep_status_mixed_new_same_modified(self, mock_lb):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
@@ -312,15 +286,11 @@ class TestShims(object):
         assert new_count == 2
         assert modified_count == 2
         assert ar.type == ActivityType.LABBOOK
-        assert len(ar.detail_objects) == 4
+        assert len(ar.detail_objects) == 2
         assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
         assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[3].type.value == ActivityDetailType.CODE.value
         assert "Created" in ar.detail_objects[0].data['text/markdown']
-        assert "Created" in ar.detail_objects[1].data['text/markdown']
-        assert "Modified" in ar.detail_objects[2].data['text/markdown']
-        assert "Modified" in ar.detail_objects[3].data['text/markdown']
+        assert "Modified" in ar.detail_objects[1].data['text/markdown']
 
     def test_process_sweep_status_same_new_mixed_modified(self, mock_lb):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
@@ -339,16 +309,11 @@ class TestShims(object):
         assert new_count == 2
         assert modified_count == 3
         assert ar.type == ActivityType.LABBOOK
-        assert len(ar.detail_objects) == 5
-        assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[3].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[4].type.value == ActivityDetailType.OUTPUT_DATA.value
-        assert "Modified" in ar.detail_objects[0].data['text/markdown']
-        assert "Created" in ar.detail_objects[1].data['text/markdown']
-        assert "Created" in ar.detail_objects[2].data['text/markdown']
-        assert "Modified" in ar.detail_objects[3].data['text/markdown']
+        assert len(ar.detail_objects) == 2
+        assert ar.detail_objects[0].type.value == ActivityDetailType.CODE.value
+        assert ar.detail_objects[1].type.value == ActivityDetailType.OUTPUT_DATA.value
+        assert "Created" in ar.detail_objects[0].data['text/markdown']
+        assert "Modified" in ar.detail_objects[1].data['text/markdown']
 
     def test_process_sweep_status_mixed_new_mixed_modified(self, mock_lb):
         helper_write_file(mock_lb, 'code', 'f1.txt', 'cat')
@@ -365,15 +330,11 @@ class TestShims(object):
         assert new_count == 2
         assert modified_count == 2
         assert ar.type == ActivityType.LABBOOK
-        assert len(ar.detail_objects) == 4
+        assert len(ar.detail_objects) == 2
         assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[3].type.value == ActivityDetailType.OUTPUT_DATA.value
+        assert ar.detail_objects[1].type.value == ActivityDetailType.OUTPUT_DATA.value
         assert "Modified" in ar.detail_objects[0].data['text/markdown']
         assert "Created" in ar.detail_objects[1].data['text/markdown']
-        assert "Modified" in ar.detail_objects[2].data['text/markdown']
-        assert "Created" in ar.detail_objects[3].data['text/markdown']
 
     def test_process_sweep_status_same_new_same_modified(self, mock_lb):
         helper_write_file(mock_lb, 'input', 'f1.txt', 'cat')
@@ -390,12 +351,8 @@ class TestShims(object):
         assert new_count == 2
         assert modified_count == 2
         assert ar.type == ActivityType.LABBOOK
-        assert len(ar.detail_objects) == 4
+        assert len(ar.detail_objects) == 2
         assert ar.detail_objects[0].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[1].type.value == ActivityDetailType.INPUT_DATA.value
-        assert ar.detail_objects[2].type.value == ActivityDetailType.CODE.value
-        assert ar.detail_objects[3].type.value == ActivityDetailType.CODE.value
+        assert ar.detail_objects[1].type.value == ActivityDetailType.CODE.value
         assert "Modified" in ar.detail_objects[0].data['text/markdown']
-        assert "Modified" in ar.detail_objects[1].data['text/markdown']
-        assert "Created" in ar.detail_objects[2].data['text/markdown']
-        assert "Created" in ar.detail_objects[3].data['text/markdown']
+        assert "Created" in ar.detail_objects[1].data['text/markdown']
