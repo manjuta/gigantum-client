@@ -7,7 +7,7 @@ import os
 from gtmcore.activity.monitors.monitor_jupyterlab import JupyterLabNotebookMonitor, JupyterLabCodeProcessor, \
     JupyterLabPlaintextProcessor, JupyterLabImageExtractorProcessor
 from gtmcore.activity.processors.core import ActivityShowBasicProcessor, GenericFileChangeProcessor, \
-    ActivityDetailLimitProcessor
+    ActivityDetailLimitProcessor, ActivityDetailProgressProcessor
 from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType
 
 
@@ -29,14 +29,15 @@ class TestJupyterLabNotebookMonitor(object):
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
                                             monitor_key, config_file=mock_labbook[0])
 
-        assert len(monitor.processors) == 7
+        assert len(monitor.processors) == 8
         assert type(monitor.processors[0]) == JupyterLabCodeProcessor
         assert type(monitor.processors[1]) == GenericFileChangeProcessor
         assert type(monitor.processors[2]) == JupyterLabPlaintextProcessor
         assert type(monitor.processors[3]) == JupyterLabImageExtractorProcessor
         assert type(monitor.processors[4]) == JupyterLabCellVisibilityProcessor
-        assert type(monitor.processors[5]) == ActivityDetailLimitProcessor
-        assert type(monitor.processors[6]) == ActivityShowBasicProcessor
+        assert type(monitor.processors[5]) == ActivityDetailProgressProcessor
+        assert type(monitor.processors[6]) == ActivityDetailLimitProcessor
+        assert type(monitor.processors[7]) == ActivityShowBasicProcessor
 
     def test_start(self, redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity"""

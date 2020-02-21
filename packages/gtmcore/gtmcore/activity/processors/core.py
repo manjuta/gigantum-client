@@ -2,9 +2,11 @@ from typing import (Any, Dict, List)
 
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
 from gtmcore.activity import ActivityRecord, ActivityDetailRecord, ActivityAction, ActivityDetailType
-from gtmcore.activity.utils import TextData
+from gtmcore.activity.utils import TextData, DetailRecordList
 from gtmcore.labbook import LabBook
 
+from gtmcore.logging import LMLogger
+logger = LMLogger.get_logger()
 
 class ActivityShowBasicProcessor(ActivityProcessor):
     """Class to simply hide an activity record if it doesn't have any detail records that are set to show=True"""
@@ -144,3 +146,48 @@ class ActivityDetailLimitProcessor(ActivityProcessor):
             result_obj = result_obj.add_detail_object(adr)
 
         return result_obj
+
+class ActivityDetailProgressProcessor(ActivityProcessor):
+    """Class to search the current detailed objects and remove any that are the result of code that is
+    rewriting the terminal screen (using control sequences)
+
+    When such output is detected the last line of the output is saved, as it is the line that is typically
+    left on the terminal when the code has finished
+    """
+
+    def process(self, result_obj: ActivityRecord, data: List[ExecutionData],
+                status: Dict[str, Any], metadata: Dict[str, Any]) -> ActivityRecord:
+        """Method to update a result object based on code and result data
+
+        Args:
+            result_obj(ActivityNote): An object containing the note
+            data(list): A list of ExecutionData instances containing the data for this record
+            status(dict): A dict containing the result of git status from gitlib
+            metadata(str): A dictionary containing Dev Env specific or other developer defined data
+
+        Returns:
+            ActivityNote
+        """
+        detail_objects : List[ActivityDetailRecord] = []
+        skip_line = True
+        for obj in result_obj.detail_objects:
+            if 'text/plain' in obj.data:
+                text = obj.data['text/plain']
+                if text.isspace():
+                    # isspace() -> catch newlines
+                    continue
+                elif text[0] in ('\x1b', '\u001b'):
+                    # 0x1b -> catch escape sequences
+                    continue
+                elif text[0] in ('\r', ) or text[0:2] in ('\n\r', ):
+                    # \r -> handle when line is being rewritten
+                    if skip_line and not text.isspace():
+                        skip_line = False
+                        if obj.show:
+                            obj = obj.update(show=False)
+                    else:
+                        continue
+
+            detail_objects.append(obj)
+
+        return result_obj.update(detail_objects=DetailRecordList(detail_objects))

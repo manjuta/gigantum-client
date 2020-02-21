@@ -15,7 +15,7 @@ from gtmcore.activity.monitors.activity import ActivityMonitor
 from gtmcore.activity.processors.jupyterlab import JupyterLabCodeProcessor, \
     JupyterLabPlaintextProcessor, JupyterLabImageExtractorProcessor, JupyterLabCellVisibilityProcessor
 from gtmcore.activity.processors.core import ActivityShowBasicProcessor, GenericFileChangeProcessor, \
-    ActivityDetailLimitProcessor
+    ActivityDetailLimitProcessor, ActivityDetailProgressProcessor
 from gtmcore.activity import ActivityType
 from gtmcore.dispatcher import Dispatcher, jobs
 from gtmcore.logging import LMLogger
@@ -170,6 +170,7 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
         self.add_processor(JupyterLabPlaintextProcessor())
         self.add_processor(JupyterLabImageExtractorProcessor())
         self.add_processor(JupyterLabCellVisibilityProcessor())
+        self.add_processor(ActivityDetailProgressProcessor())
         self.add_processor(ActivityDetailLimitProcessor())
         self.add_processor(ActivityShowBasicProcessor())
 
