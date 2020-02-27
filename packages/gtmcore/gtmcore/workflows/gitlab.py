@@ -83,7 +83,7 @@ class ProjectPermissions(Enum):
 
 class GitLabManager(object):
     """Class to manage administrative operations to a remote GitLab server"""
-    def __init__(self, remote_host: str, hub_api: str, access_token: str, id_token: str) -> None:
+    def __init__(self, remote_host: str, hub_api: str, access_token: Optional[str], id_token: Optional[str]) -> None:
         """
 
         Args:
@@ -123,38 +123,55 @@ class GitLabManager(object):
         Returns:
             dict
         """
-        return {"Authorization": f"Bearer {self.access_token}",
-                "Identity": self.id_token}
+        if self.access_token is not None and self.id_token is not None:
+            return {"Authorization": f"Bearer {self.access_token}",
+                    "Identity": self.id_token}
+        else:
+            return dict()
 
-    @property
-    def repo_token(self) -> Optional[str]:
+    def _gitlab_api_headers(self) -> Dict:
+        """Method to get the authorization and id headers for calling the gitlab api
+
+        Returns:
+            dict
+        """
+        if self.access_token is not None and self.id_token is not None:
+            return {"PRIVATE-TOKEN": self._repo_token()}
+        else:
+            return dict()
+
+    def _repo_token(self) -> Optional[str]:
         """Method to get the user's API token from the hub API"""
-        if self._gitlab_token is None:
-            # Get the token
-            query = """{
-                          additionalCredentials {
-                            gitServiceToken
-                          }  
-                        }"""
+        if self.access_token is not None and self.id_token is not None:
+            if self._gitlab_token is None:
+                # Get the token
+                query = """{
+                              additionalCredentials {
+                                gitServiceToken
+                              }  
+                            }"""
 
-            response = requests.post(self.hub_api,
-                                     json={"query": query},
-                                     headers=self._hub_api_headers())
+                response = requests.post(self.hub_api,
+                                         json={"query": query},
+                                         headers=self._hub_api_headers())
 
-            if response.status_code != 200:
-                logger.error(f"Failed to get user access key from server. Status Code: {response.status_code}")
-                logger.error(response.json())
-                raise GitLabException("Failed to get user access key from server")
+                if response.status_code != 200:
+                    logger.error(f"Failed to get user access key from server. Status Code: {response.status_code}")
+                    logger.error(response.json())
+                    raise GitLabException("Failed to get user access key from server")
 
-            result = response.json()
-            if "errors" in result:
-                logger.error(f"Failed to get user access key from server. Status Code: {response.status_code}")
-                logger.error(response.json())
-                raise GitLabException(f"Failed to get user git token: {result.get('errors')}")
+                result = response.json()
+                if "errors" in result:
+                    logger.error(f"Failed to get user access key from server. Status Code: {response.status_code}")
+                    logger.error(response.json())
+                    raise GitLabException(f"Failed to get user git token: {result.get('errors')}")
 
-            self._gitlab_token = result['data']['additionalCredentials']['gitServiceToken']
+                self._gitlab_token = result['data']['additionalCredentials']['gitServiceToken']
 
-        return self._gitlab_token
+            return self._gitlab_token
+        else:
+            # If access and ID token aren't set, don't try to get a gitlab tokens
+            return None
 
     def _get_user_id_from_username(self, username: str) -> int:
         """Method to get a user's id in GitLab based on their username
@@ -167,7 +184,7 @@ class GitLabManager(object):
         """
         # Call API to get ID of the user
         response = requests.get(f"https://{self.remote_host}/api/v4/users?username={username}",
-                                headers={"PRIVATE-TOKEN": self.repo_token},
+                                headers=self._gitlab_api_headers(),
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
             logger.error(f"Failed to query for user ID from username. Status Code: {response.status_code}")
@@ -198,7 +215,7 @@ class GitLabManager(object):
         # Call API to check for project
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                headers={"PRIVATE-TOKEN": self.repo_token},
+                                headers=self._gitlab_api_headers(),
                                 timeout=REQUEST_TIMEOUT)
 
         if response.status_code == 200:
@@ -226,7 +243,7 @@ class GitLabManager(object):
         repo_id = self.get_repository_id(namespace, repository_name)
         update_data = {'visibility': visibility}
         response = requests.put(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                data=update_data, headers={"PRIVATE-TOKEN": self.repo_token},
+                                data=update_data, headers=self._gitlab_api_headers(),
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
             msg = f"Could not set visibility for remote repository {namespace}/{repository_name} " \
@@ -250,7 +267,7 @@ class GitLabManager(object):
             """
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                headers={"PRIVATE-TOKEN": self.repo_token},
+                                headers=self._gitlab_api_headers(),
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code == 200:
             return response.json()
@@ -295,7 +312,7 @@ class GitLabManager(object):
 
         # Call API to create project
         response = requests.post(f"https://{self.remote_host}/api/v4/projects",
-                                 headers={"PRIVATE-TOKEN": self.repo_token},
+                                 headers=self._gitlab_api_headers(),
                                  json=data, timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 201:
@@ -321,7 +338,7 @@ class GitLabManager(object):
         # Call API to remove project
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                   headers={"PRIVATE-TOKEN": self.repo_token},
+                                   headers=self._gitlab_api_headers(),
                                    timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 202:
@@ -353,7 +370,7 @@ class GitLabManager(object):
         while True:
             response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/"
                                     f"members?page={page}&per_page={per_page}",
-                                    headers={"PRIVATE-TOKEN": self.repo_token},
+                                    headers=self._gitlab_api_headers(),
                                     timeout=REQUEST_TIMEOUT)
 
             if response.status_code != 200:
@@ -394,7 +411,7 @@ class GitLabManager(object):
                 "access_level": role.value}
         repo_id = self.get_repository_id(namespace, labbook_name)
         response = requests.post(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
-                                 headers={"PRIVATE-TOKEN": self.repo_token},
+                                 headers=self._gitlab_api_headers(),
                                  json=data,
                                  timeout=REQUEST_TIMEOUT)
 
@@ -428,7 +445,7 @@ class GitLabManager(object):
         # Call API to remove a collaborator
         repo_id = self.get_repository_id(namespace, labbook_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members/{user_id}",
-                                   headers={"PRIVATE-TOKEN": self.repo_token},
+                                   headers=self._gitlab_api_headers(),
                                    timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 204:
@@ -565,7 +582,7 @@ class GitLabManager(object):
                 child.expect("")
                 child.sendline(f"username={username}")
                 child.expect("")
-                child.sendline(f"password={self.repo_token}")
+                child.sendline(f"password={self._repo_token()}")
                 child.expect("")
                 child.sendline("")
                 child.expect(["", pexpect.EOF])

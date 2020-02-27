@@ -47,7 +47,12 @@ class JupyterLabMonitor(DevEnvMonitor):
         _, username, owner, labbook_name, _ = key.split(':')
         project_info = container_for_context(username)
         lb_key = project_info.default_image_tag(owner, labbook_name)
-        token = redis_conn.get(f"{lb_key}-jupyter-token").decode()
+        token_bytes = redis_conn.get(f"{lb_key}-jupyter-token")
+        if token_bytes:
+            token = token_bytes.decode()
+        else:
+            logger.warning(f"No token in cache when checking Jupyter sessions for {username}/{owner}/{labbook_name}")
+            token = ""
         url = redis_conn.hget(key, "url").decode()
 
         # Get List of active sessions

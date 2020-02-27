@@ -79,7 +79,11 @@ class RepoLocation:
 
         if parsed_url.netloc:
             if current_username:
-                self.netloc = f'{current_username}@{domain}'
+                if current_username == 'anonymous':
+                    # If the user is anonymous, don't include the username in the git URL.
+                    self.netloc = domain
+                else:
+                    self.netloc = f'{current_username}@{domain}'
             else:
                 self.netloc = domain
             # We strip this off so we can reliably add `.git/` below

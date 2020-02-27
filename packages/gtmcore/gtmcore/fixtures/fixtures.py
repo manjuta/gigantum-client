@@ -309,6 +309,38 @@ def mock_config_file_with_auth_browser():
     shutil.rmtree(working_dir)
 
 
+@pytest.fixture(scope="module")
+def mock_config_file_with_auth_anonymous():
+    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
+    # Load auth config for testing
+    test_auth_file = os.path.join(resource_filename('gtmcore',
+                                                    'auth{}tests'.format(os.path.sep)), 'auth_config.json')
+    if not os.path.exists(test_auth_file):
+        test_auth_file = f"{test_auth_file}.example"
+
+    with open(test_auth_file, 'rt') as conf:
+        auth_data = json.load(conf)
+
+    overrides = {
+        'auth': {
+            'provider_domain': 'gigantum.auth0.com',
+            'signing_algorithm': 'RS256',
+            'client_id': auth_data['client_id'],
+            'audience': auth_data['audience'],
+            'identity_manager': 'anonymous'
+        }
+    }
+
+    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
+
+    # Go get a JWT for the test user from the dev auth client (real users are not in this DB)
+    response = requests.post("https://gigantum.auth0.com/oauth/token", json=auth_data)
+    token_data = response.json()
+
+    yield conf_file, working_dir, token_data
+    shutil.rmtree(working_dir)
+
+
 @pytest.fixture()
 def mock_config_with_activitystore():
     """A pytest fixture that creates a ActivityStore (and labbook) and deletes directory after test"""

@@ -20,6 +20,10 @@ class BrowserIdentityManager(IdentityManager):
     def is_authenticated(self, access_token: Optional[str] = None, id_token: Optional[str] = None) -> bool:
         """Method to check if the user is currently authenticated in the context of this identity manager
 
+        Args:
+            access_token(str): API access JSON web token from Auth0
+            id_token(str): ID JSON web token from Auth0 (not needed for this middleware)
+
         Returns:
             bool
         """

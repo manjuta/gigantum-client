@@ -10,6 +10,7 @@ from gtmcore.container.exceptions import ContainerBuildException, ContainerExcep
 from gtmcore.dataset.cache import get_cache_manager_class
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook import LabBook
+from gtmcore.gitlib.git import GitAuthor
 
 
 class HubProjectContainer(ContainerOperations):
@@ -143,7 +144,7 @@ class HubProjectContainer(ContainerOperations):
             logger.error(f"Couldn't connect to {url}.")
             return False
         if response.status_code != 200:
-            logger.error(f"Couldn't determine if image exists: {response.content}.")
+            logger.error("Couldn't determine if image exists: {!r}.".format(response.content))
             return False
         existsRaw = response.json()["exists"]
         return True if existsRaw == "true" else False
@@ -297,7 +298,8 @@ class HubProjectContainer(ContainerOperations):
                 elif response.status_code == 404:
                     return None
                 else:
-                    logger.info(f"Fetching Project state not yet ready: {response.status_code} : {response.content}")
+                    logger.info("Fetching Project state not yet ready: {} : {!r}".format(response.status_code,
+                                                                                         response.content))
             except requests.exceptions.ConnectionError:
                 pass
 
@@ -424,10 +426,11 @@ class HubProjectContainer(ContainerOperations):
         logger.info(f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
         return hostname
 
-    def start_project_container(self):
+    def start_project_container(self, author: Optional[GitAuthor] = None) -> None:
         """Start the Docker container for the Project connected to this instance.
 
-        Expects the Hub API to set the Client hostname to the environment variable `GIGANTUM_CLIENT_IP`
+        Expects the Hub API to set the Client hostname to the environment variable `GIGANTUM_CLIENT_IP`,
+        `GIGANTUM_USERNAME` and `GIGANTUM_EMAIL` (based on the JWT)
 
         All relevant configuration for a fully functional Project is set up here, then passed off to self.run_container()
         """

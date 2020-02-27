@@ -12,7 +12,7 @@ from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions
 from gtmcore.workflows import DatasetWorkflow, MergeOverride
 
 from lmsrvcore.api import logged_mutation
-from lmsrvcore.auth.identity import parse_token
+from lmsrvcore.auth.identity import tokens_from_request_context
 from lmsrvcore.utilities import configure_git_credentials
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.api.mutations import ChunkUploadMutation, ChunkUploadInput
@@ -40,19 +40,15 @@ class PublishDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
-        # Extract valid Bearer token
-        if "HTTP_AUTHORIZATION" in info.context.headers.environ:
-            token = parse_token(info.context.headers.environ["HTTP_AUTHORIZATION"])
-        else:
-            raise ValueError(
-                "Authorization header not provided. Must have a valid session to query for collaborators")
+
+        access_token, id_token = tokens_from_request_context(tokens_required=True)
 
         job_metadata = {'method': 'publish_dataset',
                         'dataset': ds.key}
         job_kwargs = {'repository': ds,
                       'username': username,
-                      'access_token': token,
-                      'id_token': flask.g.id_token,
+                      'access_token': access_token,
+                      'id_token': id_token,
                       'public': set_public}
         dispatcher = Dispatcher()
         job_key = dispatcher.dispatch_task(jobs.publish_repository, kwargs=job_kwargs, metadata=job_metadata)
@@ -80,6 +76,9 @@ class SyncDataset(graphene.relay.ClientIDMutation):
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
 
+        # Get tokens from request context
+        access_token, id_token = tokens_from_request_context()
+
         # Configure git creds for the user
         configure_git_credentials()
 
@@ -90,8 +89,8 @@ class SyncDataset(graphene.relay.ClientIDMutation):
                       'username': username,
                       'pull_only': pull_only,
                       'override': override,
-                      'access_token': flask.g.get('access_token', None),
-                      'id_token': flask.g.get('id_token', None)}
+                      'access_token': access_token,
+                      'id_token': id_token}
 
         dispatcher = Dispatcher()
         job_key = dispatcher.dispatch_task(jobs.sync_repository, kwargs=job_kwargs, metadata=job_metadata)
@@ -193,11 +192,8 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
         config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer and ID tokens
-        access_token = flask.g.get('access_token', None)
-        id_token = flask.g.get('id_token', None)
-        if not access_token or not id_token:
-            raise ValueError("Deleting a remote Dataset requires a valid session.")
+        # Get tokens from request context
+        access_token, id_token = tokens_from_request_context(tokens_required=True)
 
         # Add / Update collaborator
         mgr = GitLabManager(remote_config['git_remote'],
@@ -252,11 +248,8 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
         config = flask.current_app.config['LABMGR_CONFIG']
         remote_config = config.get_remote_configuration()
 
-        # Extract valid Bearer and ID tokens
-        access_token = flask.g.get('access_token', None)
-        id_token = flask.g.get('id_token', None)
-        if not access_token or not id_token:
-            raise ValueError("Deleting a remote Dataset requires a valid session.")
+        # Get tokens from request context
+        access_token, id_token = tokens_from_request_context(tokens_required=True)
 
         mgr = GitLabManager(remote_config['git_remote'],
                             remote_config['hub_api'],

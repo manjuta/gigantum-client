@@ -40,9 +40,16 @@ chmod 777 /var/run/docker.sock
 export JUPYTER_RUNTIME_DIR=/mnt/share/jupyter/runtime
 chown -R giguser:root /mnt/share/
 
+# If user information is available via env vars, pre-configure git client
+if [ ! -z ${GIGANTUM_EMAIL+x} ]; then 
+  git config --global user.email "$GIGANTUM_EMAIL"
+  git config --global user.name "$GIGANTUM_USERNAME" 
+fi
+
 # Run the Docker Command
 exec gosu giguser "$@"
 """
+
 
 def strip_package_and_version(package_manager: str, package_str: str) -> Tuple[str, Optional[str]]:
     """For a particular package encoded with version, this strips off the version and returns a tuple

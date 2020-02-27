@@ -20,8 +20,11 @@ ActivityDetailTypeEnum = graphene.Enum.from_enum(ActivityDetailType)
 ActivityActionTypeEnum = graphene.Enum.from_enum(ActivityAction)
 
 
-class ActivityDetailObject(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository)):
+class ActivityDetailObject(graphene.ObjectType):
     """Container for Activity Detail Records"""
+    class Meta:
+        interfaces = (graphene.relay.Node, GitRepository)
+
     # The loaded detail record data
     _detail_record = None
     _repository_type = None
@@ -139,8 +142,11 @@ class ActivityDetailObject(graphene.ObjectType, interfaces=(graphene.relay.Node,
         return [(x, data_dict[x]) for x in data_dict]
 
 
-class ActivityRecordObject(graphene.ObjectType, interfaces=(graphene.relay.Node, GitRepository)):
+class ActivityRecordObject(graphene.ObjectType):
     """Container for Activity Records"""
+    class Meta:
+        interfaces = (graphene.relay.Node, GitRepository)
+
     # An instance of the loaded activity record data
     _activity_record = None
     _repository_type = None

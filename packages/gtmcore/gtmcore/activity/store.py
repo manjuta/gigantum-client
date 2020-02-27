@@ -44,8 +44,8 @@ class ActivityStore(object):
             self.compress_details: bool = self.repository.client_config.config['detaildb']['options']['compress']
             self.compress_min_bytes = self.repository.client_config.config['detaildb']['options']['compress_min_bytes']
         else:
-            self.compress_details: bool = False
-            self.compress_min_bytes: int = 0
+            self.compress_details = False
+            self.compress_min_bytes = 0
 
     def _validate_tags(self, tags: List[str]) -> List[str]:
         """Method to clean and validate tags

@@ -35,14 +35,14 @@ class TestGitLabManager(object):
         assert gitlab_mngr_fixture._gitlab_token is None
 
         # Get token
-        token = gitlab_mngr_fixture.repo_token
+        token = gitlab_mngr_fixture._repo_token()
         assert token == 'afaketoken'
         assert gitlab_mngr_fixture._gitlab_token == 'afaketoken'
 
         # Assert token is returned and set on second call and does not make a request
         responses.add(responses.POST, 'https://gigantum.com/api/v1',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'NOTTHERIGHTTOKEN'}}}, status=500)
-        assert token == gitlab_mngr_fixture.repo_token
+        assert token == gitlab_mngr_fixture._repo_token()
         assert token == 'afaketoken'
 
     @responses.activate
@@ -54,7 +54,7 @@ class TestGitLabManager(object):
 
         # Make sure error is raised when getting the key fails and returns !=200
         with pytest.raises(GitLabException):
-            _ = gitlab_mngr_fixture.repo_token
+            _ = gitlab_mngr_fixture._repo_token()
 
     def test_repository_id(self):
         """test the repository_id property"""
