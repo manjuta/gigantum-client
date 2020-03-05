@@ -190,7 +190,7 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to start container in launch service:"
                                      f" {response.status_code} : {response.json()}")
 
-        for _ in range(15):
+        for _ in range(150):
             # Query for the container status, setting "container_name" if running a non-project container (image_name
             # has been explicitly set. Otherwise, if image_name is none default project container will be checked.
             if self.query_container(container_name=image_name) == "running":
