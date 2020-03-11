@@ -110,12 +110,15 @@ class DatasetActionsMenu extends Component<Props> {
       fullEdge,
       isParent,
       mutations,
-      owner,
-      name,
       parentDownloading,
       section,
       setFolderIsDownloading,
+      mutationData,
     } = this.props;
+    const {
+      owner,
+      name,
+    } = mutationData;
 
     UserIdentity.getUserIdentity().then((response) => {
       const isSessionValid = response.data && response.data.userIdentity
