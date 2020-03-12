@@ -29,8 +29,6 @@ type Props = {
     deleteLabbookFiles: Function,
     downloadDatasetFiles: Function,
   },
-  name: string,
-  owner: string,
   section: string,
   parentDownloading: string,
   setFolderIsDownloading: Function,
