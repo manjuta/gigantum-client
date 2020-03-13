@@ -5,10 +5,12 @@ import shutil
 import uuid
 from typing import Any, Optional, Callable
 
+from gtmcore.gitlib import RepoLocation
 from gtmcore.workflows.gitlab import GitLabManager
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
                              ActivityDetailType, ActivityDetailRecord, \
                              ActivityAction
+from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.exceptions import GigantumException
 from gtmcore.labbook import LabBook
 from gtmcore.labbook.schemas import migrate_schema_to_current, \
@@ -85,7 +87,11 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
         mgr.create_labbook(namespace=InventoryManager().query_owner(repository),
                            labbook_name=repository.name,
                            visibility=visibility)
-        repository.add_remote("origin", f"https://{remote_config['git_remote']}/{username}/{repository.name}.git")
+
+        # URL construction logic doesn't belong at the level of Git workflows, but it works for now
+        remote = RepoLocation(f"https://{remote_config['git_remote']}/{username}/{repository.name}",
+                              current_username=username)
+        repository.add_remote("origin", remote.remote_location)
     except Exception as e:
         raise GitLabRemoteError(e)
 
@@ -206,34 +212,22 @@ def migrate_labbook_schema(labbook: LabBook) -> None:
     msg = f"Migrate schema to {CURRENT_LABBOOK_SCHEMA}"
     labbook.git.add(labbook.config_path)
     cmt = labbook.git.commit(msg, author=labbook.author, committer=labbook.author)
-    adr = ActivityDetailRecord(ActivityDetailType.LABBOOK, show=True,
+    adr = ActivityDetailRecord(ActivityDetailType.LABBOOK,
+                               show=True,
                                importance=100,
-                               action=ActivityAction.EDIT)
+                               action=ActivityAction.EDIT,
+                               data=TextData('plain', msg))
 
-    adr.add_value('text/plain', msg)
-    ar = ActivityRecord(ActivityType.LABBOOK, message=msg, show=True,
-                        importance=255, linked_commit=cmt.hexsha,
-                        tags=['schema', 'update', 'migration'])
-    ar.add_detail_object(adr)
+    ar = ActivityRecord(ActivityType.LABBOOK,
+                        message=msg,
+                        show=True,
+                        importance=255,
+                        linked_commit=cmt.hexsha,
+                        detail_objects=DetailRecordList([adr]),
+                        tags=ImmutableList(['schema', 'update', 'migration']))
+
     ars = ActivityStore(labbook)
     ars.create_activity_record(ar)
-
-
-def migrate_labbook_untracked_space(labbook: LabBook) -> None:
-
-    gitignore_path = os.path.join(labbook.root_dir, '.gitignore')
-    gitignored_lines = open(gitignore_path).readlines()
-    has_untracked_dir = any(['output/untracked' in l.strip() for l in gitignored_lines])
-    if not has_untracked_dir:
-        with open(gitignore_path, 'a') as gi_file:
-            gi_file.write('\n\n# Migrated - allow untracked area\n'
-                          'output/untracked\n')
-        labbook.sweep_uncommitted_changes(extra_msg="Added untracked area")
-
-    # Make the untracked directory -- makedirs is no-op if already exists
-    untracked_path = os.path.join(labbook.root_dir, 'output/untracked')
-    if not os.path.exists(untracked_path):
-        os.makedirs(untracked_path, exist_ok=True)
 
 
 def migrate_labbook_branches(labbook: LabBook) -> None:

@@ -147,8 +147,8 @@ const checkFileSize = (files, promptType, owner, labbookName) => {
   const oneHundredMB = 10 * tenMB;
   const fiveHundredMB = oneHundredMB * 5;
   const fifteenGigs = oneHundredMB * 150;
-  const filesAllowed = [];
-  const fileSizePrompt = [];
+  let filesAllowed = [];
+  let fileSizePrompt = [];
   const fileSizeNotAllowed = [];
   let index = 0;
 
@@ -198,6 +198,11 @@ const checkFileSize = (files, promptType, owner, labbookName) => {
     }
   }
   filesRecursionCount(files[index]);
+
+  if (fileSizeNotAllowed.length || fileSizePrompt.length) {
+    fileSizePrompt = fileSizePrompt.concat(filesAllowed);
+    filesAllowed = [];
+  }
 
   return {
     fileSizeNotAllowed,
@@ -256,7 +261,6 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
     labbookName,
     owner,
   } = mutationData;
-
   if (filesTemp.length > 0) {
     const fileSizeData = checkFileSize(filesTemp, mutationData.connection, owner, labbookName);
 
@@ -272,9 +276,12 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
         const fileToolarge = fileSizeData.fileSizeNotAllowed.map(file => file.entry.fullPath);
         const fileListAsString = fileToolarge.join(', ');
         const { section, fileSizeLimit } = getSectionLimit(mutationData);
-        setWarningMessage(owner, labbookName, `The following files are too large to upload to this section ${fileListAsString}, ${section} has a limit of ${fileSizeLimit}`);
+        if (component._fileSizePrompt) {
+          component._fileSizePrompt(fileSizeData, uploadCallback);
+        } else {
+          component.props.fileSizePrompt(fileSizeData, uploadCallback);
+        }
       }
-
       if (fileSizeData.filesAllowed.length > 0) {
         const navigateConfirm = (evt) => {
           evt.preventDefault();

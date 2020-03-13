@@ -177,6 +177,7 @@ class CustomDockerfile extends Component<Props> {
       editingDockerfile,
       savingDockerfile,
     } = this.state;
+    const editingState = editingDockerfile && !isLocked;
     const renderedContent = dockerfileContent
       ? `\`\`\`\n${dockerfileContent}\n\`\`\``
       : 'No commands provided.';
@@ -188,7 +189,7 @@ class CustomDockerfile extends Component<Props> {
     });
     const editDockerfileButtonCSS = classNames({
       'Btn Btn--feature Btn--feature Btn__edit Btn__edit--featurePosition absolute--important': true,
-      hidden: editingDockerfile,
+      hidden: editingState,
       'Tooltip-data': isLocked,
     });
 
@@ -222,13 +223,14 @@ class CustomDockerfile extends Component<Props> {
             <button
               className={editDockerfileButtonCSS}
               data-tooltip="Container must be turned off to edit docker snippets"
+              disabled={isLocked}
               onClick={() => this._editDockerfile()}
               type="button"
             >
               <span>Edit Dockerfile</span>
             </button>
             {
-              editingDockerfile
+              editingState
               && (
                 <Fragment>
 
@@ -268,7 +270,7 @@ class CustomDockerfile extends Component<Props> {
               )
             }
 
-            { !editingDockerfile
+            { !editingState
               && (
                 <div className={dockerfileCSS}>
                   <ReactMarkdown

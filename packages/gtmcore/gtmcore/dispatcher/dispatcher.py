@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import datetime
-from typing import (Any, Callable, Dict, List, Optional, Tuple)
+from typing import (Any, Callable, Dict, List, Optional, Tuple, Union)
 import signal
 import time
 import os
@@ -191,18 +191,19 @@ class Dispatcher(object):
         """
 
         # Encode job_id as byes from regular string, strip off the "rq:job" prefix.
-        enc_job_id = job_key.key_str.split(':')[-1].encode()
+        job_id_str = job_key.key_str.split(':')[-1]
+        enc_job_id = job_id_str.encode()
 
         if enc_job_id in self._scheduler:
-            logger.info("Job (encoded id=`{}`) found in scheduler, cancelling".format(enc_job_id))
+            logger.info(f"Job (encoded id=`{job_id_str}`) found in scheduler, cancelling")
             self._scheduler.cancel(enc_job_id)
-            logger.info("Unscheduled job (encoded id=`{}`)".format(enc_job_id))
+            logger.info(f"Unscheduled job (encoded id=`{job_id_str}`)")
             return True
         else:
-            logger.warning("Job (encoded id=`{}`) NOT FOUND in scheduler, nothing to cancel".format(enc_job_id))
+            logger.warning(f"Job (encoded id=`{job_id_str}`) NOT FOUND in scheduler, nothing to cancel")
             return False
 
-    def schedule_task(self, method_reference: Callable, args: Optional[Tuple[Any]] = None,
+    def schedule_task(self, method_reference: Callable, args: Optional[Tuple] = None,
                       kwargs: Optional[Dict[str, Any]] = None,
                       scheduled_time: Optional[datetime] = None, repeat: Optional[int] = 0,
                       interval: Optional[int] = None) -> JobKey:
@@ -219,7 +220,7 @@ class Dispatcher(object):
         Returns:
             str: unique key of dispatched task
         """
-        job_args = args or tuple()
+        job_args: Tuple = args or ()  # Initialize with empty tuple if not provided
         job_kwargs = kwargs or {}
         rq_job_ref = self._scheduler.schedule(scheduled_time=scheduled_time or datetime.utcnow(),
                                               func=method_reference,
