@@ -276,12 +276,14 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
         const fileToolarge = fileSizeData.fileSizeNotAllowed.map(file => file.entry.fullPath);
         const fileListAsString = fileToolarge.join(', ');
         const { section, fileSizeLimit } = getSectionLimit(mutationData);
+
         if (component._fileSizePrompt) {
           component._fileSizePrompt(fileSizeData, uploadCallback);
         } else {
           component.props.fileSizePrompt(fileSizeData, uploadCallback);
         }
       }
+
       if (fileSizeData.filesAllowed.length > 0) {
         const navigateConfirm = (evt) => {
           evt.preventDefault();
