@@ -25,6 +25,7 @@ const Visibility = {
         fetchQuery(
           DatasetVisibilityLookupQuery(),
           variables,
+          { force: true },
         ).then((response) => {
           resolve(response);
         }).catch((error) => {

@@ -21,7 +21,11 @@ const userIdentityQuery = graphql`
 const UserIdentity = {
   getUserIdentity: () => new Promise((resolve, reject) => {
     const fetchData = () => {
-      fetchQuery(userIdentityQuery(), {}).then((response, error) => {
+      fetchQuery(
+        userIdentityQuery(),
+        {},
+        { force: true },
+      ).then((response, error) => {
         if (response) {
           resolve(response);
         } else {

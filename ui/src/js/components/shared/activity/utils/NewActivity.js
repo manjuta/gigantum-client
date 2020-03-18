@@ -45,7 +45,11 @@ const NewActivity = {
       : datasetActivityFetchQuery();
 
     return new Promise((resolve, reject) => {
-      fetchQuery(query, variables).then((response, error) => {
+      fetchQuery(
+        query,
+        variables,
+        { force: true },
+      ).then((response, error) => {
         resolve(response);
       }).catch((error) => {
         console.log(error);

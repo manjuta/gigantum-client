@@ -1,0 +1,61 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-DOTPROP-543489:
+    - graphql-cli > update-notifier > configstore > dot-prop:
+        reason: None given
+        expires: '2020-04-17T16:07:05.786Z'
+      graphql-cli > creato > update-notifier > configstore > dot-prop:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-LODASH-450202:
+    - graphql-cli > graphql-cli-prepare > lodash:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-LODASH-73638:
+    - graphql-cli > graphql-cli-prepare > lodash:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-LODASH-73639:
+    - graphql-cli > graphql-cli-prepare > lodash:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-OPEN-174041:
+    - graphql-cli > graphql-cli-prepare > graphql-static-binding > cucumber-html-reporter > open:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  'npm:open:20180512':
+    - graphql-cli > graphql-cli-prepare > graphql-static-binding > cucumber-html-reporter > open:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-SERIALIZEJAVASCRIPT-536840:
+    - uglifyjs-webpack-plugin > serialize-javascript:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-SIMPLEMDE-72570:
+    - simplemde:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  SNYK-JS-YARGSPARSER-560381:
+    - graphql-cli > apollo-codegen > yargs > yargs-parser:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+    - graphql-cli > tmp-graphql-config-extension-openapi > @kbrandwijk/swagger-to-graphql > yargs > yargs-parser:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+    - graphql-cli > yargs > yargs-parser:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  'npm:mem:20180117':
+    - graphql-cli > apollo-codegen > yargs > os-locale > mem:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+    - graphql-cli > tmp-graphql-config-extension-openapi > @kbrandwijk/swagger-to-graphql > yargs > os-locale > mem:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+  'npm:sync-exec:20160124':
+    - graphql-cli > npm-run > sync-exec:
+        reason: No updates or patches
+        expires: '2020-04-17T16:29:05.403Z'
+patch: {}

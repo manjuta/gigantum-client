@@ -28,7 +28,11 @@ const PackageLookup = {
 
     return new Promise((resolve, reject) => {
       const fetchData = () => {
-        fetchQuery(PackageLookupQuery(), variables).then((response) => {
+        fetchQuery(
+          PackageLookupQuery(),
+          variables,
+          { force: true },
+        ).then((response) => {
           resolve(response);
         }).catch((error) => {
           console.log(error);

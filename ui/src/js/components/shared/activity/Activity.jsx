@@ -275,6 +275,7 @@ class Activity extends Component<Props> {
        },
        {
          filters: [],
+         force: true,
        },
      );
    }

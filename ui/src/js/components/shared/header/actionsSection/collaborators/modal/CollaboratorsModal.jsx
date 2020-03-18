@@ -122,7 +122,11 @@ class CollaboratorsModal extends Component<Props> {
     if ((userInput.length > 2) && (evt.key !== 'Enter')) {
       const apiURL = evt.target.value.indexOf('@') > 0 ? config.userAPI.getUserEmailQueryString(evt.target.value) : config.userAPI.getUsersQueryString(evt.target.value);
 
-      fetchQuery(apiURL).then((response) => {
+      fetchQuery(
+        apiURL,
+        {},
+        { force: true },
+      ).then((response) => {
         const collaborators = response.hits.hit.map(hit => hit.fields);
 
         this.setState({ colloboratorSearchList: collaborators });

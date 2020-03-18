@@ -18,7 +18,11 @@ const UpdateDatasetCommitsQuery = graphql`
 const DatasetCommits = {
   getDatasetCommits: (variables) => {
     const fetchData = () => {
-      fetchQuery(UpdateDatasetCommitsQuery(), variables).then((response, error) => {
+      fetchQuery(
+        UpdateDatasetCommitsQuery(),
+        variables,
+        { force: true },
+      ).then((response, error) => {
         UpdateDatasetCommits.updateDatasetCommits(response);
       }).catch((error) => {
         console.log(error);

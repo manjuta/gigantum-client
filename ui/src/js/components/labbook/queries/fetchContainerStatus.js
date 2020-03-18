@@ -25,8 +25,12 @@ const FetchContainerStatus = {
 
     const query = isLabbookUpdate ? labbookUpdatesQuery() : containerStatusQuery();
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
-        fetchQuery(query, variables).then((response) => {
+      const fetchData = () => {
+        fetchQuery(
+          query,
+          variables,
+          { force: true },
+        ).then((response) => {
           resolve(response.data);
         }).catch((error) => {
           console.log(error);

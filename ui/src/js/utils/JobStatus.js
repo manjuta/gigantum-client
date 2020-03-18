@@ -23,7 +23,11 @@ const JobStatus = {
     const variables = { jobKey };
     return new Promise((resolve, reject) => {
       const fetchData = () => {
-        fetchQuery(jobStatusQuery(), variables).then((response) => {
+        fetchQuery(
+          jobStatusQuery(),
+          variables,
+          { force: true },
+        ).then((response) => {
           if (
             (response.data.jobStatus.status === 'started')
             || (response.data.jobStatus.status === 'queued')
@@ -50,7 +54,11 @@ const JobStatus = {
 
     return new Promise((resolve, reject) => {
       const fetchData = () => {
-        fetchQuery(jobStatusQuery(), variables).then((response) => {
+        fetchQuery(
+          jobStatusQuery(),
+          variables,
+          { force: true },
+        ).then((response) => {
           resolve(response);
         }).catch((error) => {
           console.log(error);
