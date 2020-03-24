@@ -144,6 +144,7 @@ class RemoteDatasets extends Component {
                   edge={edge}
                   history={props.history}
                   existsLocally={edge.node.isLocal}
+                  filterText={props.filterText}
                   auth={props.auth}
                 />
               ))

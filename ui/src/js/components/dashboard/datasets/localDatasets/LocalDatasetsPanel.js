@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
+import ReactTooltip from 'react-tooltip';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // store
 import store from 'JS/redux/store';
 // assets
@@ -28,9 +30,13 @@ export default class LocalDatasetPanel extends Component {
   }
 
   render() {
-    const { props } = this;
-    const { edge } = props;
-    const link = props.noLink ? '#' : `/datasets/${edge.node.owner}/${edge.node.name}`;
+    const {
+      edge,
+      noLink,
+      visibility,
+      filterText,
+    } = this.props;
+    const link = noLink ? '#' : `/datasets/${edge.node.owner}/${edge.node.name}`;
     const sizeText = `${edge.node.overview.numFiles} file${(edge.node.overview.numFiles === 1) ? '' : 's'}, ${config.humanFileSize(edge.node.overview.totalBytes)}`;
     return (
       <Link
@@ -41,23 +47,46 @@ export default class LocalDatasetPanel extends Component {
       >
         <div className="LocalDatasets__row--icons">
           <div
-            data-tooltip={`${props.visibility}`}
-            className={`Tooltip LocalDatasetPanel__visibility LocalDatasetPanel__visibility--${props.visibility} Tooltip-data Tooltip-data--small`}
+            data-tooltip={`${visibility}`}
+            className={`Tooltip LocalDatasetPanel__visibility LocalDatasetPanel__visibility--${visibility} Tooltip-data Tooltip-data--small`}
           />
           <div className="LocalDatasets__dataset-icon" />
         </div>
         <div className="LocalDatasets__row--text">
           <div>
             <h5
+              role="presentation"
               className="LocalDatasets__panel-title"
               onClick={() => this._goToDataset()}
+              data-tip={edge.node.name}
+              data-for={`LocalDatasets--${edge.node.name}`}
             >
-              <Highlighter
-                highlightClassName="LocalDatasets__highlighted"
-                searchWords={[store.getState().datasetListing.filterText]}
-                autoEscape={false}
-                caseSensitive={false}
-                textToHighlight={edge.node.name}
+              {
+                filterText
+                && (
+                  <Highlighter
+                    highlightClassName="LocalDatasets__highlighted"
+                    searchWords={[filterText]}
+                    autoEscape={false}
+                    caseSensitive={false}
+                    textToHighlight={edge.node.name}
+                  />
+                )
+              }
+              {
+                !filterText
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={edge.node.name}
+                    smartCopy
+                  />
+                )
+              }
+              <ReactTooltip
+                place="bottom"
+                id={`LocalDatasets--${edge.node.name}`}
+                delayShow={500}
               />
             </h5>
 

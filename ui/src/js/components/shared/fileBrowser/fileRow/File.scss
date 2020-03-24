@@ -80,6 +80,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   word-break: break-all;
+  max-width: 520px;
   @extend .UserSelect--none;
 }
 

@@ -64,7 +64,8 @@ const removeExcludedFiles = (files, owner, name) => {
     const extension = fileItem.file.name
       ? fileItem.file.name.replace(/.*\./, '')
       : fileItem.entry.fullPath.replace(/.*\./, '');
-    const fileAllowed = (config.fileBrowser.excludedFiles.indexOf(extension) < 0);
+    const fileAllowed = (config.fileBrowser.excludedFiles.indexOf(extension) < 0)
+      && fileItem.file.size;
 
     if (!fileAllowed) {
       filesNotAllowedList.push(fileItem.file.name);
@@ -142,7 +143,7 @@ const flattenFiles = (files, owner, name) => {
 *
 * @return {number} totalFiles
 */
-const checkFileSize = (files, promptType, owner, labbookName) => {
+const checkFileSize = (files, promptType, owner, labbookName, isUntracked) => {
   const tenMB = 10 * 1000 * 1000;
   const oneHundredMB = 10 * tenMB;
   const fiveHundredMB = oneHundredMB * 5;
@@ -164,7 +165,7 @@ const checkFileSize = (files, promptType, owner, labbookName) => {
 
   function filesRecursionCount(file) {
     const fileSize = file.file.size;
-    if (promptType === 'CodeBrowser_allFiles') {
+    if (promptType === 'CodeBrowser_allFiles' && !isUntracked) {
       if (fileSize > oneHundredMB) {
         fileSizeNotAllowed.push(file);
       } else if ((fileSize > tenMB) && (fileSize < oneHundredMB)) {
@@ -172,7 +173,11 @@ const checkFileSize = (files, promptType, owner, labbookName) => {
       } else {
         filesAllowed.push(file);
       }
-    } else if ((promptType === 'InputBrowser_allFiles') || (promptType === 'OutputBrowser_allFiles')) {
+    } else if (
+      ((promptType === 'InputBrowser_allFiles')
+      || (promptType === 'OutputBrowser_allFiles'))
+      && !isUntracked
+    ) {
       if (fileSize > fiveHundredMB) {
         fileSizeNotAllowed.push(file);
       } else if ((fileSize > oneHundredMB) && (fileSize < fiveHundredMB)) {
@@ -180,7 +185,7 @@ const checkFileSize = (files, promptType, owner, labbookName) => {
       } else {
         filesAllowed.push(file);
       }
-    } else if (promptType === 'DataBrowser_allFiles') {
+    } else if (promptType === 'DataBrowser_allFiles' || isUntracked) {
       if (fileSize > fifteenGigs) {
         fileSizeNotAllowed.push(file);
       } else {
@@ -261,8 +266,9 @@ const handleCallback = (filesTemp, path, mutationData, component) => {
     labbookName,
     owner,
   } = mutationData;
+  const isUntracked = path === 'untracked/';
   if (filesTemp.length > 0) {
-    const fileSizeData = checkFileSize(filesTemp, mutationData.connection, owner, labbookName);
+    const fileSizeData = checkFileSize(filesTemp, mutationData.connection, owner, labbookName, isUntracked);
 
     if (fileSizeData.tooManyFiles) {
       setUploadMessageRemove('Too many files', null, 0);

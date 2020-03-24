@@ -5,12 +5,13 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import classNames from 'classnames';
+import ReactTooltip from 'react-tooltip';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // muations
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // store
 import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
-import store from 'JS/redux/store';
 // assets
 import './LocalLabbookPanel.scss';
 
@@ -26,6 +27,7 @@ type Props = {
   },
   goToLabbook: Function,
   visibility: string,
+  filterText: string,
 };
 
 /**
@@ -174,7 +176,12 @@ class LocalLabbookPanel extends Component<Props> {
 
   render() {
     const { state } = this;
-    const { edge, goToLabbook, visibility } = this.props;
+    const {
+      edge,
+      goToLabbook,
+      visibility,
+      filterText,
+    } = this.props;
     const {
       name,
       owner,
@@ -240,16 +247,36 @@ class LocalLabbookPanel extends Component<Props> {
               role="presentation"
               className="LocalLabbooks__panel-title"
               onClick={() => goToLabbook(name, owner)}
+              data-tip={name}
+              data-for={`LocalLabbooks--${name}`}
             >
-
-              <Highlighter
-                highlightClassName="LocalLabbooks__highlighted"
-                searchWords={[store.getState().labbookListing.filterText]}
-                autoEscape={false}
-                caseSensitive={false}
-                textToHighlight={name}
+              {
+                filterText
+                && (
+                  <Highlighter
+                    highlightClassName="LocalLabbooks__highlighted"
+                    searchWords={[filterText]}
+                    autoEscape={false}
+                    caseSensitive={false}
+                    textToHighlight={name}
+                  />
+                )
+              }
+              {
+                !filterText
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={name}
+                    smartCopy
+                  />
+                )
+              }
+              <ReactTooltip
+                place="bottom"
+                id={`LocalLabbooks--${name}`}
+                delayShow={500}
               />
-
             </h5>
 
           </div>
@@ -272,7 +299,7 @@ class LocalLabbookPanel extends Component<Props> {
                 ? (
                   <Highlighter
                     highlightClassName="LocalLabbooks__highlighted"
-                    searchWords={[store.getState().labbookListing.filterText]}
+                    searchWords={[filterText]}
                     autoEscape={false}
                     caseSensitive={false}
                     textToHighlight={description}

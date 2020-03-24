@@ -6,6 +6,7 @@ import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
 import { DragSource } from 'react-dnd';
 import ReactTooltip from 'react-tooltip';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // config
 import config from 'JS/config';
 // store
@@ -445,7 +446,16 @@ class File extends Component<Props> {
               data-tip={filename}
               data-for="Tooltip--file"
             >
-              {filename}
+              {
+                filename
+                && (
+                <MiddleTruncate
+                  ellipsis="..."
+                  text={filename}
+                  smartCopy
+                />
+                )
+              }
             </div>
             <ReactTooltip
               place="bottom"

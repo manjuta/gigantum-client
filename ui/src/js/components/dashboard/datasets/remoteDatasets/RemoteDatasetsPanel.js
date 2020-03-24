@@ -4,6 +4,8 @@ import uuidv4 from 'uuid/v4';
 import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
 import Moment from 'moment';
+import ReactTooltip from 'react-tooltip';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // muations
 import ImportRemoteDatasetMutation from 'Mutations/repository/import/ImportRemoteDatasetMutation';
 // store
@@ -30,6 +32,7 @@ type Props = {
     }
   },
   toggleDeleteModal: Function,
+  filterText: string,
 };
 
 class RemoteDatasetPanel extends Component<Props> {
@@ -206,6 +209,7 @@ class RemoteDatasetPanel extends Component<Props> {
     const {
       edge,
       existsLocally,
+      filterText,
     } = this.props;
     const deleteTooltipText = localStorage.getItem('username') !== edge.node.owner ? 'Only owners and admins can delete a remote Dataset' : '';
     const deleteDisabled = isImporting || (localStorage.getItem('username') !== edge.node.owner);
@@ -270,13 +274,37 @@ class RemoteDatasetPanel extends Component<Props> {
 
         <div className={descriptionCss}>
           <div className="RemoteDatasets__row RemoteDatasets__row--title">
-            <h5 className="RemoteDatasets__panel-title">
-              <Highlighter
-                highlightClassName="LocalDatasets__highlighted"
-                searchWords={[store.getState().datasetListing.filterText]}
-                autoEscape={false}
-                caseSensitive={false}
-                textToHighlight={edge.node.name}
+            <h5
+              className="RemoteDatasets__panel-title"
+              data-tip={edge.node.name}
+              data-for={`RemoteDatasets--${edge.node.name}`}
+            >
+              {
+                filterText
+                && (
+                  <Highlighter
+                    highlightClassName="RemoteDatasets__highlighted"
+                    searchWords={[filterText]}
+                    autoEscape={false}
+                    caseSensitive={false}
+                    textToHighlight={edge.node.name}
+                  />
+                )
+              }
+              {
+                !filterText
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={edge.node.name}
+                    smartCopy
+                  />
+                )
+              }
+              <ReactTooltip
+                place="bottom"
+                id={`RemoteDatasets--${edge.node.name}`}
+                delayShow={500}
               />
             </h5>
           </div>

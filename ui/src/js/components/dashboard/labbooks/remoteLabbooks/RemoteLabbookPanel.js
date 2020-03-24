@@ -4,6 +4,8 @@ import uuidv4 from 'uuid/v4';
 import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
 import Moment from 'moment';
+import ReactTooltip from 'react-tooltip';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
@@ -29,6 +31,7 @@ type Props = {
   },
   existsLocally: boolean,
   toggleDeleteModal: Function,
+  filterText: string,
 }
 
 class RemoteLabbookPanel extends Component<Props> {
@@ -221,7 +224,7 @@ class RemoteLabbookPanel extends Component<Props> {
   render() {
     // variables declared here
     const { isImporting, showLoginPrompt } = this.state;
-    const { edge, existsLocally } = this.props;
+    const { edge, existsLocally, filterText } = this.props;
     const deleteDisabled = isImporting || (localStorage.getItem('username') !== edge.node.owner);
     const deleteTooltipText = (localStorage.getItem('username') !== edge.node.owner) ? 'Only owners and admins can delete a remote Project' : '';
 
@@ -289,13 +292,37 @@ class RemoteLabbookPanel extends Component<Props> {
         <div className={descriptionCss}>
 
           <div className="RemoteLabbooks__row RemoteLabbooks__row--title">
-            <h5 className="RemoteLabbooks__panel-title">
-              <Highlighter
-                highlightClassName="LocalLabbooks__highlighted"
-                searchWords={[store.getState().labbookListing.filterText]}
-                autoEscape={false}
-                caseSensitive={false}
-                textToHighlight={edge.node.name}
+            <h5
+              className="RemoteLabbooks__panel-title"
+              data-tip={edge.node.name}
+              data-for={`RemoteLabbooks--${edge.node.name}`}
+            >
+              {
+                filterText
+                && (
+                  <Highlighter
+                    highlightClassName="RemoteLabbooks__highlighted"
+                    searchWords={[filterText]}
+                    autoEscape={false}
+                    caseSensitive={false}
+                    textToHighlight={edge.node.name}
+                  />
+                )
+              }
+              {
+                !filterText
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={edge.node.name}
+                    smartCopy
+                  />
+                )
+              }
+              <ReactTooltip
+                place="bottom"
+                id={`RemoteLabbooks--${edge.node.name}`}
+                delayShow={500}
               />
             </h5>
 
@@ -318,7 +345,7 @@ class RemoteLabbookPanel extends Component<Props> {
               ? (
                 <Highlighter
                   highlightClassName="LocalLabbooks__highlighted"
-                  searchWords={[store.getState().labbookListing.filterText]}
+                  searchWords={[filterText]}
                   autoEscape={false}
                   caseSensitive={false}
                   textToHighlight={edge.node.description}
