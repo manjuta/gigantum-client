@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
+// components
+import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // store
 import store from 'JS/redux/store';
 // assets
@@ -54,42 +56,12 @@ export default class LocalDatasetPanel extends Component {
         </div>
         <div className="LocalDatasets__row--text">
           <div>
-            <h5
-              role="presentation"
-              className="LocalDatasets__panel-title"
-              onClick={() => this._goToDataset()}
-              data-tip={edge.node.name}
-              data-for={`LocalDatasets--${edge.node.name}`}
-            >
-              {
-                filterText
-                && (
-                  <Highlighter
-                    highlightClassName="LocalDatasets__highlighted"
-                    searchWords={[filterText]}
-                    autoEscape={false}
-                    caseSensitive={false}
-                    textToHighlight={edge.node.name}
-                  />
-                )
-              }
-              {
-                !filterText
-                && (
-                  <MiddleTruncate
-                    ellipsis="..."
-                    text={edge.node.name}
-                    smartCopy
-                  />
-                )
-              }
-              <ReactTooltip
-                place="bottom"
-                id={`LocalDatasets--${edge.node.name}`}
-                delayShow={500}
-              />
-            </h5>
-
+            <RepositoryTitle
+              action={() => this._goToDataset()}
+              name={edge.node.name}
+              section="LocalDatasets"
+              filterText={filterText}
+            />
           </div>
 
           <p className="LocalDatasets__paragraph LocalDatasets__paragraph--owner">{edge.node.owner}</p>

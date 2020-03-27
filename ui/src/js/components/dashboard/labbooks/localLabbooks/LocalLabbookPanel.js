@@ -7,6 +7,8 @@ import Moment from 'moment';
 import classNames from 'classnames';
 import ReactTooltip from 'react-tooltip';
 import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
+// components
+import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // muations
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StopContainerMutation from 'Mutations/container/StopContainerMutation';
@@ -242,43 +244,12 @@ class LocalLabbookPanel extends Component<Props> {
         <div className="LocalLabbooks__row--text">
 
           <div>
-
-            <h5
-              role="presentation"
-              className="LocalLabbooks__panel-title"
-              onClick={() => goToLabbook(name, owner)}
-              data-tip={name}
-              data-for={`LocalLabbooks--${name}`}
-            >
-              {
-                filterText
-                && (
-                  <Highlighter
-                    highlightClassName="LocalLabbooks__highlighted"
-                    searchWords={[filterText]}
-                    autoEscape={false}
-                    caseSensitive={false}
-                    textToHighlight={name}
-                  />
-                )
-              }
-              {
-                !filterText
-                && (
-                  <MiddleTruncate
-                    ellipsis="..."
-                    text={name}
-                    smartCopy
-                  />
-                )
-              }
-              <ReactTooltip
-                place="bottom"
-                id={`LocalLabbooks--${name}`}
-                delayShow={500}
-              />
-            </h5>
-
+            <RepositoryTitle
+              action={() => goToLabbook(name, owner)}
+              name={name}
+              section="LocalLabbooks"
+              filterText={filterText}
+            />
           </div>
 
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{owner}</p>

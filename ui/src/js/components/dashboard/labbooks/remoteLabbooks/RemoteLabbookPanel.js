@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import Moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
+// components
+import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
@@ -292,40 +294,12 @@ class RemoteLabbookPanel extends Component<Props> {
         <div className={descriptionCss}>
 
           <div className="RemoteLabbooks__row RemoteLabbooks__row--title">
-            <h5
-              className="RemoteLabbooks__panel-title"
-              data-tip={edge.node.name}
-              data-for={`RemoteLabbooks--${edge.node.name}`}
-            >
-              {
-                filterText
-                && (
-                  <Highlighter
-                    highlightClassName="RemoteLabbooks__highlighted"
-                    searchWords={[filterText]}
-                    autoEscape={false}
-                    caseSensitive={false}
-                    textToHighlight={edge.node.name}
-                  />
-                )
-              }
-              {
-                !filterText
-                && (
-                  <MiddleTruncate
-                    ellipsis="..."
-                    text={edge.node.name}
-                    smartCopy
-                  />
-                )
-              }
-              <ReactTooltip
-                place="bottom"
-                id={`RemoteLabbooks--${edge.node.name}`}
-                delayShow={500}
-              />
-            </h5>
-
+            <RepositoryTitle
+              action={() => {}}
+              name={edge.node.name}
+              section="RemoteLabbooks"
+              filterText={filterText}
+            />
           </div>
 
           <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>

@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import Moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
+// components
+import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // muations
 import ImportRemoteDatasetMutation from 'Mutations/repository/import/ImportRemoteDatasetMutation';
 // store
@@ -274,39 +276,12 @@ class RemoteDatasetPanel extends Component<Props> {
 
         <div className={descriptionCss}>
           <div className="RemoteDatasets__row RemoteDatasets__row--title">
-            <h5
-              className="RemoteDatasets__panel-title"
-              data-tip={edge.node.name}
-              data-for={`RemoteDatasets--${edge.node.name}`}
-            >
-              {
-                filterText
-                && (
-                  <Highlighter
-                    highlightClassName="RemoteDatasets__highlighted"
-                    searchWords={[filterText]}
-                    autoEscape={false}
-                    caseSensitive={false}
-                    textToHighlight={edge.node.name}
-                  />
-                )
-              }
-              {
-                !filterText
-                && (
-                  <MiddleTruncate
-                    ellipsis="..."
-                    text={edge.node.name}
-                    smartCopy
-                  />
-                )
-              }
-              <ReactTooltip
-                place="bottom"
-                id={`RemoteDatasets--${edge.node.name}`}
-                delayShow={500}
-              />
-            </h5>
+            <RepositoryTitle
+              action={() => {}}
+              name={edge.node.name}
+              section="RemoteDatasets"
+              filterText={filterText}
+            />
           </div>
 
           <p className="RemoteDatasets__paragraph RemoteDatasets__paragraph--owner">{edge.node.owner}</p>
