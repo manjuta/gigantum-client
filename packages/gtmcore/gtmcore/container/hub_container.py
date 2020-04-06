@@ -15,6 +15,7 @@ from gtmcore.gitlib.git import GitAuthor
 
 class HubProjectContainer(ContainerOperations):
     """Implementation of ContainerOperations for when running in Gigantum Hub"""
+
     def __init__(self, username: str, labbook: Optional[LabBook] = None, path: Optional[str] = None,
                  override_image_name: Optional[str] = None):
         """Set up local Docker access and proceed to standard superclass init
@@ -60,7 +61,8 @@ class HubProjectContainer(ContainerOperations):
             if self.image_available():
                 # No need to build!
                 logger.info(f"Reusing Docker image for {str(self.labbook)}")
-                feedback_callback(f"No environment changes detected. Reusing existing image.\n")
+                feedback_callback(
+                    f"No environment changes detected. Reusing existing image.\n")
                 return
 
         build_feedback = f"Starting Project container build. Please wait.\n\n"
@@ -84,13 +86,15 @@ class HubProjectContainer(ContainerOperations):
         while True:
             time_elapsed = time.time() - start_time
             if time_elapsed > int(build_timeout_seconds):
-                feedback_callback("Container build timed out. If this problem persists, contact support@gigantum.com\n")
+                feedback_callback(
+                    "Container build timed out. If this problem persists, contact support@gigantum.com\n")
                 raise ContainerException(f"Timed out building project in launch service:"
                                          f" {response.status_code} : {response.json()}")
             resp = requests.get(f"{self._launch_service}/v1/client/{self._client_id}/namespace/{self.labbook.owner}/"
                                 f"project/{self.labbook.name}/projectbuild")
             if resp.status_code == 200:
-                logger.info(f"HubProjectContainer.build_image() in progress: {resp.json()}")
+                logger.info(
+                    f"HubProjectContainer.build_image() in progress: {resp.json()}")
                 status = resp.json()["state"]
                 if status == "COMPLETE":
                     feedback_callback("Container build complete\n")
@@ -144,7 +148,8 @@ class HubProjectContainer(ContainerOperations):
             logger.error(f"Couldn't connect to {url}.")
             return False
         if response.status_code != 200:
-            logger.error("Couldn't determine if image exists: {!r}.".format(response.content))
+            logger.error(
+                "Couldn't determine if image exists: {!r}.".format(response.content))
             return False
         existsRaw = response.json()["exists"]
         return True if existsRaw == "true" else False
@@ -170,7 +175,8 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             If wait_for_output is specified, the stdout of the cmd. Otherwise, or if stdout cannot be obtained, None.
         """
-        logger.info(f"HubProjectContainer.run_container() - volumes: {volumes} - cmd: {cmd}")
+        logger.info(
+            f"HubProjectContainer.run_container() - volumes: {volumes} - cmd: {cmd}")
         url = f"{self._launch_service}/v1/project"
         data = {"client_id": self._client_id,
                 "project_id": None,
@@ -200,7 +206,8 @@ class HubProjectContainer(ContainerOperations):
                     try:
                         # Give the k8s reconciler a bit of a cushion so everything is consistent.
                         time.sleep(2)
-                        result = self.exec_command(cmd, container_name=image_name, get_results=True)
+                        result = self.exec_command(
+                            cmd, container_name=image_name, get_results=True)
                     except Exception as err:
                         logger.exception(f"An error occurred while trying to exec into {image_name}: {err}",
                                          exc_info=True)
@@ -208,7 +215,8 @@ class HubProjectContainer(ContainerOperations):
                         self.stop_container(container_name=image_name)
 
                         if result is None:
-                            raise ContainerException(f"An error occurred while trying to exec into {image_name}")
+                            raise ContainerException(
+                                f"An error occurred while trying to exec into {image_name}")
 
                     return result
                 elif wait_for_output is True:
@@ -220,7 +228,8 @@ class HubProjectContainer(ContainerOperations):
             else:
                 time.sleep(2)
 
-        raise ContainerException(f"Failed to start container within 30 seconds")
+        raise ContainerException(
+            f"Failed to start container within 30 seconds")
 
     def _parse_container_name(self, container_name: Optional[str] = None) -> Tuple[str, str]:
         """Helper method to parse the container name into variables that Launch service can use. We do this to
@@ -242,7 +251,8 @@ class HubProjectContainer(ContainerOperations):
 
         # Return the default container information, if a specific non-default project container is provided
         if not self.labbook.owner:
-            raise ContainerException("Project owner must be set to perform container operations.")
+            raise ContainerException(
+                "Project owner must be set to perform container operations.")
         return self.labbook.owner, self.labbook.name
 
     def stop_container(self, container_name: Optional[str] = None) -> bool:
@@ -259,7 +269,8 @@ class HubProjectContainer(ContainerOperations):
         url = f"{self._launch_service}/v1/client/{self._client_id}/namespace/{namespace}/project/{project}"
         response = requests.delete(url)
         if response.status_code != 200:
-            logger.error(f"hub_container.stop_container(), response status: {response.status_code}")
+            logger.error(
+                f"hub_container.stop_container(), response status: {response.status_code}")
             raise ContainerException(f"Failed to stop Project container.")
 
         logger.debug(f"Project state: {response.json()}")
@@ -354,7 +365,8 @@ class HubProjectContainer(ContainerOperations):
         response = requests.post(url, json=data)
 
         if response.status_code != 200:
-            logger.error(f"Failed to exec into project container {self._client_id}:{namespace}/{project}.")
+            logger.error(
+                f"Failed to exec into project container {self._client_id}:{namespace}/{project}.")
             return None
 
         if get_results:
@@ -393,10 +405,11 @@ class HubProjectContainer(ContainerOperations):
             IP address as string
         """
         if container_name is not None:
-            # Currently not supported. Will be added during MITM integration
-            return None
+            # This is probably a query for a MITM proxy.
+            url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}/mitm_proxy"
+        else:
+            url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}"
 
-        url = f"{self._launch_service}/v1/hostnames/client/{self._client_id}/project/{self.labbook.owner}/{self.labbook.name}"
         response = requests.get(url)
         if response.status_code != 200:
             raise ContainerException(f"Failed to get container hostname:"
@@ -406,7 +419,8 @@ class HubProjectContainer(ContainerOperations):
         except AttributeError:
             raise ContainerException(f"No hostname attribute in response:"
                                      f" {response.json()}")
-        logger.info(f"HubProjectContainer.query_container_ip() found: {hostname}")
+        logger.info(
+            f"HubProjectContainer.query_container_ip() found: {hostname}")
         return hostname
 
     def copy_into_container(self, src_path: str, dst_dir: str) -> None:
@@ -432,7 +446,8 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to get client hostname:"
                                      f" {response.status_code} : {response.json()}")
         hostname = response.json()["hostname"]
-        logger.info(f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
+        logger.info(
+            f"HubProjectContainer.get_gigantum_client_ip() found: {hostname}")
         return hostname
 
     def start_project_container(self, author: Optional[GitAuthor] = None) -> None:
@@ -450,7 +465,8 @@ class HubProjectContainer(ContainerOperations):
         if not os.environ.get('HOST_WORK_DIR'):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
-        mnt_point = self.labbook.root_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+        mnt_point = self.labbook.root_dir.replace(
+            '/mnt/gigantum', os.environ['HOST_WORK_DIR'])
 
         volumes_dict = {
             mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
@@ -463,8 +479,10 @@ class HubProjectContainer(ContainerOperations):
             try:
                 cm_class = get_cache_manager_class(ds.client_config)
                 cm = cm_class(ds, self.username)
-                ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
-                volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+                ds_cache_dir = cm.current_revision_dir.replace(
+                    '/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+                volumes_dict[ds_cache_dir] = {
+                    'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
             except InventoryException:
                 continue
 
@@ -494,7 +512,8 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to opened ports {port_list} for {self.labbook.owner}/{self.labbook.name}"
                                      f":: {response.status_code} :: {response.json()}")
 
-        logger.info(f"Opened ports {port_list} for {self.labbook.owner}/{self.labbook.name} dynamically.")
+        logger.info(
+            f"Opened ports {port_list} for {self.labbook.owner}/{self.labbook.name} dynamically.")
 
     def configure_dev_tool(self, dev_tool: str) -> None:
         """A method to configure a dev tool if needed. This is to be inserted right before starting the tool process,
@@ -509,7 +528,8 @@ class HubProjectContainer(ContainerOperations):
             None
         """
         if dev_tool == "jupyterlab" or dev_tool == "notebook":
-            self.exec_command("mkdir -p /home/giguser/.jupyter/custom/", get_results=True)
+            self.exec_command(
+                "mkdir -p /home/giguser/.jupyter/custom/", get_results=True)
             cmd = "echo \"define(['base/js/namespace'],function(Jupyter){Jupyter._target='_self';});\" >> /home/giguser/.jupyter/custom/custom.js"
             self.exec_command(cmd, get_results=True)
 
@@ -517,4 +537,5 @@ class HubProjectContainer(ContainerOperations):
             # No configuration needed for rstudio
             pass
         else:
-            raise ValueError(f"Unsupported development tool type '{dev_tool}' when trying to configure pre-launch.")
+            raise ValueError(
+                f"Unsupported development tool type '{dev_tool}' when trying to configure pre-launch.")
