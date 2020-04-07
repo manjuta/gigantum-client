@@ -276,7 +276,8 @@ export class LocalLabbooks extends Component {
 
 export default createPaginationContainer(
   LocalLabbooks,
-  graphql`
+  {
+    localLabbooks: graphql`
     fragment LocalLabbooks_localLabbooks on LabbookList{
       localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "LocalLabbooks_localLabbooks", filters: []){
         edges {
@@ -299,7 +300,8 @@ export default createPaginationContainer(
       }
     }
   `,
-  {
+},
+{
     direction: 'forward',
     getConnectionFromProps(props, error) {
       return props.localLabbooks.localLabbooks;

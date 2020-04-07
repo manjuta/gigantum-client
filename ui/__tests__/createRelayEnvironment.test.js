@@ -23,7 +23,7 @@ test('test create relay environment', () => {
   let envrionment = createRelayEnvironment;
 
   it('has source', async () => {
-      let data = await envrionment._network.fetch(containerStatusQuery(), { name: 'demo-lab-book', owner: 'default', first: 3 });
+      let data = await envrionment._network.fetch(containerStatusQuery, { name: 'demo-lab-book', owner: 'default', first: 3 });
 
       expect(data).toBeDefined();
 });

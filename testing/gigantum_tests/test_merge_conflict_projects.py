@@ -125,7 +125,6 @@ def prep_merge_conflict(driver: selenium.webdriver, *args, **kwargs):
     logging.info(f"Logging in as {collaborator}")
     testutils.log_in(driver, user_index=1)
     guide_elts = testutils.GuideElements(driver)
-    guide_elts.remove_guide()
     logging.info(f"Navigating to {collaborator}'s cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
     cloud_project_elts.first_cloud_project.wait_to_appear(30)

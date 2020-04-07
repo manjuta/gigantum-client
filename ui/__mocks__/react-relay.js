@@ -60,7 +60,7 @@ class ReactRelayQueryRenderer extends React.Component<Props, State, Data> {
     this._rootSubscription = null;
     this._selectionReference = null;
 
-    let name = props.query().operation.name;
+    let name = props.query.operation.name;
 
     this.state = {
       readyState: {

@@ -42,7 +42,7 @@ class CollaboratorsModal extends Component<Props> {
 
   mutations = new CollaboratorMutations(this.props);
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { collaborators } = this.props;
     const buttonLoaderRemoveCollaborator = {};
     if (collaborators) {

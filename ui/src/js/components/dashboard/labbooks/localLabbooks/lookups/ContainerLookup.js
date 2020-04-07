@@ -26,7 +26,7 @@ const ContainerLookup = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          ContainerLookupQuery(),
+          ContainerLookupQuery,
           variables,
           { force: true },
         ).then((response) => {

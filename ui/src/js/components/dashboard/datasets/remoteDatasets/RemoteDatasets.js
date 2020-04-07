@@ -191,32 +191,34 @@ class RemoteDatasets extends Component {
 
 export default createPaginationContainer(
   RemoteDatasets,
-  graphql`
-    fragment RemoteDatasets_remoteDatasets on DatasetList{
-      remoteDatasets(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteDatasets_remoteDatasets", filters: []){
-        edges {
-          node {
-            name
-            description
-            visibility
-            owner
-            id
-            isLocal
-            creationDateUtc
-            modifiedDateUtc
-            importUrl
+  {
+    remoteDatasets: graphql`
+      fragment RemoteDatasets_remoteDatasets on DatasetList{
+        remoteDatasets(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteDatasets_remoteDatasets", filters: []){
+          edges {
+            node {
+              name
+              description
+              visibility
+              owner
+              id
+              isLocal
+              creationDateUtc
+              modifiedDateUtc
+              importUrl
+            }
+            cursor
           }
-          cursor
-        }
-        pageInfo {
-          endCursor
-          hasNextPage
-          hasPreviousPage
-          startCursor
+          pageInfo {
+            endCursor
+            hasNextPage
+            hasPreviousPage
+            startCursor
+          }
         }
       }
-    }
-  `,
+    `,
+  },
   {
     direction: 'forward',
     getConnectionFromProps(props, error) {

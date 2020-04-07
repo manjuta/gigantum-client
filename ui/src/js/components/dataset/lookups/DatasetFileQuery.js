@@ -23,7 +23,7 @@ const DatasetFile = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          DatasetFileQuery(),
+          DatasetFileQuery,
           variables,
           { fetch: true },
         ).then((response) => {

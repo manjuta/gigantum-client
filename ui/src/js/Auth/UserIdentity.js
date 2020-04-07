@@ -22,7 +22,7 @@ const UserIdentity = {
   getUserIdentity: () => new Promise((resolve, reject) => {
     const fetchData = () => {
       fetchQuery(
-        userIdentityQuery(),
+        userIdentityQuery,
         {},
         { force: true },
       ).then((response, error) => {

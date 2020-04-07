@@ -24,7 +24,7 @@ const JobStatus = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          jobStatusQuery(),
+          jobStatusQuery,
           variables,
           { force: true },
         ).then((response) => {
@@ -55,7 +55,7 @@ const JobStatus = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          jobStatusQuery(),
+          jobStatusQuery,
           variables,
           { force: true },
         ).then((response) => {

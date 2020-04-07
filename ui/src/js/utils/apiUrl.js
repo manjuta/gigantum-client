@@ -12,7 +12,7 @@ const getApiURL = (route) => {
   /* eslint-enable */
   const uuid = uuidv4();
   const { pathname } = globalObject.location;
-  const pathList = pathname.split('/');
+  const pathList = pathname ? pathname.split('/') : '';
   const cloudPath = pathList.length > 2 ? pathList[2] : '';
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'

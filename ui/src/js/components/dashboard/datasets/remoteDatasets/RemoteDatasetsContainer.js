@@ -8,12 +8,14 @@ import Datasets from '../Datasets';
 
 export default createFragmentContainer(
   Datasets,
-  graphql`
-    fragment RemoteDatasetsContainer_datasetList on LabbookQuery{
-      datasetList{
-        id
-        ...RemoteDatasets_remoteDatasets
+  {
+    datasetList: graphql`
+      fragment RemoteDatasetsContainer_datasetList on LabbookQuery{
+        datasetList{
+          id
+          ...RemoteDatasets_remoteDatasets
+        }
       }
-    }
-  `,
+    `,
+  },
 );

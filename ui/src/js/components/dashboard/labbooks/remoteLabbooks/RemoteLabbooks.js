@@ -199,32 +199,34 @@ class RemoteLabbooks extends Component {
 
 export default createPaginationContainer(
   RemoteLabbooks,
-  graphql`
-    fragment RemoteLabbooks_remoteLabbooks on LabbookList{
-      remoteLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteLabbooks_remoteLabbooks", filters: []){
-        edges {
-          node {
-            name
-            description
-            visibility
-            owner
-            id
-            isLocal
-            creationDateUtc
-            modifiedDateUtc
-            importUrl
+  {
+    remoteLabbooks: graphql`
+      fragment RemoteLabbooks_remoteLabbooks on LabbookList{
+        remoteLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteLabbooks_remoteLabbooks", filters: []){
+          edges {
+            node {
+              name
+              description
+              visibility
+              owner
+              id
+              isLocal
+              creationDateUtc
+              modifiedDateUtc
+              importUrl
+            }
+            cursor
           }
-          cursor
-        }
-        pageInfo {
-          endCursor
-          hasNextPage
-          hasPreviousPage
-          startCursor
+          pageInfo {
+            endCursor
+            hasNextPage
+            hasPreviousPage
+            startCursor
+          }
         }
       }
-    }
-  `,
+    `,
+  },
   {
     direction: 'forward',
     getConnectionFromProps(props, error) {

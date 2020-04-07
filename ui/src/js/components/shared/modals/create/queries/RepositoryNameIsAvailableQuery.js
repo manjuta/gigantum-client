@@ -12,7 +12,7 @@ const RepositoryNameIsAvailable = {
     return new Promise((resolve, reject) => {
       const variables = { name };
       fetchQuery(
-        query(),
+        query,
         variables,
         { force: true },
       ).then((response) => {

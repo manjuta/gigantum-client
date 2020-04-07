@@ -41,8 +41,8 @@ const NewActivity = {
       first: 1,
     };
     const query = (sectionType === 'labbook')
-      ? labbbokActivityFetchQuery()
-      : datasetActivityFetchQuery();
+      ? labbbokActivityFetchQuery
+      : datasetActivityFetchQuery;
 
     return new Promise((resolve, reject) => {
       fetchQuery(

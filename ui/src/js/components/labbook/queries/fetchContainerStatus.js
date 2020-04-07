@@ -23,7 +23,7 @@ const FetchContainerStatus = {
       name: labbookName,
     };
 
-    const query = isLabbookUpdate ? labbookUpdatesQuery() : containerStatusQuery();
+    const query = isLabbookUpdate ? labbookUpdatesQuery : containerStatusQuery;
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(

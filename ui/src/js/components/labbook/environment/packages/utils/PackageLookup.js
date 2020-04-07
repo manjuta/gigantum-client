@@ -29,7 +29,7 @@ const PackageLookup = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          PackageLookupQuery(),
+          PackageLookupQuery,
           variables,
           { force: true },
         ).then((response) => {

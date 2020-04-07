@@ -33,7 +33,7 @@ const FetchLabbook = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          fetchLabbookQuery(),
+          fetchLabbookQuery,
           variables,
           { force: true },
         ).then((response) => {

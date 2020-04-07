@@ -19,7 +19,7 @@ const DatasetCommits = {
   getDatasetCommits: (variables) => {
     const fetchData = () => {
       fetchQuery(
-        UpdateDatasetCommitsQuery(),
+        UpdateDatasetCommitsQuery,
         variables,
         { force: true },
       ).then((response, error) => {

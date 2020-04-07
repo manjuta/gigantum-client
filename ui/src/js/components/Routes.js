@@ -75,7 +75,7 @@ class Routes extends Component {
     available: 0,
   };
 
-  componentWillMount = () => {
+  UNSAFE_componentDidMount = () => {
     const values = queryString.parse(history.location.hash.slice(1));
     const newPath = values.path;
     if (newPath) {
@@ -228,6 +228,7 @@ class Routes extends Component {
   render() {
     const { props, state } = this;
     const showDiskLow = state.diskLow && !window.sessionStorage.getItem('hideDiskWarning');
+
     if (!state.hasError) {
       // declare variables
       const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
@@ -376,15 +377,17 @@ class Routes extends Component {
                     <Route
                       exact
                       path="/projects/:labbookSection"
-                      render={parentProps => (
-                        <Home
-                          userIdentityReturned={state.userIdentityReturned}
-                          loadingRenew={state.loadingRenew}
-                          auth={auth}
-                          diskLow={showDiskLow}
-                          {...parentProps}
-                        />
-                      )}
+                      render={(parentProps) => {
+                        return (
+                          <Home
+                            userIdentityReturned={state.userIdentityReturned}
+                            loadingRenew={state.loadingRenew}
+                            auth={auth}
+                            diskLow={showDiskLow}
+                            {...parentProps}
+                          />
+                        );
+                      }}
                     />
 
                     <Route

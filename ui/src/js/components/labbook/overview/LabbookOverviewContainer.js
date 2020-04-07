@@ -9,7 +9,8 @@ import Overview from 'Components/shared/overview/Overview';
 
 export default createFragmentContainer(
   Overview,
-  graphql`fragment LabbookOverviewContainer_labbook on Labbook {
+  {
+    labbook: graphql`fragment LabbookOverviewContainer_labbook on Labbook {
       overview @skip (if: $overviewSkip) {
         id
         owner
@@ -41,4 +42,5 @@ export default createFragmentContainer(
         ...Base_environment
       }
     }`,
+  },
 );

@@ -18,7 +18,7 @@ const UserIdentity = {
   getUserIdentity: () => new Promise((resolve, reject) => {
     const fetchData = () => {
       fetchQuery(
-        sessionCheckQuery(),
+        sessionCheckQuery,
         {},
         { force: true },
       ).then((response, error) => {

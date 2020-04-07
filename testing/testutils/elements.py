@@ -915,7 +915,11 @@ class CloudProjectElements(UiComponent):
 
     @property
     def first_cloud_project(self):
-        return CssElement(self.driver, ".RemoteLabbooks__panel-title > span > span")
+        return CssElement(self.driver, "[data-selenium-id='RemoteLabbookPanel']")
+
+    @property
+    def import_first_cloud_project_name(self):
+        return CssElement(self.driver, ".Card:nth-child(1) .RemoteLabbooks__panel-title")
 
     @property
     def import_first_cloud_project_button(self):
@@ -994,6 +998,7 @@ class CloudProjectElements(UiComponent):
         else:
             assert False, "An invalid argument was supplied for permissions in add_collaborator_with_permissions"
         self.close_collaborators_button.wait_to_appear().click()
+        time.sleep(2)
         self.close_collaborators_button.wait_to_disappear()
         return collaborator
 

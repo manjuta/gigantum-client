@@ -45,6 +45,7 @@ export default class Home extends Component {
   render() {
     const { props, state } = this;
     const { loadingRenew } = props;
+
     return (
       <div className="Home">
         {

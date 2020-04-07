@@ -72,7 +72,7 @@ exports[`DashbboardDatasetsLocal Renders a snapshot 1`] = `
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark "
+          className="__react_component_tooltip place-top type-dark"
           data-id="tooltip"
           id="Tooltip--createLabbook"
         />
@@ -102,7 +102,7 @@ You can also import Projects that have been shared with you in by clicking on th
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark "
+          className="__react_component_tooltip place-top type-dark"
           data-id="tooltip"
           id="Tooltip--importLabbook"
         />

@@ -5,7 +5,8 @@ import SectionWrapper from 'Components/shared/filesShared/sectionWrapper/Section
 
 export default createFragmentContainer(
   SectionWrapper,
-  graphql`
+  {
+    labbook: graphql`
       fragment Code_labbook on Labbook{
         code @skip (if: $codeSkip){
           id
@@ -14,4 +15,5 @@ export default createFragmentContainer(
         }
       }
     `,
+  },
 );

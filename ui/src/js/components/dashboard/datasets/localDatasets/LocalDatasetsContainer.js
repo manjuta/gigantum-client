@@ -8,12 +8,14 @@ import Datasets from '../Datasets';
 
 export default createFragmentContainer(
   Datasets,
-  graphql`
-    fragment LocalDatasetsContainer_datasetList on LabbookQuery{
-      datasetList{
-        id
-        ...LocalDatasets_localDatasets
+  {
+    datasetList: graphql`
+      fragment LocalDatasetsContainer_datasetList on LabbookQuery{
+        datasetList{
+          id
+          ...LocalDatasets_localDatasets
+        }
       }
-    }
-  `,
+    `,
+  },
 );

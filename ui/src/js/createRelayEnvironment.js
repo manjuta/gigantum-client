@@ -45,6 +45,7 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   if (process.env.NODE_ENV === 'development') {
     headers['Access-Control-Allow-Origin'] = '*';
   }
+
   if (uploadables && uploadables[0]) {
     if (uploadables[1]) {
       headers.authorization = `Bearer ${uploadables[1]}`;
@@ -75,20 +76,18 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
     headers.authorization = `Bearer ${accessToken}`;
     headers.Identity = `${idToken}`;
   }
-
-  if (uploadables === undefined) {
+  if ((uploadables === undefined) || (uploadables === null)) {
     headers['content-type'] = 'application/json';
 
     body = JSON.stringify({ query: queryString, variables });
   } else {
     body = new FormData();
-
     body.append('query', queryString);
     body.append('variables', JSON.stringify(variables));
     body.append('uploadChunk', uploadables[0]);
+
   }
   const apiURL = getApiURL('base');
-
   return fetch(apiURL, {
     method: 'POST',
     headers,

@@ -5,8 +5,6 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import classNames from 'classnames';
-import ReactTooltip from 'react-tooltip';
-import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // components
 import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // muations

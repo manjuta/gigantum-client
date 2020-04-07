@@ -225,21 +225,23 @@ const EnvironmentContainer = connect(mapStateToProps, mapDispatchToProps)(Enviro
 
 export default createFragmentContainer(
   EnvironmentContainer,
-  graphql`fragment Environment_labbook on Labbook {
-    environment @skip (if: $environmentSkip){
-      id
-      imageStatus
-      containerStatus
-      base{
-        developmentTools
-        packageManagers
-      }
-      dockerSnippet
-      baseLatestRevision
+  {
+    labbook: graphql`fragment Environment_labbook on Labbook {
+      environment @skip (if: $environmentSkip){
+        id
+        imageStatus
+        containerStatus
+        base{
+          developmentTools
+          packageManagers
+        }
+        dockerSnippet
+        baseLatestRevision
 
-      ...Base_environment
-      ...Packages_environment
-      ...Secrets_environment
-    }
-  }`,
+        ...Base_environment
+        ...Packages_environment
+        ...Secrets_environment
+      }
+    }`,
+  },
 );

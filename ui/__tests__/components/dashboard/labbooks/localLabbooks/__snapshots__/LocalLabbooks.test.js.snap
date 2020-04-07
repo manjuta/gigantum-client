@@ -72,7 +72,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark "
+          className="__react_component_tooltip place-top type-dark"
           data-id="tooltip"
           id="Tooltip--createLabbook"
         />
@@ -102,7 +102,7 @@ You can also import Projects that have been shared with you in by clicking on th
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark "
+          className="__react_component_tooltip place-top type-dark"
           data-id="tooltip"
           id="Tooltip--importLabbook"
         />
@@ -155,16 +155,50 @@ You can also import Projects that have been shared with you in by clicking on th
         <div>
           <h5
             className="LocalLabbooks__panel-title"
+            data-for="LocalLabbooks--ui-test-project"
+            data-selenium-id="RepositoryTitle"
+            data-tip="ui-test-project"
             onClick={[Function]}
             role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 ui-test-project
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              ui-test-project
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="LocalLabbooks--ui-test-project"
+            />
           </h5>
         </div>
         <p
@@ -247,16 +281,50 @@ You can also import Projects that have been shared with you in by clicking on th
         <div>
           <h5
             className="LocalLabbooks__panel-title"
+            data-for="LocalLabbooks--test-sync"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-sync"
             onClick={[Function]}
             role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-sync
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-sync
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="LocalLabbooks--test-sync"
+            />
           </h5>
         </div>
         <p
@@ -343,16 +411,50 @@ You can also import Projects that have been shared with you in by clicking on th
         <div>
           <h5
             className="LocalLabbooks__panel-title"
+            data-for="LocalLabbooks--test"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test"
             onClick={[Function]}
             role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="LocalLabbooks--test"
+            />
           </h5>
         </div>
         <p
@@ -435,16 +537,50 @@ You can also import Projects that have been shared with you in by clicking on th
         <div>
           <h5
             className="LocalLabbooks__panel-title"
+            data-for="LocalLabbooks--scikit-learn-in-gigantum"
+            data-selenium-id="RepositoryTitle"
+            data-tip="scikit-learn-in-gigantum"
             onClick={[Function]}
             role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 scikit-learn-in-gigantum
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              scikit-learn-in-gigantum
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="LocalLabbooks--scikit-learn-in-gigantum"
+            />
           </h5>
         </div>
         <p
@@ -531,16 +667,50 @@ You can also import Projects that have been shared with you in by clicking on th
         <div>
           <h5
             className="LocalLabbooks__panel-title"
+            data-for="LocalLabbooks--private-test"
+            data-selenium-id="RepositoryTitle"
+            data-tip="private-test"
             onClick={[Function]}
             role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 private-test
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              private-test
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="LocalLabbooks--private-test"
+            />
           </h5>
         </div>
         <p

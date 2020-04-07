@@ -17,7 +17,7 @@ const LocalDatasets = {
   getLocalDatasets: variables => new Promise((resolve, reject) => {
     const fetchData = () => {
       fetchQuery(
-        LocalDatasetsQuery(),
+        LocalDatasetsQuery,
         variables,
         { force: true },
       ).then((response, error) => {

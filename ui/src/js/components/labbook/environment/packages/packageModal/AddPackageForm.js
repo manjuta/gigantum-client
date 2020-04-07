@@ -204,6 +204,7 @@ export default class AddPackageForm extends Component<Props> {
           <div className="AddPackageForm__name flex align-items--center">
             <div className="AddPackageForm__label">Package Name</div>
             <input
+              className="AddPackageForm__input"
               type="text"
               ref={(packageNameInput) => { this.packageNameInput = packageNameInput; }}
               onChange={evt => this._updatePackageName(evt)}

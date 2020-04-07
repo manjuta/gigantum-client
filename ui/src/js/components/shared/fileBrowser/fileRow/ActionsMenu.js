@@ -12,7 +12,7 @@ export default class ActionsMenu extends Component {
   /**
   *  LIFECYCLE MEHTODS START
   */
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     window.removeEventListener('click', this._closePopup);
   }
 
