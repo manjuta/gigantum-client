@@ -38,6 +38,7 @@ LABEL maintainer="Gigantum <support@gigantum.com>"
 # Copy requirements files
 COPY packages/gtmcore/requirements.txt /opt/gtmcore/requirements.txt
 COPY packages/gtmapi/requirements.txt /opt/gtmapi/requirements.txt
+COPY build/requirements-testing.txt /opt/requirements-testing.txt
 COPY packages/confhttpproxy /opt/confhttpproxy
 ENV SHELL=/bin/bash \
     LC_ALL=C.UTF-8 \
@@ -98,8 +99,8 @@ RUN apt-get -y update && \
     cd /opt/confhttpproxy && pip3 install . && \
     # Install client package dependencies
     pip3 install wheel && \
-    pip3 install -r /opt/gtmcore/requirements.txt && \
-    pip3 install -r /opt/gtmapi/requirements.txt && \
+    # Install package deps, note testing requirements will essentially be a noop in production
+    pip3 install -r /opt/gtmcore/requirements.txt -r /opt/gtmapi/requirements.txt -r /opt/requirements-testing.txt && \
     pip3 install uwsgi && \
     # Configure Honeytail (If running in a cluster, will be a noop otherwise)
     chmod u+x /tmp/honeytail.sh && /tmp/honeytail.sh && \
@@ -116,10 +117,6 @@ RUN apt-get -y update && \
 COPY packages/gtmapi /opt/gtmapi
 COPY packages/gtmcore /opt/gtmcore
 RUN cd /opt/gtmcore/ && python3 setup.py install
-
-# Install testing requirements (will essentially be a noop in production)
-COPY build/requirements-testing.txt /opt/requirements-testing.txt
-RUN pip3 install -r /opt/requirements-testing.txt
 
 # Setup client config file - should be written by automation before copy
 COPY $CLIENT_CONFIG_FILE /etc/gigantum/labmanager.yaml

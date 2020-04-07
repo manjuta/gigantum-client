@@ -53,10 +53,10 @@ RUN apt-get -y update && \
     npm install -g configurable-http-proxy && \
     cd /opt/confhttpproxy && pip3 install . && \
     pip3 install wheel && \
-    pip3 install -r /opt/gtmcore/requirements.txt && \
-    pip3 install -r /opt/gtmapi/requirements.txt && \
-    pip3 install -r /opt/gtmcore/requirements-testing.txt && \
-    pip3 install -r /opt/gtmapi/requirements-testing.txt && \
+    pip3 install -r /opt/gtmcore/requirements.txt \
+    -r /opt/gtmapi/requirements.txt \
+    -r /opt/gtmcore/requirements-testing.txt \
+    -r /opt/gtmapi/requirements-testing.txt && \
     pip3 install codecov pytest-cov pytest-xdist && \
     apt-get -qq -y remove gcc g++ wget gnupg gnupg1 gnupg2 make autoconf dh-autoreconf && \
     apt-get -qq -y autoremove && \

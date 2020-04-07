@@ -3,7 +3,7 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:7a05e872d7-2020-02-26
+      - image: gigantum/circleci-client:8e3f88cdee-2020-04-06
   test_harness_exec:
     machine: true
 
