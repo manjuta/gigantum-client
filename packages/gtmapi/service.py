@@ -3,10 +3,14 @@
 import shutil
 import os
 import base64
+from time import sleep
+
 import flask
+
+import requests.exceptions
 import blueprint
 from flask_cors import CORS
-from confhttpproxy import ProxyRouter
+from confhttpproxy import ProxyRouter, ProxyRouterException
 from flask import Flask, jsonify
 
 import rest_routes
@@ -44,17 +48,38 @@ ON_FIRST_START = app.config['DEBUG'] == False or os.environ.get('WERKZEUG_RUN_MA
 ON_RESTART = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
 
 
-# Configure CHP
-try:
+def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
+    """Set up the configurable HTTP proxy (CHP)
+
+    Args:
+        proxy_dict: obtained from the config dict inside the config instance
+        is_hub_client: are we running on the hub? (also obtained from config instance)
+
+    Returns:
+        the final api_prefix used by the router
+
+    We define this as a function mostly so we can optionally wrap it in a try block below
+    """
     # /api by default
-    api_prefix = config.config['proxy']["labmanager_api_prefix"]
+    api_prefix = proxy_dict["labmanager_api_prefix"]
 
-    # CHP interface params
-    apparent_proxy_port = config.config['proxy']["apparent_proxy_port"]
-    api_port = config.config['proxy']['api_port']
-    proxy_router = ProxyRouter.get_proxy(config.config['proxy'])
+    proxy_router = ProxyRouter.get_proxy(proxy_dict)
+    # Wait up to 10 seconds for the CHP to be available
+    for _ in range(20):
+        try:
+            # This property raises an exception if the underlying request doesn't yield a status code of 200
+            proxy_router.routes  # noqa
+        except (requests.exceptions.ConnectionError, ProxyRouterException) as e:
+            sleep(0.5)
+            continue
 
-    if config.is_hub_client:
+        # If there was no exception, the CHP is up and responding
+        break
+    else:
+        # We exhausted our for-loop
+        logger.error("Could not reach router after 20 tries (10 seconds), proxy_router.add() will likely fail")
+
+    if is_hub_client:
         # Use full route prefix, including run/<client_id> if running in the Hub
         api_target = f"run/{os.environ['GIGANTUM_CLIENT_ID']}{api_prefix}"
         api_prefix = f"/{api_target}"
@@ -67,11 +92,19 @@ try:
     proxy_router.add("http://localhost:10001", api_target)
     logger.info(f"Proxy routes ({type(proxy_router)}): {proxy_router.routes}")
 
-    # Add rest routes
-    app.register_blueprint(rest_routes.rest_routes, url_prefix=api_prefix)
-except Exception as e:
-    logger.error(e)
-    logger.exception(e)
+    return api_prefix
+
+
+if os.environ.get('CIRCLECI') == 'true':
+    try:
+        url_prefix = configure_chp(config.config['proxy'], config.is_hub_client)
+    except requests.exceptions.ConnectionError:
+        url_prefix = config.config['proxy']["labmanager_api_prefix"]
+else:
+    url_prefix = configure_chp(config.config['proxy'], config.is_hub_client)
+
+# Add rest routes
+app.register_blueprint(rest_routes.rest_routes, url_prefix=url_prefix)
 
 
 if config.config["flask"]["allow_cors"]:
