@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1315"
+changelog:
+  - type: NON_USER_FACING
+    description: Added new changelog directory and tooling.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1294
