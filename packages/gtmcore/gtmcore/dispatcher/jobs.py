@@ -52,22 +52,14 @@ def publish_repository(repository: Repository, username: str, access_token: str,
         current_job.meta['feedback'] = msg
         current_job.save_meta()
 
-    logger = LMLogger.get_logger()
-
-    try:
-        update_feedback("Publish task in queue")
-        with repository.lock():
-            if isinstance(repository, LabBook):
-                wf = LabbookWorkflow(repository)
-            else:
-                wf = DatasetWorkflow(repository)  # type: ignore
-            wf.publish(username=username, access_token=access_token, remote=remote or "origin",
-                       public=public, feedback_callback=update_feedback, id_token=id_token)
-    except IOError:
-        raise
-    except Exception as e:
-        logger.exception(e)
-        raise Exception("Could not publish - try to log out and log in again.")
+    update_feedback("Publish task in queue")
+    with repository.lock():
+        if isinstance(repository, LabBook):
+            wf = LabbookWorkflow(repository)
+        else:
+            wf = DatasetWorkflow(repository)  # type: ignore
+        wf.publish(username=username, access_token=access_token, remote=remote or "origin",
+                   public=public, feedback_callback=update_feedback, id_token=id_token)
 
 
 def sync_repository(repository: Repository, username: str, override: MergeOverride,
@@ -108,11 +100,6 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
     except MergeConflict as me:
         logger.exception(f"(Job {p}) Merge conflict: {me}")
         raise
-    except IOError:
-        raise
-    except Exception as e:
-        logger.exception(e)
-        raise Exception("Could not sync - try to log out and log in again.")
 
 
 def import_labbook_from_remote(remote_url: str, username: str, config_file: str = None) -> str:
@@ -578,6 +565,7 @@ def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, datase
         logger.exception(err)
         raise
 
+
 def update_environment_repositories() -> None:
     """Method to clone / update the environment repositories
 
@@ -613,6 +601,7 @@ def update_environment_repositories() -> None:
         raise
 
     lock.release()
+
 
 def index_labbook_filesystem():
     """To be implemented later. """

@@ -30,7 +30,7 @@ class UserConfig(object):
         config_file_path = CONFIG_FILE
         if os.path.exists(config_file_path):
             with open(config_file_path, 'rt') as cf:
-                data = yaml.load(cf)
+                data = yaml.safe_load(cf)
             return data
         else:
             print("No gtm config file found. Run `gtm dev setup` to configure your environment")

@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import os
 import platform
 import re
@@ -76,7 +57,8 @@ class ClientBuilder(object):
             str8
         """
         if not self._container_name:
-            self._container_name = self._generate_container_name()
+            # using the setter forces a check that we have a valid name
+            self.container_name = self._generate_container_name()
         return self._container_name
 
     @container_name.setter
@@ -204,9 +186,9 @@ class ClientBuilder(object):
         final_config_file = docker_args['CLIENT_CONFIG_FILE']
 
         with open(base_config_file, "rt") as cf:
-            base_data = yaml.load(cf)
+            base_data = yaml.safe_load(cf)
         with open(os.path.join(client_root_dir, build_args['config_override_file']), "rt") as cf:
-            overwrite_data = yaml.load(cf)
+            overwrite_data = yaml.safe_load(cf)
 
         # Merge sub-sections together
         for key in base_data:

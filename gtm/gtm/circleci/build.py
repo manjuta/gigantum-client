@@ -46,7 +46,7 @@ class CircleCIImageBuilder(object):
             os.makedirs(output_dir)
 
         with open(base_config_file, "rt") as cf:
-            base_data = yaml.load(cf)
+            base_data = yaml.safe_load(cf)
 
         # Add Build Info
         built_on = str(datetime.utcnow())
