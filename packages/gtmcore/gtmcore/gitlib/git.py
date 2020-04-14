@@ -157,7 +157,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def update_author(self, author, committer=None):
         """Method to get the current branch name
@@ -190,7 +190,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             str
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def commit_hash_short(self):
@@ -199,7 +199,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             str
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def committed_on(self):
@@ -208,7 +208,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             datetime.datetime
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def git_path(self):
@@ -217,7 +217,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             str
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @abc.abstractmethod
     def get_current_branch_name(self):
@@ -226,7 +226,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             str
         """
-        raise NotImplemented
+        pass
 
     # CREATE METHODS
     @abc.abstractmethod
@@ -239,7 +239,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def clone(self, source, directory: str, branch: Optional[str] = None, single_branch=False):
@@ -251,7 +251,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
             branch: The name of the desired branch to be checked out (defaults to master)
             single_branch: Fetch ONLY the contents of the specified branch
         """
-        raise NotImplemented
+        pass
 
     # CREATE METHODS
 
@@ -273,7 +273,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             (dict(list))
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def add(self, filename):
@@ -285,7 +285,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def add_all(self, relative_directory=None):
@@ -297,7 +297,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def remove(self, filename, force=False, keep_file=True):
@@ -311,7 +311,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def diff_unstaged(self, filename=None, ignore_white_space=True):
@@ -331,7 +331,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def diff_staged(self, filename=None, ignore_white_space=True):
@@ -351,7 +351,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def diff_commits(self, commit_a='HEAD~1', commit_b='HEAD', ignore_white_space=True):
@@ -372,7 +372,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def commit(self, message, author=None, committer=None):
@@ -389,7 +389,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             git.Commit -- hash of new commit
         """
-        raise NotImplemented
+        pass
     # LOCAL CHANGE METHODS
 
     # HISTORY METHODS
@@ -418,7 +418,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             (list(dict))
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def log_entry(self, commit):
@@ -440,7 +440,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             (dict)
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def blame(self, filename):
@@ -463,7 +463,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             list(dict)
         """
-        raise NotImplemented
+        pass
     # HISTORY METHODS
 
     # BRANCH METHODS
@@ -477,7 +477,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def publish_branch(self, branch_name, remote_name="origin"):
@@ -490,7 +490,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def list_branches(self) -> Dict[str, List[str]]:
@@ -506,7 +506,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def delete_branch(self, name, remote=False, force=False):
@@ -520,7 +520,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def rename_branch(self, old_name, new_name):
@@ -533,7 +533,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def checkout(self, branch_name: str):
@@ -545,7 +545,25 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
+
+    @abc.abstractmethod
+    def reset(self, branch_name: str):
+        """git reset --hard current branch to the treeish specified by branch_name
+
+        Args:
+            branch_name: What to reset current branch to? Will be passed directly to git
+        """
+        pass
+
+    @abc.abstractmethod
+    def remote_set_branches(self, branch_names: List[str], remote_name: str = 'origin'):
+        """git remote set-branch to the list of branches
+
+        Args:
+            branch_names: What branches do you want to track?
+        """
+        pass
     # BRANCH METHODS
 
     # TAG METHODS
@@ -560,7 +578,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     def list_tags(self):
         """Method to list tags
@@ -568,7 +586,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             (list(dict)): list of dicts with `name` and `message` fields
         """
-        raise NotImplemented
+        raise NotImplementedError
     # TAG METHODS
 
     # REMOTE METHODS
@@ -586,7 +604,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             list(dict)
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def add_remote(self, name, url, kwargs=None):
@@ -600,7 +618,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def remove_remote(self, name):
@@ -612,7 +630,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def fetch(self, refspec=None, remote="origin"):
@@ -625,7 +643,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def pull(self, refspec=None, remote="origin"):
@@ -638,7 +656,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def push(self, remote_name="origin", refspec=None, tags=False):
@@ -651,7 +669,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
 
         """
-        raise NotImplemented
+        pass
     # REMOTE METHODS
 
     # MERGE METHODS
@@ -665,7 +683,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
     # MERGE METHODS
 
     # UNDO METHODS
@@ -679,7 +697,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
     # UNDO METHODS
 
     # SUBMODULE METHODS
@@ -696,7 +714,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def list_submodules(self):
@@ -713,7 +731,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             list(dict)
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def update_submodules(self, init=True):
@@ -725,7 +743,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def remove_submodules(self, submodule_name):
@@ -737,7 +755,7 @@ class GitRepoInterface(metaclass=abc.ABCMeta):
         Returns:
             None
         """
-        raise NotImplemented
+        pass
 
     @abc.abstractmethod
     def check_ignored(self, path: str) -> bool:

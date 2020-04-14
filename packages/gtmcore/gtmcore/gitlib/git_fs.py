@@ -682,22 +682,14 @@ class GitFilesystem(GitRepoInterface):
         Returns:
             None
         """
-        # Doing a fetch then working with the FETCH_HEAD is a way to robustly and directly get whatever is on the
-        #  upstream repo, and we don't need to worry about tracking branches.
-        if branch_name == 'FETCH_HEAD':
-            # This will leave the repository in a "detached" state, which is fine for the base-images repo
-            clone_process = subprocess.run(['git', 'checkout', branch_name],
-                                           stderr=subprocess.PIPE, cwd=self.working_directory)
-            if clone_process.returncode != 0:
-                raise GitFsException(clone_process.stderr)
-        elif branch_name not in self.repo.heads:
+        if branch_name not in self.repo.heads:
             # Check if the branch exists in the remote and just hasn't been pulled yet
             if "{}/{}".format(remote, branch_name) not in self.repo.refs:
                 raise ValueError("Branch `{}` not found.".format(branch_name))
             else:
                 # Need to checkout the branch from the remote
-                self.repo.create_head(branch_name, self.repo.remotes["origin"].refs[branch_name])
-                self.repo.heads[branch_name].set_tracking_branch(self.repo.remotes["origin"].refs[branch_name])
+                self.repo.create_head(branch_name, self.repo.remotes[remote].refs[branch_name])
+                self.repo.heads[branch_name].set_tracking_branch(self.repo.remotes[remote].refs[branch_name])
                 self.repo.heads[branch_name].checkout()
         else:
             self.repo.heads[branch_name].checkout()
@@ -705,6 +697,11 @@ class GitFilesystem(GitRepoInterface):
         # Remove the checkout context id file if one exists
         self.clear_checkout_context()
 
+    def reset(self, branch_name: str):
+        raise NotImplementedError
+
+    def remote_set_branches(self, branch_names: List[str], remote_name: str = 'origin'):
+        raise NotImplementedError
     # BRANCH METHODS
 
     # TAG METHODS

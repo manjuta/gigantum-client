@@ -49,7 +49,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Required positional argument
-    parser.add_argument("action", help="Desired action to run. (`validate` or `pr-check`)")
+    parser.add_argument("action", help="Desired action to run. (`validate` or `pr`)")
 
     args = parser.parse_args()
 

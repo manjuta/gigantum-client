@@ -37,7 +37,7 @@ flags:
       - packages/gtmapi/**
 
 ignore:
-  - "packages/gtmapi/lmsrvlabbook/tests/snapshots"  # ignore snapshot files as they don't really go towards coverage
+  - "packages/**/tests"  # ignore files in tests directories
 
 parsers:
   gcov:

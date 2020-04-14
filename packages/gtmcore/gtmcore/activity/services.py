@@ -87,7 +87,6 @@ def start_labbook_monitor(labbook: LabBook, username: str, dev_tool: str,
             logger.info(f'Found existing entry for {dev_env_monitor_key}, skipping setup')
             return
 
-        # XXX problem here
         proj_info = container_for_context(username, labbook=labbook)
         redis_conn.hset(dev_env_monitor_key, "container_name", proj_info.image_tag)
         redis_conn.hset(dev_env_monitor_key, "labbook_root", labbook.root_dir)
