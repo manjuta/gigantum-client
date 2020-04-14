@@ -11,6 +11,13 @@ def gitlab_mngr_fixture():
 
 
 @pytest.fixture()
+def two_gitlab_mngr_fixture():
+    """A pytest fixture that returns a GitLabRepositoryManager instance"""
+    yield GitLabManager("repo.gigantum.io", "https://gigantum.com/api/v1", "fakeaccesstoken", "fakeidtoken"), \
+          GitLabManager("repo.gigantum.io", "https://gigantum.com/api/v1", "fakeaccesstoken", "fakeidtoken")
+
+
+@pytest.fixture()
 def property_mocks_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
     responses.add(responses.POST, 'https://gigantum.com/api/v1',
@@ -390,11 +397,100 @@ class TestGitLabManager(object):
         assert token == "afaketoken"
 
         # Set creds
-        gitlab_mngr_fixture.clear_git_credentials(host)
+        gitlab_mngr_fixture.clear_git_credentials(host, username)
 
         # Check that creds are configured
         token = gitlab_mngr_fixture._check_if_git_credentials_configured(host, username)
         assert token is None
+
+    @responses.activate
+    def test_configure_git_credentials_multitenant(self, two_gitlab_mngr_fixture):
+        """test the configure_git_credentials method with multiple users
+
+        Two gitlab manager instances are used because in practice, each request context will have it's own instance.
+        The gitlab API token is stored as a class attribute once fetched, to reduce API calls, so we have to create
+        two intances for this test to work.
+
+        """
+        host = "test.gigantum.io"
+        username1 = "testuser1"
+        username2 = "testuser2"
+
+        # Setup responses mock for this test
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken1'}}}, status=200)
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken2'}}}, status=200)
+
+        glm1, glm2 = two_gitlab_mngr_fixture
+
+        # Check that creds are empty
+        token1 = glm1._check_if_git_credentials_configured(host, username1)
+        assert token1 is None
+        token2 = glm2._check_if_git_credentials_configured(host, username2)
+        assert token2 is None
+
+        # Set creds
+        glm1.configure_git_credentials(host, username1)
+
+        # Check that creds are configured
+        token1 = glm1._check_if_git_credentials_configured(host, username1)
+        assert token1 == "afaketoken1"
+        token2 = glm2._check_if_git_credentials_configured(host, username2)
+        assert token2 is None
+
+        # Set creds
+        glm2.configure_git_credentials(host, username2)
+        token1 = glm1._check_if_git_credentials_configured(host, username1)
+        assert token1 == "afaketoken1"
+        token2 = glm2._check_if_git_credentials_configured(host, username2)
+        assert token2 == "afaketoken2"
+
+        glm2.clear_git_credentials(host, username2)
+
+        token1 = glm1._check_if_git_credentials_configured(host, username1)
+        assert token1 == "afaketoken1"
+        token2 = glm2._check_if_git_credentials_configured(host, username2)
+        assert token2 is None
+
+        glm1.clear_git_credentials(host, username1)
+
+        token1 = glm1._check_if_git_credentials_configured(host, username1)
+        assert token1 is None
+        token2 = glm2._check_if_git_credentials_configured(host, username2)
+        assert token2 is None
+
+    @responses.activate
+    def test_remove_git_credentials(self, gitlab_mngr_fixture):
+        """test the remove git credential method, particularly when nothing to remove"""
+        host = "test.gigantum.io"
+        username = "testuser"
+
+        # Setup responses mock for this test
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
+
+        # Remove creds before set
+        gitlab_mngr_fixture.clear_git_credentials(host, username)
+        token = gitlab_mngr_fixture._check_if_git_credentials_configured(host, username)
+        assert token is None
+
+        # Set creds
+        gitlab_mngr_fixture.configure_git_credentials(host, username)
+
+        # Check that creds are configured
+        token = gitlab_mngr_fixture._check_if_git_credentials_configured(host, username)
+        assert token == "afaketoken"
+
+        # Remove creds
+        gitlab_mngr_fixture.clear_git_credentials(host, username)
+
+        # Check that creds are configured
+        token = gitlab_mngr_fixture._check_if_git_credentials_configured(host, username)
+        assert token is None
+
+        # Remove creds again after already removed.
+        gitlab_mngr_fixture.clear_git_credentials(host, username)
 
     @responses.activate
     def test_delete(self, gitlab_mngr_fixture, property_mocks_fixture):

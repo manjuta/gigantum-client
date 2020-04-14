@@ -1,7 +1,6 @@
 import requests
 import subprocess
-import pexpect
-import re
+import shlex
 import os
 from enum import Enum
 from typing import List, Optional, Tuple, Dict, Any
@@ -456,36 +455,30 @@ class GitLabManager(object):
             logger.info(f"Removed user id `{user_id}` as a collaborator to {labbook_name}")
 
     @staticmethod
-    def _call_shell(command: str, input_list: Optional[List[str]] = None) -> Tuple[Optional[bytes], Optional[bytes]]:
+    def _call_shell(command: str, input_str: str = "",
+                    cwd: Optional[str] = None) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Method to call shell commands, used to configure git client
 
         Args:
             command(str): command to send
-            input_list(list): List of additional strings to send to the process
+            input_str(str): String to send to the process
+            cwd(str): Working directory to run the command in
 
         Returns:
             tuple
         """
         # Start process
-        p = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-
-        # If additional commands provided, send to stdin
-        if input_list:
-            for i in input_list:
-                p.stdin.write(i.encode('utf-8'))
-                p.stdin.flush()
-
-        # Get output
+        p = subprocess.Popen(shlex.split(command), shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, cwd=cwd)
         try:
-            out, err = p.communicate(timeout=5)
+            out, err = p.communicate(input_str.encode('utf-8'), timeout=2)
         except subprocess.TimeoutExpired:
             logger.warning(f"Subprocess timed-out while calling shell for git configuration")
             p.kill()
-            out, err = p.communicate(timeout=5)
+            out, err = p.communicate(timeout=2)
 
         return out, err
 
-    # TODO #1214: This can be cleanly replaced with the stdin approach to working with `git credential`
     def _check_if_git_credentials_configured(self, host: str, username: str) -> Optional[str]:
         """
 
@@ -496,67 +489,31 @@ class GitLabManager(object):
         Returns:
 
         """
-        # Get the current working dir
-        cwd = os.getcwd()
-        try:
-            # Switch to the user's home dir (needed to make git config and credential saving work)
-            os.chdir(os.path.expanduser("~"))
-            child = pexpect.spawn("git credential fill")
-            child.expect("")
-            child.sendline("protocol=https")
-            child.expect("")
-            child.sendline(f"host={host}")
-            child.expect("")
-            child.sendline(f"username={username}")
-            child.expect("")
-            child.sendline("")
-            i = child.expect(["Password for 'https://", r"password=[\w\-\._]+", pexpect.EOF])
-        finally:
-            # Switch back to where you were
-            os.chdir(os.path.expanduser(cwd))
-        if i == 0:
-            # Not configured
-            child.sendline("")
-            return None
-        elif i == 1:
-            # Possibly configured, verify a valid string
-            matches = re.finditer(r"password=[a-zA-Z0-9\-_!@#$%^&*]+", child.after.decode("utf-8"))
+        input_str = f"protocol=https\nhost={host}\nusername={username}\n\n"
+        output, err = self._call_shell("git credential-cache get", input_str=input_str, cwd=os.path.expanduser("~"))
 
-            token = None
-            try:
-                for match in matches:
-                    _, token = match.group().split("=")
-                    break
-            except ValueError:
-                # if string is malformed it won't split properly and you don't have a token
-                pass
+        if err:
+            err_str = err.decode('utf-8')
+            raise IOError(f"Failed to check for git credentials: {err_str}")
 
-            if not token:
-                child.sendline("")
-            child.close()
+        if output:
+            output_str = output.decode('utf-8')
+            items = output_str.split('\n')
+
+            if 'username' not in items[0] or 'password' not in items[1]:
+                raise IOError("Git configuration corrupted. Restart Gigantum Client.")
+
+            _, loaded_username = items[0].split("=")
+            if loaded_username != username:
+                # This case "should never happen" but an extra check to make sure we never send the wrong
+                # credentials to the wrong user.
+                raise IOError("git credential mismatch error. Restart Gigantum Client.")
+
+            _, token = items[1].split("=")
             return token
-        elif i == 2:
-            # Possibly configured, verify a valid string
-            matches = re.finditer(r"password=[a-zA-Z0-9\-_!@#$%^&*]+", child.before.decode("utf-8"))
-
-            token = None
-            try:
-                for match in matches:
-                    _, token = match.group().split("=")
-                    break
-            except ValueError:
-                # if string is malformed it won't split properly and you don't have a token
-                pass
-
-            if not token:
-                child.sendline("")
-            child.close()
-            return token
-
         else:
             return None
 
-    # TODO #1214: This can be cleanly replaced with the stdin approach to working with `git credential`
     def configure_git_credentials(self, host: str, username: str) -> None:
         """Method to configure the local git client's credentials
 
@@ -571,54 +528,27 @@ class GitLabManager(object):
         token = self._check_if_git_credentials_configured(host, username)
 
         if token is None:
-            cwd = os.getcwd()
-            try:
-                os.chdir(os.path.expanduser("~"))
-                child = pexpect.spawn("git credential approve")
-                child.expect("")
-                child.sendline("protocol=https")
-                child.expect("")
-                child.sendline(f"host={host}")
-                child.expect("")
-                child.sendline(f"username={username}")
-                child.expect("")
-                child.sendline(f"password={self._repo_token()}")
-                child.expect("")
-                child.sendline("")
-                child.expect(["", pexpect.EOF])
-                child.sendline("")
-                child.expect(["", pexpect.EOF])
-                child.close()
-            finally:
-                os.chdir(os.path.expanduser(cwd))
+            # If None, not configured, so fetch from User service and set locally
+            input_str = f"protocol=https\nhost={host}\nusername={username}\npassword={self._repo_token()}\n\n"
+            _, err = self._call_shell("git credential approve", input_str=input_str, cwd=os.path.expanduser("~"))
+            if err:
+                raise IOError(f"Failed to configure git credentials: {err.decode('utf-8')}")
 
-            logger.info(f"Configured local git credentials for {host}")
+            logger.info(f"Configured local git credentials for {username}@{host}")
 
-    # TODO #1214: This can be cleanly replaced with the stdin approach to working with `git credential`
-    def clear_git_credentials(self, host: str) -> None:
+    def clear_git_credentials(self, host: str, username: str) -> None:
         """Method to clear the local git client's credentials
 
         Args:
             host(str): GitLab hostname
+            username(str): Username to authenticate
 
         Returns:
             None
         """
-        cwd = os.getcwd()
-        try:
-            child = pexpect.spawn("git credential reject")
-            child.expect("")
-            child.sendline("protocol=https")
-            child.expect("")
-            child.sendline(f"host={host}")
-            child.expect("")
-            child.sendline("")
-            child.expect("")
-            child.sendline("")
-            child.expect("")
-            child.sendline("")
-            child.close()
-        finally:
-            os.chdir(os.path.expanduser(cwd))
+        input_str = f"protocol=https\nhost={host}\nusername={username}\n\n"
+        _, err = self._call_shell("git credential reject", input_str=input_str, cwd=os.path.expanduser("~"))
+        if err:
+            raise IOError(f"Failed to reset git credentials: {err.decode('utf-8')}")
 
-        logger.info(f"Removed local git credentials for {host}")
+        logger.info(f"Removed local git credentials for {username}@{host}")

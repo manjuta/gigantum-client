@@ -88,7 +88,7 @@ WORKDIR /home/circleci
 
 # Setup git
 RUN git config --global user.email "noreply@gigantum.io" && \
-    git config --global user.name "CircleCI" && \
-    git config --global credential.helper store
+    git config --global user.name "Gigantum Client" && \
+    git config --global credential.helper 'cache --timeout 3600'
 
 CMD ["/bin/bash"]
