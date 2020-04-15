@@ -121,10 +121,11 @@ jobs:
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
             cd /home/circleci/repo
+            pytest --cov=gtmcore packages/gtmcore/gtmcore/dispatcher/tests/test_dispatcher.py::test_redis_not_running
             redis-server > /dev/null 2> /dev/null &
             rqscheduler --interval=2 --db 13 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
-            pytest --cov=gtmcore packages/gtmcore/gtmcore/dispatcher/tests
+            pytest --cov=gtmcore --cov-append packages/gtmcore/gtmcore/dispatcher/tests -k "not test_redis_not_running"
             codecov -F core
 
   test-ui-components:

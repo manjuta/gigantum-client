@@ -206,6 +206,17 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
 
     # Start background startup tasks
     d = Dispatcher()
+    # Make sure the queue is up before we start using RQ
+    for _ in range(20):
+        if d.ready_for_job(update_environment_repositories):
+            break
+        sleep(0.5)
+    else:
+        # We exhausted our for-loop
+        err_message = "Worker queue not ready after 20 tries (10 seconds) - fatal error"
+        logger.error(err_message)
+        raise RuntimeError(err_message)
+
     d.dispatch_task(update_environment_repositories, persist=True)
 
 

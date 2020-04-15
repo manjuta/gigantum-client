@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1322"
+changelog:
+  - type: IMPROVEMENT
+    description: Explicit wait for RQ before proceeding in service.py launch
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1321
