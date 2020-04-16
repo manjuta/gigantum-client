@@ -254,10 +254,9 @@ class DevTools extends Component<Props> {
   render() {
     const { labbook } = this.props;
     const { selectedDevTool, showDevList } = this.state;
-    let devTools = labbook.environment.base
+    const devTools = labbook.environment.base
       ? labbook.environment.base.developmentTools
       : [];
-    devTools = devTools.filter(tool => !(tool === 'rstudio' && process.env.BUILD_TYPE === 'cloud'));
     const disableLaunch = process.env.BUILD_TYPE === 'cloud'
       && selectedDevTool === 'rstudio';
     // declare css here
