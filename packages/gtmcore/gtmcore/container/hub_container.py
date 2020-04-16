@@ -171,8 +171,7 @@ class HubProjectContainer(ContainerOperations):
         Returns:
             If wait_for_output is specified, the stdout of the cmd. Otherwise, or if stdout cannot be obtained, None.
         """
-        logger.info(
-            f"HubProjectContainer.run_container() - volumes: {volumes} - cmd: {cmd}")
+        logger.info(f"HubProjectContainer.run_container() - volumes: {volumes} - cmd: {cmd}")
         url = f"{self._launch_service}/v1/project"
         data = {"client_id": self._client_id,
                 "project_id": None,
@@ -202,8 +201,7 @@ class HubProjectContainer(ContainerOperations):
                     try:
                         # Give the k8s reconciler a bit of a cushion so everything is consistent.
                         time.sleep(2)
-                        result = self.exec_command(
-                            cmd, container_name=image_name, get_results=True)
+                        result = self.exec_command(cmd, container_name=image_name, get_results=True)
                     except Exception as err:
                         logger.exception(f"An error occurred while trying to exec into {image_name}: {err}",
                                          exc_info=True)
@@ -410,8 +408,7 @@ class HubProjectContainer(ContainerOperations):
         except AttributeError:
             raise ContainerException(f"No hostname attribute in response:"
                                      f" {response.json()}")
-        logger.info(
-            f"HubProjectContainer.query_container_ip() found: {hostname}")
+        logger.info(f"HubProjectContainer.query_container_ip() found: {hostname}")
         return hostname
 
     def copy_into_container(self, src_path: str, dst_dir: str) -> None:
@@ -455,8 +452,7 @@ class HubProjectContainer(ContainerOperations):
         if not os.environ.get('HOST_WORK_DIR'):
             raise ValueError("Environment variable HOST_WORK_DIR must be set")
 
-        mnt_point = self.labbook.root_dir.replace(
-            '/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+        mnt_point = self.labbook.root_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
 
         volumes_dict = {
             mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
@@ -469,10 +465,8 @@ class HubProjectContainer(ContainerOperations):
             try:
                 cm_class = get_cache_manager_class(ds.client_config)
                 cm = cm_class(ds, self.username)
-                ds_cache_dir = cm.current_revision_dir.replace(
-                    '/mnt/gigantum', os.environ['HOST_WORK_DIR'])
-                volumes_dict[ds_cache_dir] = {
-                    'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+                ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+                volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
             except InventoryException:
                 continue
 
@@ -502,8 +496,7 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to opened ports {port_list} for {self.labbook.owner}/{self.labbook.name}"
                                      f":: {response.status_code} :: {response.json()}")
 
-        logger.info(
-            f"Opened ports {port_list} for {self.labbook.owner}/{self.labbook.name} dynamically.")
+        logger.info(f"Opened ports {port_list} for {self.labbook.owner}/{self.labbook.name} dynamically.")
 
     def configure_dev_tool(self, dev_tool: str) -> None:
         """A method to configure a dev tool if needed. This is to be inserted right before starting the tool process,
