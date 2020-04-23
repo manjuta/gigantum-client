@@ -40,10 +40,21 @@ chmod 777 /var/run/docker.sock
 export JUPYTER_RUNTIME_DIR=/mnt/share/jupyter/runtime
 chown -R giguser:root /mnt/share/
 
+if [ -n "$XDG_CACHE_HOME" ]; then
+    mkdir -p $XDG_CACHE_HOME
+    # Even though (last I checked) this is in /mnt/labbook, it might change, so we handle it directly
+    chown -R giguser:root $XDG_CACHE_HOME
+fi
+
 # If user information is available via env vars, pre-configure git client
-if [ ! -z ${GIGANTUM_EMAIL+x} ]; then 
-  git config --global user.email "$GIGANTUM_EMAIL"
-  git config --global user.name "$GIGANTUM_USERNAME" 
+if [ -n "$GIGANTUM_EMAIL" ]; then 
+  gosu giguser git config --global user.email "$GIGANTUM_EMAIL"
+  gosu giguser git config --global user.name "$GIGANTUM_USERNAME" 
+  # We make store the default so it's easier to simply add a .git-credentials file via secrets
+  gosu giguser git config --global credential.helper store
+  if hash git-lfs 2>/dev/null; then
+      gosu giguser git-lfs install
+  fi
 fi
 
 # Run the Docker Command
