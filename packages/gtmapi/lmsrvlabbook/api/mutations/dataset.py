@@ -19,6 +19,12 @@ from lmsrvlabbook.api.objects.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import Dispatcher, jobs
 
+# Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
+from gtmcore.dataset.storage import get_storage_backend
+from gtmcore.dataset import Dataset as DatasetObj
+# Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
+
+
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
 from lmsrvlabbook.api.objects.dataset import DatasetConfigurationParameterInput
 from lmsrvlabbook.api.connections.labbook import Labbook, LabbookConnection
@@ -336,22 +342,28 @@ class DeleteDataset(graphene.ClientIDMutation):
         if remote:
             logger.info(f"Deleting remote Dataset {owner}/{dataset_name}")
 
+            config = flask.current_app.config['LABMGR_CONFIG']
+
             # Get tokens from request context
             access_token, id_token = tokens_from_request_context(tokens_required=True)
 
+            # Temporary hard-coding of Gigantum Dataset type. Can be removed with #1328
             try:
                 ds = InventoryManager().load_dataset(logged_in_user, owner, dataset_name,
                                                      author=get_logged_in_author())
+                remove_remote_config = True
             except InventoryException:
-                raise ValueError("A dataset must exist locally to delete it in the remote.")
+                # Does not exist locally, so create a "mock" Dataset instance
+                remove_remote_config = False
+                ds = DatasetObj(config.config_file, owner)
+                ds._data = {"name": dataset_name}
 
-            # Delete the dataset's files if supported
-            if ds.is_managed():
-                ds.backend.set_default_configuration(logged_in_user, access_token, id_token)
-                ds.backend.delete_contents(ds)
+            ds_backend = get_storage_backend("gigantum_object_v1")
+            ds_backend.set_default_configuration(logged_in_user, access_token, id_token)
+            ds_backend.delete_contents(ds)
+            # Temporary hard-coding of Gigantum Dataset type. Can be removed with #1328
 
             # Get remote server configuration
-            config = flask.current_app.config['LABMGR_CONFIG']
             remote_config = config.get_remote_configuration()
 
             # Delete the repository
@@ -362,10 +374,11 @@ class DeleteDataset(graphene.ClientIDMutation):
                         f" remote repository {remote_config['git_remote']}")
 
             # Remove locally any references to that cloud repo that's just been deleted.
-            try:
-                ds.remove_remote()
-            except GigantumException as e:
-                logger.warning(e)
+            if remove_remote_config:
+                try:
+                    ds.remove_remote()
+                except GigantumException as e:
+                    logger.warning(f"Failed to remove remote config from Dataset during Remote Dataset Delete: {e}")
 
             remote_deleted = True
 

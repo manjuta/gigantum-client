@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1336"
+changelog:
+  - type: IMPROVEMENT
+    description: Remote Datasets can now be deleted even if the Dataset does not exist locally
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1161
