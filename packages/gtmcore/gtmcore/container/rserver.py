@@ -42,9 +42,6 @@ def start_rserver(project_container: ContainerOperations, check_reachable: bool 
 
 
 def _start_rserver_process(project_container: ContainerOperations) -> None:
-    # This custom PYTHONPATH is also specified in the neighboring jupyter.py file.
-    # It would be good we standardize this somehow at a general dev_tool level, perhaps in #453?
-    # Python should be supported in the R container.
     cmd = ("mkdir -p /home/giguser/.rstudio/monitored/user-settings"
            " && cp /tmp/user-settings /home/giguser/.rstudio/monitored/user-settings/"
            # --www-port is just here to be explicit / document how to change if needed

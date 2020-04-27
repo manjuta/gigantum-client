@@ -7,7 +7,8 @@ from gtmcore.logging import LMLogger
 from gtmcore.exceptions import GigantumException
 
 logger = LMLogger.get_logger()
-CURRENT_MITMPROXY_TAG = 'eab6f480'
+# Current tag for gigantum/mitmproxy_proxy image
+CURRENT_MITMPROXY_TAG = '2020-04-24'
 
 
 class MITMProxyOperations(object):
@@ -22,6 +23,7 @@ class MITMProxyOperations(object):
 
         Args:
             devtool_container: the specific target running a dev tool
+            new_rserver_session: is this for a freshly-launched rserver?
             router: The link to the configurable-proxy-router wrapper
             _retry: (internal use only) is this a recursive call after clean-up?
 
@@ -145,6 +147,7 @@ class MITMProxyOperations(object):
 
         Args:
             primary_container: the proxy target running a dev tool
+            new_rserver_session: create a new mitmproxy, don't re-use
 
         Returns:
             str that contains the proxy endpoint as http://{ip}:{port}
@@ -191,7 +194,7 @@ class MITMProxyOperations(object):
 
         Args:
             mitm_container: We'll also use this to get the primary_container
-            actual_devtool_endpoint: we'll use this to check our configuration
+            devtool_endpoint: we'll use this to check our configuration
 
         Returns:
             The endpoint target for this MITM proxy, otherwise None
