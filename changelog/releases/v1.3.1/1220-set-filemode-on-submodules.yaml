@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1337"
+changelog:
+  - type: FIX
+    description: Set fileMode to false when configuring Dataset submodule references when running on Windows hosts.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1220
