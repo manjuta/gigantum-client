@@ -2,13 +2,19 @@
 import React, { Component } from 'react';
 import store from 'JS/redux/store';
 import Loader from 'Components/common/Loader';
-// config
-import config from 'JS/config';
 // assets
 import './Login.scss';
 
-// import CreatePage from './components/CreatePage';
-export default class Login extends Component {
+type Props = {
+  auth: {
+    login: Function,
+    logout: Function,
+  },
+  loadingRenew: boolean,
+  userIdentityReturned: boolean,
+}
+
+class Login extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = store.getState().login;
@@ -19,8 +25,8 @@ export default class Login extends Component {
     login through Auth0
   */
   login() {
-    const { props } = this;
-    props.auth.login();
+    const { auth } = this.props;
+    auth.login();
   }
 
   /**
@@ -28,20 +34,21 @@ export default class Login extends Component {
     logout through Auth0
   */
   logout() {
-    const { props } = this;
-    props.auth.logout();
+    const { auth } = this.props;
+    auth.logout();
   }
 
   render() {
-    const { props } = this;
+    const { loadingRenew, userIdentityReturned } = this.props;
     const errorType = window.sessionStorage.getItem('LOGIN_ERROR_TYPE');
     const errorDescription = window.sessionStorage.getItem('LOGIN_ERROR_DESCRIPTION');
     const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
-    const baseURL = 'gigantum.com'
+    const baseURL = 'gigantum.com';
     const loginURL = `https://${baseURL}/client/login#route=${window.location.origin}${freshLoginText}`;
+
     return (
       <div className="Login">
-        { props.userIdentityReturned
+        { userIdentityReturned
           && (
             <div className="Login__panel">
               { errorType
@@ -74,7 +81,7 @@ export default class Login extends Component {
                 </div>
                 <div className="grid-3" />
                 <div className="grid-5 flex flex--column justify--center">
-                  { props.loadingRenew
+                  { loadingRenew
                     ? (
                       <button
                         type="button"
@@ -101,9 +108,11 @@ export default class Login extends Component {
           )
         }
         {
-          props.userIdentityReturned && <Loader />
+          userIdentityReturned && <Loader />
         }
       </div>
     );
   }
 }
+
+export default Login;

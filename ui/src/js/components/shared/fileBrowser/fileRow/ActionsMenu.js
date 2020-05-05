@@ -9,19 +9,14 @@ export default class ActionsMenu extends Component {
     popupVisible: false,
   }
 
-  /**
-  *  LIFECYCLE MEHTODS START
-  */
-  UNSAFE_componentWillMount() {
-    window.removeEventListener('click', this._closePopup);
-  }
-
   componentDidMount() {
     window.addEventListener('click', this._closePopup);
   }
-  /**
-  *  LIFECYCLE MEHTODS END
-  */
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this._closePopup);
+  }
+
 
   /**
   *  @param {Object} event

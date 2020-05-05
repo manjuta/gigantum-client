@@ -46,12 +46,13 @@ export default class SideBar extends Component {
 
   render() {
     const { props, state } = this;
+    const { diskLow } = this.props;
     const isLabbooks = (window.location.href.indexOf('projects') > 0) || (window.location.href.indexOf('datasets') === -1);
     // declare css here
     const sidebarCSS = classNames({
       'SideBar col-sm-1': state.authenticated || state.authenticated === null,
       hidden: !(state.authenticated || state.authenticated === null),
-      'SideBar--demo': (window.location.hostname === config.demoHostName) || props.diskLow,
+      'SideBar--disk-low': diskLow,
     });
     const projectsCSS = classNames({
       SideBar__icon: true,

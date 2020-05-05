@@ -7,6 +7,12 @@
   height: calc(100% - 10px);
 
   @include flex(flex-start, row);
+
+  &__temp {
+    height: 100vh;
+    width: 100Vw;
+    background-image: linear-gradient(230deg, #0b1425, #274686);
+  }
 }
 
 .HeaderBar {
@@ -20,7 +26,7 @@
   background-color: $primaryText;
 }
 
-.HeaderBar.is-demo{
+.HeaderBar--disk-low {
   top: 50px;
 }
 

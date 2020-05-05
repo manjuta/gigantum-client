@@ -449,11 +449,11 @@ class File extends Component<Props> {
               {
                 filename
                 && (
-                <MiddleTruncate
-                  ellipsis="..."
-                  text={filename}
-                  smartCopy
-                />
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={filename}
+                    smartCopy
+                  />
                 )
               }
             </div>

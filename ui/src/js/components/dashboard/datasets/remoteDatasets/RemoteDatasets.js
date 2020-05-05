@@ -16,7 +16,27 @@ import NoResults from 'Components/dashboard/shared/NoResults';
 // assets
 import './RemoteDatasets.scss';
 
-class RemoteDatasets extends Component {
+
+type Props = {
+  filterDatasets: Function,
+  filterState: String,
+  forceLocalView: Function,
+  relay: {
+    isLoading: Function,
+    loadMore: Function,
+  },
+  remoteDatasets: {
+    remoteDatasets: {
+      pageInfo: {
+        hasNextPage: boolean,
+      }
+    }
+  },
+  remoteDatasetsId: string,
+  setFilterValue: Function,
+}
+
+class RemoteDatasets extends Component<Props> {
   state = {
     deleteData: {
       remoteId: null,
@@ -33,9 +53,9 @@ class RemoteDatasets extends Component {
     loads more remote datasets on mount
   */
   componentDidMount() {
-    const { props } = this;
-    if (props.remoteDatasets.remoteDatasets
-      && props.remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
+    const { forceLocalView, remoteDatasets } = this.props;
+    if (remoteDatasets.remoteDatasets
+      && remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
       this._loadMore();
     }
 
@@ -43,23 +63,13 @@ class RemoteDatasets extends Component {
       if (navigator.onLine) {
         if (response.data) {
           if (!response.data.userIdentity.isSessionValid) {
-            props.auth.renewToken();
+            forceLocalView();
           }
         }
       } else {
-        props.forceLocalView();
+        forceLocalView();
       }
     });
-  }
-
-  /*
-    loads more remote datasets if available
-  */
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.remoteDatasets.remoteDatasets
-      && nextProps.remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
-      this._loadMore();
-    }
   }
 
   /**
@@ -67,8 +77,16 @@ class RemoteDatasets extends Component {
     *  loads more datasets using the relay pagination container
   */
   _loadMore = () => {
-    const self = this;
-    const { props } = this;
+    const {
+      forceLocalView,
+      relay,
+      remoteDatasets,
+    } = this.props;
+
+    if (relay.isLoading()) {
+      return;
+    }
+
     UserIdentity.getUserIdentity().then((response) => {
       if (navigator.onLine) {
         if (response.data) {
@@ -77,8 +95,8 @@ class RemoteDatasets extends Component {
               isPaginating: true,
             });
 
-            if (props.remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
-              props.relay.loadMore(
+            if (remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
+              relay.loadMore(
                 8, // Fetch the next 8 items
                 () => {
                   this.setState({
@@ -88,15 +106,11 @@ class RemoteDatasets extends Component {
               );
             }
           } else {
-            props.auth.renewToken(true, () => {
-              props.forceLocalView();
-            }, () => {
-              self._loadMore();
-            });
+            forceLocalView();
           }
         }
       } else {
-        props.forceLocalView();
+        forceLocalView();
       }
     });
   }
@@ -126,9 +140,21 @@ class RemoteDatasets extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    if (props.remoteDatasets && props.remoteDatasets.remoteDatasets !== null) {
-      const datasets = props.filterDatasets(props.remoteDatasets, props.filterState);
+    const {
+      filterDatasets,
+      filterState,
+      remoteDatasets,
+      remoteDatasetsId,
+      setFilterValue,
+    } = this.props;
+    const {
+      deleteData,
+      deleteModalVisible,
+      isPaginating,
+    } = this.state;
+
+    if (remoteDatasets && (remoteDatasets.remoteDatasets !== null)) {
+      const datasets = filterDatasets(remoteDatasets, filterState);
 
       return (
         <div className="Datasets__listing">
@@ -137,47 +163,42 @@ class RemoteDatasets extends Component {
             datasets.length
               ? datasets.map(edge => (
                 <RemoteDatasetPanel
+                  {...this.props}
                   toggleDeleteModal={this._toggleDeleteModal}
-                  datasetListId={props.remoteDatasetsId}
+                  datasetListId={remoteDatasetsId}
                   key={edge.node.owner + edge.node.name}
                   ref={`RemoteDatasetPanel${edge.node.name}`}
                   edge={edge}
-                  history={props.history}
                   existsLocally={edge.node.isLocal}
-                  filterText={props.filterText}
-                  auth={props.auth}
                 />
               ))
-              : !state.isPaginating
+              : !isPaginating
                 && store.getState().datasetListing.filterText
-                && <NoResults setFilterValue={props.setFilterValue} />
+                && <NoResults setFilterValue={setFilterValue} />
             }
             {
               Array(5).fill(1).map((value, index) => (
                 <CardLoader
                   key={`RemoteDatasets_paginationLoader${index}`}
                   index={index}
-                  isLoadingMore={state.isPaginating}
+                  isLoadingMore={isPaginating}
                 />
               ))
             }
           </div>
           {
-            state.deleteModalVisible
+            deleteModalVisible
             && (
             <DeleteDataset
+              {...deleteData}
+              {...this.props}
               sectionType="dataset"
               handleClose={() => { this._toggleDeleteModal(); }}
-              datasetListId={props.datasetListId}
-              remoteId={state.deleteData.remoteId}
               remoteConnection="RemoteDatasets_remoteDatasets"
               toggleModal={this._toggleDeleteModal}
-              owner={state.deleteData.remoteOwner}
-              name={state.deleteData.remoteDatasetName}
-              remoteUrl={state.deleteData.remoteUrl}
-              existsLocally={state.deleteData.existsLocally}
+              owner={deleteData.remoteOwner}
+              name={deleteData.remoteDatasetName}
               remoteDelete
-              history={props.history}
             />
             )
           }

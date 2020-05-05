@@ -24,7 +24,31 @@ import { setFilterText } from 'JS/redux/actions/datasetListing/datasetListing';
 // assets
 import './Datasets.scss';
 
-class Datasets extends Component {
+
+type Props = {
+  auth: {
+    login: Function,
+  },
+  diskLow: boolean,
+  filterText: string,
+  history: {
+    location: {
+      hash: string,
+      pathname: string,
+      search: string,
+    },
+    replace: Function,
+  },
+  datasetList: Array<Object>,
+  loading: boolean,
+  orderBy: string,
+  refetchSort: Function,
+  section: string,
+  sort: boolean,
+  sortBy: string,
+}
+
+class Datasets extends Component<Props> {
   constructor(props) {
     super(props);
 
@@ -70,6 +94,16 @@ class Datasets extends Component {
     window.addEventListener('click', this._hideSearchClear);
   }
 
+  static getDerivedStateFromProps(props, state) {
+    const paths = props.history.location.pathname.split('/');
+    const selectedSection = paths.length > 2 ? paths[2] : 'local';
+
+    return {
+      ...state,
+      selectedSection,
+    };
+  }
+
   /**
     * @param {}
     * fires when component unmounts
@@ -80,13 +114,6 @@ class Datasets extends Component {
     window.removeEventListener('click', this._closeFilterMenu);
     window.removeEventListener('scroll', this._captureScroll);
     window.removeEventListener('click', this._hideSearchClear);
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const paths = nextProps.history.location.pathname.split('/');
-    const sectionRoute = paths.length > 2 ? paths[2] : 'local';
-
-    this.setState({ selectedSection: sectionRoute });
   }
 
   /**
@@ -151,10 +178,10 @@ class Datasets extends Component {
   }
 
   /**
-    *  @param {string} datasetName
+    *  @param {} -
     *  closes dataset modal and resets state to initial state
     */
-  _closeDataset = (datasetName) => {
+  _closeDataset = () => {
     this.setState({
       datasetModalVisible: false,
       oldDatasetName: '',
@@ -189,24 +216,22 @@ class Datasets extends Component {
   }
 
   /**
-   sets state for filter menu
+   * sets state for filter menu
    */
   _toggleFilterMenu = () => {
-    const { state } = this;
-    this.setState({ filterMenuOpen: !state.filterMenuOpen });
+    this.setState(state => ({ filterMenuOpen: !state.filterMenuOpen }));
   }
 
   /**
-  sets state for sort menu
+  * sets state for sort menu
   */
   _toggleSortMenu = () => {
-    const { state } = this;
-    this.setState({ sortMenuOpen: !state.sortMenuOpen });
+    this.setState(state => ({ sortMenuOpen: !state.sortMenuOpen }));
   }
 
   /**
   * @param {string} section
-  replaces history and checks session
+  * replaces history and checks session
   */
   _setSection = (section) => {
     const { props } = this;
@@ -302,7 +327,7 @@ class Datasets extends Component {
     * checks session and selectedSection state before handing off to handleSortFilter
   */
   _setSortFilter = (orderBy, sort) => {
-    const { props, state } = this;
+    const { state } = this;
     if (state.selectedSection === 'remoteDatasets') {
       UserIdentity.getUserIdentity().then((response) => {
         if (navigator.onLine) {
@@ -310,13 +335,7 @@ class Datasets extends Component {
             if (response.data.userIdentity.isSessionValid) {
               this._handleSortFilter(orderBy, sort);
             } else {
-              props.auth.renewToken(true, () => {
-                if (!state.showLoginPrompt) {
-                  this.setState({ showLoginPrompt: true });
-                }
-              }, () => {
-                this._handleSortFilter(orderBy, sort);
-              });
+              this.setState({ showLoginPrompt: true });
             }
           }
         } else if (!state.showLoginPrompt) {
@@ -341,14 +360,7 @@ class Datasets extends Component {
           props.history.replace(`../datasets/cloud${props.history.location.search}`);
           this.setState({ selectedSection: 'cloud' });
         } else {
-          props.auth.renewToken(true, () => {
-            if (!state.showLoginPrompt) {
-              this.setState({ showLoginPrompt: true });
-            }
-          }, () => {
-            props.history.replace(`../datasets/cloud${props.history.location.search}`);
-            this.setState({ selectedSection: 'cloud' });
-          });
+          this.setState({ showLoginPrompt: true });
         }
       } else if (!state.showLoginPrompt) {
         this.setState({ showLoginPrompt: true });
@@ -394,22 +406,28 @@ class Datasets extends Component {
   }
 
   render() {
+    const {
+      filter,
+      selectedSection,
+      showLoginPrompt,
+    } = this.state;
+    const { diskLow } = this.props;
     const { props, state } = this;
     const datasetsCSS = classNames({
       Datasets: true,
-      'Datasets--demo': (window.location.hostname === config.demoHostName) || props.diskLow,
+      'Datasets--disk-low': diskLow,
     });
 
     if (props.datasetList !== null || props.loading) {
       const localNavItemCSS = classNames({
         Tab: true,
         'Tab--local': true,
-        'Tab--selected': state.selectedSection === 'local',
+        'Tab--selected': selectedSection === 'local',
       });
       const cloudNavItemCSS = classNames({
         Tab: true,
         'Tab--cloud': true,
-        'Tab--selected': state.selectedSection === 'cloud',
+        'Tab--selected': selectedSection === 'cloud',
       });
 
       return (
@@ -432,10 +450,22 @@ class Datasets extends Component {
           <div className="Datasets__menu  mui-container flex-0-0-auto">
             <ul className="Tabs">
               <li className={localNavItemCSS}>
-                <a onClick={() => this._setSection('local')}>Local</a>
+                <button
+                  className="Btn--noStyle"
+                  type="button"
+                  onClick={() => this._setSection('local')}
+                >
+                  Local
+                </button>
               </li>
               <li className={cloudNavItemCSS}>
-                <a onClick={() => this._setSection('cloud')}>Gigantum Hub</a>
+                <button
+                  className="Btn--noStyle"
+                  type="button"
+                  onClick={() => this._setSection('cloud')}
+                >
+                  Gigantum Hub
+                </button>
               </li>
 
               <Tooltip section="cloudLocal" />
@@ -452,7 +482,7 @@ class Datasets extends Component {
                         className="Btn Btn--flat"
                         onClick={() => this._setFilterValue({ target: { value: '' } })}
                       >
-                       Clear
+                        Clear
                       </button>
                     )
                   }
@@ -480,7 +510,7 @@ class Datasets extends Component {
               setSortFilter={this._setSortFilter}
             />
           </div>
-          { (!props.loading) && (state.selectedSection === 'local')
+          { (!props.loading) && (selectedSection === 'local')
             && (
               <LocalDatasetsContainer
                 datasetListId={props.datasetList.id}
@@ -495,15 +525,14 @@ class Datasets extends Component {
               />
             )
           }
-          { (!props.loading) && (state.selectedSection === 'cloud')
+          { (!props.loading) && (selectedSection === 'cloud')
             && (
               <RemoteDatasets
                 datasetListId={props.datasetList.datasetList.id}
                 remoteDatasets={props.datasetList.datasetList}
                 showModal={this._showModal}
-                goToLabbook={this._goToLabbook}
                 filterDatasets={this._filterDatasets}
-                filterState={state.filter}
+                filterState={filter}
                 setFilterValue={this._setFilterValue}
                 forceLocalView={() => { this._forceLocalView(); }}
                 changeRefetchState={bool => this.setState({ refetchLoading: bool })}
@@ -522,10 +551,11 @@ class Datasets extends Component {
               />
             )
           }
-          {
-            state.showLoginPrompt
-            && <LoginPrompt closeModal={this._closeLoginPromptModal} />
-          }
+          <LoginPrompt
+            showLoginPrompt={showLoginPrompt}
+            closeModal={this._closeLoginPromptModal}
+          />
+
         </div>
       );
     }
@@ -536,11 +566,11 @@ class Datasets extends Component {
           setErrorMessage(null, null, 'Failed to fetch Datasets.', [{ message: 'There was an error while fetching Datasets. This likely means you have a corrupted Dataset directory.' }]);
           return (
             <div className="Datasets__fetch-error">
-                There was an error attempting to fetch Datasets.
+              There was an error attempting to fetch Datasets.
               <br />
-                Try restarting Gigantum and refresh the page.
+              Try restarting Gigantum and refresh the page.
               <br />
-                If the problem persists
+              If the problem persists
               <a
                 target="_blank"
                 href="https://spectrum.chat/gigantum"
@@ -552,6 +582,8 @@ class Datasets extends Component {
           );
         }
         props.auth.login();
+
+        return null;
       });
     }
 

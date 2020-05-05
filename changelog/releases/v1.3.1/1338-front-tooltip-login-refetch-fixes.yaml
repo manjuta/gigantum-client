@@ -1,0 +1,11 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1338"
+changelog:
+  - type: FIX
+    description: Guide tooltips now disappear when clicking on another tooltip.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1331
+  - type: FIX
+    description: Refetch of container status is now delayed by 30 seconds
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1327
+  - type: FIX
+    description: Silent login now prompts user to login and redirects to the hub to login via cookie or user input.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1298

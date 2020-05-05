@@ -4,15 +4,12 @@ import uuidv4 from 'uuid/v4';
 import Highlighter from 'react-highlight-words';
 import classNames from 'classnames';
 import Moment from 'moment';
-import ReactTooltip from 'react-tooltip';
-import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // components
 import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // muations
 import ImportRemoteLabbookMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
-import store from 'JS/redux/store';
 import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/actions/footer';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
@@ -23,12 +20,15 @@ import Loader from 'Components/common/Loader';
 import './RemoteLabbookPanel.scss';
 
 type Props = {
-  auth: {
-    renewToken: Function,
-  },
   edge: {
     node: {
+      creationDateUtc: string,
+      description: string,
+      modifiedDateUtc: string,
       importUrl: string,
+      name: string,
+      owner: string,
+      visibility: string,
     }
   },
   existsLocally: boolean,
@@ -74,7 +74,7 @@ class RemoteLabbookPanel extends Component<Props> {
   */
   _importLabbook = (owner, labbookName) => {
     // TODO break up this function
-    const { auth, edge } = this.props;
+    const { edge } = this.props;
     const self = this;
     const id = uuidv4();
     const remote = edge.node.importUrl;
@@ -108,7 +108,6 @@ class RemoteLabbookPanel extends Component<Props> {
                 false,
                 (response, error) => {
                   if (error) {
-                    console.error(error);
                     const buildMessageData = {
                       id,
                       owner,
@@ -154,11 +153,7 @@ class RemoteLabbookPanel extends Component<Props> {
               },
             );
           } else {
-            auth.renewToken(true, () => {
-              this.setState({ showLoginPrompt: true });
-            }, () => {
-              this._importLabbook(owner, labbookName);
-            });
+            this.setState({ showLoginPrompt: true });
           }
         }
       } else {
@@ -185,7 +180,7 @@ class RemoteLabbookPanel extends Component<Props> {
   */
   _handleDelete = (edge) => {
     // TODO: move toggleDeleteModal
-    const { auth, existsLocally, toggleDeleteModal } = this.props;
+    const { existsLocally, toggleDeleteModal } = this.props;
     if (localStorage.getItem('username') !== edge.node.owner) {
       const { owner, name } = edge.node;
       setWarningMessage(owner, name, 'You can only delete remote Projects that you have created.');
@@ -202,17 +197,7 @@ class RemoteLabbookPanel extends Component<Props> {
                 existsLocally,
               });
             } else {
-              auth.renewToken(true, () => {
-                this.setState({ showLoginPrompt: true });
-              }, () => {
-                toggleDeleteModal({
-                  remoteId: edge.node.id,
-                  remoteUrl: edge.node.remoteUrl,
-                  remoteOwner: edge.node.owner,
-                  remoteLabbookName: edge.node.name,
-                  existsLocally,
-                });
-              });
+              this.setState({ showLoginPrompt: true });
             }
           }
         } else {
@@ -264,7 +249,7 @@ class RemoteLabbookPanel extends Component<Props> {
                 data-tooltip="This Project has already been imported"
                 disabled
               >
-              Imported
+                Imported
               </button>
             )
             : (
@@ -274,7 +259,7 @@ class RemoteLabbookPanel extends Component<Props> {
                 className="Btn__dashboard Btn--action Btn__dashboard--cloud-download"
                 onClick={() => this._importLabbook(edge.node.owner, edge.node.name)}
               >
-              Import
+                Import
               </button>
             )
           }
@@ -286,7 +271,7 @@ class RemoteLabbookPanel extends Component<Props> {
             disabled={deleteDisabled}
             onClick={() => this._handleDelete(edge)}
           >
-           Delete
+            Delete
           </button>
 
         </div>
@@ -338,9 +323,10 @@ class RemoteLabbookPanel extends Component<Props> {
           )
         }
 
-        { showLoginPrompt
-          && <LoginPrompt closeModal={this._closeLoginPromptModal} />
-        }
+        <LoginPrompt
+          showLoginPrompt={showLoginPrompt}
+          closeModal={this._closeLoginPromptModal}
+        />
       </div>
     );
   }

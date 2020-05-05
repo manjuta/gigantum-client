@@ -9,7 +9,12 @@ import config from 'JS/config';
 // assets
 import './Tooltip.scss';
 
-class Tooltip extends Component {
+type Props = {
+  isVisible: boolean,
+  section: string,
+}
+
+class Tooltip extends Component<Props> {
   state = {
     toolTipExpanded: false,
     isVisible: store.getState().helper,
@@ -45,37 +50,55 @@ class Tooltip extends Component {
    *
   */
   _hideTooltip = (evt) => {
-    const { props, state } = this;
-    if (state.toolTipExpanded
-       && (evt.target.className.indexOf(props.section) === -1)) {
+    const { section } = this.props;
+    const { toolTipExpanded } = this.state;
+    if (toolTipExpanded
+       && (evt.target.className.indexOf(section) === -1)
+    ) {
       this.setState({ toolTipExpanded: false });
     }
+
+    ReactTooltip.hide(this[`Tooltip_${section}`]);
+  }
+
+  /**
+   *  @param {event} evt
+   *  shows tooltip box when clicked
+  */
+  showToolTip = (evt) => {
+    const { section } = this.props;
+    evt.stopPropagation();
+    ReactTooltip.show(this[`tooltip_${section}`]);
   }
 
   render() {
-    const { props, state } = this;
-    const { section } = props;
+    const { toolTipExpanded } = this.state;
+    const { isVisible, section } = this.props;
     const place = (section === 'descriptionOverview') ? 'right' : null;
+    // declare css here
     const toolTipCSS = classNames({
-      Tooltip: props.isVisible,
-      hidden: !props.isVisible,
+      Tooltip: isVisible,
+      hidden: !isVisible,
       [section]: true,
       isSticky: store.getState().labbook.isSticky,
     });
     const toggleCSS = classNames({
       Tooltip__toggle: true,
       [section]: true,
-      'Tooltip__toggle--active': state.toolTipExpanded,
+      'Tooltip__toggle--active': toolTipExpanded,
     });
+
     return (
       <div className={toolTipCSS}>
         <div
           className={toggleCSS}
           data-tip={config.getTooltipText(section)}
-          data-for={`Tooltip--${section}`}
+          ref={(ref) => { this[`tooltip_${section}`] = ref; }}
+          onClick={evt => this.showToolTip(evt)}
+          role="presentation"
           data-event="click focus"
         >
-          { !state.toolTipExpanded
+          { !toolTipExpanded
             && (
             <div className="Tooltip__glow-container">
               <div className="Tooltip__glow-ring-outer">
@@ -85,9 +108,8 @@ class Tooltip extends Component {
             )
           }
         </div>
+
         <ReactTooltip
-          id={`Tooltip--${section}`}
-          globalEventOff="click"
           place={place}
         />
 

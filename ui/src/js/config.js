@@ -74,7 +74,6 @@ const CONFIG = {
     },
   },
   getTooltipText: section => tips[section],
-  demoHostName: 'try.gigantum.com',
   /**
     @param {number} bytes
     converts bytes into suitable units

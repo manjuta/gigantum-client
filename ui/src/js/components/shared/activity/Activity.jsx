@@ -350,8 +350,9 @@ class Activity extends Component<Props> {
   */
   _setStickyDate = () => {
     const { props, state } = this;
-    let offsetAmount = ((window.location.hostname === config.demoHostName) || props.diskLow)
-      ? 50 : 0;
+    let offsetAmount = props.diskLow
+      ? 50
+      : 0;
     offsetAmount = props.isDeprecated ? offsetAmount + 70 : offsetAmount;
     const upperBound = offsetAmount + 120;
     let stickyDate = null;
@@ -563,7 +564,6 @@ class Activity extends Component<Props> {
       setBuildingState,
     } = this.props;
     const section = this.props[sectionType];
-    const isDemo = (window.location.hostname === config.demoHostName);
     // declare css here
     const activityCSS = classNames({
       Activity: true,
@@ -571,9 +571,9 @@ class Activity extends Component<Props> {
     });
     const newActivityCSS = classNames({
       'Activity__new-record box-shadow': true,
-      'is-demo': (isDemo || diskLow),
-      'is-deprecated': isDeprecated,
-      'is-demo-deprecated': (isDemo || diskLow) && isDeprecated,
+      'Activity--disk-low': diskLow,
+      'Activity--deprecated': isDeprecated,
+      'Activity--disk-low--deprecated': (diskLow) && isDeprecated,
     });
 
     if (section && section.activityRecords) {
@@ -581,9 +581,9 @@ class Activity extends Component<Props> {
       const stickyDateCSS = classNames({
         'Activity__date-tab': true,
         fixed: stickyDate,
-        'is-demo': (isDemo || diskLow),
-        'is-deprecated': isDeprecated,
-        'is-demo-deprecated': (isDemo || diskLow) && isDeprecated,
+        'Activity--disk-low': diskLow,
+        'Activity--deprecated': isDeprecated,
+        'Activity--disk-low--deprecated': diskLow && isDeprecated,
       });
 
       return (

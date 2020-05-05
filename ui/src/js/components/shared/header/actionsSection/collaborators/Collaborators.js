@@ -58,9 +58,6 @@ const getCollaboratorFiltered = (collaborators, owner) => collaborators
   );
 
 type Props = {
-  auth: {
-    renewToken: Function,
-  },
   sectionType: string,
   showLoginPrompt: Function,
 }
@@ -101,26 +98,19 @@ class CollaboratorButton extends Component<Props> {
   }
 
   /**
-  *  @param {Function} retry
+  *  @param {} -
   *  shows hide collaborators modal
   *  @return {}
   */
-  _toggleCollaborators = (retry) => {
-    const { auth, showLoginPrompt } = this.props;
+  _toggleCollaborators = () => {
+    const { showLoginPrompt } = this.props;
     const { sessionValid, collaboratorModalVisible } = this.state;
 
     if (navigator.onLine) {
       if (sessionValid) {
         this.setState({ collaboratorModalVisible: !collaboratorModalVisible });
       } else {
-        auth.renewToken(true, () => {
-          showLoginPrompt();
-        }, () => {
-          if (retry) {
-            retry();
-          }
-          this.setState({ collaboratorModalVisible: !collaboratorModalVisible });
-        });
+        showLoginPrompt();
       }
     } else {
       showLoginPrompt();
@@ -226,10 +216,10 @@ class CollaboratorButton extends Component<Props> {
               <div className={collaboratorCSS}>
                 <button
                   type="button"
-                  onClick={() => this._toggleCollaborators(response.retry)}
+                  onClick={() => this._toggleCollaborators()}
                   className={collaboratorButtonCSS}
                 >
-                      Collaborators
+                  Collaborators
                   <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
 
                   { (collaboratorNames.length === 0)

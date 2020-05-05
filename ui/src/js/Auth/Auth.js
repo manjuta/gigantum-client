@@ -42,23 +42,13 @@ export default class Auth {
   }
 
   /**
-   * Renews auth token if possible, otherwise prompt login
+   * Reroutes to login screen
   */
-  renewToken(showModal, showModalCallback, successCallback, forceHistory, failureCallback) {
-    this.auth0.checkSession({}, (err, result) => {
-      if (err) {
-        if (showModal) {
-          showModalCallback();
-        } else {
-          failureCallback();
-        }
-      } else {
-        this.setSession(result, true, forceHistory);
-        if (successCallback) {
-          successCallback();
-        }
-      }
-    });
+  renewToken = () => {
+    const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
+    const baseURL = 'gigantum.com';
+    const loginURL = `https://${baseURL}/client/login#route=${window.location.href}${freshLoginText}`;
+    window.open(loginURL, '_self');
   }
 
   login() {

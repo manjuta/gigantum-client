@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import Moment from 'moment';
 import { DragSource, DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
-import { boundMethod } from 'autobind-decorator';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 import ReactTooltip from 'react-tooltip';
 // components
 import ActionsMenu from './ActionsMenu';
@@ -320,6 +320,7 @@ class Folder extends Component {
       addFolderVisible,
     } = state;
     const { updateChildState, fileData } = props;
+
     if (reverse) {
       updateChildState(
         fileData.edge.node.key,
@@ -616,7 +617,16 @@ class Folder extends Component {
               data-tip={folderName}
               data-for="Tooltip--folder"
             >
-              {folderName}
+              {
+                folderName
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={folderName}
+                    smartCopy
+                  />
+                )
+              }
             </div>
             <ReactTooltip
               place="bottom"

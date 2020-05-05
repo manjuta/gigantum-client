@@ -221,8 +221,8 @@ class Header extends Component<Props> {
     const headerCSS = classNames({
       Header: true,
       'Header--sticky': isSticky,
-      'Header--demo': (window.location.hostname === Config.demoHostName) || diskLow,
-      'Header--is-deprecated': isDeprecated,
+      'Header--disk-low': diskLow,
+      'Header--deprecated': isDeprecated,
       'Header--branchesOpen': branchesOpen,
     });
     const branchesErrorCSS = classNames({

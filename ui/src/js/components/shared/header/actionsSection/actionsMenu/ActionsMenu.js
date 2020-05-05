@@ -36,9 +36,6 @@ import DeleteDataset from 'Components/shared/modals/DeleteDataset';
 import './ActionsMenu.scss';
 
 type Props = {
-  auth: {
-    renewToken: Function,
-  },
   defaultRemote: string,
   description: string,
   history: Object,
@@ -185,7 +182,6 @@ class ActionsMenu extends Component<Props> {
   */
   _sync = (pullOnly) => {
     const {
-      auth,
       owner,
       name,
       isExporting,
@@ -301,11 +297,7 @@ class ActionsMenu extends Component<Props> {
                   );
                 }
               } else {
-                auth.renewToken(true, () => {
-                  self.setState({ showLoginPrompt: true });
-                }, () => {
-                  self._sync(pullOnly);
-                });
+                self.setState({ showLoginPrompt: true });
               }
             }
           } else {
@@ -339,9 +331,7 @@ class ActionsMenu extends Component<Props> {
   *  returns UserIdentityQeury promise
   *  @return {promise}
   */
-  _checkSessionIsValid = () => {
-    return (UserIdentity.getUserIdentity());
-  }
+  _checkSessionIsValid = () => (UserIdentity.getUserIdentity());
 
   /**
   *  @param {}
@@ -589,7 +579,6 @@ class ActionsMenu extends Component<Props> {
       sectionType,
       defaultRemote,
       history,
-      auth,
       visibility,
       description,
       isLocked,
@@ -614,11 +603,10 @@ class ActionsMenu extends Component<Props> {
     return (
       <div className="ActionsMenu flex flex--column'">
 
-        { showLoginPrompt
-          && (
-            <LoginPrompt closeModal={this._closeLoginPromptModal} />
-          )
-        }
+        <LoginPrompt
+          showLoginPrompt={showLoginPrompt}
+          closeModal={this._closeLoginPromptModal}
+        />
 
         { (deleteModalVisible && (sectionType === 'labbook'))
           && (
@@ -651,7 +639,6 @@ class ActionsMenu extends Component<Props> {
             sectionType={sectionType}
             owner={owner}
             name={name}
-            auth={auth}
             toggleModal={this._toggleModal}
             buttonText="Save"
             header="Change Visibility"
