@@ -358,9 +358,9 @@ class Branches extends Component<Props> {
               action === 'delete'
               && (
               <Fragment>
-                You are about to delete this branch. This action can lead to data loss. Please type
-                <b>{` ${branch.branchName} `}</b>
-                and click 'Confirm' to proceed.
+                You are about to delete
+                <b>{` ${branch.branchName}. `}</b>
+                This action can lead to data loss.
               </Fragment>
               )
             }
@@ -390,7 +390,7 @@ class Branches extends Component<Props> {
                   disabled={!branch.isLocal}
                   onClick={() => this.setState({ localSelected: !this.state.localSelected })}
                 />
-              Local
+                Local
               </label>
               <label
                 htmlFor="delete_remote"
@@ -404,19 +404,21 @@ class Branches extends Component<Props> {
                   disabled={!branch.isRemote}
                   onClick={() => this.setState({ remoteSelected: !this.state.remoteSelected })}
                 />
-              Remote
+                Remote
               </label>
             </div>
             )
           }
           <div className="Branches__Modal-buttons">
             <button
+              type="button"
               onClick={() => this._toggleModal(`${action}Modal`)}
               className="Btn--flat"
             >
               Cancel
             </button>
             <button
+              type="button"
               className="Branches__Modal-confirm"
               disabled={disableSubmit}
               onClick={() => this._handleConfirm(branch, action)}

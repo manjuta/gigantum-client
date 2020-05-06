@@ -29,9 +29,10 @@ import LinkedLocalDatasetsQuery from 'Components/shared/header/actionsSection/qu
 import CreateBranch from 'Components/shared/modals/CreateBranch';
 import Tooltip from 'Components/common/Tooltip';
 import LoginPrompt from 'Components/shared/modals/LoginPrompt';
-import VisibilityModal from 'Components/shared/modals/VisibilityModal';
 import DeleteLabbook from 'Components/shared/modals/DeleteLabbook';
 import DeleteDataset from 'Components/shared/modals/DeleteDataset';
+import CopyUrl from './copy/CopyUrl';
+import ChangeVisibility from './visibility/ChangeVisibility';
 // assets
 import './ActionsMenu.scss';
 
@@ -343,24 +344,6 @@ class ActionsMenu extends Component<Props> {
   }
 
   /**
-  *  @param {}
-  *  copies remote
-  *  @return {}
-  */
-  _copyRemote = () => {
-    const {
-      owner,
-      name,
-    } = this.state;
-    const copyText = document.getElementById('ActionsMenu-copy');
-    copyText.select();
-
-    document.execCommand('Copy');
-
-    setInfoMessage(owner, name, `${copyText.value} copied!`);
-  }
-
-  /**
   *  @param {jobKey}
   *  polls jobStatus for export job message
   *  updates footer with a message
@@ -579,7 +562,6 @@ class ActionsMenu extends Component<Props> {
       sectionType,
       defaultRemote,
       history,
-      visibility,
       description,
       isLocked,
     } = this.props;
@@ -587,7 +569,6 @@ class ActionsMenu extends Component<Props> {
       menuOpen,
       showLoginPrompt,
       deleteModalVisible,
-      visibilityModalVisible,
       remoteUrl,
       justOpened,
       exporting,
@@ -630,23 +611,6 @@ class ActionsMenu extends Component<Props> {
               name={name}
               owner={owner}
             />
-          )
-        }
-
-        { visibilityModalVisible
-          && (
-          <VisibilityModal
-            sectionType={sectionType}
-            owner={owner}
-            name={name}
-            toggleModal={this._toggleModal}
-            buttonText="Save"
-            header="Change Visibility"
-            modalStateValue="visibilityModalVisible"
-            checkSessionIsValid={this._checkSessionIsValid}
-            resetState={this._resetState}
-            visibility={visibility}
-          />
           )
         }
 
@@ -697,43 +661,19 @@ class ActionsMenu extends Component<Props> {
 
             </li>
 
-            { defaultRemote
-              && (
-              <li className={`ActionsMenu__item ActionsMenu__item--visibility-${visibility}`}>
+            <ChangeVisibility
+              {...this.props}
+              checkSessionIsValid={this._checkSessionIsValid}
+              defaultRemote={defaultRemote}
+              resetState={this._resetState}
+            />
 
-                <button
-                  onClick={() => this._toggleModal('visibilityModalVisible')}
-                  className="ActionsMenu__btn--flat"
-                  type="button"
-                >
-                  Change Visibility
-                </button>
-
-              </li>
-              )
-            }
-            { (remoteUrl || defaultRemote)
-              && (
-              <li className="ActionsMenu__item ActionsMenu__item--copy">
-                <div className="ActionsMenu__item--label">Get Share URL</div>
-                <div className="ActionsMenu__copyRemote">
-
-                  <input
-                    id="ActionsMenu-copy"
-                    className="ActionsMenu__input"
-                    defaultValue={`gigantum.com/${owner}/${name}`}
-                    type="text"
-                  />
-
-                  <button
-                    onClick={() => this._copyRemote()}
-                    className="ActionsMenu__btn--copy fa fa-clone"
-                    type="button"
-                  />
-                </div>
-              </li>
-              )
-            }
+            <CopyUrl
+              defaultRemote={defaultRemote}
+              name={name}
+              owner={owner}
+              remoteUrl={remoteUrl}
+            />
 
           </ul>
 

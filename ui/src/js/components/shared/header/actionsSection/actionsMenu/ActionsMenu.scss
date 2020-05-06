@@ -125,41 +125,14 @@
       }
     }
 
-    &--visibility-public {
-      background: url('~Images/icons/earth-grey.svg') no-repeat 10px center;
-      background-size: 17px;
 
-      &:hover {
-        background: $background-color url('~Images/icons/earth-grey.svg') no-repeat 10px center;
-        background-size: 17px;
-      }
-    }
-
-    &--visibility-private {
-      background: url('~Images/icons/lock-grey.svg') no-repeat 13px center;
-      background-size: 13px;
-
-      &:hover {
-        background: $background-color url('~Images/icons/lock-grey.svg') no-repeat 13px center;
-        background-size: 13px;
-      }
-    }
-
-
-    &--delete{
+    &--delete {
       background: url('~Images/icons/trash.svg') no-repeat 11px center;
       background-size: 16px;
 
       &:hover {
         background: $background-color url('~Images/icons/trash.svg') no-repeat 11px center;
         background-size: 16px;
-      }
-    }
-
-    &--copy {
-      padding: 0px;
-      &:hover button {
-        background-color: $primary;
       }
     }
 
@@ -236,20 +209,6 @@
           background-color: $white;
           border: 0px solid $white;
           color: $grey;
-       }
-     }
-
-     &--copy{
-       margin: 0;
-       height: 32px;
-       width: 40px;
-       padding: 0px;
-       border-radius: 0px 3px 3px 0px !important;
-       text-align: center;
-
-       &:hover, &:focus{
-         background-color: $secondary !important;
-         border-color: $secondary !important;
        }
      }
 
