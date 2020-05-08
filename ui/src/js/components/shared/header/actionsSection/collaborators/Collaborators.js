@@ -65,6 +65,7 @@ type Props = {
 class CollaboratorButton extends Component<Props> {
   state = {
     collaboratorModalVisible: false,
+    visibilityModalVisible: false,
     canClickCollaborators: false,
     sessionValid: null,
   };
@@ -233,21 +234,20 @@ class CollaboratorButton extends Component<Props> {
 
                 { collaboratorModalVisible
                     && (
-                    <CollaboratorsModal
-                      sectionType={sectionType}
-                      key="CollaboratorsModal"
-                      collaborators={section.collaborators}
-                      owner={owner}
-                      name={name}
-                      toggleCollaborators={this._toggleCollaborators}
-                      canManageCollaborators={section.canManageCollaborators}
-                    />
+                      <CollaboratorsModal
+                        sectionType={sectionType}
+                        key="CollaboratorsModal"
+                        collaborators={section.collaborators}
+                        owner={owner}
+                        name={name}
+                        toggleCollaborators={this._toggleCollaborators}
+                        canManageCollaborators={section.canManageCollaborators}
+                      />
                     )
-
                 }
               </div>
             );
-          } if (collaborators !== null && sessionChecked) {
+          } if ((collaborators !== null) && sessionChecked) {
             const collaboratorFilteredArr = getCollaboratorFiltered(collaborators, owner);
             const collaboratorNames = self._getCollaboratorList(
               collaborators,

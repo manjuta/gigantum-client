@@ -9,8 +9,6 @@ import {
   setModalVisible,
 } from 'JS/redux/actions/labbook/labbook';
 import { setIsSyncing, setIsExporting } from 'JS/redux/actions/dataset/dataset';
-// config
-import Config from 'JS/config';
 // components
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';

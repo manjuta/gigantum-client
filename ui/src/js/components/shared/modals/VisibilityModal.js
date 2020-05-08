@@ -15,7 +15,6 @@ import {
   setInfoMessage,
   setMultiInfoMessage,
 } from 'JS/redux/actions/footer';
-
 import store from 'JS/redux/store';
 // assets
 import './VisibilityModal.scss';

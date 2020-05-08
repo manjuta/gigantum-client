@@ -179,6 +179,17 @@ class BranchMenu extends Component<Props> {
     action: null,
   };
 
+
+  static getDerivedStateFromProps(props, state) {
+    const { publishFromCollaborators } = props;
+    const { publishModalVisible } = state;
+
+    return {
+      ...state,
+      publishModalVisible: publishFromCollaborators || publishModalVisible,
+    };
+  }
+
   componentDidMount() {
     window.addEventListener('click', this._closePopups);
   }
@@ -1109,6 +1120,7 @@ class BranchMenu extends Component<Props> {
 
 const mapStateToProps = state => ({
   collaborators: state.collaborators.collaborators,
+  publishFromCollaborators: state.collaborators.publishFromCollaborators,
 });
 
 const mapDispatchToProps = () => ({});
