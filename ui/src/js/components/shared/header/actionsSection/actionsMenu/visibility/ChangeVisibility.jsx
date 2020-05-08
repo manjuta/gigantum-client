@@ -1,11 +1,8 @@
 // @flow
 // vendor
 import React, { Component } from 'react';
-import classNames from 'classnames';
 import ReactTooltip from 'react-tooltip';
 import VisibilityModal from 'Components/shared/modals/VisibilityModal';
-// store
-import { setInfoMessage } from 'JS/redux/actions/footer';
 // css
 import './ChangeVisibility.scss';
 

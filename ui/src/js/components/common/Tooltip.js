@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
+import uuidv4 from 'uuid/v4';
 // store
 import store from 'JS/redux/store';
 // config
@@ -14,7 +15,24 @@ type Props = {
   section: string,
 }
 
+/**
+  * @param {string} section
+  * gets place based on section
+*/
+const getPlace = (section) => {
+  if (section === 'descriptionOverview') {
+    return 'right';
+  }
+  if (section === 'actionMenu') {
+    return 'left';
+  }
+
+  return null;
+};
+
 class Tooltip extends Component<Props> {
+  id = uuidv4();
+
   state = {
     toolTipExpanded: false,
     isVisible: store.getState().helper,
@@ -58,7 +76,7 @@ class Tooltip extends Component<Props> {
       this.setState({ toolTipExpanded: false });
     }
 
-    ReactTooltip.hide(this[`Tooltip_${section}`]);
+    ReactTooltip.hide(this[`Tooltip_${this.id}`]);
   }
 
   /**
@@ -66,15 +84,15 @@ class Tooltip extends Component<Props> {
    *  shows tooltip box when clicked
   */
   showToolTip = (evt) => {
-    const { section } = this.props;
     evt.stopPropagation();
-    ReactTooltip.show(this[`tooltip_${section}`]);
+    ReactTooltip.show(this[`tooltip_${this.id}`]);
   }
 
   render() {
     const { toolTipExpanded } = this.state;
     const { isVisible, section } = this.props;
-    const place = (section === 'descriptionOverview') ? 'right' : null;
+    const place = getPlace(section);
+
     // declare css here
     const toolTipCSS = classNames({
       Tooltip: isVisible,
@@ -93,7 +111,7 @@ class Tooltip extends Component<Props> {
         <div
           className={toggleCSS}
           data-tip={config.getTooltipText(section)}
-          ref={(ref) => { this[`tooltip_${section}`] = ref; }}
+          ref={(ref) => { this[`tooltip_${this.id}`] = ref; }}
           onClick={evt => this.showToolTip(evt)}
           role="presentation"
           data-event="click focus"
