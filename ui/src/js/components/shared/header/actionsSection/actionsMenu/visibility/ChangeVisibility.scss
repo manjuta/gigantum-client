@@ -1,23 +1,22 @@
 @import '~Styles/_imports.scss';
 
 .ChangeVisibility {
-
     &--visibility-public {
-      background: url('~Images/icons/earth-grey.svg') no-repeat 10px center;
+      background: url('~Images/icons/earth-azure.svg') no-repeat 10px center;
       background-size: 17px;
 
       &:hover {
-        background: $background-color url('~Images/icons/earth-grey.svg') no-repeat 10px center;
+        background: $background-color url('~Images/icons/earth-azure.svg') no-repeat 10px center;
         background-size: 17px;
       }
     }
 
     &--visibility-private {
-      background: url('~Images/icons/lock-grey.svg') no-repeat 13px center;
+      background: url('~Images/icons/lock-azure.svg') no-repeat 13px center;
       background-size: 13px;
 
       &:hover {
-        background: $background-color url('~Images/icons/lock-grey.svg') no-repeat 13px center;
+        background: $background-color url('~Images/icons/lock-azure.svg') no-repeat 13px center;
         background-size: 13px;
       }
     }

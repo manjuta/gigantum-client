@@ -1,33 +1,45 @@
 @import '~Styles/_imports.scss';
 
-.CopyUrl {
-  &--disabled {
-    opacity: 0.5;
-  }
+.Header {
+  .CopyUrl {
+    .ActionsMenu__item {
+      border: 0 !important;
+    }
+    &--disabled {
+      opacity: 0.5;
+    }
+
+    &:hover button {
+      background-color: $primary !important;
+    }
+
+    &:hover button:disabled {
+      background-color: $grey !important;
+    }
 
 
-  &__btn {
-    &--copy{
-      margin: 0;
-      height: 32px;
-      width: 40px;
-      padding: 0px;
-      border-radius: 0px 3px 3px 0px !important;
-      text-align: center;
+    &__btn {
+      &--copy {
+        margin: 0;
+        height: 32px;
+        width: 40px;
+        padding: 0px;
+        border-radius: 0px 3px 3px 0px !important;
+        text-align: center;
 
-      &:hover, &:focus {
-        background-color: $secondary !important;
-        border-color: $secondary !important;
-      }
+        &:disabled, &:focus {
+          background-color: $primary !important;
+          border-color: $primary !important;
+        }
 
-      &:disabled, &:focus {
-        background-color: $primary !important;
-        border-color: $primary !important;
-      }
+        &:hover {
+          background-color: $primary-light !important;
+        }
 
-      &:hover button,
-      &:disabled button {
-        background-color: $primary;
+        &:disabled,
+         &:disabled button {
+          background-color: $grey !important;
+        }
       }
     }
   }

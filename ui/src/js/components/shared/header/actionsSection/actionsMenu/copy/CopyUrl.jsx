@@ -52,6 +52,7 @@ class CopyUrl extends Component<Props> {
 
     return (
       <li
+        className="CopyUrl"
         data-tip="Project needs to be published before it can be shared"
         data-for="Tooltip--noCache"
       >

@@ -105,7 +105,7 @@
     color: $primaryText;
 
 
-    border-bottom: 2px solid $grey;
+    border-bottom: 1px solid $grey;
 
     a {
       color: $primaryText;
@@ -116,22 +116,22 @@
     }
 
     &--export {
-      background: url('~Images/icons/export.svg') no-repeat 7px center;
+      background: url('~Images/icons/export-azure.svg') no-repeat 7px center;
       background-size: 24px;
 
       &:hover {
-        background: $background-color url('~Images/icons/export.svg') no-repeat 7px center;
+        background: $background-color url('~Images/icons/export-azure.svg') no-repeat 7px center;
         background-size: 24px;
       }
     }
 
 
     &--delete {
-      background: url('~Images/icons/trash.svg') no-repeat 11px center;
+      background: url('~Images/icons/trash-azure.svg') no-repeat 11px center;
       background-size: 16px;
 
       &:hover {
-        background: $background-color url('~Images/icons/trash.svg') no-repeat 11px center;
+        background: $background-color url('~Images/icons/trash-azure.svg') no-repeat 11px center;
         background-size: 16px;
       }
     }
@@ -139,10 +139,6 @@
     &--label {
       font-size: 12px;
       padding: 5px 0 0 0;
-    }
-
-    &:last-child{
-      border-width: 0px;
     }
 
   }

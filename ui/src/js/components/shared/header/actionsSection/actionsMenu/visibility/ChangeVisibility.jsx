@@ -44,6 +44,7 @@ class ChangeVisibility extends Component<Props> {
 
     return (
       <li
+        className="ChangeVisibility"
         data-tip="Project needs to be published before its visibility can be changed"
         data-for="Tooltip--noCache"
       >
