@@ -18,7 +18,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
       className="LocalLabbooks__containerStatus"
     >
       <div
-        className="ContainerStatus__container-state ContainerStatus__containerStatus--state loading box-shadow"
+        className="ContainerStatus__container-state ContainerStatus__containerStatus--state undefined box-shadow"
         data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
         onClick={[Function]}
         onMouseOut={[Function]}
@@ -28,9 +28,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
       >
         <div
           className="ContainerStatus__text"
-        >
-          
-        </div>
+        />
         <div
           className="ContainerStatus__toggle"
         >
@@ -47,16 +45,50 @@ exports[`Test LocalLabbooks rendering 1`] = `
     <div>
       <h5
         className="LocalLabbooks__panel-title"
+        data-for="LocalLabbooks--ui-test-project"
+        data-selenium-id="RepositoryTitle"
+        data-tip="ui-test-project"
         onClick={[Function]}
         role="presentation"
       >
-        <span>
+        <div
+          className=""
+          end={0}
+          onCopy={[Function]}
+          start={0}
+          style={
+            Object {
+              "display": "block",
+              "overflow": "hidden",
+              "whiteSpace": "nowrap",
+            }
+          }
+        >
           <span
-            className=""
+            style={
+              Object {
+                "display": "none",
+              }
+            }
           >
             ui-test-project
           </span>
-        </span>
+          <span
+            style={
+              Object {
+                "display": "none",
+              }
+            }
+          >
+            ...
+          </span>
+          ui-test-project
+        </div>
+        <div
+          className="__react_component_tooltip place-bottom type-dark"
+          data-id="tooltip"
+          id="LocalLabbooks--ui-test-project"
+        />
       </h5>
     </div>
     <p

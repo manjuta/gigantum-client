@@ -135,7 +135,6 @@ describe('LocalLabbooks', () => {
    *
    **** */
   const showModalTest = sinon.spy();
-  const goToLabbookTest = sinon.spy();
   const sortProcessedTest = sinon.spy();
 
   const localLabbooksMount = mount(
@@ -145,7 +144,6 @@ describe('LocalLabbooks', () => {
           <LocalLabbooksComp
             {...fixtures}
             showModal={showModalTest}
-            goToLabbook={goToLabbookTest}
             sortProcessed={sortProcessedTest}
             relay={{ loadMore }}
           />
@@ -162,14 +160,6 @@ describe('LocalLabbooks', () => {
     localLabbooksMount.find('.btn--import').at(0).simulate('click');
 
     expect(showModalTest).toHaveProperty('callCount', 1);
-  });
-
-
-  it('Simulates opening a labbook', () => {
-    localLabbooksMount.find('.Card').at(4).simulate('click');
-
-
-    expect(goToLabbookTest).toHaveProperty('callCount', 1);
   });
 
 

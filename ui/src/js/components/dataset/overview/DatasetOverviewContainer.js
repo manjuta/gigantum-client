@@ -9,7 +9,8 @@ import Overview from 'Components/shared/overview/Overview';
 
 export default createFragmentContainer(
   Overview,
-  graphql`fragment DatasetOverviewContainer_dataset on Dataset {
+  {
+    dataset: graphql`fragment DatasetOverviewContainer_dataset on Dataset {
       overview @skip (if: $overviewSkip){
         id
         owner
@@ -21,4 +22,5 @@ export default createFragmentContainer(
         readme
       }
     }`,
+  },
 );

@@ -1,0 +1,47 @@
+@import '~Styles/_imports.scss';
+
+
+.NoCollaborators {
+  border: 1px solid $grey;
+  padding: 4em 0;
+  height: calc(100% - 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  &__container {
+     text-align: center;
+     width: 100%;
+     font-weight: 100;
+     height: 200px;
+
+     p {
+       margin: .5em 0;
+       font-size: 17px;
+     }
+  }
+
+  &__p--margin {
+    margin-top: 2em !important;
+  }
+
+  &__button--publish {
+    background: url('~Images/icons/branches/push.svg') no-repeat left 5px center;
+    background-size: 25px !important;
+    padding: .5em .5em .5em 2em;
+    width: 100px;
+
+    &:hover, &:focus{
+      background: $primary url('~Images/icons/branches/push-hover.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      color: $white;
+    }
+    &:disabled {
+      background: $background-color url(~Images/icons/branches/push-disabled.svg) no-repeat 5px center;
+      background-size: 25px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      padding: 0 10px 0 30px !important;
+      cursor: auto;
+    }
+  }
+}

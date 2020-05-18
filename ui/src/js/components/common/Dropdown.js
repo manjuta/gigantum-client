@@ -2,7 +2,16 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 
-class Dropdown extends Component {
+type Props = {
+  customStyle: boolean,
+  itemAction: Function,
+  label: string,
+  listAction: Function,
+  listItems: Array,
+  visibility: boolean,
+}
+
+class Dropdown extends Component<Props> {
   /**
    * @param {Object} evt
    * @param {Object} item
@@ -16,11 +25,11 @@ class Dropdown extends Component {
 
   render() {
     const {
+      customStyle,
+      label,
+      listAction,
       listItems,
       visibility,
-      customStyle,
-      listAction,
-      label,
     } = this.props;
     const dropdownCSS = classNames({
       'Dropdown relative': true,
@@ -33,6 +42,7 @@ class Dropdown extends Component {
       <div
         className={dropdownCSS}
         onClick={() => listAction()}
+        role="presentation"
       >
         {label}
         {
@@ -44,9 +54,11 @@ class Dropdown extends Component {
                   className="Dropdown__item"
                   key={item}
                   onClick={(evt) => { this._selectItem(evt, item); }}
+                  role="presentation"
                 >
                   {item}
-                </li>))
+                </li>
+              ))
             }
           </ul>
           )

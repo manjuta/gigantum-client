@@ -24,8 +24,12 @@ const ContainerLookup = {
     };
 
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
-        fetchQuery(ContainerLookupQuery(), variables).then((response) => {
+      const fetchData = () => {
+        fetchQuery(
+          ContainerLookupQuery,
+          variables,
+          { force: true },
+        ).then((response) => {
           resolve(response);
         }).catch((error) => {
           console.log(error);

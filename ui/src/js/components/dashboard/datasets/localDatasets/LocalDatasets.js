@@ -152,8 +152,10 @@ export class LocalDatasets extends Component {
   render() {
     const { props, state } = this;
     const datasetList = props.localDatasets;// datasetList is passed as localDatasets
-    if ((datasetList && datasetList.localDatasets && datasetList.localDatasets.edges)
-    || props.loading) {
+    if (
+      (datasetList && datasetList.localDatasets && datasetList.localDatasets.edges)
+      || props.loading
+    ) {
       const datasets = props.filterDatasets(datasetList, props.filterState, props.loading);
       const importVisible = (props.section === 'local' || !props.loading) && !props.filterText;
 
@@ -217,33 +219,35 @@ export class LocalDatasets extends Component {
 
 export default createPaginationContainer(
   LocalDatasets,
-  graphql`
-    fragment LocalDatasets_localDatasets on DatasetList{
-      localDatasets(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "LocalDatasets_localDatasets", filters: []){
-        edges {
-          node {
-            id
-            name
-            description
-            owner
-            createdOnUtc
-            modifiedOnUtc
-            overview {
-              numFiles
-              totalBytes
+  {
+    localDatasets: graphql`
+      fragment LocalDatasets_localDatasets on DatasetList{
+        localDatasets(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "LocalDatasets_localDatasets", filters: []){
+          edges {
+            node {
+              id
+              name
+              description
+              owner
+              createdOnUtc
+              modifiedOnUtc
+              overview {
+                numFiles
+                totalBytes
+              }
             }
+            cursor
           }
-          cursor
-        }
-        pageInfo {
-          endCursor
-          hasNextPage
-          hasPreviousPage
-          startCursor
+          pageInfo {
+            endCursor
+            hasNextPage
+            hasPreviousPage
+            startCursor
+          }
         }
       }
-    }
-  `,
+    `,
+  },
   {
     direction: 'forward',
     getConnectionFromProps(props, error) {

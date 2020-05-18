@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import Moment from 'moment';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // components
 import ActionsMenu from './DatasetActionsMenu';
 import File from './DatasetFile';
@@ -156,7 +157,16 @@ class Folder extends Component {
           <div className={folderNameCSS}>
             <div className="Folder__icon" />
             <div className="Folder__name">
-              {folderName}
+              {
+                folderName
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={folderName}
+                    smartCopy
+                  />
+                )
+              }
             </div>
           </div>
           <div className={renameCSS}>

@@ -1,0 +1,29 @@
+@import '~Styles/_imports.scss';
+
+.ChangeVisibility {
+    &--visibility-public {
+      background: url('~Images/icons/earth-azure.svg') no-repeat 10px center;
+      background-size: 17px;
+
+      &:hover {
+        background: $background-color url('~Images/icons/earth-azure.svg') no-repeat 10px center;
+        background-size: 17px;
+      }
+    }
+
+    &--visibility-private {
+      background: url('~Images/icons/lock-azure.svg') no-repeat 13px center;
+      background-size: 13px;
+
+      &:hover {
+        background: $background-color url('~Images/icons/lock-azure.svg') no-repeat 13px center;
+        background-size: 13px;
+      }
+    }
+
+    &--visibility-local {
+      .ActionsMenu__btn--flat:disabled {
+        background-color: transparent !important;
+      }
+    }
+}

@@ -53,10 +53,10 @@ RUN apt-get -y update && \
     npm install -g configurable-http-proxy && \
     cd /opt/confhttpproxy && pip3 install . && \
     pip3 install wheel && \
-    pip3 install -r /opt/gtmcore/requirements.txt && \
-    pip3 install -r /opt/gtmapi/requirements.txt && \
-    pip3 install -r /opt/gtmcore/requirements-testing.txt && \
-    pip3 install -r /opt/gtmapi/requirements-testing.txt && \
+    pip3 install -r /opt/gtmcore/requirements.txt \
+    -r /opt/gtmapi/requirements.txt \
+    -r /opt/gtmcore/requirements-testing.txt \
+    -r /opt/gtmapi/requirements-testing.txt && \
     pip3 install codecov pytest-cov pytest-xdist && \
     apt-get -qq -y remove gcc g++ wget gnupg gnupg1 gnupg2 make autoconf dh-autoreconf && \
     apt-get -qq -y autoremove && \
@@ -68,7 +68,7 @@ RUN apt-get -y update && \
 RUN useradd -ms /bin/bash circleci
 
 # Install jest for UI tests
-RUN npm install -g @babel/cli@7.2.3 @babel/core@7.2.2 jest@23.6.0 relay-compiler@2.0.0
+RUN npm install -g @babel/cli@7.2.3 @babel/core@7.2.2 jest@23.6.0 relay-compiler@2.0.0 yarn@1.21.1
 
 # Install fossa
 RUN curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
@@ -88,7 +88,7 @@ WORKDIR /home/circleci
 
 # Setup git
 RUN git config --global user.email "noreply@gigantum.io" && \
-    git config --global user.name "CircleCI" && \
-    git config --global credential.helper store
+    git config --global user.name "Gigantum Client" && \
+    git config --global credential.helper 'cache --timeout 3600'
 
 CMD ["/bin/bash"]

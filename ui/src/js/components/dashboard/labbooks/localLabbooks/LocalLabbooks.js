@@ -16,7 +16,31 @@ import VisibilityLookup from './lookups/VisibilityLookup';
 import './LocalLabbooks.scss';
 
 
-export class LocalLabbooks extends Component {
+type Props = {
+  filterLabbooks: Function,
+  filterState: string,
+  filterText: string,
+  history: Object,
+  labbookList: Array,
+  loading: boolean,
+  localLabbooks: {
+    localLabbooks: {
+      edges: Array<Object>,
+      pageInfo: {
+        hasNextPage: boolean,
+      },
+    },
+  },
+  relay: {
+    loadMore: Function,
+    refetchConnection: Function,
+  },
+  section: string,
+  setFilterValue: Function,
+  showModal: Function,
+}
+
+export class LocalLabbooks extends Component<Props> {
   state = {
     isPaginating: false,
     containerList: new Map(),
@@ -28,18 +52,22 @@ export class LocalLabbooks extends Component {
   * adds event listener for pagination and fetches container status
   */
   componentDidMount() {
-    const { props } = this;
+    const {
+      labbookList,
+      localLabbooks,
+      loading,
+    } = this.props;
     this.mounted = true;
-    if (!props.loading) {
+    if (!loading) {
       window.addEventListener('scroll', this._captureScroll);
 
       this._containerLookup();
       this._visibilityLookup();
 
-      if (props.labbookList
-         && props.localLabbooks.localLabbooks
-         && props.localLabbooks.localLabbooks.edges
-         && props.localLabbooks.localLabbooks.edges.length === 0) {
+      if (labbookList
+         && localLabbooks.localLabbooks
+         && localLabbooks.localLabbooks.edges
+         && localLabbooks.localLabbooks.edges.length === 0) {
         this._fetchDemo();
       }
     }
@@ -61,13 +89,13 @@ export class LocalLabbooks extends Component {
     *  loads more labbooks using the relay pagination container
   */
   _loadMore = () => {
-    const { props } = this;
+    const { localLabbooks, relay } = this.props;
     this.setState({
       isPaginating: true,
     });
 
-    if (props.localLabbooks.localLabbooks.pageInfo.hasNextPage) {
-      props.relay.loadMore(
+    if (localLabbooks.localLabbooks.pageInfo.hasNextPage) {
+      relay.loadMore(
         10, // Fetch the next 10 items
         () => {
           this.setState({
@@ -86,14 +114,15 @@ export class LocalLabbooks extends Component {
     *  if nextPage exists and user is scrolled down, it will cause loadmore to fire
   */
   _captureScroll = () => {
-    const { props, state } = this;
+    const { isPaginating } = this.state;
+    const { localLabbooks } = this.props;
     const root = document.getElementById('root');
     const distanceY = window.innerHeight + document.documentElement.scrollTop + 200;
     const expandOn = root.offsetHeight;
 
-    if (props.localLabbooks.localLabbooks) {
-      if ((distanceY > expandOn) && !state.isPaginating
-        && props.localLabbooks.localLabbooks.pageInfo.hasNextPage) {
+    if (localLabbooks.localLabbooks) {
+      if ((distanceY > expandOn) && !isPaginating
+        && localLabbooks.localLabbooks.pageInfo.hasNextPage) {
         this._loadMore();
       }
     }
@@ -104,18 +133,18 @@ export class LocalLabbooks extends Component {
   * calls ContainerLookup query and attaches the returned data to the state
   */
   _containerLookup = () => {
-    const { props, state } = this;
+    const { containerList } = this.state;
+    const { localLabbooks } = this.props;
     const self = this;
-
-    const idArr = props.localLabbooks.localLabbooks
-      ? props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id)
+    const idArr = localLabbooks.localLabbooks
+      ? localLabbooks.localLabbooks.edges.map(edges => edges.node.id)
       : [];
 
     ContainerLookup.query(idArr).then((res) => {
       if (res && res.data
         && res.data.labbookList
         && res.data.labbookList.localById) {
-        const containerListCopy = new Map(state.containerList);
+        const containerListCopy = new Map(containerList);
         let brokenCount = 0;
         res.data.labbookList.localById.forEach((node) => {
           if (
@@ -127,7 +156,8 @@ export class LocalLabbooks extends Component {
           containerListCopy.set(node.id, node);
         });
         if (self.mounted) {
-          const delay = (brokenCount !== res.data.labbookList.localById.length) ? 100 : 10000;
+          const delay = (brokenCount !== res.data.labbookList.localById.length) ? 30000 : 10000;
+
           if (!brokenCount !== res.data.labbookList.localById.length) {
             self.setState({ containerList: containerListCopy });
           }
@@ -144,13 +174,15 @@ export class LocalLabbooks extends Component {
     * attempts to fetch a demo if no labbooks are present, 3 times
   */
   _fetchDemo = (count = 0) => {
-    const { props } = this;
+    const {
+      localLabbooks,
+      relay,
+    } = this.props;
     if (count < 3) {
       const self = this;
-      const { relay } = props;
       setTimeout(() => {
-        relay.refetchConnection(20, (response, error) => {
-          if (props.localLabbooks.localLabbooks.edges.length > 0) {
+        relay.refetchConnection(20, () => {
+          if (localLabbooks.localLabbooks.edges.length > 0) {
             self._containerLookup();
             self._visibilityLookup();
           } else {
@@ -166,10 +198,10 @@ export class LocalLabbooks extends Component {
   * calls VisibilityLookup query and attaches the returned data to the state
   */
   _visibilityLookup = () => {
-    const { props } = this;
+    const { localLabbooks } = this.props;
     const self = this;
-    const idArr = props.localLabbooks.localLabbooks
-      ? props.localLabbooks.localLabbooks.edges.map(edges => edges.node.id)
+    const idArr = localLabbooks.localLabbooks
+      ? localLabbooks.localLabbooks.edges.map(edges => edges.node.id)
       : [];
     let index = 0;
 
@@ -203,16 +235,29 @@ export class LocalLabbooks extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const labbookList = props.localLabbooks;// labbookList is passed as localLabbooks
+    const {
+      filterLabbooks,
+      filterState,
+      filterText,
+      history,
+      loading,
+      localLabbooks,
+      section,
+      setFilterValue,
+      showModal,
+    } = this.props;
+    const { state } = this;
+    const labbookList = localLabbooks;// labbookList is passed as localLabbooks
 
-    if ((labbookList && labbookList.localLabbooks && labbookList.localLabbooks.edges)
-      || props.loading) {
-      const labbooks = !props.loading
-        ? props.filterLabbooks(labbookList.localLabbooks.edges, props.filterState)
+    if (
+      (labbookList && labbookList.localLabbooks && labbookList.localLabbooks.edges)
+      || loading
+    ) {
+      const labbooks = !loading
+        ? filterLabbooks(labbookList.localLabbooks.edges, filterState)
         : [];
-      const importVisible = (props.section === 'local' || !props.loading) && !props.filterText;
-      const isLoadingMore = state.isPaginating || props.loading;
+      const importVisible = (section === 'local' || !loading) && !filterText;
+      const isLoadingMore = state.isPaginating || loading;
 
       return (
 
@@ -222,12 +267,11 @@ export class LocalLabbooks extends Component {
             { importVisible
                 && (
                 <ImportModule
-                  ref="ImportModule_localLabooks"
-                  {...props}
+                  {...this.props}
                   section="labbook"
                   title="Add Project"
-                  showModal={props.showModal}
-                  history={props.history}
+                  showModal={showModal}
+                  history={history}
                 />
                 )
             }
@@ -244,16 +288,15 @@ export class LocalLabbooks extends Component {
                   ref={`LocalLabbookPanel${edge.node.name}`}
                   className="LocalLabbooks__panel"
                   edge={edge}
-                  history={props.history}
+                  history={history}
                   node={node}
                   visibility={visibility}
-                  filterText={props.filterText}
-                  goToLabbook={props.goToLabbook}
+                  filterText={filterText}
                 />
               );
             })
-              : !props.loading && props.filterText
-                && <NoResults setFilterValue={props.setFilterValue} />
+              : !loading && filterText
+                && <NoResults setFilterValue={setFilterValue} />
             }
 
             {
@@ -276,7 +319,8 @@ export class LocalLabbooks extends Component {
 
 export default createPaginationContainer(
   LocalLabbooks,
-  graphql`
+  {
+    localLabbooks: graphql`
     fragment LocalLabbooks_localLabbooks on LabbookList{
       localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "LocalLabbooks_localLabbooks", filters: []){
         edges {
@@ -299,12 +343,13 @@ export default createPaginationContainer(
       }
     }
   `,
+  },
   {
     direction: 'forward',
-    getConnectionFromProps(props, error) {
+    getConnectionFromProps(props) {
       return props.localLabbooks.localLabbooks;
     },
-    getFragmentVariables(prevVars, first, cursor) {
+    getFragmentVariables(prevVars, first) {
       return {
         ...prevVars,
         first,

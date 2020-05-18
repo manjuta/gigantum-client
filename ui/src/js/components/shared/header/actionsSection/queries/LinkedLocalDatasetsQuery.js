@@ -18,8 +18,12 @@ const LinkedLocalDatasetsQuery = graphql`
 
 const LocalDatasets = {
   getLocalDatasets: variables => new Promise((resolve, reject) => {
-    const fetchData = function () {
-      fetchQuery(LinkedLocalDatasetsQuery(), variables).then((response, error) => {
+    const fetchData = () => {
+      fetchQuery(
+        LinkedLocalDatasetsQuery,
+        variables,
+        { force: true },
+      ).then((response, error) => {
         if (response) {
           resolve(response);
         } else {

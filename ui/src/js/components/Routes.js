@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import YouTube from 'react-youtube';
 import Loadable from 'react-loadable';
 import queryString from 'querystring';
 import {
@@ -18,9 +17,6 @@ import Footer from 'Components/common/footer/Footer';
 import Prompt from 'Components/common/Prompt';
 import DiskHeader from 'Components/common/DiskHeader';
 import Helper from 'Components/common/Helper';
-import Loader from 'Components/common/Loader';
-// config
-import config from 'JS/config';
 // auth
 import UserIdentity from 'JS/Auth/UserIdentity';
 import Auth from 'JS/Auth/Auth';
@@ -31,9 +27,12 @@ import './Routes.scss';
 
 const Loading = () => <div />;
 const auth = new Auth();
+
 /* eslint-disable */
 const globalObject = window || self;
 /* eslint-enable */
+
+// Loadables
 const Home = Loadable({
   loader: () => import('Components/home/Home'),
   loading: Loading,
@@ -49,6 +48,7 @@ const DatasetQueryContainer = Loadable({
   loading: Loading,
 });
 
+// getter functions
 const getBasename = () => {
   const { pathname } = globalObject.location;
   const pathList = pathname.split('/');
@@ -61,48 +61,41 @@ const getBasename = () => {
   return basename;
 };
 
-const basename = getBasename();
-
 class Routes extends Component {
   state = {
     hasError: false,
     forceLoginScreen: null,
     loadingRenew: true,
     userIdentityReturned: false,
-    showYT: false,
-    showDefaultMessage: true,
     diskLow: false,
     available: 0,
   };
 
-  componentWillMount = () => {
-    const values = queryString.parse(history.location.hash.slice(1));
-    const newPath = values.path;
-    if (newPath) {
-      delete values.path;
-      values.redirect = false;
-      let stringifiedValues = queryString.stringify(values);
-      history.replace(`${basename}${newPath}#${stringifiedValues}`);
-      delete values.redirect;
-      stringifiedValues = queryString.stringify(values);
-      window.location.hash = stringifiedValues;
-    }
-  }
+  basename = getBasename();
 
   /**
     @param {}
     calls flip header text function
   */
   componentDidMount() {
-    const self = this;
+    const values = queryString.parse(history.location.hash.slice(1));
+    const newPath = values.path;
+
+    if (newPath) {
+      delete values.path;
+      values.redirect = false;
+      let stringifiedValues = queryString.stringify(values);
+      history.replace(`${this.basename}${newPath}#${stringifiedValues}`);
+      delete values.redirect;
+      stringifiedValues = queryString.stringify(values);
+      window.location.hash = stringifiedValues;
+    }
 
     this._checkSysinfo();
-    this._flipDemoHeaderText();
 
     UserIdentity.getUserIdentity().then((response) => {
       const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
       let forceLoginScreen = true;
-      let loadingRenew = false;
 
       if (response.data) {
         if (
@@ -116,16 +109,19 @@ class Routes extends Component {
           localStorage.setItem('username', response.data.userIdentity.username);
           localStorage.setItem('expires_at', expiresAt);
           forceLoginScreen = false;
-        } else if (response.data.userIdentity && localStorage.getItem('access_token')) {
-          loadingRenew = true;
-          auth.renewToken(null, null, () => {
-            setTimeout(() => {
-              self.setState({ loadingRenew: false });
-            }, 2000);
-          }, true, () => {
-            self.setState({ forceLoginScreen: true, loadingRenew: false });
-          });
-        } else if (!response.data.userIdentity && !localStorage.getItem('access_token')) {
+        } else if (
+          (response.data.userIdentity)
+          && localStorage.getItem('access_token')
+        ) {
+          const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
+          const baseURL = 'gigantum.com';
+          const loginURL = `https://${baseURL}/client/login#route=${window.location.href}${freshLoginText}`;
+          window.open(loginURL, '_self');
+          forceLoginScreen = null;
+        } else if (
+          !response.data.userIdentity
+          && !localStorage.getItem('access_token')
+        ) {
           localStorage.removeItem('family_name');
           localStorage.removeItem('given_name');
           localStorage.removeItem('email');
@@ -139,31 +135,10 @@ class Routes extends Component {
 
       this.setState({
         forceLoginScreen,
-        loadingRenew,
+        loadingRenew: false,
         userIdentityReturned: true,
       });
     });
-  }
-
-  /**
-    @param {Error, Object} error, info
-    shows error message when runtime error occurs
-  */
-  componentDidCatch(error, info) {
-    this.setState({ hasError: true });
-  }
-
-  /**
-    @param {}
-    changes text of demo header message
-  */
-  _flipDemoHeaderText = () => {
-    const { state } = this;
-    const self = this;
-    setTimeout(() => {
-      self.setState({ showDefaultMessage: !state.showDefaultMessage });
-      self._flipDemoHeaderText();
-    }, 15000);
   }
 
   /**
@@ -225,94 +200,61 @@ class Routes extends Component {
     }).catch(() => false);
   }
 
+  /**
+    @param {Error, Object} error, info
+    shows error message when runtime error occurs
+  */
+  componentDidCatch() {
+    this.setState({ hasError: true });
+  }
+
   render() {
     const { props, state } = this;
     const showDiskLow = state.diskLow && !window.sessionStorage.getItem('hideDiskWarning');
+
     if (!state.hasError) {
-      // declare variables
-      const demoText = "You're using the Gigantum web demo. Data is wiped hourly. To continue using Gigantum ";
       // declare css
       const headerCSS = classNames({
         HeaderBar: true,
-        'is-demo': (window.location.hostname === config.demoHostName) || showDiskLow,
+        'HeaderBar--disk-low': showDiskLow,
       });
       const routesCSS = classNames({
         Routes__main: true,
       });
 
       if (state.forceLoginScreen === null) {
-        return <Loader />;
+        return <div className="Routes__temp" />;
       }
 
       return (
 
-        <Router basename={basename}>
+        <Router basename={this.basename}>
 
           <Switch>
 
             <Route
               path=""
               render={() => (
+
                 <div className="Routes">
-                  {
-                    window.location.hostname === config.demoHostName
-                    && (state.showDefaultMessage
-                      ? (
-                        <div
-                          id="demo-header"
-                          className="demo-header"
-                        >
-                          {demoText}
-                          <a
-                            href="http://gigantum.com/download"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                          >
-                        download the Gigantum client.
-                          </a>
-                        </div>
-                      )
-                      : (
-                        <div
-                          id="demo-header"
-                          className="demo-header"
-                        >
-                      Curious what can Gigantum do for you? &nbsp;
-                          <a onClick={() => this.setState({ showYT: true })}>
-                         Watch this overview video.
-                          </a>
-                        </div>
-                      ))
-                  }
+
                   {
                     showDiskLow
                     && (
-                    <DiskHeader
-                      available={state.available}
-                      hideDiskWarning={this._hideDiskWarning}
-                    />)
+                      <DiskHeader
+                        available={state.available}
+                        hideDiskWarning={this._hideDiskWarning}
+                      />
+                    )
                   }
-                  {
-                    state.showYT
-                      && (
-                      <div
-                        id="yt-lightbox"
-                        className="yt-lightbox"
-                        onClick={() => this.setState({ showYT: false })}
-                      >
-                        <YouTube
-                          opts={{ height: '576', width: '1024' }}
-                          className="yt-frame"
-                          videoId="S4oW2CtN500"
-                        />
-                      </div>
-                      )
-                  }
+
                   <div className={headerCSS} />
+
                   <SideBar
                     auth={auth}
                     diskLow={showDiskLow}
                   />
+
                   <div className={routesCSS}>
 
                     <Route
@@ -344,6 +286,7 @@ class Routes extends Component {
                       )
                       }
                     />
+
                     <Route
                       exact
                       path="/:id"
@@ -355,7 +298,6 @@ class Routes extends Component {
                       path="/labbooks/:section"
                       render={() => <Redirect to="/projects/local" />}
                     />
-
 
                     <Route
                       exact
@@ -371,7 +313,6 @@ class Routes extends Component {
                       )
                       }
                     />
-
 
                     <Route
                       exact
@@ -435,8 +376,7 @@ class Routes extends Component {
 
                     <Prompt />
 
-                    <Footer
-                    />
+                    <Footer />
 
                   </div>
                 </div>

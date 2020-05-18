@@ -65,9 +65,11 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
     driver.refresh()
     cloud_project_elts.first_cloud_project.wait_to_appear(30)
 
-    assert project_title == cloud_project_elts.first_cloud_project.find().text, \
+    first_project_title = cloud_project_elts.import_first_cloud_project_name.find().text
+
+    assert testutils.project_title_correct(first_project_title, project_title), \
         f"Expected {project_title} to be the first cloud project in {collaborator}'s cloud tab, " \
-        f"but instead got {cloud_project_elts.first_cloud_project.find().text}"
+        f"but instead got {first_project_title}"
 
     cloud_project_elts.import_first_cloud_project_button.click()
     project_control = testutils.ProjectControlElements(driver)
@@ -142,9 +144,11 @@ def test_link_published_dataset_then_publish_project(driver: selenium.webdriver,
     driver.refresh()
     cloud_project_elts.first_cloud_project.wait_to_appear(30)
 
-    assert project_title == cloud_project_elts.first_cloud_project.find().text, \
+    first_project_title = cloud_project_elts.import_first_cloud_project_name.find().text
+
+    assert testutils.project_title_correct(first_project_title, project_title), \
         f"Expected {project_title} to be the first cloud project in {collaborator}'s cloud tab, " \
-        f"but instead got {cloud_project_elts.first_cloud_project.find().text}"
+        f"but instead got {first_project_title}"
 
     cloud_project_elts.import_first_cloud_project_button.click()
     project_control = testutils.ProjectControlElements(driver)

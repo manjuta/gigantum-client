@@ -6,6 +6,7 @@ from lmsrvcore.api.objects.user import UserIdentity
 
 from lmsrvcore.auth.identity import get_identity_manager_instance
 from gtmcore.logging import LMLogger
+from lmsrvcore.utilities import remove_git_credentials
 
 logger = LMLogger.get_logger()
 
@@ -20,6 +21,9 @@ class RemoveUserIdentity(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, input, client_mutation_id=None):
         # Call the logout method to remove any locally stored data
         get_identity_manager_instance().logout()
+
+        # Remove user's credentials from git cache, if they had been set
+        remove_git_credentials()
 
         # Wipe current user from request context
         flask.g.user_obj = None

@@ -1,12 +1,14 @@
-import pytest
 import os
 import pickle
+from pathlib import Path
+from subprocess import run
+
+import pytest
 from git import Repo
 
 from gtmcore.environment import RepositoryManager
 from gtmcore.fixtures import mock_config_file, setup_index, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
 from gtmcore.fixtures.fixtures import _create_temp_work_dir
-
 from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 
@@ -33,12 +35,20 @@ class TestEnvironmentRepositoryManager(object):
 
     def test_update_repositories(self, setup_index):
         """Test building the index"""
-        assert os.path.exists(os.path.join(setup_index[1], ".labmanager")) is True
-        assert os.path.exists(os.path.join(setup_index[1], ".labmanager", "environment_repositories")) is True
-        assert os.path.exists(os.path.join(setup_index[1], ".labmanager", "environment_repositories",
-                                           ENV_UNIT_TEST_REPO)) is True
-        assert os.path.exists(os.path.join(setup_index[1], ".labmanager", "environment_repositories",
-                                           ENV_UNIT_TEST_REPO, "README.md")) is True
+        erm, working_dir, conf_file = setup_index[:3]
+        gigantum_path = Path(working_dir)
+        base_repo = gigantum_path / ".labmanager" / "environment_repositories" / ENV_UNIT_TEST_REPO
+        # Existence of the README file implies all intermediate directories exist
+        assert (base_repo / "README.md").exists()
+        # This will break if we change master, or if somehow we get some other HEAD that's not master
+        assert run(['git', 'rev-parse', 'HEAD'], cwd=base_repo, capture_output=True).stdout.strip() == \
+                b'3aa9bde4d2e03e28571e81d1ed099674dea8c7ad'
+
+        # If the repositories are already checked out, this triggers a different code-path
+        erm.update_repositories()
+
+        assert run(['git', 'rev-parse', 'HEAD'], cwd=base_repo, capture_output=True).stdout.strip() == \
+               b'3aa9bde4d2e03e28571e81d1ed099674dea8c7ad'
 
     def test_index_repositories_base_image(self, setup_index):
         """Test creating and accessing the detail version of the base image index"""

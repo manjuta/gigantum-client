@@ -2,18 +2,17 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import uuidv4 from 'uuid/v4';
-// config
-import config from 'JS/config';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 // components
 import Tooltip from 'Components/common/Tooltip';
 import Modal from 'Components/common/Modal';
+import LoginPrompt from 'Components/shared/modals/LoginPrompt';
 // store
 import store from 'JS/redux/store';
 // mutations
-import ImportRemoteDatasetMutation from 'Mutations/ImportRemoteDatasetMutation';
-import ImportRemoteLabbookMutation from 'Mutations/ImportRemoteLabbookMutation';
+import ImportRemoteDatasetMutation from 'Mutations/repository/import/ImportRemoteDatasetMutation';
+import ImportRemoteLabbookMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // utilities
 import prepareUpload from './PrepareUpload';
@@ -47,7 +46,14 @@ const buildImage = (name, owner, id) => {
 };
 
 
-export default class ImportModule extends Component {
+type Props = {
+  section: string,
+  showModal: Function,
+  title: string,
+}
+
+
+export default class ImportModule extends Component<Props> {
   constructor(props) {
     super(props);
 
@@ -60,23 +66,11 @@ export default class ImportModule extends Component {
       ready: null,
       isOver: false,
     };
-
-    this._getBlob = this._getBlob.bind(this);
-    this._dragoverHandler = this._dragoverHandler.bind(this);
-    this._dropHandler = this._dropHandler.bind(this);
-    this._dragendHandler = this._dragendHandler.bind(this);
-    this._fileSelected = this._fileSelected.bind(this);
-    this._importingState = this._importingState.bind(this);
-    this._clearState = this._clearState.bind(this);
-    this._closeLoginPromptModal = this._closeLoginPromptModal.bind(this);
-    this._drop = this._drop.bind(this);
-    this._dragover = this._dragover.bind(this);
-    this._dragleave = this._dragleave.bind(this);
-    this._dragenter = this._dragenter.bind(this);
   }
 
   componentDidMount() {
     const fileInput = document.getElementById('file__input');
+
     if (fileInput) {
       fileInput.onclick = (evt) => {
         evt.cancelBubble = true;
@@ -85,15 +79,6 @@ export default class ImportModule extends Component {
     }
 
     this.counter = 0;
-
-    this.setState({
-      files: [],
-      error: false,
-      isImporting: false,
-      remoteURL: '',
-      showImportModal: false,
-      ready: null,
-    });
 
     window.addEventListener('drop', this._drop);
     window.addEventListener('dragover', this._dragover);
@@ -106,6 +91,15 @@ export default class ImportModule extends Component {
     window.removeEventListener('dragover', this._dragover);
     window.removeEventListener('dragleave', this._dragleave);
     window.removeEventListener('dragenter', this._dragenter);
+
+    this.setState({
+      files: [],
+      error: false,
+      isImporting: false,
+      remoteURL: '',
+      showImportModal: false,
+      ready: null,
+    });
   }
 
   /**
@@ -127,7 +121,7 @@ export default class ImportModule extends Component {
   *  returns corrected version of filename
   *  @return {}
   */
-  _getFilename(filename) {
+  _getFilename = (filename) => {
     const fileArray = filename.split('-');
     fileArray.pop();
     const newFilename = fileArray.join('-');
@@ -228,7 +222,7 @@ export default class ImportModule extends Component {
   *  @param {}
   *  @return {string} returns text to be rendered
   */
-  _getImportDescriptionText() {
+  _getImportDescriptionText = () => {
     return this.state.error
       ? 'File must be .zip'
       : 'Drag & Drop .zip file, or click to select.';
@@ -239,7 +233,7 @@ export default class ImportModule extends Component {
   *  shows create project modal
   *  @return {}
   */
-  _showModal(evt) {
+  _showModal = (evt) => {
     if (navigator.onLine) {
       if (evt.target.id !== 'file__input-label') {
         this.props.showModal();
@@ -281,7 +275,7 @@ export default class ImportModule extends Component {
   *  updated url in state
   *  @return {}
   */
-  _updateRemoteUrl(evt) {
+  _updateRemoteUrl = (evt) => {
     const newValue = evt.target.value;
     const name = newValue.split('/')[newValue.split('/').length - 1];
     const owner = newValue.split('/')[newValue.split('/').length - 2];
@@ -336,12 +330,7 @@ export default class ImportModule extends Component {
               this.setState({ showImportModal: false });
               this._clearState();
             } else {
-
-              props.auth.renewToken(true, () => {
-                this.setState({ showLoginPrompt: true });
-              }, () => {
-                this._import();
-              });
+              this.setState({ showLoginPrompt: true });
             }
           }
         } else {
@@ -370,7 +359,7 @@ export default class ImportModule extends Component {
   *  @param {object}
   *  detects when a file has been dropped
   */
-  _drop(evt) {
+  _drop = (evt) => {
     if (document.getElementById('dropZone')) {
       document.getElementById('dropZone').classList.remove('ImportModule__drop-area-highlight');
     }
@@ -386,7 +375,7 @@ export default class ImportModule extends Component {
   *  @param {object}
   *  detects when file has been dragged over the DOM
   */
-  _dragover(evt) {
+  _dragover = (evt) => {
     if (document.getElementById('dropZone')) {
 
       document.getElementById('dropZone').classList.add('ImportModule__drop-area-highlight');
@@ -403,7 +392,7 @@ export default class ImportModule extends Component {
   *  @param {object}
   *  detects when file leaves dropzone
   */
-  _dragleave(evt) {
+  _dragleave = (evt) => {
     this.counter -= 1;
 
     if (evt.target.classList && evt.target.classList.contains(dropZoneId) < 0) {
@@ -420,7 +409,7 @@ export default class ImportModule extends Component {
   *  @param {object}
   *  detects when file enters dropzone
   */
-  _dragenter(evt) {
+  _dragenter = (evt) => {
     this.counter += 1;
 
     if (document.getElementById('dropZone')) {
@@ -439,7 +428,7 @@ export default class ImportModule extends Component {
   *  @param {}
   *  @return {} hides login prompt modal
   */
-  _closeLoginPromptModal() {
+  _closeLoginPromptModal = () => {
     this.setState({ showLoginPrompt: false });
   }
 
@@ -448,7 +437,12 @@ export default class ImportModule extends Component {
   *  trigers ImportRemoteLabbookMutation
   *  @return {}
   */
-  _importRemoteProject(owner, name, remote, id) {
+  _importRemoteProject = (
+    owner,
+    name,
+    remote,
+    id,
+  ) => {
     const self = this;
     self._importingState();
     const sucessCall = () => {
@@ -503,7 +497,12 @@ export default class ImportModule extends Component {
   *  trigers ImportRemoteDatasetMutation
   *  @return {}
   */
-  _importRemoteDataset(owner, name, remote, id) {
+  _importRemoteDataset = (
+    owner,
+    name,
+    remote,
+    id,
+  ) => {
     const self = this;
     self._importingState();
     ImportRemoteDatasetMutation(owner, name, remote, (response, error) => {
@@ -537,11 +536,21 @@ export default class ImportModule extends Component {
     });
   }
 
+  /**
+  *  @param {} -
+  *  hides login modal
+  *  @return {}
+  */
+  _closeLoginPromptModal = () => {
+    this.setState({ showLoginPrompt: false });
+  }
+
   render() {
-    const { props, state } = this;
+    const { isImporting, showLoginPrompt } = this.state;
+    const { section, title } = this.props;
     const loadingMaskCSS = classNames({
-      'ImportModule__loading-mask': state.isImporting,
-      hidden: !state.isImporting,
+      'ImportModule__loading-mask': isImporting,
+      hidden: !isImporting,
     });
 
     return (
@@ -549,15 +558,18 @@ export default class ImportModule extends Component {
         className="ImportModule Card Card--line-50 Card--text-center Card--add Card--import column-4-span-3"
         key="AddLabbookCollaboratorPayload"
       >
-
+        <LoginPrompt
+          showLoginPrompt={showLoginPrompt}
+          closeModal={this._closeLoginPromptModal}
+        />
         <ImportModal self={this} />
 
         <div className="Import__header">
-          <div className={`Import__icon Import__icon--${props.section}`}>
+          <div className={`Import__icon Import__icon--${section}`}>
             <div className="Import__add-icon" />
           </div>
           <div className="Import__title">
-            <h2 className="Import__h2 Import__h2--azure">{props.title}</h2>
+            <h2 className="Import__h2 Import__h2--azure">{title}</h2>
           </div>
         </div>
 
@@ -572,7 +584,7 @@ export default class ImportModule extends Component {
         <button
           type="button"
           className="btn--import"
-          onClick={(evt) => { this.setState({ showImportModal: true }); }}
+          onClick={() => { this.setState({ showImportModal: true }); }}
         >
           Import Existing
         </button>
@@ -584,6 +596,8 @@ export default class ImportModule extends Component {
     );
   }
 }
+
+// TODO move this to it's own file and clean up import module
 
 const ImportModal = ({ self }) => {
   const { props, state } = self;

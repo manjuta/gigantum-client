@@ -8,12 +8,14 @@ import Labbooks from '../Labbooks';
 
 export default createFragmentContainer(
   Labbooks,
-  graphql`
-    fragment LocalLabbooksContainer_labbookList on LabbookQuery{
-      labbookList{
-        id
-        ...LocalLabbooks_localLabbooks
+  {
+    labbookList: graphql`
+      fragment LocalLabbooksContainer_labbookList on LabbookQuery{
+        labbookList{
+          id
+          ...LocalLabbooks_localLabbooks
+        }
       }
-    }
-  `,
+    `,
+  },
 );

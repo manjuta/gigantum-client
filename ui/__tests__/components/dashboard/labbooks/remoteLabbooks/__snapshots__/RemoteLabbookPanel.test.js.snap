@@ -38,14 +38,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
     >
       <h5
         className="RemoteLabbooks__panel-title"
+        data-for="RemoteLabbooks--xd"
+        data-selenium-id="RepositoryTitle"
+        data-tip="xd"
+        onClick={[Function]}
+        role="presentation"
       >
-        <span>
+        <div
+          className=""
+          end={0}
+          onCopy={[Function]}
+          start={0}
+          style={
+            Object {
+              "display": "block",
+              "overflow": "hidden",
+              "whiteSpace": "nowrap",
+            }
+          }
+        >
           <span
-            className=""
+            style={
+              Object {
+                "display": "none",
+              }
+            }
           >
             xd
           </span>
-        </span>
+          <span
+            style={
+              Object {
+                "display": "none",
+              }
+            }
+          >
+            ...
+          </span>
+          xd
+        </div>
+        <div
+          className="__react_component_tooltip place-bottom type-dark"
+          data-id="tooltip"
+          id="RemoteLabbooks--xd"
+        />
       </h5>
     </div>
     <p

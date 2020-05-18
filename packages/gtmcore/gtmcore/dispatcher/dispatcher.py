@@ -8,6 +8,7 @@ import os
 import redis
 import rq
 import rq_scheduler
+from rq import Worker
 
 from gtmcore.logging import LMLogger
 from gtmcore.exceptions import GigantumException
@@ -127,6 +128,21 @@ class Dispatcher(object):
         # Return the appropriate Queue instance for the given method.
         queue_name = JOB_QUEUE_MAP.get(method_name) or GigantumQueues.default_queue
         return rq.Queue(queue_name.value, connection=self._redis_conn)
+
+    def ready_for_job(self, method_reference: Callable) -> bool:
+        """Look up the appropriate queue for method_name and ensure workers > 0
+
+        Args:
+            method_reference:
+
+        Returns:
+            Whether there are in fact workers in the queue for this method
+        """
+        target_queue = self._get_queue(method_reference.__name__)
+        try:
+            return Worker.count(connection=self._redis_conn, queue=target_queue) > 0
+        except redis.exceptions.ConnectionError:
+            return False
 
     @property
     def all_jobs(self) -> List[JobStatus]:

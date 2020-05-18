@@ -1,5 +1,4 @@
 import uuid
-import re
 import os
 import time
 from typing import Optional
@@ -55,7 +54,7 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
 
         return suffix
     elif len(jupyter_ps) == 0:
-        new_token = uuid.uuid4().hex.replace('-', '')
+        new_token = uuid.uuid4().hex
         if proxy_prefix and proxy_prefix[0] != '/':
             proxy_prefix = f'/{proxy_prefix}'
         _start_jupyter_process(project_container, new_token, proxy_prefix)
@@ -68,8 +67,8 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
     else:
         # If "ps aux" for jupyterlab returns multiple hits - this should never happen.
         for n, l in enumerate(jupyter_ps):
-            logger.error(f'Multiple JupyerLab instances - ({n+1} of {len(jupyter_ps)}) - {l}')
-        raise ValueError(f'Multiple Jupyter Lab instances detected in project env. You should restart the container.')
+            logger.error(f'Multiple JupyterLab instances - ({n + 1} of {len(jupyter_ps)}) - {l}')
+        raise ValueError(f'Multiple JupyterLab instances detected in project env. You should restart the container.')
 
 
 def _shim_skip_python2_savehook(labbook: LabBook) -> bool:
@@ -89,15 +88,18 @@ def _start_jupyter_process(project_container: ContainerOperations, token: str,
 
     project_container.configure_dev_tool('jupyterlab')
 
-    cmd = (f'echo "{project_container.username},{labbook.owner},{labbook.name},{token}" > /home/giguser/jupyter_token'
-           " && cd /mnt/labbook"
-           f" && {PYTHON_ENV_CMD} jupyter lab --port={DEFAULT_JUPYTER_PORT} --ip=0.0.0.0 "
-           f"--NotebookApp.token='{token}' --no-browser "
-           '--ConnectionFileMixin.ip=0.0.0.0 ' +
-           ('--FileContentsManager.post_save_hook="jupyterhooks.post_save_hook" '
-            if use_savehook else "") +
-           (f'--NotebookApp.base_url="{proxy_prefix}" '
-            if proxy_prefix else ''))
+    cmd = f'echo "{project_container.username},{labbook.owner},{labbook.name},{token}" ' \
+          '> /home/giguser/jupyter_token && ' \
+          "cd /mnt/labbook && " + \
+          ' '.join([f"{PYTHON_ENV_CMD} jupyter lab --port={DEFAULT_JUPYTER_PORT} --ip=0.0.0.0",
+                    (f'--NotebookApp.base_url="{proxy_prefix}"' if proxy_prefix else ''),
+                    f"--NotebookApp.token='{token}' --no-browser",
+                    '--ConnectionFileMixin.ip=0.0.0.0',
+                    ('--FileContentsManager.post_save_hook="jupyterhooks.post_save_hook"'
+                     if use_savehook else ''),
+                    # Enable CPU monitoring by nbresuse - should be ignored on older versions
+                    '--ResourceUseDisplay.track_cpu_percent=True'
+                    ])
 
     project_container.exec_command(cmd, user='giguser')
 
@@ -121,7 +123,7 @@ def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
                 time.sleep(0.5)
             else:
                 if "version" in r.json():
-                    logger.info(f'Found Jupyter up at {test_url} after {n/2.0} seconds')
+                    logger.info(f'Found Jupyter up at {test_url} after {n / 2.0} seconds')
                     break
                 else:
                     time.sleep(0.5)

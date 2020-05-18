@@ -120,3 +120,5 @@ testing/chromedriver.exe
 
 .vscode/
 *.swp
+/changelog/changelog.md
+/changelog/changelog.json

@@ -6,8 +6,8 @@ from pathlib import Path
 
 from natsort import natsorted
 from pkg_resources import resource_filename
-import pathlib
 import subprocess
+import shlex
 import glob
 
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
@@ -394,6 +394,7 @@ class InventoryManager(object):
                     gigantum_dir / 'env' / 'base',
                     gigantum_dir / 'env' / 'custom',
                     gigantum_dir / 'env' / 'package_manager',
+                    # The .gitkeep in .gigantum/activity is used by the hub to check project status
                     gigantum_dir / 'activity',
                     gigantum_dir / 'activity' / 'log',
                     gigantum_dir / 'activity' / 'index',
@@ -781,7 +782,7 @@ class InventoryManager(object):
         git_module_dir = os.path.join(labbook.root_dir, '.git', 'modules', f"{dataset_namespace}&{dataset_name}")
 
         if not os.path.exists(absolute_submodule_root):
-            pathlib.Path(absolute_submodule_root).mkdir(parents=True, exist_ok=True)
+            Path(absolute_submodule_root).mkdir(parents=True, exist_ok=True)
 
         if os.path.exists(absolute_submodule_dir) and os.path.exists(git_module_dir):
             # Seem to be trying to link a dataset after a reset removed the dataset. Clean up first.
@@ -900,6 +901,11 @@ class InventoryManager(object):
                 # The following three commands may be null-ops, but they're local operations that should be very fast
                 call_subprocess(['git', 'submodule', 'init', '--', rel_submodule_dir],
                                 cwd=labbook.root_dir, check=True)
+
+                if os.environ.get('WINDOWS_HOST'):
+                    logger.info(f"Dataset {submodule} imported on Windows host as a submodule - set fileMode to false")
+                    call_subprocess(shlex.split("git config core.fileMode false"),
+                                    cwd=submodule_dir)
 
                 # We update the URL in our .gitconfig to include the username
                 # This shouldn't have a username in it, but it's OK if it does

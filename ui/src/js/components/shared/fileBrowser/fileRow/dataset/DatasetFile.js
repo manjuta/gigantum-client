@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Moment from 'moment';
 import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // config
 import config from 'JS/config';
 // components
@@ -14,8 +15,7 @@ class File extends Component {
   render() {
     const { props } = this;
     const { node } = props.fileData.edge;
-    const { index } = props.fileData;
-    const fileName = props.filename;
+    const { filename, index } = props.fileData;
     const fileRowCSS = classNames({
       File__row: true,
     });
@@ -40,10 +40,18 @@ class File extends Component {
 
           <div className={textIconsCSS}>
 
-            <div className={`File__icon ${fileIconsJs.getClass(fileName)}`} />
+            <div className={`File__icon ${fileIconsJs.getClass(filename)}`} />
 
             <div className="File__text">
-              {fileName}
+              { filename
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={filename}
+                    smartCopy
+                  />
+                )
+              }
             </div>
 
           </div>

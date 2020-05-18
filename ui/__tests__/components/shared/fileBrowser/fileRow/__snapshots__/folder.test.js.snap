@@ -38,7 +38,7 @@ exports[`File component File Snapshot 1`] = `
         folder
       </div>
       <div
-        className="__react_component_tooltip place-bottom type-dark "
+        className="__react_component_tooltip place-bottom type-dark"
         data-id="tooltip"
         id="Tooltip--folder"
       />

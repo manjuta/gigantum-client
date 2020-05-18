@@ -129,11 +129,6 @@ class LocalIdentityManager(IdentityManager):
         if os.path.exists(data_file):
             os.remove(data_file)
 
-        # Remove Git credentials file so you don't leak tokens between users.
-        git_credentials_file = os.path.expanduser('~/.git-credentials')
-        if os.path.exists(git_credentials_file):
-            os.remove(git_credentials_file)
-
         self.user = None
         self.rsa_key = None
         logger.info("Removed user identity from local storage.")

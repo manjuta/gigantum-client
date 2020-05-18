@@ -1,8 +1,8 @@
 // Mutations
-import AddCollaboratorMutation from 'Mutations/AddCollaboratorMutation';
-import AddDatasetCollaboratorMutation from 'Mutations/AddDatasetCollaboratorMutation';
-import DeleteCollaboratorMutation from 'Mutations/DeleteCollaboratorMutation';
-import DeleteDatasetCollaboratorMutation from 'Mutations/DeleteDatasetCollaboratorMutation';
+import AddCollaboratorMutation from 'Mutations/collaborators/AddCollaboratorMutation';
+import AddDatasetCollaboratorMutation from 'Mutations/collaborators/AddDatasetCollaboratorMutation';
+import DeleteCollaboratorMutation from 'Mutations/collaborators/DeleteCollaboratorMutation';
+import DeleteDatasetCollaboratorMutation from 'Mutations/collaborators/DeleteDatasetCollaboratorMutation';
 
 
 class CollboratorsMutations {
@@ -45,16 +45,14 @@ class CollboratorsMutations {
     const { name, owner } = this.state;
     const {
       collaboratorName,
-      newCollaborator,
-      permissionOverride,
       newPermissions,
     } = data;
 
     AddCollaboratorMutation(
       name,
       owner,
-      collaboratorName || newCollaborator,
-      permissionOverride || newPermissions,
+      collaboratorName,
+      newPermissions,
       callback,
     );
   }
@@ -69,16 +67,14 @@ class CollboratorsMutations {
     const { name, owner } = this.state;
     const {
       collaboratorName,
-      newCollaborator,
-      permissionOverride,
       newPermissions,
     } = data;
 
     AddDatasetCollaboratorMutation(
       name,
       owner,
-      collaboratorName || newCollaborator,
-      permissionOverride || newPermissions,
+      collaboratorName,
+      newPermissions,
       callback,
     );
   }

@@ -1,0 +1,8 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1316"
+changelog:
+  - type: NON_USER_FACING
+    description: Updated git credential manager to in-memory caching and improved git client interface for passwords
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1214
+  - type: DEPENDENCY_CHANGE
+    description: Removed pexpect from gtmcore.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1214

@@ -10,17 +10,51 @@ import './LoginPrompt.scss';
 
 const auth = new Auth();
 
-export default class LoginPrompt extends Component {
+type Props = {
+  closeModal: Function,
+  showLoginPrompt: boolean,
+}
+
+class LoginPrompt extends Component<Props> {
+  /**
+  *  @param {} -
+  *  sends user to refresh workflow
+  *  @return {}
+  */
   _login() {
-    auth.login();
-    this.props.closeModal(true);
+    const { closeModal } = this.props;
+
+    auth.renewToken(
+      null,
+      () => {},
+      (response) => {
+        console.log(response);
+      }, null,
+      (err) => {
+        console.log(err);
+      },
+    );
+
+    closeModal(true);
   }
 
+  /**
+  *  @param {} -
+  *  closes modal and ignores login
+  *  @return {}
+  */
   _dontLogin() {
-    this.props.closeModal(true);
+    const { closeModal } = this.props;
+    closeModal(true);
   }
 
   render() {
+    const { showLoginPrompt } = this.props;
+
+    if (!showLoginPrompt) {
+      return null;
+    }
+
     return (
       <Modal
         size="small"
@@ -30,12 +64,22 @@ export default class LoginPrompt extends Component {
           ? (
             <div className="LoginPrompt">
               <div>
-                <p>Your authentication token has expired and must be renewed to perform this action.</p>
-                <p>Do you want login?</p>
+                <p>Your session has expired and must be renewed to perform this action.</p>
+                <p>Do you want to login?</p>
               </div>
               <div className="LoginPrompt__buttonContainer">
-                <button onClick={() => { this._login(); }}>Yes</button>
-                <button onClick={() => { this._dontLogin(); }}>no</button>
+                <button
+                  type="button"
+                  onClick={() => { this._login(); }}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { this._dontLogin(); }}
+                >
+                  no
+                </button>
               </div>
             </div>
           )
@@ -51,3 +95,5 @@ export default class LoginPrompt extends Component {
     );
   }
 }
+
+export default LoginPrompt;

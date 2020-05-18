@@ -23,8 +23,9 @@ const Visibility = {
     return new Promise((resolve, reject) => {
       const fetchData = () => {
         fetchQuery(
-          DatasetVisibilityLookupQuery(),
+          DatasetVisibilityLookupQuery,
           variables,
+          { force: true },
         ).then((response) => {
           resolve(response);
         }).catch((error) => {

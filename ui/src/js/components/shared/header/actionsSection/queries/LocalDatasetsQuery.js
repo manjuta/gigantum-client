@@ -16,7 +16,11 @@ const LocalDatasetsQuery = graphql`
 const LocalDatasets = {
   getLocalDatasets: variables => new Promise((resolve, reject) => {
     const fetchData = () => {
-      fetchQuery(LocalDatasetsQuery(), variables).then((response, error) => {
+      fetchQuery(
+        LocalDatasetsQuery,
+        variables,
+        { force: true },
+      ).then((response, error) => {
         if (response) {
           resolve(response);
         } else {

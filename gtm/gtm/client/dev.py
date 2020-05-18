@@ -4,7 +4,6 @@ import shlex
 import yaml
 import sys
 import platform
-import re
 
 from gtm.utils import get_docker_client, DockerVolume
 from gtm.common import get_resources_root, get_client_root
@@ -53,7 +52,7 @@ class DevClientRunner(object):
         """
         data = {}
         with open(os.path.join(self._build_dir, 'docker-compose.yml'), 'rt') as dcf:
-            yaml_data = yaml.load(dcf)
+            yaml_data = yaml.safe_load(dcf)
             yaml_data = yaml_data['services']['labmanager']['environment']
 
         for var in yaml_data:

@@ -5,12 +5,13 @@ import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
 import classNames from 'classnames';
+// components
+import RepositoryTitle from 'Components/dashboard/shared/title/RepositoryTitle';
 // muations
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // store
 import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
-import store from 'JS/redux/store';
 // assets
 import './LocalLabbookPanel.scss';
 
@@ -24,8 +25,8 @@ type Props = {
       modifiedOnUtc: string,
     }
   },
-  goToLabbook: Function,
   visibility: string,
+  filterText: string,
 };
 
 /**
@@ -174,7 +175,11 @@ class LocalLabbookPanel extends Component<Props> {
 
   render() {
     const { state } = this;
-    const { edge, goToLabbook, visibility } = this.props;
+    const {
+      edge,
+      visibility,
+      filterText,
+    } = this.props;
     const {
       name,
       owner,
@@ -196,7 +201,6 @@ class LocalLabbookPanel extends Component<Props> {
     return (
       <Link
         to={`/projects/${owner}/${name}`}
-        onClick={() => goToLabbook(name, owner)}
         key={`local${name}`}
         className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
       >
@@ -220,6 +224,8 @@ class LocalLabbookPanel extends Component<Props> {
               onClick={evt => this._stopStartContainer(evt, cssClass)}
               onMouseOver={evt => this._updateTextStatusOver(evt, true, status)}
               onMouseOut={evt => this._updateTextStatusOut(evt, false, status)}
+              onFocus={() => {}}
+              onBlur={() => {}}
               className={containerCSS}
             >
               <div className="ContainerStatus__text">{ textStatus }</div>
@@ -235,23 +241,11 @@ class LocalLabbookPanel extends Component<Props> {
         <div className="LocalLabbooks__row--text">
 
           <div>
-
-            <h5
-              role="presentation"
-              className="LocalLabbooks__panel-title"
-              onClick={() => goToLabbook(name, owner)}
-            >
-
-              <Highlighter
-                highlightClassName="LocalLabbooks__highlighted"
-                searchWords={[store.getState().labbookListing.filterText]}
-                autoEscape={false}
-                caseSensitive={false}
-                textToHighlight={name}
-              />
-
-            </h5>
-
+            <RepositoryTitle
+              name={name}
+              section="LocalLabbooks"
+              filterText={filterText}
+            />
           </div>
 
           <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{owner}</p>
@@ -272,7 +266,7 @@ class LocalLabbookPanel extends Component<Props> {
                 ? (
                   <Highlighter
                     highlightClassName="LocalLabbooks__highlighted"
-                    searchWords={[store.getState().labbookListing.filterText]}
+                    searchWords={[filterText]}
                     autoEscape={false}
                     caseSensitive={false}
                     textToHighlight={description}

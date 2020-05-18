@@ -206,13 +206,13 @@ class Dataset extends Component {
     const { props, state } = this;
     const { owner, name } = props.dataset;
     if (props.dataset) {
-      const { dataset } = props;
+      const { dataset, diskLow } = props;
       const isLocked = getIsLocked(props);
       // declare css here
       const datasetCSS = classNames({
         Dataset: true,
         'Dataset--detail-mode': props.detailMode,
-        'Dataset--demo-mode': (window.location.hostname === Config.demoHostName) || props.diskLow,
+        'Dataset--disk-low': diskLow,
       });
 
       return (

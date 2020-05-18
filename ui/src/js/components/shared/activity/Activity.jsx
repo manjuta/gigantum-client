@@ -137,14 +137,6 @@ class Activity extends Component<Props> {
     }
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-
-    window.removeEventListener('visibilitychange', this._handleVisibilityChange);
-    window.removeEventListener('focus', this._pollForActivity);
-    window.removeEventListener('scroll', this._handleScroll);
-  }
-
   /**
    * @param {}
    * scroll to top of page
@@ -222,6 +214,7 @@ class Activity extends Component<Props> {
       name,
       owner,
     } = this.props;
+    const section = this.props[sectionType];
 
     this.setState({ newActivityAvailable: false });
 
@@ -231,11 +224,13 @@ class Activity extends Component<Props> {
         owner,
         sectionType,
       ).then((response) => {
-        const section = this.props[sectionType];
         const firstRecordCommitId = (section && section.activityRecords)
           ? section.activityRecords.edges[0].node.commit
           : null;
-        const newRecordCommitId = response.data[sectionType].activityRecords.edges[0].node.commit;
+        const newRecordCommitId = (response && response.data && response.data[sectionType]
+          && response.data[sectionType].activityRecords)
+          ? response.data[sectionType].activityRecords.edges[0].node.commit
+          : '';
 
         if ((firstRecordCommitId !== newRecordCommitId)
           && (firstRecordCommitId !== null)) {
@@ -253,7 +248,9 @@ class Activity extends Component<Props> {
       }).catch(error => console.log(error));
     };
 
-    getNewActivity();
+    if (section) {
+      getNewActivity();
+    }
   }
 
   /**
@@ -275,6 +272,7 @@ class Activity extends Component<Props> {
        },
        {
          filters: [],
+         force: true,
        },
      );
    }
@@ -352,8 +350,9 @@ class Activity extends Component<Props> {
   */
   _setStickyDate = () => {
     const { props, state } = this;
-    let offsetAmount = ((window.location.hostname === config.demoHostName) || props.diskLow)
-      ? 50 : 0;
+    let offsetAmount = props.diskLow
+      ? 50
+      : 0;
     offsetAmount = props.isDeprecated ? offsetAmount + 70 : offsetAmount;
     const upperBound = offsetAmount + 120;
     let stickyDate = null;
@@ -407,7 +406,6 @@ class Activity extends Component<Props> {
     this._setStickyDate();
     // has to be 3000 to accomodate for large monitors
     if (automaticRefetch !== (distanceY < 3000)) {
-      console.log(automaticRefetch);
       this.setState({ automaticRefetch: (distanceY < 3000) });
     }
   }
@@ -566,7 +564,6 @@ class Activity extends Component<Props> {
       setBuildingState,
     } = this.props;
     const section = this.props[sectionType];
-    const isDemo = (window.location.hostname === config.demoHostName);
     // declare css here
     const activityCSS = classNames({
       Activity: true,
@@ -574,9 +571,9 @@ class Activity extends Component<Props> {
     });
     const newActivityCSS = classNames({
       'Activity__new-record box-shadow': true,
-      'is-demo': (isDemo || diskLow),
-      'is-deprecated': isDeprecated,
-      'is-demo-deprecated': (isDemo || diskLow) && isDeprecated,
+      'Activity--disk-low': diskLow,
+      'Activity--deprecated': isDeprecated,
+      'Activity--disk-low--deprecated': (diskLow) && isDeprecated,
     });
 
     if (section && section.activityRecords) {
@@ -584,9 +581,9 @@ class Activity extends Component<Props> {
       const stickyDateCSS = classNames({
         'Activity__date-tab': true,
         fixed: stickyDate,
-        'is-demo': (isDemo || diskLow),
-        'is-deprecated': isDeprecated,
-        'is-demo-deprecated': (isDemo || diskLow) && isDeprecated,
+        'Activity--disk-low': diskLow,
+        'Activity--deprecated': isDeprecated,
+        'Activity--disk-low--deprecated': diskLow && isDeprecated,
       });
 
       return (

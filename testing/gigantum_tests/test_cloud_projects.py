@@ -34,12 +34,12 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
                                                f"but got {cloud_project_stdout}"
 
     logging.info(f"Checking if project {project_title} appears in {username}'s cloud tab")
-    first_cloud_project = cloud_project_elts.first_cloud_project.find().text
-    logging.info(f"Found first cloud project {first_cloud_project}")
 
-    assert project_title == first_cloud_project, \
+    first_project_title = cloud_project_elts.import_first_cloud_project_name.find().text
+
+    assert testutils.project_title_correct(first_project_title, project_title), \
         f"Expected {project_title} to be the first cloud project in {username}'s cloud tab, " \
-        f"but instead got {first_cloud_project}"
+        f"but instead got {first_project_title}"
 
     # Add a file and sync cloud project
     driver.get(f'{os.environ["GIGANTUM_HOST"]}/projects/{username}/{project_title}/inputData')
@@ -69,11 +69,11 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     # Assert project does not exist in cloud tab (NOTE: For this to work you must have at least 1 cloud project in
     # your first test user account!)
     time.sleep(2)
-    first_cloud_project = cloud_project_elts.first_cloud_project.find().text
+    first_project_title = cloud_project_elts.import_first_cloud_project_name.find().text
 
-    assert project_title != first_cloud_project, \
-        f"Expected {project_title} to not be the first cloud project in {username}'s Cloud tab, " \
-        f"but instead got {first_cloud_project}"
+    assert not testutils.project_title_correct(first_project_title, project_title), \
+        f"Expected {project_title} to NOT be the first cloud project in {username}'s cloud tab, " \
+        f"but instead got {first_project_title}"
 
 
 def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
@@ -106,11 +106,12 @@ def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
     logging.info(f"Navigating to {collaborator}'s cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
     cloud_project_elts.first_cloud_project.wait_to_appear(30)
-    first_cloud_project = cloud_project_elts.first_cloud_project.find().text
 
-    assert project_title == first_cloud_project, \
+    first_project_title = cloud_project_elts.import_first_cloud_project_name.find().text
+
+    assert testutils.project_title_correct(first_project_title, project_title), \
         f"Expected {project_title} to be the first cloud project in {collaborator}'s cloud tab, " \
-        f"but instead got {first_cloud_project}"
+        f"but instead got {first_project_title}"
 
     cloud_project_elts.import_first_cloud_project_button.click()
     project_control = testutils.ProjectControlElements(driver)

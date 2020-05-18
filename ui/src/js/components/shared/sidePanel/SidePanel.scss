@@ -3,19 +3,19 @@
 @media screen and (max-width: 50000px) and (min-width: 1480px){
   .SidePanel {
     top: 202px !important;
-    &--is-deprecated{
+    &--deprecated{
       top: 251px !important;
     }
     &--sticky{
       top: 110px !important;
     }
-    &--is-deprecated-sticky{
+    &--deprecated--sticky{
       top: 160px !important;
     }
-    &--is-deprecated-demo{
+    &--deprecated--disk-low{
       top: 301px !important;
     }
-    &--is-deprecated-demo-sticky{
+    &--deprecated--disk-low--sticky{
       top: 210px !important;
     }
   }
@@ -35,16 +35,16 @@
   &--sticky{
     top: 110px;
   }
-  &--is-deprecated{
+  &--deprecated{
     top: 251px;
   }
-  &--is-deprecated-sticky{
+  &--deprecated--sticky {
     top: 160px;
   }
-  &--is-deprecated-demo{
+  &--deprecated--disk-low {
     top: 251px;
   }
-  &--is-deprecated-demo-sticky{
+  &--deprecated--disk-low--sticky{
     top: 251px;
   }
 }

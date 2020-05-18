@@ -5,10 +5,12 @@ import SectionWrapper from 'Components/shared/filesShared/sectionWrapper/Section
 
 export default createFragmentContainer(
   SectionWrapper,
-  graphql`
+  {
+    dataset: graphql`
       fragment Data_dataset on Dataset{
         id @skip (if: $dataSkip)
         ...DataBrowser_data @skip (if: $dataSkip)
       }
     `,
+  },
 );

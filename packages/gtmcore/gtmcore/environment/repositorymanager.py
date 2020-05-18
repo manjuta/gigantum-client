@@ -64,7 +64,7 @@ class RepositoryManager(object):
 
         return True
 
-    def _update_repo(self, location: str, branch: Optional[str] = None) -> None:
+    def _update_repo(self, location: str, branch: str) -> None:
         """Private method to update a repository
 
         Args:
@@ -79,9 +79,12 @@ class RepositoryManager(object):
         self.git.set_working_directory(location)
 
         # Fetch the requested branch
+        self.git.remote_set_branches([branch])
         self.git.fetch(refspec=branch)
-        # Using FETCH_HEAD is robust / easy when you aren't tracking all remote branches, but still might switch branches
-        self.git.checkout('FETCH_HEAD')
+        self.git.checkout(branch)
+        # We do a reset instead of a merge because we don't want to retain local changes
+        # If the branch was freshly checked out above, this is redundant, but it's just called once at service start-up
+        self.git.reset(f'origin/{branch}')
 
     def update_repositories(self) -> bool:
         """Method to update all repositories in the LabManager configuration file
@@ -100,7 +103,7 @@ class RepositoryManager(object):
                 full_repo_dir = os.path.join(self.local_repo_directory, repo_dir_name)
 
                 # Get branch if encoded in URL
-                branch = None
+                branch = 'master'
                 if "@" in repo_url:
                     repo_url, branch = repo_url.split("@")
 
@@ -143,7 +146,7 @@ class RepositoryManager(object):
 
         Args:
             repo_name: The name of the repo cloned locally
-            component: One of 'base' or 'custom'
+
         Returns:
             OrderedDict
         """

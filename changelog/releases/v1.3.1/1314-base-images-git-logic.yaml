@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1314"
+changelog:
+  - type: FIX
+    description: Made git checkout / update reliable for base-images repo
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1317

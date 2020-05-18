@@ -37,24 +37,25 @@ class TestContainerOps:
         ib = build_lb_image_for_jupyterlab[1]
         lb = build_lb_image_for_jupyterlab[0]
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
-        l = [a for a in stdo.decode().split('\n') if a]
-        assert len(l) == 0
-
+        # This is already created inside the fixture, but because of the way tuples are used,
+        # it's too cumbersome to change the (widely-used) fixture to pass it back
         jupyter_container = container_for_context('unittester', lb)
+        stdo = jupyter_container.exec_command('pgrep jupyter', get_results=True)
+        l = [a for a in stdo.split('\n') if a]
+        assert len(l) == 0
 
         start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
-        l = [a for a in stdo.decode().split('\n') if a]
+        stdo = jupyter_container.exec_command('pgrep jupyter', get_results=True)
+        l = [a for a in stdo.split('\n') if a]
         assert len(l) == 1
 
         # Now, we test the second path through, start jupyterlab when it's already running.
         start_jupyter(jupyter_container, check_reachable=not (getpass.getuser() == 'circleci'))
 
         # Validate there is only one instance running.
-        ec, stdo = client.containers.get(container_id=container_id).exec_run(['pgrep', 'jupyter'], user='giguser')
-        l = [a for a in stdo.decode().split('\n') if a]
+        stdo = jupyter_container.exec_command('pgrep jupyter', get_results=True)
+        l = [a for a in stdo.split('\n') if a]
         assert len(l) == 1
 
     def test_start_rstudio(self, build_lb_image_for_rstudio):

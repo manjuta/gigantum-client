@@ -40,7 +40,7 @@
   background: $secondary url('~Images/icons/up-arrow-white.svg') no-repeat calc(100% - 15px) center;
   background-size: 22px;
 
-  &.is-demo{
+  &---disk-low{
     top: 200px;
   }
 
@@ -108,11 +108,11 @@
     }
   }
 
-  &.is-demo{
+  &--disk-low {
     top: 140px;
   }
 
-  &.is-expanded.is-demo{
+  &--disk-low.is-expanded{
     top: 190px;
   }
 

@@ -171,7 +171,7 @@ class GitInterfaceMixin(object):
     class_type: Any = None
 
     def get_git_obj(self, config):
-        raise NotImplemented
+        raise NotImplementedError
 
     def test_empty_dir(self, mock_config):
         """Test trying to get the filesystem interface"""

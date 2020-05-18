@@ -1,0 +1,14 @@
+message: str(required=False)
+prLink: str(required=True)
+changelog: list(include('changelog_item'))
+
+
+
+---
+changelog_item:
+  type: enum('NEW', 'IMPROVEMENT', 'FIX', 'NON_USER_FACING', 'DEPENDENCY_CHANGE', 'REMOVED', 'DEPRECATED')
+  description: str(required=True)
+  issueLink: str(required=False)
+  dependencyOwner: str(required=False)
+  dependencyRepo: str(required=False)
+  dependencyTag: str(required=False)

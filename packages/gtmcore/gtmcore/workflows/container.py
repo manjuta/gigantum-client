@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 import time
 
@@ -28,6 +29,10 @@ class ContainerWorkflows(object):
 
         for sec_local_src, sec_container_dst in secrets_dir_map:
             project_container.copy_into_container(src_path=sec_local_src, dst_dir=sec_container_dst)
+            container_path = Path(sec_container_dst) / Path(sec_local_src).name
+            # By default, we make secrets readable only by the user (so things like ssh keys work by default)
+            # If a user is changing the file, it means they're doing interactive stuff with it already!
+            project_container.exec_command(f'chown giguser:giguser {container_path}; chmod 400 {container_path}')
 
         # TODO #1064 - if putting a secret fails, then stop container and raise exception
 

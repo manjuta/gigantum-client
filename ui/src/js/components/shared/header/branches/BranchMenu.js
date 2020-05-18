@@ -122,7 +122,9 @@ const checkForWriteAccess = (activeBranch, defaultRemote, collaborators, section
     return false;
   }
   const collaboratorsSection = collaborators[sectionName];
-  const filteredArr = collaboratorsSection.filter(collaborator => collaborator.collaboratorUsername === username);
+  const filteredArr = collaboratorsSection.filter(
+    collaborator => (collaborator.collaboratorUsername === username),
+  );
 
   if (filteredArr.length === 0) {
     return false;
@@ -136,9 +138,6 @@ const checkForWriteAccess = (activeBranch, defaultRemote, collaborators, section
 
 
 type Props = {
-  auth: {
-    renewToken: Function,
-  },
   branches: string,
   collaborators: Object,
   defaultRemote: string,
@@ -179,6 +178,17 @@ class BranchMenu extends Component<Props> {
     isDataset: (this.props.sectionType !== 'labbook'),
     action: null,
   };
+
+
+  static getDerivedStateFromProps(props, state) {
+    const { publishFromCollaborators } = props;
+    const { publishModalVisible } = state;
+
+    return {
+      ...state,
+      publishModalVisible: publishFromCollaborators || publishModalVisible,
+    };
+  }
 
   componentDidMount() {
     window.addEventListener('click', this._closePopups);
@@ -276,12 +286,12 @@ class BranchMenu extends Component<Props> {
       self.setState({ switchingBranch: false });
       updateMigationState(response);
 
-      branchMutations.buildImage((response, error) => {
+      branchMutations.buildImage((buildResponse, buildError) => {
         setTimeout(() => {
           this._toggleCover(null);
         }, 3000);
-        if (error) {
-          setErrorMessage(owner, name, 'Failed to switch branches.', error);
+        if (buildError) {
+          setErrorMessage(owner, name, 'Failed to switch branches.', buildError);
         }
       });
     });
@@ -468,23 +478,6 @@ class BranchMenu extends Component<Props> {
   }
 
   /**
-  *  @param {Boolean} - pullOnly
-  *  @param {Boolean} - allowSync
-  *  @param {Boolean} - allowSyncPull
-  *  handles syncing or publishing the project
-  *  @calls {_handleSyncButton}
-  */
-  _renewToken = (pullOnly, allowSync, allowSyncPull) => {
-    const { auth } = this.props;
-
-    auth.renewToken(true, () => {
-      this.setState({ showLoginPrompt: true });
-    }, () => {
-      this._handleSyncButton(pullOnly, allowSync, allowSyncPull);
-    });
-  }
-
-  /**
   * @param {Object} data
   * syncs dataset
   */
@@ -608,7 +601,7 @@ class BranchMenu extends Component<Props> {
           } else if (!(response.data
               && response.data.userIdentity
               && response.data.userIdentity.isSessionValid)) {
-            this._renewTotken(pullOnly, allowSync, allowSyncPull);
+            self.setState({ showLoginPrompt: true });
           } else if (sectionType !== 'labbook') {
             this._syncDataset(data);
           } else {
@@ -654,7 +647,6 @@ class BranchMenu extends Component<Props> {
     resetTooltip = state.isDataset ? defaultDatasetMessage : resetTooltip;
     let switchTooltip = props.isLocked ? 'Cannot switch branches while Project is in use' : 'Switch Branches';
     switchTooltip = state.isDataset ? defaultDatasetMessage : switchTooltip;
-
     const commitsBehindText = activeBranch.commitsBehind ? `${activeBranch.commitsBehind} Commits Behind, ` : '';
     const commitsAheadText = activeBranch.commitsAhead ? `${activeBranch.commitsAhead} Commits Ahead` : '';
     const commitTooltip = `${commitsBehindText} ${commitsAheadText}`;
@@ -704,8 +696,10 @@ class BranchMenu extends Component<Props> {
      isSticky,
      section,
      collaborators,
-     setPublishingState,
    } = this.props;
+   const {
+     showLoginPrompt,
+   } = this.state;
    const {
      activeBranch,
      filteredBranches,
@@ -716,7 +710,12 @@ class BranchMenu extends Component<Props> {
    const sectionCollabs = (collaborators && collaborators[section.name])
       || null;
    const waitingOnCollabs = !sectionCollabs;
-   const hasWriteAccess = checkForWriteAccess(activeBranch, defaultRemote, collaborators, section.name);
+   const hasWriteAccess = checkForWriteAccess(
+     activeBranch,
+     defaultRemote,
+     collaborators,
+     section.name,
+   );
    const upToDate = (activeBranch.commitsAhead === 0)
     && (activeBranch.commitsBehind === 0);
    const allowSync = !((activeBranch.branchName !== 'master') && !defaultRemote)
@@ -886,7 +885,7 @@ class BranchMenu extends Component<Props> {
                       type="button"
                       className="Btn--flat"
                     >
-                    Create a new branch?
+                      Create a new branch?
                     </button>
                   </li>
                 )
@@ -936,14 +935,14 @@ class BranchMenu extends Component<Props> {
                      className="Btn--flat"
                      onClick={() => { this._toggleResetPopup(); }}
                    >
-                    Cancel
+                     Cancel
                    </button>
                    <button
                      type="button"
                      className="BranchMenu__reset-confirm"
                      onClick={() => this._resetBranch()}
                    >
-                    Confirm
+                     Confirm
                    </button>
                  </div>
                </div>
@@ -956,7 +955,9 @@ class BranchMenu extends Component<Props> {
                  data-tooltip={syncTooltip}
                  type="button"
                >
-                 { !upToDate && allowSync && (activeBranch.commitsAhead !== undefined)
+                 { (!upToDate && allowSync
+                   && (activeBranch.commitsAhead !== undefined)
+                   && (activeBranch.commitsAhead !== null))
                   && (
                     <div
                       className="BranchMenu__sync-status Tooltip-data Tooltip-data--small"
@@ -964,14 +965,16 @@ class BranchMenu extends Component<Props> {
                       onMouseEnter={() => this._hovercommits(true)}
                       onMouseLeave={() => this._hovercommits(false)}
                     >
-                      { (activeBranch.commitsBehind !== 0)
+                      { ((activeBranch.commitsBehind !== 0)
+                        && (activeBranch.commitsBehind !== null))
                         && (
                           <div className="BranchMenu__sync-status--commits-behind">
                             { activeBranch.commitsBehind }
                           </div>
                         )
                       }
-                      { (activeBranch.commitsAhead !== 0)
+                      { ((activeBranch.commitsAhead !== 0)
+                        && (activeBranch.commitsAhead !== null))
                         && (
                           <div className="BranchMenu__sync-status--commits-ahead">
                             { activeBranch.commitsAhead }
@@ -1010,7 +1013,7 @@ class BranchMenu extends Component<Props> {
                      onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}
                      role="presentation"
                    >
-                    Pull (Pull-only)
+                     Pull (Pull-only)
                    </li>
                  </ul>
                </div>
@@ -1029,11 +1032,8 @@ class BranchMenu extends Component<Props> {
        />
 
        <Branches
-         sidePanelVisible={props.sidePanelVisible}
+         {...this.props}
          toggleSidePanel={this._toggleSidePanel}
-         defaultRemote={props.defaultRemote}
-         diskLow={props.diskLow}
-         branches={props.branches}
          disableDropdown={disableDropdown}
          activeBranch={activeBranch}
          toggleModal={this._setModalState}
@@ -1048,8 +1048,6 @@ class BranchMenu extends Component<Props> {
          syncTooltip={syncTooltip}
          switchBranch={this._switchBranch}
          toggleCover={this._toggleCover}
-         isDeprecated={props.isDeprecated}
-         setBranchUptodate={props.setBranchUptodate}
          showPullOnly={showPullOnly}
          labbookName={section.name}
          owner={owner}
@@ -1059,39 +1057,34 @@ class BranchMenu extends Component<Props> {
         state.publishModalVisible
         && (
           <VisibilityModal
+            {...this.props}
             owner={section.owner}
             name={section.name}
             labbookId={props.sectionId}
             remoteUrl={defaultRemote}
-            auth={props.auth}
             buttonText="Publish"
             header="Publish"
             modalStateValue="visibilityModalVisible"
-            sectionType={props.sectionType}
-            setPublishingState={props.setPublishingState}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
             setRemoteSession={this._setRemoteSession}
+
           />
         )
        }
        { state.publishDatasetsModalVisible
         && (
           <PublishDatasetsModal
+            {...this.props}
             owner={props.section.owner}
             name={props.section.name}
             labbookId={props.sectionId}
-            remoteUrl={props.remoteUrl}
-            auth={props.auth}
             buttonText="Publish All"
             header={state.publishDatasetsModalAction}
             pullOnly={state.pullOnly}
             modalStateValue="visibilityModalVisible"
-            sectionType={props.sectionType}
-            setSyncingState={props.setSyncingState}
-            setPublishingState={props.setPublishingState}
             toggleSyncModal={this._toggleSyncModal}
             checkSessionIsValid={this._checkSessionIsValid}
             toggleModal={this._togglePublishModal}
@@ -1107,8 +1100,8 @@ class BranchMenu extends Component<Props> {
        { state.forceSyncModalVisible
         && (
           <ForceSync
+            {...this.props}
             toggleSyncModal={this._toggleSyncModal}
-            sectionType={props.sectionType}
             pullOnly={state.pullOnly}
             owner={owner}
             name={name}
@@ -1116,9 +1109,10 @@ class BranchMenu extends Component<Props> {
         )
        }
 
-       { state.showLoginPrompt
-        && <LoginPrompt closeModal={this._closeLoginPromptModal} />
-       }
+       <LoginPrompt
+         showLoginPrompt={showLoginPrompt}
+         closeModal={this._closeLoginPromptModal}
+       />
      </div>
    );
  }
@@ -1126,6 +1120,7 @@ class BranchMenu extends Component<Props> {
 
 const mapStateToProps = state => ({
   collaborators: state.collaborators.collaborators,
+  publishFromCollaborators: state.collaborators.publishFromCollaborators,
 });
 
 const mapDispatchToProps = () => ({});

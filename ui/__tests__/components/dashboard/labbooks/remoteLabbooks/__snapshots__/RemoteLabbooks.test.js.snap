@@ -45,14 +45,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--xd"
+            data-selenium-id="RepositoryTitle"
+            data-tip="xd"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 xd
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              xd
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--xd"
+            />
           </h5>
         </div>
         <p
@@ -126,14 +162,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--update-test"
+            data-selenium-id="RepositoryTitle"
+            data-tip="update-test"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 update-test
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              update-test
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--update-test"
+            />
           </h5>
         </div>
         <p
@@ -213,14 +285,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--ui-test-remote"
+            data-selenium-id="RepositoryTitle"
+            data-tip="ui-test-remote"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 ui-test-remote
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              ui-test-remote
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--ui-test-remote"
+            />
           </h5>
         </div>
         <p
@@ -294,14 +402,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--ui-test-project"
+            data-selenium-id="RepositoryTitle"
+            data-tip="ui-test-project"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 ui-test-project
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              ui-test-project
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--ui-test-project"
+            />
           </h5>
         </div>
         <p
@@ -375,14 +519,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--trump-tweets"
+            data-selenium-id="RepositoryTitle"
+            data-tip="trump-tweets"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 trump-tweets
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              trump-tweets
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--trump-tweets"
+            />
           </h5>
         </div>
         <p
@@ -462,14 +642,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test-sync"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-sync"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-sync
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-sync
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test-sync"
+            />
           </h5>
         </div>
         <p
@@ -549,14 +765,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test-lb"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-lb"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-lb
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-lb
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test-lb"
+            />
           </h5>
         </div>
         <p
@@ -636,14 +888,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test-it"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-it"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-it
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-it
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test-it"
+            />
           </h5>
         </div>
         <p
@@ -717,14 +1005,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--testing-notifications"
+            data-selenium-id="RepositoryTitle"
+            data-tip="testing-notifications"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 testing-notifications
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              testing-notifications
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--testing-notifications"
+            />
           </h5>
         </div>
         <p
@@ -804,14 +1128,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--testing-activity-feed"
+            data-selenium-id="RepositoryTitle"
+            data-tip="testing-activity-feed"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 testing-activity-feed
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              testing-activity-feed
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--testing-activity-feed"
+            />
           </h5>
         </div>
         <p
@@ -885,14 +1245,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test-book"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-book"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-book
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-book
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test-book"
+            />
           </h5>
         </div>
         <p
@@ -966,14 +1362,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test-activity-feed"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-activity-feed"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-activity-feed
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-activity-feed
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test-activity-feed"
+            />
           </h5>
         </div>
         <p
@@ -1047,14 +1479,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test-1"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test-1"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test-1
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test-1
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test-1"
+            />
           </h5>
         </div>
         <p
@@ -1128,14 +1596,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--test"
+            data-selenium-id="RepositoryTitle"
+            data-tip="test"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 test
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              test
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--test"
+            />
           </h5>
         </div>
         <p
@@ -1209,14 +1713,50 @@ exports[`Test RemoteLabbooks rendering 1`] = `
         >
           <h5
             className="RemoteLabbooks__panel-title"
+            data-for="RemoteLabbooks--tempq"
+            data-selenium-id="RepositoryTitle"
+            data-tip="tempq"
+            onClick={[Function]}
+            role="presentation"
           >
-            <span>
+            <div
+              className=""
+              end={0}
+              onCopy={[Function]}
+              start={0}
+              style={
+                Object {
+                  "display": "block",
+                  "overflow": "hidden",
+                  "whiteSpace": "nowrap",
+                }
+              }
+            >
               <span
-                className=""
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
               >
                 tempq
               </span>
-            </span>
+              <span
+                style={
+                  Object {
+                    "display": "none",
+                  }
+                }
+              >
+                ...
+              </span>
+              tempq
+            </div>
+            <div
+              className="__react_component_tooltip place-bottom type-dark"
+              data-id="tooltip"
+              id="RemoteLabbooks--tempq"
+            />
           </h5>
         </div>
         <p

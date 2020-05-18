@@ -12,7 +12,8 @@ CUDA_DRIVER_VERSION_LOOKUP = {8: {0: (375, 51)},
                                   1: (387, 26),
                                   2: (396, 26)},
                               10: {0: (410, 58),
-                                   1: (418, 39)}}
+                                   1: (418, 39),
+                                   2: (440, 33)}}
 
 
 def _parse_version_str(version: Optional[str]) -> Optional[Tuple[int, int]]:

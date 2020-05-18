@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request, abort, current_app
-from flask_cors import CORS, cross_origin
+from flask_cors import cross_origin
 import redis
 
 from lmsrvcore import telemetry
-from lmsrvcore.auth.user import get_logged_in_author, get_logged_in_username
+from lmsrvcore.auth.user import get_logged_in_username
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
 from gtmcore.gitlib.git import GitAuthor

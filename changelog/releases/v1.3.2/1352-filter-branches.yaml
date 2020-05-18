@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1352"
+changelog:
+  - type: NON_USER_FACING
+    description: Update CI config to not check for a changelog entry when merging from master or integration

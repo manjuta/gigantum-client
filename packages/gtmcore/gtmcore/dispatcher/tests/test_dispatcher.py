@@ -1,19 +1,45 @@
 import json
 import time
-import pytest
 import datetime
 import os
+from subprocess import run
+from unittest.mock import patch
+
+import pytest
 import rq
 
-from gtmcore.dispatcher import Dispatcher
+from gtmcore.dispatcher import Dispatcher, default_redis_conn
 import gtmcore.dispatcher.jobs as bg_jobs
 
+from gtmcore.dispatcher.tests import RUNNING_ON_CI, BG_SKIP_MSG, BG_SKIP_TEST
 
-from gtmcore.dispatcher.tests import BG_SKIP_MSG, BG_SKIP_TEST
+
+@pytest.mark.skipif(BG_SKIP_TEST, reason=BG_SKIP_MSG)
+def test_redis_not_running():
+    if not RUNNING_ON_CI:
+        run(['supervisorctl', 'stop', 'redis'], check=True)
+        time.sleep(0.5)
+    d = Dispatcher()
+    assert not d.ready_for_job(test_redis_not_running)
+    if not RUNNING_ON_CI:
+        run(['supervisorctl', 'start', 'redis'], check=True)
+        time.sleep(0.5)
 
 
 @pytest.mark.skipif(BG_SKIP_TEST, reason=BG_SKIP_MSG)
 class TestDispatcher(object):
+
+    def test_ready_for_job(self):
+        """tests existing and non-existing queues, and redis not running"""
+        bad_queue = rq.Queue('a-totally-nonexistent-queue', connection=default_redis_conn())
+        with patch.object(Dispatcher, '_get_queue', return_value=bad_queue):
+            d = Dispatcher()
+            # Here the method is ignored because of the patch above
+            assert not d.ready_for_job(self.test_ready_for_job)
+        time.sleep(1)
+        d = Dispatcher()
+        # Since this is an unknown method, it'll go to the default queue
+        assert d.ready_for_job(self.test_ready_for_job)
 
     def test_simple_task(self):
         d = Dispatcher()

@@ -3,8 +3,8 @@
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 // mutations
-import SetVisibilityMutation from 'Mutations/SetVisibilityMutation';
-import SetDatasetVisibilityMutation from 'Mutations/SetDatasetVisibilityMutation';
+import SetVisibilityMutation from 'Mutations/repository/visibility/SetVisibilityMutation';
+import SetDatasetVisibilityMutation from 'Mutations/repository/visibility/SetDatasetVisibilityMutation';
 import PublishLabbookMutation from 'Mutations/branches/PublishLabbookMutation';
 import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 // component
@@ -15,15 +15,11 @@ import {
   setInfoMessage,
   setMultiInfoMessage,
 } from 'JS/redux/actions/footer';
-
 import store from 'JS/redux/store';
 // assets
 import './VisibilityModal.scss';
 
 type Props = {
-  auth: {
-    renewToken: Function,
-  },
   buttonText: string,
   checkSessionIsValid: Function,
   header: string,
@@ -64,10 +60,8 @@ class VisibilityModal extends Component<Props> {
   */
   _changeVisibility = () => {
     const { props, state } = this;
-    const self = this;
     const visibility = state.isPublic ? 'public' : 'private';
     const {
-      auth,
       checkSessionIsValid,
       modalStateValue,
       owner,
@@ -116,11 +110,7 @@ class VisibilityModal extends Component<Props> {
               }
             }
           } else {
-            auth.renewToken(true, () => {
-              resetState();
-            }, () => {
-              self._changeVisibility();
-            });
+            resetState();
           }
         }
       } else {
@@ -135,11 +125,9 @@ class VisibilityModal extends Component<Props> {
   *  @return {string}
   */
   _publishLabbook = () => {
-    const { props, state } = this;
+    const { state } = this;
     const id = uuidv4();
-    const self = this;
     const {
-      auth,
       checkSessionIsValid,
       owner,
       name,
@@ -216,11 +204,7 @@ class VisibilityModal extends Component<Props> {
               }
             }
           } else {
-            auth.renewToken(true, () => {
-              resetState();
-            }, () => {
-              self._publishLabbook();
-            });
+            resetState();
           }
         }
       } else {

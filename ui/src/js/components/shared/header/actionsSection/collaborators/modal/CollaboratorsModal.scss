@@ -4,6 +4,10 @@
 .CollaboratorsModal__add {
   position: relative;
   @include flex(flex-start, row);
+
+  &--disabled {
+    opacity: 0.5;
+  }
 }
 
 .Modal__sizer {

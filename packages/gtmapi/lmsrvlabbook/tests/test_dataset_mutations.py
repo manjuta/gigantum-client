@@ -436,11 +436,6 @@ class TestDatasetMutations(object):
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
-        responses.add(responses.DELETE, 'https://api.gigantum.com/read/index/default%2Fdataset100',
-                      json=[{
-                                "message": "success"
-                            }],
-                      status=204)
         responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
                       json=[{'status': 'queueing for delete'}],
                       status=200)
@@ -468,6 +463,28 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset_not_local(self, fixture_working_dir):
+        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json=[{
+                              "id": 27,
+                              "description": "",
+                            }],
+                      status=200)
+        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json={
+                                "message": "202 Accepted"
+                            },
+                      status=202)
+        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+                      json=[{
+                                "message": "404 Project Not Found"
+                            }],
+                      status=404)
+        responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
+                      json=[{'status': 'queueing for delete'}],
+                      status=200)
+
         query = """
                 mutation myMutation($owner: String!, $datasetName: String!) {
                   deleteDataset(input: {owner: $owner, datasetName: $datasetName, local: false, remote: true}) {
@@ -478,8 +495,9 @@ class TestDatasetMutations(object):
                 """
         variables = {"datasetName": "dataset100", "owner": "default"}
         result = fixture_working_dir[2].execute(query, variable_values=variables)
-        assert "errors" in result
-        assert result['errors'][0]['message'] == "A dataset must exist locally to delete it in the remote."
+        assert "errors" not in result
+        assert result['data']['deleteDataset']['localDeleted'] is False
+        assert result['data']['deleteDataset']['remoteDeleted'] is True
 
     @responses.activate
     def test_delete_remote_dataset_no_session(self, fixture_working_dir):

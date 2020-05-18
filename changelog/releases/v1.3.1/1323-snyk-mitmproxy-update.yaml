@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1323"
+changelog:
+  - type: FIX
+    description: Updating mitmproxy and PyYaml as recommended by Snyk

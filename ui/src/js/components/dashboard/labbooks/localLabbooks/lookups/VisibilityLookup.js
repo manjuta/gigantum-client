@@ -16,15 +16,19 @@ const VisibilityLookupQuery = graphql`
 
 const Visibility = {
   constructor() {
-  	this.query = this.query;
+    this.query = this.query;
   },
 
   query: (ids) => {
     const variables = { ids };
 
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
-        fetchQuery(VisibilityLookupQuery(), variables).then((response) => {
+      const fetchData = () => {
+        fetchQuery(
+          VisibilityLookupQuery,
+          variables,
+          { force: true },
+        ).then((response) => {
           resolve(response);
         }).catch((error) => {
           console.log(error);

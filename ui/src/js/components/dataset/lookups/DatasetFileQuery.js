@@ -21,8 +21,12 @@ const DatasetFile = {
     };
 
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
-        fetchQuery(DatasetFileQuery(), variables).then((response) => {
+      const fetchData = () => {
+        fetchQuery(
+          DatasetFileQuery,
+          variables,
+          { fetch: true },
+        ).then((response) => {
           resolve(response);
         }).catch((error) => {
           console.log(error);

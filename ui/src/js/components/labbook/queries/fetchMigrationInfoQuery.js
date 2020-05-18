@@ -21,8 +21,12 @@ const FetchLabbook = {
     };
 
     return new Promise((resolve, reject) => {
-      const fetchData = function () {
-        fetchQuery(fetchMigrationInfoQuery(), variables).then((response) => {
+      const fetchData = () => {
+        fetchQuery(
+          fetchMigrationInfoQuery,
+          variables,
+          { force: true },
+        ).then((response) => {
           resolve(response.data);
         }).catch((error) => {
           console.log(error);

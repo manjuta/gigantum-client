@@ -84,3 +84,23 @@ def is_container_stopped(driver):
 def stop_container(driver):
     """ Stop container after test is finished """
     return driver.find_element_by_css_selector(".flex>.Running").click()
+
+
+def project_title_correct(project_title: str, expected_project_title: str) -> bool:
+    """Helper method to match a project title that may or may not be shortened with a `...` in the middle
+
+    Args:
+        project_title:
+        expected_project_title:
+
+    Returns:
+        True if the title matches, false if it does not
+    """
+    if "..." in project_title:
+        _, _, hashstr = expected_project_title.split('-')
+        if "selenium-" in project_title and f"-{hashstr}" in project_title:
+            return True
+        else:
+            return False
+    else:
+        return project_title == expected_project_title

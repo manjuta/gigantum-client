@@ -35,10 +35,42 @@ exports[`Project File component File Snapshot 1`] = `
         onClick={[Function]}
         role="presentation"
       >
-        NetflixViewingHistoryJ.csv
+        <div
+          className=""
+          end={0}
+          onCopy={[Function]}
+          start={0}
+          style={
+            Object {
+              "display": "block",
+              "overflow": "hidden",
+              "whiteSpace": "nowrap",
+            }
+          }
+        >
+          <span
+            style={
+              Object {
+                "display": "none",
+              }
+            }
+          >
+            NetflixViewingHistoryJ.csv
+          </span>
+          <span
+            style={
+              Object {
+                "display": "none",
+              }
+            }
+          >
+            ...
+          </span>
+          NetflixViewingHistoryJ.csv
+        </div>
       </div>
       <div
-        className="__react_component_tooltip place-bottom type-dark "
+        className="__react_component_tooltip place-bottom type-dark"
         data-id="tooltip"
         id="Tooltip--file"
       />

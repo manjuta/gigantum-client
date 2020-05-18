@@ -1,1 +1,1 @@
-from lmsrvcore.utilities.git import configure_git_credentials
+from lmsrvcore.utilities.git import configure_git_credentials, remove_git_credentials

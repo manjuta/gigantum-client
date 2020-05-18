@@ -9,8 +9,6 @@ import {
   setModalVisible,
 } from 'JS/redux/actions/labbook/labbook';
 import { setIsSyncing, setIsExporting } from 'JS/redux/actions/dataset/dataset';
-// config
-import Config from 'JS/config';
 // components
 import ErrorBoundary from 'Components/common/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';
@@ -221,8 +219,8 @@ class Header extends Component<Props> {
     const headerCSS = classNames({
       Header: true,
       'Header--sticky': isSticky,
-      'Header--demo': (window.location.hostname === Config.demoHostName) || diskLow,
-      'Header--is-deprecated': isDeprecated,
+      'Header--disk-low': diskLow,
+      'Header--deprecated': isDeprecated,
       'Header--branchesOpen': branchesOpen,
     });
     const branchesErrorCSS = classNames({
