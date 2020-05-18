@@ -206,7 +206,13 @@ workflows:
   run_tests:
     jobs:
       - changelog-schema-check
-      - changelog-pr-check
+      - changelog-pr-check:
+          # Don't run the changelog PR check when merging FROM master or integration
+          filters:
+            branches:
+              ignore:
+                - master
+                - integration
       - mypy-gtmcore
       - mypy-gtmapi
       - test-gtmcore-environment:
