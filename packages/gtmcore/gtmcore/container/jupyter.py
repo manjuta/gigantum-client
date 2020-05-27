@@ -55,8 +55,6 @@ def start_jupyter(project_container: ContainerOperations, check_reachable: bool 
         return suffix
     elif len(jupyter_ps) == 0:
         new_token = uuid.uuid4().hex
-        if proxy_prefix and proxy_prefix[0] != '/':
-            proxy_prefix = f'/{proxy_prefix}'
         _start_jupyter_process(project_container, new_token, proxy_prefix)
         suffix = f'{proxy_prefix or ""}/lab/tree/code?token={new_token}'
 
@@ -127,7 +125,7 @@ def check_jupyter_reachable(ip_address: str, port: int, prefix: str):
                     break
                 else:
                     time.sleep(0.5)
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
             # Assume API isn't up at all yet, so no connection can be made
             time.sleep(0.5)
     else:

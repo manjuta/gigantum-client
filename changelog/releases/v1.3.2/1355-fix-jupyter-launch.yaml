@@ -1,0 +1,8 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1355"
+changelog:
+  - type: FIX
+    description: Checking for the Jupyter API in the data science base at start now properly handles all errors during startup
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1339
+  - type: FIX
+    description: Route to the Jupyter API no longer contains an extra slash when launching Jupyter for the second time
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1353
