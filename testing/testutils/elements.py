@@ -198,8 +198,7 @@ class ImportProjectElements(UiComponent):
 
     def import_project_via_zip_file_drag_and_drop(self, file_path):
         """Import a project via zip file drag and drop in the zip file drop zone."""
-        project_zip_file = file_path.rsplit("/", 1)[1]
-        logging.info(f"Importing project {project_zip_file} via zip file drag and drop")
+        logging.info(f"Importing project {file_path} via zip file drag and drop")
         self.import_existing_button.wait_to_appear().click()
         with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
             js_script = js_file.read()
@@ -952,10 +951,10 @@ class CloudProjectElements(UiComponent):
         self.publish_confirm_button.wait_to_appear().click()
         project_control = ProjectControlElements(self.driver)
         project_control.container_status_publishing.wait_to_appear(60)
-        project_control.container_status_stopped.wait_to_appear(30)
+        project_control.container_status_stopped.wait_to_appear(45)
         # Time sleep necessary or cloud project does not appear in cloud tab
         # Once the new cloud platform is up, this can be removed
-        time.sleep(15)
+        time.sleep(5)
 
     def sync_cloud_project(self, project_title):
         """Sync a published project."""
@@ -963,7 +962,7 @@ class CloudProjectElements(UiComponent):
         self.sync_cloud_project_button.wait_to_appear().click()
         project_control = ProjectControlElements(self.driver)
         project_control.container_status_syncing.wait_to_appear(60)
-        project_control.container_status_stopped.wait_to_appear(30)
+        project_control.container_status_stopped.wait_to_appear(45)
 
     def delete_cloud_project(self, project_title):
         """Delete a published project."""

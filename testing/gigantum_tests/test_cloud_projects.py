@@ -113,6 +113,7 @@ def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
         f"Expected {project_title} to be the first cloud project in {collaborator}'s cloud tab, " \
         f"but instead got {first_project_title}"
 
+    time.sleep(1)
     cloud_project_elts.import_first_cloud_project_button.click()
     project_control = testutils.ProjectControlElements(driver)
     project_control.container_status_stopped.wait_to_appear(30)

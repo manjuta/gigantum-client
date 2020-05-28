@@ -68,6 +68,9 @@ def test_delete_file_local_branch(driver: selenium.webdriver, *args, **kwargs):
     # Time sleep is consistent and necessary
     time.sleep(5)
 
+    # Scroll to top. On low res screen this may be needed.
+    driver.execute_script("window.scrollTo(0, 0);")
+
     logging.info("Switching back to master branch and merging test-branch")
     branch_elts.switch_to_alternate_branch()
     branch_elts.merge_alternate_branch()
