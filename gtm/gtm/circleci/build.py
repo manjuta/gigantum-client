@@ -10,10 +10,11 @@ import yaml
 from gtm.common import get_client_root, get_resources_root
 
 
-class CircleCIImageBuilder(object):
+class CircleCIImageBuilder:
     """Class to manage building base images"""
 
-    def _get_current_commit_hash(self) -> str:
+    @staticmethod
+    def _get_current_commit_hash() -> str:
         """Method to get the current commit hash of the gtm repository
 
         Returns:
@@ -57,14 +58,14 @@ class CircleCIImageBuilder(object):
         with open(os.path.join(output_dir, 'labmanager.yaml'), "wt") as cf:
             cf.write(yaml.dump(base_data, default_flow_style=False))
 
-    def _build_image(self, no_cache: bool=False) -> str:
-        """
+    def _build_image(self, no_cache: bool = False) -> str:
+        """A helper method to build the image
 
         Args:
-            no_cache(bool): set to True to ignore docker build cache
+            no_cache: set to True to ignore docker build cache
 
         Returns:
-
+            tag for the newly built image
         """
         client = docker.from_env()
 
@@ -79,7 +80,7 @@ class CircleCIImageBuilder(object):
                                        pull=True, rm=True, decode=True)
         for line in build_lines:
             print(next(iter(line.values())), end='')
-            
+
         # Verify the desired image built successfully
         try:
             client.images.get(named_tag)
@@ -88,14 +89,12 @@ class CircleCIImageBuilder(object):
 
         return named_tag
 
-    def _publish_image(self, image_tag: str, verbose=True) -> None:
+    @staticmethod
+    def _publish_image(image_tag: str, verbose=True) -> None:
         """Private method to push images to the logged in server (e.g hub.docker.com)
 
         Args:
-            image_tag(str): full image tag to publish
-
-        Returns:
-            None
+            image_tag: full image tag to publish
         """
         client = docker.from_env()
 
