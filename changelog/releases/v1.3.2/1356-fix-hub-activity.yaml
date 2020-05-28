@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1356"
+changelog:
+  - type: FIX
+    description: Ports for monitoring jupyter are now reliably available when running the Client in a Hub
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1353
