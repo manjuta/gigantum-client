@@ -41,6 +41,7 @@ class CopyUrl extends Component<Props> {
       owner,
       remoteUrl,
     } = this.props;
+    console.log(remoteUrl)
     const doesNotHaveRemote = (defaultRemote === null) && (remoteUrl === null);
 
     // declare css here

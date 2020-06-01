@@ -550,7 +550,7 @@ class ActionsMenu extends Component<Props> {
     const { owner, name } = this.props;
     this.setState({
       addedRemoteThisSession: true,
-      remoteUrl: `https://gigantum.com/${owner}/${name}`,
+      remoteUrl: `https://self-hosted-gitlab.gtm-dev.cloud/${owner}/${name}`,
     });
   }
 
