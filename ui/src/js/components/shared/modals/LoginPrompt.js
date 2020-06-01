@@ -27,8 +27,7 @@ class LoginPrompt extends Component<Props> {
     auth.renewToken(
       null,
       () => {},
-      (response) => {
-        console.log(response);
+      () => {
       }, null,
       (err) => {
         console.log(err);
