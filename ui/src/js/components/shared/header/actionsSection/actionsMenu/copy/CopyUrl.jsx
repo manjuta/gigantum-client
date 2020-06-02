@@ -66,7 +66,7 @@ class CopyUrl extends Component<Props> {
             <input
               id="ActionsMenu-copy"
               className="ActionsMenu__input"
-              defaultValue={`gigantum.com/${owner}/${name}`}
+              defaultValue={`self-hosted-gitlab.gtm-dev.cloud/${owner}/${name}`}
               disabled={doesNotHaveRemote}
               type="text"
             />
