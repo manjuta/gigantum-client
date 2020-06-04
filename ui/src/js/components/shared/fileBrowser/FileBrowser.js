@@ -1,6 +1,5 @@
 // vendor
 import React, { Component } from 'react';
-import store from 'JS/redux/store';
 import { DropTarget } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import classNames from 'classnames';
