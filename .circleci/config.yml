@@ -52,6 +52,9 @@ jobs:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
+          name: Install codecov
+          command: pip3 install codecov
+      - run:
           name: Run Core unit and coverage tests
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
@@ -72,6 +75,9 @@ jobs:
       - run:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
+      - run:
+          name: Install codecov
+          command: pip3 install codecov
       - run:
           name: Run API unit, integration and coverage tests
           command: |
@@ -97,6 +103,9 @@ jobs:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
+          name: Install codecov
+          command: pip3 install codecov
+      - run:
           name: Run gtmcore environment tests
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
@@ -116,6 +125,9 @@ jobs:
       - run:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
+      - run:
+          name: Install codecov
+          command: pip3 install codecov
       - run:
           name: Run Dispatcher and background job tests
           command: |
