@@ -89,7 +89,7 @@ class Folder extends Component {
     *  @return {}
     */
   _setSelected = (evt, isSelected) => {
-    // evt.preventDefault();
+    evt.persist();
     evt.stopPropagation();
     const { props, state } = this;
     props.updateChildState(
@@ -164,10 +164,14 @@ class Folder extends Component {
     let incompleteCount = 0;
     // TODO remove refs, this has been deprecated
     const refs = Object.keys(this.refs);
-
     refs.forEach((ref) => {
-      const parentState = (this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance)
-      ? this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance().state : this.refs[ref].getDecoratedComponentInstance().state;
+      let parentState;
+      if ((this.refs[ref] && this.refs[ref].getDecoratedComponentInstance && this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance)) {
+        const parent = this.refs[ref].getDecoratedComponentInstance().getDecoratedComponentInstance();
+        parentState = parent.state;
+      } else {
+        parentState = this.refs[ref].getDecoratedComponentInstance().state;
+      }
 
       if (parentState.isSelected) {
         checkCount += 1;
@@ -190,7 +194,7 @@ class Folder extends Component {
           }
         },
       );
-    } else if (checkCount === Object.keys(this.refs).length && isSelected) {
+    } else if (checkCount === Object.keys(this.refs).length) {
       props.updateChildState(key, true, false, expanded, addFolderVisible);
       this.setState(
         {
@@ -214,6 +218,9 @@ class Folder extends Component {
         () => {
           if (props.setIncomplete) {
             props.setIncomplete();
+          }
+          if (props.checkParent) {
+            props.checkParent();
           }
         },
       );

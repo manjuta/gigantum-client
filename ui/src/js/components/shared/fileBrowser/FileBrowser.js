@@ -149,7 +149,7 @@ class FileBrowser extends Component {
 
   static getDerivedStateFromProps(props, state) {
     const previousCount = state.count;
-    const count = props.files.edges.length;
+    const count = props.files.edges.length - 1;
     const childrenState = state.isFetching ? state.childrenState : {};
     const selectedFiles = [];
     let selectedCount = 0;
@@ -400,6 +400,13 @@ class FileBrowser extends Component {
     childrenState[key].isAddingFolder = isAddingFolder;
 
     childrenStateKeys.forEach((childKey) => {
+      if (childKey.startsWith(key) && isSelected) {
+        childrenState[childKey].isSelected = true;
+      }
+      if (childKey.startsWith(key) && !isSelected && !isIncomplete) {
+        childrenState[childKey].isSelected = false;
+        childrenState[childKey].isIncomplete = false;
+      }
       if (childrenState[childKey].isSelected) {
         multiCount += 1;
       }
@@ -547,7 +554,7 @@ class FileBrowser extends Component {
   _selectFiles = () => {
     const { state } = this;
     const { childrenState } = state;
-    const count = Object.keys(state.childrenState).length;
+    const count = Object.keys(state.childrenState).length - 1;
     const childrenStateKeys = Object.keys(state.childrenState);
 
     let multiSelect = (count === state.selectedCount) ? 'none' : 'all';
@@ -1029,6 +1036,8 @@ class FileBrowser extends Component {
                 downloadDisabled={downloadDisabled}
                 section={props.section}
                 selectedCount={state.selectedCount}
+                selectedFolderCount={state.selectedFolderCount}
+                selectedFileCount={state.selectedFileCount}
                 popupVisible={state.popupVisible}
                 name={name}
                 owner={owner}
