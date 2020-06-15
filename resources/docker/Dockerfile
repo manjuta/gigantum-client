@@ -96,11 +96,12 @@ RUN apt-get -y update && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash && \
     apt-get -y install nodejs && \
     npm install -g configurable-http-proxy && \
-    cd /opt/confhttpproxy && pip3 install . && \
     # Install client package dependencies
     pip3 install wheel && \
     # Install package deps, note testing requirements will essentially be a noop in production
     pip3 install -r /opt/gtmcore/requirements.txt -r /opt/gtmapi/requirements.txt -r /opt/requirements-testing.txt && \
+    # Install confhttpproxy after other requirements to avoid version thrashing
+    cd /opt/confhttpproxy && pip3 install . && \
     pip3 install uwsgi && \
     # Configure Honeytail (If running in a cluster, will be a noop otherwise)
     chmod u+x /tmp/honeytail.sh && /tmp/honeytail.sh && \

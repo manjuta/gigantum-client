@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1379"
+changelog:
+  - type: IMPROVEMENT
+    description: Gigantum runs via command-line in WSL2, with improvements in filesystem performance

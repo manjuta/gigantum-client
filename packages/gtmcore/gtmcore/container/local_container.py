@@ -1,6 +1,5 @@
 import json
 import os
-import socket
 import tarfile
 import tempfile
 import time
@@ -8,7 +7,6 @@ from typing import Optional, Callable, List, Dict
 
 import docker
 import docker.errors
-from docker import DockerClient, from_env
 from docker.models.containers import Container
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
@@ -86,9 +84,8 @@ class LocalProjectContainer(ContainerOperations):
             # From: https://docker-py.readthedocs.io/en/stable/api.html#docker.api.build.BuildApiMixin.build
             # This builds the image and generates output status text.
             status_counter = 0
-            for line in self._client.api.build(path=self.env_dir, tag=self.image_tag, pull=True, nocache=nocache,
-                                               forcerm=True):
-                ldict = json.loads(line)
+            for ldict in self._client.api.build(path=self.env_dir, tag=self.image_tag, pull=True, nocache=nocache,
+                                                forcerm=True, decode=True):
                 stream = (ldict.get("stream") or "")
                 if feedback_callback:
                     feedback_callback(stream)
@@ -457,40 +454,6 @@ class LocalProjectContainer(ContainerOperations):
             raise ValueError(f"Unsupported development tool type '{dev_tool}' when trying to configure pre-launch.")
 
 
-def get_docker_client(check_server_version=True, fallback=True) -> DockerClient:
-    """Return a docker client with proper version to match server API. """
-
-    if check_server_version:
-        try:
-            docker_server_api_version = _get_docker_server_api_version()
-            return from_env(version=docker_server_api_version)
-        except ValueError as e:
-            if fallback:
-                logger.warning("Could not determine Docker server API version; using default")
-                return from_env()
-            else:
-                logger.error()
-                raise e
-    else:
-        return from_env()
-
-
-def _get_docker_server_api_version() -> str:
-    """Retrieve the Docker server API version. """
-
-    socket_path = '/var/run/docker.sock'
-    if not os.path.exists(socket_path):
-        raise ValueError('No docker.sock on machine (is a Docker server installed?)')
-
-    socket_connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    socket_connection.connect(socket_path)
-    socket_connection.send(b'GET http://*/version HTTP/1.1\r\nHost: *\r\n\r\n')
-
-    response_data = socket_connection.recv(4000)
-    content_lines = response_data.decode().split('\r\n')
-
-    version_dict = json.loads(content_lines[-1])
-    if 'ApiVersion' not in version_dict.keys():
-        raise ValueError('ApiVersion not in Docker version config data')
-    else:
-        return version_dict['ApiVersion']
+def get_docker_client():
+    """A thin wrapper that calls docker.from_env()"""
+    return docker.from_env()

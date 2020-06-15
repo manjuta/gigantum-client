@@ -7,8 +7,6 @@ setup(name='confhttpproxy',
       author_email='support@gigantum.io',
       license='MIT',
       packages=['confhttpproxy'],
-      install_requires=[
-          'pytest',
-          'requests'
-      ],
+      install_requires=['requests'],
+      tests_require=['pytest'],
       zip_safe=False)
