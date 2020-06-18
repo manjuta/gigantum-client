@@ -56,9 +56,6 @@ def git_garbage_collect(repository: Repository) -> None:
         subprocess.CalledProcessError when git gc fails.
         """
     logger.info(f"Running git gc (Garbage Collect) in {str(repository)}...")
-    if os.environ.get('WINDOWS_HOST'):
-        logger.warning(f"Avoiding `git gc` in {str(repository)} on Windows host fs")
-        return
 
     try:
         call_subprocess(['git', 'gc'], cwd=repository.root_dir)

@@ -90,7 +90,7 @@ class ZipExporter(object):
             unzipped_path = os.path.join(temp_dir, 'project', pdirs[0])
 
             repo = fetch_method(unzipped_path)
-            statusmsg = f'{statusmsg}\nCreating workspace branch...'
+            statusmsg = f'{statusmsg}\nSetting up safe Git configuration...'
             update_meta(statusmsg)
 
             # Also, remove any lingering remotes.
