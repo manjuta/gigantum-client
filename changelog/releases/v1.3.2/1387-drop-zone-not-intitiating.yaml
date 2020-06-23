@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1388"
+changelog:
+  - type: FIX
+    description: Fixes file being initiated as a drag zone, should be defaulted to drop zone.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1387

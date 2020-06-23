@@ -18,9 +18,10 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
         <div
           className="Tooltip__toggle userNote"
           data-event="click focus"
-          data-for="Tooltip--userNote"
           data-tip="This menu can be used to create a note. A note is added to the current point in the Activity Feed and can be viewed by collaborators when synced. 
  The note editor supports markdown."
+          onClick={[Function]}
+          role="presentation"
         >
           <div
             className="Tooltip__glow-container"
@@ -35,9 +36,8 @@ exports[`DatasetActivityContainer Renders a snapshot 1`] = `
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark"
+          className="__react_component_tooltip place-top type-dark "
           data-id="tooltip"
-          id="Tooltip--userNote"
         />
       </div>
       <div

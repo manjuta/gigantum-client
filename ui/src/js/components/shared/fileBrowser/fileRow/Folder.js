@@ -22,7 +22,7 @@ class Folder extends Component {
     super(props);
 
     this.state = {
-      isDragging: props.isDragging,
+      isDragging: false,
       expanded: this.props.childrenState[this.props.fileData.edge.node.key].isExpanded || false,
       isSelected: (props.isSelected || this.props.childrenState[this.props.fileData.edge.node.key].isSelected) || false,
       isIncomplete: this.props.childrenState[this.props.fileData.edge.node.key].isIncomplete || false,
