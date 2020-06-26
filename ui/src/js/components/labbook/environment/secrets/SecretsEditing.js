@@ -5,13 +5,14 @@ import React, { PureComponent } from 'react';
 import './SecretsEditing.scss';
 
 type Props = {
+  addedFiles: Array,
+  editSecret: Function,
   node: {
     filename: string,
   },
-  addedFiles: Array,
-  setFile: Function,
+  nodeMissing: boolean,
   replaceFile: Function,
-  editSecret: Function,
+  setFile: Function,
 }
 
 class SecretsEditing extends PureComponent<Props> {
@@ -22,7 +23,10 @@ class SecretsEditing extends PureComponent<Props> {
       setFile,
       replaceFile,
       editSecret,
+      nodeMissing,
     } = this.props;
+
+    const buttonText = nodeMissing ? 'Upload Missing File' : 'Replace File...';
 
     return (
       <div className="SecretsEditing flex">
@@ -33,26 +37,15 @@ class SecretsEditing extends PureComponent<Props> {
           <div
             className="Btn Btn--allStyling Btn--noMargin Btn--action padding--horizontal"
           >
-            Replace File...
+            {buttonText}
           </div>
           <input
             id="update_secret"
             className="hidden"
             type="file"
-            onChange={evt => setFile(node.filename, evt.target.files[0])}
+            onChange={evt => setFile(node, evt.target.files[0])}
           />
         </label>
-        <button
-          type="button"
-          className="Btn Btn--small Btn__check--grey Btn--round"
-          disabled={!addedFiles.has(node.filename)}
-          onClick={() => replaceFile(node.filename, node.id, node.isPresent)}
-        />
-        <button
-          type="button"
-          className="Btn Btn--small Btn__close--grey Btn--round"
-          onClick={() => editSecret(node.filename)}
-        />
       </div>
     );
   }

@@ -37,7 +37,7 @@ class MITMProxyOperations(object):
 
         # Note that the use of rserver is not intrinsically meaningful - we could make this more generic
         # if mitmproxy supports multiple dev tools
-        proxy_path = f'rserver/{devtool_container.image_tag}/'
+        proxy_path = f'/rserver/{devtool_container.image_tag}/'
 
         # existing route to MITM or not?
         matched_routes = router.get_matching_routes(mitm_endpoint, proxy_path)
@@ -46,15 +46,15 @@ class MITMProxyOperations(object):
             suffix = matched_routes[0]
         elif len(matched_routes) == 0:
             logger.info('Creating route for existing RStudio mitmproxy_proxy')
-            rt_prefix, _ = router.add(mitm_endpoint, proxy_path)
+            router.add(mitm_endpoint, proxy_path)
             # Warning: RStudio will break if there is a trailing slash!
-            suffix = f'/{rt_prefix}'
+            suffix = proxy_path
         else:
             raise ValueError(
                 f"Multiple routes to RStudio proxy for {str(devtool_container.labbook)}. Please restart Gigantum.")
 
         # The endpoint plus proxy target constitute the full URL for an MITM-reverse-proxied RStudio
-        return f"{mitm_endpoint}/{proxy_path}", suffix
+        return f"{mitm_endpoint}{proxy_path}", suffix
 
     @classmethod
     def get_mitmendpoint(cls, labbook_container: ContainerOperations) -> Optional[str]:

@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1380"
+changelog:
+  - type: DEPENDENCY_CHANGE
+    description: Updates graphl-cli from 3.0.8 to 4.0.0 to fix a security vulnerability
+    dependencyTag: 4.0.0

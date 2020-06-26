@@ -5,7 +5,7 @@ import sys
 
 import yaml
 
-from gtm.utils import dockerize_windows_path
+from gtm.utils import dockerize_mount_path
 from gtm.common.console import ask_question
 
 CONFIG_FILE = os.path.expanduser("~/.gtm/config.yaml")
@@ -66,11 +66,11 @@ class UserConfig(object):
         """Method to select a docker-compose template and update variables
 
         Args:
-            is_windows:
-            use_pycharm:
-            working_dir:
-            is_backend:
-            uid:
+            is_windows: is it?
+            use_pycharm: shall we?
+            working_dir: where does Gigantum Client keep files? (usually ~/gigantum)
+            is_backend: do we run with pre-compiled JS and mount the Python packages?
+            uid: used for the giguser when created in Client or Project
 
         Returns:
 
@@ -100,9 +100,11 @@ class UserConfig(object):
         helper_script = os.path.join(self.gigantum_client_root, 'build', 'developer', 'setup.sh')
         # Replace values
         if is_windows:
-            working_dir = dockerize_windows_path(working_dir)
-            gtm_dir = dockerize_windows_path(gtm_dir)
-            helper_script = dockerize_windows_path(helper_script)
+            # If you're developing with PyCharm, this is downloaded already. It's small anyway
+            handy_image = 'busybox:latest'
+            working_dir = dockerize_mount_path(working_dir, handy_image)
+            gtm_dir = dockerize_mount_path(gtm_dir, handy_image)
+            helper_script = dockerize_mount_path(helper_script, handy_image)
         else:
             # USER_ID only exists in the 'nix' templates - there's currently no comparable approach in Windows
             data = data.replace('{% USER_ID %}', str(uid))

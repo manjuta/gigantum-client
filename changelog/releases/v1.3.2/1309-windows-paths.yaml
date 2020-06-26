@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1349"
+changelog:
+  - type: FIX
+    description: Update method to set bind mount paths in Windows using `gtm`
+      developer CLI

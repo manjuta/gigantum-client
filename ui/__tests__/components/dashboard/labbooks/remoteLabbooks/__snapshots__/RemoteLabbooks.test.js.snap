@@ -85,7 +85,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               xd
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--xd"
             />
@@ -202,7 +202,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               update-test
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--update-test"
             />
@@ -325,7 +325,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               ui-test-remote
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--ui-test-remote"
             />
@@ -442,7 +442,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               ui-test-project
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--ui-test-project"
             />
@@ -559,7 +559,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               trump-tweets
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--trump-tweets"
             />
@@ -682,7 +682,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test-sync
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test-sync"
             />
@@ -805,7 +805,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test-lb
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test-lb"
             />
@@ -928,7 +928,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test-it
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test-it"
             />
@@ -1045,7 +1045,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               testing-notifications
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--testing-notifications"
             />
@@ -1168,7 +1168,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               testing-activity-feed
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--testing-activity-feed"
             />
@@ -1285,7 +1285,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test-book
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test-book"
             />
@@ -1402,7 +1402,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test-activity-feed
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test-activity-feed"
             />
@@ -1519,7 +1519,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test-1
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test-1"
             />
@@ -1636,7 +1636,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               test
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--test"
             />
@@ -1753,7 +1753,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
               tempq
             </div>
             <div
-              className="__react_component_tooltip place-bottom type-dark"
+              className="__react_component_tooltip place-bottom type-dark "
               data-id="tooltip"
               id="RemoteLabbooks--tempq"
             />

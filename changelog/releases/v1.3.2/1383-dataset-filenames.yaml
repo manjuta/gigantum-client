@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1384"
+changelog:
+  - type: FIX
+    description: Fixed an issue that caused filenames to not render in the linked dataset file browser widget.

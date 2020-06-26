@@ -24,6 +24,7 @@ module.exports = {
   "transformIgnorePatterns": [
     // "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
     // "/node_modules/(?!(@my-company)/).*/"
+    "<rootDir>/(node_modules)/",
     "<rootDir>/node_modules/(?!shared|another)"
   ],
   "unmockedModulePathPatterns": [
@@ -50,7 +51,10 @@ module.exports = {
     "^Components[/](.+)": "<rootDir>/src/js/components/$1",
     "^Mutations[/](.+)": "<rootDir>/src/js/mutations/$1",
     "^Tests[/](.+)": "<rootDir>/__tests__/$1",
-    "^JS[/](.+)": "<rootDir>/src/js/$1"
+    "^JS[/](.+)": "<rootDir>/src/js/$1",
+    '^dnd-core$': 'dnd-core/dist/cjs',
+    '^react-dnd$': 'react-dnd-cjs',
+    '^react-dnd-html5-backend$': 'react-dnd-html5-backend-cjs',
   },
   "testEnvironment": "jsdom"
   // "testEnvironmentOptions": "<!DOCTYPE html><html><body><div id='root'></div></body></html>"

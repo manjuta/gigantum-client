@@ -260,7 +260,8 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
             t_start = time.time()
 
             # Process collected data and create an activity record
-            activity_record = self.process(ActivityType.CODE, list(reversed(self.cell_data)), {"path": metadata["path"]})
+            activity_record = self.process(ActivityType.CODE, list(reversed(self.cell_data)),
+                                           {"path": metadata["path"]})
 
             # Commit changes to the related Notebook file
             commit = self.commit_labbook()
@@ -298,7 +299,7 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
         container_ip = self.get_container_ip()
 
         if not container_ip:
-            raise ValueError("Failed to find LabBook container IP address.")
+            raise ValueError("Failed to find Project container IP address.")
         cf_data['ip'] = container_ip
 
         # Open ports if needed.
@@ -311,7 +312,9 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
         project_container = container_for_context(self.user, labbook=self.labbook)
         project_container.open_ports(ports)
 
+        # Create a blocking jupyter client after configuration has been loaded.
         km.load_connection_info(cf_data)
+        bc = km.blocking_client()
 
         # Get connection to the DB
         redis_conn = redis.Redis(db=database)
@@ -320,7 +323,7 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
             while True:
                 try:
                     # Check for messages, waiting up to 1 second. This is the rate that records will be merged
-                    msg = km.get_iopub_msg(timeout=1)
+                    msg = bc.get_iopub_msg(timeout=1)
                     self.handle_message(msg)
 
                 except queue.Empty:
@@ -334,7 +337,7 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
                     break
 
         except Exception as err:
-            logger.error("Error in JupyterLab Activity Monitor: {}".format(err))
+            logger.exception(f"Error in JupyterLab Activity Monitor: {err}")
         finally:
             # Delete the kernel monitor key so the dev env monitor will spin up a new process
             # You may lose some activity if this happens, but the next action will sweep up changes

@@ -27,22 +27,26 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       className="Tabs"
     >
       <li
-        className="Tab Tab--local Tab--selected"
+        className="Tab Tab--local"
       >
-        <a
+        <button
+          className="Btn--noStyle"
           onClick={[Function]}
+          type="button"
         >
           Local
-        </a>
+        </button>
       </li>
       <li
         className="Tab Tab--cloud"
       >
-        <a
+        <button
+          className="Btn--noStyle"
           onClick={[Function]}
+          type="button"
         >
           Gigantum Hub
-        </a>
+        </button>
       </li>
       <div
         className="hidden cloudLocal"
@@ -51,8 +55,9 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
         <div
           className="Tooltip__toggle cloudLocal"
           data-event="click focus"
-          data-for="Tooltip--cloudLocal"
           data-tip="This allows you to switch between Local and Cloud Project listings. Both Projects you have created and Projects that have been shared with you will be visible."
+          onClick={[Function]}
+          role="presentation"
         >
           <div
             className="Tooltip__glow-container"
@@ -67,9 +72,8 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark"
+          className="__react_component_tooltip place-top type-dark "
           data-id="tooltip"
-          id="Tooltip--cloudLocal"
         />
       </div>
     </ul>
@@ -209,6 +213,5 @@ exports[`DashboardRemote Renders a snapshot 1`] = `
       </ul>
     </div>
   </div>
-  <div />
 </div>
 `;

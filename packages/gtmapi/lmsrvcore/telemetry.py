@@ -2,8 +2,7 @@ import time
 import glob
 import os
 import rq
-import redis
-from typing import Any, Optional, Tuple, Dict, List
+from typing import Any, Tuple, Dict, List
 
 from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
@@ -56,13 +55,13 @@ def service_telemetry():
     # TODO: Use a dataclass to represent this
     t0 = time.time()
     mem_total, mem_avail = _calc_mem_free()
-    disk_total, disk_avail = _calc_disk_free()
+    disk_total, disk_avail = _calc_disk_free_gb()
     nvidia_driver = os.environ.get('NVIDIA_DRIVER_VERSION')
     try:
         rq_dict = _calc_rq_free()
     except Exception as e:
         rq_dict = {'collectionError': str(e)}
-        
+
     compute_time = time.time() - t0
     return {
         'memoryKb': {
@@ -92,17 +91,19 @@ def _calc_mem_free() -> Tuple[int, int]:
     return mem_total, mem_available
 
 
-def _calc_disk_free() -> Tuple[float, float]:
-    disk_results = call_subprocess("df -h /".split(), cwd='/').split('\n')
+def _calc_disk_free_gb() -> Tuple[float, float]:
+    """Call `df` from the Client Container, parse and return as GB"""
+    # -BMB asks df to return counts in MB-sized blocks (10**6, NOT 2**20)
+    disk_results = call_subprocess("df -BMB /mnt/gigantum".split(), cwd='/').split('\n')
     _, disk_size, disk_used, disk_avail, use_pct, _ = disk_results[1].split()
 
-    disk_size_num, disk_size_unit = float(disk_used[:-1]), disk_used[-1]
-    if disk_size_unit == 'M':
-        disk_size_num /= 1000.0
+    disk_size_num, disk_size_unit = float(disk_used[:-2]) / 1000, disk_used[-2:]
+    if disk_size_unit != 'MB':
+        raise ValueError(f'Encountered unexpected unit "{disk_size_unit}" from `df -BMB` in Client')
 
-    disk_avail_num, disk_avail_unit = float(disk_avail[:-1]), disk_avail[-1]
-    if disk_avail_unit == 'M':
-        disk_avail_num /= 1000.0
+    disk_avail_num, disk_avail_unit = float(disk_avail[:-2]) / 1000, disk_avail[-2:]
+    if disk_avail_unit != 'MB':
+        raise ValueError(f'Encountered unexpected unit "{disk_avail_unit}" from `df -BMB` in Client')
 
     return disk_size_num, disk_avail_num
 
@@ -122,5 +123,5 @@ def _calc_rq_free() -> Dict[str, Any]:
     }
     queues = 'default', 'build', 'publish'
     resp.update({f'queue{q.capitalize()}Size':
-                     len(rq.Queue(f'gigantum-{q}-queue', connection=conn)) for q in queues})
+                 len(rq.Queue(f'gigantum-{q}-queue', connection=conn)) for q in queues})
     return resp

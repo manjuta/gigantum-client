@@ -2,6 +2,30 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
+/**
+  *  @param {Number} selectedFolderCount
+  *  @param {Number} selectedFileCount
+  *  returns a string with folder and file select counts
+  *  @return {string}
+*/
+const getCountText = (selectedFolderCount, selectedFileCount) => {
+  const foldersSelected = selectedFolderCount > 0;
+  const filesSelected = selectedFileCount > 0;
+  const folderText = foldersSelected > 1 ? 'Folders' : 'Folder';
+  const fileText = filesSelected > 1 ? 'Files' : 'File';
+  let multiText = foldersSelected
+    ? `${selectedFolderCount} ${folderText} selected`
+    : '';
+  multiText = filesSelected
+    ? `${selectedFileCount} ${fileText} selected`
+    : multiText;
+  multiText = (foldersSelected && filesSelected)
+    ? `${selectedFileCount} ${fileText} and ${selectedFolderCount} ${folderText} selected`
+    : multiText;
+
+  return multiText;
+}
+
 
 class FileBrowserToolbar extends PureComponent {
   render() {
@@ -15,6 +39,8 @@ class FileBrowserToolbar extends PureComponent {
       downloadDisabled,
       section,
       selectedCount,
+      selectedFolderCount,
+      selectedFileCount,
       popupVisible,
     } = props;
 
@@ -25,10 +51,12 @@ class FileBrowserToolbar extends PureComponent {
       Tooltip__message: true,
     });
 
+    const multiCountText = getCountText(selectedFolderCount, selectedFileCount);
+
     return (
       <div className="FileBrowser__toolbar flex align-items--center justify--space-between">
         <div className="FileBrowser__toolbar-text">
-          {`${selectedCount} files selected`}
+          {multiCountText}
         </div>
         <div>
           { ((section === 'data') && downloadList.length > 0)

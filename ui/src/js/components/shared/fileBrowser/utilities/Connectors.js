@@ -121,7 +121,9 @@ const targetSource = {
   canDrop(props, monitor) {
     const item = monitor.getItem();
     const { uploading } = store.getState().fileBrowser;
-    const mouseoverAllowed = !uploading && (!(props.section === 'data' && !item.isLocal) || (!item.fileData));
+    const mouseoverAllowed = !uploading
+      && (!((props.section === 'data') && !item.isLocal)
+      || (!item.fileData));
     if (props
       && props.fileData && item.fileData
       && props.fileData.edge && item.fileData.edge
@@ -267,8 +269,6 @@ function targetCollect(connect, monitor) {
   const isOverCurrent = monitor.isOver({ shallow: true });
   let isOver = monitor.isOver({});
   let canDrop = monitor.canDrop();
-  const currentTarget = monitor.internalMonitor.registry.dropTargets.get(currentTargetId);
-
   let newLastTarget;
   // get a list of drop target ids
   const targetIds = monitor.internalMonitor.getTargetIds();

@@ -10,13 +10,14 @@ import SecretsPresent from './SecretsPresent';
 import './SecretsTable.scss';
 
 type Props = {
+  isLocked: boolean,
   secrets: {
     edges: Array<Object>,
   },
   secretsMutations: {
     deleteSecret: Function,
     uploadSecret: Function,
-  }
+  },
 }
 
 class SecretsTable extends Component<Props> {
@@ -61,14 +62,19 @@ class SecretsTable extends Component<Props> {
 
   /**
   *  @param {String} filename
-  *  @param {Obect} file
+  *  @param {Object} file
+  *  @param {Number} id
+  *  @param {Boolean} isPresent
   * sets file in state
   */
-  _setFile = (filename, file) => {
+  _setFile = (node, file) => {
+    const { filename, id, isPresent } = node;
     const { addedFiles } = this.state;
     const newAddedFiles = new Map(addedFiles);
     newAddedFiles.set(filename, file);
-    this.setState({ addedFiles: newAddedFiles });
+    this.setState({ addedFiles: newAddedFiles }, () => {
+      this._replaceFile(filename, id, isPresent);
+    });
   }
 
   /**
@@ -100,15 +106,15 @@ class SecretsTable extends Component<Props> {
         secretsMutations.uploadSecret(uploadData);
       };
       secretsMutations.deleteSecret(data, removeCallback);
+      this._editSecret(filename);
     } else {
       secretsMutations.uploadSecret(uploadData);
     }
-    this._editSecret(filename);
   }
 
   render() {
     const { addedFiles, editedSecrets, tooltipVisible } = this.state;
-    const { secrets } = this.props;
+    const { secrets, isLocked } = this.props;
     const secretsArray = (secrets && secrets.edges)
       ? secrets.edges
       : [];
@@ -124,10 +130,11 @@ class SecretsTable extends Component<Props> {
           {
             secretsArray.map(({ node }) => {
               const isEditing = editedSecrets.has(node.filename);
+              const showEditFile = ((isEditing && !isLocked) || !node.isPresent);
               const nameCSS = classNames({
                 'SecretsTable__row-file flex-1 break-word': true,
                 'SecretsTable__row-file--missing': !node.isPresent,
-                'SecretsTable__row-file--editing': isEditing,
+                'SecretsTable__row-file--editing': isEditing || !node.isPresent,
               });
               return (
                 <div
@@ -135,22 +142,24 @@ class SecretsTable extends Component<Props> {
                   key={node.id}
                 >
                   <div className={nameCSS}>
-                    {
-                      !node.isPresent
-                      && (
-                        <SecretsPresent
-                          setTooltipVisible={this._setTooltipVisible}
-                          node={node}
-                          tooltipVisible={tooltipVisible}
-                        />
-                      )
-                    }
+                    <div className="flex">
+                      {
+                        !node.isPresent
+                        && (
+                          <SecretsPresent
+                            setTooltipVisible={this._setTooltipVisible}
+                            node={node}
+                            tooltipVisible={tooltipVisible}
+                          />
+                        )
+                      }
 
-                    <div className="SecretsTable__name">
-                      {node.filename}
+                      <div className="SecretsTable__name">
+                        {node.filename}
+                      </div>
                     </div>
                     {
-                      isEditing
+                      showEditFile
                       && (
                         <SecretsEditing
                           node={node}
@@ -158,6 +167,7 @@ class SecretsTable extends Component<Props> {
                           setFile={this._setFile}
                           replaceFile={this._replaceFile}
                           editSecret={this._editSecret}
+                          nodeMissing={!node.isPresent}
                         />
                       )
                     }
@@ -171,6 +181,7 @@ class SecretsTable extends Component<Props> {
                       {...this.props}
                       editSecret={this._editSecret}
                       isEditing={isEditing}
+                      nodeMissing={!node.isPresent}
                     />
                   </div>
                 </div>

@@ -112,7 +112,6 @@ class ImageBuilder(object):
 
             # Get the allowed origin from the config file
             allowed_origin = self.labbook.client_config.config['environment']['iframe']['allowed_origin']
-
             if "jupyterlab" in tools or "notebook" in tools:
                 # Create notebook config file to allow iframes
                 docker_lines.append("# Enable IFrame support in JupyterLab/Jupyter Notebook")
@@ -121,6 +120,9 @@ class ImageBuilder(object):
                 notebook_config_template = Template("RUN echo \"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\"frame-ancestors $allowed_origin 'self'; report-uri /api/security/csp-report\\\"}}\" >> /etc/jupyter/jupyter_notebook_config.py")
                 notebook_config_str = notebook_config_template.substitute(allowed_origin=allowed_origin)
                 docker_lines.append(notebook_config_str)
+
+                docker_lines.append("# Expose range of ports that kernel ZMQ sockets run on")
+                docker_lines.append("EXPOSE 30000-65535")
 
             if "rstudio" in tools:
                 docker_lines.append("# Enable IFrame support in RStudio")

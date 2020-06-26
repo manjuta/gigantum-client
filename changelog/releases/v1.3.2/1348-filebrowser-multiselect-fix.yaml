@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1358"
+changelog:
+  - type: FIX
+    description: Fixed an issue causing Filebrowser Multiselect feature not to behave as intended.
