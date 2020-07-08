@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1405"
+changelog:
+  - type: FIX
+    description: There was an issue with change visibility firing during large publish and sync jobs. To resolve this the change visibility button should be disabled while project is 'busy'.
