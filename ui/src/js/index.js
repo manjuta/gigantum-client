@@ -14,18 +14,12 @@ import { unregister } from './registerServiceWorker';
 import '../css/critical.scss';
 
 const browser = detect();
-if ((browser.name === 'chrome') || (browser.name === 'firefox')) {
-  render(
-    <Provider store={store}>
-      <Routes />
-    </Provider>,
-    document.getElementById('root') || document.createElement('div'),
-  );
-} else {
-  render(
-    <BrowserSupport />,
-    document.getElementById('root') || document.createElement('div'),
-  );
-}
+
+render(
+  <Provider store={store}>
+    <Routes />
+  </Provider>,
+  document.getElementById('root') || document.createElement('div'),
+);
 
 unregister();
