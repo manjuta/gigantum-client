@@ -70,6 +70,9 @@ class CssElement:
         except NoSuchElementException:
             return False
 
+    def is_enabled(self) -> bool:
+        return self.find().is_enabled()
+
 
 class UiComponent:
     def __init__(self, driver: selenium.webdriver):
@@ -89,6 +92,12 @@ class Auth0LoginElements(UiComponent):
     def auth0_lock_button(self):
         return CssElement(self.driver, ".auth0-lock-social-button")
 
+    def _select_login_tab(self):
+        a = self.driver.find_element_by_css_selector(".auth0-lock-tabs-container")
+        ul = a.find_element_by_tag_name('ul')
+        li = ul.find_elements_by_tag_name('li')
+        li[0].click()
+
     @property
     def not_your_account_button(self):
         return CssElement(self.driver, ".auth0-lock-alternative-link")
@@ -107,7 +116,8 @@ class Auth0LoginElements(UiComponent):
 
     def do_login(self, username, password):
         """Perform login."""
-        self.username_input.wait_to_appear().click()
+        self.login_grey_button.wait_to_appear(5)
+        self._select_login_tab()
         self.username_input().send_keys(username)
         self.password_input.wait_to_appear().click()
         self.password_input().send_keys(password)
@@ -722,7 +732,7 @@ class FileBrowserElements(UiComponent):
     def linked_dataset_card_name(self):
         return CssElement(self.driver, ".DatasetCard__name")
 
-    def drag_drop_file_in_drop_zone(self, file_content="sample text", output_data_target=False):
+    def drag_drop_file_in_drop_zone(self, file_content="sample text"):
         """Drag and drop a file into a file browser drop zone."""
         logging.info("Dragging and dropping a file into the drop zone")
         with open("testutils/file_browser_drag_drop_script.js", "r") as js_file:
@@ -733,11 +743,9 @@ class FileBrowserElements(UiComponent):
             file_path = "/tmp/sample-upload.txt"
         with open(file_path, "w") as example_file:
             example_file.write(file_content)
-        # This deals with the untracked directory in output data
-        if output_data_target:
-            file_input = self.driver.execute_script(js_script, self.untracked_directory.find(), 0, 0)
-        else:
-            file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
+
+        file_input = self.driver.execute_script(js_script, self.file_browser_area.find(), 0, 0)
+
         file_input.send_keys(file_path)
         # Time sleep consistent and necessary
         time.sleep(5)
@@ -980,7 +988,16 @@ class CloudProjectElements(UiComponent):
         logging.info(f"Adding a collaborator to {project_title} with {permissions} permissions")
         self.open_collaborators_button.wait_to_appear().click()
         collaborator = load_credentials(user_index=1)[0].rstrip()
-        self.collaborator_input.wait_to_appear().send_keys(collaborator)
+        self.collaborator_input.wait_to_appear()
+
+        # Try to wait up to 5 seconds for the input to activate (after checking for tokens/publish state is done)
+        for _ in range(5):
+            if self.collaborator_input.is_enabled():
+                break
+            else:
+                time.sleep(1)
+
+        self.collaborator_input.find().send_keys(collaborator)
         if permissions == "read":
             self.add_collaborator_button.wait_to_appear().click()
             self.add_collaborator_button.wait_to_appear()

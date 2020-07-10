@@ -40,7 +40,7 @@ def test_project_file_browser(driver: selenium.webdriver, *args, **kwargs):
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/outputData")
     file_browser_elts.untracked_directory.wait_to_appear()
     logging.info(f"Dragging and dropping file into the untracked directory in output data for project {project_title}")
-    file_browser_elts.drag_drop_file_in_drop_zone(output_data_target=True)
+    file_browser_elts.drag_drop_file_in_drop_zone()
 
     assert file_browser_elts.file_information.find().text == "sample-upload.txt", \
         "Expected sample-upload.txt to be the first file in Output Data"

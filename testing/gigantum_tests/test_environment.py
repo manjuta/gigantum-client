@@ -127,6 +127,7 @@ def test_package_removal_via_trash_can_button(driver: selenium.webdriver, *args,
     # Delete package via trash can button
     env_elts.delete_package_via_trash_can_button(pip_package)
 
+    env_elts.package_info_area.wait_to_appear(5)
     assert env_elts.package_info_area.find().text == "No packages have been added to this project", \
         f"{pip_package} package was not deleted successfully from the UI via trash can button"
 
@@ -177,6 +178,7 @@ def test_package_removal_via_check_box_button(driver: selenium.webdriver, *args,
     # Delete package via check box button
     env_elts.delete_package_via_check_box_button(pip_package)
 
+    env_elts.package_info_area.wait_to_appear(5)
     assert env_elts.package_info_area.find().text == "No packages have been added to this project", \
         f"{pip_package} package was not deleted successfully from the UI via check box button"
 

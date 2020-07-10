@@ -31,10 +31,11 @@ def prep_base(driver, base_button_check, skip_login=False):
     if skip_login is False:
         username = log_in(driver)
         elements.GuideElements(driver).remove_guide()
+        time.sleep(2)
     else:
         time.sleep(3)
     proj_name = create_project_without_base(driver)
-    time.sleep(7)
+    time.sleep(5)
     select_project_base(driver, base_button_check())
 
     # assert container status is stopped
@@ -106,7 +107,7 @@ def log_in(driver: selenium.webdriver, user_index: int = 0) -> str:
     auth0_elts.login_green_button.wait_to_appear().click()
     auth0_elts.auth0_lock_widget.wait_to_appear()
     # Time sleep is consistent and necessary
-    time.sleep(3)
+    time.sleep(2)
     if auth0_elts.auth0_lock_button.selector_exists():
         logging.info("Clicking 'Not your account?'")
         auth0_elts.not_your_account_button.wait_to_appear().click()
@@ -120,7 +121,7 @@ def log_in(driver: selenium.webdriver, user_index: int = 0) -> str:
         if active_username:
             break
         else:
-            time.sleep(1)
+            time.sleep(2)
     else:
         raise ValueError("Failed to extract username from Chrome cache to verify authentication.")
 

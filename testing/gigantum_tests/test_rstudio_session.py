@@ -21,6 +21,7 @@ ggplot(mtcars, aes(x=wt, y=mpg)) +
 ```
 """
 
+
 def test_rstudio_session(driver: selenium.webdriver, *args, **kwargs):
     """
     Test the creation of a basic RStudio session.
@@ -40,12 +41,13 @@ def test_rstudio_session(driver: selenium.webdriver, *args, **kwargs):
     assert rstudio_elements.selected_files_tab.selector_exists()
 
     logging.info("Using R console")
-    time.sleep(30)
+    time.sleep(10)
     ActionChains(driver).send_keys("with(mtcars, {plot(wt, mpg); abline(lm(mpg~wt))})\n"
                                    "title('Regression of MPG on Weight')\n").perform()
+    time.sleep(10)
     ActionChains(driver).send_keys("with(mtcars, {plot(wt, mpg); abline(lm(mpg~wt))})\n"
                                    "title('Regression of MPG on Weight')\n").perform()
-    time.sleep(30)
+    time.sleep(10)
 
     logging.info("Checking for active plot")
     # Now the plots tab should be active...
@@ -57,7 +59,7 @@ def test_rstudio_session(driver: selenium.webdriver, *args, **kwargs):
     project_elements.open_gigantum_client_tab()
     activity_elements = ActivityElements(driver)
     activity_elements.link_activity_tab.wait_to_appear().click()
-    time.sleep(3)
+    time.sleep(5)
 
     assert "Executed in console and generated a result" in activity_elements.first_card_label.find().text, \
         f"Expected 'Executed in console and generated a result' in first card label, but instead found " \
@@ -78,14 +80,14 @@ def test_rstudio_session(driver: selenium.webdriver, *args, **kwargs):
         .send_keys(Keys.ARROW_UP)
     # There's probably some more paradigmatic way to do this, but this should work fine enough for now
     rstudio_elements.ctrl_shift_enter(actions)
-    time.sleep(3)
+    time.sleep(10)
 
     logging.info("Creating a ggplot graph in R notebook")
     actions = ActionChains(driver).send_keys(Keys.ARROW_DOWN) \
         .send_keys(ggplot_snippet) \
         .send_keys(Keys.ARROW_UP)
     rstudio_elements.ctrl_shift_enter(actions)
-    time.sleep(3)
+    time.sleep(5)
 
     logging.info("Checking updated activity record")
     project_elements.open_gigantum_client_tab()
