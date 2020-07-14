@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1408"
+changelog:
+  - type: FIX
+    description: Modified git add operations to ignore gitignored files

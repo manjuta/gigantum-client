@@ -213,7 +213,10 @@ class FileOperations(object):
         if os.path.isdir(dst_abs_path):
             labbook.git.add_all(dst_abs_path)
         else:
-            labbook.git.add(dst_abs_path)
+            did_add = labbook.git.add(dst_abs_path)
+            if not did_add:
+                # We don't (and can't!) create activity records for untracked files
+                return
 
         commit = labbook.git.commit(commit_msg)
         activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)

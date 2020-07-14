@@ -9,7 +9,7 @@ logger = LMLogger.get_logger()
 
 class GitFilesystemShimmed(GitFilesystem):
 
-    def add(self, filename):
+    def add(self, filename) -> bool:
         """Add a file to a commit
 
         Args:
@@ -18,8 +18,16 @@ class GitFilesystemShimmed(GitFilesystem):
         Returns:
             None
         """
-        logger.info("Adding file {} to Git repository in {}".format(filename, self.working_directory))
-        self._run(['git', 'add', f'{filename}'])
+        if self.check_ignored(filename):
+            # This file is ignored - don't do any git operations
+            logger.info(f"Skipped adding untracked {filename} to Git repository in {self.working_directory}")
+            return False
+        else:
+            logger.info(f"Adding file {filename} to Git repository in {self.working_directory}")
+            self._run(['git', 'add', f'{filename}'])
+
+        # We added something
+        return True
 
     def reset(self, branch_name: str):
         """git reset --hard current branch to the treeish specified by branch_name

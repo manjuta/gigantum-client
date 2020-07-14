@@ -63,7 +63,8 @@ def load_playbook(path: str) -> Playbook:
 
 
 class TestRunner:
-    def __init__(self):
+    def __init__(self, skip_cleanup=False):
+        self.skip_cleanup = skip_cleanup
         self.artifact_dir = self._set_artifact_dir()
         self.duration = 0
         self.results: List[TestResult] = []
@@ -133,6 +134,9 @@ class TestRunner:
         return artifact_dir
 
     def _cleanup(self, driver):
+        if self.skip_cleanup:
+            return
+
         stop_project_containers()
         delete_project_images()
         delete_projects_on_disk()

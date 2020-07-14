@@ -27,6 +27,8 @@ if __name__ == '__main__':
                            help='Port of GraphQL API (Default 10000)')
     argparser.add_argument('--width', default=1440, type=int,
                            help='Default width in px of the browser window')
+    argparser.add_argument('--skip-cleanup', action='store_true',
+                           help='For debugging - leave containers running, and Project artifacts on disk')
     argparser.add_argument('test_path', nargs='*', type=str, default=[],
                            help='Optional name of specific playbooks')
     args = argparser.parse_args()
@@ -43,7 +45,7 @@ if __name__ == '__main__':
     else:
         driver_loader = testutils.load_chrome_driver
 
-    with driverutil.TestRunner() as runner:
+    with driverutil.TestRunner(skip_cleanup=args.skip_cleanup) as runner:
         playbooks = driverutil.load_playbooks(os.getcwd(), args.test_path)
         for playbook in playbooks:
             for test_method in playbook.test_methods:

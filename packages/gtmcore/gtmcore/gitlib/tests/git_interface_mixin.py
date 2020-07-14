@@ -1,5 +1,5 @@
 import pytest
-from typing import Any
+from typing import Any, Optional
 import tempfile
 import os
 import shutil
@@ -140,14 +140,15 @@ def create_dummy_repo(working_dir):
     repo.index.commit("initial commit")
 
 
-def write_file(git_instance, filename, content, add=True, commit_msg=None) -> str:
+def write_file(git_instance: GitFilesystem, filename: str, content: str, add=True, commit_msg: Optional[str] = None) -> str:
     """Write content to a file
 
     Args:
-        filename(str): The relative file path from the working dir
-        content(str): What to write
-        add(bool): If true, ddd to git repo
-        commit_msg (str): If not none, commit file with this message
+        git: We use this to get the working directory and perform git operations
+        filename: The relative file path from the working dir
+        content: What to write
+        add: If true, ddd to git repo
+        commit_msg: If not none, commit file with this message
 
     Returns:
         The full path of the file
@@ -164,6 +165,23 @@ def write_file(git_instance, filename, content, add=True, commit_msg=None) -> st
         git_instance.commit(commit_msg)
 
     return full_path
+
+
+def move_file(git_instance: GitFilesystem, src_name: str, dst_name: str) -> None:
+    """Move a file in the git repo.
+
+    We don't currently do any git operations.
+
+    Args:
+        git_instance: Used to get the working directory
+        src_name: A relative file path from the working dir - move from
+        dst_name: A relative file path from the working dir - move to
+    """
+    working_dir = git_instance.config["working_directory"]
+    full_src_path = os.path.join(working_dir, src_name)
+    full_dst_path = os.path.join(working_dir, dst_name)
+
+    shutil.move(full_src_path, full_dst_path)
 
 
 class GitInterfaceMixin(object):
@@ -434,6 +452,42 @@ class GitInterfaceMixin(object):
         assert status["staged"][0] == ("env/file1.txt", 'deleted')
         assert status["staged"][1] == ("env/file2.txt", 'modified')
         assert status["staged"][2] == ("env/file3.txt", 'added')
+
+    def test_add_untracked(self, mock_initialized):
+        """Test removing a gitignored file from a repository and delete it"""
+        git = mock_initialized[0]
+        working_directory = mock_initialized[1]
+
+        # We will ignore the file untracked.txt, and files in untracked/
+        write_file(git, ".gitignore", "untracked.txt\nuntracked/\n", commit_msg="Ignoring 'untracked' files")
+
+        # Create file - request to add, but this should be a no-op and also not throw an exception
+        untracked_fname = write_file(git, "untracked.txt", "I will not be added", add=True)
+
+        # Verify nothing staged
+        status = git.status()
+        assert len(status["staged"]) == 0
+        assert len(status["unstaged"]) == 0
+        assert len(status["untracked"]) == 0
+
+        untracked_dirname = os.path.join(working_directory, 'untracked')
+        os.mkdir(untracked_dirname)
+        move_file(git, untracked_fname, 'untracked')
+
+        # Verify clean status
+        status = git.status()
+        assert len(status["staged"]) == 0
+        assert len(status["unstaged"]) == 0
+        assert len(status["untracked"]) == 0
+
+        # Should do nothing, but also not throw an error
+        git.add('untracked/untracked.txt')
+
+        # Verify nothing staged
+        status = git.status()
+        assert len(status["staged"]) == 0
+        assert len(status["unstaged"]) == 0
+        assert len(status["untracked"]) == 0
 
     def test_remove_staged_file(self, mock_initialized):
         """Test removing files from a repository"""

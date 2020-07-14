@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import glob
 import yamale
 import argparse
@@ -49,7 +51,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Required positional argument
-    parser.add_argument("action", help="Desired action to run. (`validate` or `pr`)")
+    parser.add_argument("action", help="Desired action to run. (`schema` or `pr`)")
 
     args = parser.parse_args()
 
