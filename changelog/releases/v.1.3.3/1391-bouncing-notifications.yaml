@@ -1,0 +1,6 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1415"
+changelog:
+  - type: FIX
+    description: Resolved an issue with notification tray rapidly opening and closing.
+  - type: FIX
+    description: Uploading an empty folder will no longer display the same warning multiple times
