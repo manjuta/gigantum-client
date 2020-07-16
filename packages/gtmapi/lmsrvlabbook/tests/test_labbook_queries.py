@@ -135,7 +135,7 @@ class TestLabBookServiceQueries(object):
                 """
         snapshot.assert_match(fixture_working_dir_populated_scoped[2].execute(query))
 
-        im = InventoryManager(fixture_working_dir_populated_scoped[0])
+        im = InventoryManager()
         lb = im.load_labbook("default", "default", "labbook4")
         with open(os.path.join(lb.root_dir, "code", "test.txt"), 'wt') as tf:
             tf.write("asdfasdf")
@@ -388,7 +388,7 @@ class TestLabBookServiceQueries(object):
     def test_get_labbook(self, fixture_working_dir):
         """Test listing labbooks"""
         flush_redis_repo_cache()
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook1', description="my test description",
                                author=GitAuthor(name="tester", email="tester@test.com"))
 
@@ -424,7 +424,7 @@ class TestLabBookServiceQueries(object):
         """Test listing labbooks"""
         # Create labbooks
         monkeypatch.setattr(gtmcore.files.FileOperations, 'content_size', lambda labbook: (2**32)*34)
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'unittest-labbook-1',
                                description="my test description",
                                author=GitAuthor(name="tester", email="tester@test.com"))
@@ -443,7 +443,7 @@ class TestLabBookServiceQueries(object):
 
     def test_list_labbooks_container_status(self, fixture_working_dir, snapshot):
         """Test listing labbooks"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
         im.create_labbook('default', 'default', 'labbook2', description="my first labbook2")
         im.create_labbook('test3', 'test3', 'labbook2', description="my first labbook3")
@@ -473,7 +473,7 @@ class TestLabBookServiceQueries(object):
 
     def test_list_local_by_id(self, fixture_working_dir, snapshot):
         """Test listing labbooks"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
         im.create_labbook('default', 'default', 'labbook2', description="my first labbook2")
         im.create_labbook('default', 'default', 'labbook3', description="my first labbook3")
@@ -536,7 +536,7 @@ class TestLabBookServiceQueries(object):
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_list_files_code(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook1', description='my first labbook1')
 
         has_no_files_query = """
@@ -639,7 +639,7 @@ class TestLabBookServiceQueries(object):
 
     def test_list_files_many(self, fixture_working_dir, snapshot):
         # Add some extra files for listing
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook1',  description="my first labbook1")
 
         # Write data in code
@@ -754,7 +754,7 @@ class TestLabBookServiceQueries(object):
     def test_list_files(self, fixture_working_dir, snapshot):
         """Test listing labbook files"""
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook1', description="my first labbook1")
 
         # Setup some favorites in code
@@ -789,7 +789,7 @@ class TestLabBookServiceQueries(object):
 
     def test_list_all_files_many(self, fixture_working_dir, snapshot):
         # Add some extra files for listing
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook1", description="my first labbook1")
 
         # Write data in code
@@ -876,8 +876,8 @@ class TestLabBookServiceQueries(object):
                      "revision": ENV_UNIT_TEST_REV}
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
 
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
-        lb = im.load_labbook("default","default", "labbook-page-test")
+        im = InventoryManager()
+        lb = im.load_labbook("default", "default", "labbook-page-test")
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
         # Get all records at once with no pagination args and verify cursors look OK directly
@@ -920,7 +920,7 @@ class TestLabBookServiceQueries(object):
 
     def test_get_activity_records(self, fixture_working_dir, mock_labbook, snapshot, fixture_test_file):
         """Test paging through activity records"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook11', description="my test description",
                                author=GitAuthor(name="tester", email="tester@test.com"))
         open('/tmp/test_file.txt', 'w').write("xxxx")
@@ -1087,7 +1087,7 @@ class TestLabBookServiceQueries(object):
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_get_activity_records_reverse_error(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook12', description="my test description")
 
         # Get all records
@@ -1175,7 +1175,7 @@ class TestLabBookServiceQueries(object):
 
     def test_get_activity_records_with_details(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting activity records with detail records"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook11', description="my test description")
         open('/tmp/test_file.txt', 'w').write("xxx" * 50)
         FileOperations.insert_file(lb, "code", '/tmp/test_file.txt')
@@ -1257,7 +1257,7 @@ class TestLabBookServiceQueries(object):
 
     def test_get_detail_record(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting detail record directly after an initial activity record query"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook11', description="my test description")
         FileOperations.insert_file(lb, "code", fixture_test_file)
 
@@ -1331,7 +1331,7 @@ class TestLabBookServiceQueries(object):
 
     def test_get_detail_records(self, fixture_working_dir, snapshot, fixture_test_file):
         """Test getting multiple detail records directly after an initial activity record query"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook11", description="my test description")
         open('/tmp/test_file.txt', 'w').write("xxxx")
         FileOperations.insert_file(lb, "code", '/tmp/test_file.txt')
@@ -1388,7 +1388,7 @@ class TestLabBookServiceQueries(object):
     def test_get_labbook_create_date(self, fixture_working_dir, snapshot):
         """Test getting a labbook's create date"""
         # Create labbooks
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
 
         query = """
@@ -1424,7 +1424,7 @@ class TestLabBookServiceQueries(object):
     def test_get_labbook_modified_on(self, fixture_working_dir, snapshot):
         """Test getting a labbook's modifed date"""
         # Create labbooks
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
 
         modified_query = """
@@ -1459,23 +1459,23 @@ class TestLabBookServiceQueries(object):
     @responses.activate
     def test_repository_name_is_available(self, fixture_working_dir, property_mocks_fixture):
         # Create repositories
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook('default', 'default', 'project-1', description="a project that exists")
         im.create_dataset('default', 'default', 'dataset-1', storage_type="gigantum_object_v1",
                           description="a project that exists")
         flask.g.access_token = "afaketoken"
 
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fremote-project',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fremote-project',
                       json=[{
                           "id": 26,
                           "description": "",
                       }],
                       status=200)
 
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Funique-name',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Funique-name',
                       status=404)
 
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Ffailure',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Ffailure',
                       status=500)
 
         query = """

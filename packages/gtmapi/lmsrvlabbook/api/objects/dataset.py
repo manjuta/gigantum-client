@@ -165,14 +165,14 @@ class Dataset(graphene.ObjectType):
 
         """
         # Get remote server configuration
-        config = flask.current_app.config['LABMGR_CONFIG']
-        remote_config = config.get_remote_configuration()
+        server_config = flask.current_app.config['LABMGR_CONFIG'].get_server_configuration()
 
         # Get tokens from request context
         access_token, id_token = tokens_from_request_context(tokens_required=True)
 
         # Get collaborators from remote service
-        mgr = GitLabManager(remote_config['git_remote'], remote_config['hub_api'],
+        mgr = GitLabManager(server_config.git_url,
+                            server_config.hub_api_url,
                             access_token=access_token,
                             id_token=id_token)
         try:
@@ -417,14 +417,13 @@ class Dataset(graphene.ObjectType):
             return 'local'
         else:
             # Get remote server configuration
-            config = flask.current_app.config['LABMGR_CONFIG']
-            remote_config = config.get_remote_configuration()
+            server_config = flask.current_app.config['LABMGR_CONFIG'].get_server_configuration()
 
             # Get tokens from request context
             access_token, id_token = tokens_from_request_context()
 
-            mgr = GitLabManager(remote_config['git_remote'],
-                                remote_config['hub_api'],
+            mgr = GitLabManager(server_config.git_url,
+                                server_config.hub_api_url,
                                 access_token=access_token,
                                 id_token=id_token)
             try:

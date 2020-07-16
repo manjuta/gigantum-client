@@ -20,7 +20,7 @@ class LocalIdentityManager(IdentityManager):
         # Call super constructor
         IdentityManager.__init__(self, config_obj=config_obj)
 
-        self.auth_dir = os.path.join(self.config.config['git']['working_directory'], '.labmanager', 'identity')
+        self.auth_dir = os.path.join(self.config.app_workdir, '.labmanager', 'identity')
 
         self._lock_redis_client: Optional[StrictRedis] = None
 
@@ -67,7 +67,8 @@ class LocalIdentityManager(IdentityManager):
             return False
         else:
             try:
-                _ = self.validate_jwt_token(access_token, self.config.config['auth']['audience'])
+                auth_config = self.config.get_auth_configuration()
+                _ = self.validate_jwt_token(access_token, auth_config.audience)
             except AuthenticationError:
                 return False
 
@@ -94,7 +95,8 @@ class LocalIdentityManager(IdentityManager):
                 raise AuthenticationError(err_dict, 401)
 
             # Validate JWT token
-            token_payload = self.validate_jwt_token(id_token, self.config.config['auth']['client_id'],
+            auth_config = self.config.get_auth_configuration()
+            token_payload = self.validate_jwt_token(id_token, auth_config.auth0_client_id,
                                                     access_token=access_token)
 
             # Create user identity instance
@@ -155,7 +157,8 @@ class LocalIdentityManager(IdentityManager):
                     return None
 
             # Load data from JWT with limited checks due to possible timeout and lack of access token
-            token_payload = self.validate_jwt_token(current_cached_id_token, self.config.config['auth']['client_id'],
+            auth_config = self.config.get_auth_configuration()
+            token_payload = self.validate_jwt_token(current_cached_id_token, auth_config.auth0_client_id,
                                                     limited_validation=True)
 
             # Create user identity instance

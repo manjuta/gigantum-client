@@ -23,8 +23,8 @@ class LabBook(Repository):
     _default_activity_detail_type = ActivityDetailType.LABBOOK
     _default_activity_section = "Project Root"
 
-    def __init__(self, config_file: Optional[str] = None, author: Optional[GitAuthor] = None) -> None:
-        super().__init__(config_file, author)
+    def __init__(self, author: Optional[GitAuthor] = None) -> None:
+        super().__init__(author)
 
         # LabBook Environment
         self._env = None

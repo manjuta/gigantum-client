@@ -14,7 +14,7 @@ ANON_TOKEN = "R0lHQU5UVU0tQU5PTllNT1VTLVVTRVI=.VVVJRDEyMzQ1Njc4OTA=.R0lHQU5UVU0t
 class TestIdentityAnonymous(object):
     def test_is_session_valid(self, mock_config_file_with_auth_anonymous):
         """test check for valid session"""
-        config = Configuration(mock_config_file_with_auth_anonymous[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == AnonymousIdentityManager
 
@@ -34,7 +34,7 @@ class TestIdentityAnonymous(object):
 
     def test_is_authenticated_token(self, mock_config_file_with_auth_anonymous):
         """test checking if the user is authenticated via a token"""
-        config = Configuration(mock_config_file_with_auth_anonymous[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == AnonymousIdentityManager
 
@@ -50,12 +50,12 @@ class TestIdentityAnonymous(object):
     @responses.activate
     def test_get_user_profile(self, mock_config_file_with_auth_anonymous):
         """test getting a user profile from Auth0"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
                       status=200)
         responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
 
-        config = Configuration(mock_config_file_with_auth_anonymous[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == AnonymousIdentityManager
         # Don't check at_hash claim due to password grant not setting it in the token
@@ -83,7 +83,7 @@ class TestIdentityAnonymous(object):
 
     def test_get_anon_user_profile(self, mock_config_file_with_auth_anonymous):
         """test getting a user profile when anonymous"""
-        config = Configuration(mock_config_file_with_auth_anonymous[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == AnonymousIdentityManager
         # Don't check at_hash claim due to password grant not setting it in the token

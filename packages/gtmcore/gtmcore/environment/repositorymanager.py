@@ -38,14 +38,11 @@ class RepositoryManager(object):
     """Class to manage local copies of Base Repositories
     """
 
-    def __init__(self, config_file: str=None) -> None:
+    def __init__(self) -> None:
         """Constructor
-
-        Args:
-            config_file(str): Optional config file location if don't want to load from default location
         """
-        self.config = Configuration(config_file=config_file)
-        self.local_repo_directory = os.path.expanduser(os.path.join(self.config.config["git"]['working_directory'],
+        self.config = Configuration()
+        self.local_repo_directory = os.path.expanduser(os.path.join(self.config.app_workdir,
                                                        ".labmanager", "environment_repositories"))
         self.git = get_git_interface(self.config.config['git'])
 

@@ -3,6 +3,7 @@ import shutil
 
 import os
 
+from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage import get_storage_backend
 from gtmcore.dataset.storage.local import LocalFilesystem
 from gtmcore.dataset.manifest.manifest import Manifest
@@ -23,14 +24,12 @@ def helper_write_object(directory, object_id, contents):
 @pytest.fixture()
 def mock_dataset_with_local_dir(mock_dataset_with_cache_dir_local):
     """A mock when testing local filesystem backend and you need local contents to add to the dataset"""
-
     ds = mock_dataset_with_cache_dir_local[0]
-    working_dir = mock_dataset_with_cache_dir_local[1]
     ds.backend.set_default_configuration(USERNAME, 'asdf', '1234')
     current_config = ds.backend_config
     current_config['Data Directory'] = "test_dir"
     ds.backend_config = current_config
-    test_dir = os.path.join(working_dir, "local_data", "test_dir")
+    test_dir = os.path.join(ds.client_config.app_workdir, "local_data", "test_dir")
 
     os.makedirs(test_dir)
 
@@ -97,7 +96,7 @@ class TestStorageBackendLocalFilesystem(object):
         assert current_config[0]['parameter'] == "Data Directory"
 
     def test_confirm_configuration(self, mock_dataset_with_cache_dir_local):
-        ds = mock_dataset_with_cache_dir_local[0]
+        ds, working_dir, commit_hash = mock_dataset_with_cache_dir_local
 
         ds.backend.set_default_configuration('test', 'asdf', '1234')
 
@@ -115,7 +114,7 @@ class TestStorageBackendLocalFilesystem(object):
             ds.backend.confirm_configuration(ds)
 
         # Create test data dir
-        os.makedirs(os.path.join(mock_dataset_with_cache_dir_local[1], "local_data", "test_dir"))
+        os.makedirs(os.path.join(Configuration().app_workdir, "local_data", "test_dir"))
 
         assert ds.backend.confirm_configuration(ds) is None
 
@@ -160,7 +159,7 @@ class TestStorageBackendLocalFilesystem(object):
         modified_items = ds.backend.verify_contents(ds, updater)
         assert len(modified_items) == 0
 
-        test_dir = os.path.join(mock_dataset_with_local_dir[1], "local_data", "test_dir")
+        test_dir = os.path.join(ds.client_config.app_workdir, "local_data", "test_dir")
         with open(os.path.join(test_dir, 'test1.txt'), 'wt') as tf:
             tf.write("This file got changed in the filesystem")
 

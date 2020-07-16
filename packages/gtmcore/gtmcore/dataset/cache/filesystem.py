@@ -29,7 +29,7 @@ class HostFilesystemCache(CacheManager):
         if not self.dataset.namespace:
             raise ValueError("Host Filesystem Object Cache requires the Dataset namespace to be set.")
 
-        return os.path.join(os.path.expanduser(self.dataset.client_config.config.get('git')['working_directory']),
+        return os.path.join(os.path.expanduser(self.dataset.client_config.app_workdir),
                             '.labmanager', 'datasets', self.username, self.dataset.namespace, self.dataset.name)
 
     def initialize(self):

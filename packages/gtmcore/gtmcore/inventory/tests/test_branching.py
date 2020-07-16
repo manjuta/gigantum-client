@@ -7,8 +7,7 @@ from gtmcore.inventory.branching import (BranchManager, InvalidBranchName, Branc
     BranchException, MergeConflict)
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import (mock_config_file, mock_labbook, mock_labbook_lfs_disabled,
-                               mock_duplicate_labbook, remote_bare_repo, sample_src_file,
-                               _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
+                              sample_src_file, helper_create_remote_repo as _MOCK_create_remote_repo,
                               remote_labbook_repo)
 
 # If importing from remote, does new user's branch get created and does it push properly?
@@ -258,7 +257,6 @@ class TestBranching(object):
         assert bm.branches_remote == []
 
     def test_assert_all_remote_branches_can_be_checked_out(self,
-                                                           mock_config_file,
                                                            remote_labbook_repo,
                                                            mock_labbook_lfs_disabled):
         # Make sure all local branches can be checked out
@@ -297,7 +295,7 @@ class TestBranching(object):
         bm.workon_branch("testing-branch")
 
         from gtmcore.inventory.inventory import InventoryManager
-        remote_lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(remote_labbook_repo)
+        remote_lb = InventoryManager().load_labbook_from_directory(remote_labbook_repo)
         remote_bm = BranchManager(remote_lb, 'test')
         remote_bm.workon_branch("testing-branch")
         FileOperations.makedir(remote_lb, 'code/xyzdir', create_activity_record=True)

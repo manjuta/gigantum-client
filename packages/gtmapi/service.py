@@ -15,7 +15,7 @@ from flask import Flask, jsonify
 
 import rest_routes
 from gtmcore.dispatcher import Dispatcher
-from gtmcore.dispatcher.jobs import update_environment_repositories
+from gtmcore.dispatcher.jobs import update_environment_repositories, load_default_server_configuration
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager
@@ -23,29 +23,6 @@ from gtmcore.labbook.lock import reset_all_locks
 
 
 logger = LMLogger.get_logger()
-app = Flask("lmsrvlabbook")
-
-# Load configuration class into the flask application
-if os.path.exists(Configuration.USER_LOCATION):
-    logger.info(f"Using custom user configuration from {Configuration.USER_LOCATION}")
-else:
-    logger.info("No custom user configuration found")
-
-random_bytes = os.urandom(32)
-app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
-app.config["LABMGR_CONFIG"] = config = Configuration()
-app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
-
-# Set Debug mode
-app.config['DEBUG'] = config.config["flask"]["DEBUG"]
-app.register_blueprint(blueprint.complete_labbook_service)
-
-# Set starting flags
-# If flask is run in debug mode the service will restart when code is changed, and some tasks
-#   we only want to happen once (ON_FIRST_START)
-# The WERKZEUG_RUN_MAIN environmental variable is set only when running under debugging mode
-ON_FIRST_START = app.config['DEBUG'] == False or os.environ.get('WERKZEUG_RUN_MAIN') != 'true'
-ON_RESTART = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
 
 
 def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
@@ -69,7 +46,7 @@ def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
         try:
             # This property raises an exception if the underlying request doesn't yield a status code of 200
             proxy_router.routes  # noqa
-        except (requests.exceptions.ConnectionError, ProxyRouterException) as e:
+        except (requests.exceptions.ConnectionError, ProxyRouterException):
             sleep(0.5)
             continue
 
@@ -94,6 +71,25 @@ def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
 
     return api_prefix
 
+
+# Start Flask Server Initialization and app configuration
+app = Flask("lmsrvlabbook")
+
+random_bytes = os.urandom(32)
+app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
+app.config["LABMGR_CONFIG"] = config = Configuration(wait_for_cache=10)
+app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+
+# Set Debug mode
+app.config['DEBUG'] = config.config["flask"]["DEBUG"]
+app.register_blueprint(blueprint.complete_labbook_service)
+
+# Set starting flags
+# If flask is run in debug mode the service will restart when code is changed, and some tasks
+#   we only want to happen once (ON_FIRST_START)
+# The WERKZEUG_RUN_MAIN environmental variable is set only when running under debugging mode
+ON_FIRST_START = app.config['DEBUG'] is False or os.environ.get('WERKZEUG_RUN_MAIN') != 'true'
+ON_RESTART = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
 
 if os.environ.get('CIRCLECI') == 'true':
     try:
@@ -177,7 +173,6 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
     with open(os.path.join(share_dir, 'jupyterhooks', '__init__.py'), 'w') as initpy:
         initpy.write(post_save_hook_code)
 
-
     # Reset distributed lock, if desired
     if config.config["lock"]["reset_on_start"]:
         logger.info("Resetting ALL distributed locks")
@@ -195,6 +190,10 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         os.makedirs(certificate_dir, exist_ok=True)
         logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
 
+    # Create server data dir if it doesn't exist
+    if os.path.isdir(config.server_config_dir) is False:
+        os.makedirs(config.server_config_dir, exist_ok=True)
+        logger.info(f'Created `servers` dir for server configurations: {config.server_config_dir}')
 
     # make sure temporary upload directory exists and is empty
     tempdir = config.upload_dir
@@ -202,7 +201,6 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         shutil.rmtree(tempdir)
         logger.info(f'Cleared upload temp dir: {tempdir}')
     os.makedirs(tempdir)
-
 
     # Start background startup tasks
     d = Dispatcher()
@@ -217,7 +215,10 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         logger.error(err_message)
         raise RuntimeError(err_message)
 
+    # Run job to update Base images in the background
     d.dispatch_task(update_environment_repositories, persist=True)
+    # Run job to auto-configure with default server (if needed) in the background
+    d.dispatch_task(load_default_server_configuration)
 
 
 def main(debug=False) -> None:

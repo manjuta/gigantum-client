@@ -32,7 +32,7 @@ from gtmcore.fixtures import (mock_config_file, mock_labbook, remote_labbook_rep
 class TestLabBook(object):
     def test_checkout_id_property(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook")
         checkout_file = os.path.join(lb.root_dir, '.gigantum', '.checkout')
         assert os.path.exists(checkout_file) is False
@@ -61,7 +61,7 @@ class TestLabBook(object):
 
     def test_checkout_id_property_multiple_access(self, mock_config_file):
         """Test getting a checkout id multiple times"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook")
 
         checkout_file = os.path.join(lb.root_dir, '.gigantum', '.checkout')
@@ -79,7 +79,7 @@ class TestLabBook(object):
 
     def test_change_properties(self, mock_config_file):
         """Test loading a labbook from a directory"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook")
         lb.description = "an updated description"
 
@@ -91,7 +91,7 @@ class TestLabBook(object):
         assert lb_loaded.description == "an updated description"
 
     def test_validate_new_labbook_name(self, mock_config_file):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
 
         bad_labbook_names = [
             None, "", "-", "--", "--a", '_', "-a", "a-", "$#Q", "Catbook4me", "--MeowMe", "-meow-4-me-",
@@ -131,13 +131,13 @@ class TestLabBook(object):
             assert LabBook.make_path_relative(sample_input) == expected_output
 
     def test_labbook_key(self, mock_config_file):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'test-lb-key', description="validate tests.")
         assert lb.key == 'test|test|test-lb-key'
 
     def test_sweep_uncommitted_changes(self, mock_config_file):
         """ Test sweep covers Added, Removed, and """
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'test-insert-files-1', description="validate tests")
 
         with open(os.path.join(lb.root_dir, 'input', 'sillyfile'), 'wb') as newf:
@@ -165,7 +165,7 @@ class TestLabBook(object):
 
     def test_read_write_readme(self, mock_config_file):
         """Test creating a reading and writing a readme file to the labbook"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
                                author=GitAuthor(name="test", email="test@test.com"))
 
@@ -180,7 +180,7 @@ class TestLabBook(object):
 
     def test_readme_size_limit(self, mock_config_file):
         """Test creating a reading and writing a readme file to the labbook"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
                                author=GitAuthor(name="test", email="test@test.com"))
         assert lb.get_readme() is None
@@ -194,7 +194,7 @@ class TestLabBook(object):
 
     def test_readme_wierd_strings(self, mock_config_file):
         """Test creating a reading and writing a readme file to the labbook with complex strings"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
                                author=GitAuthor(name="test", email="test@test.com"))
 
@@ -233,7 +233,7 @@ class TestLabBook(object):
 
     def test_is_labbook_modified_date(self, mock_config_file):
         """Test getting the modified date"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
                                author=GitAuthor(name="test", email="test@test.com"))
 
@@ -256,7 +256,7 @@ class TestLabBook(object):
 
     def test_untracked_output_dir(self, mock_config_file):
         """Test that contents of the untracked directory (in output) truly is untracked. """
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook",
                                author=GitAuthor(name="test", email="test@test.com"))
 

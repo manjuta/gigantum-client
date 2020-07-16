@@ -21,7 +21,7 @@ from gtmcore.dataset.io import PushObject
 
 
 def hash_dataset_files(logged_in_username: str, dataset_owner: str, dataset_name: str,
-                       file_list: List, config_file: str = None) -> None:
+                       file_list: List) -> None:
     """
 
     Args:
@@ -29,7 +29,6 @@ def hash_dataset_files(logged_in_username: str, dataset_owner: str, dataset_name
         dataset_owner: Owner of the labbook if this dataset is linked
         dataset_name: Name of the labbook if this dataset is linked
         file_list: List of files to be hashed
-        config_file: Optional config file to use
 
     Returns:
         None
@@ -41,7 +40,7 @@ def hash_dataset_files(logged_in_username: str, dataset_owner: str, dataset_name
         logger.info(f"(Job {p}) Starting hash_dataset_files(logged_in_username={logged_in_username},"
                     f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
 
-        ds = InventoryManager(config_file=config_file).load_dataset(logged_in_username, dataset_owner, dataset_name)
+        ds = InventoryManager().load_dataset(logged_in_username, dataset_owner, dataset_name)
         manifest = Manifest(ds, logged_in_username)
 
         hash_result, fast_hash_result = manifest.hash_files(file_list)
@@ -59,8 +58,7 @@ def hash_dataset_files(logged_in_username: str, dataset_owner: str, dataset_name
 
 
 def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email: str,
-                                        dataset_owner: str, dataset_name: str, dispatcher,
-                                        config_file: str = None) -> None:
+                                        dataset_owner: str, dataset_name: str, dispatcher) -> None:
     """Method to import a dataset from a zip file
 
     Args:
@@ -69,7 +67,6 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
         dataset_owner: Owner of the labbook if this dataset is linked
         dataset_name: Name of the labbook if this dataset is linked
         dispatcher: Reference to the dispatcher CLASS
-        config_file: config file (used for test mocking)
 
     Returns:
         None
@@ -129,8 +126,7 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
 
         author = GitAuthor(name=logged_in_username, email=logged_in_email)
         dispatcher_obj = Dispatcher()
-        ds = InventoryManager(config_file=config_file).load_dataset(logged_in_username, dataset_owner, dataset_name,
-                                                                    author=author)
+        ds = InventoryManager().load_dataset(logged_in_username, dataset_owner, dataset_name, author=author)
         manifest = Manifest(ds, logged_in_username)
 
         with ds.lock():
@@ -151,7 +147,6 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
                     'dataset_owner': dataset_owner,
                     'dataset_name': dataset_name,
                     'file_list': list(),
-                    'config_file': config_file,
                 }
                 job_metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
                                 'method': 'hash_dataset_files'}
@@ -219,8 +214,7 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
 
 
 def check_and_import_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str, remote_url: str,
-                             access_token: Optional[str] = None, id_token: Optional[str] = None,
-                             config_file: Optional[str] = None) -> None:
+                             access_token: Optional[str] = None, id_token: Optional[str] = None) -> None:
     """Job to check if a dataset exists in the user's working directory, and if not import it. This is primarily used
     when importing, syncing, or switching branches on a project with linked datasets
 
@@ -231,7 +225,6 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
         remote_url: URL of the dataset to import if needed
         access_token: The current user's access token, needed to initialize git credentials in certain situations
         id_token: The current user's id token, needed to initialize git credentials in certain situations
-        config_file: config file (used for test mocking)
 
     Returns:
         None
@@ -243,7 +236,7 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
 
     remote = RepoLocation(remote_url, logged_in_username)
     try:
-        im = InventoryManager(config_file=config_file)
+        im = InventoryManager()
 
         try:
             # Check for dataset already existing in the user's working directory
@@ -254,7 +247,8 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
             # Dataset not found, import it
             logger.info(f"{logged_in_username}/{dataset_owner}/{dataset_name} not found. "
                         f"Auto-importing remote dataset from {remote_url}")
-            config_obj = Configuration(config_file=config_file)
+            config_obj = Configuration()
+            server_config = config_obj.get_server_configuration()
 
             # TODO gigantum/ideas#11: this token logic is NOT duplicated in the standard dataset or labbook flows. It
             #  could be handled in gitworkflows_utils.clone_repo below, or somewhere in a git auth logic module/object.
@@ -264,17 +258,12 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
                     raise ValueError("Access and ID tokens are required to initialize git credentials")
 
                 # If the access token is set, git creds should be configured
-
-                try:
-                    hub_api = config_obj.config['git']['remotes'][remote.host]['hub_api']
-                except KeyError:
-                    raise ValueError(f"Failed to configure git service URL based on target remote: {remote.host}")
-
-                gl_mgr = GitLabManager(remote.host, hub_api=hub_api,
+                gl_mgr = GitLabManager(remote.host, hub_api=server_config.hub_api_url,
                                        access_token=access_token, id_token=id_token)
                 gl_mgr.configure_git_credentials(remote.host, logged_in_username)
 
-            gitworkflows_utils.clone_repo(remote_url=remote.remote_location, username=logged_in_username, owner=dataset_owner,
+            gitworkflows_utils.clone_repo(remote_url=remote.remote_location, username=logged_in_username,
+                                          owner=dataset_owner,
                                           load_repository=im.load_dataset_from_directory,
                                           put_repository=im.put_dataset)
             logger.info(f"{logged_in_username}/{dataset_owner}/{dataset_name} auto-imported successfully")
@@ -286,7 +275,7 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
 
 
 def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access_token: str, id_token: str,
-                         dataset_owner: str, dataset_name: str, config_file: str = None) -> None:
+                         dataset_owner: str, dataset_name: str) -> None:
     """Method to pull a collection of objects from a dataset's backend
 
     Args:
@@ -296,7 +285,6 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access
         id_token: identity token
         dataset_owner: Owner of the dataset containing the files to download
         dataset_name: Name of the dataset containing the files to download
-        config_file: config file (used for test mocking)
 
     Returns:
         str: directory path of imported labbook
@@ -319,7 +307,7 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access
         logger.info(f"(Job {p}) Starting push_dataset_objects(logged_in_username={logged_in_username},"
                     f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
 
-        im = InventoryManager(config_file=config_file)
+        im = InventoryManager()
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
         ds.namespace = dataset_owner
@@ -342,8 +330,7 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access
 
 def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id_token: str,
                  dataset_owner: str, dataset_name: str,
-                 labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None,
-                 config_file: str = None) -> None:
+                 labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None) -> None:
     """Method to pull a collection of objects from a dataset's backend.
 
     This runs the IOManager.pull_objects() method with `link_revision=False`. This is because this job can be run in
@@ -359,7 +346,6 @@ def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id
         dataset_name: Name of the dataset containing the files to download
         labbook_owner: Owner of the labbook if this dataset is linked
         labbook_name: Name of the labbook if this dataset is linked
-        config_file: config file (used for test mocking)
 
     Returns:
         str: directory path of imported labbook
@@ -383,7 +369,7 @@ def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id
                     f"dataset_owner={dataset_owner}, dataset_name={dataset_name}, labbook_owner={labbook_owner},"
                     f" labbook_name={labbook_name}")
 
-        im = InventoryManager(config_file=config_file)
+        im = InventoryManager()
 
         if labbook_owner is not None and labbook_name is not None:
             # This is a linked dataset, load repo from the Project
@@ -415,8 +401,7 @@ def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id
 def download_dataset_files(logged_in_username: str, access_token: str, id_token: str,
                            dataset_owner: str, dataset_name: str,
                            labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None,
-                           all_keys: Optional[bool] = False, keys: Optional[List[str]] = None,
-                           config_file: str = None) -> None:
+                           all_keys: Optional[bool] = False, keys: Optional[List[str]] = None) -> None:
     """Method to download files from a dataset in the background and provide status to the UI.
 
     This job schedules `pull_objects` jobs after splitting up the download work into batches. At the end, the job
@@ -432,7 +417,6 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
         labbook_name: Name of the labbook if this dataset is linked
         all_keys: Boolean indicating if all remaining files should be downloaded
         keys: List if file keys to download
-        config_file: config file (used for test mocking)
 
     Returns:
         str: directory path of imported labbook
@@ -462,7 +446,7 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
                     f" dataset_owner={dataset_owner}, dataset_name={dataset_name}, labbook_owner={labbook_owner},"
                     f" labbook_name={labbook_name}, all_keys={all_keys}, keys={keys}")
 
-        im = InventoryManager(config_file=config_file)
+        im = InventoryManager()
 
         if labbook_owner is not None and labbook_name is not None:
             # This is a linked dataset, load repo from the Project
@@ -493,8 +477,7 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
                     'dataset_owner': dataset_owner,
                     'dataset_name': dataset_name,
                     'labbook_owner': labbook_owner,
-                    'labbook_name': labbook_name,
-                    'config_file': config_file,
+                    'labbook_name': labbook_name
                 }
                 job_metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
                                 'method': 'pull_objects'}

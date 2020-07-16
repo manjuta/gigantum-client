@@ -589,26 +589,6 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         """
         return None
 
-    @staticmethod
-    def _object_service_endpoint(dataset: Dataset) -> str:
-        """
-
-        Args:
-            dataset:
-
-        Returns:
-
-        """
-        remote_config = dataset.client_config.get_remote_configuration()
-        obj_service = None
-        if remote_config:
-            obj_service = remote_config.get('object_service')
-
-        if not obj_service:
-            raise ValueError('Object Service endpoint not configured.')
-
-        return f"https://{obj_service}"
-
     def _object_service_headers(self) -> dict:
         """Method to generate the request headers, including authorization information
 
@@ -640,7 +620,8 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             raise ValueError("User must have valid session to push objects to Gigantum Cloud")
 
         # Pre-check auth so it gets cached and speeds up future requests
-        url = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        object_service = dataset.client_config.get_server_configuration().object_service_url
+        url = f"{object_service}{dataset.namespace}/{dataset.name}"
         response = requests.head(url, headers=self._object_service_headers(), timeout=60)
         if response.status_code == 200:
             access_level = response.headers.get('x-access-level')
@@ -674,7 +655,11 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             raise ValueError("User must have valid session to push objects to Gigantum Cloud")
 
         # Pre-check auth so it gets cached and speeds up future requests
-        url = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        object_service = dataset.client_config.get_server_configuration().object_service_url
+        if object_service[-1] != '/':
+            # Make sure trailing slash doesn't cause a problem by always including it in the object service URL
+            object_service = object_service + "/"
+        url = f"{object_service}{dataset.namespace}/{dataset.name}"
         response = requests.head(url, headers=self._object_service_headers(), timeout=60)
         if response.status_code != 200:
             raise IOError("Failed to pull files from Gigantum Cloud. You either do not have access or "
@@ -896,7 +881,8 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         multipart_chunk_size = backend_config['multipart_chunk_size']
         num_workers = backend_config['num_workers']
 
-        object_service_root = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        object_service = dataset.client_config.get_server_configuration().object_service_url
+        object_service_root = f"{object_service}{dataset.namespace}/{dataset.name}"
 
         loop = get_event_loop()
         loop.run_until_complete(self._run_push_pipeline(object_service_root, self._object_service_headers(), objects,
@@ -1041,7 +1027,8 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         download_chunk_size = backend_config['download_chunk_size']
         num_workers = backend_config['num_workers']
 
-        object_service_root = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        object_service = dataset.client_config.get_server_configuration().object_service_url
+        object_service_root = f"{object_service}{dataset.namespace}/{dataset.name}"
 
         loop = get_event_loop()
         loop.run_until_complete(self._run_pull_pipeline(object_service_root, self._object_service_headers(), objects,
@@ -1069,7 +1056,8 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         Returns:
             None
         """
-        url = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
+        server_config = dataset.client_config.get_server_configuration()
+        url = f"{server_config.object_service_url}{dataset.namespace}/{dataset.name}"
         response = requests.delete(url, headers=self._object_service_headers(), timeout=30)
 
         if response.status_code != 200:

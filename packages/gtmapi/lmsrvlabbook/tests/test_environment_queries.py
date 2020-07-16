@@ -13,7 +13,7 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fix
 class TestEnvironmentServiceQueries(object):
     def test_get_environment_status(self, fixture_working_dir, snapshot):
         """Test getting the a LabBook's environment status"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook10", description="my first labbook10000")
 
         query = """
@@ -85,7 +85,7 @@ class TestEnvironmentServiceQueries(object):
     def test_get_package_manager(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's package manager dependencies"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook4", description="my first labbook10000")
 
         query = """
@@ -186,7 +186,7 @@ class TestEnvironmentServiceQueries(object):
     def test_get_package_manager_metadata(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test getting the a LabBook's package manager dependencies"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook4meta", description="my first asdf")
 
         query = """
@@ -236,7 +236,7 @@ class TestEnvironmentServiceQueries(object):
     def test_package_query_with_errors(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook5", description="my first labbook10000")
 
         query = """
@@ -265,7 +265,7 @@ class TestEnvironmentServiceQueries(object):
     def test_package_query_with_errors_conda(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook5conda", description="my first labbook10000")
 
         query = """
@@ -295,7 +295,7 @@ class TestEnvironmentServiceQueries(object):
     def test_package_query_with_errors_apt(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook5apt", description="my first labbook10000")
 
         # Create Component Manager
@@ -327,7 +327,7 @@ class TestEnvironmentServiceQueries(object):
 
     def test_package_query(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook6", description="my first labbook10000")
 
         query = """
@@ -350,7 +350,7 @@ class TestEnvironmentServiceQueries(object):
 
     def test_package_query_no_version(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for package info"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook6noversion", description="my first labbook10000")
 
         # Create Component Manager
@@ -419,7 +419,7 @@ class TestEnvironmentServiceQueries(object):
 
     def test_bundle_app_query(self, snapshot, fixture_working_dir_env_repo_scoped):
         """Test querying for bundled app info"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook-bundle", description="my first df")
 
         query = """
@@ -449,7 +449,7 @@ class TestEnvironmentServiceQueries(object):
 
     def test_base_update_available(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test checking if the base is able to be updated"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'labbook-base-test-update')
 
         cm = ComponentManager(lb)

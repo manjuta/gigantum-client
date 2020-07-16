@@ -135,7 +135,7 @@ class ImageBuilder(object):
     def _install_user_defined_ca(self) -> List[str]:
         """Step to add layers to install user defined CA certificates into Project containers"""
         docker_lines: List[str] = list()
-        certificate_dir_client = os.path.join(self.labbook.client_config.config['git']['working_directory'],
+        certificate_dir_client = os.path.join(self.labbook.client_config.app_workdir,
                                               'certificates')
         certificate_files = [x for x in glob.glob(os.path.join(certificate_dir_client, "*.crt"))]
 

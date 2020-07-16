@@ -246,16 +246,12 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
             return False
 
         # Check if repository exists remotely
-        remote_config = flask.current_app.config['LABMGR_CONFIG'].get_remote_configuration()
-        hub_api = None
-        remote = None
-        if remote_config:
-            hub_api = remote_config.get('hub_api')
-            remote = remote_config.get('git_remote')
+        server_config = flask.current_app.config['LABMGR_CONFIG'].get_server_configuration()
 
         # Get collaborators from remote service
         try:
-            mgr = GitLabManager(remote, hub_api, flask.g.access_token, flask.g.id_token)
+            mgr = GitLabManager(server_config.git_url, server_config.hub_api_url,
+                                flask.g.access_token, flask.g.id_token)
             if mgr.repository_exists(logged_in_username, name):
                 return False
         except:
