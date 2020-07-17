@@ -46,7 +46,6 @@ class RemoteDatasets extends Component<Props> {
       existsLocally: null,
     },
     deleteModalVisible: false,
-    isPaginating: false,
   };
 
   /*
@@ -91,17 +90,17 @@ class RemoteDatasets extends Component<Props> {
       if (navigator.onLine) {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
-            this.setState({
-              isPaginating: true,
-            });
 
             if (remoteDatasets.remoteDatasets.pageInfo.hasNextPage) {
               relay.loadMore(
                 8, // Fetch the next 8 items
                 () => {
-                  this.setState({
-                    isPaginating: false,
-                  });
+                  if (
+                    remoteDatasets.remoteDatasets
+                    && remoteDatasets.remoteDatasets.pageInfo.hasNextPage
+                  ) {
+                    this._loadMore();
+                  }
                 },
               );
             }
@@ -146,11 +145,11 @@ class RemoteDatasets extends Component<Props> {
       remoteDatasets,
       remoteDatasetsId,
       setFilterValue,
+      relay,
     } = this.props;
     const {
       deleteData,
       deleteModalVisible,
-      isPaginating,
     } = this.state;
 
     if (remoteDatasets && (remoteDatasets.remoteDatasets !== null)) {
@@ -172,7 +171,7 @@ class RemoteDatasets extends Component<Props> {
                   existsLocally={edge.node.isLocal}
                 />
               ))
-              : !isPaginating
+              : !relay.isLoading()
                 && store.getState().datasetListing.filterText
                 && <NoResults setFilterValue={setFilterValue} />
             }
@@ -181,7 +180,7 @@ class RemoteDatasets extends Component<Props> {
                 <CardLoader
                   key={`RemoteDatasets_paginationLoader${index}`}
                   index={index}
-                  isLoadingMore={isPaginating}
+                  isLoadingMore={relay.isLoading()}
                 />
               ))
             }
