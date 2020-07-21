@@ -77,7 +77,7 @@ const removeExcludedFiles = (files, owner, name) => {
 
   if (filesNotAllowedList.length > 0) {
     const filesNotAllowed = filesNotAllowedList.join(', ');
-    setWarningMessage(owner, name, `The following files are not allowed ${filesNotAllowed}`);
+    setWarningMessage(owner, name, `The following files are not allowed: ${filesNotAllowed}`);
   }
 
   return newFileArray;
@@ -131,9 +131,6 @@ const flattenFiles = (files, owner, name) => {
 
   const prunedFiles = removeExcludedFiles(flattenedFiles, owner, name);
 
-  if (prunedFiles.length === 0) {
-    clearFileUpload(owner, name);
-  }
   return prunedFiles;
 };
 
