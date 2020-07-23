@@ -389,7 +389,7 @@ class Routes extends Component {
     return (
       <div className="Routes__error">
 
-        <p>An error has occured. Please try refreshing the page.</p>
+        <p>An error has occurred. Please try refreshing the page.</p>
       </div>
     );
   }
