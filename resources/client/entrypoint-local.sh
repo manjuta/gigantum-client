@@ -25,6 +25,7 @@ chown giguser:root /opt/my-first-project.zip
 gosu giguser bash -c "git config --global user.email 'noreply@gigantum.io'"
 gosu giguser bash -c "git config --global user.name 'Gigantum Client'"
 gosu giguser bash -c "git config --global credential.helper 'cache --timeout 3600'"
+gosu giguser bash -c "git config --global http.sslVerify false"
 
 # Setup everything to allow giguser to run nginx and git
 chown -R giguser:root /opt/log

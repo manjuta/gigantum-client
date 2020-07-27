@@ -52,7 +52,7 @@ def repository_exists(namespace: str, repository_name: str, api_url: Optional[st
 """)
     query_str = query_template.substitute(namespace=namespace, repository_name=repository_name)
 
-    result = requests.post(api_url, json={'query': query_str}, headers=headers)
+    result = requests.post(api_url, json={'query': query_str}, verify=False, headers=headers)
     if result.status_code != 200:
         raise GraphQLException(f"Request to hub API failed. Status Code: {result.status_code}")
 

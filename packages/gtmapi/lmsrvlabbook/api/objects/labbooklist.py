@@ -218,7 +218,7 @@ class LabbookList(graphene.ObjectType):
 """)
         query_str = query_template.substitute(order_by=order_by, sort=sort, first=str(first), after=after)
         # Query SaaS index service for data
-        response = requests.post(config.get_hub_api_url(),
+        response = requests.post(config.get_hub_api_url(), verify=False,
                                  json={"query": query_str},
                                  headers={"Authorization": f"Bearer {access_token}",
                                           "Identity": id_token,

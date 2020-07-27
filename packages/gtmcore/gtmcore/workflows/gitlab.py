@@ -31,7 +31,7 @@ def check_and_add_user(hub_api: str, access_token: str, id_token: str) -> None:
                 }"""
 
     response = requests.post(hub_api,
-                             json={"query": query},
+                             json={"query": query}, verify=False,
                              headers={'Authorization': f"Bearer {access_token}", 'Identity': id_token})
 
     if response.status_code != 200:
@@ -150,7 +150,7 @@ class GitLabManager(object):
                               }  
                             }"""
 
-                response = requests.post(self.hub_api,
+                response = requests.post(self.hub_api, verify=False,
                                          json={"query": query},
                                          headers=self._hub_api_headers())
 
@@ -183,7 +183,7 @@ class GitLabManager(object):
         """
         # Call API to get ID of the user
         response = requests.get(f"https://{self.remote_host}/api/v4/users?username={username}",
-                                headers=self._gitlab_api_headers(),
+                                headers=self._gitlab_api_headers(), verify=False,
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
             logger.error(f"Failed to query for user ID from username. Status Code: {response.status_code}")
@@ -214,7 +214,7 @@ class GitLabManager(object):
         # Call API to check for project
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                headers=self._gitlab_api_headers(),
+                                headers=self._gitlab_api_headers(), verify=False,
                                 timeout=REQUEST_TIMEOUT)
 
         if response.status_code == 200:
@@ -243,7 +243,7 @@ class GitLabManager(object):
         update_data = {'visibility': visibility}
         response = requests.put(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                 data=update_data, headers=self._gitlab_api_headers(),
-                                timeout=REQUEST_TIMEOUT)
+                                timeout=REQUEST_TIMEOUT, verify=False)
         if response.status_code != 200:
             msg = f"Could not set visibility for remote repository {namespace}/{repository_name} " \
                   f"to {visibility}: Status code {response.status_code}"
@@ -267,7 +267,7 @@ class GitLabManager(object):
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
                                 headers=self._gitlab_api_headers(),
-                                timeout=REQUEST_TIMEOUT)
+                                timeout=REQUEST_TIMEOUT, verify=False)
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
@@ -312,7 +312,7 @@ class GitLabManager(object):
         # Call API to create project
         response = requests.post(f"https://{self.remote_host}/api/v4/projects",
                                  headers=self._gitlab_api_headers(),
-                                 json=data, timeout=REQUEST_TIMEOUT)
+                                 json=data, timeout=REQUEST_TIMEOUT, verify=False)
 
         if response.status_code != 201:
             logger.error("Failed to create remote repository")
@@ -337,7 +337,7 @@ class GitLabManager(object):
         # Call API to remove project
         repo_id = self.get_repository_id(namespace, repository_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
-                                   headers=self._gitlab_api_headers(),
+                                   headers=self._gitlab_api_headers(), verify=False,
                                    timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 202:
@@ -370,7 +370,7 @@ class GitLabManager(object):
             response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/"
                                     f"members?page={page}&per_page={per_page}",
                                     headers=self._gitlab_api_headers(),
-                                    timeout=REQUEST_TIMEOUT)
+                                    timeout=REQUEST_TIMEOUT, verify=False)
 
             if response.status_code != 200:
                 logger.error(f"Failed to get remote repository collaborators for {repo_id}, page {page}")
@@ -412,7 +412,7 @@ class GitLabManager(object):
         response = requests.post(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
                                  headers=self._gitlab_api_headers(),
                                  json=data,
-                                 timeout=REQUEST_TIMEOUT)
+                                 timeout=REQUEST_TIMEOUT, verify=False)
 
         if response.status_code != 201:
             logger.error("Failed to add collaborator")
@@ -444,7 +444,7 @@ class GitLabManager(object):
         # Call API to remove a collaborator
         repo_id = self.get_repository_id(namespace, labbook_name)
         response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members/{user_id}",
-                                   headers=self._gitlab_api_headers(),
+                                   headers=self._gitlab_api_headers(), verify=False,
                                    timeout=REQUEST_TIMEOUT)
 
         if response.status_code != 204:
