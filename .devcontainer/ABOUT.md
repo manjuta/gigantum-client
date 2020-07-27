@@ -1,0 +1,1 @@
+This directory configures VS Code to work with Docker Compose (including Docker Compose on WSL2)
