@@ -1,0 +1,35 @@
+version: '2'
+services:
+  labmanager:
+    image: gigantum/labmanager-dev:latest
+    entrypoint: /usr/local/bin/entrypoint.sh
+    command:
+      - "python3"
+      - "-u"
+      - "/opt/project/packages/gtmapi/service.py"  
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - /home/dav/gigantum:/mnt/gigantum
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/dav/gigantum-client:/opt/project/
+      - labmanager_share_vol:/mnt/share
+      - /home/dav/gigantum-client/build/developer/setup.sh:/opt/setup.sh
+    environment:
+      LOCAL_USER_ID: 1000
+      HOST_WORK_DIR: /home/dav/gigantum      
+      PYTHONPATH: /opt/project:/opt/project/packages/gtmapi:/opt/project/packages/gtmcore
+      # This may become necessary if we do any debugging in VS Code?
+      # PYTHONUNBUFFERED: "1"
+      # A PyCharm snippet
+      # PYTHONIOENCODING: UTF-8
+    # This was from PyCharm - doesn't seem to be needed
+    # stdin_open: true
+      
+    network_mode: "bridge"
+
+volumes:
+  labmanager_share_vol:
+    external: true
