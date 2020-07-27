@@ -70,6 +70,9 @@ input[type="text"].full--border:focus {
     font-size: 14px !important;
     padding: 0 5px !important;
   }
+  input::-webkit-input-placeholder {
+    line-height:normal!important;
+  }
 }
 
 textarea {

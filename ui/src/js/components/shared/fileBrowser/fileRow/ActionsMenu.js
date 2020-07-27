@@ -1,6 +1,7 @@
 // vendor
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
+import ReactTooltip from 'react-tooltip';
 // assets
 import './ActionsMenu.scss';
 
@@ -125,11 +126,10 @@ export default class ActionsMenu extends Component {
     });
     const deleteCSS = classNames({
       'ActionsMenu__item Btn Btn--fileBrowser Btn__delete-secondary Btn--round': true,
-      'Tooltip-data Tooltip-data--small': !state.popupVisible,
       'ActionsMenu__popup-visible': state.popupVisible,
     });
     const folderCSS = classNames({
-      'ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round': true,
+      'ActionsMenu__item Btn Btn--fileBrowser Btn--round': true,
       Btn__addFolder: true,
       'visibility-hidden': !props.folder,
     });
@@ -144,7 +144,7 @@ export default class ActionsMenu extends Component {
           onClick={() => { this._addFolderVisibile(); }}
           className={folderCSS}
           data-click-id="addFolder"
-          data-tooltip="Add Subfolder"
+          data-tip="Add Subfolder"
           type="button"
         />
         { !isUntrackedDirectory
@@ -153,7 +153,7 @@ export default class ActionsMenu extends Component {
                 <div className="relative">
                   <button
                     className={deleteCSS}
-                    data-tooltip={deleteTooltip}
+                    data-tip={deleteTooltip}
                     onClick={(evt) => { this._togglePopup(evt, true); }}
                     disabled={disableButtons}
                     type="button"
@@ -178,13 +178,17 @@ export default class ActionsMenu extends Component {
                 <button
                   disabled={disableButtons}
                   onClick={() => { props.renameEditMode(true); }}
-                  className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--round"
-                  data-tooltip={renameTooltip}
+                  className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename  Btn--round"
+                  data-tip={renameTooltip}
                   type="button"
                 />
               </Fragment>
             )
           }
+        <ReactTooltip
+          place="bottom"
+          effect="solid"
+        />
       </div>
     );
   }

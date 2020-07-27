@@ -12,7 +12,7 @@ const BrowserSupport = () => (
       src={gigantumSrc}
       alt="Gigantum"
     />
-    <p>Gigantum currently only supports Chrome and Firefox</p>
+    <p>Gigantum currently only supports Chrome, Safari and Firefox</p>
     <p>We intend on supporting all major browsers in the near future</p>
   </div>
 );
