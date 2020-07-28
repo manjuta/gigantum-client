@@ -1,12 +1,16 @@
 import importlib
 from typing import List, Union
 from gtmcore.exceptions import GigantumException
-from gtmcore.dataset.storage.backend import ManagedStorageBackend, UnmanagedStorageBackend
+from gtmcore.dataset.storage.backend import ManagedStorageBackend
+from gtmcore.dataset.storage.local import LocalFilesystemBackend
 
 SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": ("gtmcore.dataset.storage.gigantum", "GigantumObjectStore")}
 
+# The set of StorageBackend classes we support currently
+ValidBackend = Union[ManagedStorageBackend, LocalFilesystemBackend]
 
-def get_storage_backend(storage_type: str) -> Union[ManagedStorageBackend, UnmanagedStorageBackend]:
+
+def get_storage_backend(storage_type: str) -> ValidBackend:
     """
 
     Args:

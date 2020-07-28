@@ -4,7 +4,7 @@ from gtmcore.exceptions import GigantumException
 from gtmcore.fixtures.datasets import mock_enable_unmanaged_for_testing
 from gtmcore.dataset.storage import get_storage_backend, get_storage_backend_descriptions
 from gtmcore.dataset.storage.gigantum import GigantumObjectStore
-from gtmcore.dataset.storage.local import LocalFilesystem
+from gtmcore.dataset.storage.local import LocalFilesystemBackend
 
 
 class TestStorageBackendParent(object):
@@ -25,7 +25,7 @@ class TestStorageBackendParent(object):
     def test_get_storage_backend_unmanaged(self, mock_enable_unmanaged_for_testing):
         sb = get_storage_backend("local_filesystem")
 
-        assert isinstance(sb, LocalFilesystem)
+        assert isinstance(sb, LocalFilesystemBackend)
 
     def test_get_storage_backend_invalid(self):
         with pytest.raises(GigantumException):

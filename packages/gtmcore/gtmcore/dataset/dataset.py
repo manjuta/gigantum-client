@@ -4,7 +4,7 @@ import yaml
 import datetime
 import json
 
-from typing import (Optional, Union)
+from typing import Optional
 
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema
@@ -12,7 +12,7 @@ from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, 
     ActivityAction, ActivityDetailRecord
 from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.dataset.storage import get_storage_backend
-from gtmcore.dataset.storage.backend import ManagedStorageBackend, UnmanagedStorageBackend
+from gtmcore.dataset.storage import ValidBackend
 
 from gtmcore.inventory.repository import Repository
 
@@ -29,7 +29,7 @@ class Dataset(Repository):
         # TODO - Need a more formalizes solution for differentiating Datasets from other repo types
         self.client_config.config['git']['lfs_enabled'] = False
         self.namespace = namespace
-        self._backend: Optional[Union[ManagedStorageBackend, UnmanagedStorageBackend]] = None
+        self._backend: Optional[ValidBackend] = None
 
     def __str__(self):
         if self._root_dir:
@@ -132,7 +132,7 @@ class Dataset(Repository):
         return is_managed if is_managed is not None else False
 
     @property
-    def backend(self) -> Union[ManagedStorageBackend, UnmanagedStorageBackend]:
+    def backend(self) -> ValidBackend:
         """Property to access the storage backend for this dataset"""
         if not self._backend:
             self._backend = get_storage_backend(self.storage_type)

@@ -8,7 +8,7 @@ import math
 
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
-from gtmcore.dataset.storage.backend import UnmanagedStorageBackend, ManagedStorageBackend
+from gtmcore.dataset.storage.backend import ExternalStorageBackend, ManagedStorageBackend
 from gtmcore.dataset.io import PushObject, PushResult, PullResult, PullObject
 
 from gtmcore.logging import LMLogger
@@ -113,7 +113,7 @@ class IOManager(object):
         Returns:
             IOResult
         """
-        if isinstance(self, UnmanagedStorageBackend):
+        if isinstance(self, ExternalStorageBackend):
             raise TypeError("Cannot push objects using an Unmanaged dataset storage type")
 
         try:

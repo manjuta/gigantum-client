@@ -1,14 +1,12 @@
 import abc
 import os
 from pkg_resources import resource_filename
-from typing import Optional, List, Dict, Callable, Tuple
+from typing import Optional, List, Dict, Callable
 import base64
 import asyncio
-import shutil
-import copy
 
 from gtmcore.dataset.io import PushResult, PushObject, PullObject, PullResult
-from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
+from gtmcore.dataset.manifest.manifest import Manifest
 from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 
@@ -60,7 +58,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def metadata(self):
@@ -127,7 +125,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
            - gigantum_bearer_token: the gigantum bearer token for the current session
            - gigantum_id_token: the gigantum id token for the current session
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def confirm_configuration(self, dataset) -> Optional[str]:
         """Method to verify a configuration and optionally allow the user to confirm before proceeding
@@ -136,7 +134,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
         return None
 
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def is_configured(self) -> bool:
@@ -173,12 +171,11 @@ class StorageBackend(metaclass=abc.ABCMeta):
         Args:
             dataset: The dataset instance
             objects: A list of PullObjects, indicating which objects to pull
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
 
         Returns:
 
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def pull_objects(self, dataset, objects: List[PullObject], progress_update_fn: Callable) -> PullResult:
         """Method to pull objects locally
@@ -192,19 +189,18 @@ class StorageBackend(metaclass=abc.ABCMeta):
         Returns:
             PullResult
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def finalize_pull(self, dataset) -> None:
         """Method to finalize and cleanup a backend after pulling objects locally
 
         Args:
             dataset: The dataset instance
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
 
         Returns:
 
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def hash_file_key_list(self, dataset, keys):
         m = Manifest(dataset, self.configuration.get('username'))
@@ -253,7 +249,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
 
 class ManagedStorageBackend(StorageBackend):
-    """Parent class for Managed Dataset storage backends"""
+    """Parent class for the fully-managed Gigantum Dataset storage backend"""
 
     @property
     def client_should_dedup_on_push(self) -> bool:
@@ -265,7 +261,7 @@ class ManagedStorageBackend(StorageBackend):
         Returns:
             bool
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def prepare_push(self, dataset, objects: List[PushObject]) -> None:
         """Method to prepare a backend for pushing objects to the remote storage backend
@@ -273,12 +269,11 @@ class ManagedStorageBackend(StorageBackend):
         Args:
             dataset: The dataset instance
             objects: A list of PushObjects, indicating which objects to push
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
 
         Returns:
 
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def push_objects(self, dataset, objects: List[PushObject], progress_update_fn: Callable) -> PushResult:
         """Method to push objects to the remote storage backend
@@ -293,19 +288,18 @@ class ManagedStorageBackend(StorageBackend):
         Returns:
 
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def finalize_push(self, dataset) -> None:
         """Method to finalize and cleanup a backend after pushing objects to the remote storage backend
 
         Args:
             dataset: The dataset instance
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
 
         Returns:
 
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def delete_contents(self, dataset) -> None:
         """Method to remove the contents of a dataset from the storage backend, should only work if managed
@@ -316,96 +310,4 @@ class ManagedStorageBackend(StorageBackend):
         Returns:
             None
         """
-        raise NotImplemented
-
-
-class UnmanagedStorageBackend(StorageBackend):
-    """Parent class for Unmanaged Dataset storage backends"""
-
-    def update_from_local(self, dataset, status_update_fn: Callable,
-                          verify_contents: bool = False,
-                          status_result: Optional[StatusResult] = None) -> None:
-        """Method to update the dataset manifest for changed files that exists locally
-
-        Args:
-            dataset: Dataset object
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
-            verify_contents: Boolean indicating if "verify_contents" should be run, and the results added to modified
-            status_result: Optional StatusResult object to include in the update (typically from update_from_remote())
-
-        Returns:
-            None
-        """
-        if 'username' not in self.configuration:
-            raise ValueError("Dataset storage backend requires current logged in username to verify contents")
-        m = Manifest(dataset, self.configuration.get('username'))
-
-        status_update_fn("Updating Dataset manifest from local file state.")
-
-        if status_result is not None:
-            if status_result.modified is not None:
-                modified_keys = copy.deepcopy(status_result.modified)
-            else:
-                modified_keys = list()
-        else:
-            modified_keys = list()
-
-        if verify_contents:
-            modified_keys.extend(self.verify_contents(dataset, status_update_fn))
-
-        # Create StatusResult to force modifications
-        if status_result:
-            created_result = copy.deepcopy(status_result.created)
-            # Check if any directories got created
-            for key in status_result.created:
-                if key[-1] != '/':
-                    # a file
-                    if os.path.dirname(key) not in m.manifest:
-                        # Add the directory to the manifest
-                        created_result.append(f"{os.path.dirname(key)}/")
-
-            created_result = list(set(created_result))
-            if '/' in created_result:
-                created_result.remove('/')
-
-            # Combine a previous StatusResult object (typically from "update_from_remote")
-            status = StatusResult(created=created_result,
-                                  modified=modified_keys,
-                                  deleted=status_result.deleted)
-        else:
-            status = StatusResult(created=[], modified=modified_keys, deleted=[])
-
-        # Update the manifest
-        previous_revision = m.dataset_revision
-
-        m.update(status)
-        m.create_update_activity_record(status)
-
-        # Link the revision dir
-        m.link_revision()
-        if os.path.isdir(os.path.join(m.cache_mgr.cache_root, previous_revision)):
-            shutil.rmtree(os.path.join(m.cache_mgr.cache_root, previous_revision))
-
-        status_update_fn("Update complete.")
-
-    @property
-    def can_update_from_remote(self) -> bool:
-        """Property indicating if this backend can automatically update its contents to the latest on the remote
-
-        Returns:
-            bool
-        """
-        raise NotImplemented
-
-    def update_from_remote(self, dataset, status_update_fn: Callable) -> None:
-        """Optional method that updates the dataset by comparing against the remote. Not all unmanaged dataset backends
-        will be able to do this.
-
-        Args:
-            dataset: Dataset object
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
-
-        Returns:
-            None
-        """
-        raise NotImplemented
+        raise NotImplementedError

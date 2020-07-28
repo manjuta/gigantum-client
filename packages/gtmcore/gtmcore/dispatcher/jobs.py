@@ -21,7 +21,7 @@ from gtmcore.environment.repository import RepositoryLock
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
 
-from gtmcore.dataset.storage.backend import UnmanagedStorageBackend
+from gtmcore.dataset.storage.backend import ExternalStorageBackend
 
 
 # PLEASE NOTE -- No global variables!
@@ -400,7 +400,7 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
         ds.namespace = dataset_owner
         ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
 
-        if not isinstance(ds.backend, UnmanagedStorageBackend):
+        if not isinstance(ds.backend, ExternalStorageBackend):
             raise ValueError("Can only auto-update unmanaged dataset types")
 
         if not ds.backend.can_update_from_remote:
@@ -507,7 +507,7 @@ def update_unmanaged_dataset_from_local(logged_in_username: str, access_token: s
         ds.namespace = dataset_owner
         ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
 
-        if not isinstance(ds.backend, UnmanagedStorageBackend):
+        if not isinstance(ds.backend, ExternalStorageBackend):
             raise ValueError("Can only auto-update unmanaged dataset types")
 
         ds.backend.update_from_local(ds, update_meta, verify_contents=True)

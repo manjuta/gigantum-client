@@ -4,7 +4,7 @@ import shutil
 import os
 
 from gtmcore.dataset.storage import get_storage_backend
-from gtmcore.dataset.storage.local import LocalFilesystem
+from gtmcore.dataset.storage.local import LocalFilesystemBackend
 from gtmcore.dataset.manifest.manifest import Manifest
 from gtmcore.fixtures.datasets import helper_compress_file, mock_dataset_with_cache_dir_local, USERNAME, \
     mock_enable_unmanaged_for_testing
@@ -51,11 +51,11 @@ class TestStorageBackendLocalFilesystem(object):
     def test_get_storage_backend(self, mock_dataset_with_cache_dir_local):
         sb = get_storage_backend("local_filesystem")
 
-        assert isinstance(sb, LocalFilesystem)
+        assert isinstance(sb, LocalFilesystemBackend)
 
     def test_backend_config(self, mock_dataset_with_cache_dir_local):
         ds = mock_dataset_with_cache_dir_local[0]
-        assert isinstance(ds.backend, LocalFilesystem)
+        assert isinstance(ds.backend, LocalFilesystemBackend)
 
         assert ds.backend.is_configured is False
 
@@ -78,7 +78,7 @@ class TestStorageBackendLocalFilesystem(object):
 
     def test_backend_current_config(self, mock_dataset_with_cache_dir_local):
         ds = mock_dataset_with_cache_dir_local[0]
-        assert isinstance(ds.backend, LocalFilesystem)
+        assert isinstance(ds.backend, LocalFilesystemBackend)
 
         assert ds.backend.is_configured is False
 
