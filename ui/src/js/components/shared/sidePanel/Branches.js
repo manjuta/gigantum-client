@@ -2,6 +2,7 @@
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import shallowCompare from 'react-addons-shallow-compare';
+import ReactTooltip from 'react-tooltip';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
@@ -463,7 +464,7 @@ class Branches extends Component<Props> {
       'Branches__btn--delete--selected': deleteModalVisible,
     });
     const syncButtonCSS = classNames({
-      'Branches__btn Tooltip-data': true,
+      Branches__btn: true,
       'Branches__btn--sync': props.defaultRemote,
       'Branches__btn--push': !props.defaultRemote,
       'Branches__btn--pull': props.showPullOnly,
@@ -471,7 +472,6 @@ class Branches extends Component<Props> {
     const syncMenuDropdownButtonCSS = classNames({
       'Branches__btn Branches__btn--sync-dropdown': true,
       'Branches__btn--sync-open': state.syncMenuVisible,
-      'Tooltip-data': props.disableDropdown && props.showPullOnly,
     });
     const syncMenuDropdownCSS = classNames({
       'Branches__dropdown-menu': state.syncMenuVisible && !props.disableDropdown,
@@ -485,31 +485,55 @@ class Branches extends Component<Props> {
               <Fragment>
                 <button
                   type="button"
-                  className="Branches__btn Branches__btn--create Tooltip-data"
+                  className="Branches__btn Branches__btn--create"
                   disabled={!branch.isActive}
-                  data-tooltip="Create Branch"
+                  data-tip="Create Branch"
+                  data-for="Tooltip--createBranch"
                   onClick={() => props.toggleModal('createBranchVisible')}
+                />
+                <ReactTooltip
+                  id="Tooltip--createBranch"
+                  place="bottom"
+                  effect="solid"
                 />
                 <button
                   type="button"
-                  className="Branches__btn Tooltip-data Branches__btn--reset"
-                  data-tooltip={resetTooltip}
+                  className="Branches__btn Branches__btn--reset"
+                  data-tip={resetTooltip}
+                  data-for="Tooltip--reset"
                   disabled={!branch.isRemote || upToDate}
                   onClick={() => this._toggleModal('resetModal', branch.branchName)}
+                />
+                <ReactTooltip
+                  id="Tooltip--reset"
+                  place="bottom"
+                  effect="solid"
                 />
                 <button
                   type="button"
                   className={syncButtonCSS}
-                  data-tooltip={syncTooltip}
+                  data-tip={syncTooltip}
+                  data-for="Tooltip--sync"
                   disabled={syncDisabled}
                   onClick={() => props.handleSyncButton(props.showPullOnly, props.allowSync, props.allowSyncPull)}
+                />
+                <ReactTooltip
+                  id="Tooltip--sync"
+                  place="bottom"
+                  effect="solid"
                 />
                 <button
                   type="button"
                   className={syncMenuDropdownButtonCSS}
                   disabled={props.disableDropdown}
-                  data-tooltip="You do not have the appropriate permissions to sync"
+                  data-tip="You do not have the appropriate permissions to sync"
+                  data-for="Tooltip--syncDropdown"
                   onClick={() => { this._toggleSyncDropdown(); }}
+                />
+                <ReactTooltip
+                  id="Tooltip--syncDropdown"
+                  place="bottom"
+                  effect="solid"
                 />
                 <div className={syncMenuDropdownCSS}>
                   <h5 className="Branches__h5">Remote Action</h5>
