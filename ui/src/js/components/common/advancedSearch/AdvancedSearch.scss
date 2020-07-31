@@ -201,8 +201,11 @@ div.ReactTags__selected span.ReactTags__tag {
       border: 1px solid $romanSilver;
     }
 
+  .AdvancedSearch__li.Languanges:hover,
   .ReactTags__tag.Languages,
   .ReactTags__tag.Dataset.Type,
+  .AdvancedSearch__li.Dataset.Type:hover,
+  .AdvancedSearch__li.Package.Managers:hover,
   .ReactTags__tag.Package.Managers {
       color: $white !important;
       background: $primary !important;
@@ -211,6 +214,7 @@ div.ReactTags__selected span.ReactTags__tag {
       }
   }
 
+  .AdvancedSearch__li.CUDA.Version:hover,
   .ReactTags__tag.CUDA.Version {
       color: $white !important;
       background: $slateBlueOpaque !important;
@@ -219,8 +223,9 @@ div.ReactTags__selected span.ReactTags__tag {
       }
   }
 
-
+  .AdvancedSearch__li.Development.Environments:hover,
   .ReactTags__tag.Development.Environments,
+  .AdvancedSearch__li.Base.Type:hover,
   .ReactTags__tag.Base.Type {
       color: $white !important;
       background: $slateBlue !important;
@@ -229,6 +234,7 @@ div.ReactTags__selected span.ReactTags__tag {
       }
   }
 
+  .AdvancedSearch__li.Tags:hover,
   .ReactTags__tag.Tags {
       color: $white !important;
       background: $lightblue !important;

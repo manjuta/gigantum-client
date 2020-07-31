@@ -83,6 +83,7 @@ class Category extends PureComponent<Props> {
                 filterCategories[category].map(filter => (
                   <li
                     key={filter}
+                    className={`AdvancedSearch__li ${category}`}
                     onClick={() => handleAddition({ id: filter, text: filter }, category)}
                   >
                     {filter}
