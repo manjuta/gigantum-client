@@ -342,10 +342,10 @@ export default class ImportModule extends Component<Props> {
         ? state.remoteURL
         : `https://${state.remoteURL}`;
       const domain = new URL(modifiedURL);
-      const hostname = domain.hostname.replace('.com', '.io');
+      const hostname = domain.hostname;
       const name = state.remoteURL.split('/')[state.remoteURL.split('/').length - 1];
       const owner = state.remoteURL.split('/')[state.remoteURL.split('/').length - 2];
-      const remote = `https://repo.${hostname}/${owner}/${name}.git`;
+      const remote = `https://${hostname}/${owner}/${name}.git`;
 
       if (props.section === 'labbook') {
         this._importRemoteProject(owner, name, remote, id);
