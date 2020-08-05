@@ -131,19 +131,6 @@ class ContainerStatus extends Component<Props> {
   }
 
   /**
-    @param {}
-    set containerStatus secondsElapsed state by iterating
-    @return {string}
-  */
-  _checkJupyterStatus = () => {
-    // update this when juphyter can accept cors
-
-    setTimeout(() => {
-      window.open('http://localhost:8888', '_blank');
-    }, 5000);
-  }
-
-  /**
     @param {string, string} containerStatus,imageStatus -
     get status by mixing containrSatus imagesStatus and state.status
     @return {string}

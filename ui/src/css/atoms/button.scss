@@ -858,4 +858,9 @@ button {
     box-shadow: none !important;
     cursor: auto;
   }
+  &--popup-blocked {
+    padding-left: 25px;
+    background: url('~Images/icons/offsite-azure.svg') no-repeat left 15px center;
+    background-size: 15px;
+   }
 }

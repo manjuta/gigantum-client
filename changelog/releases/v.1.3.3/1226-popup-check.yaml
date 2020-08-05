@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1410"
+changelog:
+  - type: IMPROVEMENT
+    description: Improved messaging when the browser's popup blocker prevents launching of the development tool

@@ -2,6 +2,8 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+// components
+import PopupBlocked from 'Components/shared/modals/PopupBlocked';
 // store
 import { setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/actions/footer';
@@ -74,6 +76,7 @@ class DevTools extends Component<Props> {
   state = {
     selectedDevTool: setSelectedDevTool(this),
     showDevList: false,
+    showPopupBlocked: false,
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -101,6 +104,13 @@ class DevTools extends Component<Props> {
 
   componentWillUnmount() {
     window.removeEventListener('click', this._closeDevtoolMenu);
+  }
+
+  /**
+   * sets state for popup modal
+   */
+  _togglePopupModal = () => {
+    this.setState({ showPopupBlocked: false });
   }
 
   /**
@@ -145,6 +155,8 @@ class DevTools extends Component<Props> {
       isSyncing,
     } = this.props;
 
+    const { showPopupBlocked } = this.state;
+
     const { owner, name } = labbook;
     const labbookCreationDate = Date.parse(`${creationDateUtc}Z`);
     const timeNow = Date.parse(new Date());
@@ -187,6 +199,15 @@ class DevTools extends Component<Props> {
             }
 
             window[tabName] = window.open(path, tabName);
+            if (
+              !window[tabName]
+              || window[tabName].closed
+              || typeof window[tabName].closed === 'undefined'
+            ) {
+              this.setState({ showPopupBlocked: true });
+            } else if (showPopupBlocked) {
+              this.setState({ showPopupBlocked: false });
+            }
           }
         },
       );
@@ -211,6 +232,15 @@ class DevTools extends Component<Props> {
             }
 
             window[tabName] = window.open(path, tabName);
+            if (
+              !window[tabName]
+              || window[tabName].closed
+              || typeof window[tabName].closed === 'undefined'
+            ) {
+              this.setState({ showPopupBlocked: true });
+            } else if (showPopupBlocked) {
+              this.setState({ showPopupBlocked: false });
+            }
           }
 
           if (error) {
@@ -253,7 +283,11 @@ class DevTools extends Component<Props> {
 
   render() {
     const { labbook } = this.props;
-    const { selectedDevTool, showDevList } = this.state;
+    const {
+      selectedDevTool,
+      showDevList,
+      showPopupBlocked,
+    } = this.state;
     let devTools = labbook.environment.base
       ? labbook.environment.base.developmentTools
       : [];
@@ -276,6 +310,16 @@ class DevTools extends Component<Props> {
 
     return (
       <div className="DevTools">
+        {
+          showPopupBlocked
+          && (
+            <PopupBlocked
+              togglePopupModal={this._togglePopupModal}
+              devTool={selectedDevTool}
+              attemptRelaunch={() => { this._openDevToolMuation(selectedDevTool); }}
+            />
+          )
+        }
         <div className="DevTools__flex">
           <button
             type="submit"

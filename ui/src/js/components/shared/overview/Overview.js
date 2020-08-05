@@ -132,14 +132,6 @@ class Overview extends Component<Props> {
    @param {}
    sets element to expand
    */
-  _openJupyter = () => {
-    window.open('http://localhost:8888', '_blank');
-  }
-
-  /**
-   @param {}
-   sets element to expand
-   */
   _setExpand = () => {
     const { state } = this;
     const element = document.getElementsByClassName('ReadmeMarkdown')[0];
