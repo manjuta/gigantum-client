@@ -1,5 +1,6 @@
 import graphene
 from gtmcore.dataset.storage import get_storage_backend
+from gtmcore.dataset.storage.s3 import ExternalStorageBackend
 
 
 class DatasetType(graphene.ObjectType):
@@ -43,8 +44,8 @@ class DatasetType(graphene.ObjectType):
             sb = get_storage_backend(self.storage_type)
 
             self._dataset_type_data = sb.metadata
-            self._dataset_type_data['is_managed'] = sb.is_managed
-            if sb.is_managed is False:
+            self._dataset_type_data['is_managed'] = isinstance(sb, ExternalStorageBackend)
+            if self._dataset_type_data['is_managed']:
                 self._dataset_type_data['can_update_unmanaged_from_remote'] = sb.can_update_from_remote
             else:
                 self._dataset_type_data['can_update_unmanaged_from_remote'] = False

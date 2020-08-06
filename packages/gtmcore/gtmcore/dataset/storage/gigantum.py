@@ -8,7 +8,7 @@ import math
 
 from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
-from typing import Optional, List, Dict, Callable, Tuple, NamedTuple
+from typing import Optional, List, Dict, Callable, NamedTuple
 import os
 
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
@@ -18,7 +18,7 @@ from gtmcore.dataset.manifest.eventloop import get_event_loop
 logger = LMLogger.get_logger()
 
 
-# Namedtuples to track parts in a multipart upload
+# NamedTuples to track parts in a multipart upload
 MultipartPart = NamedTuple("MultipartUploadPart", [('part_number', int), ('start_byte', int), ('end_byte', int)])
 MultipartPartCompleted = NamedTuple("MultipartUploadPart", [('part_number', int), ('etag', str)])
 
@@ -796,7 +796,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
                     try:
                         await presigned_request.abort_multipart_upload(session)
                     except Exception as err:
-                        logger.error(f"An error occured while trying to abort multipart upload "
+                        logger.error(f"An error occurred while trying to abort multipart upload "
                                      f"{presigned_request.multipart_upload_id} for {presigned_request.object_id}")
                         logger.exception(err)
 

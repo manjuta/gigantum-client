@@ -9,6 +9,8 @@ from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.container import container_for_context
+from gtmcore.dataset.storage import LocalFilesystemBackend
+from gtmcore.dataset.storage.s3 import PublicS3Bucket
 from gtmcore.labbook import LabBook
 from gtmcore.gitlib import RepoLocation
 
@@ -21,7 +23,7 @@ from gtmcore.environment.repository import RepositoryLock
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
 
-from gtmcore.dataset.storage.backend import ExternalStorageBackend
+from gtmcore.dataset.storage.s3 import ExternalStorageBackend
 
 
 # PLEASE NOTE -- No global variables!
@@ -400,8 +402,8 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
         ds.namespace = dataset_owner
         ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
 
-        if not isinstance(ds.backend, ExternalStorageBackend):
-            raise ValueError("Can only auto-update unmanaged dataset types")
+        if not isinstance(ds.backend, PublicS3Bucket):
+            raise ValueError("Can only auto-update externally-hosted remote dataset types")
 
         if not ds.backend.can_update_from_remote:
             raise ValueError("Storage backend cannot update automatically from remote.")
@@ -470,16 +472,16 @@ def verify_dataset_contents(logged_in_username: str, access_token: str, id_token
         raise
 
 
-def update_unmanaged_dataset_from_local(logged_in_username: str, access_token: str, id_token: str,
-                                        dataset_owner: str, dataset_name: str) -> None:
-    """Method to update/populate an unmanaged dataset from it local state
+def update_local_dataset(logged_in_username: str, access_token: str, id_token: str,
+                         dataset_owner: str, dataset_name: str) -> None:
+    """Method to update/populate a local dataset from it local state
 
     Args:
         logged_in_username: username for the currently logged in user
         access_token: bearer token
         id_token: identity token
-        dataset_owner: Owner of the dataset containing the files to download
-        dataset_name: Name of the dataset containing the files to download
+        dataset_owner: Owner of the dataset
+        dataset_name: Name of the dataset
 
     Returns:
 
@@ -507,7 +509,8 @@ def update_unmanaged_dataset_from_local(logged_in_username: str, access_token: s
         ds.namespace = dataset_owner
         ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
 
-        if not isinstance(ds.backend, ExternalStorageBackend):
+        # XXX DJWC - is ds.backend only populated after .set_default_configuration() above?
+        if not isinstance(ds.backend, LocalFilesystemBackend):
             raise ValueError("Can only auto-update unmanaged dataset types")
 
         ds.backend.update_from_local(ds, update_meta, verify_contents=True)

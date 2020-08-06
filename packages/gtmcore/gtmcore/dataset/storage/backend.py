@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Callable
 import base64
 import asyncio
 
-from gtmcore.dataset.io import PushResult, PushObject, PullObject, PullResult
+from gtmcore.dataset.io import PullObject, PullResult
 from gtmcore.dataset.manifest.manifest import Manifest
 from gtmcore.dataset.manifest.eventloop import get_event_loop
 
@@ -72,17 +72,10 @@ class StorageBackend(metaclass=abc.ABCMeta):
         dataset_pkg = resource_filename('gtmcore', 'dataset')
         icon_file = os.path.join(dataset_pkg, 'storage', 'thumbnails', metadata['icon'])
 
-        metadata['is_managed'] = self.is_managed
-
         with open(icon_file, 'rb') as icf:
             metadata['icon'] = base64.b64encode(icf.read()).decode("utf-8")
 
         return metadata
-
-    @property
-    def is_managed(self):
-        """Boolean property indicating if this is a managed dataset type"""
-        return isinstance(self, ManagedStorageBackend)
 
     def set_default_configuration(self, username: str, bearer_token: str, id_token: str) -> None:
         """Method to configure default keys. This should be called from API and other situations where

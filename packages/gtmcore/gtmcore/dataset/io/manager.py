@@ -1,14 +1,12 @@
 import os
 from typing import List, Callable, Optional, Tuple
 import subprocess
-import glob
 from natsort import natsorted
 from operator import attrgetter
-import math
 
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
-from gtmcore.dataset.storage.backend import ExternalStorageBackend, ManagedStorageBackend
+from gtmcore.dataset.storage.s3 import ExternalStorageBackend
 from gtmcore.dataset.io import PushObject, PushResult, PullResult, PullObject
 
 from gtmcore.logging import LMLogger

@@ -25,7 +25,7 @@ from lmsrvlabbook.api.mutations.labbooksharing import (SyncLabbook, PublishLabbo
 # Dataset Mutations
 from lmsrvlabbook.api.mutations.dataset import (CreateDataset, ConfigureDataset, DeleteDataset, FetchDatasetEdge,
                                                 ModifyDatasetLink, SetDatasetDescription, WriteDatasetReadme,
-                                                UpdateUnmanagedDataset, VerifyDataset)
+                                                UpdateLocalDataset, VerifyDataset)
 from lmsrvlabbook.api.mutations.datasetfiles import (AddDatasetFile, CompleteDatasetUploadTransaction,
                                                      DownloadDatasetFiles, DeleteDatasetFiles, MoveDatasetFile,
                                                      MakeDatasetDirectory)

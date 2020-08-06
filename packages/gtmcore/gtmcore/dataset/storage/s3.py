@@ -6,7 +6,6 @@ import json
 
 from gtmcore.dataset.io import PullResult, PullObject
 from gtmcore.logging import LMLogger
-from gtmcore.configuration import Configuration
 from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
 
 import boto3
@@ -17,7 +16,22 @@ from botocore import UNSIGNED
 logger = LMLogger.get_logger()
 
 
-class PublicS3Bucket(StorageBackend):
+class ExternalStorageBackend(StorageBackend):
+    """A place-holder class to allow us to generically refer to PublicS3Bucket and similar (as yet unwritten) classes.
+
+    Once other descendants are implemented, this can be moved to some generic place. Keeping it in the same file as the
+    S3 backend for now to fascilitate rapid iteration.
+    """
+    pass
+
+
+class PublicS3Bucket(ExternalStorageBackend):
+    """This is an in-progress, non-working example of an externally hosted, remote backend on S3.
+
+    Ultimately, there should likely be an intermediate class such as ExternalStorageBackend that could be used to
+    collect storage backends on HTTP, SSH, and potentially provide an extension point for individuals to implement their
+    own classes.
+    """
 
     def _backend_metadata(self) -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
@@ -301,5 +315,10 @@ Due to the possibility of storing lots of data, when updating you can optionally
 
         self._save_etag_data(dataset, etag_data)
 
+        # XXX DJWC - this was a mypy error AND...
+        #  The current model is that we do NOT upload new data.
+        #  If local data matches neither the remote, nor a previous version of the Dataset, it's wrong
+        #  Users can manually upload to the remote to fix this issue if desired, or create a local dataset
+
         # Run local update
-        self.update_from_local(dataset, status_update_fn, status_result=status)
+        # self.update_from_local(dataset, status_update_fn, status_result=status)

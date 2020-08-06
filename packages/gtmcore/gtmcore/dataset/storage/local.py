@@ -272,29 +272,3 @@ more, check out the docs here: [https://docs.gigantum.com](https://docs.gigantum
             shutil.rmtree(os.path.join(m.cache_mgr.cache_root, previous_revision))
 
         status_update_fn("Update complete.")
-
-
-class ExternalStorageBackend(LocalFilesystemBackend):
-    """Parent class extending LocalFilesystemBackend to include synchronization with a remote (such as S3)"""
-
-    @property
-    def can_update_from_remote(self) -> bool:
-        """Property indicating if this backend can automatically update its contents to the latest on the remote
-
-        Returns:
-            bool
-        """
-        return True
-
-    def update_from_remote(self, dataset, status_update_fn: Callable) -> None:
-        """Optional method that updates the dataset by comparing against the remote. Not all unmanaged dataset backends
-        will be able to do this.
-
-        Args:
-            dataset: Dataset object
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
-
-        Returns:
-            None
-        """
-        raise NotImplemented

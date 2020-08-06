@@ -11,8 +11,7 @@ from gtmcore.dataset.schemas import validate_dataset_schema
 from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, ActivityType,\
     ActivityAction, ActivityDetailRecord
 from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
-from gtmcore.dataset.storage import get_storage_backend
-from gtmcore.dataset.storage import ValidBackend
+from gtmcore.dataset.storage import get_storage_backend, StorageBackend
 
 from gtmcore.inventory.repository import Repository
 
@@ -29,7 +28,7 @@ class Dataset(Repository):
         # TODO - Need a more formalizes solution for differentiating Datasets from other repo types
         self.client_config.config['git']['lfs_enabled'] = False
         self.namespace = namespace
-        self._backend: Optional[ValidBackend] = None
+        self._backend: Optional[StorageBackend] = None
 
     def __str__(self):
         if self._root_dir:
@@ -126,13 +125,8 @@ class Dataset(Repository):
 
         self._save_gigantum_data()
 
-    def is_managed(self) -> bool:
-        """Property to check if the dataset is managed"""
-        is_managed = self.backend.metadata.get("is_managed")
-        return is_managed if is_managed is not None else False
-
     @property
-    def backend(self) -> ValidBackend:
+    def backend(self) -> StorageBackend:
         """Property to access the storage backend for this dataset"""
         if not self._backend:
             self._backend = get_storage_backend(self.storage_type)
