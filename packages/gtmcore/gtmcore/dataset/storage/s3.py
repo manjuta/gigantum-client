@@ -1,5 +1,5 @@
 from gtmcore.dataset import Dataset
-from gtmcore.dataset.storage.backend import ExternalStorageBackend
+from gtmcore.dataset.storage.backend import StorageBackend
 from typing import List, Dict, Callable, Optional
 import os
 import json
@@ -17,7 +17,7 @@ from botocore import UNSIGNED
 logger = LMLogger.get_logger()
 
 
-class PublicS3Bucket(ExternalStorageBackend):
+class PublicS3Bucket(StorageBackend):
 
     def _backend_metadata(self) -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI

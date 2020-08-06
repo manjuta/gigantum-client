@@ -7,7 +7,7 @@ import requests
 import math
 
 from gtmcore.dataset import Dataset
-from gtmcore.dataset.storage.backend import ManagedStorageBackend
+from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Optional, List, Dict, Callable, Tuple, NamedTuple
 import os
 
@@ -522,7 +522,7 @@ class PresignedS3Download(object):
             raise IOError(f"Failed to get {self.object_details.dataset_path} from storage backend. {err}")
 
 
-class GigantumObjectStore(ManagedStorageBackend):
+class GigantumObjectStore(StorageBackend):
 
     def __init__(self) -> None:
         # Additional attributes to track processed requests

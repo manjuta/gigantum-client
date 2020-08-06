@@ -1,4 +1,5 @@
 import shutil
+import copy
 
 from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
@@ -229,11 +230,8 @@ more, check out the docs here: [https://docs.gigantum.com](https://docs.gigantum
 
         status_update_fn("Updating Dataset manifest from local file state.")
 
-        if status_result is not None:
-            if status_result.modified is not None:
-                modified_keys = copy.deepcopy(status_result.modified)
-            else:
-                modified_keys = list()
+        if (status_result is not None) and (status_result.modified is not None):
+            modified_keys = copy.deepcopy(status_result.modified)
         else:
             modified_keys = list()
 

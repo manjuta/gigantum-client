@@ -243,10 +243,9 @@ class Manifest(object):
                 else:
                     raise ValueError(f"Invalid Change type: {change}")
 
-        # De-dup and sort
+        # De-dup with set() and sort
         status['created'] = list(set(status['created']))
-        status['modified'] = list(set(status['modified']))
-        status['modified'] = natsorted(status['modified'])
+        status['modified'] = natsorted(set(status['modified']))
         status['created'] = natsorted(status['created'])
 
         all_files = list(set(all_files))
@@ -318,6 +317,7 @@ class Manifest(object):
         """
         # Hash Files
         loop = get_event_loop()
+        # XXX What is the point of this async if it just waits immediately? -DJWC
         hash_task = asyncio.ensure_future(self.hasher.hash(update_files))
         loop.run_until_complete(asyncio.gather(hash_task))
 
