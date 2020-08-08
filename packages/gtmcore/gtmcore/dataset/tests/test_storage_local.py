@@ -26,7 +26,6 @@ def mock_dataset_with_local_dir(mock_dataset_with_cache_dir_local):
 
     ds = mock_dataset_with_cache_dir_local[0]
     working_dir = mock_dataset_with_cache_dir_local[1]
-    ds.backend.set_default_configuration(USERNAME, 'asdf', '1234')
     current_config = ds.backend_config
     current_config['Data Directory'] = "test_dir"
     ds.backend_config = current_config
@@ -62,7 +61,6 @@ class TestStorageBackendLocalFilesystem(object):
         missing = ds.backend.missing_configuration
         assert len(missing) == 4
 
-        ds.backend.set_default_configuration('test', 'asdf', '1234')
         assert ds.backend.is_configured is False
 
         missing = ds.backend.missing_configuration
@@ -98,8 +96,6 @@ class TestStorageBackendLocalFilesystem(object):
 
     def test_confirm_configuration(self, mock_dataset_with_cache_dir_local):
         ds = mock_dataset_with_cache_dir_local[0]
-
-        ds.backend.set_default_configuration('test', 'asdf', '1234')
 
         with pytest.raises(ValueError):
             ds.backend.confirm_configuration(ds)

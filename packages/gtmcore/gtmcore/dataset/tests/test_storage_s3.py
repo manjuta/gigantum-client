@@ -48,7 +48,8 @@ class TestStorageBackendS3PublicBuckets(object):
         missing = ds.backend.missing_configuration
         assert len(missing) == 5
 
-        ds.backend.set_default_configuration('test', 'asdf', '1234')
+        # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
+        ds.backend.set_credentials('test', 'asdf', '1234')
         assert ds.backend.is_configured is False
 
         missing = ds.backend.missing_configuration
@@ -69,7 +70,8 @@ class TestStorageBackendS3PublicBuckets(object):
         ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
                                storage_type="public_s3_bucket")
 
-        ds.backend.set_default_configuration('test', 'asdf', '1234')
+        # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
+        ds.backend.set_credentials('test', 'asdf', '1234')
 
         with pytest.raises(ValueError):
             ds.backend.confirm_configuration(ds)
@@ -117,7 +119,8 @@ class TestStorageBackendS3PublicBuckets(object):
         im = mock_config_class[0]
         ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
                                storage_type="public_s3_bucket")
-        ds.backend.set_default_configuration(USERNAME, 'fakebearertoken', 'fakeidtoken')
+        # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
+        ds.backend.set_credentials(USERNAME, 'fakebearertoken', 'fakeidtoken')
 
         assert ds.backend.can_update_from_remote() is True
 
@@ -153,7 +156,8 @@ class TestStorageBackendS3PublicBuckets(object):
         im = mock_config_class[0]
         ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
                                storage_type="public_s3_bucket")
-        ds.backend.set_default_configuration(USERNAME, 'fakebearertoken', 'fakeidtoken')
+        # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
+        ds.backend.set_credentials(USERNAME, 'fakebearertoken', 'fakeidtoken')
 
         assert ds.backend.can_update_from_remote() is True
 
@@ -194,7 +198,8 @@ class TestStorageBackendS3PublicBuckets(object):
         im = mock_config_class[0]
         ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
                                storage_type="public_s3_bucket")
-        ds.backend.set_default_configuration(USERNAME, 'fakebearertoken', 'fakeidtoken')
+        # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
+        ds.backend.set_credentials(USERNAME, 'fakebearertoken', 'fakeidtoken')
 
         # Configure backend completely
         current_config = ds.backend_config

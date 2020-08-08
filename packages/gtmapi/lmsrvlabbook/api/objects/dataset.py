@@ -473,7 +473,8 @@ class Dataset(graphene.ObjectType):
         # Get tokens from request context
         access_token, id_token = tokens_from_request_context(tokens_required=True)
 
-        dataset.backend.set_default_configuration(get_logged_in_username(), access_token, id_token)
+        # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
+        dataset.backend.set_credentials(get_logged_in_username(), access_token, id_token)
         return dataset
 
     def resolve_backend_is_configured(self, info):

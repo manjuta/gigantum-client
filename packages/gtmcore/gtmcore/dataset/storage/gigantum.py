@@ -523,6 +523,7 @@ class PresignedS3Download(object):
 
 
 class GigantumObjectStore(StorageBackend):
+    """Backend for fully-managed Gigantum Datasets"""
 
     def __init__(self) -> None:
         # Additional attributes to track processed requests
@@ -554,40 +555,25 @@ This dataset type is fully managed. That means as you modify data, each version 
 to Gigantum Cloud will count towards your storage quota and include all versions of files.
 """}
 
+    def set_credentials(self, username: str, bearer_token: str, id_token: str) -> None:
+        """Method to configure default keys. This should be called from API and other situations where
+        remote ops are desired and the bearer and ID tokens exist
+
+        Args:
+            username: current logged in username
+            bearer_token: current session bearer token (gigantum auth service)
+            id_token: current session id token (gigantum auth service)
+
+        Returns:
+            None
+        """
+        self.configuration['username'] = username
+        self.configuration['gigantum_bearer_token'] = bearer_token
+        self.configuration['gigantum_id_token'] = id_token
+
     @property
     def client_should_dedup_on_push(self) -> bool:
         return True
-
-    def _required_configuration(self) -> List[Dict[str, str]]:
-        """A private method to return a list of keys that must be set for a backend to be fully configured
-
-        The format is a dict of keys and descriptions. E.g.
-
-        {
-          "server": "The host name for the remote server",
-          "username": "The current logged in username"
-
-        }
-
-        There are 3 keys that are always automatically populated:
-           - username: the gigantum username for the logged in user
-           - gigantum_bearer_token: the gigantum bearer token for the current session
-           - gigantum_id_token: the gigantum id token for the current session
-
-        Returns:
-
-        """
-        # No additional config required beyond defaults
-        return list()
-
-    def confirm_configuration(self, dataset) -> Optional[str]:
-        """Method to verify a configuration and optionally allow the user to confirm before proceeding
-
-        Should return the desired confirmation message if there is one. If no confirmation is required/possible,
-        return None
-
-        """
-        return None
 
     @staticmethod
     def _object_service_endpoint(dataset: Dataset) -> str:

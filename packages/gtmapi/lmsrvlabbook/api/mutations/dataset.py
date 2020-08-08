@@ -12,7 +12,7 @@ from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.utilities import configure_git_credentials
 from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType, ActivityRecord, \
     ActivityDetailRecord
-from gtmcore.activity.utils import ImmutableDict, TextData, DetailRecordList, ImmutableList
+from gtmcore.activity.utils import TextData, DetailRecordList, ImmutableList
 
 
 from lmsrvlabbook.api.objects.dataset import Dataset
@@ -20,7 +20,8 @@ from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import Dispatcher, jobs
 
 # Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
-from gtmcore.dataset.storage import get_storage_backend
+from gtmcore.dataset.storage import ExternalStorageBackend, GigantumObjectStore, LocalFilesystemBackend
+# Avoid name conflict with the Dataset API imported above
 from gtmcore.dataset import Dataset as DatasetObj
 # Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
 
@@ -103,6 +104,8 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
         background_job_key = None
         is_configured = None
 
+        can_update_from_remote: bool = isinstance(ds.backend, ExternalStorageBackend)
+
         if confirm is None:
             if parameters:
                 # Update the configuration
@@ -128,7 +131,7 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                 ds.backend_config = current_config
 
             else:
-                if ds.backend.can_update_from_remote:
+                if can_update_from_remote:
                     d = Dispatcher()
                     kwargs = {
                         'logged_in_username': logged_in_username,
@@ -155,7 +158,7 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                                 should_confirm=should_confirm,
                                 confirm_message=confirm_message,
                                 error_message=error_message,
-                                has_background_job=ds.backend.can_update_from_remote,
+                                has_background_job=can_update_from_remote,
                                 background_job_key=background_job_key)
 
 
@@ -337,8 +340,13 @@ class DeleteDataset(graphene.ClientIDMutation):
                 ds = DatasetObj(config.config_file, owner)
                 ds._data = {"name": dataset_name}
 
-            ds_backend = get_storage_backend("gigantum_object_v1")
-            ds_backend.set_default_configuration(logged_in_user, access_token, id_token)
+            if ds.storage_type != "gigantum_object_v1":
+                raise GigantumException(f"Remote deletion of {dataset_name} failed, only Gigantum Datasets supported!")
+
+            # We directly use the GigantumObjectStore here, as we don't support remote deletion in any other cases
+            ds_backend = GigantumObjectStore()
+            ds_backend.set_credentials(logged_in_user, access_token, id_token)
+
             ds_backend.delete_contents(ds)
             # Temporary hard-coding of Gigantum Dataset type. Can be removed with #1328
 

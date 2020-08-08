@@ -19,23 +19,6 @@ class StorageBackend(metaclass=abc.ABCMeta):
         # Configuration is populated from the Dataset at runtime (via a file and in-memory secrets)
         self.configuration = dict()
 
-        # Attributes used to store the required keys for a backend
-        self._required_configuration_params = [{'parameter': 'username',
-                                                'description': "the Gigantum username for the logged in user",
-                                                'type': 'str'
-                                                },
-                                               {'parameter': 'gigantum_bearer_token',
-                                                'description': "Gigantum bearer token for the current session",
-                                                'type': 'str'
-                                                },
-                                               {'parameter': 'gigantum_id_token',
-                                                'description': "Gigantum ID token for the current session",
-                                                'type': 'str'
-                                                }]
-        if self._required_configuration():
-            # If additional config required, append
-            self._required_configuration_params.extend(self._required_configuration())
-
     @property
     def storage_type(self) -> str:
         """Return the string identifier for the dataset's storage class"""
@@ -76,22 +59,6 @@ class StorageBackend(metaclass=abc.ABCMeta):
             metadata['icon'] = base64.b64encode(icf.read()).decode("utf-8")
 
         return metadata
-
-    def set_default_configuration(self, username: str, bearer_token: str, id_token: str) -> None:
-        """Method to configure default keys. This should be called from API and other situations where
-        remote ops are desired and the bearer and ID tokens exist
-
-        Args:
-            username: current logged in username
-            bearer_token: current session bearer token (gigantum auth service)
-            id_token: current session id token (gigantum auth service)
-
-        Returns:
-            None
-        """
-        self.configuration['username'] = username
-        self.configuration['gigantum_bearer_token'] = bearer_token
-        self.configuration['gigantum_id_token'] = id_token
 
     def _required_configuration(self) -> List[Dict[str, str]]:
         """A private method to return a list of parameters that must be set for a backend to be fully configured
@@ -159,19 +126,19 @@ class StorageBackend(metaclass=abc.ABCMeta):
         return current_params
 
     def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
-        """Method to prepare a backend for pulling objects locally
+        """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends
+        support pull
 
         Args:
             dataset: The dataset instance
             objects: A list of PullObjects, indicating which objects to pull
-
-        Returns:
-
         """
         raise NotImplementedError
 
     def pull_objects(self, dataset, objects: List[PullObject], progress_update_fn: Callable) -> PullResult:
-        """Method to pull objects locally
+        """Method to pull objects locally. It's optional to implement as not all back-ends
+        support pull
+
 
         Args:
             dataset: The dataset instance

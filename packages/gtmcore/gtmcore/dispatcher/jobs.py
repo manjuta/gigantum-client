@@ -506,12 +506,11 @@ def update_local_dataset(logged_in_username: str, access_token: str, id_token: s
         im = InventoryManager()
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
-        ds.namespace = dataset_owner
-        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
-
-        # XXX DJWC - is ds.backend only populated after .set_default_configuration() above?
+        # We try to fail as fast as possible
         if not isinstance(ds.backend, LocalFilesystemBackend):
             raise ValueError("Can only auto-update unmanaged dataset types")
+
+        ds.namespace = dataset_owner
 
         ds.backend.update_from_local(ds, update_meta, verify_contents=True)
 
