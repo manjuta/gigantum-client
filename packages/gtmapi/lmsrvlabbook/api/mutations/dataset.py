@@ -150,7 +150,7 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                     background_job_key = job_response.key_str
 
         if is_configured is None:
-            is_configured = ds.backend.is_configured
+            is_configured = ds.backend.has_credentials
 
         return ConfigureDataset(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
                                                 name=dataset_name, owner=dataset_owner),
@@ -181,7 +181,7 @@ class UpdateLocalDataset(graphene.relay.ClientIDMutation):
                                              bearer_token=flask.g.access_token,
                                              id_token=flask.g.id_token)
 
-        if not ds.backend.is_configured:
+        if not ds.backend.has_credentials:
             raise ValueError("Dataset is not fully configured. Cannot update.")
 
         d = Dispatcher()

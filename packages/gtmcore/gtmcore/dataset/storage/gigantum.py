@@ -567,9 +567,11 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         Returns:
             None
         """
-        self.configuration['username'] = username
-        self.configuration['gigantum_bearer_token'] = bearer_token
-        self.configuration['gigantum_id_token'] = id_token
+        self.configuration['credentials'] = {
+            'username': username,
+            'gigantum_bearer_token': bearer_token,
+            'gigantum_id_token': id_token
+        }
 
     @property
     def client_should_dedup_on_push(self) -> bool:

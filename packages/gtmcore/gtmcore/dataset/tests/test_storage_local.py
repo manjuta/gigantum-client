@@ -56,43 +56,29 @@ class TestStorageBackendLocalFilesystem(object):
         ds = mock_dataset_with_cache_dir_local[0]
         assert isinstance(ds.backend, LocalFilesystemBackend)
 
-        assert ds.backend.is_configured is False
+        assert ds.backend.has_credentials is False
 
-        missing = ds.backend.missing_configuration
-        assert len(missing) == 4
-
-        assert ds.backend.is_configured is False
-
-        missing = ds.backend.missing_configuration
-        assert len(missing) == 1
-        assert missing[0]['parameter'] == "Data Directory"
+        # missing = ds.backend.missing_configuration
+        # assert len(missing) == 1
+        # assert missing[0]['parameter'] == "Data Directory"
 
         current_config = ds.backend_config
         current_config['Data Directory'] = "test_dir"
         ds.backend_config = current_config
-
-        assert ds.backend.is_configured is True
-        assert len(ds.backend.missing_configuration) == 0
 
     def test_backend_current_config(self, mock_dataset_with_cache_dir_local):
         ds = mock_dataset_with_cache_dir_local[0]
         assert isinstance(ds.backend, LocalFilesystemBackend)
 
-        assert ds.backend.is_configured is False
+        assert ds.backend.has_credentials is False
 
-        current_config = ds.backend.safe_current_configuration
-        assert len(current_config) == 1
-        assert current_config[0]['value'] is None
-        assert current_config[0]['parameter'] == "Data Directory"
+        # assert len(current_config) == 1
+        # assert current_config[0]['value'] is None
+        # assert current_config[0]['parameter'] == "Data Directory"
 
         current_config = ds.backend_config
         current_config['Data Directory'] = "test_dir"
         ds.backend_config = current_config
-
-        current_config = ds.backend.safe_current_configuration
-        assert len(current_config) == 1
-        assert current_config[0]['value'] == "test_dir"
-        assert current_config[0]['parameter'] == "Data Directory"
 
     def test_confirm_configuration(self, mock_dataset_with_cache_dir_local):
         ds = mock_dataset_with_cache_dir_local[0]
@@ -103,9 +89,6 @@ class TestStorageBackendLocalFilesystem(object):
         current_config = ds.backend_config
         current_config['Data Directory'] = "test_dir"
         ds.backend_config = current_config
-
-        assert ds.backend.is_configured is True
-        assert len(ds.backend.missing_configuration) == 0
 
         with pytest.raises(ValueError):
             ds.backend.confirm_configuration(ds)

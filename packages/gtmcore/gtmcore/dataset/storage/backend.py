@@ -24,6 +24,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
         """Return the string identifier for the dataset's storage class"""
         return self._backend_metadata()['storage_type']
 
+    @abc.abstractmethod
     def _backend_metadata(self) -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
 
@@ -60,70 +61,12 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         return metadata
 
-    def _required_configuration(self) -> List[Dict[str, str]]:
-        """A private method to return a list of parameters that must be set for a backend to be fully configured
-
-        The format is a list of dictionaries, e.g.:
-
-        [
-          {
-            "parameter": "server",
-            "description": "URL of the remote server",
-            "type": "str"
-          },
-          {
-            "parameter": "username",
-            "description": "The current logged in username",
-            "type": "str"
-          }
-        ]
-
-        "type" must be either `str` or `bool`
-
-        There are 3 parameters that are always automatically populated:
-           - username: the gigantum username for the logged in user
-           - gigantum_bearer_token: the gigantum bearer token for the current session
-           - gigantum_id_token: the gigantum id token for the current session
-        """
-        raise NotImplementedError
-
-    def confirm_configuration(self, dataset) -> Optional[str]:
-        """Method to verify a configuration and optionally allow the user to confirm before proceeding
-
-        Should return the desired confirmation message if there is one. If no confirmation is required/possible,
-        return None
-
-        """
-        raise NotImplementedError
 
     @property
-    def is_configured(self) -> bool:
+    def has_credentials(self) -> bool:
         """Boolean property indicating if a storage backend has all required config items set"""
-        return len(self.missing_configuration) == 0
+        return self.missing_configuration) == 0
 
-    @property
-    def missing_configuration(self) -> List[Dict[str, str]]:
-        """Property returning the missing configuration parameters"""
-        configured_params = list(self.configuration.keys())
-
-        missing_params = list()
-        for param in self._required_configuration_params:
-            if param['parameter'] not in configured_params:
-                missing_params.append(param)
-
-        return missing_params
-
-    @property
-    def safe_current_configuration(self) -> List[Dict[str, str]]:
-        """Property returning the current configuration, excluding the default parameters which include secrets"""
-        current_params = list()
-        for param in self._required_configuration_params:
-            if param['parameter'] in ['username', 'gigantum_bearer_token', 'gigantum_id_token']:
-                continue
-            param['value'] = self.configuration.get(param['parameter'])
-            current_params.append(param)
-
-        return current_params
 
     def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
         """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends

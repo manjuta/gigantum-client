@@ -109,7 +109,7 @@ class TestStorageBackendGigantum(object):
         sb = get_storage_backend("gigantum_object_v1")
         ds = mock_dataset_with_cache_dir[0]
 
-        assert sb.is_configured is False
+        assert sb.has_credentials is False
 
         missing = sb.missing_configuration
         assert len(missing) == 3
@@ -118,14 +118,14 @@ class TestStorageBackendGigantum(object):
         # Configure 1 param
         sb.configuration['username'] = "test"
 
-        assert sb.is_configured is False
+        assert sb.has_credentials is False
         missing = sb.missing_configuration
         assert len(missing) == 2
         assert missing[0]['parameter'] == "gigantum_bearer_token"
 
         # Configure all
         sb.set_default_configuration('test', 'asdf', '1234')
-        assert sb.is_configured is True
+        assert sb.has_credentials is True
 
         assert sb.confirm_configuration(ds) is None
 

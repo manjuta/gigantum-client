@@ -7,6 +7,8 @@ from enum import Enum
 import shutil
 import asyncio
 from collections import OrderedDict, namedtuple
+
+import aiofiles.os
 from natsort import natsorted
 import copy
 from pathlib import Path
@@ -253,8 +255,8 @@ class Manifest(object):
                             deleted=self.hasher.get_deleted_files(all_files))
 
     @staticmethod
-    def _blocking_move_and_link(source, destination):
-        """Blocking method to move a file and hard link it
+    async def _move_and_link(source, destination):
+        """Move a file and hard link it
 
         Args:
             source: source path
@@ -265,10 +267,12 @@ class Manifest(object):
         """
         if os.path.isfile(destination):
             # Object already exists, no need to store again
-            os.remove(source)
+            await aiofiles.os.remove(source)
+            # XXX above works? os.remove(source)
         else:
             # Move file to new object
-            shutil.move(source, destination)
+            await aiofiles.os.rename(source, destination)
+            # XXX above works? shutil.move(source, destination)
         # Link object back
         try:
             os.link(destination, source)
@@ -295,8 +299,7 @@ class Manifest(object):
             destination = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
 
             # Move file to new object
-            loop = get_event_loop()
-            await loop.run_in_executor(None, self._blocking_move_and_link, source, destination)
+            await self._move_and_link(source, destination)
 
             # Queue new object for push
             self.queue_to_push(destination, relative_path, self.dataset_revision)
@@ -305,7 +308,7 @@ class Manifest(object):
 
         return destination
 
-    def hash_files(self, update_files: List[str]) -> Tuple[List[Optional[str]], List[Optional[str]]]:
+    async def hash_files(self, update_files: List[str]) -> Tuple[List[Optional[str]], List[Optional[str]]]:
         """Method to run the update process on the manifest based on change status (optionally computing changes if
         status is not set)
 
@@ -315,16 +318,10 @@ class Manifest(object):
         Returns:
             StatusResult
         """
-        # Hash Files
-        loop = get_event_loop()
-        # XXX What is the point of this async if it just waits immediately? -DJWC
-        hash_task = asyncio.ensure_future(self.hasher.hash(update_files))
-        loop.run_until_complete(asyncio.gather(hash_task))
+        hash_result = await self.hasher.hash(update_files)
 
         # Move files into object cache and link back to the revision directory
-        hash_result = hash_task.result()
-        tasks = [asyncio.ensure_future(self._move_to_object_cache(f, h)) for f, h in zip(update_files, hash_result)]
-        loop.run_until_complete(asyncio.gather(*tasks))
+        await asyncio.gather(self._move_to_object_cache(f, h) for f, h in zip(update_files, hash_result))
 
         # Update fast hash after objects have been moved/relinked
         fast_hash_result = self.hasher.fast_hash(update_files, save=True)
@@ -348,7 +345,10 @@ class Manifest(object):
         update_files.extend(status.modified)
 
         if update_files:
-            hash_result, fast_hash_result = self.hash_files(update_files)
+            loop = get_event_loop()
+            hash_task = asyncio.create_task(self.hash_files(update_files))
+            loop.run_until_complete(hash_task)
+            hash_result, fast_hash_result = hash_task.result()
 
             # Update manifest file
             for f, h, fh in zip(update_files, hash_result, fast_hash_result):

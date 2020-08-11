@@ -151,7 +151,7 @@ Due to the possibility of storing lots of data, when updating you can optionally
         Returns:
             None
         """
-        if not self.is_configured:
+        if not self.has_credentials:
             raise ValueError("S3 backend must be fully configured before running pull.")
 
     def finalize_pull(self, dataset) -> None:

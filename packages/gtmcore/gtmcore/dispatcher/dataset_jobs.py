@@ -1,3 +1,4 @@
+import asyncio
 import copy
 import os
 import time
@@ -44,7 +45,10 @@ def hash_dataset_files(logged_in_username: str, dataset_owner: str, dataset_name
         ds = InventoryManager(config_file=config_file).load_dataset(logged_in_username, dataset_owner, dataset_name)
         manifest = Manifest(ds, logged_in_username)
 
-        hash_result, fast_hash_result = manifest.hash_files(file_list)
+        loop = asyncio.get_event_loop()
+        hash_task = asyncio.create_task(manifest.hash_files(file_list))
+        loop.run_until_complete(hash_task)
+        hash_result, fast_hash_result = hash_task.result()
 
         job = get_current_job()
         if job:

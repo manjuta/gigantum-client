@@ -43,14 +43,14 @@ class TestStorageBackendS3PublicBuckets(object):
                                storage_type="public_s3_bucket")
         assert isinstance(ds.backend, PublicS3Bucket)
 
-        assert ds.backend.is_configured is False
+        assert ds.backend.has_credentials is False
 
         missing = ds.backend.missing_configuration
         assert len(missing) == 5
 
         # TODO DJWC - needs to be changed to some S3 credentials - GigaUsername not relevant
         ds.backend.set_credentials('test', 'asdf', '1234')
-        assert ds.backend.is_configured is False
+        assert ds.backend.has_credentials is False
 
         missing = ds.backend.missing_configuration
         assert len(missing) == 2
@@ -62,7 +62,7 @@ class TestStorageBackendS3PublicBuckets(object):
         current_config['Prefix'] = "desktop"
         ds.backend_config = current_config
 
-        assert ds.backend.is_configured is True
+        assert ds.backend.has_credentials is True
         assert len(ds.backend.missing_configuration) == 0
 
     def test_confirm_configuration(self, mock_config_class, mock_public_bucket):
@@ -81,7 +81,7 @@ class TestStorageBackendS3PublicBuckets(object):
         current_config['Prefix'] = "my-prefix"
         ds.backend_config = current_config
 
-        assert ds.backend.is_configured is True
+        assert ds.backend.has_credentials is True
         assert len(ds.backend.missing_configuration) == 0
 
         with pytest.raises(ValueError):

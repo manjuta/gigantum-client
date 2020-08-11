@@ -480,7 +480,7 @@ class Dataset(graphene.ObjectType):
     def resolve_backend_is_configured(self, info):
         """Field to check if a dataset backend is fully configured"""
         return info.context.dataset_loader.load(f"{get_logged_in_username()}&{self.owner}&{self.name}").then(
-            lambda dataset: self._helper_configure_default_parameters(dataset).backend.is_configured)
+            lambda dataset: self._helper_configure_default_parameters(dataset).backend.has_credentials)
 
     def helper_resolve_backend_configuration(self, dataset):
         """Helper populate backend configuration fields"""
