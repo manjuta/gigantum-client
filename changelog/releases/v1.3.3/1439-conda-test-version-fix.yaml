@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1439"
+changelog:
+  - type: NON_USER_FACING
+    description: Update cdutil version for conda package manager tests
