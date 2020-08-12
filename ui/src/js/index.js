@@ -14,7 +14,9 @@ import { unregister } from './registerServiceWorker';
 import '../css/critical.scss';
 
 const browser = detect();
-if ((browser.name === 'chrome') || (browser.name === 'firefox')) {
+
+console.log(browser);
+if ((browser.name !== 'edge') || (browser.name !== 'ie')) {
   render(
     <Provider store={store}>
       <Routes />
