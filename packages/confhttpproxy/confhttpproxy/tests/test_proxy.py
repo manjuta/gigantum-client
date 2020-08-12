@@ -73,7 +73,7 @@ def test_search(config_fixture, start_proxy):
     rando = str(uuid.uuid4()).replace('-', '')[:6]
     pr = ProxyRouter.get_proxy(config_fixture)
     pf1, host1 = pr.add("http://localhost:6666")
-    pf2, host2 = pr.add("http://localhost:5555", f'constant/{rando}')
+    pf2, host2 = pr.add("http://localhost:5555", f'/constant/{rando}')
 
     assert pr.search('cat') is None
     assert pr.search('http://localhost:6666')[1:].isalnum()

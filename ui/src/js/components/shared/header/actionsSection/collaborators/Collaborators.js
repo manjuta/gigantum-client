@@ -82,7 +82,7 @@ class CollaboratorButton extends Component<Props> {
 
   static getDerivedStateFromProps(nextProps, nextState) {
     if (nextProps.menuOpen) {
-      return nextProps.checkSessionIsValid().then((res) => {
+      nextProps.checkSessionIsValid().then((res) => {
         if (res.data && res.data.userIdentity && res.data.userIdentity.isSessionValid) {
           return {
             ...nextState,
@@ -106,9 +106,14 @@ class CollaboratorButton extends Component<Props> {
   _toggleCollaborators = () => {
     const { showLoginPrompt } = this.props;
     const { sessionValid, collaboratorModalVisible } = this.state;
-
+    const date = new Date();
+    const time = date.getTime();
+    const expiresAt = localStorage.getItem('expires_at')
+      ? parseInt(localStorage.getItem('expires_at'), 10) / 1000
+      : time - 100;
+    const isTokenNotExpired = expiresAt > time;
     if (navigator.onLine) {
-      if (sessionValid) {
+      if (sessionValid && isTokenNotExpired) {
         this.setState({ collaboratorModalVisible: !collaboratorModalVisible });
       } else {
         showLoginPrompt();

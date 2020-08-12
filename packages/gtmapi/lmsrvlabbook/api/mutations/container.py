@@ -82,15 +82,25 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         labbook_ip = project_container.query_container_ip()
         labbook_endpoint = f'http://{labbook_ip}:{tool_port}'
 
-        matched_routes = router.get_matching_routes(labbook_endpoint, 'jupyter')
+        # Set route prefix to jupyter based on if you are running locally or in a hub
+        if labbook.client_config.is_hub_client:
+            jupyter_prefix = f"/run/{os.environ['GIGANTUM_CLIENT_ID']}/jupyter"
+        else:
+            jupyter_prefix = f'/jupyter'
 
-        run_start_jupyter = True
+        matched_routes = router.get_matching_routes(labbook_endpoint, jupyter_prefix)
+
         # The "suffix" is the relative route to return to the browser for the user
         suffix = None
         # The "external_rt_prefix" is the external route to jupyter (just to the server, so you can do things like hit
-        # the jupyter API or build a full "suffix"
-        external_rt_prefix = None
-        if len(matched_routes) == 1:
+        # the jupyter API or build a full "suffix")
+        if len(matched_routes) == 0:
+            # We are starting jupyter for the first time
+            external_rt_prefix = f"{jupyter_prefix}/{unique_id()}"
+            run_start_jupyter = True
+
+        elif len(matched_routes) == 1:
+            # A route to jupyter was found in the route table
             logger.info(f'Found existing Jupyter instance in route table for {str(labbook)}.')
 
             # Load the jupyter token out of redis, if available
@@ -107,40 +117,36 @@ class StartDevTool(graphene.relay.ClientIDMutation):
             try:
                 check_jupyter_reachable(labbook_ip, tool_port, suffix)
 
-                # Add token on for the user before sending back, if available.
+                # Add token on for the user before sending back, if available. Don't re-start the Jupyter process
                 suffix = f'{suffix}/lab/tree/code?{token_str}'
                 run_start_jupyter = False
 
             except GigantumException:
+                # If you get here, the Jupyter API didn't respond, so it's probably a stale route.
                 logger.warning(f'Detected stale route. Attempting to restart Jupyter and clean up route table.')
-                # Trim leading slash and remove from the router
-                router.remove(suffix[1:])
+                # Remove stale route
+                router.remove(suffix)
                 # Delete the token from redis
                 redis_conn.delete(f"{project_container.image_tag}-jupyter-token")
 
-        elif len(matched_routes) > 1:
+                # Try re-starting jupyter
+                run_start_jupyter = True
+
+        else:
             raise ValueError(f"Multiple Jupyter instances found in route table for {str(labbook)}! Restart container.")
 
         if run_start_jupyter:
-            internal_rt_prefix = f'jupyter/{unique_id()}'
-
-            # Manipulate route prefix for hub if needed adding full hub prefix as well
-            if labbook.client_config.is_hub_client:
-                external_rt_prefix = f"run/{os.environ['GIGANTUM_CLIENT_ID']}/{internal_rt_prefix}"
-            else:
-                external_rt_prefix = internal_rt_prefix
-
-            external_rt_prefix, _ = router.add(labbook_endpoint, external_rt_prefix)
+            # Add route
+            router.add(labbook_endpoint, external_rt_prefix)
 
             # Start jupyterlab
             suffix = start_jupyter(project_container, proxy_prefix=external_rt_prefix)
 
-        # Ensure we start monitor IF jupyter isn't already running. This method will exit if the dev env monitor
-        # for this jupyter instance is already running.
-        if external_rt_prefix:
-            start_labbook_monitor(labbook, username, 'jupyterlab',
-                                  url=f'{labbook_endpoint}/{external_rt_prefix}',
-                                  author=get_logged_in_author())
+        # Ensure we start monitor it it isn't already running. This method will exit without scheduling a
+        # dev env monitory if the dev env monitor for this jupyter instance is already running.
+        start_labbook_monitor(labbook, username, 'jupyterlab',
+                              url=f'{labbook_endpoint}{external_rt_prefix}',
+                              author=get_logged_in_author())
 
         return suffix
 
@@ -189,6 +195,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                              f"for {str(labbook)}! Restart container.")
 
         if run_command:
+            # TODO: when this feature is completed, need to be sure to update route.add due to leading slash issue
             logger.info(f"Adding {bundled_app['name']} to route table for {str(labbook)}.")
             suffix, _ = router.add(endpoint, route_prefix)
             suffix = "/" + suffix

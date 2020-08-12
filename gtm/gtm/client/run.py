@@ -5,7 +5,7 @@ import subprocess
 
 import docker
 
-from gtm.utils import dockerize_windows_path, DockerVolume
+from gtm.utils import dockerize_mount_path, DockerVolume
 from gtm.common.gpu import get_nvidia_driver_version
 
 
@@ -64,12 +64,10 @@ class ClientRunner(object):
 
         environment_mapping = dict()
         if platform.system() == 'Windows':
-            # HOST_WORK_DIR will be used to mount inside labbook.
-            environment_mapping['HOST_WORK_DIR'] = dockerize_windows_path(working_dir)
+            # HOST_WORK_DIR will be used to mount inside the Client.
+            environment_mapping['HOST_WORK_DIR'] = dockerize_mount_path(working_dir, self.image_name)
             environment_mapping['WINDOWS_HOST'] = 1
-            # Windows does not support cached, but this is silently ignored (as of late Jan 2018)
-            # We convert \ to /
-            volume_mapping[dockerize_windows_path(working_dir)] = {'bind': '/mnt/gigantum', 'mode': 'cached'}
+            volume_mapping[working_dir] = {'bind': '/mnt/gigantum', 'mode': 'rw'}
         else:
             environment_mapping['HOST_WORK_DIR'] = working_dir
             environment_mapping['LOCAL_USER_ID'] = os.getuid()

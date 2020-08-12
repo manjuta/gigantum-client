@@ -61,7 +61,7 @@ export default class AddSecret extends Component<Props> {
   }
 
   /**
-  *  @param {Obect} file
+  *  @param {Object} files
   * sets file in state
   */
   _setFile(files) {

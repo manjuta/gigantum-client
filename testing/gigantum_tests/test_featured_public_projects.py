@@ -25,6 +25,11 @@ def test_import_projects_via_url(driver: selenium.webdriver, *args, **kwargs):
             import_project_elts.import_project_via_url(project_url)
             project_control = testutils.ProjectControlElements(driver)
 
+            try:
+                project_control.close_footer_notification_button.click()
+            except:
+                pass
+
             assert project_control.container_status_stopped.find().is_displayed(), \
                 f"Project {project_url} was not imported successfully via url"
 

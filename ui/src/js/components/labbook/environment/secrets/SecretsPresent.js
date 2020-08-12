@@ -27,7 +27,7 @@ class SecretsPresent extends PureComponent<Props> {
         (tooltipVisible === node.filename)
         && (
         <div className="InfoTooltip">
-          Secrets file not found. Edit to replace file.
+          Sensitive file not found.
           {' '}
           <a
             target="_blank"

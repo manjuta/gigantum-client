@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1359"
+changelog:
+  - type: IMPROVEMENT
+    description: Changes to the workflow related to updating sensitive files, restrictions while project is in use, and minor styling tweaks
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1341

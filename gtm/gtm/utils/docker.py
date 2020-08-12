@@ -84,28 +84,30 @@ def get_docker_client(check_server_version=True, fallback=True):
         return docker.from_env()
 
 
-def dockerize_windows_path(dkrpath: str) -> str:
-    """Returns a path that can be mounted as a docker volume on windows Docker
-    uses non-standard formats for windows mounts. Note that different
-    components of the docker ecosystem may support a different set of formats
-    for paths. This one seems to work across docker cp, docker compose and
-    command-line volume mounts on Windows. Specifically, this routine converts
-    C:\a\b -> /C/a/b
-    C:/a/b -> /C/a/b
+def dockerize_mount_path(host_path: str, image_name_with_tag: str) -> str:
+    """Returns a path that can be mounted as a docker volume from the host
 
-    (As in general with current Windows, forwards and backwards slashes are accepted)
-
-    Previously, the colon + forward-slash notation was necessary to build
-    images with docker-py. Currently that syntax breaks docker-compose (again?).
+    Docker uses non-standard formats for windows mounts.
+    Last we checked, this routine converts C:\a/gigantum -> /host_mnt/c/a/gigantum
+    on Windows with Hyper-V, other stuff on WSL 2, and does nothing on posix systems.
 
     Args:
-        dkrpath(str): a python path
+        host_path: a path on the host - Windows can use a mix of forward and back slashes
+        image_name_with_tag: e.g., 'gigantum/labmanager:latest' - MUST include /usr/bin/tail
 
     Returns:
-        str: path that can be handed to Docker for a volume mount
+        path that can be handed to Docker inside another container for a volume mount
     """
-    dkrpath = dkrpath.replace('\\', '/')
-    if dkrpath[1] == ':':
-        dkrpath = '/' + dkrpath[0] + dkrpath[2:]
+    client = get_docker_client()
+    volume_mapping = {host_path: {'bind': '/mnt/gigantum', 'mode': 'ro'}}
+    container = client.containers.run(image=image_name_with_tag,
+                                      entrypoint='/usr/bin/tail',
+                                      command='-f /dev/null',
+                                      detach=True,
+                                      init=True,
+                                      volumes=volume_mapping,
+                                      remove=True)
+    rewritten_work_dir = container.attrs['Mounts'][0]['Source']
+    container.stop()
 
-    return dkrpath
+    return rewritten_work_dir

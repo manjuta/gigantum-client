@@ -20,7 +20,9 @@ exports[`Test LocalLabbooks rendering 1`] = `
       <div
         className="ContainerStatus__container-state ContainerStatus__containerStatus--state undefined box-shadow"
         data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
+        onBlur={[Function]}
         onClick={[Function]}
+        onFocus={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
         role="presentation"
@@ -48,7 +50,6 @@ exports[`Test LocalLabbooks rendering 1`] = `
         data-for="LocalLabbooks--ui-test-project"
         data-selenium-id="RepositoryTitle"
         data-tip="ui-test-project"
-        onClick={[Function]}
         role="presentation"
       >
         <div
@@ -85,7 +86,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
           ui-test-project
         </div>
         <div
-          className="__react_component_tooltip place-bottom type-dark"
+          className="__react_component_tooltip place-bottom type-dark "
           data-id="tooltip"
           id="LocalLabbooks--ui-test-project"
         />

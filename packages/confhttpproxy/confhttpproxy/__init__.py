@@ -39,14 +39,25 @@ class ProxyRouter(object):
 
     def add(self, target: str, prefix: Optional[str] = None) -> Tuple[str, str]:
         p = prefix or self.encode(target)
+        if p[0] == "/":
+            # When setting a route, if a leading slash is included remove it. If you do not do this, you'll get a
+            # double leading slash. By handling this here, it greatly simplifies the code, as you can now assume
+            # all prefixes will contain a leading slash, since that's how CHP stores them!
+            p = p[1:]
         r = requests.post(f'http://{self.api_host}:{self.api_port}/api/routes/{p}',
                           json={'target': target})
         if r.status_code == 201:
-            return (p, target)
+            return p, target
         raise ProxyRouterException(f'Cannot set route to {target}: '
                                    f'{r.status_code} {r.text}')
 
     def remove(self, prefix: str) -> None:
+        if prefix[0] == "/":
+            # When deleting a route a route, if a leading slash is included remove it. If you do not do this, you'll
+            # get a double leading slash. By handling this here, it greatly simplifies the code, as you can now assume
+            # all prefixes will contain a leading slash, since that's how CHP stores them!
+            prefix = prefix[1:]
+
         r = requests.delete(f'http://{self.api_host}:{self.api_port}/api/routes/{prefix}')
         if r.status_code == 204:
             return None
@@ -101,13 +112,13 @@ class NullRouter(ProxyRouter):
     def routes(self) -> Dict[str, Dict[str, str]]:
         return {}
 
-    def add(self, target: str, prefix: Optional[str]) -> Tuple[str, str]:
+    def add(self, target: str, prefix: Optional[str] = None) -> Tuple[str, str]:
         return prefix or "", target
 
     def remove(self, prefix: str) -> None:
         pass
 
-    def check(self) -> bool:
+    def check(self, prefix: str) -> bool:
         return True
 
     def search(self, target: str) -> bool:

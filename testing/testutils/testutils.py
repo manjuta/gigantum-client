@@ -48,7 +48,10 @@ def load_chrome_driver_headless():
 
 def load_firefox_driver():
     """ Return Firefox webdriver """
-    return webdriver.Firefox()
+    firefox_profile = webdriver.FirefoxProfile()
+    firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
+
+    return webdriver.Firefox(firefox_profile=firefox_profile)
 
 
 def unique_project_name(prefix: str = "selenium-project"):

@@ -74,12 +74,7 @@ class AnonymousIdentityManager(IdentityManager):
             # If no access token, you aren't authenticated and can't be checked to be anonymous
             return False
 
-        if self.is_anonymous(access_token):
-            is_authenticated = True
-        else:
-            is_authenticated = self.is_token_valid(access_token)
-
-        return is_authenticated
+        return self.is_token_valid(access_token)
 
     def is_anonymous(self, access_token: str) -> bool:
         """Method to determine if the user is running anonymously

@@ -178,7 +178,7 @@ const checkFileSize = (files, promptType, owner, labbookName, isUntracked) => {
       || (promptType === 'OutputBrowser_allFiles'))
       && !isUntracked
     ) {
-      if (fileSize > fiveHundredMB) {
+      if (fileSize >= fiveHundredMB) {
         fileSizeNotAllowed.push(file);
       } else if ((fileSize > oneHundredMB) && (fileSize < fiveHundredMB)) {
         fileSizePrompt.push(file);

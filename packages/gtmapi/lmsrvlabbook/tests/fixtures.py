@@ -526,7 +526,7 @@ def property_mocks_fixture():
 def docker_socket_fixture():
     """Helper method to get the docker client version"""
 
-    client = get_docker_client(check_server_version=False)
+    client = get_docker_client()
     version = client.version()['ApiVersion']
 
     if "CIRCLECI" in os.environ:

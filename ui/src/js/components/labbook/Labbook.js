@@ -23,8 +23,6 @@ import { setInfoMessage } from 'JS/redux/actions/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 import BranchMutations from 'Components/shared/utils/BranchMutations';
-// config
-import Config from 'JS/config';
 // mutations
 import LabbookContainerStatusMutation from 'Mutations/repository/labbook/LabbookContainerStatusMutation';
 import LabbookLookupMutation from 'Mutations/repository/labbook/LabbookLookupMutation';
@@ -49,7 +47,6 @@ import './Labbook.scss';
 
 let count = 0;
 const containerStatusList = [];
-
 /**
   scrolls to top of window
 */
