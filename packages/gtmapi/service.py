@@ -3,6 +3,7 @@
 import shutil
 import os
 import base64
+import asyncio
 from time import sleep
 
 import flask
@@ -222,6 +223,10 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
 
 def main(debug=False) -> None:
     try:
+        # We ensure that a single event loop is set up at the beginning
+        # If an event loop is already set up, we should get an exception
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         # Run app on 0.0.0.0, assuming not an issue since it should be in a container
         # Please note: Debug mode must explicitly be set to False when running integration
         # tests, due to properties of Flask werkzeug dynamic package reloading.
