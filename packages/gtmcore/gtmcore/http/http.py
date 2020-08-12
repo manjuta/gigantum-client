@@ -2,8 +2,6 @@ from typing import Optional, Dict, Callable, Any, List, Tuple
 import aiohttp
 import asyncio
 
-from gtmcore.dataset.manifest.eventloop import get_event_loop
-
 
 class ConcurrentRequest(object):
     """Class for a URL to be resolved concurrently
@@ -104,13 +102,7 @@ class ConcurrentRequestManager(object):
 
     async def _resolve_worker(self, url_objs: List[ConcurrentRequest]) -> List:
         """Method to gather all resolve tasks"""
-        tasks = list()
-        for url_obj in url_objs:
-            task = asyncio.ensure_future(self._bound_fetch(url_obj))
-            tasks.append(task)
-
-        responses = asyncio.gather(*tasks)
-        return await responses
+        return await asyncio.gather(self._bound_fetch(url_obj) for url_obj in url_objs)
 
     def resolve(self, url_obj: ConcurrentRequest) -> ConcurrentRequest:
         """Method to resolve a single ConcurrentRequest object
@@ -121,21 +113,18 @@ class ConcurrentRequestManager(object):
         Returns:
             ConcurrentRequest
         """
-        loop = get_event_loop()
-        future = asyncio.ensure_future(self._resolve_worker([url_obj]))
-        result = loop.run_until_complete(future)
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(self._resolve_worker([url_obj]))
         return result[0]
 
     def resolve_many(self, url_objs: List[ConcurrentRequest]) -> List[ConcurrentRequest]:
-        """Method to resolve a many ConcurrentRequest objects
+        """Method to resolve many ConcurrentRequest objects
 
         Args:
-            url_objs(list): ConcurrentRequest object to resolve
+            url_objs(list): ConcurrentRequest objects to resolve
 
         Returns:
             list
         """
-        loop = get_event_loop()
-        future = asyncio.ensure_future(self._resolve_worker(url_objs))
-        result = loop.run_until_complete(future)
-        return result
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(self._resolve_worker(url_objs))

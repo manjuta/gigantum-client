@@ -1,13 +1,12 @@
 import abc
 import os
 from pkg_resources import resource_filename
-from typing import Optional, List, Dict, Callable
+from typing import List, Callable
 import base64
 import asyncio
 
 from gtmcore.dataset.io import PullObject, PullResult
 from gtmcore.dataset.manifest.manifest import Manifest
-from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 
 class StorageBackend(metaclass=abc.ABCMeta):
@@ -61,12 +60,10 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         return metadata
 
-
     @property
     def has_credentials(self) -> bool:
         """Boolean property indicating if a storage backend has all required config items set"""
-        return self.missing_configuration) == 0
-
+        return 'credentials' in self.configuration
 
     def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
         """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends
@@ -107,9 +104,9 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
     def hash_file_key_list(self, dataset, keys):
         m = Manifest(dataset, self.configuration.get('username'))
-        loop = get_event_loop()
-        hash_task = asyncio.ensure_future(m.hasher.hash(keys))
-        loop.run_until_complete(asyncio.gather(hash_task))
+        loop = asyncio.get_event_loop()
+        hash_task = asyncio.create_task(m.hasher.hash(keys))
+        loop.run_until_complete(hash_task)
         return hash_task.result()
 
     def verify_contents(self, dataset, status_update_fn: Callable) -> List[str]:

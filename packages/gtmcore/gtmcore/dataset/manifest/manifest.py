@@ -1,5 +1,4 @@
-from typing import Callable, List, Dict, Any, Tuple, Optional, TYPE_CHECKING
-import pickle
+from typing import TYPE_CHECKING
 from typing import List, Dict, Any, Tuple, Optional
 
 import os
@@ -20,7 +19,6 @@ from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.dataset.manifest.hash import SmartHash
 from gtmcore.dataset.manifest.file import ManifestFileCache
 from gtmcore.dataset.cache import get_cache_manager_class, CacheManager
-from gtmcore.dataset.manifest.eventloop import get_event_loop
 from gtmcore.logging import LMLogger
 
 if TYPE_CHECKING:
@@ -345,7 +343,7 @@ class Manifest(object):
         update_files.extend(status.modified)
 
         if update_files:
-            loop = get_event_loop()
+            loop = asyncio.get_event_loop()
             hash_task = asyncio.create_task(self.hash_files(update_files))
             loop.run_until_complete(hash_task)
             hash_result, fast_hash_result = hash_task.result()

@@ -13,7 +13,6 @@ import os
 
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
 from gtmcore.logging import LMLogger
-from gtmcore.dataset.manifest.eventloop import get_event_loop
 
 logger = LMLogger.get_logger()
 
@@ -886,7 +885,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 
         object_service_root = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
 
-        loop = get_event_loop()
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(self._run_push_pipeline(object_service_root, self._object_service_headers(), objects,
                                                         progress_update_fn=progress_update_fn,
                                                         multipart_chunk_size=multipart_chunk_size,
@@ -1031,7 +1030,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 
         object_service_root = f"{self._object_service_endpoint(dataset)}/{dataset.namespace}/{dataset.name}"
 
-        loop = get_event_loop()
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(self._run_pull_pipeline(object_service_root, self._object_service_headers(), objects,
                                                         progress_update_fn=progress_update_fn,
                                                         download_chunk_size=download_chunk_size,
