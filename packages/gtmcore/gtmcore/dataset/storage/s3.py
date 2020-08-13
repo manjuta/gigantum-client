@@ -1,10 +1,10 @@
 from gtmcore.dataset import Dataset
-from gtmcore.dataset.storage.backend import StorageBackend
 from typing import List, Dict, Callable, Optional
 import os
 import json
 
 from gtmcore.dataset.io import PullResult, PullObject
+from gtmcore.dataset.storage.backend import ExternalProtectedStorage
 from gtmcore.logging import LMLogger
 from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
 
@@ -16,16 +16,7 @@ from botocore import UNSIGNED
 logger = LMLogger.get_logger()
 
 
-class ExternalStorageBackend(StorageBackend):
-    """A place-holder class to allow us to generically refer to PublicS3Bucket and similar (as yet unwritten) classes.
-
-    Once other descendants are implemented, this can be moved to some generic place. Keeping it in the same file as the
-    S3 backend for now to fascilitate rapid iteration.
-    """
-    pass
-
-
-class PublicS3Bucket(ExternalStorageBackend):
+class PublicS3Bucket(ExternalProtectedStorage):
     """This is an in-progress, non-working example of an externally hosted, remote backend on S3.
 
     Ultimately, there should likely be an intermediate class such as ExternalStorageBackend that could be used to

@@ -1,11 +1,10 @@
 import importlib
 from typing import List
 
-from gtmcore.dataset.storage.backend import StorageBackend
+from gtmcore.dataset.storage.backend import StorageBackend, ExternalProtectedStorage
 from gtmcore.exceptions import GigantumException
 from gtmcore.dataset.storage.gigantum import GigantumObjectStore
 from gtmcore.dataset.storage.local import LocalFilesystemBackend
-from gtmcore.dataset.storage.s3 import ExternalStorageBackend
 
 SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": ("gtmcore.dataset.storage.gigantum", "GigantumObjectStore"),
                               "local_filesystem":   ("gtmcore.dataset.storage.local",    "LocalFilesystemBackend")}

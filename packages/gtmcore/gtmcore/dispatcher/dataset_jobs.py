@@ -10,7 +10,9 @@ from rq import get_current_job
 from gtmcore.configuration import Configuration
 from gtmcore.dataset import Manifest
 from gtmcore.dataset.manifest.job import generate_bg_hash_job_list
+from gtmcore.dataset.storage import GigantumObjectStore
 from gtmcore.dispatcher import Dispatcher
+from gtmcore.exceptions import GigantumException
 from gtmcore.gitlib import GitAuthor, RepoLocation
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
@@ -80,22 +82,6 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
     """
     logger = LMLogger.get_logger()
     dispatcher_obj = dispatcher()
-
-    def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
-                        percent_complete: Optional[float] = None):
-        """Method to update the job's metadata and provide feedback to the UI"""
-        current_job = get_current_job()
-        if not current_job:
-            return
-        if has_failures:
-            current_job.meta['has_failures'] = has_failures
-        if failure_detail:
-            current_job.meta['failure_detail'] = failure_detail
-        if percent_complete:
-            current_job.meta['percent_complete'] = percent_complete
-
-        current_job.meta['feedback'] = msg
-        current_job.save_meta()
 
     def schedule_bg_hash_job():
         """Method to check if a bg job should get scheduled and do so"""
@@ -291,7 +277,9 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
 
 def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access_token: str, id_token: str,
                          dataset_owner: str, dataset_name: str, config_file: str = None) -> None:
-    """Method to pull a collection of objects from a dataset's backend
+    """Method to push a collection of objects from a dataset's backend
+
+    Note that we currently only intend to support pushing to GignatumHub
 
     Args:
         objs: List if file PushObject to push
@@ -300,23 +288,12 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access
         id_token: identity token
         dataset_owner: Owner of the dataset containing the files to download
         dataset_name: Name of the dataset containing the files to download
-        config_file: config file (used for test mocking)
+        config_file: path to config file (used for test mocking)
 
     Returns:
         str: directory path of imported labbook
     """
     logger = LMLogger.get_logger()
-
-    def progress_update_callback(completed_bytes: int) -> None:
-        """Method to update the job's metadata and provide feedback to the UI"""
-        current_job = get_current_job()
-        if not current_job:
-            return
-        if 'completed_bytes' not in current_job.meta:
-            current_job.meta['completed_bytes'] = 0
-
-        current_job.meta['completed_bytes'] = int(current_job.meta['completed_bytes']) + completed_bytes
-        current_job.save_meta()
 
     try:
         p = os.getpid()
@@ -327,7 +304,11 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
         ds.namespace = dataset_owner
-        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        backend = ds.backend
+        if not isinstance(backend, GigantumObjectStore):
+            raise GigantumException(f'Can only push objects for Gigantum Datasets! (not {type(ds).__name__})')
+
+        backend.set_credentials(logged_in_username, access_token, id_token)
         m = Manifest(ds, logged_in_username)
         iom = IOManager(ds, m)
 
@@ -370,23 +351,14 @@ def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id
     """
     logger = LMLogger.get_logger()
 
-    def progress_update_callback(completed_bytes: int) -> None:
-        """Method to update the job's metadata and provide feedback to the UI"""
-        current_job = get_current_job()
-        if not current_job:
-            return
-        if 'completed_bytes' not in current_job.meta:
-            current_job.meta['completed_bytes'] = 0
-
-        current_job.meta['completed_bytes'] = int(current_job.meta['completed_bytes']) + completed_bytes
-        current_job.save_meta()
-
     try:
         p = os.getpid()
         logger.info(f"(Job {p}) Starting pull_objects(logged_in_username={logged_in_username},"
                     f"dataset_owner={dataset_owner}, dataset_name={dataset_name}, labbook_owner={labbook_owner},"
                     f" labbook_name={labbook_name}")
 
+        # TODO DJWC - This whole selection below is duplicated in download_dataset_files() but will wait for some
+        #  discussion before any refactor
         im = InventoryManager(config_file=config_file)
 
         if labbook_owner is not None and labbook_name is not None:
@@ -399,7 +371,14 @@ def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id
             ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
         ds.namespace = dataset_owner
-        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        backend = ds.backend
+        # Note that this will change once we develop an Externally managed backend like S3
+        if not isinstance(backend, GigantumObjectStore):
+            # This should absolutely never happen, as we'll already throw an exception in download_dataset_files()
+            # But it fixes mypy/typing for now
+            raise GigantumException(f'Can only pull objects for Gigantum Datasets! (not {type(ds).__name__})')
+
+        backend.set_credentials(logged_in_username, access_token, id_token)
         m = Manifest(ds, logged_in_username)
         iom = IOManager(ds, m)
 
@@ -443,21 +422,6 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
     """
     dispatcher_obj = Dispatcher()
 
-    def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
-                        percent_complete: Optional[float] = None) -> None:
-        """Method to update the job's metadata and provide feedback to the UI"""
-        current_job = get_current_job()
-        if not current_job:
-            return
-        if has_failures:
-            current_job.meta['has_failures'] = has_failures
-        if failure_detail:
-            current_job.meta['failure_detail'] = failure_detail
-        if percent_complete:
-            current_job.meta['percent_complete'] = percent_complete
-
-        current_job.meta['feedback'] = msg
-        current_job.save_meta()
     logger = LMLogger.get_logger()
 
     try:
@@ -478,7 +442,11 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
             ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
         ds.namespace = dataset_owner
-        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        backend = ds.backend
+        if not isinstance(backend, GigantumObjectStore):
+            raise GigantumException(f'Can only download objects for Gigantum Datasets! (not {type(ds).__name__})')
+
+        backend.set_credentials(logged_in_username, access_token, id_token)
         m = Manifest(ds, logged_in_username)
         iom = IOManager(ds, m)
 
@@ -561,3 +529,33 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
     except Exception as err:
         logger.exception(err)
         raise
+
+## Utility functions
+
+def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
+                    percent_complete: Optional[float] = None) -> None:
+    """Method to update the job's metadata and provide feedback to the UI"""
+    current_job = get_current_job()
+    if not current_job:
+        return
+    if has_failures:
+        current_job.meta['has_failures'] = has_failures
+    if failure_detail:
+        current_job.meta['failure_detail'] = failure_detail
+    if percent_complete:
+        current_job.meta['percent_complete'] = percent_complete
+
+    current_job.meta['feedback'] = msg
+    current_job.save_meta()
+
+
+def progress_update_callback(completed_bytes: int) -> None:
+    """Method to update the job's metadata and provide feedback to the UI"""
+    current_job = get_current_job()
+    if not current_job:
+        return
+    if 'completed_bytes' not in current_job.meta:
+        current_job.meta['completed_bytes'] = 0
+
+    current_job.meta['completed_bytes'] = int(current_job.meta['completed_bytes']) + completed_bytes
+    current_job.save_meta()

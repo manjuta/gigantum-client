@@ -555,8 +555,16 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 """}
 
     def set_credentials(self, username: str, bearer_token: str, id_token: str) -> None:
-        """Method to configure default keys. This should be called from API and other situations where
-        remote ops are desired and the bearer and ID tokens exist
+        """Method to configure keys for pulling and pushing data from our Hub endpoint
+
+        This should be called from API and other situations where remote ops are desired and the bearer and
+        ID tokens exist.
+
+        TODO DJWC - can we get rid of this since we always have these credentials available in any given session?
+
+        While we represent the credential contents in the method signature, they are stored in a dictionary,
+        which allows the API to change fairly easily, and also makes it easy to pass around credentials in a
+        generic way.
 
         Args:
             username: current logged in username

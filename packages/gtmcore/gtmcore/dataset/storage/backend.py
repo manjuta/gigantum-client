@@ -1,7 +1,7 @@
 import abc
 import os
 from pkg_resources import resource_filename
-from typing import List, Callable
+from typing import List, Callable, Dict
 import base64
 import asyncio
 
@@ -41,7 +41,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        raise NotImplementedError
+        pass
 
     @property
     def metadata(self):
@@ -60,47 +60,12 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         return metadata
 
+    # TODO DJWC - push down into ExternalProtectedStorage?
     @property
     def has_credentials(self) -> bool:
         """Boolean property indicating if a storage backend has all required config items set"""
         return 'credentials' in self.configuration
 
-    def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
-        """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends
-        support pull
-
-        Args:
-            dataset: The dataset instance
-            objects: A list of PullObjects, indicating which objects to pull
-        """
-        raise NotImplementedError
-
-    def pull_objects(self, dataset, objects: List[PullObject], progress_update_fn: Callable) -> PullResult:
-        """Method to pull objects locally. It's optional to implement as not all back-ends
-        support pull
-
-
-        Args:
-            dataset: The dataset instance
-            objects: A list of PullObjects, indicating which objects to pull
-            progress_update_fn: A callable with arg "completed_bytes" (int) indicating how many bytes have been
-                                downloaded in since last called
-
-        Returns:
-            PullResult
-        """
-        raise NotImplementedError
-
-    def finalize_pull(self, dataset) -> None:
-        """Method to finalize and cleanup a backend after pulling objects locally
-
-        Args:
-            dataset: The dataset instance
-
-        Returns:
-
-        """
-        raise NotImplementedError
 
     def hash_file_key_list(self, dataset, keys):
         m = Manifest(dataset, self.configuration.get('username'))
@@ -146,3 +111,54 @@ class StorageBackend(metaclass=abc.ABCMeta):
             status_update_fn(f"Integrity check complete. No files have been modified.")
 
         return modified_items
+
+
+class ExternalProtectedStorage(StorageBackend):
+    """A place-holder class to allow us to generically refer to PublicS3Bucket and similar (as yet unwritten) classes.
+
+    Instances of this class will require credentials.
+
+    Once other descendants are implemented, this can be moved to some generic place. Keeping it in the same file as the
+    S3 backend for now to fascilitate rapid iteration.
+    """
+
+    @abc.abstractmethod
+    def set_credentials(self, credentials: Dict[str, str]):
+        pass
+
+    def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
+        """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends
+        support pull
+
+        Args:
+            dataset: The dataset instance
+            objects: A list of PullObjects, indicating which objects to pull
+        """
+        raise NotImplementedError
+
+    def pull_objects(self, dataset, objects: List[PullObject], progress_update_fn: Callable) -> PullResult:
+        """Method to pull objects locally. It's optional to implement as not all back-ends
+        support pull
+
+
+        Args:
+            dataset: The dataset instance
+            objects: A list of PullObjects, indicating which objects to pull
+            progress_update_fn: A callable with arg "completed_bytes" (int) indicating how many bytes have been
+                                downloaded in since last called
+
+        Returns:
+            PullResult
+        """
+        raise NotImplementedError
+
+    def finalize_pull(self, dataset) -> None:
+        """Method to finalize and cleanup a backend after pulling objects locally
+
+        Args:
+            dataset: The dataset instance
+
+        Returns:
+
+        """
+        raise NotImplementedError

@@ -23,8 +23,6 @@ from gtmcore.environment.repository import RepositoryLock
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
 
-from gtmcore.dataset.storage.s3 import ExternalStorageBackend
-
 
 # PLEASE NOTE -- No global variables!
 #
@@ -369,6 +367,8 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
                                          dataset_owner: str, dataset_name: str) -> None:
     """Method to update/populate an unmanaged dataset from its remote automatically
 
+    Currently hard-coded to the "Public" S3 bucket
+
     Args:
         logged_in_username: username for the currently logged in user
         access_token: bearer token
@@ -400,15 +400,18 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
         ds.namespace = dataset_owner
-        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
+        backend = ds.backend
 
-        if not isinstance(ds.backend, PublicS3Bucket):
+        # Make more general once we have more external backends
+        if not isinstance(backend, PublicS3Bucket):
             raise ValueError("Can only auto-update externally-hosted remote dataset types")
 
-        if not ds.backend.can_update_from_remote:
-            raise ValueError("Storage backend cannot update automatically from remote.")
+        # TODO DJWC - if we know the region, we don't need credentials
+        #  AND you can query for the region of a bucket
+        backend.set_credentials({'access_token': access_token,
+                                 'id_token': id_token})
 
-        ds.backend.update_from_remote(ds, update_meta)
+        backend.update_from_remote(ds, update_meta)
 
     except Exception as err:
         logger.exception(err)
@@ -462,6 +465,7 @@ def verify_dataset_contents(logged_in_username: str, access_token: str, id_token
             ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
 
         ds.namespace = dataset_owner
+        # TODO DJWC - This needs to be re-thought-out
         ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
 
         result = ds.backend.verify_contents(ds, update_meta)
@@ -505,14 +509,13 @@ def update_local_dataset(logged_in_username: str, access_token: str, id_token: s
 
         im = InventoryManager()
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
-
-        # We try to fail as fast as possible
-        if not isinstance(ds.backend, LocalFilesystemBackend):
-            raise ValueError("Can only auto-update unmanaged dataset types")
-
         ds.namespace = dataset_owner
 
-        ds.backend.update_from_local(ds, update_meta, verify_contents=True)
+        backend = ds.backend
+        if not isinstance(backend, LocalFilesystemBackend):
+            raise ValueError("Can only auto-update unmanaged dataset types")
+
+        backend.update_from_local(ds, update_meta, verify_contents=True)
 
     except Exception as err:
         logger.exception(err)

@@ -20,7 +20,7 @@ from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import Dispatcher, jobs
 
 # Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
-from gtmcore.dataset.storage import ExternalStorageBackend, GigantumObjectStore, LocalFilesystemBackend
+from gtmcore.dataset.storage import GigantumObjectStore
 # Avoid name conflict with the Dataset API imported above
 from gtmcore.dataset import Dataset as DatasetObj
 # Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
@@ -68,14 +68,17 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
     Workflow to configure a dataset:
     - TODO
 
+    TODO DJWC - I renamed this endpoint intentionally to ensure we revisit this in the front end. It's not clear this is
+     necessary at all for gigantum datasets. Maybe remove entirely? Code that may be useful for Externally Managed
+     Datasets should be retained. Should also be made generic but in a much simpler way than the current configuration
+     publishing mechanism.
     """
 
     class Input:
         dataset_owner = graphene.String(required=True, description="Owner of the dataset to configure")
         dataset_name = graphene.String(required=True, description="Name of the dataset to configure")
         parameters = graphene.List(DatasetConfigurationParameterInput)
-        confirm = graphene.Boolean(description="Set to true so confirm the configuration and continue. "
-                                               "False will clear the configuration to start over")
+        reset_parameters = graphene.Boolean(description="Set to true to clear the configuration to start over")
 
     dataset = graphene.Field(Dataset)
     is_configured = graphene.Boolean(description="If true, all parameters a set and OK to continue")
@@ -89,77 +92,49 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
     background_job_key = graphene.String(description="Background job key to query on for feedback if needed")
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, parameters=None, confirm=None,
+    def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, parameters=None, reset_parameters=False,
                                client_mutation_id=None):
         logged_in_username = get_logged_in_username()
         im = InventoryManager()
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
-        ds.backend.set_default_configuration(logged_in_username,
-                                             bearer_token=flask.g.access_token,
-                                             id_token=flask.g.id_token)
+        backend = ds.backend
 
-        should_confirm = False
-        error_message = None
-        confirm_message = None
-        background_job_key = None
-        is_configured = None
-
-        can_update_from_remote: bool = isinstance(ds.backend, ExternalStorageBackend)
-
-        if confirm is None:
-            if parameters:
+        if reset_parameters:
+            current_config = ds.backend_config
+            # TODO DJWC - do we clear credentials here?
+            # Need to delete to make .has_credentials() work, could make into a method
+            del current_config['credentials']
+            for param in parameters:
+                # TODO DJWC - and why not `del` here?
+                current_config[param.parameter] = None
+            ds.backend_config = current_config
+        else:
+            if isinstance(backend, GigantumObjectStore):
+                # TODO DJWC - review
+                # We ONLY set credentials on the Gigantum object store back-end. And currently ALWAYS set them if we're
+                # setting parameters. If there is a failure conforming to the method API, we'll raise a TypeError
+                # (should never happen here). Likewise the method should raise an Exception if there's some problem with
+                # the credentials.
+                backend.set_credentials(logged_in_username,
+                                        bearer_token=flask.g.access_token, id_token=flask.g.id_token)
+            if parameters is not None:
                 # Update the configuration
                 current_config = ds.backend_config
                 for param in parameters:
                     current_config[param.parameter] = param.value
                 ds.backend_config = current_config
 
-            # Validate the configuration
-            try:
-                confirm_message = ds.backend.confirm_configuration(ds)
-                if confirm_message is not None:
-                    should_confirm = True
-            except ValueError as err:
-                error_message = f"{err}"
-                is_configured = False
-        else:
-            if confirm is False:
-                # Clear configuration
-                current_config = ds.backend_config
-                for param in parameters:
-                    current_config[param.parameter] = None
-                ds.backend_config = current_config
-
-            else:
-                if can_update_from_remote:
-                    d = Dispatcher()
-                    kwargs = {
-                        'logged_in_username': logged_in_username,
-                        'access_token': flask.g.access_token,
-                        'id_token': flask.g.id_token,
-                        'dataset_owner': dataset_owner,
-                        'dataset_name': dataset_name,
-                    }
-
-                    # Gen unique keys for tracking jobs
-                    metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
-                                'method': 'update_unmanaged_dataset_from_remote'}
-                    job_response = d.dispatch_task(jobs.update_unmanaged_dataset_from_remote,
-                                                   kwargs=kwargs, metadata=metadata)
-
-                    background_job_key = job_response.key_str
-
-        if is_configured is None:
-            is_configured = ds.backend.has_credentials
-
         return ConfigureDataset(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
                                                 name=dataset_name, owner=dataset_owner),
-                                is_configured=is_configured,
-                                should_confirm=should_confirm,
-                                confirm_message=confirm_message,
-                                error_message=error_message,
-                                has_background_job=can_update_from_remote,
-                                background_job_key=background_job_key)
+                                # TODO DJWC - keeping all params in for now to avoid breaking API too much
+                                # We don't check, so None instead of False
+                                is_configured=None,
+                                # Should be true for external datasets, and maybe local, but is never true for now
+                                should_confirm=False,
+                                confirm_message=None,
+                                error_message=None,
+                                has_background_job=False,
+                                background_job_key=None)
 
 
 class UpdateLocalDataset(graphene.relay.ClientIDMutation):
@@ -177,9 +152,6 @@ class UpdateLocalDataset(graphene.relay.ClientIDMutation):
         logged_in_username = get_logged_in_username()
         im = InventoryManager()
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
-        ds.backend.set_default_configuration(logged_in_username,
-                                             bearer_token=flask.g.access_token,
-                                             id_token=flask.g.id_token)
 
         if not ds.backend.has_credentials:
             raise ValueError("Dataset is not fully configured. Cannot update.")

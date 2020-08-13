@@ -100,9 +100,9 @@ class ConcurrentRequestManager(object):
         async with self.semaphore:
             return await self._fetch(url_obj)
 
-    async def _resolve_worker(self, url_objs: List[ConcurrentRequest]) -> List:
+    async def _resolve_worker(self, url_objs: List[ConcurrentRequest]) -> List[ConcurrentRequest]:
         """Method to gather all resolve tasks"""
-        return await asyncio.gather(self._bound_fetch(url_obj) for url_obj in url_objs)
+        return [await self._bound_fetch(url_obj) for url_obj in url_objs]
 
     def resolve(self, url_obj: ConcurrentRequest) -> ConcurrentRequest:
         """Method to resolve a single ConcurrentRequest object
@@ -121,10 +121,10 @@ class ConcurrentRequestManager(object):
         """Method to resolve many ConcurrentRequest objects
 
         Args:
-            url_objs(list): ConcurrentRequest objects to resolve
+            url_objs: objects to resolve
 
         Returns:
-            list
+            A list of resolved requests
         """
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(self._resolve_worker(url_objs))
