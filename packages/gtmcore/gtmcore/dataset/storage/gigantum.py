@@ -140,21 +140,30 @@ class PresignedS3Upload(object):
         """
         return [dict(ETag=p.etag, PartNumber=p.part_number) for p in self._multipart_completed_parts]
 
-    def set_s3_headers(self, encryption_key_id: str) -> None:
-        """Method to set the header property for S3
+    def set_s3_headers(self, encryption_key_id: Optional[str]) -> None:
+        """Method to set the header property for S3 if encryption is enabled
 
         Args:
-            encryption_key_id: The encryption key id returned from the object service. This is required so the request
-                               made to s3 is consistent with what was signed
+            encryption_key_id: The encryption key id returned from the object service. This is needed when server-side
+                               encryption is enabled so the request made to s3 is consistent with what was signed.
+                               If `encryption_key_id` is None, then encryption is not enabled on the server and
+                               the headers will not be set.
 
         Returns:
             None
         """
         if self.is_multipart:
+            # You don't need to set the header. The encryption is set up when creating the multipart upload, not on
+            # the actual file upload.
             self.s3_headers = dict()
         else:
-            self.s3_headers = {'x-amz-server-side-encryption': 'aws:kms',
-                               'x-amz-server-side-encryption-aws-kms-key-id': encryption_key_id}
+            if encryption_key_id:
+                # Server-side encryption enabled
+                self.s3_headers = {'x-amz-server-side-encryption': 'aws:kms',
+                                   'x-amz-server-side-encryption-aws-kms-key-id': encryption_key_id}
+            else:
+                # Server-side encryption disabled
+                self.s3_headers = dict()
 
     async def get_presigned_s3_url(self, session: aiohttp.ClientSession) -> None:
         """Method to make a request to the object service and pre-sign an S3 PUT

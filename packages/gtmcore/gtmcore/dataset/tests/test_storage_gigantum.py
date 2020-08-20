@@ -154,6 +154,44 @@ class TestStorageBackendGigantum(object):
         assert psu.skip_object is False
 
     @pytest.mark.asyncio
+    async def test_presigneds3upload_get_presigned_s3_url_no_encryption(self, event_loop, mock_dataset_with_cache_dir):
+        sb = get_storage_backend("gigantum_object_v1")
+        sb.set_default_configuration("test-user", "abcd", '1234')
+        ds = mock_dataset_with_cache_dir[0]
+
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
+        headers = sb._object_service_headers()
+        upload_chunk_size = 40000
+        multipart_chunk_size = 4000000
+
+        with tempfile.NamedTemporaryFile() as tf:
+            object_id = os.path.basename(tf.name)
+            object_details = PushObject(object_path=tf.name,
+                                        revision=ds.git.repo.head.commit.hexsha,
+                                        dataset_path='myfile1.txt')
+            psu = PresignedS3Upload(object_service_root, headers, multipart_chunk_size, upload_chunk_size, object_details)
+
+            with aioresponses() as mocked_responses:
+                async with aiohttp.ClientSession() as session:
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
+                                         payload={
+                                             "presigned_url": "https://dummyurl.com?params=1",
+                                             "key_id": None,
+                                             "namespace": ds.namespace,
+                                             "obj_id": object_id,
+                                             "dataset": ds.name
+                                         },
+                                         status=200)
+
+                    await psu.get_presigned_s3_url(session)
+
+        assert psu.presigned_s3_url == "https://dummyurl.com?params=1"
+        assert 'x-amz-server-side-encryption-aws-kms-key-id' not in psu.s3_headers
+        assert psu.skip_object is False
+
+    @pytest.mark.asyncio
     async def test_presigneds3upload_get_presigned_s3_url_multipart(self, event_loop, mock_dataset_with_cache_dir,
                                                                     helper_write_large_file):
         sb = get_storage_backend("gigantum_object_v1")
