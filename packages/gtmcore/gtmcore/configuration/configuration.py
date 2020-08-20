@@ -314,7 +314,7 @@ class Configuration:
         """
         return os.path.join(self.server_config_dir, f"{server_id}.json")
 
-    def list_available_servers(self) -> List[Tuple[str, str]]:
+    def list_available_servers(self) -> List[Tuple[str, str, str]]:
         """Method to list the servers currently configured in this client in id, name pairs
         
         Returns:
@@ -324,7 +324,7 @@ class Configuration:
         for server_file in glob.glob(os.path.join(self.server_config_dir, "*.json")):
             with open(server_file, 'rt') as f:
                 data = json.load(f)
-                configured_servers.append((data['server']['id'], data['server']['name']))
+                configured_servers.append((data['server']['id'], data['server']['name'], data['auth']['login_url']))
 
         return configured_servers
 
@@ -384,6 +384,8 @@ class Configuration:
         self._cache_server_config(data['server'])
         self._cache_auth_config(data['auth'])
 
+        logger.info(f"Selected server: {server_id}")
+
     def add_server(self, url: str) -> str:
         """Method to discover a server's configuration and add it to the local configured servers
 
@@ -393,6 +395,11 @@ class Configuration:
         Returns:
             str: id for the server
         """
+        # Create server data dir if it doesn't exist
+        if os.path.isdir(self.server_config_dir) is False:
+            os.makedirs(self.server_config_dir, exist_ok=True)
+            logger.info(f'Created `servers` dir for server configurations: {self.server_config_dir}')
+
         # Run primary discovery
         discovery_service = urljoin(url, '.well-known/discover.json')
         response = requests.get(discovery_service)
@@ -432,9 +439,26 @@ class Configuration:
             json.dump(save_data, f, indent=2)
 
         # Create directory for server's projects/datasets
-        os.makedirs(self.get_user_storage_dir(server_config))
+        os.makedirs(self.get_user_storage_dir(server_config), exist_ok=True)
+
+        logger.info(f"Successfully added server located at {url} with server id {server_config.id}")
 
         return server_config.id
+
+    def get_current_server_id(self) -> Optional[str]:
+        """Method to load the current server ID
+
+        Returns:
+            the server id, or None if no server is configured
+        """
+        current_file = os.path.join(self.server_config_dir, 'CURRENT')
+        server_id: Optional[str] = None
+        if os.path.isfile(current_file):
+            # Load server config from file
+            with open(current_file, 'rt') as f:
+                server_id = f.read().strip()
+
+        return server_id
 
     def _load_current_configuration(self) -> dict:
         """Method to look up the current selected server and load its data file
@@ -442,15 +466,10 @@ class Configuration:
         Returns:
             dict
         """
-        current_file = os.path.join(self.server_config_dir, 'CURRENT')
-        if os.path.isfile(current_file):
-            # Load server config from file
-            with open(current_file, 'rt') as f:
-                server_id = f.read().strip()
-
+        server_id = self.get_current_server_id()
+        if server_id:
             with open(self.get_server_config_file(server_id), 'rt') as f:
                 return json.load(f)
-
         else:
             raise FileNotFoundError("No server is currently configured and selected.")
 

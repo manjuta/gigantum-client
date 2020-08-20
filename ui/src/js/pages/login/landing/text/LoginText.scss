@@ -1,0 +1,18 @@
+@import '~Styles/_imports.scss';
+
+
+.LoginText {
+  color: $white;
+  text-align: left;
+  width: 500px;
+
+  p {
+    font-size: 18px;
+    font-weight: 100;
+  }
+
+  h4 {
+    color: $white;
+    text-align: center;
+  }
+}

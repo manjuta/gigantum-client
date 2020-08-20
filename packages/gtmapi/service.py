@@ -15,7 +15,7 @@ from flask import Flask, jsonify
 
 import rest_routes
 from gtmcore.dispatcher import Dispatcher
-from gtmcore.dispatcher.jobs import update_environment_repositories, load_default_server_configuration
+from gtmcore.dispatcher.jobs import update_environment_repositories
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager
@@ -72,12 +72,30 @@ def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
     return api_prefix
 
 
+def configure_default_server(config_instance: Configuration) -> None:
+    """Function to check if a server has been configured, and if not, configure and select the default server"""
+    try:
+        # Load the server configuration. If you get a FileNotFoundError there is no configured server
+        config_instance.get_server_configuration()
+    except FileNotFoundError:
+        default_server = config_instance.config['core']['default_server']
+        logger.info(f"Configuring Client with default server via auto-discovery: {default_server}")
+        try:
+            server_id = config_instance.add_server(default_server)
+            config_instance.set_current_server(server_id)
+        except Exception as err:
+            logger.exception(f"Failed to configure default server! Restart Client to try again: {err}")
+            # Re-raise the exception so the API doesn't come up
+            raise
+
+
 # Start Flask Server Initialization and app configuration
 app = Flask("lmsrvlabbook")
 
 random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration(wait_for_cache=10)
+configure_default_server(config)
 app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
 # Set Debug mode
@@ -106,32 +124,6 @@ app.register_blueprint(rest_routes.rest_routes, url_prefix=url_prefix)
 if config.config["flask"]["allow_cors"]:
     # Allow CORS
     CORS(app, max_age=7200)
-
-
-# Set auth error handler
-@app.errorhandler(AuthenticationError)
-def handle_auth_error(ex):
-    response = jsonify(ex.error)
-    response.status_code = ex.status_code
-    return response
-
-
-# TEMPORARY KLUDGE
-# Due to GitPython implementation, resources leak. This block deletes all GitPython instances at the end of the request
-# Future work will remove GitPython, at which point this block should be removed.
-@app.after_request
-def cleanup_git(response):
-    loader = getattr(flask.request, 'labbook_loader', None)
-    if loader:
-        for key in loader.__dict__["_promise_cache"]:
-            try:
-                lb = loader.__dict__["_promise_cache"][key].value
-                lb.git.repo.__del__()
-            except AttributeError:
-                continue
-    return response
-# TEMPORARY KLUDGE
-
 
 if ON_FIRST_START:
     # Empty container-container share dir as it is ephemeral
@@ -190,11 +182,6 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         os.makedirs(certificate_dir, exist_ok=True)
         logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
 
-    # Create server data dir if it doesn't exist
-    if os.path.isdir(config.server_config_dir) is False:
-        os.makedirs(config.server_config_dir, exist_ok=True)
-        logger.info(f'Created `servers` dir for server configurations: {config.server_config_dir}')
-
     # make sure temporary upload directory exists and is empty
     tempdir = config.upload_dir
     if os.path.exists(tempdir):
@@ -217,8 +204,31 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
 
     # Run job to update Base images in the background
     d.dispatch_task(update_environment_repositories, persist=True)
-    # Run job to auto-configure with default server (if needed) in the background
-    d.dispatch_task(load_default_server_configuration)
+
+
+# Set auth error handler
+@app.errorhandler(AuthenticationError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
+
+
+# TEMPORARY KLUDGE
+# Due to GitPython implementation, resources leak. This block deletes all GitPython instances at the end of the request
+# Future work will remove GitPython, at which point this block should be removed.
+@app.after_request
+def cleanup_git(response):
+    loader = getattr(flask.request, 'labbook_loader', None)
+    if loader:
+        for key in loader.__dict__["_promise_cache"]:
+            try:
+                lb = loader.__dict__["_promise_cache"][key].value
+                lb.git.repo.__del__()
+            except AttributeError:
+                continue
+    return response
+# TEMPORARY KLUDGE
 
 
 def main(debug=False) -> None:

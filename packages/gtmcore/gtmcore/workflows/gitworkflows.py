@@ -153,7 +153,7 @@ class LabbookWorkflow(GitWorkflow):
 
             return wf
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             raise
 
     def should_migrate(self) -> bool:

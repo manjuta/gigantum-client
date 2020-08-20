@@ -6,6 +6,7 @@ import dataclasses
 class ServerConfigData:
     id: str
     name: str
+    base_url: str
     git_url: str
     git_server_type: str
     hub_api_url: str
@@ -16,6 +17,7 @@ class ServerConfigData:
     def to_dict(self) -> Dict[str, Union[str, bool]]:
         return {"id": self.id,
                 "name": self.name,
+                "base_url": self.base_url,
                 "git_url": self.git_url,
                 "git_server_type": self.git_server_type,
                 "hub_api_url": self.hub_api_url,
@@ -28,6 +30,7 @@ class ServerConfigData:
 def dict_to_server_config(data: dict) -> ServerConfigData:
     return ServerConfigData(id=data['id'],
                             name=data['name'],
+                            base_url=data['base_url'],
                             git_url=data['git_url'],
                             git_server_type=data['git_server_type'],
                             hub_api_url=data['hub_api_url'],

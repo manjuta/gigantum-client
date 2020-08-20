@@ -105,7 +105,7 @@ class TestJobs(object):
 
         monkeypatch.setattr(LabbookWorkflow, 'import_from_remote', _mock_import_labbook_from_remote)
         # Mock out actual import, as it's already tested in workflows.
-        root_dir = jobs.import_labbook_from_remote('http://mocked-url.com/unittester/mock-labbook', 'unittester')
+        root_dir = jobs.import_labbook_from_remote('http://test.gigantum.com/unittester/mock-labbook', 'unittester')
         assert '/labbooks/' in root_dir
         assert 'mock-labbook' == root_dir.split('/')[-1]
 

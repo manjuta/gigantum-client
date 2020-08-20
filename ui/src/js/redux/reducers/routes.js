@@ -6,6 +6,7 @@ export default (
     owner: '',
     labbookName: '',
     callbackRoute: '',
+    baseUrl: 'https://gigantum.com/',
   },
   action,
 ) => {
@@ -30,6 +31,11 @@ export default (
       ...state,
       labbookName: action.payload.labbookName,
       owner: action.payload.owner,
+    };
+  } if (action.type === types.UPDATE_BASE_URL) {
+    return {
+      ...state,
+      baseUrl: action.payload.baseUrl,
     };
   }
 

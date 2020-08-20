@@ -2,7 +2,7 @@
       import React from 'react'
       import renderer from 'react-test-renderer';
       import {mount} from 'enzyme'
-      import LabbookContainerQuery from 'Components/labbook/LabbookContainerQuery';
+      import LabbookContainerQuery from 'Pages/repository/labbook/LabbookContainerQuery';
 
       import relayTestingUtils from '@gigantum/relay-testing-utils'
 

@@ -12,3 +12,8 @@ export const setUpdateAll = (owner, labbookName) => dispatcher(
   types.UPDATE_ALL,
   { owner, labbookName },
 );
+
+export const setBaseUrl = (baseUrl) => dispatcher(
+  types.UPDATE_BASE_URL,
+  { baseUrl },
+);

@@ -6,7 +6,7 @@ import relayTestingUtils from '@gigantum/relay-testing-utils';
 // data
 import json from './../__relaydata__/LocalDatasets.json';
 // components
-import DatasetVisibilityLookup from 'Components/dashboard/datasets/localDatasets/lookups/DatasetVisibilityLookup';
+import DatasetVisibilityLookup from 'Pages/dashboard/datasets/localDatasets/lookups/DatasetVisibilityLookup';
 
 test('Test DatasetVisibilityLookup', async () => {
   let id = json.data.datasetList.localDatasets.edges[0].node.id;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import Code from 'Components/labbook/code/Code';
+import Code from 'Pages/repository/labbook/code/Code';
 import renderer from 'react-test-renderer';
 
 

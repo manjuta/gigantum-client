@@ -5,7 +5,7 @@
       import {mount} from 'enzyme';
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       // components;
-      import Packages from 'Components/labbook/environment/packages/Packages';
+      import Packages from 'Pages/repository/labbook/environment/packages/Packages';
 
       test('Test Packages', () => {
         const wrapper = renderer.create(<Packages />);

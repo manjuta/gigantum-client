@@ -6,7 +6,7 @@ import relayTestingUtils from '@gigantum/relay-testing-utils';
 // data
 import codeData from 'Tests/components/labbook/code/__relaydata__/CodeBrowser.json';
 // components
-import AddSubFolder from 'Components/shared/fileBrowser/fileRow/AddSubfolder';
+import AddSubFolder from 'Pages/repository/shared/fileBrowser/fileRow/AddSubfolder';
 
 const edge = codeData.data.labbook.code.allFiles.edges[0];
 

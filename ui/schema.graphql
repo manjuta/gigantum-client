@@ -1,6 +1,3 @@
-# source: http://localhost:10000/api/labbook/
-# timestamp: Tue Oct 08 2019 08:54:23 GMT-0400 (Eastern Daylight Time)
-
 schema {
   query: LabbookQuery
   mutation: LabbookMutations
@@ -17,7 +14,10 @@ enum ActivityAction {
 
 """A Connection for paging through activity recrods"""
 type ActivityConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [ActivityEdge]!
 }
 
@@ -49,6 +49,7 @@ enum ActivityDetailType {
   ENVIRONMENT
 }
 
+"""A Relay edge containing a `Activity` and its cursor."""
 type ActivityEdge {
   """The item at the end of the edge"""
   node: ActivityRecordObject
@@ -229,10 +230,14 @@ type BaseComponent implements Node {
 
 """A Connection for paging through Base components"""
 type BaseComponentConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [BaseComponentEdge]!
 }
 
+"""A Relay edge containing a `BaseComponent` and its cursor."""
 type BaseComponentEdge {
   """The item at the end of the edge"""
   node: BaseComponent
@@ -553,10 +558,14 @@ input DatasetConfigurationParameterInput {
 
 """A Connection for paging through datasets that exist locally. """
 type DatasetConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [DatasetEdge]!
 }
 
+"""A Relay edge containing a `Dataset` and its cursor."""
 type DatasetEdge {
   """The item at the end of the edge"""
   node: Dataset
@@ -582,10 +591,14 @@ type DatasetFile implements Node & GitRepository {
 
 """A connection for paging through labbook files. """
 type DatasetFileConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [DatasetFileEdge]!
 }
 
+"""A Relay edge containing a `DatasetFile` and its cursor."""
 type DatasetFileEdge {
   """The item at the end of the edge"""
   node: DatasetFile
@@ -610,10 +623,7 @@ type DatasetList implements Node {
   remoteDatasets(orderBy: String = "name", sort: String = "asc", before: String, after: String, first: Int, last: Int): RemoteDatasetConnection
 }
 
-"""
-A type representing the overview of a Dataset
-    
-"""
+"""A type representing the overview of a Dataset"""
 type DatasetOverview implements Node & GitRepository {
   """The ID of the object."""
   id: ID!
@@ -953,10 +963,14 @@ type JobStatus implements Node {
 A Connection for paging through all background jobs the system is aware of. 
 """
 type JobStatusConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [JobStatusEdge]!
 }
 
+"""A Relay edge containing a `JobStatus` and its cursor."""
 type JobStatusEdge {
   """The item at the end of the edge"""
   node: JobStatus
@@ -1005,10 +1019,14 @@ type Labbook implements Node & GitRepository {
 
 """A Connection for paging through labbooks that exist locally. """
 type LabbookConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [LabbookEdge]!
 }
 
+"""A Relay edge containing a `Labbook` and its cursor."""
 type LabbookEdge {
   """The item at the end of the edge"""
   node: Labbook
@@ -1034,10 +1052,14 @@ type LabbookFile implements Node & GitRepository {
 
 """A connection for paging through labbook files. """
 type LabbookFileConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [LabbookFileEdge]!
 }
 
+"""A Relay edge containing a `LabbookFile` and its cursor."""
 type LabbookFileEdge {
   """The item at the end of the edge"""
   node: LabbookFile
@@ -1064,25 +1086,66 @@ type LabbookList implements Node {
 
 """Entry point for all graphql mutations"""
 type LabbookMutations {
+  """
+  Creates an entry in the Project's Secret Store. Note, you will
+  need to use the Upload mutation to actually put the file content in
+  the secret store. 
+  """
   insertSecretsEntry(input: InsertSecretsEntryInput!): InsertSecretsEntryPayload
+
+  """
+  Removes the entry from the Project's SecretStore. Will also remove
+  any associated files. This undoes the InsertSecretsEntry mutation. 
+  """
   removeSecretsEntry(input: RemoveSecretsEntryInput!): RemoveSecretsEntryPayload
+
+  """
+  Uploades the actual secrets file pertaining to the given filename in the
+  SecretStore registry. The InsertSecretsEntry must be called first. 
+  """
   uploadSecretsFile(input: UploadSecretsFileInput!): UploadSecretsFilePayload
+
+  """
+  Delete the secrets file on the host, but without removing the
+  corresponding entry in the registry. 
+  """
   deleteSecretsFile(input: DeleteSecretsFileInput!): DeleteSecretsFilePayload
+
+  """Mutator to build a LabBook's Docker Image"""
   buildImage(input: BuildImageInput!): BuildImagePayload
   cancelBuild(input: CancelBuildInput!): CancelBuildPayload
+
+  """Mutator to start a LabBook's Docker Image in a container"""
   startContainer(input: StartContainerInput!): StartContainerPayload
+
+  """Mutation to stop a Docker container. """
   stopContainer(input: StopContainerInput!): StopContainerPayload
   startDevTool(input: StartDevToolInput!): StartDevToolPayload
+
+  """
+  Mutation to add or update packages to labbook
+  
+  You MUST have previously validated the package information or errors can occur at build time.
+  You MUST include a version, since auto-addition of a package version is done during validation.
+  """
   addPackageComponents(input: AddPackageComponentsInput!): AddPackageComponentsPayload
+
+  """Mutation to remove packages from labbook"""
   removePackageComponents(input: RemovePackageComponentsInput!): RemovePackageComponentsPayload
   addCustomDocker(input: AddCustomDockerInput!): AddCustomDockerPayload
   removeCustomDocker(input: RemoveCustomDockerInput!): RemoveCustomDockerPayload
   changeLabbookBase(input: ChangeLabbookBaseInput!): ChangeLabbookBasePayload
+
+  """Mutation to add or update a bundled app configuration to a project"""
   setBundledApp(input: SetBundledAppInput!): SetBundledAppPayload
+
+  """Mutation to remove a bundled app from a container"""
   removeBundledApp(input: RemoveBundledAppInput!): RemoveBundledAppPayload
   importLabbook(input: ImportLabbookInput!): ImportLabbookPayload
   exportLabbook(input: ExportLabbookInput!): ExportLabbookPayload
   importRemoteLabbook(input: ImportRemoteLabbookInput!): ImportRemoteLabbookPayload
+
+  """Delete a labbook from the remote repository."""
   deleteRemoteLabbook(input: DeleteRemoteLabbookInput!): DeleteRemoteLabbookPayload
   syncLabbook(input: SyncLabbookInput!): SyncLabbookPayload
   publishLabbook(input: PublishLabbookInput!): PublishLabbookPayload
@@ -1091,40 +1154,110 @@ type LabbookMutations {
   addCollaborator(input: AddLabbookCollaboratorInput!): AddLabbookCollaboratorPayload
   deleteCollaborator(input: DeleteLabbookCollaboratorInput!): DeleteLabbookCollaboratorPayload
   migrateLabbookSchema(input: MigrateLabbookSchemaInput!): MigrateLabbookSchemaPayload
+
+  """Mutation to create a local experimental (or Rollback) branch. """
   createExperimentalBranch(input: CreateExperimentalBranchInput!): CreateExperimentalBranchPayload
+
+  """Delete a feature/rollback branch. Fails for any other attempt."""
   deleteExperimentalBranch(input: DeleteExperimentalBranchInput!): DeleteExperimentalBranchPayload
+
+  """
+  Merge from another branch into the current active branch. Force if necessary. 
+  """
   mergeFromBranch(input: MergeFromBranchInput!): MergeFromBranchPayload
+
+  """Work on another branch (perform a git checkout)."""
   workonExperimentalBranch(input: WorkonBranchInput!): WorkonBranchPayload
   importRemoteDataset(input: ImportRemoteDatasetInput!): ImportRemoteDatasetPayload
   importDataset(input: ImportDatasetInput!): ImportDatasetPayload
   exportDataset(input: ExportDatasetInput!): ExportDatasetPayload
+
+  """Mutation for creation of a new Labbook on disk"""
   createLabbook(input: CreateLabbookInput!): CreateLabbookPayload
+
+  """Delete a labbook from disk. """
   deleteLabbook(input: DeleteLabbookInput!): DeleteLabbookPayload
   setLabbookDescription(input: SetLabbookDescriptionInput!): SetLabbookDescriptionPayload
   publishDataset(input: PublishDatasetInput!): PublishDatasetPayload
+
+  """
+  Undo all local history and then set current branch tip to match remote.
+  
+  Very useful when changes are made to master that cannot be pushed. 
+  """
   resetBranchToRemote(input: ResetBranchToRemoteInput!): ResetBranchToRemotePayload
+
+  """
+  Mutation to create a new user note entry in the activity feed of lab book
+  
+  The `linked_commit` is an empty string since there is no linked commit
+  """
   createUserNote(input: CreateUserNoteInput!): CreateUserNotePayload
+
+  """
+  Mutation to add a file to a labbook. File should be sent in the
+  `uploadFile` key as a multi-part/form upload.
+  file_path is the relative path from the labbook section specified.
+  """
   addLabbookFile(input: AddLabbookFileInput!): AddLabbookFilePayload
   completeBatchUploadTransaction(input: CompleteBatchUploadTransactionInput!): CompleteBatchUploadTransactionPayload
+
+  """
+  Method to move/rename a file or directory. If file, both src_path and dst_path should contain the file name.
+  If a directory, be sure to include the trailing slash
+  """
   moveLabbookFile(input: MoveLabbookFileInput!): MoveLabbookFilePayload
   deleteLabbookFiles(input: DeleteLabbookFilesInput!): DeleteLabbookFilesPayload
   makeLabbookDirectory(input: MakeLabbookDirectoryInput!): MakeLabbookDirectoryPayload
+
+  """
+  Mutation to remove a locally stored user identity (no-op if not running in local mode)
+  """
   removeUserIdentity(input: RemoveUserIdentityInput!): RemoveUserIdentityPayload
   addDatasetCollaborator(input: AddDatasetCollaboratorInput!): AddDatasetCollaboratorPayload
   deleteDatasetCollaborator(input: DeleteDatasetCollaboratorInput!): DeleteDatasetCollaboratorPayload
   writeLabbookReadme(input: WriteLabbookReadmeInput!): WriteLabbookReadmePayload
   fetchLabbookEdge(input: FetchLabbookEdgeInput!): FetchLabbookEdgePayload
+
+  """Mutation for creation of a new Dataset on disk"""
   createDataset(input: CreateDatasetInput!): CreateDatasetPayload
+
+  """
+  Mutation to configure a dataset backend if needed.
+  
+  Workflow to configure a dataset:
+  - TODO
+  """
   configureDataset(input: ConfigureDatasetInput!): ConfigureDatasetPayload
+
+  """
+  Mutation to update the manifest for a local dataset based on changes either locally or via the remote the
+  dataset is linked to
+  """
   updateUnmanagedDataset(input: UpdateUnmanagedDatasetInput!): UpdateUnmanagedDatasetPayload
+
+  """
+  Verify the contents of a dataset, returning a job key. The 'modified_keys' value in the metadata indicates
+  which files have changed, once the job is complete.
+  """
   verifyDataset(input: VerifyDatasetInput!): VerifyDatasetPayload
+
+  """Delete a dataset."""
   deleteDataset(input: DeleteDatasetInput!): DeleteDatasetPayload
+
+  """
+  Mutation to add a file to a labbook. File should be sent in the
+  `uploadFile` key as a multi-part/form upload.
+  file_path is the relative path in the dataset.
+  """
   addDatasetFile(input: AddDatasetFileInput!): AddDatasetFilePayload
   completeDatasetUploadTransaction(input: CompleteDatasetUploadTransactionInput!): CompleteDatasetUploadTransactionPayload
   fetchDatasetEdge(input: FetchDatasetEdgeInput!): FetchDatasetEdgePayload
   setDatasetVisibility(input: SetDatasetVisibilityInput!): SetDatasetVisibilityPayload
   syncDataset(input: SyncDatasetInput!): SyncDatasetPayload
   downloadDatasetFiles(input: DownloadDatasetFilesInput!): DownloadDatasetFilesPayload
+
+  """"Mutation to link and unlink Datasets from a Project"""
   modifyDatasetLink(input: ModifyDatasetLinkInput!): ModifyDatasetLinkPayload
   deleteDatasetFiles(input: DeleteDatasetFilesInput!): DeleteDatasetFilesPayload
   moveDatasetFile(input: MoveDatasetFileInput!): MoveDatasetFilePayload
@@ -1160,6 +1293,7 @@ type LabbookQuery {
   jobStatus(jobId: String): JobStatus
   backgroundJobs(before: String, after: String, first: Int, last: Int): JobStatusConnection
   userIdentity: UserIdentity
+  currentServer: Server
 
   """The ID of the object"""
   node(id: ID!): Node
@@ -1175,7 +1309,6 @@ type LabbookQuery {
 
 """
 A type representing a section within a LabBook (i.e., code, input, output)
-    
 """
 type LabbookSection implements Node & GitRepository {
   """The ID of the object."""
@@ -1321,10 +1454,14 @@ type PackageComponent implements Node {
 
 """A Connection for paging through Package components"""
 type PackageComponentConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [PackageComponentEdge]!
 }
 
+"""A Relay edge containing a `PackageComponent` and its cursor."""
 type PackageComponentEdge {
   """The item at the end of the edge"""
   node: PackageComponent
@@ -1340,6 +1477,9 @@ input PackageComponentInput {
   version: String
 }
 
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
 type PageInfo {
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
@@ -1411,10 +1551,14 @@ Supported sorting modes:
     - modified_on: sort by modification date, newest first
 """
 type RemoteDatasetConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [RemoteDatasetEdge]!
 }
 
+"""A Relay edge containing a `RemoteDataset` and its cursor."""
 type RemoteDatasetEdge {
   """The item at the end of the edge"""
   node: RemoteDataset
@@ -1456,10 +1600,14 @@ Supported sorting modes:
     - modified_on: sort by modification date, newest first
 """
 type RemoteLabbookConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [RemoteLabbookEdge]!
 }
 
+"""A Relay edge containing a `RemoteLabbook` and its cursor."""
 type RemoteLabbookEdge {
   """The item at the end of the edge"""
   node: RemoteLabbook
@@ -1572,16 +1720,65 @@ type SecretFileMapping implements Node & GitRepository {
 
 """Paging through a Project's Secrets Mapping"""
 type SecretFileMappingConnection {
+  """Pagination data for this connection."""
   pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
   edges: [SecretFileMappingEdge]!
 }
 
+"""A Relay edge containing a `SecretFileMapping` and its cursor."""
 type SecretFileMappingEdge {
   """The item at the end of the edge"""
   node: SecretFileMapping
 
   """A cursor for use in pagination"""
   cursor: String!
+}
+
+"""
+A type representing a server's configuration (typically the currently selected server)
+"""
+type Server implements Node {
+  """The ID of the object."""
+  id: ID!
+  serverId: String!
+  name: String
+  baseUrl: String
+  gitUrl: String
+  gitServerType: String
+  hubApiUrl: String
+  objectServiceUrl: String
+  userSearchUrl: String
+  lfsEnabled: Boolean
+  authConfig: ServerAuth
+}
+
+"""
+A type representing a server's auth configuration (typically the currently selected server)
+"""
+type ServerAuth implements Node {
+  """The ID of the object."""
+  id: ID!
+  serverId: String!
+  loginType: String
+  loginUrl: String
+  audience: String
+  issuer: String
+  signingAlgorithm: String
+  publicKeyUrl: String
+  typeSpecificFields: [ServerAuthTypeSpecificField]
+}
+
+"""
+A type representing a server's auth configuration (typically the currently selected server)
+"""
+type ServerAuthTypeSpecificField implements Node {
+  """The ID of the object."""
+  id: ID!
+  serverId: String!
+  parameter: String!
+  value: String!
 }
 
 input SetBundledAppInput {
@@ -1605,10 +1802,7 @@ input SetBundledAppInput {
   clientMutationId: String
 }
 
-"""
-Mutation to add or update a bundled app configuration to a project
-    
-"""
+"""Mutation to add or update a bundled app configuration to a project"""
 type SetBundledAppPayload {
   environment: Environment
   clientMutationId: String

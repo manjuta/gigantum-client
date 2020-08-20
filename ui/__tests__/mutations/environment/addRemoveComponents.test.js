@@ -3,7 +3,7 @@ import uuidv4 from 'uuid/v4';
 import fs from 'fs';
 import os from 'os';
 // mutations
-import FetchContainerStatus from 'Components/labbook/containerStatus/fetchContainerStatus';
+import FetchContainerStatus from 'Pages/repository/labbook/containerStatus/fetchContainerStatus';
 import DeleteLabbook from '../deleteLabbook';
 import CreateLabbook from '../createLabbook';
 import PackageComponents from '../packageComponents';

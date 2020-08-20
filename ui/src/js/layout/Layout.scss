@@ -1,0 +1,10 @@
+@import '~Styles/_imports.scss';
+
+.Layout {
+  &__main {
+    flex: 1 0;
+    margin-left: 140px;
+    max-width: 100%;
+    margin-left: $sideBarWidth;
+  }
+}

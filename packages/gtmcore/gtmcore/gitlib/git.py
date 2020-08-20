@@ -4,6 +4,8 @@ from typing import Dict, List, Optional, Tuple
 from urllib import parse
 import re
 
+from gtmcore.configuration import Configuration
+
 # Dictionary of supported implementations.
 # Key is the value to put in the config_dict["backend"].
 # Value is a list with the first entry being the module and the second the class
@@ -71,18 +73,28 @@ class RepoLocation:
         # If given something like a filesystem path, that's what ends up in path (other elements are '')
         parsed_url = parse.urlparse(requested_url)
 
-        # We currently always remove any existing username from the URL
-        if parsed_url.username:
-            username, domain = parsed_url.netloc.split('@')
-        else:
-            domain = parsed_url.netloc
-
         if parsed_url.netloc:
+            # Always use the configured git domain, verifying that the requested_url is either git or base domains.
+            server_config = Configuration().get_server_configuration()
+            parsed_git_url = parse.urlparse(server_config.git_url)
+            parsed_base_url = parse.urlparse(server_config.base_url)
+            if parsed_url.username:
+                _, requested_domain = parsed_url.netloc.split('@')
+            else:
+                requested_domain = parsed_url.netloc
+
+            if requested_domain not in [parsed_git_url.netloc, parsed_base_url.netloc]:
+                raise ValueError("Invalid repository URL.")
+
+            domain = parsed_git_url.netloc
+            self.scheme = parsed_git_url.scheme
+
             if current_username:
                 if current_username == 'anonymous':
                     # If the user is anonymous, don't include the username in the git URL.
                     self.netloc = domain
                 else:
+                    # We currently always remove any existing username from the URL and use the provided username
                     self.netloc = f'{current_username}@{domain}'
             else:
                 self.netloc = domain
@@ -97,7 +109,7 @@ class RepoLocation:
             #  and provide error messages
             self.host = self.base_path
 
-        path_toks = self.base_path.split("/")
+        path_toks = [t for t in self.base_path.split("/") if t]
         self.repo_name = path_toks[-1]
         if len(path_toks) > 1:
             self.owner = path_toks[-2]
@@ -113,7 +125,10 @@ class RepoLocation:
     def remote_location(self) -> str:
         """The final endpoint for our git remote (avoids redirects, etc.)"""
         if self.netloc:
-            return parse.urlunparse(('https', self.netloc, self.base_path + '.git/',
+            # Remove trailing slashes if provided by a user
+            base_path = self.base_path[:-1] if self.base_path[-1] == "/" else self.base_path
+
+            return parse.urlunparse((self.scheme, self.netloc, base_path + '.git/',
                                      self.params, self.query, self.fragment))
         else:
             # We assume this is a filesystem path

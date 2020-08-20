@@ -71,6 +71,7 @@ def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
             "server": {
                 "id": "test-gigantum-com",
                 "name": "Gigantum Hub Test",
+                "base_url": "https://test.gigantum.com/",
                 "git_url": "https://test.repo.gigantum.com/",
                 "git_server_type": "gitlab",
                 "hub_api_url": "https://test.gigantum.com/api/v1/",

@@ -16,7 +16,7 @@ import getApiURL from 'JS/utils/apiUrl';
 const oneHour = 60 * 60 * 1000;
 const cache = new QueryResponseCache({ size: 250, ttl: oneHour });
 
-function fetchQuery(operation, variables, cacheConfig, uploadables) {
+function fetchQuery(operation, variables, cacheConfig, uploadables, overrideHeaders = {}) {
   const queryID = operation.text;
   const isMutation = operation.operationKind === 'mutation';
   const isQuery = operation.operationKind === 'query';
@@ -53,18 +53,17 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
     }
   } else if (globalObject.location.href.indexOf('access_token') > -1) {
     const values = qs.parse(globalObject.location.hash.slice(1));
-    const {
-      access_token,
-      id_token,
-    } = values;
-    if (access_token) {
-      headers.authorization = `Bearer ${access_token}`;
-      globalObject.localStorage.setItem('access_token', access_token);
+    const accessToken = values.access_token;
+    const idToken = values.id_token;
+    const serverId = values.server_id;
+    if (accessToken) {
+      headers.authorization = `Bearer ${accessToken}`;
+      globalObject.localStorage.setItem('access_token', accessToken);
       delete values.access_token;
     }
-    if (id_token) {
-      headers.Identity = `${id_token}`;
-      globalObject.localStorage.setItem('id_token', id_token);
+    if (idToken) {
+      headers.Identity = `${idToken}`;
+      globalObject.localStorage.setItem('id_token', idToken);
       delete values.id_token;
     }
     const stringifiedValues = qs.stringify(values);
@@ -90,7 +89,10 @@ function fetchQuery(operation, variables, cacheConfig, uploadables) {
   const apiURL = getApiURL('base');
   return fetch(apiURL, {
     method: 'POST',
-    headers,
+    headers: {
+      ...headers,
+      ...overrideHeaders,
+    },
     body,
   }).then(response => response.json()).then((json) => {
     // Update cache on queries

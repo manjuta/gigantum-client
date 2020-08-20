@@ -1,0 +1,20 @@
+@import '~Styles/_imports.scss';
+
+
+.App {
+  height: 100%;
+  width: 100%;
+  background: $gradient;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &__loader {
+    margin: 80px;
+    color: $white;
+  }
+
+  &__header {
+    margin: 50px auto;
+  }
+}

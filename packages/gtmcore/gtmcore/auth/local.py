@@ -124,16 +124,17 @@ class LocalIdentityManager(IdentityManager):
         # Removed cached identity.
         data_file = os.path.join(self.auth_dir, 'cached_id_jwt')
         if os.path.exists(data_file):
+            logger.info("Removed cached user identity from local storage.")
             os.remove(data_file)
 
         # Remove the public key. If it even happens to get updated, this is a path to automatically fix
         data_file = os.path.join(self.auth_dir, 'jwks.json')
         if os.path.exists(data_file):
+            logger.info("Removed cached jwks file.")
             os.remove(data_file)
 
         self.user = None
         self.rsa_key = None
-        logger.info("Removed user identity from local storage.")
 
     def _load_user(self, id_token: Optional[str]) -> Optional[User]:
         """Method to load a users's ID token from disk

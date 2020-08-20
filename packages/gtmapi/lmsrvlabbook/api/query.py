@@ -26,6 +26,7 @@ from lmsrvlabbook.api.connections.environment import BaseComponentConnection
 from lmsrvlabbook.api.connections.jobstatus import JobStatusConnection
 from lmsrvlabbook.api.objects.datasettype import DatasetType
 from lmsrvlabbook.api.objects.dataset import Dataset
+from lmsrvlabbook.api.objects.server import Server, helper_get_current_server
 
 logger = LMLogger.get_logger()
 
@@ -54,9 +55,11 @@ class AppQueries(graphene.ObjectType):
     # Get the current logged in user identity, primarily used when running offline
     user_identity = graphene.Field(UserIdentity)
 
+    # Get the configuration for the current server
+    current_server = graphene.Field(Server)
+
     def resolve_build_info(self, info):
         """Return this LabManager build info (hash, build timestamp, etc)"""
-        # TODO - CUDA version should possibly go in here
         build_info = flask.current_app.config['LABMGR_CONFIG'].config.get('build_info') \
                      or "Unable to retrieve version"
         return build_info
@@ -113,6 +116,17 @@ class AppQueries(graphene.ObjectType):
             UserIdentity
         """
         return UserIdentity()
+
+    def resolve_current_server(self, info):
+        """Field to resolve the current server's configuration
+
+        Args:
+            info:
+
+        Returns:
+            Server
+        """
+        return helper_get_current_server()
 
 
 class LabbookQuery(AppQueries, graphene.ObjectType):

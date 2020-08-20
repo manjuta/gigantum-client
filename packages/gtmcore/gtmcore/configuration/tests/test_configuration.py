@@ -151,6 +151,7 @@ git:
         responses.add(responses.GET, 'https://test.gigantum.com/.well-known/discover.json',
                       json={"id": 'test-gigantum-com',
                             "name": "Gigantum Hub Test",
+                            "base_url": "https://test.gigantum.com/",
                             "git_url": "https://test.repo.gigantum.com/",
                             "git_server_type": "gitlab",
                             "hub_api_url": "https://test.gigantum.com/api/v1/",
@@ -183,6 +184,7 @@ git:
         responses.add(responses.GET, 'https://test.gigantum.com/.well-known/discover.json',
                       json={"id": 'test-gigantum-com',
                             "name": "Gigantum Hub Test",
+                            "base_url": "https://test.gigantum.com/",
                             "git_url": "https://test.repo.gigantum.com/",
                             "git_server_type": "gitlab",
                             "hub_api_url": "https://test.gigantum.com/api/v1/",
@@ -237,6 +239,7 @@ git:
         server_config = config_instance.get_server_configuration()
         assert server_config.id == 'test-gigantum-com'
         assert server_config.name == "Gigantum Hub Test"
+        assert server_config.base_url == "https://test.gigantum.com/"
         assert server_config.git_url == "https://test.repo.gigantum.com/"
         assert server_config.git_server_type == "gitlab"
         assert server_config.hub_api_url == "https://test.gigantum.com/api/v1/"
@@ -252,6 +255,7 @@ git:
         server_config = config_instance.get_server_configuration()
         assert server_config.id == 'test-gigantum-com'
         assert server_config.name == "Gigantum Hub Test"
+        assert server_config.base_url == "https://test.gigantum.com/"
         assert server_config.git_url == "https://test.repo.gigantum.com/"
         assert server_config.git_server_type == "gitlab"
         assert server_config.hub_api_url == "https://test.gigantum.com/api/v1/"
@@ -292,6 +296,7 @@ git:
         responses.add(responses.GET, 'https://test2.gigantum.com/.well-known/discover.json',
                       json={"id": 'another-server',
                             "name": "Another server",
+                            "base_url": "https://test2.gigantum.com/",
                             "git_url": "https://test2.repo.gigantum.com/",
                             "git_server_type": "gitlab",
                             "hub_api_url": "https://test2.gigantum.com/api/v1/",
@@ -315,7 +320,7 @@ git:
 
         servers = config_instance.list_available_servers()
         assert len(servers) == 1
-        assert servers[0] == ('test-gigantum-com', "Gigantum Hub Test")
+        assert servers[0] == ('test-gigantum-com', "Gigantum Hub Test", "https://test.gigantum.com/client/login")
 
         config_instance.add_server('https://test2.gigantum.com/')
 

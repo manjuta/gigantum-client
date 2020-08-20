@@ -19,12 +19,14 @@ const userIdentityQuery = graphql`
 `;
 
 const UserIdentity = {
-  getUserIdentity: () => new Promise((resolve, reject) => {
+  getUserIdentity: (overrideHeaders = {}) => new Promise((resolve, reject) => {
     const fetchData = () => {
       fetchQuery(
         userIdentityQuery,
         {},
         { force: true },
+        null,
+        overrideHeaders,
       ).then((response, error) => {
         if (response) {
           resolve(response);

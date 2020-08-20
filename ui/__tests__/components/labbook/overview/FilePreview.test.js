@@ -2,7 +2,7 @@
       import React from 'react';
       import renderer from 'react-test-renderer';
       import { mount } from 'enzyme';
-      import FilePreview from 'Components/labbook/overview/FilePreview';
+      import FilePreview from 'Pages/repository/labbook/overview/FilePreview';
 
       import store from 'JS/redux/store';
 

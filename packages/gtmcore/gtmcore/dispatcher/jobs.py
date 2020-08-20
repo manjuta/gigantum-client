@@ -596,24 +596,6 @@ def update_environment_repositories() -> None:
     lock.release()
 
 
-def load_default_server_configuration() -> None:
-    """Method to load a default server configuration if no servers are currently configured
-
-    Returns:
-        None
-    """
-    config = Configuration()
-    try:
-        config.get_server_configuration()
-    except FileNotFoundError:
-        logger = LMLogger.get_logger()
-
-        default_server = config.config['core']['default_server']
-        logger.info(f"Configuring Client with default server via auto-discovery: {default_server}")
-        server_id = config.add_server(default_server)
-        config.set_current_server(server_id)
-
-
 def index_labbook_filesystem():
     """To be implemented later. """
     raise NotImplemented
