@@ -20,6 +20,8 @@ import Branches from 'Pages/repository/shared/sidePanel/Branches';
 import VisibilityModal from 'Pages/repository/shared/modals/VisibilityModal';
 import PublishDatasetsModal from 'Pages/repository/shared/modals/publishDataset/PublishDatasetsModal';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
+// context
+import ServerContext from 'Pages/ServerContext';
 // utils
 import BranchMutations from '../../utils/BranchMutations';
 // assets
@@ -138,7 +140,6 @@ const checkForWriteAccess = (activeBranch, defaultRemote, collaborators, section
 
 
 type Props = {
-  baseUrl: string,
   branches: string,
   collaborators: Object,
   defaultRemote: string,
@@ -472,7 +473,8 @@ class BranchMenu extends Component<Props> {
   */
   _setRemoteSession = () => {
     const { owner, labbookName } = this.state;
-    const { baseUrl } = this.props;
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
     this.setState({
       addedRemoteThisSession: true,
       remoteUrl: `${baseUrl}${owner}/${labbookName}`,
@@ -686,6 +688,8 @@ class BranchMenu extends Component<Props> {
      };
    });
  }
+
+ static contextType = ServerContext;
 
  render() {
    const { props, state } = this;

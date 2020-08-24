@@ -12,7 +12,6 @@ import './Layout.scss';
 
 type Props = {
   auth: Object,
-  baseUrl: String,
   children: Node,
   showDiskLow: boolean,
 }

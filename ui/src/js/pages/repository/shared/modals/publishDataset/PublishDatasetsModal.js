@@ -8,6 +8,8 @@ import { setErrorMessage, setMultiInfoMessage } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
 // query
 import LocalDatasetsQuery from 'Pages/repository/shared/header/actionsSection/queries/LocalDatasetsQuery';
+// context
+import ServerContext from 'Pages/ServerContext';
 // component
 import Modal from 'Components/modal/Modal';
 import DatasetPublish from './DatasetPublish';
@@ -19,7 +21,6 @@ import PublishMutations from './mutations/PublishMutations';
 import './PublishDatasetsModal.scss';
 
 type Props = {
-  baseUrl: string,
   buttonText: string,
   checkSessionIsValid: Function,
   handleSync: Function,
@@ -95,7 +96,6 @@ class PublishDatasetsModal extends Component<Props> {
   _successCall = () => {
     const { progress } = this.state;
     const {
-      baseUrl,
       header,
       name,
       owner,
@@ -104,6 +104,8 @@ class PublishDatasetsModal extends Component<Props> {
       setRemoteSession,
       toggleModal,
     } = this.props;
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
     const isPublishing = header === 'Publish';
     const id = uuidv4();
     const successProgress = Object.assign({}, progress);
@@ -448,6 +450,7 @@ class PublishDatasetsModal extends Component<Props> {
     }
   }
 
+  static contextType = ServerContext;
 
   render() {
     const {

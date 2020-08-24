@@ -1,14 +1,16 @@
 // vendor
 import React, { Component } from 'react';
 import classNames from 'classnames';
+// context
+import ServerContext from 'Pages/ServerContext';
 // assets
+import serverImg from 'Images/icons/server.svg';
 import './User.scss';
 
 type Props = {
   auth: {
     logout: Function,
   },
-  baseUrl: String,
 }
 
 class User extends Component<Props> {
@@ -63,9 +65,12 @@ class User extends Component<Props> {
     });
   }
 
+  static contextType = ServerContext;
+
   render() {
     const { dropdownVisible, username } = this.state;
-    const { baseUrl } = this.props;
+    const { currentServer } = this.context;
+    const { baseUrl, name } = currentServer;
     const firstInitial = username.charAt(0).toUpperCase();
     // declare css here
     const usernameCSS = classNames({
@@ -88,6 +93,14 @@ class User extends Component<Props> {
         className="User"
         key="user"
       >
+        <div className="User__server flex flex-row">
+          <img
+            alt="Server"
+            className="User__icon"
+            src={serverImg}
+          />
+          <h6 className="User__server-name">{name}</h6>
+        </div>
         <div className="User__image">{firstInitial}</div>
         <h6
           role="presentation"

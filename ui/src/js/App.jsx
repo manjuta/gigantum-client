@@ -4,6 +4,9 @@ import React, { Component } from 'react';
 import { Router } from 'react-router-dom';
 import queryString from 'querystring';
 import fetchQuery from 'JS/fetch';
+import { graphql, QueryRenderer } from 'react-relay';
+// environment
+import environment from 'JS/createRelayEnvironment';
 // history
 import history from 'JS/history';
 // queries
@@ -13,11 +16,18 @@ import Auth from 'JS/Auth/Auth';
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';
 // components
-import Loader from 'Components/loader/Loader';
-import Login from './pages/login/Login';
-import Routes from './pages/Routes';
+import Login from 'Pages/login/Login';
+import Routes from 'Pages/Routes';
+import Interstitial from 'Components/interstitial/Interstitial';
 // css
 import './App.scss';
+
+
+const AppQuery = graphql`
+  query AppQuery {
+    ...Routes_currentServer
+  }
+`;
 
 
 class App extends Component {
@@ -43,9 +53,11 @@ class App extends Component {
         const currentServer = serverResponse.current_server;
         const availableServers = serverResponse.available_servers;
         this.setState({ availableServers });
+
         const authURL = availableServers.filter((server) => {
           return server.server_id === currentServer;
         })[0].login_url;
+
         UserIdentity.getUserIdentity(overrideHeaders).then((response) => {
           const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
           let isLoggedIn = null;
@@ -106,7 +118,7 @@ class App extends Component {
             <header className="App__header">
               <img
                 alt="Gigantum"
-                width="600"
+                width="515"
                 src={gigantumLogo}
               />
             </header>
@@ -122,27 +134,46 @@ class App extends Component {
 
     if (isLoggedIn) {
       return (
-        <Routes
-          auth={this.auth}
-          history={history}
-          isLoggedIn={isLoggedIn}
+        <QueryRenderer
+          environment={environment}
+          variables={{}}
+          query={AppQuery}
+          render={({ props, error }) => {
+            if (props) {
+              return (
+                <Routes
+                  {...props}
+                  currentServer={props}
+                  auth={this.auth}
+                  history={history}
+                  isLoggedIn={isLoggedIn}
+                />
+              );
+            }
+
+            if (error) {
+              return (
+                <Interstitial
+                  message="There was problem loading app data. Refresh to try again, if the problem persists you may need to restart GigantumClient"
+                  messageType="error"
+                />
+              );
+            }
+
+
+            return (
+              <Interstitial
+                message="Please wait. Gigantum Client is starting…"
+                messageType="loader"
+              />
+            );
+          }}
         />
       );
     }
 
     return (
-      <div className="App flex flex--column align-items--center">
-        <header className="App__header">
-          <img
-            alt="Gigantum"
-            width="600"
-            src={gigantumLogo}
-          />
-        </header>
-        <main className="App__loader relative">
-          <p>Please wait. Gigantum Client is starting…</p>
-        </main>
-      </div>
+      <Interstitial />
     );
   }
 }

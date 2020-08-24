@@ -31,7 +31,6 @@ const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cur
 
 type Props = {
   auth: Object,
-  baseUrl: string,
   diskLow: boolean,
   history: Object,
   match: Object,
@@ -92,7 +91,6 @@ export default class DashboardContainer extends Component<Props> {
     } = this.state;
     const {
       auth,
-      baseUrl,
       diskLow,
       history,
       match,
@@ -135,7 +133,6 @@ export default class DashboardContainer extends Component<Props> {
                 return (
                   <RemoteDatasetsContainer
                     auth={auth}
-                    baseUrl={baseUrl}
                     datasetList={queryProps}
                     diskLow={diskLow}
                     history={history}
@@ -165,7 +162,6 @@ export default class DashboardContainer extends Component<Props> {
               return (
                 <RemoteLabbooksContainer
                   auth={auth}
-                  baseUrl={baseUrl}
                   diskLow={diskLow}
                   history={history}
                   labbookList={queryProps}

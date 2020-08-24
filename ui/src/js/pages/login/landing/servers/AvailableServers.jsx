@@ -1,7 +1,6 @@
 // @flow
 // vendors
 import React from 'react';
-import { Link } from 'react-router-dom';
 // components
 import Server from './server/Server';
 // css
@@ -31,15 +30,14 @@ const AvailablesServers = (props: Props) => {
       ))}
 
       <br />
-      or
-      <br />
+
       <div>
         <a
           href="https://docs.gigantum.com/docs/adding-self-hosted-servers"
           rel="noopener noreferrer"
           target="_blank"
         >
-          Add a self-managed server
+          How to add a self-managed server
         </a>
       </div>
     </section>

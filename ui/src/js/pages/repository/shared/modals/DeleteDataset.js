@@ -12,11 +12,12 @@ import DeleteDatasetMutation from 'Mutations/repository/delete/DeleteDatasetMuta
 // components
 import ButtonLoader from 'Components/buttonLoader/ButtonLoader';
 import Modal from 'Components/modal/Modal';
+// context
+import ServerContext from 'Pages/ServerContext';
 // assets
 import './DeleteDataset.scss';
 
 type Props = {
-  baseUrl: string,
   history: {
     replace: Function,
   },
@@ -159,13 +160,15 @@ class DeleteDataset extends Component<Props> {
 */
   _getExplanationText() {
     const {
+      existsLocally,
       name,
       owner,
-      remoteDelete,
-      existsLocally,
       remoteAdded,
-      baseUrl,
+      remoteDelete,
     } = this.props;
+
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
 
     if (remoteDelete) {
       if (existsLocally) {
@@ -216,6 +219,8 @@ class DeleteDataset extends Component<Props> {
       </p>
     );
   }
+
+  static contextType = ServerContext;
 
   render() {
     const {

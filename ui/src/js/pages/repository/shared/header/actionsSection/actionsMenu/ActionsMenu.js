@@ -25,6 +25,8 @@ import { setContainerMenuWarningMessage, setContainerMenuVisibility } from 'JS/r
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
 import LinkedLocalDatasetsQuery from 'Pages/repository/shared/header/actionsSection/queries/LinkedLocalDatasetsQuery';
+// context
+import ServerContext from 'Pages/ServerContext';
 // components
 import CreateBranch from 'Pages/repository/shared/modals/CreateBranch';
 import Tooltip from 'Components/tooltip/Tooltip';
@@ -37,7 +39,6 @@ import ChangeVisibility from './visibility/ChangeVisibility';
 import './ActionsMenu.scss';
 
 type Props = {
-  baseUrl: string,
   defaultRemote: string,
   description: string,
   history: Object,
@@ -548,8 +549,9 @@ class ActionsMenu extends Component<Props> {
   *  @return {}
   */
   _setRemoteSession = () => {
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
     const {
-      baseUrl,
       name,
       owner,
     } = this.props;
@@ -559,6 +561,7 @@ class ActionsMenu extends Component<Props> {
     });
   }
 
+  static contextType = ServerContext;
 
   render() {
     const {
@@ -569,7 +572,6 @@ class ActionsMenu extends Component<Props> {
       history,
       description,
       isLocked,
-      baseUrl,
     } = this.props;
     const {
       menuOpen,
@@ -598,7 +600,6 @@ class ActionsMenu extends Component<Props> {
         { (deleteModalVisible && (sectionType === 'labbook'))
           && (
             <DeleteLabbook
-              baseUrl={baseUrl}
               handleClose={() => this._toggleDeleteModal()}
               history={history}
               name={name}
@@ -612,7 +613,6 @@ class ActionsMenu extends Component<Props> {
         { (deleteModalVisible && (sectionType === 'dataset'))
           && (
             <DeleteDataset
-              baseUrl={baseUrl}
               handleClose={() => this._toggleDeleteModal()}
               history={history}
               name={name}
@@ -681,7 +681,6 @@ class ActionsMenu extends Component<Props> {
               name={name}
               owner={owner}
               remoteUrl={remoteUrl}
-              baseUrl={baseUrl}
             />
 
           </ul>

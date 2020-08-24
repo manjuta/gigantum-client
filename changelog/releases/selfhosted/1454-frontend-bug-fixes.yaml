@@ -1,0 +1,8 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1454"
+changelog:
+  - type: IMPROVEMENT
+    description: Moves api query to QueryRenderer and adds react context to provide and consume context for neted components
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1441
+  - type: FIX
+    description: Fixes datasets listing not left aligning, fixes alignment and spacing issues on the select server page.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1453

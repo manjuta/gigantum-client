@@ -5,11 +5,12 @@ import classNames from 'classnames';
 import ReactTooltip from 'react-tooltip';
 // store
 import { setInfoMessage } from 'JS/redux/actions/footer';
+// context
+import ServerContext from 'Pages/ServerContext';
 // css
 import './CopyUrl.scss';
 
 type Props = {
-  baseUrl: string,
   defaultRemote: string,
   name: string,
   owner: string,
@@ -35,21 +36,23 @@ class CopyUrl extends Component<Props> {
     setInfoMessage(owner, name, `${copyText.value} copied!`);
   }
 
+  static contextType = ServerContext;
+
   render() {
     const {
-      baseUrl,
       defaultRemote,
       name,
       owner,
       remoteUrl,
     } = this.props;
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
     const doesNotHaveRemote = (defaultRemote === null) && (remoteUrl === null);
     // declare css here
     const copyUrlCSS = classNames({
       'ActionsMenu__item ActionsMenu__item--copy': true,
       'CopyUrl--disabled': doesNotHaveRemote,
     });
-
 
     return (
       <li

@@ -7,6 +7,8 @@ import DeleteRemoteLabbookMutation from 'Mutations/repository/delete/DeleteRemot
 // components
 import ButtonLoader from 'Components/buttonLoader/ButtonLoader';
 import Modal from 'Components/modal/Modal';
+// context
+import ServerContext from 'Pages/ServerContext';
 // store
 import {
   setErrorMessage,
@@ -17,7 +19,6 @@ import {
 import './DeleteLabbook.scss';
 
 type Props = {
-  baseUrl: string,
   name: string,
   owner: string,
   handleClose: Function,
@@ -151,13 +152,14 @@ export default class DeleteLabbook extends Component<Props> {
   */
   _getExplanationText = () => {
     const {
+      existsLocally,
       name,
       owner,
-      remoteDelete,
-      existsLocally,
       remoteAdded,
-      baseUrl,
+      remoteDelete,
     } = this.props;
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
 
     if (remoteDelete) {
       if (existsLocally) {
@@ -207,6 +209,8 @@ export default class DeleteLabbook extends Component<Props> {
       </p>
     );
   }
+
+  static contextType = ServerContext;
 
   render() {
     const {

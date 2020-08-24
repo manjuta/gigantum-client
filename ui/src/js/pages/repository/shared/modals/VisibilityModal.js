@@ -9,6 +9,8 @@ import PublishLabbookMutation from 'Mutations/branches/PublishLabbookMutation';
 import PublishDatasetMutation from 'Mutations/branches/PublishDatasetMutation';
 // component
 import Modal from 'Components/modal/Modal';
+// context
+import ServerContext from 'Pages/ServerContext';
 // store
 import {
   setErrorMessage,
@@ -20,7 +22,6 @@ import store from 'JS/redux/store';
 import './VisibilityModal.scss';
 
 type Props = {
-  baseUrl: string,
   buttonText: string,
   checkSessionIsValid: Function,
   header: string,
@@ -129,7 +130,6 @@ class VisibilityModal extends Component<Props> {
     const { state } = this;
     const id = uuidv4();
     const {
-      baseUrl,
       checkSessionIsValid,
       owner,
       name,
@@ -142,6 +142,9 @@ class VisibilityModal extends Component<Props> {
       setRemoteSession,
       toggleModal,
     } = this.props;
+
+    const { currentServer } = this.context;
+    const { baseUrl } = currentServer;
 
     toggleModal();
 
@@ -228,6 +231,7 @@ class VisibilityModal extends Component<Props> {
     }
   }
 
+  static contextType = ServerContext;
 
   render() {
     const {

@@ -13,7 +13,7 @@ export const setUpdateAll = (owner, labbookName) => dispatcher(
   { owner, labbookName },
 );
 
-export const setBaseUrl = (baseUrl) => dispatcher(
-  types.UPDATE_BASE_URL,
-  { baseUrl },
+export const setCurrentServer = (currentServer) => dispatcher(
+  types.UPDATE_CURRENT_SERVER,
+  { currentServer },
 );

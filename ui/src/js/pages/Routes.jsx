@@ -1,6 +1,7 @@
 // @flow
 // vendor
 import React, { Component } from 'react';
+import { createFragmentContainer, graphql } from 'react-relay';
 import Loadable from 'react-loadable';
 import { connect } from 'react-redux';
 import queryString from 'querystring';
@@ -11,15 +12,12 @@ import {
   Redirect,
 } from 'react-router-dom'; // keep browser router, reloads page with Router in labbook view
 // components
-import Layout from 'JS/layout/Layout';
 import Dashboard from 'Pages/dashboard/Dashboard';
-import Login from 'Pages/login/Login';
-// queries
-import AppQuery from 'JS/Auth/App';
-// store
-import { setBaseUrl } from 'JS/redux/actions/routes';
+import Layout from 'JS/layout/Layout';
 // utils
 import getApiURL from 'JS/utils/apiUrl';
+// context
+import ServerContext from './ServerContext';
 // assets
 import './Routes.scss';
 
@@ -52,7 +50,24 @@ const getBasename = () => {
   return basename;
 };
 
-class Routes extends Component {
+
+type Props = {
+  auth: {
+    login: Function,
+    logout: Function,
+  },
+  currentServer: {
+    baseUrl: string,
+  },
+  history: {
+    location: {
+      hash: string,
+    },
+      replace: Function,
+  },
+}
+
+class Routes extends Component<Props> {
   state = {
     hasError: false,
     forceLoginScreen: null,
@@ -78,23 +93,7 @@ class Routes extends Component {
     }
 
     this._checkSysinfo();
-
-    AppQuery.getAppData().then((response) => {
-      if (
-        response.data
-        && response.data.currentServer
-      ) {
-        const { currentServer } = response.data;
-        setBaseUrl(currentServer.baseUrl);
-        this.setState({ serverName: currentServer.name });
-      }
-    });
   }
-
-  /**
-    @param {}
-    calls flip header text function
-  */
 
 
   /**
@@ -170,99 +169,95 @@ class Routes extends Component {
     const { props, state } = this;
     const {
       auth,
-      baseUrl,
+      currentServer,
       history,
-      isLoggedIn,
     } = this.props;
     const { serverName } = this.state;
     const showDiskLow = state.diskLow && !window.sessionStorage.getItem('hideDiskWarning');
-
     if (!state.hasError) {
       // declare csc
 
       return (
-
-        <Router
-          history={history}
-          basename={this.basename}
-        >
-         <Layout
-            auth={auth}
-            baseUrl={baseUrl}
-            diskLow={showDiskLow}
+        <ServerContext.Provider value={currentServer}>
+          <Router
             history={history}
+            basename={this.basename}
           >
-
-          <Switch>
-
-            <Route
-              exact
-              path={[
-                '/',
-                '/datasets/:labbookSection',
-                '/projects/:labbookSection',
-              ]}
-              render={parentProps => (
-                <Dashboard
-                  {...props}
-                  {...parentProps}
-                  auth={auth}
-                  baseUrl={baseUrl}
-                  diskLow={showDiskLow}
-                  history={history}
-                  serverName={serverName}
-                />
-              )
-              }
-            />
-
-            <Route
-              exact
-              path={[
-                '/labbooks/:section',
-                '/:id',
-              ]}
-              render={() => <Redirect to="/projects/local" />}
-            />
-
-            <Route
-              path="/datasets/:owner/:datasetName"
+            <Layout
+              {...this.props}
               auth={auth}
-              render={(parentProps) => (
-                <DatasetQueryContainer
-                  {...props}
-                  {...parentProps}
-                  auth={auth}
-                  baseUrl={baseUrl}
-                  datasetName={parentProps.match.params.datasetName}
-                  diskLow={showDiskLow}
-                  history={history}
-                  owner={parentProps.match.params.owner}
-                  serverName={serverName}
-                />
-               )}
-              />
+              diskLow={showDiskLow}
+              history={history}
+            >
 
-              <Route
-                path="/projects/:owner/:labbookName"
-                auth={auth}
-                render={(parentProps) => (
-                  <LabbookQueryContainer
-                    {...props}
-                    {...parentProps}
-                    auth={auth}
-                    baseUrl={baseUrl}
-                    diskLow={showDiskLow}
-                    history={history}
-                    labbookName={parentProps.match.params.labbookName}
-                    owner={parentProps.match.params.owner}
-                    serverName={serverName}
-                  />
-                 )}
-               />
-            </Switch>
-          </Layout>
-        </Router>
+              <Switch>
+
+                <Route
+                  exact
+                  path={[
+                    '/',
+                    '/datasets/:labbookSection',
+                    '/projects/:labbookSection',
+                  ]}
+                  render={parentProps => (
+                    <Dashboard
+                      {...props}
+                      {...parentProps}
+                      auth={auth}
+                      diskLow={showDiskLow}
+                      history={history}
+                      serverName={serverName}
+                    />
+                  )
+                  }
+                />
+
+                <Route
+                  exact
+                  path={[
+                    '/labbooks/:section',
+                    '/:id',
+                  ]}
+                  render={() => <Redirect to="/projects/local" />}
+                />
+
+                <Route
+                  path="/datasets/:owner/:datasetName"
+                  auth={auth}
+                  render={(parentProps) => (
+                    <DatasetQueryContainer
+                      {...props}
+                      {...parentProps}
+                      auth={auth}
+                      datasetName={parentProps.match.params.datasetName}
+                      diskLow={showDiskLow}
+                      history={history}
+                      owner={parentProps.match.params.owner}
+                      serverName={serverName}
+                    />
+                  )}
+                />
+
+                <Route
+                  path="/projects/:owner/:labbookName"
+                  auth={auth}
+                  render={(parentProps) => (
+                    <LabbookQueryContainer
+                      {...props}
+                      {...parentProps}
+                      auth={auth}
+                      diskLow={showDiskLow}
+                      history={history}
+                      labbookName={parentProps.match.params.labbookName}
+                      owner={parentProps.match.params.owner}
+                      serverName={serverName}
+                    />
+                  )}
+                />
+              </Switch>
+            </Layout>
+          </Router>
+        </ServerContext.Provider>
       );
     }
 
@@ -274,8 +269,51 @@ class Routes extends Component {
   }
 }
 
-const mapStateToProps = state => state.routes;
+const RoutesFragement = createFragmentContainer(
+  Routes,
+  {
+    currentServer: graphql`
+      fragment Routes_currentServer on LabbookQuery {
+        currentServer {
+          authConfig {
+            audience
+            id
+            issuer
+            loginType
+            loginUrl
+            publicKeyUrl
+            serverId
+            signingAlgorithm
+            typeSpecificFields {
+              id
+              parameter
+              serverId
+              value
+            }
+          }
+          baseUrl
+          gitServerType
+          gitUrl
+          hubApiUrl
+          id
+          lfsEnabled
+          name
+          objectServiceUrl
+          serverId
+          userSearchUrl
+        }
+      }
+    `,
+  },
+);
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    ...state.routes,
+    ...ownProps,
+  };
+};
 
 const mapDispatchToProps = () => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(Routes);
+export default connect(mapStateToProps, mapDispatchToProps)(RoutesFragement);

@@ -14,8 +14,10 @@ const LoginError = (props: Props) => {
   if (errorType) {
     return (
       <section className="LoginError">
-        <h2 className="LoginError--type">
-          <div className="LoginError--exclamation" />
+        <h2 className="LoginError--type flex">
+          <div className="LoginError--exclamation">
+            !
+          </div>
           <span>{errorType}</span>
         </h2>
         <p className="LoginError__p">

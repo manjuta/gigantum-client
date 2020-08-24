@@ -16,8 +16,8 @@ import SortByDropdown from 'Pages/dashboard/shared/filters/SortByDropdown';
 import Validation from 'JS/utils/Validation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
-// config
-import config from 'JS/config';
+// context
+import ServerContext from 'Pages/ServerContext';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 import { setFilterText } from 'JS/redux/actions/datasetListing/datasetListing';
@@ -406,13 +406,16 @@ class Datasets extends Component<Props> {
     });
   }
 
+  static contextType = ServerContext;
+
   render() {
     const {
       filter,
       selectedSection,
       showLoginPrompt,
     } = this.state;
-    const { diskLow, serverName } = this.props;
+    const { currentServer } = this.context;
+    const { diskLow } = this.props;
     const { props, state } = this;
     const datasetsCSS = classNames({
       Datasets: true,
@@ -431,8 +434,8 @@ class Datasets extends Component<Props> {
         'Tab--selected': selectedSection === 'cloud',
       });
 
-      return (
 
+      return (
         <div className={datasetsCSS}>
 
           <CreateModal
@@ -465,7 +468,7 @@ class Datasets extends Component<Props> {
                   type="button"
                   onClick={() => this._setSection('cloud')}
                 >
-                  {serverName}
+                  {currentServer.name}
                 </button>
               </li>
 

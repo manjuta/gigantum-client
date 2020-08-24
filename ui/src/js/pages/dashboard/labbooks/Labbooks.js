@@ -17,6 +17,8 @@ import SortByDropdown from 'Pages/dashboard/shared/filters/SortByDropdown';
 import Validation from 'JS/utils/Validation';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
+// context
+import ServerContext from 'Pages/ServerContext';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 import { setFilterText } from 'JS/redux/actions/labbookListing/labbookListing';
@@ -414,6 +416,8 @@ class Labbooks extends Component<Props> {
     });
   }
 
+  static contextType = ServerContext;
+
   render() {
     const {
       diskLow,
@@ -428,6 +432,7 @@ class Labbooks extends Component<Props> {
       selectedSection,
       showLoginPrompt,
     } = this.state;
+    const { currentServer } = this.context;
     // declare css
     const labbooksCSS = classNames({
       Labbooks: true,
@@ -478,7 +483,7 @@ class Labbooks extends Component<Props> {
                   type="button"
                   onClick={() => this._setSection('cloud')}
                 >
-                  {serverName}
+                  {currentServer.name}
                 </button>
               </li>
 

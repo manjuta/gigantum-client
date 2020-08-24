@@ -10,6 +10,25 @@
   background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0) 9px);
 
   @include flex(flex-start, column);
+
+
+  &__server {
+    color: $white;
+    width: 120px;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  &__server-name {
+    color: $white;
+    font-size: 12px;
+  }
+
+  &__icon {
+    height: 20px;
+    width: 20px;
+    margin: 0 .5em 0 0;
+  }
 }
 
 .User__image {

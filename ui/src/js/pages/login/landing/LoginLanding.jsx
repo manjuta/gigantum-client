@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import store from 'JS/redux/store';
-import fetchQuery from 'JS/fetch';
 // components
 import LoginError from './error/LoginError';
 import LoginText from './text/LoginText';
@@ -23,21 +22,19 @@ class Login extends Component<Props> {
     this.state = store.getState().login;
   }
 
-  componentDidMount() {
-  }
-
   render() {
     const { auth, availableServers } = this.props;
     const errorType = window.sessionStorage.getItem('LOGIN_ERROR_TYPE');
     const errorDescription = window.sessionStorage.getItem('LOGIN_ERROR_DESCRIPTION');
     return (
-      <main className="LoginLanding">
+      <main className="LoginLanding flex flex-column flex--space-between">
         <LoginError
           errorDescription={errorDescription}
           errorType={errorType}
         />
-        <div className="grid justify--space-around flex align-items--start">
+        <div className="LoginLanding__container justify--center flex align-items--start">
           <LoginText />
+          <div className="LoginLanding__spacer" />
           <AvailableServers
             auth={auth}
             availableServers={availableServers}

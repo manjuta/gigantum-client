@@ -274,7 +274,7 @@ export default createPaginationContainer(
         $orderBy: String
         $sort: String
       ) {
-        datasetList{
+        datasetList {
           ...RemoteDatasets_remoteDatasets
         }
       }

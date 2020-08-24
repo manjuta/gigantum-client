@@ -4,9 +4,11 @@
 .LoginText {
   color: $white;
   text-align: left;
-  width: 500px;
+  width: 510px;
+  padding: 15px;
+  max-height: 350px;
 
-  p {
+  p, a {
     font-size: 18px;
     font-weight: 100;
   }
@@ -14,5 +16,7 @@
   h4 {
     color: $white;
     text-align: center;
+    margin-top: 20.6421px;
+    margin-bottom: 0;
   }
 }
