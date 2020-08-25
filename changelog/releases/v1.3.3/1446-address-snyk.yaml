@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1459"
+changelog:
+  - type: NON_USER_FACING
+    description: Upates to packates using snyk wizard.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1446
