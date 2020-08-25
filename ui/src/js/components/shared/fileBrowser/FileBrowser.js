@@ -950,6 +950,9 @@ class FileBrowser extends Component {
     const downloadList = getDownloadList(props, state);
     const downloadDisabled = isLocked || downloadingEdges || downloadingAll;
     const { fileTooLarge, filePrompted } = getQueuedFiles(uploadData);
+    const showDropzone = (Object.keys(childrenState).length <= 1)
+      && (search === '')
+      && (!initialLoad);
     // declare css here
     const fileBrowserCSS = classNames({
       FileBrowser: true,
@@ -1220,7 +1223,7 @@ class FileBrowser extends Component {
                 )
             }
 
-            { (childrenKeys.length === 0) && (search === '') && (!initialLoad)
+            { showDropzone
                 && (
                   <div className={dropBoxCSS}>
                     <div className="Dropbox--menu">
@@ -1252,14 +1255,14 @@ class FileBrowser extends Component {
             {
               initialLoad
               && (
-                <div className={dropBoxCSS}>
+                <div className="flex flex--column align-items--center">
                   <div className="Dropbox--menu">
                     Files are currently being processed. Please wait.
                   </div>
                 </div>
               )
             }
-            { (isProcessing || lockFileBrowser || initialLoad)
+            { (isProcessing || lockFileBrowser)
               && (
                 <div className="FileBrowser__lock">
                   <span />
