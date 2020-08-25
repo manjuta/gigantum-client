@@ -151,6 +151,7 @@ class RemoteDatasets extends Component<Props> {
       deleteData,
       deleteModalVisible,
     } = this.state;
+    const { hasNextPage } = remoteDatasets.remoteDatasets.pageInfo;
 
     if (remoteDatasets && (remoteDatasets.remoteDatasets !== null)) {
       const datasets = filterDatasets(remoteDatasets, filterState);
@@ -180,7 +181,7 @@ class RemoteDatasets extends Component<Props> {
                 <CardLoader
                   key={`RemoteDatasets_paginationLoader${index}`}
                   index={index}
-                  isLoadingMore={relay.isLoading()}
+                  isLoadingMore={relay.isLoading() || hasNextPage}
                 />
               ))
             }

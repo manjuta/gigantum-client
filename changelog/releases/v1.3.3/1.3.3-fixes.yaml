@@ -1,0 +1,8 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1460"
+changelog:
+  - type: FIX
+    description: Added loading state for fileBrowser while worker processes files
+  - type: FIX
+    description: Support popup blocker modal for newly supported browsers
+  - type: FIX
+    description: Remote Datasets will correctly show loading cards while paging
