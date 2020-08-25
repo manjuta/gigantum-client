@@ -162,7 +162,6 @@ const checkFileSize = (files, promptType, owner, labbookName, isUntracked) => {
       tooManyFiles: true,
     };
   }
-  
 
   function filesRecursionCount(file) {
     const fileSize = file.file.size;
