@@ -303,7 +303,7 @@ class ProjectControlElements(UiComponent):
 
     @property
     def close_footer_notification_button(self):
-        return CssElement(self.driver, ".Footer > .Footer__disc-button")
+        return CssElement(self.driver, ".Footer > .Footer__disc-button--open")
 
     @property
     def devtool_launch_button(self):
@@ -757,7 +757,7 @@ class FileBrowserElements(UiComponent):
         self.link_dataset_card_button.wait_to_appear().click()
         project_control_elts = ProjectControlElements(self.driver)
         try:
-            project_control_elts.close_footer_notification_button.wait_to_appear(10).click()
+            project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
         except:
             pass
         self.confirm_link_dataset_button.wait_to_appear().click()
@@ -1107,11 +1107,17 @@ class DatasetElements(UiComponent):
 
     def publish_private_project_with_unpublished_linked_dataset(self, username, project_title, dataset_title):
         """Publish a project with an unpublished linked dataset as private."""
+        project_control_elts = ProjectControlElements(self.driver)
         cloud_project_elts = CloudProjectElements(self.driver)
         cloud_project_elts.publish_project_button.wait_to_appear(nsec=20).click()
         logging.info(f"Publishing project {project_title} with unpublished linked dataset {dataset_title} "
                      f"as private to cloud")
-        time.sleep(30)
+
+        # close notification tray
+        time.sleep(2)
+        project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
+        time.sleep(1)
+
         self.publish_project_linked_dataset_button.wait_to_appear(nsec=20).click()
         self.publish_project_linked_dataset_private_button.wait_to_appear().click()
         self.driver.find_element_by_css_selector(f".Radio input[id='{username}/{dataset_title}_private'] "
@@ -1120,6 +1126,4 @@ class DatasetElements(UiComponent):
         project_control_elts = ProjectControlElements(self.driver)
         project_control_elts.container_status_publishing.wait_to_appear(180)
         project_control_elts.container_status_stopped.wait_to_appear(180)
-        # Time sleep necessary or cloud project does not appear in cloud tab
-        # Once the new cloud platform is up, this can be removed
-        time.sleep(15)
+
