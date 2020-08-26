@@ -303,7 +303,7 @@ class ProjectControlElements(UiComponent):
 
     @property
     def close_footer_notification_button(self):
-        return CssElement(self.driver, ".Footer__messageContainer > .Footer__disc-button")
+        return CssElement(self.driver, ".Footer > .Footer__disc-button")
 
     @property
     def devtool_launch_button(self):

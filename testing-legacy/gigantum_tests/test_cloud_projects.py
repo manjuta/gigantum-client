@@ -23,10 +23,10 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     cloud_project_elts.publish_private_project(project_title)
 
     project_control_elts = ProjectControlElements(driver)
-    try:
-        project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
-    except:
-        pass
+
+    # close notification tray
+    project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
+    time.sleep(1)
 
     logging.info(f"Navigating to {username}'s cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
@@ -58,10 +58,10 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     assert "Sync complete" in project_control_elts.footer_notification_message.find().text, \
         "Expected 'Sync complete' in footer"
 
-    try:
-        project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
-    except:
-        pass
+    # close notification tray after all messages pop up
+    time.sleep(3)
+    project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
+    time.sleep(1)
 
     # Delete cloud project
     cloud_project_elts.delete_cloud_project(project_title)
@@ -155,4 +155,3 @@ def test_publish_collaborator(driver: selenium.webdriver, *args, ** kwargs):
 
     assert "fatal" in del_cloud_project_stderr, f"Expected to not see a remote set for project {project_title}, " \
                                                 f"but got {del_cloud_project_stderr}"
-
