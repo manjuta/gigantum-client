@@ -5,10 +5,10 @@ import { WithContext as ReactTags } from 'react-tag-input';
 // mutations
 import CreateUserNoteMutation from 'Mutations/activity/CreateUserNoteMutation';
 import { setErrorMessage } from 'JS/redux/actions/footer';
+// components
+import MarkdownEditor from 'Components/common/markdownEditor/MarkdownEditor';
 // assets
 import './UserNote.scss';
-// componetns
-import MarkdownEditor from './editor/MarkdownEditor';
 
 
 type Props = {

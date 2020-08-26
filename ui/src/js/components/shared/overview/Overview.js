@@ -1,7 +1,6 @@
 // vendor
 import React, { Component } from 'react';
 import ReactMarkdown from 'react-markdown';
-import SimpleMDE from 'simplemde';
 import classNames from 'classnames';
 // mutations
 import WriteLabbookReadmeMutation from 'Mutations/repository/readme/WriteLabbookReadmeMutation';
@@ -9,6 +8,7 @@ import WriteDatasetReadmeMutation from 'Mutations/repository/readme/WriteDataset
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
+import MarkdownEditor from 'Components/common/markdownEditor/MarkdownEditor';
 import Base from 'Components/labbook/environment/Base';
 import Type from 'Components/dataset/overview/Type';
 import RecentActivity from 'Components/labbook/overview/RecentActivity';
@@ -16,12 +16,9 @@ import Loader from 'Components/common/Loader';
 import CodeBlock from 'Components/labbook/renderers/CodeBlock';
 import Tooltip from 'Components/common/Tooltip';
 import Summary from 'Components/dataset/overview/Summary';
-import ReadmeEdit from './ReadmeEdit';
 import EmptyReadme from './EmptyReadme';
 // assets
 import './Overview.scss';
-
-let simple;
 
 /**
   @param {}
@@ -61,9 +58,8 @@ class Overview extends Component<Props> {
     editingReadme: false,
     readmeExpanded: false,
     overflowExists: false,
-    simpleExists: false,
     editorFullscreen: false,
-
+    markdown: '',
   };
 
   /*
@@ -80,33 +76,6 @@ class Overview extends Component<Props> {
   */
   componentDidUpdate() {
     this._setExpand();
-    const { simpleExists } = this.state;
-    const { sectionType } = this.props;
-    const sectionProps = this.props[sectionType];
-
-    if (!simpleExists) {
-      if (document.getElementById('markDown')) {
-        simple = new SimpleMDE({
-          element: document.getElementById('markDown'),
-          spellChecker: true,
-        });
-
-        simple.value(sectionProps.overview.readme ? sectionProps.overview.readme : '');
-
-        this.setState({ simpleExists: true });
-
-        const fullscreenButton = document.getElementsByClassName('fa-arrows-alt')[0];
-        const sideBySideButton = document.getElementsByClassName('fa-columns')[0];
-        // TODO move set state to functions
-        if (fullscreenButton) {
-          fullscreenButton.addEventListener('click', this._fullscreen);
-        }
-
-        if (sideBySideButton) {
-          sideBySideButton.addEventListener('click', this._openEditor);
-        }
-      }
-    }
   }
 
   /**
@@ -172,7 +141,7 @@ class Overview extends Component<Props> {
    sets readme state to false
    */
   _closeReadme = () => {
-    this.setState({ editingReadme: false, simpleExists: false });
+    this.setState({ editingReadme: false });
   }
 
   /**
@@ -181,16 +150,17 @@ class Overview extends Component<Props> {
    calls mutation to save labbook readme
    */
   _saveLabbookReadme = (owner, name) => {
+    const { markdown } = this.state;
     WriteLabbookReadmeMutation(
       owner,
       name,
-      simple.value(),
+      markdown,
       (res, error) => {
         if (error) {
           console.log(error);
           setErrorMessage(owner, name, 'Readme was not set: ', error);
         } else {
-          this.setState({ editingReadme: false, simpleExists: false });
+          this.setState({ editingReadme: false });
         }
       },
     );
@@ -202,16 +172,17 @@ class Overview extends Component<Props> {
    calls mutation to save dataset readme
    */
   _saveDatasetReadme = (owner, name) => {
+    const { markdown } = this.state;
     WriteDatasetReadmeMutation(
       owner,
       name,
-      simple.value(),
+      markdown,
       (res, error) => {
         if (error) {
           console.log(error);
           setErrorMessage(owner, name, 'Readme was not set: ', error);
         } else {
-          this.setState({ editingReadme: false, simpleExists: false });
+          this.setState({ editingReadme: false });
         }
       },
     );
@@ -250,6 +221,16 @@ class Overview extends Component<Props> {
     history.push(`/projects/${owner}/${name}/${section}`);
   }
 
+  /**
+    * Method updates markdown in state
+     @param {Object} event
+   */
+   _updateMarkdownText = (value) => {
+     if (value) {
+       this.setState({ markdown: value });
+     }
+   }
+
   render() {
     // destructure here
     const {
@@ -264,6 +245,7 @@ class Overview extends Component<Props> {
     const {
       editingReadme,
       editorFullscreen,
+      markdown,
       overflowExists,
       readmeExpanded,
     } = this.state;
@@ -334,11 +316,31 @@ class Overview extends Component<Props> {
 
           { editingReadme
             && (
-              <ReadmeEdit
-                {...this.state}
-                closeReadme={this._closeReadme}
-                saveReadme={this._saveReadme}
-              />
+              <div className="Overview__readme--editing column-1-span-12">
+                <MarkdownEditor
+                  {...this.props}
+                  markdown={sectionProps.overview.readme || markdown}
+                  updateMarkdownText={this._updateMarkdownText}
+                />
+                <div className="Overview__readme--editing-buttons">
+                  <button
+                    type="button"
+                    className="Overview__readme-cancel Btn--flat"
+                    onClick={() => { this._closeReadme(); }}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    className="Overview__readme-save Btn--last"
+                    disabled={false}
+                    onClick={() => { this._saveReadme(); }}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
             )
           }
           { sectionProps.overview.readme

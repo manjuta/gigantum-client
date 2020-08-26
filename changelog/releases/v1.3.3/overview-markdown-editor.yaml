@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1463"
+changelog:
+  - type: NON_USER_FACING
+    description: Updates overview component to use the more robust MarkdownEditor component

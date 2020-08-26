@@ -163,6 +163,7 @@ const checkFileSize = (files, promptType, owner, labbookName, isUntracked) => {
     };
   }
 
+
   function filesRecursionCount(file) {
     const fileSize = file.file.size;
     if ((promptType === 'CodeBrowser_allFiles') && !isUntracked) {
