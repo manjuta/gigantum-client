@@ -52,6 +52,10 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     file_browser_elts = testutils.FileBrowserElements(driver)
     file_browser_elts.file_browser_area.wait_to_appear()
     file_browser_elts.drag_drop_file_in_drop_zone()
+
+    # Scroll to top. On low res screen this may be needed.
+    driver.execute_script("window.scrollTo(0, 0);")
+    
     cloud_project_elts.sync_cloud_project(project_title)
     project_control_elts = testutils.ProjectControlElements(driver)
 
