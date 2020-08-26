@@ -671,7 +671,7 @@ class RStudioElements(UiComponent):
 class FileBrowserElements(UiComponent):
     @property
     def file_browser_area(self):
-        return CssElement(self.driver, ".FileBrowser")
+        return CssElement(self.driver, ".Dropbox")
 
     @property
     def file_browser_message(self):
