@@ -5,7 +5,7 @@ import time
 import selenium
 
 import testutils
-from testutils import graphql_helpers
+from testutils import graphql_helpers, ProjectControlElements
 
 
 def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdriver, *args, **kwargs):
@@ -24,12 +24,14 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
     # Create a dataset
     dataset_elts = testutils.DatasetElements(driver)
     dataset_title = dataset_elts.create_dataset()
+    project_control_elts = ProjectControlElements(driver)
 
     # Create a project and link the dataset
     driver.get(os.environ['GIGANTUM_HOST'])
     r = testutils.prep_py3_minimal_base(driver, skip_login=True)
     _, project_title = r.username, r.project_name
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
+
     file_browser_elts = testutils.FileBrowserElements(driver)
     file_browser_elts.file_browser_area.wait_to_appear(15)
     file_browser_elts.link_dataset(dataset_title, project_title)
@@ -44,7 +46,7 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
     collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
     # Add collaborator to dataset
     driver.get(f"{os.environ['GIGANTUM_HOST']}/datasets/{username}/{dataset_title}")
-    time.sleep(10)
+    time.sleep(2)
     cloud_project_elts.add_collaborator_with_permissions(dataset_title)
     # Log out
     side_bar_elts = testutils.SideBarElements(driver)
@@ -60,9 +62,6 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
         pass
     logging.info(f"Navigating to {collaborator}'s cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
-    cloud_project_elts.first_cloud_project.wait_to_appear(30)
-    # This was added for dev cloud, may no longer be needed
-    driver.refresh()
     cloud_project_elts.first_cloud_project.wait_to_appear(30)
 
     first_project_title = cloud_project_elts.import_first_cloud_project_name.find().text
@@ -153,6 +152,7 @@ def test_link_published_dataset_then_publish_project(driver: selenium.webdriver,
     cloud_project_elts.import_first_cloud_project_button.click()
     project_control = testutils.ProjectControlElements(driver)
     project_control.container_status_stopped.wait_to_appear(30)
+    project_control.close_footer_notification_button.wait_to_appear(2).click()
 
     # Collaborator checks that they can view linked dataset
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")

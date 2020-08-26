@@ -1115,8 +1115,11 @@ class DatasetElements(UiComponent):
 
         # close notification tray
         time.sleep(2)
-        project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
-        time.sleep(1)
+        try:
+            project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
+            time.sleep(1)
+        except:
+            pass
 
         self.publish_project_linked_dataset_button.wait_to_appear(nsec=20).click()
         self.publish_project_linked_dataset_private_button.wait_to_appear().click()
