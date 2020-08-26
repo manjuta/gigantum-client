@@ -5,7 +5,7 @@ import time
 import selenium
 
 import testutils
-from testutils import graphql_helpers, graphql_hub_helpers
+from testutils import graphql_helpers, graphql_hub_helpers, ProjectControlElements
 
 
 def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs):
@@ -21,6 +21,12 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
     # Publish a project as private
     cloud_project_elts = testutils.CloudProjectElements(driver)
     cloud_project_elts.publish_private_project(project_title)
+
+    project_control_elts = ProjectControlElements(driver)
+    try:
+        project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
+    except:
+        pass
 
     logging.info(f"Navigating to {username}'s cloud tab")
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/cloud")
@@ -51,6 +57,11 @@ def test_publish_sync_delete_project(driver: selenium.webdriver, *args, **kwargs
 
     assert "Sync complete" in project_control_elts.footer_notification_message.find().text, \
         "Expected 'Sync complete' in footer"
+
+    try:
+        project_control_elts.close_footer_notification_button.wait_to_appear(2).click()
+    except:
+        pass
 
     # Delete cloud project
     cloud_project_elts.delete_cloud_project(project_title)
