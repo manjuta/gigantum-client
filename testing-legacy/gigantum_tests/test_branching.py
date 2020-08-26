@@ -78,5 +78,7 @@ def test_delete_file_local_branch(driver: selenium.webdriver, *args, **kwargs):
     logging.info(f"Checking that file deleted in input data tab while on test-branch does not appear in master branch")
 
     contents = file_browser_elts.input_file_browser_contents_list
-    assert len(contents) == 1, "Expected sample-upload.txt to not appear in master branch"
+    assert len(contents) == 3, "Expected sample-upload.txt to not appear in master branch"
     assert contents[0] == 'untracked', "Expected sample-upload.txt to not appear in master branch"
+    assert contents[1] == 'Drag and drop files here', "Dropzone to appear"
+    assert contents[2] == 'Choose Files...', "Dropzone to appear"
