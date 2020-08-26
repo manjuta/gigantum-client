@@ -54,6 +54,8 @@ def test_delete_file_local_branch(driver: selenium.webdriver, *args, **kwargs):
     file_browser_elts.drag_drop_file_in_drop_zone()
 
     branch_elts = testutils.BranchElements(driver)
+
+    driver.execute_script("window.scrollTo(0, 0);")
     branch_elts.create_local_branch("test-branch")
 
     contents = file_browser_elts.input_file_browser_contents_list
