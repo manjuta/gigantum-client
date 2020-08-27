@@ -104,10 +104,12 @@ def test_delete_file_project_file_browser(driver: selenium.webdriver, *args, **k
 
     # Expect to be empty
     file_contents = file_browser_elts.input_file_browser_contents_list
-    assert len(file_contents) == 1, "Expected file browser to be empty but more than 1 file/directory exists"
+    assert len(file_contents) == 3, "Expected file browser to be empty but more than 1 file/directory exists"
     assert file_contents[0] == 'untracked', "Expected file browser to be empty, but still have untracked folder"
+    assert file_contents[1] == 'Drag and drop files here', "Dropzone to appear"
+    assert file_contents[2] == 'Choose Files...', "Dropzone to appear"
 
-               
+
 def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
     """
     Test that a file can be dragged and dropped into data in a dataset.
