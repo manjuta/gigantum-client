@@ -24,7 +24,7 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
     # Create a dataset
     dataset_elts = testutils.DatasetElements(driver)
     dataset_title = dataset_elts.create_dataset()
-    project_control_elts = ProjectControlElements(driver)
+    project_control = testutils.ProjectControlElements(driver)
 
     # Create a project and link the dataset
     driver.get(os.environ['GIGANTUM_HOST'])
@@ -44,10 +44,12 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
     # Add collaborator to project
     cloud_project_elts = testutils.CloudProjectElements(driver)
     collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
+    project_control.close_footer_notification_button.wait_to_appear(2).click()
     # Add collaborator to dataset
     driver.get(f"{os.environ['GIGANTUM_HOST']}/datasets/{username}/{dataset_title}")
     time.sleep(2)
     cloud_project_elts.add_collaborator_with_permissions(dataset_title)
+
     # Log out
     side_bar_elts = testutils.SideBarElements(driver)
     side_bar_elts.do_logout(username)
@@ -71,8 +73,8 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
         f"but instead got {first_project_title}"
 
     cloud_project_elts.import_first_cloud_project_button.click()
-    project_control = testutils.ProjectControlElements(driver)
     project_control.container_status_stopped.wait_to_appear(30)
+    project_control.close_footer_notification_button.wait_to_appear(2).click()
 
     # Collaborator checks that they can view linked dataset
     driver.get(f"{os.environ['GIGANTUM_HOST']}/projects/{username}/{project_title}/inputData")
