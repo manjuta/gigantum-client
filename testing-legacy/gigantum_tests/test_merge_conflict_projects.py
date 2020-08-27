@@ -65,15 +65,16 @@ def test_use_theirs_merge_conflict_project(driver: selenium.webdriver, *args, **
         if time.time() - waiting_start > 35:
             raise ValueError(f'Timed out waiting for sync to complete')
 
+    time.sleep(2)
     # Check that merge conflict resolves to "use theirs"
     file_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username, 'labbooks',
                              project_title, 'input', 'sample-upload.txt')
-    with open(file_path, "r") as resolve_merge_conflict_file:
-        resolve_merge_conflict_file = resolve_merge_conflict_file.read()
+    with open(file_path, "r") as f:
+        resolve_merge_conflict_file_str = f.read()
 
-    assert resolve_merge_conflict_file == "collaborator", \
+    assert resolve_merge_conflict_file_str == "collaborator", \
         f"Merge did not resolve to 'use theirs,' expected to see 'collaborator' in file, " \
-        f"but instead got {resolve_merge_conflict_file}"
+        f"but instead got {resolve_merge_conflict_file_str}"
 
 
 def test_abort_merge_conflict_project(driver: selenium.webdriver, *args, **kwargs):
