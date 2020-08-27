@@ -1,6 +1,5 @@
 import graphene
 from gtmcore.dataset.storage import get_storage_backend
-from gtmcore.dataset.storage.s3 import ExternalStorageBackend
 
 
 class DatasetType(graphene.ObjectType):
@@ -16,9 +15,6 @@ class DatasetType(graphene.ObjectType):
 
     # Unique identifier for the Dataset Type
     storage_type = graphene.String()
-
-    # Boolean indicating if type is fully managed
-    is_managed = graphene.Boolean()
 
     # Boolean indicating if type can automatically update the manifest from the remote storage backend
     can_update_unmanaged_from_remote = graphene.Boolean()
@@ -44,11 +40,6 @@ class DatasetType(graphene.ObjectType):
             sb = get_storage_backend(self.storage_type)
 
             self._dataset_type_data = sb.metadata
-            self._dataset_type_data['is_managed'] = isinstance(sb, ExternalStorageBackend)
-            if self._dataset_type_data['is_managed']:
-                self._dataset_type_data['can_update_unmanaged_from_remote'] = sb.can_update_from_remote
-            else:
-                self._dataset_type_data['can_update_unmanaged_from_remote'] = False
 
         self.name = self._dataset_type_data['name']
         self.description = self._dataset_type_data['description']
@@ -56,8 +47,6 @@ class DatasetType(graphene.ObjectType):
         self.tags = self._dataset_type_data['tags']
         self.icon = self._dataset_type_data['icon']
         self.url = self._dataset_type_data['url']
-        self.is_managed = self._dataset_type_data['is_managed']
-        self.can_update_unmanaged_from_remote = self._dataset_type_data['can_update_unmanaged_from_remote']
 
     @classmethod
     def get_node(cls, info, id):
@@ -83,12 +72,6 @@ class DatasetType(graphene.ObjectType):
             self._load_info()
         return self.description
 
-    def resolve_is_managed(self, info):
-        """Resolve the is_managed field"""
-        if self.is_managed is None:
-            self._load_info()
-        return self.is_managed
-
     def resolve_readme(self, info):
         """Resolve the readme field"""
         if self.readme is None:
@@ -112,9 +95,3 @@ class DatasetType(graphene.ObjectType):
         if self.url is None:
             self._load_info()
         return self.url
-
-    def resolve_can_update_unmanaged_from_remote(self, info):
-        """Resolve the tags field"""
-        if self.can_update_unmanaged_from_remote is None:
-            self._load_info()
-        return self.can_update_unmanaged_from_remote

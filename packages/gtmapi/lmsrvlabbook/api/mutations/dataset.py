@@ -3,6 +3,7 @@ import base64
 import os
 import flask
 
+import gtmcore.dispatcher.dataset_jobs
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.workflows.gitlab import GitLabManager
@@ -10,8 +11,7 @@ from gtmcore.exceptions import GigantumException
 
 from lmsrvcore.auth.user import get_logged_in_username, get_logged_in_author
 from lmsrvcore.utilities import configure_git_credentials
-from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType, ActivityRecord, \
-    ActivityDetailRecord
+from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType, ActivityRecord, ActivityDetailRecord
 from gtmcore.activity.utils import TextData, DetailRecordList, ImmutableList
 
 
@@ -19,11 +19,9 @@ from lmsrvlabbook.api.objects.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import Dispatcher, jobs
 
-# Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
 from gtmcore.dataset.storage import GigantumObjectStore
 # Avoid name conflict with the Dataset API imported above
 from gtmcore.dataset import Dataset as DatasetObj
-# Temporary hardcoding of Gigantum Dataset type. Can be removed with #1328
 
 
 from lmsrvlabbook.api.connections.dataset import DatasetConnection
@@ -153,9 +151,6 @@ class UpdateLocalDataset(graphene.relay.ClientIDMutation):
         im = InventoryManager()
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
 
-        if not ds.backend.has_credentials:
-            raise ValueError("Dataset is not fully configured. Cannot update.")
-
         d = Dispatcher()
         kwargs = {
             'logged_in_username': logged_in_username,
@@ -172,7 +167,7 @@ class UpdateLocalDataset(graphene.relay.ClientIDMutation):
         metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",
                     'method': 'update_local_dataset'}
 
-        job_response = d.dispatch_task(jobs.update_local_dataset,
+        job_response = d.dispatch_task(gtmcore.dispatcher.dataset_jobs.update_local_dataset,
                                        kwargs=kwargs, metadata=metadata)
         background_job_key = job_response.key_str
 
@@ -301,7 +296,6 @@ class DeleteDataset(graphene.ClientIDMutation):
             # Get tokens from request context
             access_token, id_token = tokens_from_request_context(tokens_required=True)
 
-            # Temporary hard-coding of Gigantum Dataset type. Can be removed with #1328
             try:
                 ds = InventoryManager().load_dataset(logged_in_user, owner, dataset_name,
                                                      author=get_logged_in_author())
@@ -312,15 +306,14 @@ class DeleteDataset(graphene.ClientIDMutation):
                 ds = DatasetObj(config.config_file, owner)
                 ds._data = {"name": dataset_name}
 
+
             if ds.storage_type != "gigantum_object_v1":
                 raise GigantumException(f"Remote deletion of {dataset_name} failed, only Gigantum Datasets supported!")
 
             # We directly use the GigantumObjectStore here, as we don't support remote deletion in any other cases
             ds_backend = GigantumObjectStore()
-            ds_backend.set_credentials(logged_in_user, access_token, id_token)
 
             ds_backend.delete_contents(ds)
-            # Temporary hard-coding of Gigantum Dataset type. Can be removed with #1328
 
             # Get remote server configuration
             remote_config = config.get_remote_configuration()
@@ -358,7 +351,7 @@ class DeleteDataset(graphene.ClientIDMutation):
             }
 
             dispatcher = Dispatcher()
-            job_key = dispatcher.dispatch_task(jobs.clean_dataset_file_cache, metadata=job_metadata,
+            job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache, metadata=job_metadata,
                                                kwargs=job_kwargs)
             logger.info(f"Dispatched clean_dataset_file_cache({owner}/{dataset_name}) to Job {job_key}")
 
@@ -452,7 +445,7 @@ class VerifyDataset(graphene.ClientIDMutation):
         }
 
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.verify_dataset_contents, metadata=job_metadata,
+        job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.verify_dataset_contents, metadata=job_metadata,
                                            kwargs=job_kwargs)
         logger.info(f"Dispatched verify_dataset_contents({dataset_owner}/{dataset_name}) to Job {job_key}")
 

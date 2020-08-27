@@ -972,7 +972,7 @@ class TestManifest(object):
         os.remove(checkout_file)
 
         # Reload classes
-        ds = im.load_dataset(USERNAME, USERNAME, 'dataset-1')
+        ds = im.prepare_to_manage_dataset(USERNAME, USERNAME, 'dataset-1')
         m = Manifest(ds, USERNAME)
 
         # Add file and verify
@@ -993,7 +993,7 @@ class TestManifest(object):
         os.remove(os.path.join(ds.root_dir, 'manifest', manifest_file))
 
         # Reload classes
-        ds = im.load_dataset(USERNAME, USERNAME, 'dataset-1')
+        ds = im.prepare_to_manage_dataset(USERNAME, USERNAME, 'dataset-1')
         m = Manifest(ds, USERNAME)
 
         # Verify manifest hasn't changed

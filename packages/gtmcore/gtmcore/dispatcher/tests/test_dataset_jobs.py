@@ -260,7 +260,7 @@ class TestDatasetBackgroundJobs(object):
             'dataset_name': 'dataset-1'
         }
 
-        jobs.update_unmanaged_dataset_from_remote(**kwargs)
+        gtmcore.dispatcher.dataset_jobs.update_unmanaged_dataset_from_remote(**kwargs)
 
         m = Manifest(ds, 'tester')
         assert len(m.manifest.keys()) == 4
@@ -357,7 +357,7 @@ class TestDatasetBackgroundJobs(object):
                 'dataset_name': 'dataset-1'
             }
 
-            jobs.verify_dataset_contents(**kwargs)
+            gtmcore.dispatcher.dataset_jobs.verify_dataset_contents(**kwargs)
             job = gtmcore.dispatcher.jobs.get_current_job()
 
             assert 'modified_keys' in job.meta
@@ -411,7 +411,7 @@ class TestDatasetBackgroundJobs(object):
                 'labbook_name': 'test-labbook'
             }
 
-            jobs.verify_dataset_contents(**kwargs)
+            gtmcore.dispatcher.dataset_jobs.verify_dataset_contents(**kwargs)
             job = gtmcore.dispatcher.jobs.get_current_job()
 
             assert 'modified_keys' in job.meta

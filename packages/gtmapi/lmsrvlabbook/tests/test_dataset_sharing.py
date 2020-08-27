@@ -9,7 +9,7 @@ from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fix
 from graphene.test import Client
 from werkzeug.datastructures import FileStorage
 
-from gtmcore.dispatcher.jobs import export_dataset_as_zip
+from gtmcore.dispatcher.dataset_jobs import export_dataset_as_zip
 from gtmcore.files import FileOperations
 
 from gtmcore.inventory.inventory import InventoryManager

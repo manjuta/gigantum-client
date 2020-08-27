@@ -9,12 +9,10 @@ from rq import get_current_job
 
 from gtmcore.activity.monitors.devenv import DevEnvMonitorManager
 from gtmcore.container import container_for_context
-from gtmcore.dataset.storage import LocalFilesystemBackend
-from gtmcore.dataset.storage.s3 import PublicS3Bucket
 from gtmcore.labbook import LabBook
 from gtmcore.gitlib import RepoLocation
 
-from gtmcore.inventory.inventory import InventoryManager, InventoryException
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.inventory.branching import MergeConflict
 from gtmcore.inventory import Repository
 
@@ -159,22 +157,6 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
         raise
 
 
-def export_dataset_as_zip(dataset_path: str, ds_export_directory: str) -> str:
-    """Return path to archive file of exported dataset. """
-    p = os.getpid()
-    logger = LMLogger.get_logger()
-    logger.info(f"(Job {p}) Starting export_dataset_as_zip({dataset_path})")
-
-    try:
-        ds = InventoryManager().load_dataset_from_directory(dataset_path)
-        with ds.lock():
-            path = ZipExporter.export_dataset(ds.root_dir, ds_export_directory)
-        return path
-    except Exception as e:
-        logger.exception(f"(Job {p}) Error on export_dataset_as_zip: {e}")
-        raise
-
-
 def import_labboook_from_zip(archive_path: str, username: str, owner: str,
                              config_file: Optional[str] = None) -> str:
     """Method to import a labbook from a zip file
@@ -208,45 +190,6 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
         return lb.root_dir
     except Exception as e:
         logger.exception(f"(Job {p}) Error on import_labbook_from_zip({archive_path}): {e}")
-        raise
-    finally:
-        if os.path.exists(archive_path):
-            os.remove(archive_path)
-
-
-def import_dataset_from_zip(archive_path: str, username: str, owner: str,
-                            config_file: Optional[str] = None) -> str:
-    """Method to import a dataset from a zip file
-
-    Args:
-        archive_path(str): Path to the uploaded zip
-        username(str): Username
-        owner(str): Owner username
-        config_file(str): Optional path to a labmanager config file
-
-    Returns:
-        str: directory path of imported labbook
-    """
-
-    def update_meta(msg):
-        job = get_current_job()
-        if not job:
-            return
-        job.meta['feedback'] = msg
-        job.save_meta()
-
-    p = os.getpid()
-    logger = LMLogger.get_logger()
-    logger.info(f"(Job {p}) Starting import_dataset_from_zip(archive_path={archive_path},"
-                f"username={username}, owner={owner}, config_file={config_file})")
-
-    try:
-        lb = ZipExporter.import_dataset(archive_path, username, owner,
-                                        config_file=config_file,
-                                        update_meta=update_meta)
-        return lb.root_dir
-    except Exception as e:
-        logger.exception(f"(Job {p}) Error on import_dataset_from_zip({archive_path}): {e}")
         raise
     finally:
         if os.path.exists(archive_path):
@@ -361,214 +304,6 @@ def start_and_run_activity_monitor(module_name, class_name, user, owner, labbook
     except Exception as e:
         logger.error("Error on start_and_run_activity_monitor in pid {}: {}".format(os.getpid(), e))
         raise e
-
-
-def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: str, id_token: str,
-                                         dataset_owner: str, dataset_name: str) -> None:
-    """Method to update/populate an unmanaged dataset from its remote automatically
-
-    Currently hard-coded to the "Public" S3 bucket
-
-    Args:
-        logged_in_username: username for the currently logged in user
-        access_token: bearer token
-        id_token: identity token
-        dataset_owner: Owner of the dataset containing the files to download
-        dataset_name: Name of the dataset containing the files to download
-
-    Returns:
-
-    """
-    def update_meta(msg):
-        job = get_current_job()
-        if not job:
-            return
-        if 'feedback' not in job.meta:
-            job.meta['feedback'] = msg
-        else:
-            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
-        job.save_meta()
-
-    logger = LMLogger.get_logger()
-
-    try:
-        p = os.getpid()
-        logger.info(f"(Job {p}) Starting update_unmanaged_dataset_from_remote(logged_in_username={logged_in_username},"
-                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
-
-        im = InventoryManager()
-        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
-
-        ds.namespace = dataset_owner
-        backend = ds.backend
-
-        # Make more general once we have more external backends
-        if not isinstance(backend, PublicS3Bucket):
-            raise ValueError("Can only auto-update externally-hosted remote dataset types")
-
-        # TODO DJWC - if we know the region, we don't need credentials
-        #  AND you can query for the region of a bucket
-        backend.set_credentials({'access_token': access_token,
-                                 'id_token': id_token})
-
-        backend.update_from_remote(ds, update_meta)
-
-    except Exception as err:
-        logger.exception(err)
-        raise
-
-
-def verify_dataset_contents(logged_in_username: str, access_token: str, id_token: str,
-                            dataset_owner: str, dataset_name: str,
-                            labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None) -> None:
-    """Method to update/populate an unmanaged dataset from it local state
-
-    Args:
-        logged_in_username: username for the currently logged in user
-        access_token: bearer token
-        id_token: identity token
-        dataset_owner: Owner of the dataset containing the files to download
-        dataset_name: Name of the dataset containing the files to download
-        labbook_owner: Owner of the labbook if this dataset is linked
-        labbook_name: Name of the labbook if this dataset is linked
-
-    Returns:
-        None
-    """
-    job = get_current_job()
-
-    def update_meta(msg):
-        if not job:
-            return
-        if 'feedback' not in job.meta:
-            job.meta['feedback'] = msg
-        else:
-            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
-        job.save_meta()
-
-    logger = LMLogger.get_logger()
-
-    try:
-        p = os.getpid()
-        logger.info(f"(Job {p}) Starting verify_dataset_contents(logged_in_username={logged_in_username},"
-                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name},"
-                    f"labbook_owner={labbook_owner}, labbook_name={labbook_name}")
-
-        im = InventoryManager()
-        if labbook_owner is not None and labbook_name is not None:
-            # This is a linked dataset, load repo from the Project
-            lb = im.load_labbook(logged_in_username, labbook_owner, labbook_name)
-            dataset_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', dataset_owner, dataset_name)
-            ds = im.load_dataset_from_directory(dataset_dir)
-        else:
-            # this is a normal dataset. Load repo from working dir
-            ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
-
-        ds.namespace = dataset_owner
-        # TODO DJWC - This needs to be re-thought-out
-        ds.backend.set_default_configuration(logged_in_username, access_token, id_token)
-
-        result = ds.backend.verify_contents(ds, update_meta)
-        job.meta['modified_keys'] = result
-
-    except Exception as err:
-        logger.exception(err)
-        raise
-
-
-def update_local_dataset(logged_in_username: str, access_token: str, id_token: str,
-                         dataset_owner: str, dataset_name: str) -> None:
-    """Method to update/populate a local dataset from it local state
-
-    Args:
-        logged_in_username: username for the currently logged in user
-        access_token: bearer token
-        id_token: identity token
-        dataset_owner: Owner of the dataset
-        dataset_name: Name of the dataset
-
-    Returns:
-
-    """
-    def update_meta(msg):
-        job = get_current_job()
-        if not job:
-            return
-        if 'feedback' not in job.meta:
-            job.meta['feedback'] = msg
-        else:
-            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
-        job.save_meta()
-
-    logger = LMLogger.get_logger()
-
-    try:
-        p = os.getpid()
-        logger.info(f"(Job {p}) Starting update_unmanaged_dataset_from_local(logged_in_username={logged_in_username},"
-                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
-
-        im = InventoryManager()
-        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
-        ds.namespace = dataset_owner
-
-        backend = ds.backend
-        if not isinstance(backend, LocalFilesystemBackend):
-            raise ValueError("Can only auto-update unmanaged dataset types")
-
-        backend.update_from_local(ds, update_meta, verify_contents=True)
-
-    except Exception as err:
-        logger.exception(err)
-        raise
-
-
-def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, dataset_name: str,
-                             cache_location: str, config_file: str = None) -> None:
-    """Method to import a dataset from a zip file
-
-    Args:
-        logged_in_username: username for the currently logged in user
-        dataset_owner: Owner of the labbook if this dataset is linked
-        dataset_name: Name of the labbook if this dataset is linked
-        cache_location: Absolute path to the file cache (inside the container) for this dataset
-        config_file:
-
-    Returns:
-        None
-    """
-    logger = LMLogger.get_logger()
-
-    p = os.getpid()
-    try:
-        logger.info(f"(Job {p}) Starting clean_dataset_file_cache(logged_in_username={logged_in_username},"
-                    f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
-
-        im = InventoryManager(config_file=config_file)
-
-        # Check for dataset
-        try:
-            im.load_dataset(logged_in_username, dataset_owner, dataset_name)
-            logger.info(f"{logged_in_username}/{dataset_owner}/{dataset_name} still exists. Skipping file cache clean.")
-            return
-        except InventoryException:
-            # Dataset not found, move along
-            pass
-
-        # Check for submodule references
-        for lb in im.list_labbooks(logged_in_username):
-            for ds in im.get_linked_datasets(lb):
-                if ds.namespace == dataset_owner and ds.name == dataset_name:
-                    logger.info(f"{logged_in_username}/{dataset_owner}/{dataset_name} still referenced by {str(lb)}."
-                                f" Skipping file cache clean.")
-                    return
-
-        # If you get here the dataset no longer exists and is not used by any projects, clear files
-        shutil.rmtree(cache_location)
-
-    except Exception as err:
-        logger.error(f"(Job {p}) Error in clean_dataset_file_cache job")
-        logger.exception(err)
-        raise
 
 
 def update_environment_repositories() -> None:

@@ -15,7 +15,7 @@ from gtmcore.configuration import Configuration
 from gtmcore.fixtures.fixtures import _create_temp_work_dir, mock_config_file_background_tests
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dataset import Manifest
-from gtmcore.dispatcher.jobs import import_dataset_from_zip
+from gtmcore.dispatcher.dataset_jobs import import_dataset_from_zip
 import gtmcore
 
 USERNAME = 'tester'

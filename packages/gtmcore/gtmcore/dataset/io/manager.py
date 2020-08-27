@@ -48,7 +48,7 @@ class IOManager(object):
         except subprocess.CalledProcessError:
             return False
 
-    def objects_to_push(self, remove_duplicates: bool = False) -> List[PushObject]:
+    def objects_to_push(self) -> List[PushObject]:
         """Return a list of named tuples of all objects that need to be pushed
 
         Returns:
@@ -75,12 +75,10 @@ class IOManager(object):
                             dataset_path, object_path = line.split(',')
                             _, object_id = object_path.rsplit('/', 1)
 
-                            # Handle de-duplicating objects if the backend supports it
-                            if remove_duplicates is True:
-                                if object_id in object_ids:
-                                    continue
+                            if object_id in object_ids:
+                                continue
 
-                                object_ids.append(object_id)
+                            object_ids.append(object_id)
 
                             objects.append(PushObject(dataset_path=dataset_path, object_path=object_path, revision=pf))
 
@@ -88,13 +86,13 @@ class IOManager(object):
 
         return objects
 
-    def num_objects_to_push(self, remove_duplicates: bool = False) -> int:
+    def num_objects_to_push(self) -> int:
         """Helper to get the total number of objects to push
 
         Returns:
             int
         """
-        return len(self.objects_to_push(remove_duplicates))
+        return len(self.objects_to_push())
 
     def push_objects(self, objs: List[PushObject], progress_update_fn: Callable) -> PushResult:
         """Method to push the provided objects
@@ -159,12 +157,15 @@ class IOManager(object):
         Returns:
             PullResult
         """
+        backend = self.dataset.backend
+        if not isinstance(backend, GigantumObjectStore):
+            raise ValueError('Pull supported only for Gigantum Datasets')
         objs: List[PullObject] = self._gen_pull_objects(keys)
 
         # Pull the object
-        self.dataset.backend.prepare_pull(self.dataset, objs)
-        result = self.dataset.backend.pull_objects(self.dataset, objs, progress_update_fn)
-        self.dataset.backend.finalize_pull(self.dataset)
+        backend.prepare_pull(self.dataset, objs)
+        result = backend.pull_objects(self.dataset, objs, progress_update_fn)
+        backend.finalize_pull(self.dataset)
 
         # Relink the revision
         if link_revision:
@@ -250,8 +251,7 @@ class IOManager(object):
         obj_batches: List[List] = [list() for _ in range(num_cores)]
         size_sums = [0 for _ in range(num_cores)]
 
-        should_dedup = backend.client_should_dedup_on_push  # type: ignore
-        objs: List[PushObject] = self.objects_to_push(remove_duplicates=should_dedup)
+        objs: List[PushObject] = self.objects_to_push()
 
         # Build batches by dividing keys across batches by file size
         for obj in objs:

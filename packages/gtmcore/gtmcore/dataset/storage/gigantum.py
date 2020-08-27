@@ -554,32 +554,6 @@ This dataset type is fully managed. That means as you modify data, each version 
 to Gigantum Cloud will count towards your storage quota and include all versions of files.
 """}
 
-    def set_credentials(self, username: str, bearer_token: str, id_token: str) -> None:
-        """Method to configure keys for pulling and pushing data from our Hub endpoint
-
-        This should be called from API and other situations where remote ops are desired and the bearer and
-        ID tokens exist.
-
-        TODO DJWC - can we get rid of this since we always have these credentials available in any given session?
-
-        While we represent the credential contents in the method signature, they are stored in a dictionary,
-        which allows the API to change fairly easily, and also makes it easy to pass around credentials in a
-        generic way.
-
-        Args:
-            username: current logged in username
-            bearer_token: current session bearer token (gigantum auth service)
-            id_token: current session id token (gigantum auth service)
-
-        Returns:
-            None
-        """
-        self.configuration['credentials'] = {
-            'username': username,
-            'gigantum_bearer_token': bearer_token,
-            'gigantum_id_token': id_token
-        }
-
     @property
     def client_should_dedup_on_push(self) -> bool:
         return True
@@ -1056,7 +1030,10 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         return PullResult(success=successes, failure=failures, message=message)
 
     def delete_contents(self, dataset) -> None:
-        """Method to remove the contents of a dataset from the storage backend, should only work if managed
+        """Method to remove the contents of a dataset from the storage backend
+
+        This should only be implemented for GigantumObjectStore. I.e., this is the only implementation and it shouldn't
+        be used elsewhere.
 
         Args:
             dataset: Dataset object

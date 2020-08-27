@@ -2,6 +2,7 @@ import base64
 import os
 import graphene
 
+import gtmcore.dispatcher.dataset_jobs
 from gtmcore.container import container_for_context
 from gtmcore.dispatcher import (Dispatcher, jobs)
 
@@ -113,7 +114,7 @@ class DeleteLabbook(graphene.ClientIDMutation):
                     'cache_location': cleanup_job.cache_root
                 }
                 dispatcher = Dispatcher()
-                job_key = dispatcher.dispatch_task(jobs.clean_dataset_file_cache, metadata=job_metadata,
+                job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache, metadata=job_metadata,
                                                    kwargs=job_kwargs)
                 logger.info(f"Dispatched clean_dataset_file_cache({ cleanup_job.namespace}/{cleanup_job.name})"
                             f" to Job {job_key}")

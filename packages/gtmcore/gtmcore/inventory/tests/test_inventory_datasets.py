@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import time
 
+import gtmcore.dispatcher.dataset_jobs
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.dataset.manifest import Manifest
@@ -115,8 +116,8 @@ class TestInventoryDatasets(object):
         assert dataset_delete_job.name == "dataset1"
         assert dataset_delete_job.cache_root == m.cache_mgr.cache_root
 
-        jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
-                                      dataset_delete_job.cache_root, config_file=mock_config_file[0])
+        gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
+                                                                 dataset_delete_job.cache_root, config_file=mock_config_file[0])
 
         assert os.path.exists(m.cache_mgr.cache_root) is False
 
@@ -153,8 +154,8 @@ class TestInventoryDatasets(object):
         assert dataset_delete_job.name == "dataset1"
         assert dataset_delete_job.cache_root == m.cache_mgr.cache_root
 
-        jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
-                                      dataset_delete_job.cache_root, config_file=mock_config_file[0])
+        gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
+                                                                 dataset_delete_job.cache_root, config_file=mock_config_file[0])
 
         assert os.path.exists(m.cache_mgr.cache_root) is True
 

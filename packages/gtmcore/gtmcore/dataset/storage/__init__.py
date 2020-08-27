@@ -22,8 +22,8 @@ def get_storage_backend(storage_type: str) -> StorageBackend:
     if storage_type in SUPPORTED_STORAGE_BACKENDS.keys():
         module, package = SUPPORTED_STORAGE_BACKENDS.get(storage_type)  # type: ignore
         imported = importlib.import_module(module, package)
-        class_instance = getattr(imported, package)
-        return class_instance()
+        class_for_backend = getattr(imported, package)
+        return class_for_backend()
     else:
         raise GigantumException(f"Unsupported Dataset Storage Type: {storage_type}")
 

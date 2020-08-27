@@ -60,13 +60,6 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         return metadata
 
-    # TODO DJWC - push down into ExternalProtectedStorage?
-    @property
-    def has_credentials(self) -> bool:
-        """Boolean property indicating if a storage backend has all required config items set"""
-        return 'credentials' in self.configuration
-
-
     def hash_file_key_list(self, dataset, keys):
         m = Manifest(dataset, self.configuration.get('username'))
         loop = asyncio.get_event_loop()
@@ -119,12 +112,19 @@ class ExternalProtectedStorage(StorageBackend):
     Instances of this class will require credentials.
 
     Once other descendants are implemented, this can be moved to some generic place. Keeping it in the same file as the
-    S3 backend for now to fascilitate rapid iteration.
+    S3 backend for now to facilitate rapid iteration.
     """
 
     @abc.abstractmethod
     def set_credentials(self, credentials: Dict[str, str]):
         pass
+
+    @property
+    def has_credentials(self) -> bool:
+        """Boolean property indicating if a storage backend has all required config items set.
+
+        We may ultimately want a third option for invalid credentials."""
+        return 'credentials' in self.configuration
 
     def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
         """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends

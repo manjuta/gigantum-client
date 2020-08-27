@@ -3,6 +3,7 @@ import graphene
 import flask
 import os
 
+import gtmcore.dispatcher.dataset_jobs
 from gtmcore.gitlib import RepoLocation
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord
 from gtmcore.inventory.inventory import InventoryManager
@@ -291,7 +292,7 @@ class ExportDataset(graphene.relay.ClientIDMutation):
         job_kwargs = {'dataset_path': ds.root_dir,
                       'ds_export_directory': os.path.join(working_directory, 'export')}
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.export_dataset_as_zip,
+        job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.export_dataset_as_zip,
                                            kwargs=job_kwargs,
                                            metadata=job_metadata)
 
@@ -322,7 +323,7 @@ class ImportDataset(graphene.relay.ClientIDMutation, ChunkUploadMutation):
             'owner': username
         }
         dispatcher = Dispatcher()
-        job_key = dispatcher.dispatch_task(jobs.import_dataset_from_zip,
+        job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.import_dataset_from_zip,
                                            kwargs=job_kwargs,
                                            metadata=job_metadata)
 
