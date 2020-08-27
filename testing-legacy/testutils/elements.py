@@ -992,10 +992,9 @@ class CloudProjectElements(UiComponent):
 
         # Try to wait up to 5 seconds for the input to activate (after checking for tokens/publish state is done)
         for _ in range(5):
+            time.sleep(1)
             if self.collaborator_input.is_enabled():
                 break
-            else:
-                time.sleep(1)
 
         self.collaborator_input.find().send_keys(collaborator)
         if permissions == "read":

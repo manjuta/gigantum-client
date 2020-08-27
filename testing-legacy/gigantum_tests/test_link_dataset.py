@@ -43,8 +43,9 @@ def test_link_unpublished_dataset_then_publish_project(driver: selenium.webdrive
     dataset_elts.publish_private_project_with_unpublished_linked_dataset(username, project_title, dataset_title)
     # Add collaborator to project
     cloud_project_elts = testutils.CloudProjectElements(driver)
-    collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
     project_control.close_footer_notification_button.wait_to_appear(2).click()
+    time.sleep(2)
+    collaborator = cloud_project_elts.add_collaborator_with_permissions(project_title)
     # Add collaborator to dataset
     driver.get(f"{os.environ['GIGANTUM_HOST']}/datasets/{username}/{dataset_title}")
     time.sleep(2)
