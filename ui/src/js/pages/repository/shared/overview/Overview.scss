@@ -8,6 +8,11 @@
 
   @include flex(space-between, column);
 
+  .fa {
+    color: $mineShaft;
+    font-family: FontAwesome !important;
+  }
+
   &--fullscreen {
     z-index: index($elements, modal);
   }

@@ -2,19 +2,17 @@
 // vendor
 import React, { Component } from 'react';
 import { WithContext as ReactTags } from 'react-tag-input';
-import classNames from 'classnames';
 // mutations
 import CreateUserNoteMutation from 'Mutations/activity/CreateUserNoteMutation';
 import { setErrorMessage } from 'JS/redux/actions/footer';
+// components
+import MarkdownEditor from 'Components/common/markdownEditor/MarkdownEditor';
 // assets
 import './UserNote.scss';
 
-let simple;
 
 type Props = {
-  changeFullScreenState: Function,
   datasetId: string,
-  editorFullscreen: Boolean,
   labbookId: string,
   name: string,
   owner: string,
@@ -24,39 +22,11 @@ type Props = {
 
 class UserNote extends Component<Props> {
   state = {
-    tags: [],
-    userSummaryText: '',
     addNoteDisabled: true,
+    tags: [],
     unsubmittedTag: '',
+    userSummaryText: '',
   };
-
-  /**
-    @param {}
-    after component mounts apply simplemde to the dom element id:markdown
-  */
-  componentDidMount() {
-    const { changeFullScreenState } = this.props;
-
-    import('simplemde').then((comp) => {
-      if (document.getElementById('markDown')) {
-        const Simple = comp.default;
-        simple = new Simple({
-          element: document.getElementById('markDown'),
-          spellChecker: true,
-        });
-        const fullscreenButton = document.getElementsByClassName('fa-arrows-alt')[0];
-        const sideBySideButton = document.getElementsByClassName('fa-columns')[0];
-
-        if (fullscreenButton) {
-          fullscreenButton.addEventListener('click', () => changeFullScreenState());
-        }
-
-        if (sideBySideButton) {
-          sideBySideButton.addEventListener('click', () => changeFullScreenState(true));
-        }
-      }
-    });
-  }
 
   /**
     @param {}
@@ -75,6 +45,7 @@ class UserNote extends Component<Props> {
       toggleUserNote,
     } = this.props;
     const {
+      markdown,
       unsubmittedTag,
       userSummaryText,
     } = this.state;
@@ -96,7 +67,7 @@ class UserNote extends Component<Props> {
       sectionType,
       name,
       userSummaryText,
-      simple.value(),
+      markdown,
       owner,
       [],
       tags,
@@ -176,15 +147,24 @@ class UserNote extends Component<Props> {
      });
    }
 
+   /**
+    * Method updates markdown in state
+     @param {Object} event
+   */
+   _updateMarkdownText = (value) => {
+     if (value) {
+       this.setState({ markdown: value });
+     }
+   }
 
    render() {
-     const { toggleUserNote, editorFullscreen } = this.props;
-     const { addNoteDisabled, tags } = this.state;
-     // declare css here
-     const userNoteSummaryCSS = classNames({
-       UserNote__summary: true,
-       'UserNote__summary--fullscreen': editorFullscreen,
-     });
+     const { toggleUserNote } = this.props;
+     const {
+       addNoteDisabled,
+       markdown,
+       tags,
+     } = this.state;
+
      return (
        <div className="UserNote flex flex--column">
 
@@ -200,10 +180,11 @@ class UserNote extends Component<Props> {
            onKeyUp={evt => this._setUserSummaryText(evt)}
            className="UserNote__title"
          />
-         <div className={userNoteSummaryCSS}>
-           <textarea
-             ref={(ref) => { this.markdown = ref; }}
-             id="markDown"
+         <div className="UserNote__summary">
+           <MarkdownEditor
+             {...this.props}
+             markdown={markdown}
+             updateMarkdownText={this._updateMarkdownText}
            />
          </div>
 

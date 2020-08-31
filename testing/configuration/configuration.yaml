@@ -1,0 +1,5 @@
+configuration:
+  chrome_driver_version: "2.36"
+  test_environment: dev
+  browsers: ["chrome"]
+  incognito: True

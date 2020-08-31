@@ -6,7 +6,18 @@ import Modal from 'Components/modal/Modal';
 // assets
 import firefoxSrc from 'Images/logos/Firefox-popup.png';
 import chromeSrc from 'Images/logos/Chrome-popup.png';
+import safariSrc from 'Images/logos/safari-popup.png';
 import './PopupBlocked.scss';
+
+const getIcon = (browserName) => {
+  if (browserName === 'firefox') {
+    return firefoxSrc;
+  }
+  if (browserName === 'safari') {
+    return safariSrc;
+  }
+  return chromeSrc;
+};
 
 type Props = {
   attemptRelaunch: Function,
@@ -23,9 +34,7 @@ class PopupBlocked extends PureComponent<Props> {
     } = this.props;
 
     const browser = detect();
-    const isChrome = browser.name === ('chrome');
-
-    const icon = isChrome ? chromeSrc : firefoxSrc;
+    const icon = getIcon(browser.name);
 
     return (
       <Modal
@@ -46,21 +55,8 @@ class PopupBlocked extends PureComponent<Props> {
                 Please modify your browser settings to allow pop-ups, as shown below.
               </p>
             </div>
-            {
-              isChrome
-              && (
-                <img
-                  alt="browser"
-                  width="362"
-                  height="225"
-                  src={chromeSrc}
-                />
-              )
-            }
             <img
-              alt="firefox"
-              width="362"
-              height="225"
+              alt="browser"
               src={icon}
             />
             <div className="PopupBlocked__buttonContainer flex justify--right">

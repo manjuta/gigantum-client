@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1407"
+changelog:
+  - type: FIX
+    description: Files that are exactly 500MB in size will now recieve a warning on filesize limits while uploading

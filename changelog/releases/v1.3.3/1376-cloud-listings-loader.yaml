@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1462"
+changelog:
+  - type: FIX
+    description: Fixes loading cards temporarily not displaying when remote projects/datasets are loading.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1376

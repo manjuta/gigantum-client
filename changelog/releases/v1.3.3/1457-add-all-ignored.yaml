@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1457"
+changelog:
+  - type: FIX
+    description: git add_all was raising an exception when trying to add an ignored directory (e.g. in untracked)

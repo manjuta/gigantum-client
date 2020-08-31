@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import {
@@ -82,6 +83,7 @@ class RemoteDatasets extends Component<Props> {
       remoteDatasets,
     } = this.props;
 
+
     if (relay.isLoading()) {
       return;
     }
@@ -144,8 +146,8 @@ class RemoteDatasets extends Component<Props> {
       filterState,
       remoteDatasets,
       remoteDatasetsId,
-      setFilterValue,
       relay,
+      setFilterValue,
     } = this.props;
     const {
       deleteData,
@@ -181,7 +183,7 @@ class RemoteDatasets extends Component<Props> {
                 <CardLoader
                   key={`RemoteDatasets_paginationLoader${index}`}
                   index={index}
-                  isLoadingMore={relay.isLoading() && hasNextPage}
+                  isLoadingMore={hasNextPage}
                 />
               ))
             }

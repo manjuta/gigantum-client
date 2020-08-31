@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1447"
+changelog:
+  - type: IMPROVEMENT
+    description: Updates browser detect to support safari, edge-chromium and opera
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1430
