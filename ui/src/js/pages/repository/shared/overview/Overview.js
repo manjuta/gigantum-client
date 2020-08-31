@@ -14,7 +14,7 @@ import Type from 'Components/dataset/overview/Type';
 import RecentActivity from 'Components/labbook/overview/RecentActivity';
 import Loader from 'Components/common/Loader';
 import CodeBlock from 'Components/labbook/renderers/CodeBlock';
-import Tooltip from 'Components/common/Tooltip';
+import Tooltip from 'Components/tooltip/Tooltip';
 import Summary from 'Components/dataset/overview/Summary';
 
 import EmptyReadme from './EmptyReadme';
