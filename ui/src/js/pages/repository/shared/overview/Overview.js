@@ -12,7 +12,7 @@ import MarkdownEditor from 'Components/markdownEditor/MarkdownEditor';
 import Base from 'Components/labbook/environment/Base';
 import Type from 'Components/dataset/overview/Type';
 import RecentActivity from 'Components/labbook/overview/RecentActivity';
-import Loader from 'Components/common/Loader';
+import Loader from 'Components/loader/Loader';
 import CodeBlock from 'Components/labbook/renderers/CodeBlock';
 import Tooltip from 'Components/tooltip/Tooltip';
 import Summary from 'Components/dataset/overview/Summary';
