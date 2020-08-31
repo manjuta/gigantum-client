@@ -747,6 +747,13 @@ def update_meta(msg: str):
     job.save_meta()
 
 
+def update_modified_keys(result):
+    """A mildly over-engineered simple function to keep our API consistent"""
+    job = get_current_job()
+    job.meta['modified_keys'] = result
+    job.save_meta()
+
+
 def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
                     percent_complete: Optional[float] = None) -> None:
     """Method to update the job's progress metadata and provide feedback to the UI"""
@@ -774,9 +781,3 @@ def progress_update_callback(completed_bytes: int) -> None:
 
     current_job.meta['completed_bytes'] = int(current_job.meta['completed_bytes']) + completed_bytes
     current_job.save_meta()
-
-
-def update_modified_keys(result):
-    job.meta['modified_keys'] = result
-
-
