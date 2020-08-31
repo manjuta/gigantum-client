@@ -3,7 +3,7 @@ import copy
 import os
 import shutil
 import time
-from typing import Optional, List, Tuple, Type
+from typing import Optional, List, Tuple, Union
 
 from humanfriendly import format_size
 from rq import get_current_job
@@ -357,7 +357,7 @@ def pull_objects(keys: List[str], logged_in_username: str,
 
         ds = load_dataset(logged_in_username, dataset_owner, dataset_name,
                           labbook_owner, labbook_name, config_file,
-                          check_isinstance=[GigantumObjectStore])
+                          check_isinstance=GigantumObjectStore)
 
         m = Manifest(ds, logged_in_username)
         iom = IOManager(ds, m)
@@ -516,7 +516,7 @@ def verify_dataset_contents(logged_in_username: str, dataset_owner: str, dataset
         ds = load_dataset(logged_in_username, dataset_owner, dataset_name, labbook_owner, labbook_name)
 
         result = ds.backend.verify_contents(ds, update_meta)
-        job.meta['modified_keys'] = result
+        update_modified_keys(result)
 
     except Exception as err:
         logger.exception(err)
@@ -701,7 +701,19 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
 
 def load_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str,
                  labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None,
-                 config_file: Optional[str] = None, check_isinstance: Optional[Tuple[Type]] = None):
+                 config_file: Optional[str] = None, check_isinstance: Optional[Union[type, Tuple[type]]] = None):
+    """Load a dataset in a variety of contexts
+
+    Args:
+        logged_in_username: user
+        dataset_owner: gigantum namespace for dataset
+        dataset_name: label for dataset
+        labbook_owner: gigantum namespace for a project containing the dataset - if specified, dataset will be loaded
+          from within the Project, otherwise will be loaded as a top-level dataset
+        labbook_name: label for project - required along with labbook_owner to specify the containing project
+        config_file: any non-standard configuration for InventoryManager
+        check_isinstance: will be passed directly to `isinstance()` builtin after loading the dataset
+    """
     im = InventoryManager(config_file=config_file)
 
     if labbook_owner is not None and labbook_name is not None:
@@ -762,3 +774,9 @@ def progress_update_callback(completed_bytes: int) -> None:
 
     current_job.meta['completed_bytes'] = int(current_job.meta['completed_bytes']) + completed_bytes
     current_job.save_meta()
+
+
+def update_modified_keys(result):
+    job.meta['modified_keys'] = result
+
+
