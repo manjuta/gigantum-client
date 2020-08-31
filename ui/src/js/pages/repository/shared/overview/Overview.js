@@ -8,7 +8,7 @@ import WriteDatasetReadmeMutation from 'Mutations/repository/readme/WriteDataset
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
-import MarkdownEditor from 'Components/common/markdownEditor/MarkdownEditor';
+import MarkdownEditor from 'Components/markdownEditor/MarkdownEditor';
 import Base from 'Components/labbook/environment/Base';
 import Type from 'Components/dataset/overview/Type';
 import RecentActivity from 'Components/labbook/overview/RecentActivity';
