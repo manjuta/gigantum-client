@@ -6,7 +6,7 @@ import { WithContext as ReactTags } from 'react-tag-input';
 import CreateUserNoteMutation from 'Mutations/activity/CreateUserNoteMutation';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
-import MarkdownEditor from 'Components/common/markdownEditor/MarkdownEditor';
+import MarkdownEditor from 'Components/markdownEditor/MarkdownEditor';
 // assets
 import './UserNote.scss';
 
