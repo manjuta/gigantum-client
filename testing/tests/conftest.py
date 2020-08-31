@@ -126,7 +126,7 @@ def __take_screenshot(web_driver: webdriver, test_name: str):
         web_driver: Current web driver.
         test_name: Name of the test function.
     """
-    root_dir = os.path.dirname(os.path.abspath(__file__)).replace("tests", "reports\\")
-    screenshot_file_path = f"{root_dir}" \
-                           f"{str(datetime.datetime.now().timestamp())}_{test_name}.jpg"
+    root_dir = os.path.dirname(os.path.abspath(__file__)).replace("tests", "reports")
+    file_name = f"{str(datetime.datetime.now().timestamp())}_{test_name}.jpg"
+    screenshot_file_path = os.path.join(root_dir, file_name)
     web_driver.save_screenshot(screenshot_file_path)

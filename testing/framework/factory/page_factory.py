@@ -9,9 +9,10 @@ from selenium.common.exceptions import *
 from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
-from framework.factory.models_enums.constants_enums import LocatorType
+from framework.factory.models_enums.constants_enums import LocatorType, CompareUtilityType
 import time
 import pkg_resources
+from framework.factory.compare_utility import CompareUtility
 
 
 class PageFactory(object):
@@ -38,7 +39,7 @@ class PageFactory(object):
         else:
             self.driver = instance.driver
 
-    def get_locator(self, locator_type: LocatorType, locator_key: str) -> object:
+    def get_locator(self, locator_type: LocatorType, locator_key: str) -> WebElement:
         """Get UI element based on given locator type and locator key.
 
         Args:
@@ -268,6 +269,25 @@ class PageFactory(object):
         file_input.send_keys(file_path)
         time.sleep(sleep_time)
 
+    def wait_until(self, predicate: CompareUtilityType, timeout: int, *args) -> bool:
+        """Monitor the ui element for a change
+
+        The function can return once the timeout period is reached or if it finds the
+        required element.
+
+        Args:
+            predicate: Indicates the function to execute while wait period.
+            timeout: The time period for which the wait should continue.
+            *args:Input to predicate.
+
+        Returns: boolean value based on the result
+        """
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if getattr(CompareUtility, predicate.value)(self, *args): return True
+            time.sleep(0.25)
+        return False
+
 
 WebElement.click_button = PageFactory.click
 WebElement.double_click = PageFactory.double_click
@@ -290,3 +310,4 @@ WebElement.get_list_item_count = PageFactory.get_list_item_count
 WebElement.get_all_list_item = PageFactory.get_all_list_item
 WebElement.get_list_selected_item = PageFactory.get_list_selected_item
 WebElement.execute_script = PageFactory.execute_script
+setattr(WebElement, 'wait_until', PageFactory.wait_until)
