@@ -10,8 +10,9 @@ type Props = {
   defaultRemote: string,
   name: string,
   owner: string,
+  isLocked: boolean,
   remoteUrl: string,
-  visibility: string
+  visibility: string,
 };
 
 class ChangeVisibility extends Component<Props> {
@@ -36,6 +37,7 @@ class ChangeVisibility extends Component<Props> {
       defaultRemote,
       remoteUrl,
       visibility,
+      isLocked,
     } = this.props;
     const { visibilityModalVisible } = this.state;
 
@@ -51,7 +53,7 @@ class ChangeVisibility extends Component<Props> {
         <div className={`ActionsMenu__item ChangeVisibility--visibility-${visibility}`}>
 
           <button
-            disabled={doesNotHaveRemote}
+            disabled={doesNotHaveRemote || isLocked}
             onClick={() => this._toggleModal('visibilityModalVisible')}
             className="ActionsMenu__btn--flat"
             type="button"

@@ -71,7 +71,8 @@ class TestRStudioServerMonitor:
         # call processor
         server_monitor.store_record() 
 
-        a_store = ActivityStore(mock_labbook[2])
+        lb = mock_labbook[2]
+        a_store = ActivityStore(lb)
         ars = a_store.get_activity_records()
 
         # details object [x][3] gets the x^th object
@@ -79,7 +80,7 @@ class TestRStudioServerMonitor:
         cell_2 = a_store.get_detail_record(ars[0].detail_objects[3].key).data
 
         # if the cells were divided, there will be two records
-        assert(cell_1['text/plain'][55:58] == 'pop')
+        assert(cell_1['text/plain'][59:62] == 'pop')
         assert(cell_2['text/plain'][200:204] == 'stan')
 
 

@@ -36,24 +36,21 @@ type Props = {
     }
   },
   remoteLabbooksId: string,
+  setFilterValue: Function,
 };
 
 class RemoteLabbooks extends Component<Props> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      deleteData: {
-        remoteId: null,
-        remoteOwner: null,
-        remoteLabbookName: null,
-        remoteUrl: null,
-        existsLocally: null,
-      },
-      deleteModalVisible: false,
-      isPaginating: false,
-      showLoginPrompt: false,
-    };
-  }
+  state = {
+    deleteData: {
+      remoteId: null,
+      remoteOwner: null,
+      remoteLabbookName: null,
+      remoteUrl: null,
+      existsLocally: null,
+    },
+    deleteModalVisible: false,
+    showLoginPrompt: false,
+  };
 
   /*
     loads more remote labbooks on mount
@@ -99,24 +96,11 @@ class RemoteLabbooks extends Component<Props> {
       if (navigator.onLine) {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
-            this.setState({
-              isPaginating: true,
-            });
-
             if (remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
               relay.loadMore(
                 8, // Fetch the next 8 items
                 () => {
                   const newProps = this.props;
-                  if (
-                    newProps.remoteLabbooks.remoteLabbooks
-                    && !newProps.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage
-                  ) {
-                    this.setState({
-                      isPaginating: false,
-                    });
-                  }
-
                   if (
                     newProps.remoteLabbooks.remoteLabbooks
                     && newProps.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage
@@ -174,13 +158,15 @@ class RemoteLabbooks extends Component<Props> {
       filterState,
       remoteLabbooks,
       remoteLabbooksId,
+      relay,
+      setFilterValue,
     } = this.props;
     const {
       deleteData,
       deleteModalVisible,
-      isPaginating,
       showLoginPrompt,
     } = this.state;
+    const { hasNextPage } = remoteLabbooks.remoteLabbooks.pageInfo;
 
     if (
       remoteLabbooks
@@ -207,15 +193,15 @@ class RemoteLabbooks extends Component<Props> {
                   existsLocally={edge.node.isLocal}
                 />
               ))
-              : !isPaginating
+              : !relay.isLoading()
             && store.getState().labbookListing.filterText
-            && <NoResults />
+            && <NoResults setFilterValue={setFilterValue} />
             }
             { Array(5).fill(1).map((value, index) => (
               <CardLoader
                 key={`RemoteLabbooks_paginationLoader${index}`}
                 index={index}
-                isLoadingMore={isPaginating}
+                isLoadingMore={hasNextPage}
               />
             ))}
 

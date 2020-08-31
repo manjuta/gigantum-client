@@ -36,7 +36,7 @@ const removeExcludedFiles = (files, owner, name) => {
 
   if (filesNotAllowedList.length > 0) {
     const filesNotAllowed = filesNotAllowedList.join(', ');
-    setWarningMessage(owner, name, `The following files are not allowed ${filesNotAllowed}`);
+    setWarningMessage(owner, name, `The following files are not allowed: ${filesNotAllowed}`);
   }
 
   return newFileArray;

@@ -1,5 +1,6 @@
-selenium==3.14.1
-docker==4.0.1
-pillow==6.2.2
-boto3==1.9.130
-sgqlc==7.0
+pytest==5.4.3
+pytest-html==2.1.1
+PyYAML==5.3.1
+selenium==3.141.0
+selenium-page-factory==2.0
+webdriver-manager==3.2.1

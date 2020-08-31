@@ -127,9 +127,9 @@ exports[`Dataset File component File Snapshot 1`] = `
         data-selenium-id="ActionsMenu"
       >
         <button
-          className="ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn__addFolder visibility-hidden"
+          className="ActionsMenu__item Btn Btn--fileBrowser Btn--round Btn__addFolder visibility-hidden"
           data-click-id="addFolder"
-          data-tooltip="Add Subfolder"
+          data-tip="Add Subfolder"
           onClick={[Function]}
           type="button"
         />
@@ -137,8 +137,8 @@ exports[`Dataset File component File Snapshot 1`] = `
           className="relative"
         >
           <button
-            className="ActionsMenu__item Btn Btn--fileBrowser Btn__delete-secondary Btn--round Tooltip-data Tooltip-data--small"
-            data-tooltip="Must download before deleting"
+            className="ActionsMenu__item Btn Btn--fileBrowser Btn__delete-secondary Btn--round"
+            data-tip="Must download before deleting"
             disabled={true}
             onClick={[Function]}
             type="button"
@@ -169,11 +169,15 @@ exports[`Dataset File component File Snapshot 1`] = `
           </div>
         </div>
         <button
-          className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--round"
-          data-tooltip="Must download before renaming"
+          className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename  Btn--round"
+          data-tip="Must download before renaming"
           disabled={true}
           onClick={[Function]}
           type="button"
+        />
+        <div
+          className="__react_component_tooltip place-bottom type-dark "
+          data-id="tooltip"
         />
       </div>
       <div

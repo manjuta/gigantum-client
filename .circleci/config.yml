@@ -3,7 +3,10 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:075ba5be15-2020-04-13
+      - image: gigantum/circleci-client:5e336f4bc7-2020-07-11
+
+orbs:
+    codecov: codecov/codecov@1.1.0
 
 jobs:
   mypy-gtmcore:
@@ -52,9 +55,6 @@ jobs:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
-          name: Install codecov
-          command: pip3 install codecov
-      - run:
           name: Run Core unit and coverage tests
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
@@ -64,7 +64,8 @@ jobs:
             rqscheduler --interval=2 --db 13 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
             pytest --cov=gtmcore packages/gtmcore/gtmcore/
-            codecov -F core
+      - codecov/upload:
+          flags: core
 
   test-gtmapi:
     executor: gig_client
@@ -75,9 +76,6 @@ jobs:
       - run:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
-      - run:
-          name: Install codecov
-          command: pip3 install codecov
       - run:
           name: Run API unit, integration and coverage tests
           command: |
@@ -91,7 +89,8 @@ jobs:
             pytest --cov=lmsrvlabbook --cov=lmsrvcore packages/gtmapi/lmsrvlabbook
             pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvcore
             pytest --cov=lmsrvlabbook --cov=lmsrvcore --cov-append packages/gtmapi/lmsrvlabbook/tests/int_labbook_mutations.py
-            codecov -F api
+      - codecov/upload:
+          flags: api
 
   test-gtmcore-environment:
     executor: gig_client
@@ -103,9 +102,6 @@ jobs:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
-          name: Install codecov
-          command: pip3 install codecov
-      - run:
           name: Run gtmcore environment tests
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
@@ -114,7 +110,8 @@ jobs:
             rqscheduler --interval=2 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
             pytest --cov=gtmcore packages/gtmcore/gtmcore/environment/tests
-            codecov -F core
+      - codecov/upload:
+          flags: core
 
   test-background-jobs:
     executor: gig_client
@@ -126,9 +123,6 @@ jobs:
           name: Set authentication credentials
           command: bash /home/circleci/repo/.circleci/write_auth.sh
       - run:
-          name: Install codecov
-          command: pip3 install codecov
-      - run:
           name: Run Dispatcher and background job tests
           command: |
             export PYTHONPATH=$PYTHONPATH:/home/circleci/repo/packages/gtmcore
@@ -138,7 +132,8 @@ jobs:
             rqscheduler --interval=2 --db 13 2> /dev/null &
             python3 /home/circleci/repo/packages/gtmcore/gtmcore/dispatcher/worker.py &
             pytest --cov=gtmcore --cov-append packages/gtmcore/gtmcore/dispatcher/tests -k "not test_redis_not_running"
-            codecov -F core
+      - codecov/upload:
+          flags: core
 
   test-ui-components:
     executor: gig_client
@@ -255,3 +250,4 @@ workflows:
           requires:
             - mypy-gtmcore
             - mypy-gtmapi
+

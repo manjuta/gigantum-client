@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1422"
+changelog:
+  - type: FIX
+    description: Fixed a typo in the main fallback error component (Grey screen of death)

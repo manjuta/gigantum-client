@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1406"
+changelog:
+  - type: FIX
+    description: Adjusted the min-size of text input elements. This solves overflow issues with some input fields on Firefox.

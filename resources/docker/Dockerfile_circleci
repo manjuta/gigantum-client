@@ -51,12 +51,13 @@ RUN apt-get -y update && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash && \
     apt-get -y install nodejs && \
     npm install -g configurable-http-proxy && \
-    cd /opt/confhttpproxy && pip3 install . && \
     pip3 install wheel && \
     pip3 install -r /opt/gtmcore/requirements.txt \
     -r /opt/gtmapi/requirements.txt \
     -r /opt/gtmcore/requirements-testing.txt \
     -r /opt/gtmapi/requirements-testing.txt && \
+    # Install confhttpproxy after other requirements to avoid version thrashing
+    cd /opt/confhttpproxy && pip3 install . && \
     pip3 install pytest-cov pytest-xdist && \
     apt-get -qq -y remove gcc g++ wget gnupg gnupg1 gnupg2 make autoconf dh-autoreconf && \
     apt-get -qq -y autoremove && \
