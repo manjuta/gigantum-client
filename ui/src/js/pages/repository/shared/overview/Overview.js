@@ -9,15 +9,15 @@ import WriteDatasetReadmeMutation from 'Mutations/repository/readme/WriteDataset
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
 import MarkdownEditor from 'Components/markdownEditor/MarkdownEditor';
-import Base from 'Components/labbook/environment/Base';
-import Type from 'Components/dataset/overview/Type';
-import RecentActivity from 'Components/labbook/overview/RecentActivity';
+import Base from 'Pages/repository/labbook/environment/Base';
+import Type from 'Pages/repository/dataset/overview/Type';
+import RecentActivity from 'Pages/repository/labbook/overview/RecentActivity';
 import Loader from 'Components/loader/Loader';
-import CodeBlock from 'Components/labbook/renderers/CodeBlock';
+import CodeBlock from 'Pages/repository/labbook/renderers/CodeBlock';
 import Tooltip from 'Components/tooltip/Tooltip';
-import Summary from 'Components/dataset/overview/Summary';
-
+import Summary from 'Pages/repository/dataset/overview/Summary';
 import EmptyReadme from './EmptyReadme';
+
 // assets
 import './Overview.scss';
 
