@@ -183,8 +183,9 @@ class TestInventoryDatasets(object):
         assert parts1[4] == parts2[4]
         assert parts1[5] == parts2[5]
         assert parts1[6] == parts2[6]
-        assert parts1[7] == 'dataset1'
-        assert parts2[7] == 'dataset-updated'
+        assert parts1[7] == parts2[7]
+        assert parts1[8] == 'dataset1'
+        assert parts2[8] == 'dataset-updated'
 
     def test_change_dataset_name_errors(self, mock_config_file):
         inv_manager = InventoryManager()

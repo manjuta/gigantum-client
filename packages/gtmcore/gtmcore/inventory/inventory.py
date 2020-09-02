@@ -56,7 +56,7 @@ class InventoryManager(object):
     def __init__(self) -> None:
         config = Configuration()
         server_config = config.get_server_configuration()
-        self.inventory_root = os.path.join(config.app_workdir, server_config.id)
+        self.inventory_root = os.path.join(config.server_data_dir, server_config.id)
 
     def __str__(self) -> str:
         return f'<InventoryManager: {self.inventory_root}>'

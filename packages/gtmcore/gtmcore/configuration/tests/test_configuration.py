@@ -50,7 +50,7 @@ def reset_server_configuration_fixture():
     Path(config_instance.server_config_dir, 'CURRENT').unlink()
     config_instance._get_redis_client().delete(config_instance.SERVER_CONFIG_CACHE_KEY,
                                                config_instance.AUTH_CONFIG_CACHE_KEY)
-    Path(config_instance.app_workdir, 'test-gigantum-com').rmdir()
+    Path(config_instance.server_data_dir, 'test-gigantum-com').rmdir()
 
 
 class TestConfiguration(object):
