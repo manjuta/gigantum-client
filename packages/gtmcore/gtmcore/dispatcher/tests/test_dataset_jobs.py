@@ -16,11 +16,9 @@ from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import jobs
 
-from gtmcore.dataset.tests.test_storage_local import mock_dataset_with_local_dir
 from gtmcore.fixtures import mock_config_file, mock_config_file_background_tests, _MOCK_create_remote_repo2
 from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file, helper_write_big_file, \
-    mock_enable_unmanaged_for_testing, mock_dataset_with_cache_dir_local
-
+    mock_enable_unmanaged_for_testing, mock_dataset_with_local_dir
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.dispatcher.dispatcher import Dispatcher

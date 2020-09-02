@@ -4,7 +4,7 @@ import yaml
 import datetime
 import json
 
-from typing import Optional
+from typing import Optional, Dict
 
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema
@@ -22,13 +22,14 @@ class Dataset(Repository):
     _default_activity_detail_type = ActivityDetailType.DATASET
     _default_activity_section = "Dataset Root"
 
-    def __init__(self, config_file: Optional[str] = None, namespace: Optional[str] = None,
+    def __init__(self, storage_type: str, backend_config: Optional[Dict[str, str]] = None,
+                 config_file: Optional[str] = None, namespace: Optional[str] = None,
                  author: Optional[GitAuthor] = None) -> None:
         super().__init__(config_file, author)
-        # TODO - Need a more formalizes solution for differentiating Datasets from other repo types
         self.client_config.config['git']['lfs_enabled'] = False
         self.namespace = namespace
-        self._backend: Optional[StorageBackend] = None
+        self._storage_type = storage_type
+        self._backend = get_storage_backend(storage_type, backend_config)
 
     def __str__(self):
         if self._root_dir:
@@ -128,60 +129,7 @@ class Dataset(Repository):
     @property
     def backend(self) -> StorageBackend:
         """Property to access the storage backend for this dataset"""
-        if not self._backend:
-            self._backend = get_storage_backend(self.storage_type)
-            self._backend.configuration = self.backend_config
-
         return self._backend
-
-    @property
-    def backend_config(self) -> dict:
-        """Property to load the storage.json file"""
-        config_file = os.path.join(self.root_dir, ".gigantum", "backend.json")
-        if os.path.exists(config_file):
-            with open(os.path.join(self.root_dir, ".gigantum", "backend.json"), 'rt') as sf:
-                data = json.load(sf)
-        else:
-            data = dict()
-
-        return data
-
-    @backend_config.setter
-    def backend_config(self, data: dict) -> None:
-        """Save storage config data"""
-        if self._backend:
-            self._backend.configuration = {**self._backend.configuration, **data}
-
-        # Remove defaults set at runtime that shouldn't be persisted
-        if "username" in data:
-            del data["username"]
-        if "gigantum_bearer_token" in data:
-            del data["gigantum_bearer_token"]
-        if "gigantum_id_token" in data:
-            del data["gigantum_id_token"]
-
-        config_file = os.path.join(self.root_dir, ".gigantum", "backend.json")
-        with open(config_file, 'wt') as sf:
-            json.dump(data, sf, indent=2)
-
-        self.git.add(config_file)
-        cm = self.git.commit("Updating backend config")
-
-        d = json.dumps(data, indent=2)
-        markdown_data = f"Updated dataset storage backend configuration:\n\n ```{d}```"
-        adr = ActivityDetailRecord(ActivityDetailType.DATASET, show=False, importance=255,
-                                   action=ActivityAction.EDIT, data=TextData('markdown', markdown_data))
-
-        ar = ActivityRecord(ActivityType.DATASET,
-                            message="Updated Dataset storage backend configuration",
-                            show=True,
-                            importance=255,
-                            linked_commit=cm.hexsha,
-                            detail_objects=DetailRecordList([adr]),
-                            tags=ImmutableList(['config']))
-
-        ars = ActivityStore(self)
-        ars.create_activity_record(ar)
 
     def _save_gigantum_data(self) -> None:
         """Method to save changes to the LabBook

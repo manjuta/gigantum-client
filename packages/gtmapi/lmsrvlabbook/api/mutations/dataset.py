@@ -33,43 +33,19 @@ from lmsrvcore.auth.identity import tokens_from_request_context
 logger = LMLogger.get_logger()
 
 
-class CreateDataset(graphene.relay.ClientIDMutation):
-    """Mutation for creation of a new Dataset on disk"""
-
-    class Input:
-        name = graphene.String(required=True)
-        description = graphene.String(required=True)
-        storage_type = graphene.String(required=True)
-
-    # Return the dataset instance
-    dataset = graphene.Field(Dataset)
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, name, description, storage_type, client_mutation_id=None):
-        username = get_logged_in_username()
-        inv_manager = InventoryManager()
-
-        inv_manager.create_dataset(username=username,
-                                   owner=username,
-                                   dataset_name=name,
-                                   description=description,
-                                   storage_type=storage_type,
-                                   author=get_logged_in_author())
-
-        return CreateDataset(dataset=Dataset(id="{}&{}".format(username, name),
-                                             name=name, owner=username))
-
-
-class ConfigureDataset(graphene.relay.ClientIDMutation):
+class ConfigureDatasetBackend(graphene.relay.ClientIDMutation):
     """Mutation to configure a dataset backend if needed.
-
-    Workflow to configure a dataset:
-    - TODO
 
     TODO DJWC - I renamed this endpoint intentionally to ensure we revisit this in the front end. It's not clear this is
      necessary at all for gigantum datasets. Maybe remove entirely? Code that may be useful for Externally Managed
      Datasets should be retained. Should also be made generic but in a much simpler way than the current configuration
      publishing mechanism.
+
+     The idea now is to configure the backend, and THEN pass that configuration into the Dataset Creation (directly
+     above). I'm not actually sure if this needs to be a mutation on the back-end. In terms of the client app, this
+     would correspond to the first screen after clicking "new dataset" where the user selects the backend using
+     something like the base-image selection tool.
+
     """
 
     class Input:
@@ -106,15 +82,7 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                 # TODO DJWC - and why not `del` here?
                 current_config[param.parameter] = None
             ds.backend_config = current_config
-        else:
-            if isinstance(backend, GigantumObjectStore):
-                # TODO DJWC - review
-                # We ONLY set credentials on the Gigantum object store back-end. And currently ALWAYS set them if we're
-                # setting parameters. If there is a failure conforming to the method API, we'll raise a TypeError
-                # (should never happen here). Likewise the method should raise an Exception if there's some problem with
-                # the credentials.
-                backend.set_credentials(logged_in_username,
-                                        bearer_token=flask.g.access_token, id_token=flask.g.id_token)
+
             if parameters is not None:
                 # Update the configuration
                 current_config = ds.backend_config
@@ -122,17 +90,52 @@ class ConfigureDataset(graphene.relay.ClientIDMutation):
                     current_config[param.parameter] = param.value
                 ds.backend_config = current_config
 
-        return ConfigureDataset(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
-                                                name=dataset_name, owner=dataset_owner),
-                                # TODO DJWC - keeping all params in for now to avoid breaking API too much
-                                # We don't check, so None instead of False
-                                is_configured=None,
-                                # Should be true for external datasets, and maybe local, but is never true for now
-                                should_confirm=False,
-                                confirm_message=None,
-                                error_message=None,
-                                has_background_job=False,
-                                background_job_key=None)
+        # TODO DJWC - This needs to get changed to a backend instead of a full dataset
+        return ConfigureDatasetBackend(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
+                                                       name=dataset_name, owner=dataset_owner),
+                                       # TODO DJWC - keeping all params in for now to avoid breaking API too much
+                                       # We don't check, so None instead of False
+                                       is_configured=None,
+                                       # Should be true for external datasets, and maybe local, but is never true for now
+                                       should_confirm=False,
+                                       confirm_message=None,
+                                       error_message=None,
+                                       has_background_job=False,
+                                       background_job_key=None)
+
+
+class CreateDataset(graphene.relay.ClientIDMutation):
+    """Mutation for creation of a new Dataset on disk
+
+    TODO DJWC - Workflow to create a dataset:
+    - Click "new dataset"
+    - Backend selection modal -> backend configuration parameters
+    - Backend configuration is passed to the
+    """
+
+    class Input:
+        name = graphene.String(required=True)
+        description = graphene.String(required=True)
+        # storage_type = graphene.String(required=True)
+        backend_configuration = graphene.Field(ConfigureDatasetBackend)
+
+    # Return the dataset instance
+    dataset = graphene.Field(Dataset)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, name, description, storage_type, client_mutation_id=None):
+        username = get_logged_in_username()
+        inv_manager = InventoryManager()
+
+        inv_manager.create_dataset(username=username,
+                                   owner=username,
+                                   dataset_name=name,
+                                   description=description,
+                                   storage_type=storage_type,
+                                   author=get_logged_in_author())
+
+        return CreateDataset(dataset=Dataset(id="{}&{}".format(username, name),
+                                             name=name, owner=username))
 
 
 class UpdateLocalDataset(graphene.relay.ClientIDMutation):

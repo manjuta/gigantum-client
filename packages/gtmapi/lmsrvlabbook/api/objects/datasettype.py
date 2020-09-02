@@ -1,5 +1,5 @@
 import graphene
-from gtmcore.dataset.storage import get_storage_backend
+from gtmcore.dataset.storage import get_storage_backend, storage_backend_metadata
 
 
 class DatasetType(graphene.ObjectType):
@@ -37,9 +37,7 @@ class DatasetType(graphene.ObjectType):
     def _load_info(self):
         """Private method to load the metadata for the Type"""
         if not self._dataset_type_data:
-            sb = get_storage_backend(self.storage_type)
-
-            self._dataset_type_data = sb.metadata
+            self._dataset_type_data = storage_backend_metadata(self.storage_type)
 
         self.name = self._dataset_type_data['name']
         self.description = self._dataset_type_data['description']

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 import os
 import shutil
@@ -12,6 +14,7 @@ from pkg_resources import resource_filename
 import tempfile
 
 from gtmcore.configuration import Configuration
+from gtmcore.dataset.tests.test_storage_local import helper_write_object
 from gtmcore.fixtures.fixtures import _create_temp_work_dir, mock_config_file_background_tests
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dataset import Manifest
@@ -64,17 +67,28 @@ def mock_config_class(mock_enable_unmanaged_for_testing):
 
 
 @pytest.fixture()
-def mock_dataset_with_cache_dir_local(mock_enable_unmanaged_for_testing):
-    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
+def mock_dataset_with_local_data():
+    """A mock when testing local filesystem backend and you need local contents to add to the dataset"""
+
     conf_file, working_dir = _create_temp_work_dir()
+    working_path = Path(working_dir)
+    dir1 = (working_path / 'local_data' / 'dir1')
+    dir2 = (working_path / 'local_data' / 'dir2')
+    (dir1 / 'subdir').mkdir(parents=True)
+    dir2.mkdir()
+    (dir1 / "test1.txt").write_text("temp contents 1")
+    (dir1 / "test2.txt").write_text("temp contents 2")
+    (dir1 / "subdir/test3.txt").write_text("temp contents 3")
+
     with patch.object(Configuration, 'find_default_config', lambda self: conf_file):
         im = InventoryManager(conf_file)
-        ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
-                               storage_type="local_filesystem")
+        local_config = {'mount': 'default', 'subdirectory': 'dir1'}
+        ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', storage_type="local_filesystem",
+                               backend_config=local_config, description="my dataset 1")
 
-        yield ds, working_dir, ds.git.repo.head.commit.hexsha
+    yield ds, working_dir, ds.git.repo.head.commit.hexsha
 
-        shutil.rmtree(working_dir)
+    shutil.rmtree(working_dir)
 
 
 @pytest.fixture()

@@ -30,7 +30,7 @@ def flush_redis_repo_cache():
     r.flushdb()
 
 
-def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
+def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True) -> (str, str):
     """Helper method to create a temporary working directory and associated config file"""
     def merge_dict(d1, d2) -> None:
         """Method to merge 1 dictionary into another, updating and adding key/values as needed

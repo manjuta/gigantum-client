@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import uuid
@@ -12,6 +13,7 @@ import glob
 
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
 
+from gtmcore.dataset.storage import StorageBackend
 from gtmcore.exceptions import GigantumException
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
 from gtmcore.dataset.schemas import CURRENT_SCHEMA as DATASET_CURRENT_SCHEMA
@@ -481,7 +483,8 @@ class InventoryManager(object):
         return datasets_to_schedule
 
     def create_dataset(self, username: str, owner: str, dataset_name: str, storage_type: str,
-                       description: Optional[str] = None, author: Optional[GitAuthor] = None) -> Dataset:
+                       backend_config: Optional[Dict[str, Any]] = None, description: Optional[str] = None,
+                       author: Optional[GitAuthor] = None) -> Dataset:
         """Create a new Dataset in this Gigantum working directory.
 
         Args:
@@ -489,6 +492,7 @@ class InventoryManager(object):
             owner: Namespace in which to place this Dataset
             dataset_name: Name of the Dataset
             storage_type: String identifying the type of Dataset to instantiate
+            backend_config: Keyword arguments to the backend storage class constructor
             description: Optional brief description of Dataset
             author: Optional Git Author
 
@@ -496,10 +500,8 @@ class InventoryManager(object):
             Newly created LabBook instance
 
         """
-        dataset = Dataset(config_file=self.config_file, author=author, namespace=owner)
-
-        if storage_type not in storage.SUPPORTED_STORAGE_BACKENDS:
-            raise ValueError(f"Unsupported Dataset storage type: {storage_type}")
+        dataset = Dataset(storage_type, backend_config=backend_config, config_file=self.config_file,
+                          author=author, namespace=owner)
 
         try:
             build_info = Configuration(self.config_file).config['build_info']
@@ -524,29 +526,16 @@ class InventoryManager(object):
         with dataset.lock(lock_key=f"new_dataset_lock|{username}|{owner}|{dataset_name}"):
             # Verify or Create user subdirectory
             # Make sure you expand a user dir string
-            starting_dir = os.path.expanduser(dataset.client_config.config["git"]["working_directory"])
-            user_dir = os.path.join(starting_dir, username)
-            if not os.path.isdir(user_dir):
-                os.makedirs(user_dir)
-
-            # Create owner dir - store LabBooks in working dir > logged in user > owner
-            owner_dir = os.path.join(user_dir, owner)
-            if not os.path.isdir(owner_dir):
-                os.makedirs(owner_dir)
-
-                # Create `datasets` subdir in the owner dir
-                owner_dir = os.path.join(owner_dir, "datasets")
-            else:
-                owner_dir = os.path.join(owner_dir, "datasets")
+            starting_dir = Path(dataset.client_config.config["git"]["working_directory"]).expanduser()
+            dataset_dir = starting_dir / username / owner / "datasets" / dataset_name
 
             # Verify name not already in use
-            if os.path.isdir(os.path.join(owner_dir, dataset_name)):
-                raise ValueError(f"Dataset `{dataset_name}` already exists locally. Choose a new Dataset name")
+            if dataset_dir.is_dir():
+                raise ValueError(f"Dataset `{owner}/{dataset_name}` already exists locally. Choose a new Dataset name")
 
             # Create Dataset subdirectory
-            new_root_dir = os.path.join(owner_dir, dataset_name)
-            os.makedirs(new_root_dir)
-            dataset._set_root_dir(new_root_dir)
+            dataset_dir.mkdir(parents=True)
+            dataset._set_root_dir(str(dataset_dir))
 
             # Init repository
             dataset.git.initialize()
@@ -571,15 +560,11 @@ class InventoryManager(object):
 
             dataset._save_gigantum_data()
 
-            # Create an empty storage.json file
-            dataset.backend_config = {}
-
             # Commit
             dataset.git.add_all()
 
             # NOTE: this string is used to indicate there are no more activity records to get. Changing the string will
             # break activity paging.
-            # TODO: Improve method for detecting the first activity record
             dataset.git.commit(f"Creating new empty Dataset: {dataset_name}")
 
             # Create Activity Record
@@ -669,6 +654,17 @@ class InventoryManager(object):
         m.link_revision()
 
         return ds
+
+    def load_backend_config(self) -> dict:
+        """Property to load the backend.json file"""
+        config_file = os.path.join(self.inventory_root, ".gigantum", "backend.json")
+        if os.path.exists(config_file):
+            with open(os.path.join(self.inventory_root, ".gigantum", "backend.json"), 'rt') as sf:
+                data = json.load(sf)
+        else:
+            data = dict()
+
+        return data
 
     def load_dataset(self, username: str, owner: str, dataset_name: str,
                      author: Optional[GitAuthor] = None) -> Dataset:

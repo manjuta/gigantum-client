@@ -6,40 +6,8 @@ import os
 from gtmcore.dataset.storage import get_storage_backend
 from gtmcore.dataset.storage.local import LocalFilesystemBackend
 from gtmcore.dataset.manifest.manifest import Manifest
-from gtmcore.fixtures.datasets import helper_compress_file, mock_dataset_with_cache_dir_local, USERNAME, \
-    mock_enable_unmanaged_for_testing
 from gtmcore.dataset.io import PullObject
-from gtmcore.fixtures.datasets import mock_enable_unmanaged_for_testing
-
-
-def helper_write_object(directory, object_id, contents):
-    object_file = os.path.join(directory, object_id)
-    with open(object_file, 'wt') as temp:
-        temp.write(f'dummy data: {contents}')
-
-    return object_file
-
-
-@pytest.fixture()
-def mock_dataset_with_local_dir(mock_dataset_with_cache_dir_local):
-    """A mock when testing local filesystem backend and you need local contents to add to the dataset"""
-
-    ds = mock_dataset_with_cache_dir_local[0]
-    working_dir = mock_dataset_with_cache_dir_local[1]
-    current_config = ds.backend_config
-    current_config['Data Directory'] = "test_dir"
-    ds.backend_config = current_config
-    test_dir = os.path.join(working_dir, "local_data", "test_dir")
-
-    os.makedirs(test_dir)
-
-    helper_write_object(test_dir, "test1.txt", "temp contents 1")
-    helper_write_object(test_dir, "test2.txt", "temp contents 2")
-    os.makedirs(os.path.join(test_dir, 'subdir'))
-    helper_write_object(test_dir, "subdir/test3.txt", "temp contents 3")
-
-    yield mock_dataset_with_cache_dir_local
-    shutil.rmtree(test_dir)
+from gtmcore.fixtures.datasets import mock_dataset_with_local_data
 
 
 def updater(msg):
@@ -47,13 +15,13 @@ def updater(msg):
 
 
 class TestStorageBackendLocalFilesystem(object):
-    def test_get_storage_backend(self, mock_dataset_with_cache_dir_local):
-        sb = get_storage_backend("local_filesystem")
+    def test_get_storage_backend(self, mock_dataset_with_local_data):
+        ds, _, _ = mock_dataset_with_local_data
 
-        assert isinstance(sb, LocalFilesystemBackend)
+        assert isinstance(ds.backend, LocalFilesystemBackend)
 
-    def test_backend_config(self, mock_dataset_with_cache_dir_local):
-        ds = mock_dataset_with_cache_dir_local[0]
+    def test_backend_config(self, mock_dataset_with_local_data):
+        ds = mock_dataset_with_local_data[0]
         assert isinstance(ds.backend, LocalFilesystemBackend)
 
         assert ds.backend.has_credentials is False
@@ -66,8 +34,8 @@ class TestStorageBackendLocalFilesystem(object):
         current_config['Data Directory'] = "test_dir"
         ds.backend_config = current_config
 
-    def test_backend_current_config(self, mock_dataset_with_cache_dir_local):
-        ds = mock_dataset_with_cache_dir_local[0]
+    def test_backend_current_config(self, mock_dataset_with_local_data):
+        ds = mock_dataset_with_local_data[0]
         assert isinstance(ds.backend, LocalFilesystemBackend)
 
         assert ds.backend.has_credentials is False
@@ -80,8 +48,8 @@ class TestStorageBackendLocalFilesystem(object):
         current_config['Data Directory'] = "test_dir"
         ds.backend_config = current_config
 
-    def test_confirm_configuration(self, mock_dataset_with_cache_dir_local):
-        ds = mock_dataset_with_cache_dir_local[0]
+    def test_confirm_configuration(self, mock_dataset_with_local_data):
+        ds = mock_dataset_with_local_data[0]
 
         with pytest.raises(ValueError):
             ds.backend.confirm_configuration(ds)
@@ -94,12 +62,12 @@ class TestStorageBackendLocalFilesystem(object):
             ds.backend.confirm_configuration(ds)
 
         # Create test data dir
-        os.makedirs(os.path.join(mock_dataset_with_cache_dir_local[1], "local_data", "test_dir"))
+        os.makedirs(os.path.join(mock_dataset_with_local_data[1], "local_data", "test_dir"))
 
         assert ds.backend.confirm_configuration(ds) is None
 
-    def test_prepare_pull_not_configured(self, mock_dataset_with_cache_dir_local):
-        ds = mock_dataset_with_cache_dir_local[0]
+    def test_prepare_pull_not_configured(self, mock_dataset_with_local_data):
+        ds = mock_dataset_with_local_data[0]
 
         with pytest.raises(ValueError):
             ds.backend.prepare_pull(ds, [])

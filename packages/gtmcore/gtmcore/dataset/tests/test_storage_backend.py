@@ -2,14 +2,14 @@ import pytest
 
 from gtmcore.exceptions import GigantumException
 from gtmcore.fixtures.datasets import mock_enable_unmanaged_for_testing
-from gtmcore.dataset.storage import get_storage_backend, get_storage_backend_descriptions
+from gtmcore.dataset.storage import get_storage_backend, all_storage_backend_descriptions
 from gtmcore.dataset.storage.gigantum import GigantumObjectStore
 from gtmcore.dataset.storage.local import LocalFilesystemBackend
 
 
 class TestStorageBackendParent(object):
     def test_get_storage_backend_descriptions(self, mock_enable_unmanaged_for_testing):
-        metadata = get_storage_backend_descriptions()
+        metadata = all_storage_backend_descriptions()
 
         assert len(metadata) == 3
         assert metadata[0].get("name") == "Gigantum Cloud"

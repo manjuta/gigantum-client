@@ -9,7 +9,7 @@ from gtmcore.dispatcher import Dispatcher
 from gtmcore.environment import BaseRepository
 from gtmcore.environment.repository import RepositoryLock
 from gtmcore.labbook.schemas import CURRENT_SCHEMA
-from gtmcore.dataset.storage import get_storage_backend_descriptions
+from gtmcore.dataset.storage import all_storage_backend_descriptions
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.workflows.gitlab import GitLabManager
 
@@ -216,7 +216,7 @@ class LabbookQuery(AppQueries, graphene.ObjectType):
             list
         """
         dataset_types = list()
-        for metadata in get_storage_backend_descriptions():
+        for metadata in all_storage_backend_descriptions():
             d = DatasetType()
             d.id = metadata['storage_type']
             d.storage_type = metadata['storage_type']

@@ -28,7 +28,7 @@ from lmsrvlabbook.api.mutations.bundledapp import SetBundledApp, RemoveBundledAp
 # Dataset Mutations
 from lmsrvlabbook.api.mutations.dataset import (CreateDataset, DeleteDataset, FetchDatasetEdge, ModifyDatasetLink,
                                                 SetDatasetDescription, WriteDatasetReadme, UpdateLocalDataset,
-                                                VerifyDataset, ConfigureDataset)
+                                                VerifyDataset, ConfigureDatasetBackend)
 from lmsrvlabbook.api.mutations.datasetfiles import (AddDatasetFile, CompleteDatasetUploadTransaction,
                                                      DownloadDatasetFiles, DeleteDatasetFiles, MoveDatasetFile,
                                                      MakeDatasetDirectory)
@@ -205,7 +205,7 @@ class LabbookMutations(BranchMutations, LabbookSharingMutations,
     create_dataset = CreateDataset.Field()
 
     # Configure a dataset storage backend
-    configure_dataset = ConfigureDataset.Field()
+    configure_dataset_backend = ConfigureDatasetBackend.Field()
 
     # Update the manifest of an unmanaged dataset
     update_local_dataset = UpdateLocalDataset.Field()
