@@ -4,7 +4,7 @@ import renderer from 'react-test-renderer';
 import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 // components
-import DatasetContainerQuery from 'Components/dataset/DatasetContainerQuery';
+import DatasetContainerQuery from 'Pages/repository/dataset/DatasetContainerQuery';
 
 test('Test DatasetContainerQuery', () => {
   const wrapper = renderer.create(

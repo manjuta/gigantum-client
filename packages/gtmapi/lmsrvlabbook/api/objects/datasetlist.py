@@ -221,7 +221,8 @@ class DatasetList(graphene.ObjectType):
 """)
         query_str = query_template.substitute(order_by=order_by, sort=sort, first=str(first), after=after)
         # Query SaaS index service for data
-        response = requests.post(config.get_hub_api_url(),
+        server_config = config.get_server_configuration()
+        response = requests.post(server_config.hub_api_url,
                                  json={"query": query_str},
                                  headers={"Authorization": f"Bearer {access_token}",
                                           "Identity": id_token,
@@ -232,8 +233,6 @@ class DatasetList(graphene.ObjectType):
         response_data = response.json()
         if 'errors' in response_data:
             raise IOError(f"Failed to retrieve Dataset listing from remote server: {response_data['errors']}")
-
-        remote_url = config.get_remote_configuration()['git_remote']
 
         # Get Labbook instances
         edge_objs = []
@@ -248,7 +247,7 @@ class DatasetList(graphene.ObjectType):
                                 "creation_date_utc": node["createdOnUtc"],
                                 "modified_date_utc": node["modifiedOnUtc"],
                                 "visibility": node["visibility"],
-                                "import_url": f"https://{remote_url}/{node['namespace']}/{node['repositoryName']}.git/"
+                                "import_url": f"{server_config.git_url}{node['namespace']}/{node['repositoryName']}.git/"
                                }
 
                 edge_objs.append(RemoteDatasetConnection.Edge(node=RemoteDataset(**create_data),

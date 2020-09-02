@@ -4,7 +4,7 @@ import renderer from 'react-test-renderer';
 import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 // components
-import LinkModal from 'Components/shared/fileBrowser/LinkModal';
+import LinkModal from 'Pages/repository/shared/fileBrowser/LinkModal';
 import ReactDOM from 'react-dom';
 
 ReactDOM.createPortal = node => node

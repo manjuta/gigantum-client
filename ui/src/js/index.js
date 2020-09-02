@@ -1,3 +1,4 @@
+// vendor
 import React from 'react';
 import { render } from 'react-dom';
 
@@ -6,7 +7,7 @@ import { detect } from 'detect-browser';
 // store
 import store from 'JS/redux/store';
 // components
-import Routes from 'Components/Routes';
+import App from 'JS/App';
 import BrowserSupport from 'Components/browserSupport/BrowserSupport';
 // service worker
 import { unregister } from './registerServiceWorker';
@@ -14,10 +15,10 @@ import { unregister } from './registerServiceWorker';
 import '../css/critical.scss';
 
 const browser = detect();
-if ((browser.name === 'chrome') || (browser.name === 'firefox')) {
+if ((browser.name !== 'edge') || (browser.name !== 'ie')) {
   render(
     <Provider store={store}>
-      <Routes />
+      <App />
     </Provider>,
     document.getElementById('root') || document.createElement('div'),
   );

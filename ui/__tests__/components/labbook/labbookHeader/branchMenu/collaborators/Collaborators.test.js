@@ -2,7 +2,7 @@
 import React from 'react'
 import renderer from 'react-test-renderer';
 import { mount } from 'enzyme'
-import Collaborators from 'Components/labbook/labbookHeader/branchMenu/collaborators/Collaborators';
+import Collaborators from 'Pages/repository/labbook/labbookHeader/branchMenu/collaborators/Collaborators';
 
 import relayTestingUtils from '@gigantum/relay-testing-utils'
 

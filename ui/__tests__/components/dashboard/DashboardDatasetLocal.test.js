@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import store from 'JS/redux/store';
 import history from 'JS/history';
 // components
-import LocalDatasets from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
+import LocalDatasets from 'Pages/dashboard/datasets/localDatasets/LocalDatasets';
 // data
 import json from './datasets/localDatasets/__relaydata__/LocalDatasets.json';
 

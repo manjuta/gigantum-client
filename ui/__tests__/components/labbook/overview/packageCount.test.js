@@ -1,5 +1,5 @@
 import React from 'react';
-import PackageCount from 'Components/labbook/overview/PackageCount';
+import PackageCount from 'Pages/repository/labbook/overview/PackageCount';
 import { shallow, mount } from 'enzyme';
 import renderer from 'react-test-renderer';
 import { MemoryRouter } from 'react-router-dom';

@@ -1,35 +1,10 @@
 import pytest
-import mockredis
-import redis
-from unittest.mock import patch
 import os
+import redis
+
 from jupyter_client.manager import start_new_kernel
 import json
 from pkg_resources import resource_filename
-
-
-REDIS_TEST_CLIENT = None
-
-
-@patch('redis.Redis', mockredis.mock_redis_client)
-def get_redis_client_mock(db=1):
-    global REDIS_TEST_CLIENT
-
-    if not REDIS_TEST_CLIENT:
-        REDIS_TEST_CLIENT = redis.Redis(db=db)
-    return REDIS_TEST_CLIENT
-
-
-@pytest.fixture()
-def redis_client(monkeypatch):
-    """A pytest fixture to manage getting a redis client for test purposes"""
-    monkeypatch.setattr(redis, 'Redis', get_redis_client_mock)
-
-    redis_conn = redis.Redis(db=1)
-
-    yield redis_conn
-
-    redis_conn.flushdb()
 
 
 @pytest.fixture()
@@ -40,6 +15,14 @@ def mock_kernel():
     yield kc, km
 
     km.shutdown_kernel(now=True)
+
+
+@pytest.fixture()
+def mock_redis_client():
+    """A pytest fixture that creates a redis client and cleans up the db, specifically for activity testing"""
+    redis_conn = redis.Redis(db=1)
+    yield redis_conn
+    redis_conn.flushdb()
 
 
 class MockSessionsResponse(object):

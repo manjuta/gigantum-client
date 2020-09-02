@@ -1,0 +1,24 @@
+@import '~Styles/_imports.scss';
+
+.LoginError {
+  width: 500px;
+  height: 200px;
+  margin: 30px auto;
+
+  color: $crimson;
+
+  @include flex(space-around, column);
+
+
+  &--type {
+    align-items: center;
+
+    font-size: 22px;
+
+    @include flex(center, row);
+  }
+
+  &--exclamation {
+    margin-right: 10px;
+  }
+}

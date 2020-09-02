@@ -14,8 +14,8 @@ import gtmcore.fixtures
 from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
 
-def create_tmp_labbook(cfg_file):
-    im = InventoryManager(cfg_file)
+def create_tmp_labbook():
+    im = InventoryManager()
     lb = im.create_labbook('unittest', 'unittest',
                            f'unittest-labbook-{str(uuid.uuid4())[:4]}')
     return lb
@@ -26,7 +26,7 @@ class TestComponentManager(object):
     def test_initalize_labbook(self, mock_config_with_repo):
         """Test preparing an empty labbook"""
 
-        lb = create_tmp_labbook(mock_config_with_repo[0])
+        lb = create_tmp_labbook()
         labbook_dir = lb.root_dir
 
         pprint.pprint([n[0] for n in os.walk(labbook_dir)])
@@ -47,7 +47,7 @@ class TestComponentManager(object):
     def test_add_package(self, mock_config_with_repo):
         """Test adding a package such as one from apt-get or pip3. """
         # Create a labook
-        lb = create_tmp_labbook(mock_config_with_repo[0])
+        lb = create_tmp_labbook()
         labbook_dir = lb.root_dir
 
         # Create Component Manager
@@ -90,7 +90,7 @@ class TestComponentManager(object):
     def test_add_duplicate_package(self, mock_config_with_repo):
         """Test adding a duplicate package to a labbook"""
 
-        lb = create_tmp_labbook(mock_config_with_repo[0])
+        lb = create_tmp_labbook()
         labbook_dir = lb.root_dir
         cm = ComponentManager(lb)
 
@@ -121,7 +121,7 @@ class TestComponentManager(object):
     def test_add_base(self, mock_config_with_repo):
         """Test adding a base to a labbook"""
         # Create a labook
-        lb = create_tmp_labbook(mock_config_with_repo[0])
+        lb = create_tmp_labbook()
         labbook_dir = lb.root_dir
 
         # Create Component Manager
@@ -165,7 +165,7 @@ class TestComponentManager(object):
     def test_add_duplicate_base(self, mock_config_with_repo):
         """Test adding a duplicate base to a labbook"""
         # Create a labook
-        lb = create_tmp_labbook(mock_config_with_repo[0])
+        lb = create_tmp_labbook()
         labbook_dir = lb.root_dir
 
         # Create Component Manager
@@ -189,8 +189,201 @@ class TestComponentManager(object):
             cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
                         gtmcore.fixtures.ENV_UNIT_TEST_REV)
 
+    def test_get_component_list_base(self, mock_config_with_repo):
+        """Test listing base images added a to labbook"""
+        lb = create_tmp_labbook()
+        labbook_dir = lb.root_dir
+        cm = ComponentManager(lb)
+
+        # mock_config_with_repo is a ComponentManager Instance
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
+                    gtmcore.fixtures.ENV_UNIT_TEST_REV)
+
+        bases = cm.get_component_list('base')
+
+        assert len(bases) == 1
+        assert bases[0]['id'] == gtmcore.fixtures.ENV_UNIT_TEST_BASE
+        assert bases[0]['revision'] == gtmcore.fixtures.ENV_UNIT_TEST_REV
+
+    def test_get_component_list_packages(self, mock_config_with_repo):
+        """Test listing packages added a to labbook"""
+        lb = create_tmp_labbook()
+        labbook_dir = lb.root_dir
+        cm = ComponentManager(lb)
+
+        # mock_config_with_repo is a ComponentManager Instance
+        pkgs = [{"manager": "pip3", "package": "requests", "version": "2.18.2"},
+                {"manager": "pip3", "package": "gigantum", "version": "0.5"}]
+        cm.add_packages('pip3', pkgs)
+
+        packages = cm.get_component_list('package_manager')
+
+        assert len(packages) == 2
+        assert packages[1]['manager'] == 'pip3'
+        assert packages[1]['package'] == 'requests'
+        assert packages[1]['version'] == '2.18.2'
+        assert packages[0]['manager'] == 'pip3'
+        assert packages[0]['package'] == 'gigantum'
+        assert packages[0]['version'] == '0.5'
+
+    def test_remove_package_errors(self, mock_config_with_repo):
+        """Test removing a package with expected errors"""
+        lb = create_tmp_labbook()
+        cm = ComponentManager(lb)
+
+        # Try removing package that doesn't exist
+        with pytest.raises(ValueError):
+            cm.remove_packages('apt', ['ack'])
+
+        # Add a package as if it's from the base
+        pkgs = [{"manager": "pip3", "package": "requests", "version": "2.18.2"}]
+        cm.add_packages('pip3', pkgs, from_base=True)
+
+        # Try removing package that you can't because it comes from a base
+        with pytest.raises(ValueError):
+            cm.remove_packages('pip3', ['requests'])
+
+    def test_remove_package(self, mock_config_with_repo):
+        """Test removing a package such as one from apt-get or pip3. """
+        lb = create_tmp_labbook()
+        labbook_dir = lb.root_dir
+        cm = ComponentManager(lb)
+
+        # Add some sample components
+        pkgs = [{"manager": "pip3", "package": "requests", "version": "2.18.2"},
+                {"manager": "pip3", "package": "docker", "version": "0.5"}]
+        cm.add_packages('pip3', pkgs)
+
+        pkgs = [{"manager": "apt", "package": "ack", "version": "1.5"},
+                {"manager": "apt", "package": "docker", "version": "1.3"}]
+        cm.add_packages('apt', pkgs)
+
+        pkgs = [{"manager": "pip3", "package": "matplotlib", "version": "2.0.0"}]
+        cm.add_packages('pip3', pkgs, from_base=True)
+
+        package_path = os.path.join(lb._root_dir, '.gigantum', 'env', 'package_manager')
+        assert os.path.exists(package_path)
+
+        # Ensure all four packages exist
+        assert os.path.exists(os.path.join(package_path, "apt_ack.yaml"))
+        assert os.path.exists(os.path.join(package_path, "pip3_requests.yaml"))
+        assert os.path.exists(os.path.join(package_path, "apt_docker.yaml"))
+        assert os.path.exists(os.path.join(package_path, "pip3_docker.yaml"))
+        assert os.path.exists(os.path.join(package_path, "pip3_matplotlib.yaml"))
+
+        # Remove packages
+        cm.remove_packages("apt", ["ack", "docker"])
+        cm.remove_packages("pip3", ["requests", "docker"])
+
+        with pytest.raises(ValueError):
+            cm.remove_packages("pip3", ["matplotlib"])
+
+        # Ensure files are gone
+        assert not os.path.exists(os.path.join(package_path, "apt_ack.yaml"))
+        assert not os.path.exists(os.path.join(package_path, "pip3_requests.yaml"))
+        assert not os.path.exists(os.path.join(package_path, "apt_docker.yaml"))
+        assert not os.path.exists(os.path.join(package_path, "pip3_docker.yaml"))
+        assert os.path.exists(os.path.join(package_path, "pip3_matplotlib.yaml"))
+
+        # Ensure git is clean
+        status = lb.git.status()
+        assert status['untracked'] == []
+        assert status['staged'] == []
+        assert status['unstaged'] == []
+
+        # Ensure activity is being written
+        log = lb.git.log()
+        assert "_GTM_ACTIVITY_START_" in log[0]["message"]
+        assert 'Removed 2 pip3 managed package(s)' in log[0]["message"]
+
+    def test_misconfigured_base_no_base(self, mock_config_with_repo):
+        lb = create_tmp_labbook()
+        cm = ComponentManager(lb)
+        with pytest.raises(ValueError):
+            a = cm.base_fields
+
+    def test_misconfigured_base_two_bases(self, mock_config_with_repo):
+        lb = create_tmp_labbook()
+        cm = ComponentManager(lb)
+        # mock_config_with_repo is a ComponentManager Instance
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
+        # Updated logic to enable changing bases won't allow `add_base` again. Need to manually create a file
+        bad_base_config = Path(cm.env_dir, 'base', 'evil_repo_quantum-deathray.yaml')
+        bad_base_config.write_text("I'm gonna break you!")
+
+        with pytest.raises(ValueError):
+            a = cm.base_fields
+
+    def test_try_configuring_two_bases(self, mock_config_with_repo):
+        lb = create_tmp_labbook()
+        cm = ComponentManager(lb)
+        # mock_config_with_repo is a ComponentManager Instance
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
+        with pytest.raises(ValueError):
+            cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-2", 0)
+
+    def test_get_base(self, mock_config_with_repo):
+        lb = create_tmp_labbook()
+        cm = ComponentManager(lb)
+
+        # mock_config_with_repo is a ComponentManager Instance
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
+
+        base_data = cm.base_fields
+
+        assert type(base_data) == dict
+        assert base_data['name'] == 'Unit Test1'
+        assert base_data['os_class'] == 'ubuntu'
+        assert base_data['schema'] == 1
+
+    def test_get_base_empty_error(self, mock_config_with_repo):
+        lb = create_tmp_labbook()
+        cm = ComponentManager(lb)
+
+        # mock_config_with_repo is a ComponentManager Instance
+        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
+
+        base_filename = f"gigantum_base-images-testing_ut-jupyterlab-1.yaml"
+        base_final_path = os.path.join(cm.env_dir, 'base', base_filename)
+
+        with open(base_final_path, 'wt') as cf:
+            cf.write(yaml.safe_dump({}, default_flow_style=False))
+
+        with pytest.raises(ValueError):
+            cm.base_fields
+
+    def test_add_then_remove_custom_docker_snipper_with_valid_docker(self, mock_config_with_repo):
+        lb = create_tmp_labbook()
+        snippet = ["RUN true", "RUN touch /tmp/testfile", "RUN rm /tmp/testfile", "RUN echo 'done'"]
+        c1 = lb.git.commit_hash
+        cm = ComponentManager(lb)
+        cm.add_docker_snippet("unittest-docker", docker_content=snippet,
+                              description="yada yada's, \n\n **I'm putting in lots of apostrophę's**.")
+        c2 = lb.git.commit_hash
+        assert c1 != c2
+
+        import yaml
+        d = yaml.safe_load(open(os.path.join(lb.root_dir, '.gigantum', 'env', 'docker', 'unittest-docker.yaml')))
+        print(d)
+        assert d['description'] == "yada yada's, \n\n **I'm putting in lots of apostrophę's**."
+        assert d['name'] == 'unittest-docker'
+        assert all([d['content'][i] == snippet[i] for i in range(len(snippet))])
+
+        with pytest.raises(ValueError):
+            cm.remove_docker_snippet('nothing')
+
+        c1 = lb.git.commit_hash
+        cm.remove_docker_snippet('unittest-docker')
+        c2 = lb.git.commit_hash
+        assert not os.path.exists(os.path.join(lb.root_dir, '.gigantum', 'env', 'docker', 'unittest-docker.yaml'))
+        assert c1 != c2
+
     def test_change_base(self, mock_labbook):
-        """change_base is used both for updating versions and truly changing the base"""
+        """change_base is used both for updating versions and truly changing the base
+
+        NOTE: THIS TEST MUST BE AT THE END OF THIS FILE. IT USES A DIFFERENT MOCK THAN THE REST (WHICH IS A CLASS LEVEL
+        MOCK) AND WILL WIPE CLIENT CONFIGURATION AND CAUSE AN ERROR.
+        """
         conf_file, root_dir, lb = mock_labbook
 
         # Initial configuration for the labbook - base config taken from `test_add_base` and package config from
@@ -255,194 +448,3 @@ class TestComponentManager(object):
 
         # Base revision now 2?
         assert(cm.base_fields['revision'] == 2)
-
-    def test_get_component_list_base(self, mock_config_with_repo):
-        """Test listing base images added a to labbook"""
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        labbook_dir = lb.root_dir
-        cm = ComponentManager(lb)
-
-        # mock_config_with_repo is a ComponentManager Instance
-        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, gtmcore.fixtures.ENV_UNIT_TEST_BASE,
-                    gtmcore.fixtures.ENV_UNIT_TEST_REV)
-
-        bases = cm.get_component_list('base')
-
-        assert len(bases) == 1
-        assert bases[0]['id'] == gtmcore.fixtures.ENV_UNIT_TEST_BASE
-        assert bases[0]['revision'] == gtmcore.fixtures.ENV_UNIT_TEST_REV
-
-    def test_get_component_list_packages(self, mock_config_with_repo):
-        """Test listing packages added a to labbook"""
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        labbook_dir = lb.root_dir
-        cm = ComponentManager(lb)
-
-        # mock_config_with_repo is a ComponentManager Instance
-        pkgs = [{"manager": "pip3", "package": "requests", "version": "2.18.2"},
-                {"manager": "pip3", "package": "gigantum", "version": "0.5"}]
-        cm.add_packages('pip3', pkgs)
-
-        packages = cm.get_component_list('package_manager')
-
-        assert len(packages) == 2
-        assert packages[1]['manager'] == 'pip3'
-        assert packages[1]['package'] == 'requests'
-        assert packages[1]['version'] == '2.18.2'
-        assert packages[0]['manager'] == 'pip3'
-        assert packages[0]['package'] == 'gigantum'
-        assert packages[0]['version'] == '0.5'
-
-    def test_remove_package_errors(self, mock_config_with_repo):
-        """Test removing a package with expected errors"""
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        cm = ComponentManager(lb)
-
-        # Try removing package that doesn't exist
-        with pytest.raises(ValueError):
-            cm.remove_packages('apt', ['ack'])
-
-        # Add a package as if it's from the base
-        pkgs = [{"manager": "pip3", "package": "requests", "version": "2.18.2"}]
-        cm.add_packages('pip3', pkgs, from_base=True)
-
-        # Try removing package that you can't because it comes from a base
-        with pytest.raises(ValueError):
-            cm.remove_packages('pip3', ['requests'])
-
-    def test_remove_package(self, mock_config_with_repo):
-        """Test removing a package such as one from apt-get or pip3. """
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        labbook_dir = lb.root_dir
-        cm = ComponentManager(lb)
-
-        # Add some sample components
-        pkgs = [{"manager": "pip3", "package": "requests", "version": "2.18.2"},
-                {"manager": "pip3", "package": "docker", "version": "0.5"}]
-        cm.add_packages('pip3', pkgs)
-
-        pkgs = [{"manager": "apt", "package": "ack", "version": "1.5"},
-                {"manager": "apt", "package": "docker", "version": "1.3"}]
-        cm.add_packages('apt', pkgs)
-
-        pkgs = [{"manager": "pip3", "package": "matplotlib", "version": "2.0.0"}]
-        cm.add_packages('pip3', pkgs, from_base=True)
-
-        package_path = os.path.join(lb._root_dir, '.gigantum', 'env', 'package_manager')
-        assert os.path.exists(package_path)
-
-        # Ensure all four packages exist
-        assert os.path.exists(os.path.join(package_path, "apt_ack.yaml"))
-        assert os.path.exists(os.path.join(package_path, "pip3_requests.yaml"))
-        assert os.path.exists(os.path.join(package_path, "apt_docker.yaml"))
-        assert os.path.exists(os.path.join(package_path, "pip3_docker.yaml"))
-        assert os.path.exists(os.path.join(package_path, "pip3_matplotlib.yaml"))
-
-        # Remove packages
-        cm.remove_packages("apt", ["ack", "docker"])
-        cm.remove_packages("pip3", ["requests", "docker"])
-
-        with pytest.raises(ValueError):
-            cm.remove_packages("pip3", ["matplotlib"])
-
-        # Ensure files are gone
-        assert not os.path.exists(os.path.join(package_path, "apt_ack.yaml"))
-        assert not os.path.exists(os.path.join(package_path, "pip3_requests.yaml"))
-        assert not os.path.exists(os.path.join(package_path, "apt_docker.yaml"))
-        assert not os.path.exists(os.path.join(package_path, "pip3_docker.yaml"))
-        assert os.path.exists(os.path.join(package_path, "pip3_matplotlib.yaml"))
-
-        # Ensure git is clean
-        status = lb.git.status()
-        assert status['untracked'] == []
-        assert status['staged'] == []
-        assert status['unstaged'] == []
-
-        # Ensure activity is being written
-        log = lb.git.log()
-        assert "_GTM_ACTIVITY_START_" in log[0]["message"]
-        assert 'Removed 2 pip3 managed package(s)' in log[0]["message"]
-
-    def test_misconfigured_base_no_base(self, mock_config_with_repo):
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        cm = ComponentManager(lb)
-        with pytest.raises(ValueError):
-            a = cm.base_fields
-
-    def test_misconfigured_base_two_bases(self, mock_config_with_repo):
-        conf_file = mock_config_with_repo[0]
-        lb = create_tmp_labbook(conf_file)
-        cm = ComponentManager(lb)
-        # mock_config_with_repo is a ComponentManager Instance
-        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
-        # Updated logic to enable changing bases won't allow `add_base` again. Need to manually create a file
-        bad_base_config = Path(cm.env_dir, 'base', 'evil_repo_quantum-deathray.yaml')
-        bad_base_config.write_text("I'm gonna break you!")
-
-        with pytest.raises(ValueError):
-            a = cm.base_fields
-
-    def test_try_configuring_two_bases(self, mock_config_with_repo):
-        conf_file = mock_config_with_repo[0]
-        lb = create_tmp_labbook(conf_file)
-        cm = ComponentManager(lb)
-        # mock_config_with_repo is a ComponentManager Instance
-        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
-        with pytest.raises(ValueError):
-            cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-2", 0)
-
-    def test_get_base(self, mock_config_with_repo):
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        cm = ComponentManager(lb)
-
-        # mock_config_with_repo is a ComponentManager Instance
-        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
-
-        base_data = cm.base_fields
-
-        assert type(base_data) == dict
-        assert base_data['name'] == 'Unit Test1'
-        assert base_data['os_class'] == 'ubuntu'
-        assert base_data['schema'] == 1
-
-    def test_get_base_empty_error(self, mock_config_with_repo):
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        cm = ComponentManager(lb)
-
-        # mock_config_with_repo is a ComponentManager Instance
-        cm.add_base(gtmcore.fixtures.ENV_UNIT_TEST_REPO, "ut-jupyterlab-1", 0)
-
-        base_filename = f"gigantum_base-images-testing_ut-jupyterlab-1.yaml"
-        base_final_path = os.path.join(cm.env_dir, 'base', base_filename)
-
-        with open(base_final_path, 'wt') as cf:
-            cf.write(yaml.safe_dump({}, default_flow_style=False))
-
-        with pytest.raises(ValueError):
-            cm.base_fields
-
-    def test_add_then_remove_custom_docker_snipper_with_valid_docker(self, mock_config_with_repo):
-        lb = create_tmp_labbook(mock_config_with_repo[0])
-        snippet = ["RUN true", "RUN touch /tmp/testfile", "RUN rm /tmp/testfile", "RUN echo 'done'"]
-        c1 = lb.git.commit_hash
-        cm = ComponentManager(lb)
-        cm.add_docker_snippet("unittest-docker", docker_content=snippet,
-                              description="yada yada's, \n\n **I'm putting in lots of apostrophę's**.")
-        c2 = lb.git.commit_hash
-        assert c1 != c2
-
-        import yaml
-        d = yaml.safe_load(open(os.path.join(lb.root_dir, '.gigantum', 'env', 'docker', 'unittest-docker.yaml')))
-        print(d)
-        assert d['description'] == "yada yada's, \n\n **I'm putting in lots of apostrophę's**."
-        assert d['name'] == 'unittest-docker'
-        assert all([d['content'][i] == snippet[i] for i in range(len(snippet))])
-
-        with pytest.raises(ValueError):
-            cm.remove_docker_snippet('nothing')
-
-        c1 = lb.git.commit_hash
-        cm.remove_docker_snippet('unittest-docker')
-        c2 = lb.git.commit_hash
-        assert not os.path.exists(os.path.join(lb.root_dir, '.gigantum', 'env', 'docker', 'unittest-docker.yaml'))
-        assert c1 != c2

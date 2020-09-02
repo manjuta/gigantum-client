@@ -111,12 +111,11 @@ class ZipExporter(object):
 
     @classmethod
     def import_labbook(cls, archive_path: str, username: str, owner: str,
-                       config_file: Optional[str] = None,
                        update_meta: Callable = lambda _ : None) -> LabBook:
         try:
             repo = cls._import_zip(archive_path, username, owner,
-                                   fetch_method=InventoryManager(config_file).load_labbook_from_directory,
-                                   put_method=InventoryManager(config_file).put_labbook,
+                                   fetch_method=InventoryManager().load_labbook_from_directory,
+                                   put_method=InventoryManager().put_labbook,
                                    update_meta=update_meta)
             lb = cast(LabBook, repo)
             gitworkflows_utils.process_linked_datasets(lb, username)
@@ -130,12 +129,11 @@ class ZipExporter(object):
 
     @classmethod
     def import_dataset(cls, archive_path: str, username: str, owner: str,
-                   config_file: Optional[str] = None,
-                   update_meta: Callable = lambda _ : None) -> Dataset:
+                       update_meta: Callable = lambda _ : None) -> Dataset:
         try:
             repo = cls._import_zip(archive_path, username, owner,
-                                   fetch_method=InventoryManager(config_file).load_dataset_from_directory,
-                                   put_method=InventoryManager(config_file).put_dataset,
+                                   fetch_method=InventoryManager().load_dataset_from_directory,
+                                   put_method=InventoryManager().put_dataset,
                                    update_meta=update_meta)
             return cast(Dataset, repo)
         except Exception as e:

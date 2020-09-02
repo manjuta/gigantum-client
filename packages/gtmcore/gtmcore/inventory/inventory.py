@@ -13,7 +13,6 @@ import glob
 
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
 
-from gtmcore.dataset.storage import StorageBackend
 from gtmcore.exceptions import GigantumException
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
 from gtmcore.dataset.schemas import CURRENT_SCHEMA as DATASET_CURRENT_SCHEMA
@@ -21,11 +20,10 @@ from gtmcore.gitlib import GitAuthor, RepoLocation
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.configuration.utils import call_subprocess
-from gtmcore.labbook import SecretStore, LabBook
+from gtmcore.labbook import SecretStore
 from gtmcore.labbook.labbook import LabBook
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.inventory import Repository
-from gtmcore.dataset import storage
 from gtmcore.activity import ActivityStore, ActivityDetailRecord, ActivityDetailType, ActivityRecord, ActivityType, \
     ActivityAction
 from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
@@ -55,10 +53,10 @@ class InventoryManager(object):
     # There should be no leading or trailing slash, but a leading slash will be added for the .gitignore
     untracked_dirs = [Path(d) for d in ['code/untracked', 'input/untracked', 'output/untracked']]
 
-    def __init__(self, config_file: Optional[str] = None) -> None:
-        self.config_file = config_file
-        cfg = Configuration(self.config_file)
-        self.inventory_root = os.path.expanduser(cfg.config['git']['working_directory'])
+    def __init__(self) -> None:
+        config = Configuration()
+        server_config = config.get_server_configuration()
+        self.inventory_root = os.path.join(config.app_workdir, server_config.id)
 
     def __str__(self) -> str:
         return f'<InventoryManager: {self.inventory_root}>'
@@ -72,7 +70,7 @@ class InventoryManager(object):
     def query_owner(repository: Repository) -> str:
         """Returns the Repository's owner in the Inventory. """
         tokens = repository.root_dir.rsplit('/', 3)
-        # expected pattern: gigantum/<username>/<owner>/<labbook or dataset>/<project or dataset name>
+        # expected pattern: gigantum/<server-id>/<username>/<owner>/<labbook or dataset>/<project or dataset name>
         if len(tokens) < 3 or tokens[-2] not in ['labbooks', 'datasets']:
             raise InventoryException(f'Unexpected root in {str(repository)}')
         return tokens[-3]
@@ -113,7 +111,7 @@ class InventoryManager(object):
 
     def _put_labbook(self, path: str, username: str, owner: str) -> LabBook:
         # Validate that given path contains labbook
-        temp_lb = self.load_labbook_from_directory(path)
+        self.load_labbook_from_directory(path)
 
         p = os.path.join(self.inventory_root, username, owner, 'labbooks')
         dname = os.path.basename(path)
@@ -170,7 +168,7 @@ class InventoryManager(object):
             LabBook object
         """
         try:
-            lb = LabBook(config_file=self.config_file)
+            lb = LabBook()
             lb._set_root_dir(path)
             lb._load_gigantum_data()
             lb._validate_gigantum_data()
@@ -183,7 +181,7 @@ class InventoryManager(object):
     def load_labbook(self, username: str, owner: str, labbook_name: str,
                      author: Optional[GitAuthor] = None) -> LabBook:
         try:
-            lb = LabBook(self.config_file)
+            lb = LabBook()
             lbroot = os.path.join(self.inventory_root, username,
                                   owner, 'labbooks', labbook_name)
             lb._set_root_dir(lbroot)
@@ -333,10 +331,10 @@ class InventoryManager(object):
             logger.warning("Using owner username `{}` when making new labbook".format(owner['username']))
             username = owner["username"]
 
-        labbook = LabBook(config_file=self.config_file, author=author)
+        labbook = LabBook(author=author)
 
         # Build data file contents
-        buildinfo = Configuration(self.config_file).config['build_info']
+        buildinfo = Configuration().config['build_info']
         labbook._data = {
             "schema": LABBOOK_CURRENT_SCHEMA,
             "id": uuid.uuid4().hex,
@@ -354,8 +352,7 @@ class InventoryManager(object):
         with labbook.lock(lock_key=f"new_labbook_lock|{username}|{owner['username']}|{name}"):
             # Verify or Create user subdirectory
             # Make sure you expand a user dir string
-            starting_dir = os.path.expanduser(labbook.client_config.config["git"]["working_directory"])
-            user_dir = os.path.join(starting_dir, username)
+            user_dir = os.path.join(self.inventory_root, username)
             if not os.path.isdir(user_dir):
                 os.makedirs(user_dir)
 
@@ -379,7 +376,8 @@ class InventoryManager(object):
             labbook.git.initialize()
 
             # Setup LFS
-            if labbook.client_config.config["git"]["lfs_enabled"] and not bypass_lfs:
+            server_config = labbook.client_config.get_server_configuration()
+            if server_config.lfs_enabled and not bypass_lfs:
                 # Make sure LFS install is setup and rack input and output directories
                 call_subprocess(["git", "lfs", "install"], cwd=new_root_dir)
                 call_subprocess(["git", "lfs", "track", "input/**"], cwd=new_root_dir)
@@ -436,7 +434,6 @@ class InventoryManager(object):
                 labbook.git.add(gitkeep_file)
             except subprocess.CalledProcessError:
                 logger.error(f'Problem adding {d / ".gitkeep"} to Git - check your .gitignore?')
-
 
     def delete_labbook(self, username: str, owner: str, labbook_name: str) -> List[DatasetCleanupJob]:
         """Delete a Labbook from this Gigantum working directory.
@@ -500,11 +497,11 @@ class InventoryManager(object):
             Newly created LabBook instance
 
         """
-        dataset = Dataset(storage_type, backend_config=backend_config, config_file=self.config_file,
+        dataset = Dataset(storage_type, backend_config=backend_config,
                           author=author, namespace=owner)
 
         try:
-            build_info = Configuration(self.config_file).config['build_info']
+            build_info = Configuration().config['build_info']
         except KeyError:
             logger.warning("Could not obtain build_info from config")
             build_info = None
@@ -526,8 +523,7 @@ class InventoryManager(object):
         with dataset.lock(lock_key=f"new_dataset_lock|{username}|{owner}|{dataset_name}"):
             # Verify or Create user subdirectory
             # Make sure you expand a user dir string
-            starting_dir = Path(dataset.client_config.config["git"]["working_directory"]).expanduser()
-            dataset_dir = starting_dir / username / owner / "datasets" / dataset_name
+            dataset_dir = Path(self.inventory_root, username, owner, "datasets", dataset_name)
 
             # Verify name not already in use
             if dataset_dir.is_dir():
@@ -680,7 +676,7 @@ class InventoryManager(object):
             Dataset
         """
         try:
-            ds = Dataset(self.config_file, author=author, namespace=owner)
+            ds = Dataset(storage_type='FIXME', author=author, namespace=owner)
 
             ds_root = os.path.join(self.inventory_root, username,
                                    owner, 'datasets', dataset_name)
@@ -702,7 +698,7 @@ class InventoryManager(object):
             Dataset object
         """
         try:
-            ds = Dataset(config_file=self.config_file)
+            ds = Dataset(storage_type='FIXME')
             ds._set_root_dir(path)
             ds._load_gigantum_data()
             ds._validate_gigantum_data()

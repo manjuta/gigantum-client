@@ -306,7 +306,7 @@ class DeleteDataset(graphene.ClientIDMutation):
             except InventoryException:
                 # Does not exist locally, so create a "mock" Dataset instance
                 remove_remote_config = False
-                ds = DatasetObj(config.config_file, owner)
+                ds = DatasetObj(owner)
                 ds._data = {"name": dataset_name}
 
 
@@ -319,14 +319,16 @@ class DeleteDataset(graphene.ClientIDMutation):
             ds_backend.delete_contents(ds)
 
             # Get remote server configuration
-            remote_config = config.get_remote_configuration()
+            server_config = config.get_server_configuration()
 
             # Delete the repository
-            mgr = GitLabManager(remote_config['git_remote'], remote_config['hub_api'], access_token=access_token,
+            mgr = GitLabManager(server_config.git_url,
+                                server_config.hub_api_url,
+                                access_token=access_token,
                                 id_token=id_token)
             mgr.remove_repository(owner, dataset_name)
             logger.info(f"Deleted {owner}/{dataset_name} repository from the"
-                        f" remote repository {remote_config['git_remote']}")
+                        f" remote repository {server_config.git_url}")
 
             # Remove locally any references to that cloud repo that's just been deleted.
             if remove_remote_config:

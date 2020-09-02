@@ -1,7 +1,7 @@
 import React from 'react';
 import history from 'JS/history';
 import { shallow } from 'enzyme';
-import Dashboard from 'Components/dashboard/Dashboard';
+import Dashboard from 'Pages/dashboard/Dashboard';
 
 describe('Test create history', () => {
   it('has a replace method', () => {

@@ -35,7 +35,7 @@ def check_projects(config: Configuration, username: str) -> Dict[str, Any]:
     """
     gigantum_root = config.app_workdir
     project_paths = glob.glob(f'{gigantum_root}/{username}/*/labbooks/*')
-    inventory = InventoryManager(config.config_file)
+    inventory = InventoryManager()
     t0 = time.time()
     errors: Dict[str, Any] = {'errors': {}}
     for project_path in project_paths:

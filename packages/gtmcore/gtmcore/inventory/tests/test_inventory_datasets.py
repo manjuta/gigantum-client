@@ -1,5 +1,4 @@
 import pytest
-import getpass
 import os
 import yaml
 import datetime
@@ -7,22 +6,21 @@ import shutil
 import tempfile
 import time
 
-import gtmcore.dispatcher.dataset_jobs
 from gtmcore.dataset.dataset import Dataset
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.gitlib.git import GitAuthor
-from gtmcore.dispatcher import (Dispatcher, jobs)
+from gtmcore.dispatcher import dataset_jobs
 from gtmcore.inventory.branching import BranchManager
 
-from gtmcore.fixtures import mock_config_file, mock_labbook, _MOCK_create_remote_repo2
+from gtmcore.fixtures import mock_config_file, mock_labbook, helper_create_remote_repo
 
 from gtmcore.fixtures.datasets import helper_append_file
 
 @pytest.fixture
 def create_datasets_to_list(mock_config_file):
-    inv_manager = InventoryManager(mock_config_file[0])
+    inv_manager = InventoryManager()
     inv_manager.create_dataset("user1", "user1", "dataset2", "gigantum_object_v1", description="my dataset")
     time.sleep(1.5)
     inv_manager.create_dataset("user1", "user2", "a-dataset3", "gigantum_object_v1", description="my dataset")
@@ -36,7 +34,7 @@ def create_datasets_to_list(mock_config_file):
 class TestInventoryDatasets(object):
     def test_create_dataset_with_author(self, mock_config_file):
         """Test creating an empty labbook with the author set"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -72,7 +70,7 @@ class TestInventoryDatasets(object):
         assert os.path.exists(os.path.join(ds.root_dir, '.gigantum', 'backend.json')) is True
 
     def test_dataset_attributes(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -94,7 +92,7 @@ class TestInventoryDatasets(object):
         assert ds.backend_config == {"my_config": 123}
 
     def test_delete_dataset(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="test", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -116,8 +114,8 @@ class TestInventoryDatasets(object):
         assert dataset_delete_job.name == "dataset1"
         assert dataset_delete_job.cache_root == m.cache_mgr.cache_root
 
-        gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
-                                                                 dataset_delete_job.cache_root, config_file=mock_config_file[0])
+        dataset_jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
+                                              dataset_delete_job.cache_root)
 
         assert os.path.exists(m.cache_mgr.cache_root) is False
 
@@ -125,7 +123,7 @@ class TestInventoryDatasets(object):
         assert os.path.exists(cache_base) is True
 
     def test_delete_dataset_while_linked(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="test", email="user1@test.com")
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
@@ -154,8 +152,8 @@ class TestInventoryDatasets(object):
         assert dataset_delete_job.name == "dataset1"
         assert dataset_delete_job.cache_root == m.cache_mgr.cache_root
 
-        gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
-                                                                 dataset_delete_job.cache_root, config_file=mock_config_file[0])
+        dataset_jobs.clean_dataset_file_cache("test", dataset_delete_job.namespace, dataset_delete_job.name,
+                                              dataset_delete_job.cache_root)
 
         assert os.path.exists(m.cache_mgr.cache_root) is True
 
@@ -163,7 +161,7 @@ class TestInventoryDatasets(object):
         assert os.path.exists(cache_base) is True
 
     def test_change_dataset_name(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -183,11 +181,12 @@ class TestInventoryDatasets(object):
         assert parts1[3] == parts2[3]
         assert parts1[4] == parts2[4]
         assert parts1[5] == parts2[5]
-        assert parts1[6] == 'dataset1'
-        assert parts2[6] == 'dataset-updated'
+        assert parts1[6] == parts2[6]
+        assert parts1[7] == 'dataset1'
+        assert parts2[7] == 'dataset-updated'
 
     def test_change_dataset_name_errors(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -202,9 +201,9 @@ class TestInventoryDatasets(object):
 
     def test_create_dataset_that_exists(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
-        ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
+        inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
                                         author=auth)
         with pytest.raises(ValueError):
@@ -213,7 +212,7 @@ class TestInventoryDatasets(object):
                                        author=auth)
 
     def test_load_dataset_from_file(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -221,14 +220,14 @@ class TestInventoryDatasets(object):
 
         with tempfile.TemporaryDirectory() as tempdir:
             r = shutil.move(ds.root_dir, tempdir)
-            ds_loaded_from_file = inv_manager.load_dataset_from_directory(r)
+            inv_manager.load_dataset_from_directory(r)
 
         # Test failing case - invalid dir
         with pytest.raises(InventoryException):
-            r = inv_manager.load_dataset_from_directory('/tmp')
+            inv_manager.load_dataset_from_directory('/tmp')
 
     def test_put_dataset(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         ds = inv_manager.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                         description="my first dataset",
@@ -237,7 +236,7 @@ class TestInventoryDatasets(object):
         orig_location = ds.root_dir
         with tempfile.TemporaryDirectory() as tempdir:
             r = shutil.move(ds.root_dir, tempdir)
-            ds_loaded_from_file = inv_manager.load_dataset_from_directory(r)
+            inv_manager.load_dataset_from_directory(r)
             assert not os.path.exists(orig_location)
             assert orig_location not in [d.root_dir for d in inv_manager.list_datasets('test')]
             placed_ds = inv_manager.put_dataset(r, 'test', 'test')
@@ -245,13 +244,13 @@ class TestInventoryDatasets(object):
 
     def test_list_datasets_empty(self, mock_labbook):
         """Test list datasets when no dataset directory exists for the user"""
-        inv_manager = InventoryManager(mock_labbook[0])
+        inv_manager = InventoryManager()
         datasets = inv_manager.list_datasets(username="test")
         assert len(datasets) == 0
 
     def test_list_datasets_az(self, create_datasets_to_list):
         """Test list az datasets"""
-        inv_manager = InventoryManager(create_datasets_to_list[0])
+        inv_manager = InventoryManager()
         datasets = inv_manager.list_datasets(username="user1")
         assert len(datasets) == 3
         assert datasets[0].name == 'a-dataset3'
@@ -264,7 +263,7 @@ class TestInventoryDatasets(object):
 
     def test_list_datasets_created_on(self, create_datasets_to_list):
         """Test list az datasets"""
-        inv_manager = InventoryManager(create_datasets_to_list[0])
+        inv_manager = InventoryManager()
 
         datasets = inv_manager.list_datasets(username="user1", sort_mode="created_on")
         assert len(datasets) == 3
@@ -274,7 +273,7 @@ class TestInventoryDatasets(object):
 
     def test_list_datasets_modified_on(self, mock_config_file):
         """Test list az datasets"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         inv_manager.create_dataset("user1", "user1", "dataset2", "gigantum_object_v1", description="my dataset")
         time.sleep(1)
         inv_manager.create_dataset("user1", "user2", "a-dataset3", "gigantum_object_v1", description="my dataset")
@@ -305,13 +304,13 @@ class TestInventoryDatasets(object):
 
     def test_list_datasets_invalid(self, create_datasets_to_list):
         """Test list az datasets"""
-        inv_manager = InventoryManager(create_datasets_to_list[0])
+        inv_manager = InventoryManager()
 
         with pytest.raises(InventoryException):
             _ = inv_manager.list_datasets(username="user1", sort_mode="created_atasdf")
 
     def test_create_dataset_invalid_storage_type(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth = GitAuthor(name="username", email="user1@test.com")
         with pytest.raises(ValueError):
             inv_manager.create_dataset("test", "test", "dataset1", "asdfdfgh",
@@ -319,12 +318,12 @@ class TestInventoryDatasets(object):
                                        author=auth)
 
     def test_link_unlink_dataset(self, mock_labbook):
-        inv_manager = InventoryManager(mock_labbook[0])
+        inv_manager = InventoryManager()
         lb = mock_labbook[2]
         ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 
@@ -346,12 +345,12 @@ class TestInventoryDatasets(object):
         assert len(data) == 0
 
     def test_link_unlink_dataset_with_repair(self, mock_labbook):
-        inv_manager = InventoryManager(mock_labbook[0])
+        inv_manager = InventoryManager()
         lb = mock_labbook[2]
         ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 
@@ -384,12 +383,12 @@ class TestInventoryDatasets(object):
         - Switch to other branch: dataset is gone
         - Switch to master: dataset is available
         """
-        inv_manager = InventoryManager(mock_labbook[0])
+        inv_manager = InventoryManager()
         lb = mock_labbook[2]
         ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 
@@ -473,12 +472,12 @@ class TestInventoryDatasets(object):
         assert len(data) > 0
 
     def test_update_dataset_link(self, mock_labbook):
-        inv_manager = InventoryManager(mock_labbook[0])
+        inv_manager = InventoryManager()
         lb = mock_labbook[2]
         ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 
@@ -514,7 +513,7 @@ class TestInventoryDatasets(object):
                 shutil.rmtree(git_dir)
 
     def test_get_linked_datasets(self, mock_labbook):
-        inv_manager = InventoryManager(mock_labbook[0])
+        inv_manager = InventoryManager()
         lb = mock_labbook[2]
 
         datasets = inv_manager.get_linked_datasets(lb)
@@ -523,7 +522,7 @@ class TestInventoryDatasets(object):
         ds = inv_manager.create_dataset("test", "test", "dataset100", "gigantum_object_v1", description="my dataset")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 

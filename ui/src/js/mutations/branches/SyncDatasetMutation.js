@@ -9,8 +9,8 @@ import environment from 'JS/createRelayEnvironment';
 // redux
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 // utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
-import footerCallback from 'Components/common/footer/utils/SyncDataset';
+import FooterUtils from 'Components/footer/FooterUtils';
+import footerCallback from 'Components/footer/utils/SyncDataset';
 
 const mutation = graphql`
   mutation SyncDatasetMutation($input: SyncDatasetInput!){

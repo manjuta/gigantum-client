@@ -2,7 +2,7 @@
       import React from 'react';
       import renderer from 'react-test-renderer';
       import { mount } from 'enzyme';
-      import CodeFavorites from 'Components/labbook/code/CodeFavorites';
+      import CodeFavorites from 'Pages/repository/labbook/code/CodeFavorites';
 
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       import json from './__relaydata__/CodeFavorites.json';

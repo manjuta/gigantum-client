@@ -1,5 +1,6 @@
 from typing import Optional
 
+from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.auth.identity import User, AuthenticationError
 from gtmcore.auth.anonymous import AnonymousIdentityManager
@@ -14,9 +15,24 @@ class AnonymousReviewIdentityManager(AnonymousIdentityManager):
     not currently encoded into a psuedo-JWT, in order to simplify reading directly from the deploy
     script or the config file itself.
 
-    The secret token is generally set in the config file with top level key `anon_review_secret`.
-    (Being top-level makes it easier to simply append the secret to an existing config.)
+    The secret tokens are generally set in the config file with top level key `anon_review_secret` -
+    being top-level makes it easier to simply append the secret to an existing config.
+    The value can be a single string or a list of strings. A distinct user will be created for each individual token.
     """
+
+    def __init__(self, config_obj: Configuration):
+        super().__init__(config_obj)
+
+        try:
+            secrets = self.config.config["anon_review_secret"]
+        except KeyError:
+            raise ValueError("'auth > identity_manager' set to 'anon_review' but no 'anon_review_secret' is specified")
+
+        if type(secrets) is not list:
+            self.secrets = [str(secrets)]
+        else:
+            self.secrets = [str(s) for s in secrets]
+
 
     @property
     def allow_server_access(self) -> bool:
@@ -47,13 +63,13 @@ class AnonymousReviewIdentityManager(AnonymousIdentityManager):
         """In anonymous review, we are always / only anonymous
 
         Args:
-            access_token: checked against the anon_review_secret
+            access_token: checked against the anon_review_secret, which is a list of str
+              (note that an individual str is converted to a list of str in __init__())
 
         Returns:
             True
         """
-        secret = str(self.config.config["anon_review_secret"])
-        return access_token == secret
+        return access_token in self.secrets
 
     def is_token_valid(self, access_token: Optional[str] = None) -> bool:
         """Method to check if the user's access token session is still valid
@@ -83,12 +99,14 @@ class AnonymousReviewIdentityManager(AnonymousIdentityManager):
                         "description": "access_token must be provided for anonymous access"}
             raise AuthenticationError(err_dict, 401)
 
-        if self.is_anonymous(access_token):
+        try:
+            index = self.secrets.index(access_token) + 1
             # Create user identity instance
-            self.user = self.anon_user
-        else:
+            return User(email="anonymous@gigantum.com",
+                        username=f"anonymous{index}",
+                        given_name="Anonymous",
+                        family_name=f"Reviewer-{index}")
+        except ValueError:
             err_dict = {"code": "wrong_token",
                         "description": "access_token must match client configuration for anonymous access"}
             raise AuthenticationError(err_dict, 401)
-
-        return self.user

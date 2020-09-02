@@ -2,31 +2,32 @@ import os
 import re
 import yaml
 import datetime
-import json
 
 from typing import Optional, Dict
 
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema
-from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, ActivityType,\
-    ActivityAction, ActivityDetailRecord
-from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
+from gtmcore.activity import ActivityDetailType, ActivityType
 from gtmcore.dataset.storage import get_storage_backend, StorageBackend
 
 from gtmcore.inventory.repository import Repository
 
 
 class Dataset(Repository):
-    """Class representing a single LabBook"""
+    """Class representing a single Dataset
+
+    As with the other Repository class (LabBook), the primary configuration file is located in
+    `.gigantum/gigantum.yaml`. Additional configuration information for the contained StorageBackend subclass may
+    optionally be stored in `.gigantum/backend.json`. The backend file should describe a dict than can be unpacked into
+    keyword arguments to the StorageBackend constructor.
+    """
     _default_activity_type = ActivityType.DATASET
     _default_activity_detail_type = ActivityDetailType.DATASET
     _default_activity_section = "Dataset Root"
 
     def __init__(self, storage_type: str, backend_config: Optional[Dict[str, str]] = None,
-                 config_file: Optional[str] = None, namespace: Optional[str] = None,
-                 author: Optional[GitAuthor] = None) -> None:
-        super().__init__(config_file, author)
-        self.client_config.config['git']['lfs_enabled'] = False
+                 namespace: Optional[str] = None, author: Optional[GitAuthor] = None) -> None:
+        super().__init__(author)
         self.namespace = namespace
         self._storage_type = storage_type
         self._backend = get_storage_backend(storage_type, backend_config)
@@ -170,7 +171,6 @@ class Dataset(Repository):
 
         # Validate schema is supported by running version of the software and valid
         if not validate_dataset_schema(self.schema, self.data):
-            import json
             errmsg = f"Schema in Dataset {str(self)} does not match indicated version {self.schema}"
             raise ValueError(errmsg)
 

@@ -57,8 +57,8 @@ class AnonymousIdentityManager(IdentityManager):
                 if not id_token:
                     raise ValueError("Cannot check first login without a valid id_token")
 
-                remote_config = self.config.get_remote_configuration()
-                check_and_add_user(hub_api=remote_config['hub_api'], access_token=access_token, id_token=id_token)
+                server_config = self.config.get_server_configuration()
+                check_and_add_user(hub_api=server_config.hub_api_url, access_token=access_token, id_token=id_token)
 
     def is_authenticated(self, access_token: Optional[str] = None, id_token: Optional[str] = None) -> bool:
         """Method to check if the user is currently authenticated in the context of this identity manager

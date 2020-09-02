@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1442"
+changelog:
+  - type: IMPROVEMENT
+    description: Update import URL to be handled by API instead of manipulated in front-end

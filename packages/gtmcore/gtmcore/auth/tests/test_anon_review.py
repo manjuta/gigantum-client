@@ -1,7 +1,7 @@
 import pytest
 
 from gtmcore.configuration import Configuration
-from gtmcore.fixtures import mock_config_file_with_auth_anon_review
+from gtmcore.fixtures import mock_config_file_with_auth_anon_review, mock_config_file_with_auth_multi_anon_review
 from gtmcore.auth.identity import get_identity_manager, AuthenticationError
 from gtmcore.auth.anon_review import AnonymousReviewIdentityManager
 from gtmcore.auth import User
@@ -10,7 +10,7 @@ from gtmcore.auth import User
 class TestIdentityAnonReview(object):
     def test_is_session_valid(self, mock_config_file_with_auth_anon_review):
         """test check for valid session"""
-        config = Configuration(mock_config_file_with_auth_anon_review)
+        config = Configuration()
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secret = config.config['anon_review_secret']
 
@@ -29,7 +29,7 @@ class TestIdentityAnonReview(object):
 
     def test_is_authenticated_token(self, mock_config_file_with_auth_anon_review):
         """test checking if we have the right token"""
-        config = Configuration(mock_config_file_with_auth_anon_review)
+        config = Configuration()
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secret = config.config['anon_review_secret']
 
@@ -43,7 +43,7 @@ class TestIdentityAnonReview(object):
 
     def test_get_anon_user_profile(self, mock_config_file_with_auth_anon_review):
         """test getting a user profile when anonymous"""
-        config = Configuration(mock_config_file_with_auth_anon_review)
+        config = Configuration()
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secret = config.config['anon_review_secret']
 
@@ -59,7 +59,31 @@ class TestIdentityAnonReview(object):
         u = mgr.get_user_profile(anon_review_secret)
 
         assert type(u) == User
-        assert u.username == "anonymous"
+        assert u.username == "anonymous1"
         assert u.email == "anonymous@gigantum.com"
         assert u.given_name == "Anonymous"
-        assert u.family_name == "User"
+        assert u.family_name == "Reviewer-1"
+
+    def test_get_multi_anon_user_profile(self, mock_config_file_with_auth_multi_anon_review):
+        """test getting a user profile when anonymous"""
+        config = Configuration(mock_config_file_with_auth_multi_anon_review)
+        # We grab the string that was used to configure the AnonymousReviewIdentityManager
+        anon_review_secrets = config.config['anon_review_secret']
+
+        mgr = get_identity_manager(config)
+        assert type(mgr) == AnonymousReviewIdentityManager
+
+        # Load User
+        with pytest.raises(AuthenticationError):
+            # Should fail without a token
+            mgr.get_user_profile()
+
+        # Load Users
+        for i, secret in enumerate(anon_review_secrets):
+            u = mgr.get_user_profile(secret)
+
+            assert type(u) == User
+            assert u.username == f"anonymous{i+1}"
+            assert u.email == "anonymous@gigantum.com"
+            assert u.given_name == "Anonymous"
+            assert u.family_name == f"Reviewer-{i+1}"

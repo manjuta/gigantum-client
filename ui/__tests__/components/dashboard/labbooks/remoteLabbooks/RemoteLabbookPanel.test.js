@@ -7,7 +7,7 @@ import relayTestingUtils from '@gigantum/relay-testing-utils';
 // history
 import history from 'JS/history';
 // components
-import RemoteLabbookPanel from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
+import RemoteLabbookPanel from 'Pages/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
 import json from './__relaydata__/RemoteLabbooks.json';
 
 const variables = { first: 20 };

@@ -33,7 +33,7 @@ from ..api import LabbookMutations, LabbookQuery
 class TestNodeQueries(object):
 
     def test_node_labbook_from_object(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "cat-lab-book1", description="Test cat labbook from obj")
 
         query = """
@@ -56,7 +56,7 @@ class TestNodeQueries(object):
         assert r['data']['node']['activeBranchName'] == 'master'
 
     def test_node_package(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "node-env-test-lb", description="Example labbook by mutation.")
 
         env_query = """
@@ -80,7 +80,7 @@ class TestNodeQueries(object):
         #results['data']['node']['latestVersion'] == '1.14.2'
 
     def test_node_environment(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "node-env-test-lb",
                                description="Example labbook by mutation.")
 
@@ -125,7 +125,7 @@ class TestNodeQueries(object):
 
     def test_file_node(self, fixture_working_dir):
         """Test listing labbook favorites"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook1",
                                description="my first labbook1")
 
@@ -154,7 +154,7 @@ class TestNodeQueries(object):
 
     def test_activity_record_node(self, fixture_working_dir, fixture_test_file):
         """Test getting an activity record by node ID"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook1",
                                description="my test description")
         FileOperations.insert_file(lb, "code", fixture_test_file)
@@ -223,7 +223,7 @@ class TestNodeQueries(object):
 
     def test_detail_record_node(self, fixture_working_dir, fixture_test_file):
         """Test getting an detail record by node ID"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook1",
                                description="my test description")
         FileOperations.insert_file(lb, "code", fixture_test_file)

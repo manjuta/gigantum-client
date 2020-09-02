@@ -1,21 +1,4 @@
-# Copyright (c) 2018 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CO
+
 import pytest
 import shutil
 import tempfile
@@ -27,9 +10,8 @@ from gtmcore.inventory.inventory  import InventoryManager, InventoryException
 from gtmcore.configuration import Configuration
 from gtmcore.workflows import ZipExporter, ZipWorkflowException
 
-from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled, mock_duplicate_labbook, remote_bare_repo,
-                               sample_src_file, _MOCK_create_remote_repo2 as _MOCK_create_remote_repo,
-                               mock_config_lfs_disabled)
+from gtmcore.fixtures import (mock_config_file, mock_labbook_lfs_disabled,
+                              sample_src_file, helper_create_remote_repo as _MOCK_create_remote_repo)
 
 
 class TestDatasetImportZipping(object):
@@ -40,14 +22,14 @@ class TestDatasetImportZipping(object):
         
         # Test with a non-existing file
         with pytest.raises(ZipWorkflowException):
-            z.import_dataset('nonsense.zip', 'none', 'none', mock_config_file[0])
+            z.import_dataset('nonsense.zip', 'none', 'none')
         assert snapshot == str(list(sorted(os.walk(mock_config_file[1]))))
 
         # Test with an invalid zip file
         with open('/tmp/invalid.zip', 'wb') as x:
             x.write(b'Invalid zip file content. ' * 500)
         with pytest.raises(ZipWorkflowException):
-            z.import_dataset(x.name, 'none', 'none', mock_config_file[0])
+            z.import_dataset(x.name, 'none', 'none')
         assert snapshot == str(list(sorted(os.walk(mock_config_file[1]))))
 
     def test_fail_import_non_dataset_zip_single_file(self, mock_config_file):
@@ -64,7 +46,7 @@ class TestDatasetImportZipping(object):
         snapshot = str(list(sorted(os.walk(mock_config_file[1]))))
         z = ZipExporter()
         with pytest.raises(ZipWorkflowException):
-            z.import_dataset('/tmp/single_file_zip.zip', 'test', 'test', mock_config_file[0])
+            z.import_dataset('/tmp/single_file_zip.zip', 'test', 'test')
 
     def test_fail_import_non_dataset_zip_directory(self, mock_config_file):
         # Test a valid zip file but one that does not contain project
@@ -82,7 +64,7 @@ class TestDatasetImportZipping(object):
         pre_snapshot = str(list(sorted(os.walk(mock_config_file[1]))))
         z = ZipExporter()
         with pytest.raises(ZipWorkflowException):
-            z.import_dataset('/tmp/non-ds-dir.zip', 'test', 'test', mock_config_file[0])
+            z.import_dataset('/tmp/non-ds-dir.zip', 'test', 'test')
         post_snapshot = str(list(sorted(os.walk(mock_config_file[1]))))
         assert pre_snapshot == post_snapshot
 
@@ -101,12 +83,12 @@ class TestDatasetImportZipping(object):
         assert os.path.exists(import_zip)
         dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset.zip')
 
-        workspace = Configuration(mock_config_file[0]).config['git']['working_directory']
+        workspace = Configuration().app_workdir
 
         # Snapshots of directories before and after import - assert different
         pre_snapshot = str(list(sorted(os.walk(workspace))))
         z = ZipExporter()
-        x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
+        x = z.import_dataset(dup_import, 'test', 'test')
         post_snapshot = str(list(sorted(os.walk(workspace))))
         assert pre_snapshot != post_snapshot
         assert x.active_branch == 'master'
@@ -116,34 +98,31 @@ class TestDatasetImportZipping(object):
                                   'tests', 'test_dataset.zip')
         dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset.zip')
         z = ZipExporter()
-        x = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
+        x = z.import_dataset(dup_import, 'test', 'test')
 
         dup_import = shutil.copy(import_zip, '/tmp/copy-of-test_dataset.zip')
         # Now try to import that again and it should fail, cause a
         # project by that name already exists.
         with pytest.raises(ZipWorkflowException):
-            y = z.import_dataset(dup_import, 'test', 'test', mock_config_file[0])
-
+            y = z.import_dataset(dup_import, 'test', 'test')
 
     def test_success_export_then_import_different_users(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         ds = inv_manager.create_dataset('unittester', 'unittester', 'unittest-zip',
                                         'gigantum_object_v1')
 
         with tempfile.TemporaryDirectory() as tempd:
             path = ZipExporter.export_dataset(ds.root_dir, tempd)
-            newds = ZipExporter.import_dataset(path, "unittester2", "unittester2",
-                                               mock_config_file[0])
+            newds = ZipExporter.import_dataset(path, "unittester2", "unittester2")
             assert not os.path.exists(path)
-            assert 'unittester2' == InventoryManager(mock_config_file[0]).query_owner(newds)
+            assert 'unittester2' == InventoryManager().query_owner(newds)
             assert newds.is_repo_clean
             assert newds.active_branch == 'master'
 
             # Now try with same user as exporter
             path2 = ZipExporter.export_dataset(ds.root_dir, tempd)
             shutil.rmtree(ds.root_dir)
-            lb2 = ZipExporter.import_dataset(path2, "unittester", "unittester",
-                                             mock_config_file[0])
-            assert 'unittester' == InventoryManager(mock_config_file[0]).query_owner(lb2)
+            lb2 = ZipExporter.import_dataset(path2, "unittester", "unittester")
+            assert 'unittester' == InventoryManager().query_owner(lb2)
             assert lb2.is_repo_clean
             assert lb2.active_branch == 'master'

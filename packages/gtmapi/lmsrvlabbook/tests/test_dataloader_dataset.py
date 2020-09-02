@@ -10,7 +10,7 @@ class TestDataloaderDataset(object):
 
     def test_load_one(self, fixture_working_dir):
         """Test loading 1 dataset"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_dataset("default", "default", "dataset1", storage_type="gigantum_object_v1",
                           description="a dataset")
         im.create_dataset("default", "default", "dataset2", storage_type="gigantum_object_v1",
@@ -27,7 +27,7 @@ class TestDataloaderDataset(object):
 
     def test_load_many(self, fixture_working_dir):
         """Test loading many labbooks"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_dataset("default", "default", "dataset1", storage_type="gigantum_object_v1",
                           description="a dataset")
         im.create_dataset("default", "default", "dataset2", storage_type="gigantum_object_v1",

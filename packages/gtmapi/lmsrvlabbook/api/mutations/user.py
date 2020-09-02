@@ -19,11 +19,11 @@ class RemoveUserIdentity(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, input, client_mutation_id=None):
-        # Call the logout method to remove any locally stored data
-        get_identity_manager_instance().logout()
-
         # Remove user's credentials from git cache, if they had been set
         remove_git_credentials()
+
+        # Call the logout method to remove any locally stored data
+        get_identity_manager_instance().logout()
 
         # Wipe current user from request context
         flask.g.user_obj = None

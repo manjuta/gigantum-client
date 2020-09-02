@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1443"
+changelog:
+  - type: IMPROVEMENT
+    description: Add `base_url` field to server configuration to support user-facing URL generation and parsing.

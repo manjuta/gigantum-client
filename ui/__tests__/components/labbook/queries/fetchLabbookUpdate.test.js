@@ -5,7 +5,7 @@
       import {mount} from 'enzyme';
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       // components;
-      import fetchLabbookUpdate from 'Components/labbook/queries/fetchLabbookUpdate';
+      import fetchLabbookUpdate from 'Pages/repository/labbook/queries/fetchLabbookUpdate';
 
       test('Test fetchLabbookUpdate', () => {
         const wrapper = renderer.create(<fetchLabbookUpdate />);

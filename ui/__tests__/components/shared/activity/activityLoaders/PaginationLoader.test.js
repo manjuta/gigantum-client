@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 import { Provider } from 'react-redux';
 // components
-import PaginationLoader from 'Components/shared/activity/loaders/PaginationLoader';
+import PaginationLoader from 'Pages/repository/shared/activity/loaders/PaginationLoader';
 // store
 import store from 'JS/redux/store';
 

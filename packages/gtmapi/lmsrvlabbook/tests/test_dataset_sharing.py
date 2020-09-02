@@ -18,7 +18,7 @@ from lmsrvcore.middleware import DataloaderMiddleware
 
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file
 
-from gtmcore.fixtures import _MOCK_create_remote_repo2
+from gtmcore.fixtures import helper_create_remote_repo
 
 
 class TestDatasetSharingMutations(object):
@@ -32,7 +32,7 @@ class TestDatasetSharingMutations(object):
         client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
 
         # Create a temporary dataset
-        ds = InventoryManager(fixture_working_dir[0]).create_dataset("default", "default", "test-export",
+        ds = InventoryManager().create_dataset("default", "default", "test-export",
                                                                      "gigantum_object_v1",
                                                                      description="Tester")
 

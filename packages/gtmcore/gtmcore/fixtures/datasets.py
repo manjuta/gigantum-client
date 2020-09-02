@@ -1,9 +1,9 @@
 from pathlib import Path
 
+from typing import Iterable, Tuple, TYPE_CHECKING
 import pytest
 import os
 import shutil
-from mock import patch
 import responses
 
 import boto3
@@ -14,14 +14,25 @@ from pkg_resources import resource_filename
 import tempfile
 
 from gtmcore.configuration import Configuration
-from gtmcore.dataset.tests.test_storage_local import helper_write_object
 from gtmcore.fixtures.fixtures import _create_temp_work_dir, mock_config_file_background_tests
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.dataset import Manifest
 from gtmcore.dispatcher.dataset_jobs import import_dataset_from_zip
+from gtmcore.dataset import Manifest
 import gtmcore
 
 USERNAME = 'tester'
+
+if TYPE_CHECKING:
+    from gtmcore.dataset import Dataset
+
+
+@pytest.fixture()
+def mock_dataset_head():
+    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
+    with responses.RequestsMock() as rsps:
+        rsps.add(responses.HEAD, 'https://test.api.gigantum.com/object-v1/tester/dataset-1',
+                 headers={'x-access-level': 'a'}, status=200)
+        yield
 
 
 @pytest.fixture(scope='session')
@@ -30,7 +41,7 @@ def mock_enable_unmanaged_for_testing():
     are disabled and dormant. We want to keep testing them and carry the code forward, but don't want them to be
     used yet.
 
-    When running via a normal build, only "gigantum_object_v1" is available. To enable the others, you need to edit
+    When running via a normal build, only some backends are available. To enable the others, you need to edit
     gtmcore.dataset.storage.SUPPORTED_STORAGE_BACKENDS in gtmcore.dataset.storage.__init__.py
 
     When this is done (unmanaged datasets are being re-activated) you should remove this fixture everywhere.
@@ -44,33 +55,33 @@ def mock_enable_unmanaged_for_testing():
 
 
 @pytest.fixture()
-def mock_dataset_with_cache_dir():
+def mock_dataset_with_cache_dir() -> Iterable[Tuple['Dataset', str, str]]:
     """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
-    conf_file, working_dir = _create_temp_work_dir()
-    with patch.object(Configuration, 'find_default_config', lambda self: conf_file):
-        im = InventoryManager(conf_file)
-        ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
-                               storage_type="gigantum_object_v1")
+    config_instance, working_dir = _create_temp_work_dir()
+    im = InventoryManager()
+    ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', description="my dataset 1",
+                           storage_type="gigantum_object_v1")
 
-        yield ds, working_dir, ds.git.repo.head.commit.hexsha
-        shutil.rmtree(working_dir)
+    yield ds, working_dir, ds.git.repo.head.commit.hexsha
+    config_instance.clear_cached_configuration()
+    shutil.rmtree(working_dir)
 
 
 @pytest.fixture()
-def mock_config_class(mock_enable_unmanaged_for_testing):
+def mock_config_class(mock_enable_unmanaged_for_testing) -> Iterable[Tuple[InventoryManager, Configuration, str]]:
     """A pytest fixture that creates a temp working dir, mocks the Configuration class to resolve the mocked config"""
-    conf_file, working_dir = _create_temp_work_dir()
-    with patch.object(Configuration, 'find_default_config', lambda self: conf_file):
-        im = InventoryManager(conf_file)
-        yield im, conf_file, working_dir
-        shutil.rmtree(working_dir)
+    config_instance, working_dir = _create_temp_work_dir()
+    im = InventoryManager()
+    yield im, config_instance, working_dir
+    config_instance.clear_cached_configuration()
+    shutil.rmtree(working_dir)
 
 
 @pytest.fixture()
 def mock_dataset_with_local_data():
     """A mock when testing local filesystem backend and you need local contents to add to the dataset"""
 
-    conf_file, working_dir = _create_temp_work_dir()
+    config_instance, working_dir = _create_temp_work_dir()
     working_path = Path(working_dir)
     dir1 = (working_path / 'local_data' / 'dir1')
     dir2 = (working_path / 'local_data' / 'dir2')
@@ -80,11 +91,10 @@ def mock_dataset_with_local_data():
     (dir1 / "test2.txt").write_text("temp contents 2")
     (dir1 / "subdir/test3.txt").write_text("temp contents 3")
 
-    with patch.object(Configuration, 'find_default_config', lambda self: conf_file):
-        im = InventoryManager(conf_file)
-        local_config = {'mount': 'default', 'subdirectory': 'dir1'}
-        ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', storage_type="local_filesystem",
-                               backend_config=local_config, description="my dataset 1")
+    im = InventoryManager()
+    local_config = {'mount': 'default', 'subdirectory': 'dir1'}
+    ds = im.create_dataset(USERNAME, USERNAME, 'dataset-1', storage_type="local_filesystem",
+                           backend_config=local_config, description="my dataset 1")
 
     yield ds, working_dir, ds.git.repo.head.commit.hexsha
 
@@ -92,7 +102,7 @@ def mock_dataset_with_local_data():
 
 
 @pytest.fixture()
-def mock_dataset_with_manifest(mock_dataset_with_cache_dir):
+def mock_dataset_with_manifest(mock_dataset_with_cache_dir) -> Iterable[Tuple['Dataset', Manifest, str]]:
     """A pytest fixture that creates a dataset in a temp working dir and provides a cache manager"""
     m = Manifest(mock_dataset_with_cache_dir[0], USERNAME)
     m.link_revision()
@@ -102,31 +112,29 @@ def mock_dataset_with_manifest(mock_dataset_with_cache_dir):
 
 
 @pytest.fixture()
-def mock_dataset_with_manifest_bg_tests(mock_config_file_background_tests):
+def mock_dataset_with_manifest_bg_tests(mock_config_file_background_tests) -> Iterable[Tuple['Dataset', Manifest, str]]:
     """A pytest fixture that creates a dataset in a temp working dir and provides a cache manager, configured with
     additional overrides for dataset tests running in the background"""
-    conf_file, working_dir = mock_config_file_background_tests
-    with patch.object(Configuration, 'find_default_config', lambda self: conf_file):
-        im = InventoryManager(conf_file)
-        ds = im.create_dataset(USERNAME,  USERNAME, 'dataset-1', description="my dataset 1",
-                               storage_type="gigantum_object_v1")
+    config_instance, working_dir = mock_config_file_background_tests
+    im = InventoryManager()
+    ds = im.create_dataset(USERNAME,  USERNAME, 'dataset-1', description="my dataset 1",
+                           storage_type="gigantum_object_v1")
 
-        m = Manifest(ds, USERNAME)
-        m.link_revision()
+    m = Manifest(ds, USERNAME)
+    m.link_revision()
 
-        # yield dataset, manifest, working_dir
-        yield ds, m, working_dir
+    # yield dataset, manifest, working_dir
+    yield ds, m, working_dir
 
 
 @pytest.fixture()
-def mock_legacy_dataset(mock_dataset_with_cache_dir):
+def mock_legacy_dataset(mock_dataset_with_cache_dir) -> Iterable[Tuple['Dataset', Manifest, str]]:
     """A pytest fixture that imports the legacy dataset"""
     archive_path = os.path.join(resource_filename('gtmcore.dataset.tests', 'data'), 'test-legacy-dataset.zip')
     temp_path = os.path.join(tempfile.gettempdir(), 'test-legacy-dataset.zip')
     shutil.copyfile(archive_path, temp_path)
-    conf_file = mock_dataset_with_cache_dir[0].client_config.config_file
     import_dataset_from_zip(archive_path=temp_path, username=USERNAME,
-                            owner=USERNAME, config_file=conf_file)
+                            owner=USERNAME)
 
     im = InventoryManager()
     ds = im.load_dataset(USERNAME, USERNAME, 'test-legacy-dataset')
@@ -169,14 +177,14 @@ def mock_public_bucket():
         yield bucket
 
 
-def helper_append_file(cache_dir, revision, rel_path, content):
+def helper_append_file(cache_dir, revision, rel_path, content) -> None:
     if not os.path.exists(os.path.join(cache_dir, revision)):
         os.makedirs(os.path.join(cache_dir, revision))
     with open(os.path.join(cache_dir, revision, rel_path), 'at') as fh:
         fh.write(content)
 
 
-def helper_write_big_file(cache_dir, revision, rel_path, content):
+def helper_write_big_file(cache_dir, revision, rel_path, content) -> None:
     if not os.path.exists(os.path.join(cache_dir, revision)):
         os.makedirs(os.path.join(cache_dir, revision))
     with open(os.path.join(cache_dir, revision, rel_path), 'wt') as fh:
@@ -186,7 +194,7 @@ def helper_write_big_file(cache_dir, revision, rel_path, content):
         fh.write(content * 250000000)
 
 
-def helper_compress_file(source, destination):
+def helper_compress_file(source, destination) -> None:
     with open(source, "rb") as src_file:
         with open(destination, mode="wb") as compressed_file:
             snappy.stream_compress(src_file, compressed_file)

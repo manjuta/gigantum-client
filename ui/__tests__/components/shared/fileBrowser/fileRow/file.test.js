@@ -6,7 +6,7 @@ import path from 'path';
 // data
 import codeData from 'Tests/components/labbook/code/__relaydata__/CodeBrowser.json';
 // components
-import File from 'Components/shared/fileBrowser/fileRow/File';
+import File from 'Pages/repository/shared/fileBrowser/fileRow/File';
 
 const edge = codeData.data.labbook.code.allFiles.edges[1];
 const filename = path.basename(edge.node.key);

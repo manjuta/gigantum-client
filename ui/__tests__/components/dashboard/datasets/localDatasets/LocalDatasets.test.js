@@ -12,7 +12,7 @@ import json from './__relaydata__/LocalDatasets.json';
 // store
 import store from 'JS/redux/store';
 // components
-import LocalDatasets from 'Components/dashboard/datasets/localDatasets/LocalDatasets';
+import LocalDatasets from 'Pages/dashboard/datasets/localDatasets/LocalDatasets';
 
 const fixtures = {
   auth: () => {},

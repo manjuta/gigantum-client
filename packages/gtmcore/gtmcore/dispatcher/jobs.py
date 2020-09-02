@@ -34,22 +34,6 @@ def publish_repository(repository: Repository, username: str, access_token: str,
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting publish_repository({str(repository)})")
 
-    def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
-                        percent_complete: Optional[float] = None):
-        """Method to update the job's metadata and provide feedback to the UI"""
-        current_job = get_current_job()
-        if not current_job:
-            return
-        if has_failures:
-            current_job.meta['has_failures'] = has_failures
-        if failure_detail:
-            current_job.meta['failure_detail'] = failure_detail
-        if percent_complete:
-            current_job.meta['percent_complete'] = percent_complete
-
-        current_job.meta['feedback'] = msg
-        current_job.save_meta()
-
     update_feedback("Publish task in queue")
     with repository.lock():
         if isinstance(repository, LabBook):
@@ -66,22 +50,6 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting sync_repository({str(repository)})")
-
-    def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
-                        percent_complete: Optional[float] = None):
-        """Method to update the job's metadata and provide feedback to the UI"""
-        current_job = get_current_job()
-        if not current_job:
-            return
-        if has_failures:
-            current_job.meta['has_failures'] = has_failures
-        if failure_detail:
-            current_job.meta['failure_detail'] = failure_detail
-        if percent_complete:
-            current_job.meta['percent_complete'] = percent_complete
-
-        current_job.meta['feedback'] = msg
-        current_job.save_meta()
 
     try:
         update_feedback("Sync task in queue")
@@ -100,7 +68,7 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
         raise
 
 
-def import_labbook_from_remote(remote_url: str, username: str, config_file: str = None) -> str:
+def import_labbook_from_remote(remote_url: str, username: str) -> str:
     """Return the root directory of the newly imported Project
 
     Args:
@@ -108,7 +76,6 @@ def import_labbook_from_remote(remote_url: str, username: str, config_file: str 
           actual network location for our repository, like "https://username@repo.domain/owner/project.git/", as
           robustly as we can manage.
         username: username for currently logged in user
-        config_file: a copy of the parsed config file
 
     Returns:
         Path to project root directory
@@ -131,7 +98,7 @@ def import_labbook_from_remote(remote_url: str, username: str, config_file: str 
     update_meta(f"Importing Project from {remote.owner_repo!r}...")
 
     try:
-        wf = LabbookWorkflow.import_from_remote(remote, username, config_file)
+        wf = LabbookWorkflow.import_from_remote(remote, username)
     except Exception as e:
         update_meta(f"Could not import Project from {remote.remote_location}.")
         logger.exception(f"(Job {p}) Error on import_labbook_from_remote: {e}")
@@ -157,15 +124,13 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
         raise
 
 
-def import_labboook_from_zip(archive_path: str, username: str, owner: str,
-                             config_file: Optional[str] = None) -> str:
+def import_labbook_from_zip(archive_path: str, username: str, owner: str) -> str:
     """Method to import a labbook from a zip file
 
     Args:
         archive_path(str): Path to the uploaded zip
         username(str): Username
         owner(str): Owner username
-        config_file(str): Optional path to a labmanager config file
 
     Returns:
         str: directory path of imported labbook
@@ -181,11 +146,10 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting import_labbook_from_zip(archive_path={archive_path},"
-                f"username={username}, owner={owner}, config_file={config_file})")
+                f"username={username}, owner={owner})")
 
     try:
         lb = ZipExporter.import_labbook(archive_path, username, owner,
-                                        config_file=config_file,
                                         update_meta=update_meta)
         return lb.root_dir
     except Exception as e:
@@ -399,3 +363,20 @@ def test_incr(path):
     except Exception as e:
         logger.error("Error on test_incr in pid {}: {}".format(os.getpid(), e))
         raise
+
+
+def update_feedback(msg: str, has_failures: Optional[bool] = None, failure_detail: Optional[str] = None,
+                    percent_complete: Optional[float] = None) -> None:
+    """Method to update the job's progress metadata and provide feedback to the UI"""
+    current_job = get_current_job()
+    if not current_job:
+        return
+    if has_failures:
+        current_job.meta['has_failures'] = has_failures
+    if failure_detail:
+        current_job.meta['failure_detail'] = failure_detail
+    if percent_complete:
+        current_job.meta['percent_complete'] = percent_complete
+
+    current_job.meta['feedback'] = msg
+    current_job.save_meta()

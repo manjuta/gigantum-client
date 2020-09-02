@@ -6,7 +6,7 @@ import shutil
 
 from gtmcore.imagebuilder import ImageBuilder
 from gtmcore.environment import ComponentManager, RepositoryManager
-from gtmcore.fixtures import labbook_dir_tree, mock_config_file, setup_index, mock_config_with_repo, mock_labbook, \
+from gtmcore.fixtures import mock_config_file, mock_config_with_repo, mock_labbook, \
     ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV, mock_enabled_iframes
 from gtmcore.environment.bundledapp import BundledAppManager
 
@@ -136,7 +136,7 @@ class TestImageBuilder(object):
     def test_docker_snippet(self, mock_labbook):
         lb = mock_labbook[2]
         package_manager_dir = os.path.join(lb.root_dir, '.gigantum', 'env', 'custom')
-        erm = RepositoryManager(mock_labbook[0])
+        erm = RepositoryManager()
         erm.update_repositories()
         erm.index_repositories()
         cm = ComponentManager(lb)
@@ -156,7 +156,7 @@ class TestImageBuilder(object):
         bam.add_bundled_app(9000, 'dash 2', 'a demo dash app 2', 'python app2.py')
         bam.add_bundled_app(9001, 'dash 3', 'a demo dash app 3', 'python app3.py')
 
-        erm = RepositoryManager(mock_labbook[0])
+        erm = RepositoryManager()
         erm.update_repositories()
         erm.index_repositories()
         cm = ComponentManager(lb)
@@ -177,7 +177,7 @@ class TestImageBuilder(object):
     def test_iframe_support(self, mock_enabled_iframes):
         """Test if the Dockerfile builds with iframe support when enabled"""
         lb = mock_enabled_iframes[2]
-        erm = RepositoryManager(mock_enabled_iframes[0])
+        erm = RepositoryManager()
         erm.update_repositories()
         erm.index_repositories()
         cm = ComponentManager(lb)
@@ -198,7 +198,7 @@ class TestImageBuilder(object):
         """Test if the Dockerfile builds with user defined cas when cert files are available"""
         lb = mock_labbook[2]
 
-        erm = RepositoryManager(mock_labbook[0])
+        erm = RepositoryManager()
         erm.update_repositories()
         erm.index_repositories()
         cm = ComponentManager(lb)
@@ -218,7 +218,7 @@ class TestImageBuilder(object):
             assert line not in docker_lines
 
         # A file without a .crt extension in certificate dir, CA code still shouldn't run
-        certificate_dir_container = os.path.join(lb.client_config.config['git']['working_directory'], 'certificates')
+        certificate_dir_container = os.path.join(lb.client_config.app_workdir, 'certificates')
         os.makedirs(certificate_dir_container, exist_ok=True)
         with open(os.path.join(certificate_dir_container, 'test.txt'), 'wt') as tf:
             tf.write("dummy file")
@@ -229,7 +229,7 @@ class TestImageBuilder(object):
             assert line not in docker_lines
 
         # A file WITH a .crt extension in certificate dir, CA code SHOULD run
-        certificate_dir_container = os.path.join(lb.client_config.config['git']['working_directory'], 'certificates')
+        certificate_dir_container = os.path.join(lb.client_config.app_workdir, 'certificates')
         with open(os.path.join(certificate_dir_container, 'myCA.crt'), 'wt') as tf:
             tf.write("a faked CA file")
 

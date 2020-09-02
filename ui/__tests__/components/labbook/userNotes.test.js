@@ -1,4 +1,4 @@
-import UserNote from 'Components/labbook/UserNote';
+import UserNote from 'Pages/repository/labbook/UserNote';
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { mount, shallow } from 'enzyme';

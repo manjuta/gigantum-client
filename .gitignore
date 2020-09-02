@@ -122,3 +122,6 @@ testing/chromedriver.exe
 *.swp
 /changelog/changelog.md
 /changelog/changelog.json
+/testing/reports
+/testing/g-venv
+/testing/configuration/credentials.json

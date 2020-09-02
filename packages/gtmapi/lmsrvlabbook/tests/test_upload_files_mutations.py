@@ -3,7 +3,6 @@ import io
 import math
 import pprint
 import tempfile
-import pytest
 import random
 
 from graphene.test import Client
@@ -13,24 +12,7 @@ from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.files import FileOperations
 from gtmcore.fixtures import remote_labbook_repo, mock_config_file
 from lmsrvcore.middleware import DataloaderMiddleware
-from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
-
-
-@pytest.fixture()
-def mock_create_labbooks(fixture_working_dir):
-    # Create a labbook in the temporary directory
-    im = InventoryManager(fixture_working_dir[0])
-    lb = im.create_labbook("default", "default", "labbook1", description="Cats labbook 1")
-
-    # Create a file in the dir
-    with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
-        sf.write("1234567")
-        sf.seek(0)
-    FileOperations.insert_file(lb, 'code', sf.name)
-
-    assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'sillyfile'))
-    # name of the config file, temporary working directory, the schema
-    yield fixture_working_dir
+from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir, mock_create_labbooks
 
 
 class TestUploadFilesMutations(object):
@@ -62,7 +44,7 @@ class TestUploadFilesMutations(object):
 
         target_file = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks',
                                    'labbook1', 'code', 'newdir', "myValidFile.dat")
-        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
+        lb = InventoryManager().load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         txid = "000-unitest-transaction"
@@ -160,7 +142,7 @@ class TestUploadFilesMutations(object):
             os.remove(target_file)
         except:
             pass
-        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
+        lb = InventoryManager().load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         with open(test_file, 'rb') as tf:
@@ -368,7 +350,7 @@ class TestUploadFilesMutations(object):
         r = client.execute(complete_query, context_value=DummyContext(file))
         assert 'errors' not in r
 
-        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
+        lb = InventoryManager().load_labbook('default', 'default', 'labbook1')
 
         with open(test_file, 'rb') as tf:
             with open(os.path.join(lb.root_dir, 'code', 'myValidFile.dat'), 'rb') as nf:
@@ -399,7 +381,7 @@ class TestUploadFilesMutations(object):
 
         target_file = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks',
                                    'labbook1', 'code', 'newdir', "myEmptyFile.dat")
-        lb = InventoryManager(mock_create_labbooks[0]).load_labbook('default', 'default', 'labbook1')
+        lb = InventoryManager().load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/newdir', create_activity_record=True)
 
         txid = "000-unitest-transaction"

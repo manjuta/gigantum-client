@@ -1,3 +1,4 @@
+from typing import Tuple
 import pytest
 import tempfile
 import os
@@ -8,13 +9,13 @@ from flask import Flask
 import flask
 import time
 import redis
-from mock import patch
 import responses
 from graphene.test import Client
+from gtmcore.files import FileOperations
 
 from gtmcore.container.local_container import get_docker_client
 from gtmcore.environment import RepositoryManager
-from gtmcore.configuration import Configuration
+from gtmcore.configuration.configuration import Configuration, deep_update
 from gtmcore.auth.identity import get_identity_manager
 from gtmcore.environment.bundledapp import BundledAppManager
 
@@ -32,6 +33,7 @@ from lmsrvlabbook.api.query import LabbookQuery
 from lmsrvlabbook.api.mutation import LabbookMutations
 
 from gtmcore.fixtures.datasets import helper_append_file
+from gtmcore.fixtures.fixtures import _create_temp_work_dir
 from gtmcore.dataset.cache import get_cache_manager_class
 from gtmcore.dataset import Manifest
 import gtmcore
@@ -56,33 +58,6 @@ def mock_enable_unmanaged_for_testing():
     yield
 
 
-def _create_temp_work_dir(lfs_enabled: bool = True):
-    """Helper method to create a temporary working directory and associated config file"""
-    # Create a temporary working directory
-    temp_dir = os.path.join(tempfile.gettempdir(), uuid.uuid4().hex)
-    os.makedirs(temp_dir)
-
-    config = Configuration()
-    # Make sure the "test" environment components are always used
-    config.config["environment"]["repo_url"] = ["https://github.com/gigantum/base-images-testing.git"]
-    config.config["flask"]["DEBUG"] = False
-    # Set the working dir to the new temp dir
-    config.config["git"]["working_directory"] = temp_dir
-    config.config["git"]["lfs_enabled"] = lfs_enabled
-    # Set the auth0 client to the test client (only contains 1 test user and is partitioned from prod)
-    config.config["auth"]["audience"] = "io.gigantum.api.dev"
-    config.config["auth"]["client_id"] = "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
-    config_file = os.path.join(temp_dir, "temp_config.yaml")
-    config.save(config_file)
-    os.environ['HOST_WORK_DIR'] = temp_dir
-
-    # Create upload folder
-    if not os.path.exists(config.upload_dir):
-        os.makedirs(config.upload_dir)
-
-    return config_file, temp_dir
-
-
 class EnvironMock(object):
     """A simple class to mock the Flask environ object so you can have a token"""
     def __init__(self):
@@ -101,32 +76,33 @@ def fixture_working_dir():
     """A pytest fixture that creates a temporary working directory, config file, schema, and local user identity
     """
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
+    config_instance, temp_dir = _create_temp_work_dir()
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            flask.g.access_token = "afakeaccesstoken"
-            flask.g.id_token = "afakeidtoken"
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.access_token = "afakeaccesstoken"
+        flask.g.id_token = "afakeidtoken"
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
-            # name of the config file, temporary working directory, the schema
-            yield config_file, temp_dir, client, schema
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
+                        context_value=ContextMock())
+        # name of the config file, temporary working directory (for the current server), the schema
+        yield config_instance, temp_dir, client, schema
 
     # Remove the temp_dir
+    config_instance.clear_cached_configuration()
     shutil.rmtree(temp_dir)
 
 
@@ -143,33 +119,33 @@ def fixture_working_dir_lfs_disabled():
     """A pytest fixture that creates a temporary working directory, config file, schema, and local user identity
     """
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir(lfs_enabled=False)
+    config_instance, temp_dir = _create_temp_work_dir(lfs_enabled=False)
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            flask.g.access_token = "afakeaccesstoken"
-            flask.g.id_token = "afakeidtoken"
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.access_token = "afakeaccesstoken"
+        flask.g.id_token = "afakeidtoken"
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
-                            context_value=ContextMock())
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
+                        context_value=ContextMock())
 
-            yield config_file, temp_dir, client, schema  # name of the config file, temporary working directory, the schema
+        yield config_instance, temp_dir, client, schema
 
     # Remove the temp_dir
+    config_instance.clear_cached_configuration()
     shutil.rmtree(temp_dir)
 
 
@@ -180,38 +156,39 @@ def fixture_working_dir_env_repo_scoped():
     Class scope modifier attached
     """
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
+    config_instance, temp_dir = _create_temp_work_dir()
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
     # get environment data and index
-    erm = RepositoryManager(config_file)
+    erm = RepositoryManager()
     erm.update_repositories()
     erm.index_repositories()
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            flask.g.access_token = "afakeaccesstoken"
-            flask.g.id_token = "afakeidtoken"
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.access_token = "afakeaccesstoken"
+        flask.g.id_token = "afakeidtoken"
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()], context_value=ContextMock())
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()],
+                        context_value=ContextMock())
 
-            # name of the config file, temporary working directory, the schema
-            yield config_file, temp_dir, client, schema
+        # name of the config file, temporary working directory (for current server), the schema
+        yield config_instance, temp_dir, client, schema
 
     # Remove the temp_dir
+    config_instance.clear_cached_configuration()
     shutil.rmtree(temp_dir)
 
 
@@ -226,16 +203,16 @@ def fixture_working_dir_populated_scoped():
     redis.Redis(db=7).flushdb()
 
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
+    config_instance, temp_dir = _create_temp_work_dir()
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
     # Create a bunch of lab books
-    im = InventoryManager(config_file)
+    im = InventoryManager()
 
     im.create_labbook('default', 'default', "labbook1", description="Cats labbook 1")
     time.sleep(1.1)
@@ -266,24 +243,25 @@ def fixture_working_dir_populated_scoped():
 
     im.create_labbook('test3', 'test3', "labbook-0", description="This should not show up.")
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            flask.g.access_token = "afakeaccesstoken"
-            flask.g.id_token = "afakeidtoken"
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.access_token = "afakeaccesstoken"
+        flask.g.id_token = "afakeidtoken"
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
+                        context_value=ContextMock())
 
-            yield config_file, temp_dir, client, schema
+        yield config_instance, temp_dir, client, schema
 
     # Remove the temp_dir
+    config_instance.clear_cached_configuration()
     shutil.rmtree(temp_dir)
 
 
@@ -294,16 +272,16 @@ def fixture_working_dir_dataset_populated_scoped():
     Class scope modifier attached
     """
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
+    config_instance, temp_dir = _create_temp_work_dir()
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
     # Create a bunch of lab books
-    im = InventoryManager(config_file)
+    im = InventoryManager()
 
     im.create_dataset('default', 'default', "dataset2", storage_type="gigantum_object_v1", description="Cats 2")
     time.sleep(1.1)
@@ -340,25 +318,25 @@ def fixture_working_dir_dataset_populated_scoped():
     # Flush Redis cache for Repo info
     DatasetCacheController().clear_all()
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            flask.g.access_token = "afakeaccesstoken"
-            flask.g.id_token = "afakeidtoken"
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.access_token = "afakeaccesstoken"
+        flask.g.id_token = "afakeidtoken"
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
-                            context_value=ContextMock())
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()],
+                        context_value=ContextMock())
 
-            yield config_file, temp_dir, client, schema
+        yield config_instance, temp_dir, client, schema
 
     # Remove the temp_dir
+    config_instance.clear_cached_configuration()
     shutil.rmtree(temp_dir)
 
 
@@ -369,16 +347,16 @@ def fixture_single_dataset():
     Class scope modifier attached
     """
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
+    config_instance, temp_dir = _create_temp_work_dir()
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
     # Create a bunch of lab books
-    im = InventoryManager(config_file)
+    im = InventoryManager()
 
     ds = im.create_dataset('default', 'default', "test-dataset", storage_type="gigantum_object_v1", description="Cats 2")
     m = Manifest(ds, 'default')
@@ -394,95 +372,111 @@ def fixture_single_dataset():
     helper_append_file(cache_mgr.cache_root, revision, "other_dir/test5.txt", "fdghdfgsa")
     m.update()
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            flask.g.access_token = "afakeaccesstoken"
-            flask.g.id_token = "afakeidtoken"
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.access_token = "afakeaccesstoken"
+        flask.g.id_token = "afakeidtoken"
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), RepositoryCacheMiddleware()], context_value=ContextMock())
 
-            yield config_file, temp_dir, client, ds, cache_mgr
+        yield config_instance, temp_dir, client, ds, cache_mgr
 
     # Remove the temp_dir
+    config_instance.clear_cached_configuration()
     shutil.rmtree(temp_dir)
 
 
 @pytest.fixture(scope='class')
 def build_image_for_jupyterlab():
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
+    config_instance, temp_dir = _create_temp_work_dir()
 
     # Create user identity
-    insert_cached_identity(temp_dir)
+    insert_cached_identity(config_instance.app_workdir)
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
 
     # get environment data and index
-    erm = RepositoryManager(config_file)
+    erm = RepositoryManager()
     erm.update_repositories()
     erm.index_repositories()
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        # Load User identity into app context
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load User identity into app context
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
 
-        with app.app_context():
-            # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+    with app.app_context():
+        # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
+        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
 
-            # Create a test client
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()],
-                            context_value=ContextMock())
+        # Create a test client
+        client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()],
+                        context_value=ContextMock())
 
-            # Create a labook
-            im = InventoryManager(config_file)
-            lb = im.create_labbook('default', 'unittester', "containerunittestbook",
-                                   description="Testing docker building.")
-            cm = ComponentManager(lb)
-            cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
-            cm.add_packages("pip3", [{"manager": "pip3", "package": "requests", "version": "2.18.4"}])
+        # Create a labook
+        im = InventoryManager()
+        lb = im.create_labbook('default', 'unittester', "containerunittestbook",
+                               description="Testing docker building.")
+        cm = ComponentManager(lb)
+        cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+        cm.add_packages("pip3", [{"manager": "pip3", "package": "requests", "version": "2.18.4"}])
 
-            bam = BundledAppManager(lb)
-            bam.add_bundled_app(9999, 'share', 'A bundled app for testing', "cd /mnt; python3 -m http.server 9999")
+        bam = BundledAppManager(lb)
+        bam.add_bundled_app(9999, 'share', 'A bundled app for testing', "cd /mnt; python3 -m http.server 9999")
 
-            ib = ImageBuilder(lb)
-            ib.assemble_dockerfile(write=True)
+        ib = ImageBuilder(lb)
+        ib.assemble_dockerfile(write=True)
 
-            container_ops = container_for_context(username="default", labbook=lb)
-            # We are not currently concerned with running these tests on the cloud context
-            docker_client = container_ops._client
+        container_ops = container_for_context(username="default", labbook=lb)
+        # We are not currently concerned with running these tests on the cloud context
+        docker_client = container_ops._client
+
+        try:
+            container_ops.build_image()
+            docker_image_id = container_ops._image_id
+
+            # Note: The final field is the owner
+            yield lb, ib, docker_client, docker_image_id, client, "unittester"
+
+        finally:
+            try:
+                docker_client.containers.get(docker_image_id).stop()
+                docker_client.containers.get(docker_image_id).remove()
+            except:
+                pass
 
             try:
-                container_ops.build_image()
-                docker_image_id = container_ops._image_id
+                docker_client.images.remove(docker_image_id, force=True, noprune=False)
+            except:
+                pass
 
-                # Note: The final field is the owner
-                yield lb, ib, docker_client, docker_image_id, client, "unittester"
+            config_instance.clear_cached_configuration()
+            shutil.rmtree(lb.root_dir)
 
-            finally:
-                try:
-                    docker_client.containers.get(docker_image_id).stop()
-                    docker_client.containers.get(docker_image_id).remove()
-                except:
-                    pass
 
-                try:
-                    docker_client.images.remove(docker_image_id, force=True, noprune=False)
-                except:
-                    pass
+@pytest.fixture()
+def mock_create_labbooks(fixture_working_dir):
+    # Create a temporary labbook
+    lb = InventoryManager().create_labbook("default", "default", "labbook1", description="Cats labbook 1")
 
-                shutil.rmtree(lb.root_dir)
+    # Create a file in the dir
+    with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
+        sf.write("1234567")
+        sf.seek(0)
+    FileOperations.insert_file(lb, 'code', sf.name)
+
+    assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'sillyfile'))
+    # name of the config file, temporary working directory, the schema
+    yield fixture_working_dir
 
 
 @pytest.fixture(scope='class')
@@ -511,9 +505,9 @@ def fixture_test_file():
 @pytest.fixture()
 def property_mocks_fixture():
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
-    responses.add(responses.POST, 'https://gigantum.com/api/v1',
+    responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
-    responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects?search=labbook1',
+    responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects?search=labbook1',
                   json=[{
                           "id": 26,
                           "description": "",

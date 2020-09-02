@@ -184,9 +184,9 @@ class FileOperations(object):
 
 
         Args:
-            labbook(LabBook): Subject LabBook
-            section(str): Section name (code, input, output)
-            relative_paths(list(str)): a list of relative paths from labbook root to target
+            labbook: Subject LabBook
+            section: Section name (code, input, output)
+            relative_paths: a list of relative paths from labbook root to target
 
         Returns:
             None
@@ -211,12 +211,13 @@ class FileOperations(object):
     def _make_move_activity_record(cls, labbook: LabBook, section: str, dst_abs_path: str,
                                    commit_msg: str) -> None:
         if os.path.isdir(dst_abs_path):
-            labbook.git.add_all(dst_abs_path)
+            did_add = labbook.git.add_all(dst_abs_path)
         else:
             did_add = labbook.git.add(dst_abs_path)
-            if not did_add:
-                # We don't (and can't!) create activity records for untracked files
-                return
+
+        if not did_add:
+            # We don't (and can't!) create activity records for untracked files
+            return
 
         commit = labbook.git.commit(commit_msg)
         activity_type, activity_detail_type, section_str = labbook.get_activity_type_from_section(section)
@@ -274,7 +275,7 @@ class FileOperations(object):
             labbook.git.remove(src_abs_path, keep_file=True)
             final_dest = shutil.move(src_abs_path, dst_abs_path)
             commit_msg = f"Moved {src_type} `{src_rel_path}` to `{dst_rel_path}`"
-            cls._make_move_activity_record(labbook, section, dst_abs_path, commit_msg)
+            cls._make_move_activity_record(labbook, section, final_dest, commit_msg)
 
             if os.path.isfile(final_dest):
                 t = final_dest.replace(os.path.join(labbook.root_dir, section), '')
