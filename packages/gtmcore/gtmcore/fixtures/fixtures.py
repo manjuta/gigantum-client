@@ -104,7 +104,7 @@ def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True) 
     config.save_to_cache(config.config)
 
     # Return (Configuration instance, ephemeral-working-directory).
-    inventory_dir = os.path.join(unit_test_working_dir, 'test-gigantum-com')
+    inventory_dir = config.get_user_storage_dir()
     os.makedirs(inventory_dir)
     return config, inventory_dir
 

@@ -15,6 +15,7 @@ from confhttpproxy import ProxyRouter, ProxyRouterException
 from flask import Flask, jsonify
 
 import rest_routes
+from lmsrvcore.utilities.migrate import migrate_work_dir_structure_v2
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.dispatcher.jobs import update_environment_repositories
 from gtmcore.configuration import Configuration
@@ -84,6 +85,10 @@ def configure_default_server(config_instance: Configuration) -> None:
         try:
             server_id = config_instance.add_server(default_server)
             config_instance.set_current_server(server_id)
+
+            # Migrate any user dirs if needed. Here we assume all projects belong to the default server, since
+            # at the time it was the only available server.
+            migrate_work_dir_structure_v2(server_id)
         except Exception as err:
             logger.exception(f"Failed to configure default server! Restart Client to try again: {err}")
             # Re-raise the exception so the API doesn't come up

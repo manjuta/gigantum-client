@@ -118,6 +118,15 @@ class Configuration:
         return os.path.join(self.app_workdir, '.labmanager', 'servers')
 
     @property
+    def server_data_dir(self) -> str:
+        """Method to get the server data directory location. This is where each server will store user data
+
+        Returns:
+            str
+        """
+        return os.path.join(self.app_workdir, 'servers')
+
+    @property
     def upload_dir(self) -> str:
         """Return the location to write temporary data for uploads. It should be within the workdir so copies
         across filesystems can be avoided.
@@ -192,7 +201,7 @@ class Configuration:
         if not server_config:
             server_config = self.get_server_configuration()
 
-        return os.path.join(self.app_workdir, server_config.id)
+        return os.path.join(self.server_data_dir, server_config.id)
 
     def _load_config(self, config_file: Optional[str] = None) -> Dict:
         """Load the configuration via file or cache"""

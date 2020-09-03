@@ -386,8 +386,8 @@ class TestIdentityLocal(object):
                                             cleanup_auto_import):
         """Test login, but the user already logged into this instance"""
         # fake the user already existing by creating the user directory
-        working_dir = mock_config_file_with_auth_first_login[1]
-        os.makedirs(os.path.join(working_dir, "johndoe"))
+        config = mock_config_file_with_auth_first_login[0]
+        os.makedirs(os.path.join(config.get_user_storage_dir(), "johndoe"))
 
         config = Configuration()
         mgr = get_identity_manager(config)
