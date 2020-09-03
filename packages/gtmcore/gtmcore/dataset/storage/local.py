@@ -1,7 +1,6 @@
 import shutil
 import copy
 
-from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Callable, Optional
 import os

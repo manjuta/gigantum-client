@@ -6,7 +6,7 @@ import snappy
 import requests
 import math
 
-from gtmcore.dataset import Dataset
+from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Optional, List, Dict, Callable, NamedTuple
 import os
@@ -533,12 +533,24 @@ class PresignedS3Download(object):
 class GigantumObjectStore(StorageBackend):
     """Backend for fully-managed Gigantum Datasets"""
 
-    def __init__(self) -> None:
+    def __init__(self, namespaced_name: str) -> None:
+        """Configure properties that are used by multiple methods below
+
+        Args:
+            namespaced_name: usually dataset.namespace/dataset.name
+        """
+        super().__init__()
+
+        client_config = Configuration()
+
+        self.configuration = client_config.config['datasets']['backends']['gigantum_object_v1']
+        object_service = client_config.get_server_configuration().object_service_url
+        # The endpoint for the object service
+        self.url = f"{object_service}{namespaced_name}"
+
         # Additional attributes to track processed requests
         self.successful_requests: List = list()
         self.failed_requests: List = list()
-
-        super().__init__()
 
     def _backend_metadata(self) -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
@@ -574,20 +586,19 @@ to Gigantum Cloud will count towards your storage quota and include all versions
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'}
 
-    def prepare_push(self, dataset, objects: List[PushObject]) -> None:
+
+    def prepare_push(self, objects: List[PushObject]) -> None:
         """Gigantum Object Service only requires that the user's tokens have been set
 
         Args:
             dataset: The current dataset instance
-            objects: A list of PushObjects to be pushed
+            objects: TODO DJWC CURRENTLY IGNORED A list of PushObjects to be pushed
 
         Returns:
             None
         """
         # Pre-check auth so it gets cached and speeds up future requests
-        object_service = dataset.client_config.get_server_configuration().object_service_url
-        url = f"{object_service}{dataset.namespace}/{dataset.name}"
-        response = requests.head(url, headers=self._object_service_headers(), timeout=60)
+        response = requests.head(self.url, headers=self._object_service_headers(), timeout=60)
         if response.status_code == 200:
             access_level = response.headers.get('x-access-level')
             if access_level is not None and access_level != 'r':
@@ -610,13 +621,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         Returns:
             None
         """
-        # Pre-check auth so it gets cached and speeds up future requests
-        object_service = dataset.client_config.get_server_configuration().object_service_url
-        if object_service[-1] != '/':
-            # Make sure trailing slash doesn't cause a problem by always including it in the object service URL
-            object_service = object_service + "/"
-        url = f"{object_service}{dataset.namespace}/{dataset.name}"
-        response = requests.head(url, headers=self._object_service_headers(), timeout=60)
+        response = requests.head(self.url, headers=self._object_service_headers(), timeout=60)
         if response.status_code != 200:
             raise IOError("Failed to pull files from Gigantum Cloud. You either do not have access or "
                           "the Dataset does not exist.")
@@ -814,8 +819,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             for worker in workers:
                 worker.cancel()
 
-    def push_objects(self, dataset: Dataset, objects: List[PushObject],
-                     progress_update_fn: Callable) -> PushResult:
+    def push_objects(self, objects: List[PushObject], progress_update_fn: Callable) -> PushResult:
         """High-level method to push objects to the object service/s3
 
         Args:
@@ -832,16 +836,12 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         self.failed_requests = list()
         message = "Successfully synced all objects"
 
-        backend_config = dataset.client_config.config['datasets']['backends']['gigantum_object_v1']
-        upload_chunk_size = backend_config['upload_chunk_size']
-        multipart_chunk_size = backend_config['multipart_chunk_size']
-        num_workers = backend_config['num_workers']
-
-        object_service = dataset.client_config.get_server_configuration().object_service_url
-        object_service_root = f"{object_service}{dataset.namespace}/{dataset.name}"
+        upload_chunk_size = self.configuration['upload_chunk_size']
+        multipart_chunk_size = self.configuration['multipart_chunk_size']
+        num_workers = self.configuration['num_workers']
 
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._run_push_pipeline(object_service_root, self._object_service_headers(), objects,
+        loop.run_until_complete(self._run_push_pipeline(self.url, self._object_service_headers(), objects,
                                                         progress_update_fn=progress_update_fn,
                                                         multipart_chunk_size=multipart_chunk_size,
                                                         upload_chunk_size=upload_chunk_size,
@@ -962,12 +962,11 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             for worker in workers:
                 worker.cancel()
 
-    def pull_objects(self, dataset: Dataset, objects: List[PullObject],
+    def pull_objects(self, objects: List[PullObject],
                      progress_update_fn: Callable) -> PullResult:
         """High-level method to pull objects from the object service/s3
 
         Args:
-            dataset: The current dataset
             objects: A list of PullObjects the enumerate objects to push
             progress_update_fn: A callable with arg "completed_bytes" (int) indicating how many bytes have been
                                 downloaded in since last called
@@ -979,15 +978,11 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         self.failed_requests = list()
         message = "Successfully synced all objects"
 
-        backend_config = dataset.client_config.config['datasets']['backends']['gigantum_object_v1']
-        download_chunk_size = backend_config['download_chunk_size']
-        num_workers = backend_config['num_workers']
-
-        object_service = dataset.client_config.get_server_configuration().object_service_url
-        object_service_root = f"{object_service}{dataset.namespace}/{dataset.name}"
+        download_chunk_size = self.configuration['download_chunk_size']
+        num_workers = self.configuration['num_workers']
 
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._run_pull_pipeline(object_service_root, self._object_service_headers(), objects,
+        loop.run_until_complete(self._run_pull_pipeline(self.url, self._object_service_headers(), objects,
                                                         progress_update_fn=progress_update_fn,
                                                         download_chunk_size=download_chunk_size,
                                                         num_workers=num_workers))

@@ -12,8 +12,8 @@ class TestStorageBackendLocalFilesystem(object):
         ds = mock_dataset_with_local_data[0]
         assert isinstance(ds.backend, LocalFilesystemBackend)
 
-    def test_update_from_local(self, mock_dataset_with_local_dir):
-        ds = mock_dataset_with_local_dir[0]
+    def test_update_from_local(self, mock_dataset_with_local_data):
+        ds = mock_dataset_with_local_data[0]
 
         assert ds.backend.can_update_from_remote() is True
 

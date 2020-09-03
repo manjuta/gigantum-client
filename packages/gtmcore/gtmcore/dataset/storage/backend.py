@@ -5,12 +5,17 @@ from typing import List, Callable, Dict
 import base64
 import asyncio
 
+from gtmcore.configuration import Configuration
 from gtmcore.dataset.io import PullObject, PullResult
 from gtmcore.dataset.manifest.manifest import Manifest
 
 
 class StorageBackend(metaclass=abc.ABCMeta):
-    """Parent class for Dataset storage backends"""
+    """Parent class for Dataset storage backends
+
+    The subclass should provide an ability to check current hashes of local files against known hashes (and optionally
+    remote hashes). A StorageBackend will also provide the basic functionality required to copy data to or from a
+    remote, including authentication."""
 
     def __init__(self):
         # Optional configuration data that is in the form of key-value pairs
