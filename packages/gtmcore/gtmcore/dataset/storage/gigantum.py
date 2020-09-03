@@ -591,7 +591,6 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         """Gigantum Object Service only requires that the user's tokens have been set
 
         Args:
-            dataset: The current dataset instance
             objects: TODO DJWC CURRENTLY IGNORED A list of PushObjects to be pushed
 
         Returns:
@@ -823,7 +822,6 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         """High-level method to push objects to the object service/s3
 
         Args:
-            dataset: The current dataset
             objects: A list of PushObjects the enumerate objects to push
             progress_update_fn: A callable with arg "completed_bytes" (int) indicating how many bytes have been
                                 uploaded in since last called
