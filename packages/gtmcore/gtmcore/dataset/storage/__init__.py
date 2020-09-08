@@ -10,7 +10,7 @@ SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": ("gtmcore.dataset.storage.gi
                               "local_filesystem":   ("gtmcore.dataset.storage.local",    "LocalFilesystemBackend")}
 
 
-def get_storage_backend(storage_type, backend_config: Optional[Dict[str, Any]] = None) -> StorageBackend:
+def get_storage_backend(client_config: Dict[str, Any], storage_type: str, backend_config: Optional[Dict[str, Any]] = None) -> StorageBackend:
     """Return a configured instance of the desired StorageBackend
 
     This function is designed to be called using dict-unpacking like so: get_storage_backend(**
@@ -35,9 +35,9 @@ def get_storage_backend(storage_type, backend_config: Optional[Dict[str, Any]] =
 
     try:
         if backend_config is None:
-            instance = class_for_backend()
+            instance = class_for_backend(client_config)
         else:
-            instance = class_for_backend(**backend_config)
+            instance = class_for_backend(client_config, **backend_config)
         return instance
     except ValueError:
         if backend_config is None:

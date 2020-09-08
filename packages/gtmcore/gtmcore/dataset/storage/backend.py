@@ -17,7 +17,8 @@ class StorageBackend(metaclass=abc.ABCMeta):
     remote hashes). A StorageBackend will also provide the basic functionality required to copy data to or from a
     remote, including authentication."""
 
-    def __init__(self):
+    def __init__(self, client_config: Configuration):
+        """Subclasses should call this __init__() and handle client_config, but may add mandatory parameters to their __init__()"""
         # Optional configuration data that is in the form of key-value pairs
         # No nesting of values is supported
         # Configuration is populated from the Dataset at runtime (via a file and in-memory secrets)

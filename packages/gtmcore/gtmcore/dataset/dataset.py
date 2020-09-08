@@ -3,7 +3,7 @@ import re
 import yaml
 import datetime
 
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema
@@ -25,12 +25,12 @@ class Dataset(Repository):
     _default_activity_detail_type = ActivityDetailType.DATASET
     _default_activity_section = "Dataset Root"
 
-    def __init__(self, storage_type: str, backend_config: Optional[Dict[str, str]] = None,
+    def __init__(self, storage_type: str, backend_config: Optional[Dict[str, Any]] = None,
                  namespace: Optional[str] = None, author: Optional[GitAuthor] = None) -> None:
         super().__init__(author)
         self.namespace = namespace
         self._storage_type = storage_type
-        self._backend = get_storage_backend(storage_type, backend_config)
+        self._backend = get_storage_backend(self.client_config, storage_type, backend_config)
 
     def __str__(self):
         if self._root_dir:

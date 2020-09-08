@@ -8,7 +8,7 @@ import math
 
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage.backend import StorageBackend
-from typing import Optional, List, Dict, Callable, NamedTuple
+from typing import Optional, List, Dict, Callable, NamedTuple, Any
 import os
 
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
@@ -533,15 +533,13 @@ class PresignedS3Download(object):
 class GigantumObjectStore(StorageBackend):
     """Backend for fully-managed Gigantum Datasets"""
 
-    def __init__(self, namespaced_name: str) -> None:
+    def __init__(self, client_config: Configuration, namespaced_name: str) -> None:
         """Configure properties that are used by multiple methods below
 
         Args:
             namespaced_name: usually dataset.namespace/dataset.name
         """
-        super().__init__()
-
-        client_config = Configuration()
+        super().__init__(client_config)
 
         self.configuration = client_config.config['datasets']['backends']['gigantum_object_v1']
         object_service = client_config.get_server_configuration().object_service_url

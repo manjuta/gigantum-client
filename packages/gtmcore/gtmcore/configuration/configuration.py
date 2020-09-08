@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import (Any, Dict, Optional, Mapping, Union, MutableMapping, List, Tuple)
 import os
 import yaml
@@ -13,6 +14,7 @@ from urllib.parse import urljoin
 
 from gtmcore.configuration.server import ServerConfigData, dict_to_server_config
 from gtmcore.configuration.authentication import Auth0AuthConfiguration, dict_to_auth_config
+from gtmcore.exceptions import GigantumException
 
 from gtmcore.logging import LMLogger
 logger = LMLogger.get_logger()
@@ -520,3 +522,23 @@ class Configuration:
             data = file_data['auth']
 
         return dict_to_auth_config(data)
+
+    @staticmethod
+    def get_host_work_path() -> Path:
+        """What's the path prefix we should use to find our Gigantum files on the Host?
+
+        This is used for specifying mount-points into Projects among other things
+
+        # DJWC TODO - make an issue to go through the codebase and replace hard-coded / idiosyncratic exmaples with
+        #  this function
+
+        Returns:
+            A Path object suitable to the OS on the host (e.g., WindowsPath if on a Windows Host)
+        """
+
+        try:
+            host_dir = os.environ['HOST_WORK_DIR']
+        except KeyError:
+            raise GigantumException('Gigantum Client misconfigured: HOST_WORK_DIR not set')
+
+        return Path(host_dir).expanduser()

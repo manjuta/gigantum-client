@@ -9,8 +9,21 @@ from gtmcore.fixtures.datasets import mock_dataset_with_local_data
 
 class TestStorageBackendLocalFilesystem(object):
     def test_backend_configured(self, mock_dataset_with_local_data):
+        """In the fixture, we create a dataset and just ensure that it finishes without error"""
         ds = mock_dataset_with_local_data[0]
         assert isinstance(ds.backend, LocalFilesystemBackend)
+
+    @pytest.mark.skip
+    def test_load_existing_local_dataset(self, mock_dataset_with_local_data):
+        """Can we load a dataset from the filesystem?"""
+        pass
+
+    @pytest.mark.skip
+    def test_configured_local_mount(self):
+        """Can we create a dataset on a configured mount-point?"""
+        # This will be annoying to test because it depends on a different launch configuration.
+        # It seems reasonable to just configure the client with a host mount from a temp directory or something...
+        pass
 
     def test_update_from_local(self, mock_dataset_with_local_data):
         ds = mock_dataset_with_local_data[0]

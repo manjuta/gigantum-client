@@ -1,10 +1,16 @@
+"""Local-only Datasets are mounted into your Projects from the host machine. This allows for great flexiblity, but you
+are responsible for managing data files - syncrhonization logic is implemented *only for metadata*.
+"""
+
 import shutil
 import copy
+from pathlib import Path
 
 from gtmcore.dataset.storage.backend import StorageBackend
-from typing import Callable, Optional
+from typing import Callable, Optional, Dict, Any
 import os
 
+from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
@@ -13,6 +19,26 @@ logger = LMLogger.get_logger()
 
 
 class LocalFilesystemBackend(StorageBackend):
+
+    def __init__(self, client_config: Configuration, mount: str, subdirectory: Optional[str] = None):
+        """Configure the local data directory for mounting into the Project container
+
+        Args:
+            client_config: Configuration() instance
+            mount: named mount-point, note that 'default' is reserved and points to <gigantum dir>/local_data
+            subdirectory: a subdirectory within the mount, will be created on Project launch if it doesn't exist
+              (validation should be handled prior to instantiating the backend)
+        """
+        super().__init__(client_config)
+
+        if mount == 'default':
+            host_dir = client_config.get_host_work_path()
+            self.host_mount_path = host_dir / 'local_data'
+        else:
+            raise GigantumException("TODO DJWC - still need to implement arbitrary mount configuration")
+
+        if subdirectory is not None:
+            self.host_mount_path /= subdirectory
 
     def _backend_metadata(self) -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
@@ -23,39 +49,13 @@ class LocalFilesystemBackend(StorageBackend):
         Returns:
             dict
         """
-        return {"storage_type": "local_filesystem",
-                "name": "Local Filesystem",
-                "description": "Dataset type to use locally stored data. No files will sync with this dataset type.",
-                "tags": ["local"],
-                "icon": "local_filesystem.png",
+        return {"storage_type": "gigantum_object_v1",
+                "name": "Gigantum Cloud",
+                "description": "Dataset storage provided by your Gigantum account supporting files up to 5GB in size",
+                "tags": ["gigantum"],
+                "icon": "gigantum_object_storage.png",
                 "url": "https://docs.gigantum.com",
-                "readme": """Local Filesystem datasets simply mount a local directory for use inside your projects. 
-For security reasons, only folders located the 'local_data' directory inside of your Gigantum working directory 
-can be specified as the dataset root folder. This means you either need to place data there or symlink it. To learn
-more, check out the docs here: [https://docs.gigantum.com](https://docs.gigantum.com)
-"""}
-
-    def _get_local_data_dir(self) -> str:
-        """Method to get the local data directory inside the current container
-
-        Returns:
-            str
-        """
-        working_dir = Configuration().config['git']['working_directory']
-        data_dir = self.configuration.get("Data Directory")
-        if not data_dir:
-            raise ValueError("Data Directory must be specified.")
-
-        return os.path.join(working_dir, 'local_data', data_dir)
-
-    @staticmethod
-    def can_update_from_remote() -> bool:
-        """Property indicating if this backend can automatically update its contents to the latest on the remote
-
-        Returns:
-            bool
-        """
-        return False
+                "readme": __doc__}
 
     def update_from_local(self, dataset, status_update_fn: Callable,
                           verify_contents: bool = False,
