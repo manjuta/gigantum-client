@@ -6,6 +6,7 @@ import shutil
 import copy
 from pathlib import Path
 
+from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Callable, Optional, Dict, Any
 import os
@@ -57,7 +58,8 @@ class LocalFilesystemBackend(StorageBackend):
                 "url": "https://docs.gigantum.com",
                 "readme": __doc__}
 
-    def update_from_local(self, dataset, status_update_fn: Callable,
+    # TODO DJWC Moving logic up to dataset_jobs
+    def update_from_local(self, dataset: Dataset, status_update_fn: Callable,
                           verify_contents: bool = False,
                           status_result: Optional[StatusResult] = None) -> None:
         """Method to update the dataset manifest for changed files that exists locally

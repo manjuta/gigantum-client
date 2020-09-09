@@ -66,50 +66,51 @@ class StorageBackend(metaclass=abc.ABCMeta):
 
         return metadata
 
-    def hash_file_key_list(self, dataset, keys):
-        m = Manifest(dataset, self.configuration.get('username'))
-        loop = asyncio.get_event_loop()
-        hash_task = asyncio.create_task(m.hasher.hash(keys))
-        loop.run_until_complete(hash_task)
-        return hash_task.result()
+    # TODO DJWC delete these commented functions
+    # def hash_file_key_list(self, dataset, keys):
+    #     m = Manifest(dataset, self.configuration.get('username'))
+    #     loop = asyncio.get_event_loop()
+    #     hash_task = asyncio.create_task(m.hasher.hash(keys))
+    #     loop.run_until_complete(hash_task)
+    #     return hash_task.result()
 
-    def verify_contents(self, dataset, status_update_fn: Callable) -> List[str]:
-        """Method to verify the hashes of all local files and indicate if they have changed
+    # def verify_contents(self, dataset, status_update_fn: Callable) -> List[str]:
+    #     """Method to verify the hashes of all local files and indicate if they have changed
 
-        Args:
-            dataset: Dataset object
-            status_update_fn: A callable, accepting a string for logging/providing status to the UI
+    #     Args:
+    #         dataset: Dataset object
+    #         status_update_fn: A callable, accepting a string for logging/providing status to the UI
 
-        Returns:
-            list
-        """
-        if 'username' not in self.configuration:
-            raise ValueError("Dataset storage backend requires current logged in username to verify contents")
+    #     Returns:
+    #         list
+    #     """
+    #     if 'username' not in self.configuration:
+    #         raise ValueError("Dataset storage backend requires current logged in username to verify contents")
 
-        m = Manifest(dataset, self.configuration.get('username'))
-        keys_to_verify = list()
-        for item in m.manifest:
-            if os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, item)):
-                # File exists locally
-                keys_to_verify.append(item)
+    #     m = Manifest(dataset, self.configuration.get('username'))
+    #     keys_to_verify = list()
+    #     for item in m.manifest:
+    #         if os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, item)):
+    #             # File exists locally
+    #             keys_to_verify.append(item)
 
-        # re-hash files
-        status_update_fn(f"Validating contents of {len(keys_to_verify)} files. Please wait.")
-        updated_hashes = self.hash_file_key_list(dataset, keys_to_verify)
+    #     # re-hash files
+    #     status_update_fn(f"Validating contents of {len(keys_to_verify)} files. Please wait.")
+    #     updated_hashes = self.hash_file_key_list(dataset, keys_to_verify)
 
-        modified_items = list()
-        for key, new_hash in zip(keys_to_verify, updated_hashes):
-            item = m.manifest.get(key)
-            if item:
-                if new_hash != item.get('h'):
-                    modified_items.append(key)
+    #     modified_items = list()
+    #     for key, new_hash in zip(keys_to_verify, updated_hashes):
+    #         item = m.manifest.get(key)
+    #         if item:
+    #             if new_hash != item.get('h'):
+    #                 modified_items.append(key)
 
-        if modified_items:
-            status_update_fn(f"Integrity check complete. {len(modified_items)} files have been modified.")
-        else:
-            status_update_fn(f"Integrity check complete. No files have been modified.")
+    #     if modified_items:
+    #         status_update_fn(f"Integrity check complete. {len(modified_items)} files have been modified.")
+    #     else:
+    #         status_update_fn(f"Integrity check complete. No files have been modified.")
 
-        return modified_items
+    #     return modified_items
 
 
 class ExternalProtectedStorage(StorageBackend):

@@ -13,6 +13,13 @@ class SmartHash(object):
     """Class to handle file hashing that is operationally optimized for Gigantum"""
 
     def __init__(self, root_dir: str, file_cache_root: str, current_revision: str) -> None:
+        """
+
+        Args:
+            root_dir: The location of the dataset (either top-level or inside a Project)
+            file_cache_root:
+            current_revision:
+        """
         self.root_dir = root_dir
         self.file_cache_root = file_cache_root
         self.current_revision = current_revision
@@ -136,8 +143,8 @@ class SmartHash(object):
         relative file path || size in bytes || mtime
 
         Args:
-            path_list:
-            save:
+            path_list: Strings specifying files in the dataset
+            save: Update the on-disk hash cache?
 
         Returns:
 
@@ -189,7 +196,7 @@ class SmartHash(object):
         """Method to compute the blake2b hash of a file's contents.
 
         Args:
-            path_list:
+            path_list: path names for files to hash / compare
 
         Returns:
             list

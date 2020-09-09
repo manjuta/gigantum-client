@@ -1,3 +1,11 @@
+"""Gigantum Cloud Datasets are backed by a scalable object storage service that is linked to
+your Gigantum account and credentials. It provides efficient storage at the file level and works seamlessly with the
+Client.
+
+This dataset type is fully managed. That means as you modify data, each version will be tracked independently. Syncing
+to Gigantum Cloud will count towards your storage quota and include all versions of files.
+"""
+
 import asyncio
 import aiohttp
 import aiofiles
@@ -565,13 +573,7 @@ class GigantumObjectStore(StorageBackend):
                 "tags": ["gigantum"],
                 "icon": "gigantum_object_storage.png",
                 "url": "https://docs.gigantum.com",
-                "readme": """Gigantum Cloud Datasets are backed by a scalable object storage service that is linked to
-your Gigantum account and credentials. It provides efficient storage at the file level and works seamlessly with the
-Client.
-
-This dataset type is fully managed. That means as you modify data, each version will be tracked independently. Syncing
-to Gigantum Cloud will count towards your storage quota and include all versions of files.
-"""}
+                "readme": __doc__}
 
     def _object_service_headers(self) -> dict:
         """Method to generate the request headers, including authorization information
@@ -605,15 +607,14 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         raise IOError("Failed to push files to Gigantum Cloud. You either have read-only permissions or "
                       "the Dataset does not exist.")
 
-    def finalize_push(self, dataset) -> None:
+    def finalize_push(self) -> None:
         pass
 
-    def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
+    def prepare_pull(self, objects: List[PullObject]) -> None:
         """Gigantum Object Service only requires that the user's tokens have been set
 
         Args:
-            dataset: The current dataset instance
-            objects: A list of PushObjects to be pulled
+            objects: TODO DJWC CURRENTLY IGNORED A list of PullObjects to be pulled
 
         Returns:
             None
@@ -623,7 +624,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             raise IOError("Failed to pull files from Gigantum Cloud. You either do not have access or "
                           "the Dataset does not exist.")
 
-    def finalize_pull(self, dataset) -> None:
+    def finalize_pull(self) -> None:
         pass
 
     async def _process_standard_upload(self, queue: asyncio.LifoQueue, session: aiohttp.ClientSession,

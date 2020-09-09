@@ -531,6 +531,57 @@ def update_local_dataset(logged_in_username: str, dataset_owner: str, dataset_na
         if not isinstance(backend, LocalFilesystemBackend):
             raise ValueError("Can only auto-update unmanaged dataset types")
 
+        # XXX moved/modified from local backend.update_from_local()
+
+        m = Manifest(ds, logged_in_username)
+
+        update_meta("Updating Dataset manifest from local file state.")
+
+        status_result = m.status()
+
+        if (status_result is not None) and (status_result.modified is not None):
+            modified_keys = copy.deepcopy(status_result.modified)
+        else:
+            modified_keys = list()
+
+        if verify_contents:
+            modified_keys.extend(self.verify_contents(dataset, status_update_fn))
+
+        # Create StatusResult to force modifications
+        if status_result:
+            created_result = copy.deepcopy(status_result.created)
+            # Check if any directories got created
+            for key in status_result.created:
+                if key[-1] != '/':
+                    # a file
+                    if os.path.dirname(key) not in m.manifest:
+                        # Add the directory to the manifest
+                        created_result.append(f"{os.path.dirname(key)}/")
+
+            created_result = list(set(created_result))
+            if '/' in created_result:
+                created_result.remove('/')
+
+            # Combine a previous StatusResult object (typically from "update_from_remote")
+            status = StatusResult(created=created_result,
+                                  modified=modified_keys,
+                                  deleted=status_result.deleted)
+        else:
+            status = StatusResult(created=[], modified=modified_keys, deleted=[])
+
+        # Update the manifest
+        previous_revision = m.dataset_revision
+
+        m.update(status)
+        m.create_update_activity_record(status)
+
+        # Link the revision dir
+        m.link_revision()
+        if os.path.isdir(os.path.join(m.cache_mgr.cache_root, previous_revision)):
+            shutil.rmtree(os.path.join(m.cache_mgr.cache_root, previous_revision))
+
+        status_update_fn("Update complete.")
+        # XXX Original fn call
         backend.update_from_local(ds, update_meta, verify_contents=True)
 
     except Exception as err:

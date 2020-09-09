@@ -39,7 +39,7 @@ StatusResult = namedtuple('StatusResult', ['created', 'modified', 'deleted'])
 
 
 class Manifest(object):
-    """Class to handle file file manifest"""
+    """Class to handle a file manifest, including known hashes"""
 
     def __init__(self, dataset: 'Dataset', logged_in_username: Optional[str] = None) -> None:
         self.dataset = dataset
@@ -170,7 +170,7 @@ class Manifest(object):
         with open(os.path.join(push_dir, revision), 'at') as fh:
             fh.write(f"{rel_path},{obj}\n")
 
-    def get_change_type(self, path) -> FileChangeType:
+    def get_change_type(self, path, fast_hash: bool = True) -> FileChangeType:
         """Helper method to get the type of change from the manifest/fast hash
 
         Args:
@@ -179,13 +179,19 @@ class Manifest(object):
         Returns:
 
         """
+        if fast_hash:
+            has_changed = self.hasher.has_changed_fast
+        else:
+            has_changed = self.hasher.has_changed
+
         if self.hasher.is_cached(path):
-            if self.hasher.has_changed_fast(path):
+            if has_changed(path):
                 result = FileChangeType.MODIFIED
             else:
                 result = FileChangeType.NOCHANGE
         else:
             if path in self.manifest:
+                # XXX DJWC - is this logic relevant / valid?
                 # No fast hash, but exists in manifest. User just edited a file that hasn't been pulled
                 result = FileChangeType.MODIFIED
             else:
@@ -193,7 +199,7 @@ class Manifest(object):
                 result = FileChangeType.CREATED
         return result
 
-    def status(self) -> StatusResult:
+    def status(self, verify_contents: bool = False) -> StatusResult:
         """Method to compute the changes (create, modified, delete) of a dataset, comparing local state to the
         manifest and fast hash
 
@@ -344,6 +350,9 @@ class Manifest(object):
 
         if update_files:
             loop = asyncio.get_event_loop()
+            # TODO DJWC extract object store backend logic from hash_files,
+            #  and move into the Gigantum backend.
+            #  The below will also redundantly compute hashes, even though we've already done it.
             hash_task = asyncio.create_task(self.hash_files(update_files))
             loop.run_until_complete(hash_task)
             hash_result, fast_hash_result = hash_task.result()

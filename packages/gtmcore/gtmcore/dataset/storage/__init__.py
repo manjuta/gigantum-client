@@ -1,21 +1,24 @@
 import importlib
 from typing import List, Dict, Any, Optional
 
+from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage.backend import StorageBackend, ExternalProtectedStorage
 from gtmcore.exceptions import GigantumException
 from gtmcore.dataset.storage.gigantum import GigantumObjectStore
 from gtmcore.dataset.storage.local import LocalFilesystemBackend
 
-SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": ("gtmcore.dataset.storage.gigantum", "GigantumObjectStore"),
-                              "local_filesystem":   ("gtmcore.dataset.storage.local",    "LocalFilesystemBackend")}
+# Based on Client configuration, this dict may eventually be updated at start-up time (though not currently)
+SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": GigantumObjectStore,
+                              "local_filesystem":   LocalFilesystemBackend}
 
 
-def get_storage_backend(client_config: Dict[str, Any], storage_type: str, backend_config: Optional[Dict[str, Any]] = None) -> StorageBackend:
+def get_storage_backend(client_config: Configuration, storage_type: str, backend_config: Optional[Dict[str, Any]] = None) -> StorageBackend:
     """Return a configured instance of the desired StorageBackend
 
     This function is designed to be called using dict-unpacking like so: get_storage_backend(**
 
     Args:
+        client_config: An instance of the Configuration class for this Client
         storage_type: Identifier to load class
         backend_config: A dictionary with arguments to the class constructor (will be unpacked to keyword args)
 
@@ -26,12 +29,9 @@ def get_storage_backend(client_config: Dict[str, Any], storage_type: str, backen
         GigantumException if storage_type is not supported
     """
     try:
-        module, package = SUPPORTED_STORAGE_BACKENDS[storage_type]
+        class_for_backend = SUPPORTED_STORAGE_BACKENDS[storage_type]
     except KeyError:
         raise GigantumException(f"Unsupported Dataset Storage Type: {storage_type}")
-
-    imported = importlib.import_module(module, package)
-    class_for_backend = getattr(imported, package)
 
     try:
         if backend_config is None:
