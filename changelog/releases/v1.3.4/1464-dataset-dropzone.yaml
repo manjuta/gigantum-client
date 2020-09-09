@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1470"
+changelog:
+  - type: FIX
+    description: Dropzone will no longer appear in the dataset file section if a file already exists.
