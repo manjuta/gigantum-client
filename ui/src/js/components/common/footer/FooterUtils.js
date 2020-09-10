@@ -61,7 +61,6 @@ const FooterUtils = {
    *  @return {}
    */
   getJobStatus: (owner, name, footerData) => {
-
     const {
       result,
       type,
@@ -90,7 +89,6 @@ const FooterUtils = {
       *  @return {}
       */
     const fetchStatus = () => {
-
       const resultType = result[type];
       const resultKey = resultType ? resultType[key] : false;
       const mutations = {
@@ -106,7 +104,6 @@ const FooterUtils = {
               && response.data.jobStatus
               && response.data.jobStatus.jobMetadata
           ) {
-
             const responseId = id || response.data.jobStatus.id;
             const { html, message } = messageParser(response);
             // executes while job status is still running, refetches until status is finished or failed

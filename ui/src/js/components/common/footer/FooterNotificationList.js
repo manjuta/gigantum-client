@@ -11,8 +11,19 @@ import './FooterNotificationList.scss';
 import './FooterMessage.scss';
 
 type Props = {
+  parentState: {
+    helperVisible: boolean,
+    messageListOpen: boolean,
+    messageStack: Array,
+    messageStackHistory: Array,
+    viewHistory: boolean,
+  },
   toggleMessageList: Function,
-  parentState: Object,
+}
+
+type State = {
+  selectedBuildId: string,
+  messageBodyOpenCount: number,
 }
 
 /**
@@ -27,8 +38,7 @@ const getHeight = (messageList, messageListOpenItems) => {
   return height;
 };
 
-export default class FooterNotificationList extends Component<Props> {
-
+class FooterNotificationList extends Component<Props, State> {
   state = {
     selectedBuildId: '',
     messageBodyOpenCount: 0,
@@ -54,30 +64,40 @@ export default class FooterNotificationList extends Component<Props> {
   *  sets selectedBuildId in state
   */
   _setBuildId = (selectedBuildId) => {
+    const { toggleMessageList } = this.props;
     this.setState({ selectedBuildId });
-    this.props.toggleMessageList();
+
+    toggleMessageList();
   }
 
   render() {
-    const { state } = this;
+    const { messageBodyOpenCount, selectedBuildId } = this.state;
     const { parentState } = this.props;
-    const messageList = parentState.viewHistory
-      ? parentState.messageStackHistory
-      : parentState.messageStack;
-    const height = getHeight(messageList, state.messageBodyOpenCount);
+    const {
+      helperVisible,
+      messageListOpen,
+      messageStack,
+      messageStackHistory,
+      viewHistory,
+    } = parentState;
+    const messageList = viewHistory
+      ? messageStackHistory
+      : messageStack;
+    console.trace(messageList, viewHistory);
+    const height = getHeight(messageList, messageBodyOpenCount);
     // declare css here
     const footerMessageSectionClass = classNames({
       Footer__messageContainer: true,
-      'Footer__messageContainer--collapsed': !parentState.messageListOpen,
-      'Footer__messageContainer--helper-open': parentState.helperVisible,
+      'Footer__messageContainer--collapsed': !messageListOpen,
+      'Footer__messageContainer--helper-open': helperVisible,
     });
     const footerMessageListClass = classNames({
       Footer__messageList: true,
-      'Footer__messageList--collapsed': !parentState.messageListOpen,
+      'Footer__messageList--collapsed': !messageListOpen,
     });
     const viewAllButtonClass = classNames({
       'Btn Btn--feature Btn--feature--expanded Btn--feature--noPadding': true,
-      hidden: (parentState.viewHistory || !parentState.messageListOpen),
+      hidden: (viewHistory || !messageListOpen),
     });
 
     return (
@@ -99,7 +119,7 @@ export default class FooterNotificationList extends Component<Props> {
                 <FooterMessage
                   key={messageItem.id}
                   messageItem={messageItem}
-                  selectedBuildId={state.selectedBuildId}
+                  selectedBuildId={selectedBuildId}
                   owner={messageItem.owner}
                   name={messageItem.name}
                   setBuildId={this._setBuildId}
@@ -127,3 +147,5 @@ export default class FooterNotificationList extends Component<Props> {
     );
   }
 }
+
+export default FooterNotificationList;
