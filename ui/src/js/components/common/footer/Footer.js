@@ -14,13 +14,22 @@ import './Footer.scss';
 
 
 type Props = {
-  messageListOpen: Boolean,
-  viewHistory: Boolean,
+  helperVisible: boolean,
   history: Object,
-  labbookName: string,
   footerActions: {
+    setRemoveMessage: Function,
+    setResetFooter: Function,
+    setResizeFooter: Function,
     setToggleMessageList: Function,
+    setUpdateHistoryStackItemVisibility: Function,
+    setUpdateMessageStackItemVisibility: Function,
+    setUploadMessageRemove: Function,
   },
+  labbookName: string,
+  messageListOpen: boolean,
+  open: boolean,
+  uploadOpen: boolean,
+  viewHistory: boolean,
 }
 
 class Footer extends Component<Props> {
@@ -80,10 +89,10 @@ class Footer extends Component<Props> {
     add scroll listener to pop up footer
   */
   _clearState = () => {
-    const { props } = this;
+    const { footerActions } = this.props;
     document.getElementById('footerProgressBar').style.opacity = 0;
 
-    props.footerActions.setResetFooter();
+    footerActions.setResetFooter();
 
     setTimeout(() => {
       document.getElementById('footerProgressBar').style.width = '0%';
@@ -106,8 +115,8 @@ class Footer extends Component<Props> {
     gets upload message which tracks progess
   */
   _closeFooter = () => {
-    const { props } = this;
-    props.footerActions.setUploadMessageRemove('', '', 0);
+    const { footerActions } = this.props;
+    footerActions.setUploadMessageRemove('', '', 0);
   }
 
   /**
@@ -115,8 +124,8 @@ class Footer extends Component<Props> {
     gets upload message which tracks progess
   */
   _removeMessage = (messageItem) => {
-    const { props } = this;
-    props.footerActions.setRemoveMessage(messageItem.id);
+    const { footerActions } = this.props;
+    footerActions.setRemoveMessage(messageItem.id);
   }
 
   /**
@@ -126,8 +135,8 @@ class Footer extends Component<Props> {
     @return {}
   */
   _toggleMessageList = () => {
-    const { props } = this;
-    props.footerActions.setToggleMessageList(!props.messageListOpen, true);
+    const { footerActions, messageListOpen } = this.props;
+    footerActions.setToggleMessageList(!messageListOpen, true);
   }
 
   /**
@@ -137,14 +146,14 @@ class Footer extends Component<Props> {
     @return {}
    */
   _showMessageBody = (index) => {
-    const { props } = this;
+    const { footerActions } = this.props;
     const {
       viewHistory,
     } = this.props;
     if (!viewHistory) {
-      props.footerActions.setUpdateMessageStackItemVisibility(index);
+      footerActions.setUpdateMessageStackItemVisibility(index);
     } else {
-      props.footerActions.setUpdateHistoryStackItemVisibility(index);
+      footerActions.setUpdateHistoryStackItemVisibility(index);
     }
   }
 
@@ -153,27 +162,32 @@ class Footer extends Component<Props> {
     * update store to risize component
   */
   _resize = () => {
-    const { props } = this;
-    props.footerActions.setResizeFooter();
+    const { footerActions } = this.props;
+    footerActions.setResizeFooter();
   }
 
   render() {
-    const { props } = this;
+    const {
+      helperVisible,
+      messageListOpen,
+      open,
+      uploadOpen,
+    } = this.props;
     const bodyWidth = document.body.clientWidth;
 
     const footerClass = classNames({
       Footer: true,
-      'Footer--uploading': props.uploadOpen,
-      'Footer--expand': (props.open) || props.uploadOpen,
-      'Footer--expand-extra': (props.open && props.uploadOpen),
+      'Footer--uploading': uploadOpen,
+      'Footer--expand': (open) || uploadOpen,
+      'Footer--expand-extra': (open && uploadOpen),
 
     });
     const footerButtonClass = classNames({
       'Footer__disc-button': true,
-      'Footer__disc-button--open': props.messageListOpen,
+      'Footer__disc-button--open': messageListOpen,
       'Footer__dist-button--side-view': bodyWidth < 1600,
-      'Footer__disc-button--helper-open': props.helperVisible,
-      'Footer__disc-button--bottom': !props.messageListOpen && props.uploadOpen,
+      'Footer__disc-button--helper-open': helperVisible,
+      'Footer__disc-button--bottom': !messageListOpen && uploadOpen,
     });
 
     return (
