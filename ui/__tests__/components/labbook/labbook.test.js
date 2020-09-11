@@ -1,8 +1,8 @@
-import Labbook from 'Components/labbook/Labbook';
+import Labbook from 'Pages/repository/labbook/Labbook';
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-import { LabbookQuery } from 'Components/labbook/LabbookQueryContainer';
+import { LabbookQuery } from 'Pages/repository/labbook/LabbookQueryContainer';
 import { mount, shallow } from 'enzyme';
 import Auth from 'JS/Auth/Auth';
 import history from 'JS/history';

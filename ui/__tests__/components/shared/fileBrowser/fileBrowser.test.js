@@ -2,7 +2,7 @@
 import { Provider } from 'react-redux';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import FileBrowserDropZone from 'Components/shared/fileBrowser/FileBrowser';
+import FileBrowserDropZone from 'Pages/repository/shared/fileBrowser/FileBrowser';
 import { mount, shallow } from 'enzyme';
 import { BrowserRouter as Router } from 'react-router-dom';
 // import { Provider } from 'react-redux';

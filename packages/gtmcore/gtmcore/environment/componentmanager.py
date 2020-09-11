@@ -101,7 +101,7 @@ class ComponentManager(object):
         # Save labbook instance
         self.labbook = labbook
         # Create a base repo instance using the same config file
-        self.bases = BaseRepository(config_file=self.labbook.client_config.config_file)
+        self.bases = BaseRepository()
         # Make sure the LabBook's environment directory is ready to go
         self._initialize_env_dir()
 

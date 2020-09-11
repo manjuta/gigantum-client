@@ -4,9 +4,8 @@ from git import InvalidGitRepositoryError, BadName
 import os
 import re
 import shutil
-import subprocess
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from gtmcore.logging import LMLogger
 
@@ -114,20 +113,6 @@ class GitFilesystem(GitRepoInterface):
         """
         return self.repo.active_branch.name
 
-    def check_ignored(self, path: str) -> bool:
-        """Check if path is ignored (e.g., via .gitignore)
-
-        path: a path relative to the repository root
-
-        Returns:
-            is the path ignored?
-        """
-        git_ignored = subprocess.run(['git', 'check-ignore', path], stdout=subprocess.PIPE,
-                                     cwd=self.working_directory)
-
-        # git check-ignore echos back the given filenames if they are untracked, else it's b''
-        return git_ignored.stdout != b''
-
     # CREATE METHODS
     def initialize(self, bare=False):
         """Initialize a new repo
@@ -143,36 +128,6 @@ class GitFilesystem(GitRepoInterface):
 
         logger.info("Initializing Git repository in {}".format(self.working_directory))
         self.repo = Repo.init(self.working_directory, bare=bare)
-
-    def clone(self, source: str, directory: str, branch: Optional[str] = None, single_branch=False):
-        """Clone a repo
-
-        Args:
-            source: Git ssh or https string to clone - should be a bare path, or include '/' as a final delimiter
-            directory: Directory to clone into
-            branch: The name of the desired branch to be checked out (defaults to master)
-            single_branch: Fetch ONLY the contents of the specified branch
-
-        Returns:
-            None
-        """
-        if self.repo:
-            raise ValueError("Cannot init an existing git repository. Choose a different working directory")
-
-        logger.info("Cloning Git repository from {} into {}".format(source, directory))
-        args = []
-        if branch is not None:
-            args.extend(['--branch', branch])
-        if single_branch:
-            args.append('--single-branch')
-
-        command_string = ['git', 'clone'] + args + [source, directory]
-
-        clone_process = subprocess.run(command_string, stderr=subprocess.PIPE, cwd=directory)
-        if clone_process.returncode == 0:
-            self.set_working_directory(directory)
-        else:
-            raise GitFsException(clone_process.stderr)
 
     # LOCAL CHANGE METHODS
     def status(self) -> Dict[str, List[Tuple[str, str]]]:
@@ -232,32 +187,6 @@ class GitFilesystem(GitRepoInterface):
 
         return result
 
-    def add(self, filename):
-        """Add a file to a commit
-
-        Args:
-            filename(str): Filename to add.
-
-        Returns:
-            None
-        """
-        logger.info("Adding file {} to Git repository in {}".format(filename, self.working_directory))
-        self.repo.index.add([filename])
-
-    def add_all(self, relative_directory=None):
-        """Add all changes/files using the `git add -A` command
-
-        Args:
-            relative_directory(str): Relative directory (from the root_dir) to add everything
-
-        Returns:
-            None
-        """
-        if relative_directory:
-            self.repo.git.add(os.path.join('.', relative_directory), A=True)
-        else:
-            self.repo.git.add(A=True)
-
     def remove(self, filename, force=False, keep_file=True):
         """Remove a file from tracking
 
@@ -311,7 +240,6 @@ class GitFilesystem(GitRepoInterface):
 
         return [(x, y) for x, y in zip(line_info, change_info)]
 
-    # TODO: Add support to diff branches
     def diff_unstaged(self, filename=None, ignore_white_space=True):
         """Method to return the diff for unstaged files, optionally for a specific file
 
@@ -562,7 +490,6 @@ class GitFilesystem(GitRepoInterface):
                           })
 
         return result
-    # HISTORY METHODS
 
     # BRANCH METHODS
     def create_branch(self, name):
@@ -697,13 +624,6 @@ class GitFilesystem(GitRepoInterface):
         # Remove the checkout context id file if one exists
         self.clear_checkout_context()
 
-    def reset(self, branch_name: str):
-        raise NotImplementedError
-
-    def remote_set_branches(self, branch_names: List[str], remote_name: str = 'origin'):
-        raise NotImplementedError
-    # BRANCH METHODS
-
     # TAG METHODS
     def create_tag(self, name, message):
         """Method to create a tag
@@ -724,7 +644,6 @@ class GitFilesystem(GitRepoInterface):
             (list(dict)): list of dicts with `name` and `message` fields
         """
         return [{"name": x.tag.tag, "message": x.tag.message} for x in self.repo.tags]
-    # TAG METHODS
 
     # REMOTE METHODS
     def list_remotes(self):
@@ -816,7 +735,6 @@ class GitFilesystem(GitRepoInterface):
 
         """
         return self.repo.remotes[remote_name].push(tags=tags)
-    # REMOTE METHODS
 
     # MERGE METHODS
     def merge(self, branch_name):
@@ -852,7 +770,6 @@ class GitFilesystem(GitRepoInterface):
 
         # Now checkout latest commit
         current_branch.checkout(force=True)
-    # MERGE METHODS
 
     # UNDO METHODS
     def discard_changes(self, filename=None):
@@ -868,7 +785,6 @@ class GitFilesystem(GitRepoInterface):
             self.repo.index.checkout([filename], force=True)
         else:
             self.repo.index.checkout(force=True)
-    # UNDO METHODS
 
     # SUBMODULE METHODS
     def add_submodule(self, name, relative_path, repository, branch=None):
@@ -885,34 +801,6 @@ class GitFilesystem(GitRepoInterface):
         """
         self.repo.create_submodule(name, relative_path, url=repository, branch=branch)
         self.repo.index.commit("Added submodule: {}".format(name))
-
-    def list_submodules(self):
-        """Method to list the name of configured submodules
-
-            Should return a list of dicts with the format:
-
-        Returns:
-            list(str)
-        """
-        # Git-python is broken when not all submodules have been initialized and you try to do remote git ops.
-        # So instead of listing with self.repo.submodules, we just look at the .gitmodule file
-        submodule_list = list()
-        gitmodules_file = os.path.join(self.working_directory, '.gitmodules')
-        if os.path.exists(gitmodules_file):
-            if os.stat(gitmodules_file).st_size > 0:
-                r = subprocess.run(['git', 'config', '--file', '.gitmodules', '--name-only', '--get-regexp', 'path'],
-                                   cwd=self.working_directory, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   check=True)
-                result = r.stdout
-                if result:
-                    lines = result.decode().split('\n')
-                    for line in lines:
-                        if line:
-                            _, part = line.split('submodule.')
-                            name, _ = part.split('.path')
-                            submodule_list.append(name)
-
-        return submodule_list
 
     def update_submodules(self, init=True):
         """Method to update submodules and optionally init if needed

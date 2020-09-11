@@ -42,7 +42,7 @@ module.exports = {
     "function-bind",
     "object-keys",
     "object.values",
-    "es-abstract"
+    "es-abstract",
   ],
   // "setupTestFrameworkScriptFile": "<rootDir>/__tests__/setupTests.js",
   "moduleNameMapper": {
@@ -55,6 +55,7 @@ module.exports = {
     '^dnd-core$': 'dnd-core/dist/cjs',
     '^react-dnd$': 'react-dnd-cjs',
     '^react-dnd-html5-backend$': 'react-dnd-html5-backend-cjs',
+    "^easymde/dist/easymde.min.css$": "<rootDir>/node_modules/easymde/dist/easymde.min.css",
   },
   "testEnvironment": "jsdom"
   // "testEnvironmentOptions": "<!DOCTYPE html><html><body><div id='root'></div></body></html>"

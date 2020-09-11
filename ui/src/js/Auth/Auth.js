@@ -1,68 +1,27 @@
 import history from 'JS/history';
-import auth0 from 'auth0-js';
 import RemoveUserIdentityMutation from 'Mutations/user/RemoveUserIdentityMutation';
 // queries
 import SessionCheck from 'JS/Auth/sessionCheck';
 // store
-import { setLogout, setLoginError } from 'JS/redux/actions/login';
-// variables
-import { AUTH_CONFIG } from './auth0-variables';
+import { setLogout } from 'JS/redux/actions/login';
 
-const getBasename = () => {
-  const globalObject = this || window;
-  const { pathname } = globalObject.location;
-  const pathList = pathname ? pathname.split('/') : [];
-  const uniqueClientString = (pathList.length > 2)
-    ? pathList[2]
-    : '';
-  const basename = process.env.BUILD_TYPE === 'cloud'
-    ? `/run/${uniqueClientString}`
-    : '';
-  return basename;
-};
-
-const basename = getBasename();
+const basename = '';
 
 export default class Auth {
-  auth0 = new auth0.WebAuth({
-    domain: AUTH_CONFIG.domain,
-    clientID: AUTH_CONFIG.clientId,
-    redirectUri: AUTH_CONFIG.callbackUrl,
-    audience: AUTH_CONFIG.audience,
-    responseType: 'token id_token',
-    scope: 'openid profile email user_metadata',
-  });
-
   /**
    * Reroutes to login screen
   */
-  renewToken = () => {
-    const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
-    const baseURL = 'gigantum.com';
-    const route = window.location.href.replace('#', '');
-    const loginURL = `https://${baseURL}/client/login#route=${route}${freshLoginText}`;
-    window.open(loginURL, '_self');
+  renewToken = (server, hash) => {
+    const loginUrl = server.authConfig;
+    const url = hash ? `${loginUrl}${hash}` : loginUrl;
+    window.open(url, '_self');
   }
 
-  login = () => {
+  login = (server, hash) => {
     setLogout(false);
-    this.auth0.authorize();
-  }
-
-  handleAuthentication = () => {
-    this.auth0.parseHash((err, authResult) => {
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        this.setSession(authResult);
-        window.sessionStorage.removeItem('LOGIN_ERROR_DESCRIPTION');
-        window.sessionStorage.removeItem('LOGIN_ERROR_TYPE');
-      } else if (err) {
-        history.replace(`${basename}/login`);
-        setLoginError(err);
-        window.sessionStorage.setItem('LOGIN_ERROR_TYPE', err.error);
-        window.sessionStorage.setItem('LOGIN_ERROR_DESCRIPTION', err.errorDescription);
-        // alert(`Error: ${err.error}. Check the console for further details.`); TODO make this a modal or redirect to login failure page
-      }
-    });
+    const loginUrl = server.login_url;
+    const url = hash ? `${loginUrl}${hash}` : loginUrl;
+    window.open(url, '_self');
   }
 
   setSession = (authResult, silent, forceHistory) => {
@@ -93,7 +52,6 @@ export default class Auth {
     setLogout(true);
     RemoveUserIdentityMutation(() => {
       // redirect to root when user logs out
-
       localStorage.removeItem('access_token');
       localStorage.removeItem('id_token');
       localStorage.removeItem('expires_at');
@@ -104,6 +62,7 @@ export default class Auth {
       window.sessionStorage.removeItem('CALLBACK_ROUTE');
 
       history.replace(`${basename}/`);
+      window.location.reload();
     });
   }
 

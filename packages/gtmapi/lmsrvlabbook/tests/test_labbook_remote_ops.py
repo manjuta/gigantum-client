@@ -66,11 +66,11 @@ class TestLabBookRemoteOperations(object):
     @responses.activate
     def test_list_remote_labbooks_az(self, fixture_working_dir, snapshot):
         """test list labbooks"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_az, status=200)
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_za, status=200)
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_az_end, status=200)
 
         list_query = """
@@ -158,9 +158,9 @@ class TestLabBookRemoteOperations(object):
     @responses.activate
     def test_list_remote_labbooks_modified(self, fixture_working_dir, snapshot):
         """test list labbooks"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_modified_desc, status=200)
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_modified_asc, status=200)
 
         list_query = """
@@ -225,11 +225,11 @@ class TestLabBookRemoteOperations(object):
     @responses.activate
     def test_list_remote_labbooks_page(self, fixture_working_dir, snapshot):
         """test list labbooks"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_page_1, status=200)
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_page_2, status=200)
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json=mock_project_list_az_end, status=200)
 
         list_query = """

@@ -1,0 +1,13 @@
+.LoginLanding {
+  width: 100%;
+
+  &__container {
+    margin: initial !important;
+    min-width: 100% !important;
+    /* width: auto; */
+  }
+
+  &__spacer {
+    width: 270px;
+  }
+}

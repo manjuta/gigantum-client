@@ -3,7 +3,7 @@ import renderer from 'react-test-renderer';
 import { shallow, mount } from 'enzyme';
 import history from 'JS/history';
 import { StaticRouter, Link } from 'react-router';
-import LocalLabbookPanel from 'Components/dashboard/labbooks/localLabbooks/LocalLabbookPanel';
+import LocalLabbookPanel from 'Pages/dashboard/labbooks/localLabbooks/LocalLabbookPanel';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 import { MemoryRouter } from 'react-router-dom';
 import environment from 'JS/createRelayEnvironment';

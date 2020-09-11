@@ -78,7 +78,7 @@ class TestDataloaderPackage(object):
         version_list = promise1.get()
         assert len(version_list) == 4
 
-        assert version_list[0].latest_version == "8.2"
+        assert version_list[0].latest_version == "8.2.1"
         assert version_list[0].description == 'A set of tools to manipulate climate data'
         assert version_list[0].docs_url == 'http://anaconda.org/conda-forge/cdutil'
 
@@ -105,7 +105,7 @@ class TestDataloaderPackage(object):
         version_list = promise1.get()
         assert len(version_list) == 3
 
-        assert version_list[0].latest_version == "8.2"
+        assert version_list[0].latest_version == "8.2.1"
         assert version_list[0].description == 'A set of tools to manipulate climate data'
         assert version_list[0].docs_url == 'http://anaconda.org/conda-forge/cdutil'
 
@@ -127,7 +127,7 @@ class TestDataloaderPackage(object):
 
         version_list = promise1.get()
         assert len(version_list) == 5
-        assert version_list[0].latest_version == "8.2"
+        assert version_list[0].latest_version == "8.2.1"
         assert version_list[0].description == 'A set of tools to manipulate climate data'
         assert version_list[0].docs_url == 'http://anaconda.org/conda-forge/cdutil'
 

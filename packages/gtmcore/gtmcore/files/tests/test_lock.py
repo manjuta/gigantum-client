@@ -21,9 +21,9 @@ class TestFileWriteLock(object):
 
     def test_multiple_acquires(self, mock_config_file):
         """Test trying to lock around multiple writes"""
-        conf_file, working_dir = mock_config_file
+        conf_instance, working_dir = mock_config_file
 
-        config = Configuration(config_file=conf_file)
+        config = Configuration()
         filename = os.path.join(working_dir, "testfile1.dat")
         lock = FileWriteLock(filename, config)
 
@@ -49,9 +49,9 @@ class TestFileWriteLock(object):
 
     def test_lock_independence(self, mock_config_file):
         """Test to verify different files have different locks automatically"""
-        conf_file, working_dir = mock_config_file
+        conf_instance, working_dir = mock_config_file
 
-        config = Configuration(config_file=conf_file)
+        config = Configuration()
         filename1 = os.path.join(working_dir, "testfile1.dat")
         lock1 = FileWriteLock(filename1, config)
         filename2 = os.path.join(working_dir, "testfile2.dat")

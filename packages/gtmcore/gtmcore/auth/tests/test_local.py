@@ -15,8 +15,7 @@ from gtmcore.auth.local import LocalIdentityManager
 from gtmcore.auth import User
 
 
-def mock_import(archive_path: str, username: str, owner: str,
-                config_file: Optional[str] = None, base_filename: Optional[str] = None,
+def mock_import(archive_path: str, username: str, owner: str, base_filename: Optional[str] = None,
                 remove_source: bool = True):
     if not username:
         username = "johndoe"
@@ -62,7 +61,7 @@ class TestIdentityLocal(object):
 
     def test_load_user_no_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -73,7 +72,7 @@ class TestIdentityLocal(object):
 
     def test_save_load_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -95,7 +94,7 @@ class TestIdentityLocal(object):
 
     def test_load_user_refresh(self, mock_config_file_with_auth):
         """handling a new token for the same user"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
 
         with mock.patch.object(jose.jwt, 'get_unverified_claims', lambda x: mock_jwt_claims(x)):
             with mock.patch.object(LocalIdentityManager, 'validate_jwt_token', mock_jwt_validate):
@@ -129,7 +128,7 @@ class TestIdentityLocal(object):
 
     def test_load_user_mismatch(self, mock_config_file_with_auth):
         """handling a new token for the same user"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
 
         with mock.patch.object(jose.jwt, 'get_unverified_claims', lambda x: mock_jwt_claims(x)):
             with mock.patch.object(LocalIdentityManager, 'validate_jwt_token', mock_jwt_validate):
@@ -150,7 +149,7 @@ class TestIdentityLocal(object):
 
     def test_load_corrupt(self, mock_config_file_with_auth):
         """handling a corrupted cached id token"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -170,7 +169,7 @@ class TestIdentityLocal(object):
 
     def test_logout_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -192,7 +191,7 @@ class TestIdentityLocal(object):
 
     def test_authenticate_user_exists_no_token(self, mock_config_file_with_auth):
         """test getting a user after stored locally already"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -214,7 +213,7 @@ class TestIdentityLocal(object):
 
     def test_authenticate_user_exists_token(self, mock_config_file_with_auth):
         """test getting a user after stored locally already"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -237,7 +236,7 @@ class TestIdentityLocal(object):
 
     def test_get_profile_attribute(self, mock_config_file_with_auth):
         """test getting profile attributes safely from the profile dictionary"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
 
         profile_data = {"username": "",
@@ -262,7 +261,7 @@ class TestIdentityLocal(object):
 
     def test_is_session_valid(self, mock_config_file_with_auth):
         """test check for valid session"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
 
@@ -279,12 +278,12 @@ class TestIdentityLocal(object):
     @responses.activate
     def test_is_authenticated_token(self, mock_config_file_with_auth):
         """test checking if the user is authenticated via a token"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
                       status=200)
         responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
 
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
         # Don't check at_hash claim due to password grant not setting it in the token
@@ -314,12 +313,12 @@ class TestIdentityLocal(object):
     @responses.activate
     def test_get_user_profile(self, mock_config_file_with_auth):
         """test getting a user profile from Auth0"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
                       status=200)
-        responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
+        responses.add_passthru('https://auth.gigantum.com/.well-known/jwks.json')
 
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == LocalIdentityManager
         # Don't check at_hash claim due to password grant not setting it in the token
@@ -368,7 +367,7 @@ class TestIdentityLocal(object):
         working_dir = mock_config_file_with_auth_first_login[1]
         os.makedirs(os.path.join(working_dir, "johndoe"))
 
-        config = Configuration(mock_config_file_with_auth_first_login[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
 
         with pytest.raises(ValueError):
@@ -387,10 +386,10 @@ class TestIdentityLocal(object):
                                             cleanup_auto_import):
         """Test login, but the user already logged into this instance"""
         # fake the user already existing by creating the user directory
-        working_dir = mock_config_file_with_auth_first_login[1]
-        os.makedirs(os.path.join(working_dir, "johndoe"))
+        config = mock_config_file_with_auth_first_login[0]
+        os.makedirs(os.path.join(config.get_user_storage_dir(), "johndoe"))
 
-        config = Configuration(mock_config_file_with_auth_first_login[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
 
         mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
@@ -406,10 +405,10 @@ class TestIdentityLocal(object):
     def test_check_first_login_no_user_locally_in_repo(self, mock_import, mock_config_file_with_auth_first_login,
                                                        cleanup_auto_import):
         """Test login with the user in the repo already"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': 123}}}, status=200)
 
-        config = Configuration(mock_config_file_with_auth_first_login[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
 
         # Don't check at_hash claim due to password grant not setting it in the token
@@ -430,10 +429,10 @@ class TestIdentityLocal(object):
 
         """Test login with the user in the repo alread"""
         # Add mock for call to auth service
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': 123}}}, status=200)
 
-        config = Configuration(mock_config_file_with_auth_first_login[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
 
         # Don't check at_hash claim due to password grant not setting it in the token

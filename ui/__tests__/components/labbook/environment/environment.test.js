@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import Environment from 'Components/labbook/environment/Environment';
+import Environment from 'Pages/repository/labbook/environment/Environment';
 import renderer from 'react-test-renderer';
 import { MemoryRouter } from 'react-router-dom';
 import relayTestingUtils from '@gigantum/relay-testing-utils';

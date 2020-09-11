@@ -1,5 +1,5 @@
 import React from 'react';
-import InputData from 'Components/labbook/inputData/InputData';
+import InputData from 'Pages/repository/labbook/inputData/InputData';
 import renderer from 'react-test-renderer';
 
 const variables = { first: 20, labbook: 'demo-lab-book' };

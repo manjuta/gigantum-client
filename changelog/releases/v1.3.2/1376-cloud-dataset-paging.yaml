@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1400"
+changelog:
+  - type: FIX
+    description: Cloud Datasets will now page correctly if hasNextPage from pageInfo is true

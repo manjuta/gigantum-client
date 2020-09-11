@@ -8,8 +8,8 @@ import uuidv4 from 'uuid/v4';
 // redux store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
-import footerCallback from 'Components/common/footer/utils/BuildImage';
+import FooterUtils from 'Components/footer/FooterUtils';
+import footerCallback from 'Components/footer/utils/BuildImage';
 
 
 const mutation = graphql`

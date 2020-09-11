@@ -164,7 +164,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                         <p
                           className="ActivityCard__time"
                         >
-                          3:10pm
+                          10:10am
                         </p>
                         <div
                           className="ActivityCard__user"
@@ -260,7 +260,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                         <p
                           className="ActivityCard__time"
                         >
-                          3:09pm
+                          10:09am
                         </p>
                         <div
                           className="ActivityCard__user"
@@ -388,7 +388,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                         <p
                           className="ActivityCard__time"
                         >
-                          3:53pm
+                          10:53am
                         </p>
                         <div
                           className="ActivityCard__user"
@@ -484,7 +484,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                         <p
                           className="ActivityCard__time"
                         >
-                          3:53pm
+                          10:53am
                         </p>
                         <div
                           className="ActivityCard__user"
@@ -580,7 +580,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                         <p
                           className="ActivityCard__time"
                         >
-                          3:53pm
+                          10:53am
                         </p>
                         <div
                           className="ActivityCard__user"
@@ -631,7 +631,7 @@ exports[`LabbookActivityContainer Renders a snapshot 1`] = `
                         <p
                           className="ActivityCard__time"
                         >
-                          3:53pm
+                          10:53am
                         </p>
                         <div
                           className="ActivityCard__user"

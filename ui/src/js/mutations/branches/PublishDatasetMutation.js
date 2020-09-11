@@ -9,8 +9,8 @@ import environment from 'JS/createRelayEnvironment';
 // redux
 import { setMultiInfoMessage, setErrorMessage } from 'JS/redux/actions/footer';
 // utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
-import footerCallback from 'Components/common/footer/utils/PublishDataset';
+import FooterUtils from 'Components/footer/FooterUtils';
+import footerCallback from 'Components/footer/utils/PublishDataset';
 
 const mutation = graphql`
   mutation PublishDatasetMutation($input: PublishDatasetInput!){

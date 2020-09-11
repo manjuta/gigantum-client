@@ -5,7 +5,7 @@
       import { mount } from 'enzyme';
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       // components;
-      import OutputBrowser from 'Components/labbook/outputData/OutputBrowser';
+      import OutputBrowser from 'Pages/repository/labbook/outputData/OutputBrowser';
 
       test('Test OutputBrowser', () => {
         const wrapper = renderer.create(<OutputBrowser />);

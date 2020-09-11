@@ -40,6 +40,7 @@ class GitLabRemoteError(WorkflowsException):
     pass
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def git_garbage_collect(repository: Repository) -> None:
     """Run "git gc" (garbage collect) over the repo. If run frequently enough, this only takes a short time
     even on large repos.
@@ -69,30 +70,31 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
 
     Note: It may make more sense to factor this out later on. """
     config = Configuration()
-    remote_config = config.get_remote_configuration()
+    server_config = config.get_server_configuration()
 
     if not access_token or not id_token:
         raise ValueError("Creating a remote repository requires a valid session")
 
     try:
         # Add collaborator to remote service
-        mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['hub_api'],
+        mgr = GitLabManager(server_config.git_url,
+                            server_config.hub_api_url,
                             access_token=access_token,
                             id_token=id_token)
-        mgr.configure_git_credentials(remote_config['git_remote'], username)
+        mgr.configure_git_credentials(server_config.git_url, username)
         mgr.create_labbook(namespace=InventoryManager().query_owner(repository),
                            labbook_name=repository.name,
                            visibility=visibility)
 
         # URL construction logic doesn't belong at the level of Git workflows, but it works for now
-        remote = RepoLocation(f"https://{remote_config['git_remote']}/{username}/{repository.name}",
+        remote = RepoLocation(f"{server_config.git_url}{username}/{repository.name}",
                               current_username=username)
         repository.add_remote("origin", remote.remote_location)
     except Exception as e:
         raise GitLabRemoteError(e)
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def publish_to_remote(repository: Repository, username: str, remote: str,
                       feedback_callback: Callable) -> None:
     # TODO(billvb) - Refactor all (or part) to BranchManager
@@ -122,12 +124,14 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
     repository.git.clear_checkout_context()
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: Callable):
     # TODO(billvb) - Refactor to BranchManager
     set_upstream_tokens = ['git', 'push', '--set-upstream', 'origin', branch_name]
     call_subprocess(set_upstream_tokens, cwd=repository.root_dir)
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable,
           username: Optional[str] = None) -> None:
     # TODO(billvb) Refactor to BranchManager
@@ -182,6 +186,7 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
         _pull(repository, branch_name, override, feedback_callback, username=username)
         should_push = not pull_only
         if should_push:
+            feedback_callback(f"Pushing changes to remote branch \"{branch_name}\"...")
             # Skip pushing back up if set to pull_only
             push_tokens = f'git push origin {branch_name}'.split()
             if branch_name not in bm.branches_remote:
@@ -195,6 +200,7 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
         return pulled_updates_count
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def migrate_labbook_schema(labbook: LabBook) -> None:
     # Fallback point in case of a problem
     initial_commit = labbook.git.commit_hash
@@ -227,6 +233,7 @@ def migrate_labbook_schema(labbook: LabBook) -> None:
     ars.create_activity_record(ar)
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def migrate_labbook_branches(labbook: LabBook) -> None:
     bm = BranchManager(labbook)
     if 'gm.workspace' not in bm.active_branch:
@@ -239,7 +246,7 @@ def migrate_labbook_branches(labbook: LabBook) -> None:
 
     bm.create_branch(master_branch)
 
-
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def _clone(remote_url: str, working_dir: str) -> str:
 
     clone_tokens = f"git clone {remote_url}".split()
@@ -266,6 +273,7 @@ def _clone(remote_url: str, working_dir: str) -> str:
     return p
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def clone_repo(remote_url: str, username: str, owner: str,
                load_repository: Callable[[str], Any],
                put_repository: Callable[[str, str, str], Any],
@@ -300,7 +308,7 @@ def process_linked_datasets(labbook: LabBook, logged_in_username: str) -> None:
     Returns:
 
     """
-    im = InventoryManager(config_file=labbook.client_config.config_file)
+    im = InventoryManager()
 
     # Update linked datasets inside the Project or clean them out if needed
     im.update_linked_datasets(labbook, logged_in_username)

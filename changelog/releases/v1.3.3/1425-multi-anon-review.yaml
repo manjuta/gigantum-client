@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1449"
+changelog:
+  - type: IMPROVEMENT
+    description: Added ability for multiple anonymous accounts when using anon_review auth

@@ -5,7 +5,7 @@
       import {mount} from 'enzyme';
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       // components;
-      import Secrets from 'Components/labbook/environment/secrets/Secrets';
+      import Secrets from 'Pages/repository/labbook/environment/secrets/Secrets';
 
       test('Test Secrets', () => {
         const wrapper = renderer.create(<Secrets />);

@@ -12,12 +12,12 @@ This is for caching high-latency fields from repositories (e.g., creation date).
 
  - Database 7
  
-## RStudio MITM Proxy
+## RStudio MITM Proxy, Jupyterlab activity monitoring
 
  - Database 1
  
 ## All Others
 
-HTTP-proxies, etc.
+HTTP-proxies, Client Configuration, etc.
 
  - Database 0

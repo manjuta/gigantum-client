@@ -323,7 +323,11 @@ export default (state = {
   } if (action.type === types.MULTIPART_INFO_MESSAGE) {
     const { owner, name } = action.payload;
     const { messageStack } = state;
-    let { messageStackHistory, messageListOpen } = state;
+    let {
+      messageStackHistory,
+      messageListOpen,
+      viewHistory,
+    } = state;
     let previousHistoryIndex = 0;
     let previousIndex = 0;
     let messageBodyOpen = false;
@@ -348,7 +352,6 @@ export default (state = {
 
       return message.id === action.payload.id;
     });
-
     if ((doesHistoryMessageExist.length > 0) && doesHistoryMessageExist[0].dismissed) {
       if (state.messageListOpen && state.viewHistory) {
         messageListOpen = true;
@@ -358,6 +361,7 @@ export default (state = {
     } else {
       messageListOpen = (action.payload.messageListOpen === undefined)
         || action.payload.messageListOpen;
+      viewHistory = messageListOpen || viewHistory;
     }
 
     const buildProgress = action.payload.buildProgress
@@ -415,7 +419,8 @@ export default (state = {
       messageListOpen,
       viewHistory: ((doesHistoryMessageExist.length > 0)
         && doesHistoryMessageExist[0].dismissed
-        && state.viewHistory),
+        && state.viewHistory)
+        || viewHistory,
     };
   } if (action.type === types.RESET_FOOTER_STORE) {
     return {

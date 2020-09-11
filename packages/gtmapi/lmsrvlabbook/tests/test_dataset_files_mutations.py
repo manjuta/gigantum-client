@@ -41,7 +41,7 @@ class TestDatasetFilesMutations(object):
 
             return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2b66f90b6b10")
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
 
         flask.g.access_token = "asdf"
@@ -81,7 +81,7 @@ class TestDatasetFilesMutations(object):
 
             return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2b66f90b6b10")
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         lb = im.create_labbook('default', 'default', "test-lb", description="tester")
         im.link_dataset_to_labbook(f"{ds.root_dir}/.git", 'default', 'dataset100', lb, 'default')
@@ -104,7 +104,7 @@ class TestDatasetFilesMutations(object):
             assert "rq:" in r['data']['downloadDatasetFiles']['backgroundJobKey']
 
     def test_delete_dataset_files(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset-delete",
                                storage_type="gigantum_object_v1", description="testing delete")
         m = Manifest(ds, 'default')
@@ -163,7 +163,7 @@ class TestDatasetFilesMutations(object):
         assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test1.txt")) is False
 
     def test_delete_dataset_files_errors(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset-delete-2",
                                storage_type="gigantum_object_v1", description="testing delete")
         m = Manifest(ds, 'default')
@@ -188,7 +188,7 @@ class TestDatasetFilesMutations(object):
         assert 'errors' in result
 
     def test_move_dataset_file(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset-move",
                                storage_type="gigantum_object_v1", description="testing move")
         m = Manifest(ds, 'default')
@@ -227,7 +227,7 @@ class TestDatasetFilesMutations(object):
         assert os.path.exists(os.path.join(cr, revision, "test1-renamed.txt")) is True
 
     def test_move_dataset_dir(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset-move",
                                storage_type="gigantum_object_v1", description="testing move")
         m = Manifest(ds, 'default')
@@ -312,7 +312,7 @@ class TestDatasetFilesMutations(object):
         assert os.path.exists(os.path.join(cr, revision, "other_dir_renamed", "nested_dir", "test7.txt")) is True
 
     def test_make_directory(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset-dir",
                                storage_type="gigantum_object_v1", description="testing move")
         m = Manifest(ds, 'default')
@@ -370,7 +370,7 @@ class TestDatasetFilesMutations(object):
         assert os.path.isdir(os.path.join(m.cache_mgr.current_revision_dir, "test_dir1", "test_dir2")) is True
 
     def test_make_directory_error(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset-dir",
                                storage_type="gigantum_object_v1", description="testing move")
         m = Manifest(ds, 'default')

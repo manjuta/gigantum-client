@@ -2,7 +2,7 @@
       import React from 'react'
       import renderer from 'react-test-renderer';
       import {mount} from 'enzyme'
-      import fetchContainerStatus from 'Components/labbook/labbookHeader/containerStatus/fetchContainerStatus';
+      import fetchContainerStatus from 'Pages/repository/labbook/labbookHeader/containerStatus/fetchContainerStatus';
 
       import relayTestingUtils from '@gigantum/relay-testing-utils'
 

@@ -253,7 +253,7 @@ snapshots['TestEnvironmentServiceQueries.test_get_package_manager_metadata 2'] =
                                 'docsUrl': 'http://anaconda.org/conda-forge/cdutil',
                                 'fromBase': False,
                                 'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmY2R1dGlsJjguMQ==',
-                                'latestVersion': '8.2',
+                                'latestVersion': '8.2.1',
                                 'manager': 'conda3',
                                 'package': 'cdutil',
                                 'version': '8.1'
@@ -420,7 +420,7 @@ snapshots['TestEnvironmentServiceQueries.test_package_query_with_errors_conda 1'
                     'description': 'A set of tools to manipulate climate data',
                     'id': 'UGFja2FnZUNvbXBvbmVudDpjb25kYTMmY2R1dGlsJjguMQ==',
                     'isValid': True,
-                    'latestVersion': '8.2',
+                    'latestVersion': '8.2.1',
                     'manager': 'conda3',
                     'package': 'cdutil',
                     'version': '8.1'

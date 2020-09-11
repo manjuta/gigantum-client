@@ -3,7 +3,7 @@ import React from 'react';
 import renderer from 'react-test-renderer';
 import history from 'JS/history';
 import { mount } from 'enzyme';
-import LocalLabbooksContainer from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooksContainer';
+import LocalLabbooksContainer from 'Pages/dashboard/labbooks/localLabbooks/LocalLabbooksContainer';
 import store from 'JS/redux/store';
 import { BrowserRouter as Router } from 'react-router-dom';
 

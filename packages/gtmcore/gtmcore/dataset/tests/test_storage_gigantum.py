@@ -10,9 +10,10 @@ import string
 import os
 import uuid
 
+from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage import get_storage_backend
 from gtmcore.dataset.storage.gigantum import GigantumObjectStore, PresignedS3Download, PresignedS3Upload
-from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, helper_compress_file
+from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, helper_compress_file, mock_dataset_head
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
 
 
@@ -57,15 +58,6 @@ def chunk_update_callback(completed_bytes: int):
 
 
 @pytest.fixture()
-def mock_dataset_head():
-    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
-    with responses.RequestsMock() as rsps:
-        rsps.add(responses.HEAD, 'https://api.gigantum.com/object-v1/tester/dataset-1',
-                 headers={'x-access-level': 'a'}, status=200)
-        yield
-
-
-@pytest.fixture()
 def temp_directories():
     object_dir = f'/tmp/{uuid.uuid4().hex}'
     compressed_dir = f'/tmp/{uuid.uuid4().hex}'
@@ -81,12 +73,6 @@ class TestStorageBackendGigantum(object):
         sb = get_storage_backend("gigantum_object_v1")
 
         assert isinstance(sb, GigantumObjectStore)
-
-    def test_get_service_endpoint(self, mock_dataset_with_cache_dir):
-        sb = get_storage_backend("gigantum_object_v1")
-        ds = mock_dataset_with_cache_dir[0]
-
-        assert sb._object_service_endpoint(ds) == "https://api.gigantum.com/object-v1"
 
     def test_get_request_headers(self):
         sb = get_storage_backend("gigantum_object_v1")
@@ -135,7 +121,8 @@ class TestStorageBackendGigantum(object):
         sb.set_default_configuration("test-user", "abcd", '1234')
         ds = mock_dataset_with_cache_dir[0]
 
-        object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         headers = sb._object_service_headers()
         upload_chunk_size = 40000
@@ -150,7 +137,7 @@ class TestStorageBackendGigantum(object):
 
             with aioresponses() as mocked_responses:
                 async with aiohttp.ClientSession() as session:
-                    mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
                                          payload={
                                              "presigned_url": "https://dummyurl.com?params=1",
                                              "key_id": "asdfasdf",
@@ -167,13 +154,52 @@ class TestStorageBackendGigantum(object):
         assert psu.skip_object is False
 
     @pytest.mark.asyncio
+    async def test_presigneds3upload_get_presigned_s3_url_no_encryption(self, event_loop, mock_dataset_with_cache_dir):
+        sb = get_storage_backend("gigantum_object_v1")
+        sb.set_default_configuration("test-user", "abcd", '1234')
+        ds = mock_dataset_with_cache_dir[0]
+
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
+        headers = sb._object_service_headers()
+        upload_chunk_size = 40000
+        multipart_chunk_size = 4000000
+
+        with tempfile.NamedTemporaryFile() as tf:
+            object_id = os.path.basename(tf.name)
+            object_details = PushObject(object_path=tf.name,
+                                        revision=ds.git.repo.head.commit.hexsha,
+                                        dataset_path='myfile1.txt')
+            psu = PresignedS3Upload(object_service_root, headers, multipart_chunk_size, upload_chunk_size, object_details)
+
+            with aioresponses() as mocked_responses:
+                async with aiohttp.ClientSession() as session:
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
+                                         payload={
+                                             "presigned_url": "https://dummyurl.com?params=1",
+                                             "key_id": None,
+                                             "namespace": ds.namespace,
+                                             "obj_id": object_id,
+                                             "dataset": ds.name
+                                         },
+                                         status=200)
+
+                    await psu.get_presigned_s3_url(session)
+
+        assert psu.presigned_s3_url == "https://dummyurl.com?params=1"
+        assert 'x-amz-server-side-encryption-aws-kms-key-id' not in psu.s3_headers
+        assert psu.skip_object is False
+
+    @pytest.mark.asyncio
     async def test_presigneds3upload_get_presigned_s3_url_multipart(self, event_loop, mock_dataset_with_cache_dir,
                                                                     helper_write_large_file):
         sb = get_storage_backend("gigantum_object_v1")
         sb.set_default_configuration("test-user", "abcd", '1234')
         ds = mock_dataset_with_cache_dir[0]
 
-        object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         headers = sb._object_service_headers()
 
@@ -193,12 +219,11 @@ class TestStorageBackendGigantum(object):
 
         with aioresponses() as mocked_responses:
             async with aiohttp.ClientSession() as session:
-                mocked_responses.post(
-                    f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}/multipart',
+                mocked_responses.post(f"{object_service_root}/{object_id}/multipart",
                     payload={},
                     status=500)
                 mocked_responses.post(
-                    f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}/multipart',
+                    f"{object_service_root}/{object_id}/multipart",
                     payload={
                         "namespace": ds.namespace,
                         "key_id": "hghghg",
@@ -208,7 +233,7 @@ class TestStorageBackendGigantum(object):
                     },
                     status=200)
 
-                mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}/'
+                mocked_responses.put(f'{object_service_root}/{object_id}/'
                                      f'multipart/fakeid123/part/1',
                                      payload={
                                          "presigned_url": "https://dummyurl.com?params=1",
@@ -256,7 +281,8 @@ class TestStorageBackendGigantum(object):
 
         with tempfile.NamedTemporaryFile() as tf:
             object_id = os.path.basename(tf.name)
-            object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
             headers = sb._object_service_headers()
             upload_chunk_size = 40000
@@ -268,7 +294,7 @@ class TestStorageBackendGigantum(object):
 
             with aioresponses() as mocked_responses:
                 async with aiohttp.ClientSession() as session:
-                    mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
                                          payload={
                                              "presigned_url": "https://dummyurl.com?params=1",
                                              "key_id": "asdfasdf",
@@ -291,7 +317,9 @@ class TestStorageBackendGigantum(object):
 
         with tempfile.NamedTemporaryFile() as tf:
             object_id = os.path.basename(tf.name)
-            object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
             headers = sb._object_service_headers()
             upload_chunk_size = 40000
@@ -303,11 +331,11 @@ class TestStorageBackendGigantum(object):
 
             with aioresponses() as mocked_responses:
                 async with aiohttp.ClientSession() as session:
-                    mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
                                          status=500)
-                    mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
                                          status=500)
-                    mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                    mocked_responses.put(f'{object_service_root}/{object_id}',
                                          status=500)
                     with pytest.raises(IOError):
                         await psu.get_presigned_s3_url(session)
@@ -319,7 +347,9 @@ class TestStorageBackendGigantum(object):
         ds = mock_dataset_with_cache_dir[0]
 
         object_id = "abcd1234"
-        object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         headers = sb._object_service_headers()
         download_chunk_size = 40000
@@ -330,7 +360,7 @@ class TestStorageBackendGigantum(object):
 
         with aioresponses() as mocked_responses:
             async with aiohttp.ClientSession() as session:
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                mocked_responses.get(f'{object_service_root}/{object_id}',
                                      payload={
                                          "presigned_url": "https://dummyurl.com?params=2",
                                          "namespace": ds.namespace,
@@ -350,7 +380,9 @@ class TestStorageBackendGigantum(object):
         ds = mock_dataset_with_cache_dir[0]
 
         object_id = "abcd1234"
-        object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         headers = sb._object_service_headers()
         download_chunk_size = 40000
@@ -361,7 +393,7 @@ class TestStorageBackendGigantum(object):
 
         with aioresponses() as mocked_responses:
             async with aiohttp.ClientSession() as session:
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{object_id}',
+                mocked_responses.get(f'{object_service_root}/{object_id}',
                                      payload={
                                          "presigned_url": "https://dummyurl.com?params=2",
                                          "namespace": ds.namespace,
@@ -377,10 +409,13 @@ class TestStorageBackendGigantum(object):
         sb = get_storage_backend("gigantum_object_v1")
         ds = mock_dataset_with_cache_dir[0]
 
-        responses.add(responses.HEAD, f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}",
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
+        responses.add(responses.HEAD, f"{object_service_root}",
                       headers={'x-access-level': 'r'}, status=200)
 
-        responses.add(responses.HEAD, f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}",
+        responses.add(responses.HEAD, f"{object_service_root}",
                       headers={}, status=200)
 
         with pytest.raises(ValueError):
@@ -408,7 +443,10 @@ class TestStorageBackendGigantum(object):
         sb = get_storage_backend("gigantum_object_v1")
         ds = mock_dataset_with_cache_dir[0]
 
-        responses.add(responses.HEAD, f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}",
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
+        responses.add(responses.HEAD, f"{object_service_root}",
                       headers={'x-access-level': 'a'}, status=200)
 
         sb.set_default_configuration("test-user", "abcd", '1234')
@@ -419,6 +457,9 @@ class TestStorageBackendGigantum(object):
             sb = get_storage_backend("gigantum_object_v1")
 
             ds = mock_dataset_with_cache_dir[0]
+
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
@@ -440,7 +481,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -453,7 +494,7 @@ class TestStorageBackendGigantum(object):
                                  headers={'Etag': 'asdfasf'},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.put(f'{object_service_root}/{obj2_id}',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
@@ -485,6 +526,9 @@ class TestStorageBackendGigantum(object):
 
             object_dir, compressed_dir = temp_directories
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             obj1_id = uuid.uuid4().hex
             obj2_id = uuid.uuid4().hex
 
@@ -501,7 +545,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -511,7 +555,7 @@ class TestStorageBackendGigantum(object):
                                  },
                                  status=403)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.put(f'{object_service_root}/{obj2_id}',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
@@ -541,6 +585,9 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             object_dir, compressed_dir = temp_directories
 
             obj1_id = uuid.uuid4().hex
@@ -559,7 +606,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -569,7 +616,7 @@ class TestStorageBackendGigantum(object):
                                  },
                                  status=400)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.put(f'{object_service_root}/{obj2_id}',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
@@ -600,6 +647,9 @@ class TestStorageBackendGigantum(object):
 
             object_dir, compressed_dir = temp_directories
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             obj1_id = uuid.uuid4().hex
             obj2_id = uuid.uuid4().hex
 
@@ -616,7 +666,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -629,7 +679,7 @@ class TestStorageBackendGigantum(object):
                                  headers={'Etag': 'asdfasdf'},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.put(f'{object_service_root}/{obj2_id}',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                             "namespace": ds.namespace,
@@ -663,10 +713,13 @@ class TestStorageBackendGigantum(object):
         sb = get_storage_backend("gigantum_object_v1")
         ds = mock_dataset_with_cache_dir[0]
 
-        responses.add(responses.HEAD, f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}",
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
+        responses.add(responses.HEAD, object_service_root,
                       headers={}, status=404)
 
-        responses.add(responses.HEAD, f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}",
+        responses.add(responses.HEAD, object_service_root,
                       headers={'x-access-level': 'r'}, status=200)
 
         with pytest.raises(ValueError):
@@ -695,6 +748,9 @@ class TestStorageBackendGigantum(object):
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
             object_dir, compressed_dir = temp_directories
+
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
             obj1_id = uuid.uuid4().hex
             obj2_id = uuid.uuid4().hex
@@ -725,7 +781,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.get(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -739,7 +795,7 @@ class TestStorageBackendGigantum(object):
                                      body=data1.read(), status=200,
                                      content_type='application/octet-stream')
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.get(f'{object_service_root}/{obj2_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                          "namespace": ds.namespace,
@@ -782,6 +838,9 @@ class TestStorageBackendGigantum(object):
 
             object_dir, compressed_dir = temp_directories
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             obj1_id = uuid.uuid4().hex
             obj2_id = uuid.uuid4().hex
 
@@ -811,7 +870,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.get(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -823,7 +882,7 @@ class TestStorageBackendGigantum(object):
             mocked_responses.get(f"https://dummyurl.com/{obj1_id}?params=1", status=500,
                                  content_type='application/octet-stream')
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.get(f'{object_service_root}/{obj2_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                          "namespace": ds.namespace,
@@ -864,6 +923,9 @@ class TestStorageBackendGigantum(object):
 
             object_dir, compressed_dir = temp_directories
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             obj1_id = uuid.uuid4().hex
             obj2_id = uuid.uuid4().hex
 
@@ -893,7 +955,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.get(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -902,7 +964,7 @@ class TestStorageBackendGigantum(object):
                                  },
                                  status=400)
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}',
+            mocked_responses.get(f'{object_service_root}/{obj2_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
                                          "namespace": ds.namespace,
@@ -950,6 +1012,9 @@ class TestStorageBackendGigantum(object):
 
             object_dir, compressed_dir = temp_directories
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             obj1_id = uuid.uuid4().hex
             obj2_id = uuid.uuid4().hex
 
@@ -968,7 +1033,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -981,7 +1046,7 @@ class TestStorageBackendGigantum(object):
                                  headers={'Etag': 'asdfasf'},
                                  status=200)
 
-            mocked_responses.post(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart',
+            mocked_responses.post(f'{object_service_root}/{obj2_id}/multipart',
                                  payload={
                                             "namespace": ds.namespace,
                                             "key_id": "hghghg",
@@ -991,7 +1056,7 @@ class TestStorageBackendGigantum(object):
                                  },
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart/'
+            mocked_responses.put(f'{object_service_root}/{obj2_id}/multipart/'
                                  f'fakeid123/part/1',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
@@ -1002,7 +1067,7 @@ class TestStorageBackendGigantum(object):
                                  },
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart/'
+            mocked_responses.put(f'{object_service_root}/{obj2_id}/multipart/'
                                  f'fakeid123/part/2',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=2",
@@ -1020,7 +1085,7 @@ class TestStorageBackendGigantum(object):
                                  status=200)
 
             # Fail complete multipart once to demonstrate retry
-            mocked_responses.post(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/'
+            mocked_responses.post(f'{object_service_root}/{obj2_id}/'
                                   f'multipart/fakeid123',
                                   payload={
                                              "namespace": ds.namespace,
@@ -1029,7 +1094,7 @@ class TestStorageBackendGigantum(object):
                                   },
                                   status=500)
 
-            mocked_responses.post(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/'
+            mocked_responses.post(f'{object_service_root}/{obj2_id}/'
                                   f'multipart/fakeid123',
                                   payload={
                                              "namespace": ds.namespace,
@@ -1056,6 +1121,9 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             object_dir, compressed_dir = temp_directories
 
             obj1_id = uuid.uuid4().hex
@@ -1076,7 +1144,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -1089,7 +1157,7 @@ class TestStorageBackendGigantum(object):
                                  headers={'Etag': 'asdfasf'},
                                  status=200)
 
-            mocked_responses.post(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart',
+            mocked_responses.post(f'{object_service_root}/{obj2_id}/multipart',
                                  payload={
                                             "namespace": ds.namespace,
                                             "key_id": "hghghg",
@@ -1099,7 +1167,7 @@ class TestStorageBackendGigantum(object):
                                  },
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart/'
+            mocked_responses.put(f'{object_service_root}/{obj2_id}/multipart/'
                                  f'fakeid123/part/1',
                                  payload={
                                             "presigned_url": f"https://dummyurl.com/{obj2_id}?params=1",
@@ -1113,22 +1181,22 @@ class TestStorageBackendGigantum(object):
                                  headers={'Etag': '12341234'},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart/'
+            mocked_responses.put(f'{object_service_root}/{obj2_id}/multipart/'
                                  f'fakeid123/part/2',
                                  status=500)
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart/'
+            mocked_responses.put(f'{object_service_root}/{obj2_id}/multipart/'
                                  f'fakeid123/part/2',
                                  status=500)
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart/'
+            mocked_responses.put(f'{object_service_root}/{obj2_id}/multipart/'
                                  f'fakeid123/part/2',
                                  status=500)
 
             # Fail abort multipart once to test retry
-            mocked_responses.delete(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/'
+            mocked_responses.delete(f'{object_service_root}/{obj2_id}/'
                                     f'multipart/fakeid123',
                                     status=500)
 
-            mocked_responses.delete(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/'
+            mocked_responses.delete(f'{object_service_root}/{obj2_id}/'
                                     f'multipart/fakeid123',
                                     status=204)
 
@@ -1152,7 +1220,8 @@ class TestStorageBackendGigantum(object):
         sb.set_default_configuration("test-user", "abcd", '1234')
         ds = mock_dataset_with_cache_dir[0]
 
-        object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         headers = sb._object_service_headers()
 
@@ -1202,7 +1271,8 @@ class TestStorageBackendGigantum(object):
             sb.set_default_configuration("test-user", "abcd", '1234')
             ds = mock_dataset_with_cache_dir[0]
 
-            object_service_root = f"{sb._object_service_endpoint(ds)}/{ds.namespace}/{ds.name}"
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
             headers = sb._object_service_headers()
 
@@ -1224,7 +1294,7 @@ class TestStorageBackendGigantum(object):
                 await iterator.__anext__()
 
             obj2_id = os.path.basename(helper_write_two_part_file)
-            mocked_responses.post(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart',
+            mocked_responses.post(f'{object_service_root}/{obj2_id}/multipart',
                                   payload={
                                       "namespace": ds.namespace,
                                       "key_id": "hghghg",
@@ -1288,6 +1358,9 @@ class TestStorageBackendGigantum(object):
 
             sb.set_default_configuration(ds.namespace, "abcd", '1234')
 
+            object_service_url = Configuration().get_server_configuration().object_service_url
+            object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
+
             object_dir, compressed_dir = temp_directories
 
             obj1_id = uuid.uuid4().hex
@@ -1308,7 +1381,7 @@ class TestStorageBackendGigantum(object):
                                   dataset_path='myfile2.txt')
                        ]
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1_id}',
+            mocked_responses.put(f'{object_service_root}/{obj1_id}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1_id}?params=1",
                                          "namespace": ds.namespace,
@@ -1321,7 +1394,7 @@ class TestStorageBackendGigantum(object):
                                  headers={'Etag': 'asdfasf'},
                                  status=200)
 
-            mocked_responses.post(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2_id}/multipart',
+            mocked_responses.post(f'{object_service_root}/{obj2_id}/multipart',
                                   payload={},
                                   status=403)
 

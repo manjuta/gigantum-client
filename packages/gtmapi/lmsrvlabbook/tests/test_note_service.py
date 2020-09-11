@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import pytest
 import os
 from snapshottest import snapshot
@@ -35,7 +16,7 @@ class TestNoteService(object):
     def test_create_user_note_no_body(self, fixture_working_dir, snapshot):
         """Test creating and getting a user note"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "user-note-test",
                                description="testing user notes")
 
@@ -73,7 +54,7 @@ class TestNoteService(object):
         """Test creating a full user note"""
 
         # Create labbook
-        lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default",
+        lb = InventoryManager().create_labbook("default", "default",
                                                                      "user-note-test",
                                                                      description="testing user notes")
 
@@ -112,7 +93,7 @@ class TestNoteService(object):
     def test_create_user_note_check_vals(self, fixture_working_dir, snapshot):
         """Test to make sure keys and IDs are getting set OK"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "user-note-test",
                                description="testing user notes")
 
@@ -170,7 +151,7 @@ class TestNoteService(object):
     def test_create_user_note_check_vals_dataset(self, fixture_working_dir, snapshot):
         """Test to make sure keys and IDs are getting set OK"""
         # Create labbook
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset("default", "default", "user-note-test", storage_type='gigantum_object_v1',
                                description="testing user notes")
 

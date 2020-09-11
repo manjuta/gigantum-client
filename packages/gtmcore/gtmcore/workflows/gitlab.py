@@ -4,7 +4,7 @@ import shlex
 import os
 from enum import Enum
 from typing import List, Optional, Tuple, Dict, Any
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 
 from gtmcore.logging import LMLogger
 
@@ -86,7 +86,7 @@ class GitLabManager(object):
         """
 
         Args:
-            remote_host: the domain of the remote git host
+            remote_host: the URL of the remote git host, including the protocol
             hub_api: the url to the hub API
             access_token(str): The logged in user's access token
             id_token(str): The logged in user's id token
@@ -182,7 +182,7 @@ class GitLabManager(object):
             int
         """
         # Call API to get ID of the user
-        response = requests.get(f"https://{self.remote_host}/api/v4/users?username={username}",
+        response = requests.get(f"{self.remote_host}api/v4/users?username={username}",
                                 headers=self._gitlab_api_headers(), verify=False,
                                 timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
@@ -213,7 +213,7 @@ class GitLabManager(object):
         """
         # Call API to check for project
         repo_id = self.get_repository_id(namespace, repository_name)
-        response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
+        response = requests.get(f"{self.remote_host}api/v4/projects/{repo_id}",
                                 headers=self._gitlab_api_headers(), verify=False,
                                 timeout=REQUEST_TIMEOUT)
 
@@ -241,7 +241,7 @@ class GitLabManager(object):
         """
         repo_id = self.get_repository_id(namespace, repository_name)
         update_data = {'visibility': visibility}
-        response = requests.put(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
+        response = requests.put(f"{self.remote_host}api/v4/projects/{repo_id}",
                                 data=update_data, headers=self._gitlab_api_headers(),
                                 timeout=REQUEST_TIMEOUT, verify=False)
         if response.status_code != 200:
@@ -265,7 +265,7 @@ class GitLabManager(object):
                 Dict of repository properties, for keys see above link.
             """
         repo_id = self.get_repository_id(namespace, repository_name)
-        response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
+        response = requests.get(f"{self.remote_host}api/v4/projects/{repo_id}",
                                 headers=self._gitlab_api_headers(),
                                 timeout=REQUEST_TIMEOUT, verify=False)
         if response.status_code == 200:
@@ -310,7 +310,7 @@ class GitLabManager(object):
                 }
 
         # Call API to create project
-        response = requests.post(f"https://{self.remote_host}/api/v4/projects",
+        response = requests.post(f"{self.remote_host}api/v4/projects",
                                  headers=self._gitlab_api_headers(),
                                  json=data, timeout=REQUEST_TIMEOUT, verify=False)
 
@@ -336,7 +336,7 @@ class GitLabManager(object):
 
         # Call API to remove project
         repo_id = self.get_repository_id(namespace, repository_name)
-        response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}",
+        response = requests.delete(f"{self.remote_host}api/v4/projects/{repo_id}",
                                    headers=self._gitlab_api_headers(), verify=False,
                                    timeout=REQUEST_TIMEOUT)
 
@@ -367,7 +367,7 @@ class GitLabManager(object):
         per_page = 20
         repo_id = self.get_repository_id(namespace, repository_name)
         while True:
-            response = requests.get(f"https://{self.remote_host}/api/v4/projects/{repo_id}/"
+            response = requests.get(f"{self.remote_host}api/v4/projects/{repo_id}/"
                                     f"members?page={page}&per_page={per_page}",
                                     headers=self._gitlab_api_headers(),
                                     timeout=REQUEST_TIMEOUT, verify=False)
@@ -409,7 +409,7 @@ class GitLabManager(object):
         data = {"user_id": user_id,
                 "access_level": role.value}
         repo_id = self.get_repository_id(namespace, labbook_name)
-        response = requests.post(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members",
+        response = requests.post(f"{self.remote_host}api/v4/projects/{repo_id}/members",
                                  headers=self._gitlab_api_headers(),
                                  json=data,
                                  timeout=REQUEST_TIMEOUT, verify=False)
@@ -443,7 +443,7 @@ class GitLabManager(object):
 
         # Call API to remove a collaborator
         repo_id = self.get_repository_id(namespace, labbook_name)
-        response = requests.delete(f"https://{self.remote_host}/api/v4/projects/{repo_id}/members/{user_id}",
+        response = requests.delete(f"{self.remote_host}api/v4/projects/{repo_id}/members/{user_id}",
                                    headers=self._gitlab_api_headers(), verify=False,
                                    timeout=REQUEST_TIMEOUT)
 
@@ -489,7 +489,8 @@ class GitLabManager(object):
         Returns:
 
         """
-        input_str = f"protocol=https\nhost={host}\nusername={username}\n\n"
+        parsed_uri = urlparse(host)
+        input_str = f"protocol={parsed_uri.scheme}\nhost={parsed_uri.netloc}\nusername={username}\n\n"
         output, err = self._call_shell("git credential-cache get", input_str=input_str, cwd=os.path.expanduser("~"))
 
         if err:
@@ -518,7 +519,7 @@ class GitLabManager(object):
         """Method to configure the local git client's credentials
 
         Args:
-            host(str): GitLab hostname
+            host(str): GitLab url, including the protocol
             username(str): Username to authenticate
 
         Returns:
@@ -529,7 +530,9 @@ class GitLabManager(object):
 
         if token is None:
             # If None, not configured, so fetch from User service and set locally
-            input_str = f"protocol=https\nhost={host}\nusername={username}\npassword={self._repo_token()}\n\n"
+            parsed_uri = urlparse(host)
+            input_str = f"protocol={parsed_uri.scheme}\nhost={parsed_uri.netloc}\n" \
+                f"username={username}\npassword={self._repo_token()}\n\n"
             _, err = self._call_shell("git credential approve", input_str=input_str, cwd=os.path.expanduser("~"))
             if err:
                 raise IOError(f"Failed to configure git credentials: {err.decode('utf-8')}")
@@ -546,7 +549,8 @@ class GitLabManager(object):
         Returns:
             None
         """
-        input_str = f"protocol=https\nhost={host}\nusername={username}\n\n"
+        parsed_uri = urlparse(host)
+        input_str = f"protocol={parsed_uri.scheme}\nhost={parsed_uri.netloc}\nusername={username}\n\n"
         _, err = self._call_shell("git credential reject", input_str=input_str, cwd=os.path.expanduser("~"))
         if err:
             raise IOError(f"Failed to reset git credentials: {err.decode('utf-8')}")

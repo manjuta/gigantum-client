@@ -13,7 +13,7 @@ class TestIdentityBrowser(object):
 
     def test_is_session_valid(self, mock_config_file_with_auth_browser):
         """test check for valid session"""
-        config = Configuration(mock_config_file_with_auth_browser[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == BrowserIdentityManager
 
@@ -27,7 +27,7 @@ class TestIdentityBrowser(object):
 
     def test_is_authenticated_token(self, mock_config_file_with_auth_browser):
         """test checking if the user is authenticated via a token"""
-        config = Configuration(mock_config_file_with_auth_browser[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == BrowserIdentityManager
 
@@ -46,12 +46,12 @@ class TestIdentityBrowser(object):
     @responses.activate
     def test_get_user_profile(self, mock_config_file_with_auth_browser):
         """test getting a user profile from Auth0"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
                       status=200)
         responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
 
-        config = Configuration(mock_config_file_with_auth_browser[0])
+        config = Configuration()
         mgr = get_identity_manager(config)
         assert type(mgr) == BrowserIdentityManager
         # Don't check at_hash claim due to password grant not setting it in the token

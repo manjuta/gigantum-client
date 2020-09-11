@@ -17,7 +17,7 @@ from gtmcore.dataset.manifest import Manifest
 from gtmcore.dispatcher import jobs
 
 from gtmcore.dataset.tests.test_storage_local import mock_dataset_with_local_dir
-from gtmcore.fixtures import mock_config_file, mock_config_file_background_tests, _MOCK_create_remote_repo2
+from gtmcore.fixtures import mock_config_file, mock_config_file_background_tests, helper_create_remote_repo
 from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file, helper_write_big_file, \
     mock_enable_unmanaged_for_testing, mock_dataset_with_cache_dir_local
 
@@ -31,7 +31,7 @@ from gtmcore.dispatcher.tests import BG_SKIP_MSG, BG_SKIP_TEST
 def mock_dataset_head():
     """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
     with responses.RequestsMock() as rsps:
-        rsps.add(responses.HEAD, 'https://api.gigantum.com/object-v1/default/dataset100',
+        rsps.add(responses.HEAD, 'https://test.api.gigantum.com/object-v1/default/dataset100',
                  headers={'x-access-level': 'a'}, status=200)
         yield
 
@@ -39,10 +39,13 @@ def mock_dataset_head():
 @pytest.mark.skipif(BG_SKIP_TEST, reason=BG_SKIP_MSG)
 class TestDatasetBackgroundJobs(object):
     def test_pull_objects(self, mock_config_file, mock_dataset_head):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
         iom = IOManager(ds, m)
+
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "other_dir"))
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfadfsdf")
@@ -72,104 +75,106 @@ class TestDatasetBackgroundJobs(object):
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt'))
 
-        with patch.object(Configuration, 'find_default_config', lambda self: mock_config_file[0]):
-            with aioresponses() as mocked_responses:
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
-                                     payload={
-                                             "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
-                                             "namespace": ds.namespace,
-                                             "obj_id": obj_id_1,
-                                             "dataset": ds.name
-                                     },
-                                     status=200)
+        with aioresponses() as mocked_responses:
+            mocked_responses.get(f'{object_service_root}/{obj_id_1}',
+                                 payload={
+                                         "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
+                                         "namespace": ds.namespace,
+                                         "obj_id": obj_id_1,
+                                         "dataset": ds.name
+                                 },
+                                 status=200)
 
-                with open(obj1_source, 'rb') as data1:
-                    mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1",
-                                         body=data1.read(), status=200,
-                                         content_type='application/octet-stream')
+            with open(obj1_source, 'rb') as data1:
+                mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1",
+                                     body=data1.read(), status=200,
+                                     content_type='application/octet-stream')
 
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
-                                     payload={
-                                             "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
-                                             "namespace": ds.namespace,
-                                             "obj_id": obj_id_2,
-                                             "dataset": ds.name
-                                     },
-                                     status=200)
+            mocked_responses.get(f'{object_service_root}/{obj_id_2}',
+                                 payload={
+                                         "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
+                                         "namespace": ds.namespace,
+                                         "obj_id": obj_id_2,
+                                         "dataset": ds.name
+                                 },
+                                 status=200)
 
-                with open(obj2_source, 'rb') as data2:
-                    mocked_responses.get(f"https://dummyurl.com/{obj_id_2}?params=1",
-                                         body=data2.read(), status=200,
-                                         content_type='application/octet-stream')
+            with open(obj2_source, 'rb') as data2:
+                mocked_responses.get(f"https://dummyurl.com/{obj_id_2}?params=1",
+                                     body=data2.read(), status=200,
+                                     content_type='application/octet-stream')
 
-                dl_kwargs = {
-                    'logged_in_username': "default",
-                    'access_token': "asdf",
-                    'id_token': "1234",
-                    'dataset_owner': "default",
-                    'dataset_name': "dataset100",
-                    'labbook_owner': None,
-                    'labbook_name': None,
-                    'keys': ["test1.txt"]
-                }
+            dl_kwargs = {
+                'logged_in_username': "default",
+                'access_token': "asdf",
+                'id_token': "1234",
+                'dataset_owner': "default",
+                'dataset_name': "dataset100",
+                'labbook_owner': None,
+                'labbook_name': None,
+                'keys': ["test1.txt"]
+            }
 
-                gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
+            gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
 
-                # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
-                # in parallel and you only want to link once.
-                m.link_revision()
+            # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
+            # in parallel and you only want to link once.
+            m.link_revision()
 
-                assert os.path.isfile(obj1_target) is True
-                assert os.path.isfile(obj2_target) is False
+            assert os.path.isfile(obj1_target) is True
+            assert os.path.isfile(obj2_target) is False
 
-                decompressor = snappy.StreamDecompressor()
-                with open(obj1_source, 'rb') as dd:
-                    source1 = decompressor.decompress(dd.read())
-                    source1 += decompressor.flush()
-                with open(obj1_target, 'rt') as dd:
-                    dest1 = dd.read()
-                assert source1.decode("utf-8") == dest1
+            decompressor = snappy.StreamDecompressor()
+            with open(obj1_source, 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
+            with open(obj1_target, 'rt') as dd:
+                dest1 = dd.read()
+            assert source1.decode("utf-8") == dest1
 
-                # Download other file
-                dl_kwargs = {
-                    'logged_in_username': "default",
-                    'access_token': "asdf",
-                    'id_token': "1234",
-                    'dataset_owner': "default",
-                    'dataset_name': "dataset100",
-                    'labbook_owner': None,
-                    'labbook_name': None,
-                    'keys': ["test2.txt"]
-                }
+            # Download other file
+            dl_kwargs = {
+                'logged_in_username': "default",
+                'access_token': "asdf",
+                'id_token': "1234",
+                'dataset_owner': "default",
+                'dataset_name': "dataset100",
+                'labbook_owner': None,
+                'labbook_name': None,
+                'keys': ["test2.txt"]
+            }
 
-                gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
+            gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
 
-                # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
-                # in parallel and you only want to link once.
-                m.link_revision()
+            # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
+            # in parallel and you only want to link once.
+            m.link_revision()
 
-                assert os.path.isfile(obj1_target) is True
-                assert os.path.isfile(obj2_target) is True
+            assert os.path.isfile(obj1_target) is True
+            assert os.path.isfile(obj2_target) is True
 
-                with open(obj1_source, 'rb') as dd:
-                    source1 = decompressor.decompress(dd.read())
-                    source1 += decompressor.flush()
-                with open(obj1_target, 'rt') as dd:
-                    dest1 = dd.read()
-                assert source1.decode("utf-8") == dest1
+            with open(obj1_source, 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
+            with open(obj1_target, 'rt') as dd:
+                dest1 = dd.read()
+            assert source1.decode("utf-8") == dest1
 
-                with open(obj2_source, 'rb') as dd:
-                    source1 = decompressor.decompress(dd.read())
-                    source1 += decompressor.flush()
-                with open(obj2_target, 'rt') as dd:
-                    dest1 = dd.read()
-                assert source1.decode("utf-8") == dest1
+            with open(obj2_source, 'rb') as dd:
+                source1 = decompressor.decompress(dd.read())
+                source1 += decompressor.flush()
+            with open(obj2_target, 'rt') as dd:
+                dest1 = dd.read()
+            assert source1.decode("utf-8") == dest1
 
     def test_pull_objects_error(self, mock_config_file, mock_dataset_head):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
         iom = IOManager(ds, m)
+
+        object_service_url = Configuration().get_server_configuration().object_service_url
+        object_service_root = f"{object_service_url}{ds.namespace}/{ds.name}"
 
         os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "other_dir"))
         helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfadfsdf")
@@ -199,52 +204,51 @@ class TestDatasetBackgroundJobs(object):
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt'))
 
-        with patch.object(Configuration, 'find_default_config', lambda self: mock_config_file[0]):
-            with aioresponses() as mocked_responses:
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
-                                     payload={
-                                             "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
-                                             "namespace": ds.namespace,
-                                             "obj_id": obj_id_1,
-                                             "dataset": ds.name
-                                     },
-                                     status=200)
+        with aioresponses() as mocked_responses:
+            mocked_responses.get(f'{object_service_root}/{obj_id_1}',
+                                 payload={
+                                         "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
+                                         "namespace": ds.namespace,
+                                         "obj_id": obj_id_1,
+                                         "dataset": ds.name
+                                 },
+                                 status=200)
 
-                with open(obj1_source, 'rb') as data1:
-                    mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1",
-                                         body=data1.read(), status=200,
-                                         content_type='application/octet-stream')
+            with open(obj1_source, 'rb') as data1:
+                mocked_responses.get(f"https://dummyurl.com/{obj_id_1}?params=1",
+                                     body=data1.read(), status=200,
+                                     content_type='application/octet-stream')
 
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
-                                     payload={
-                                             "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
-                                             "namespace": ds.namespace,
-                                             "obj_id": obj_id_2,
-                                             "dataset": ds.name
-                                     },
-                                     status=400)
+            mocked_responses.get(f'{object_service_root}/{obj_id_2}',
+                                 payload={
+                                         "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
+                                         "namespace": ds.namespace,
+                                         "obj_id": obj_id_2,
+                                         "dataset": ds.name
+                                 },
+                                 status=400)
 
-                dl_kwargs = {
-                    'logged_in_username': "default",
-                    'access_token': "asdf",
-                    'id_token': "1234",
-                    'dataset_owner': "default",
-                    'dataset_name': "dataset100",
-                    'labbook_owner': None,
-                    'labbook_name': None,
-                    'keys': ['test1.txt', 'test2.txt']
-                }
+            dl_kwargs = {
+                'logged_in_username': "default",
+                'access_token': "asdf",
+                'id_token': "1234",
+                'dataset_owner': "default",
+                'dataset_name': "dataset100",
+                'labbook_owner': None,
+                'labbook_name': None,
+                'keys': ['test1.txt', 'test2.txt']
+            }
 
-                gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
+            gtmcore.dispatcher.dataset_jobs.pull_objects(**dl_kwargs)
 
-                # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
-                # in parallel and you only want to link once.
-                m.link_revision()
+            # Manually link since this is disabled by default in the job (because in real use, multiple jobs run
+            # in parallel and you only want to link once.
+            m.link_revision()
 
-                assert os.path.isfile(obj1_target) is True
-                assert os.path.isfile(obj2_target) is False
-                assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt')) is True
-                assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt')) is False
+            assert os.path.isfile(obj1_target) is True
+            assert os.path.isfile(obj2_target) is False
+            assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt')) is True
+            assert os.path.isfile(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test2.txt')) is False
 
     def test_update_from_remote(self, mock_dataset_with_local_dir):
         ds = mock_dataset_with_local_dir[0]
@@ -284,7 +288,7 @@ class TestDatasetBackgroundJobs(object):
         modified_items = ds.backend.verify_contents(ds, lambda x: print(x))
         assert len(modified_items) == 0
 
-        test_dir = os.path.join(mock_dataset_with_local_dir[1], "local_data", "test_dir")
+        test_dir = os.path.join(ds.client_config.app_workdir, "local_data", "test_dir")
         with open(os.path.join(test_dir, 'test1.txt'), 'wt') as tf:
             tf.write("This file got changed in the filesystem")
 
@@ -341,7 +345,7 @@ class TestDatasetBackgroundJobs(object):
             modified_items = ds.backend.verify_contents(ds, lambda x: print(x))
             assert len(modified_items) == 0
 
-            test_dir = os.path.join(mock_dataset_with_local_dir[1], "local_data", "test_dir")
+            test_dir = os.path.join(ds.client_config.app_workdir, "local_data", "test_dir")
             with open(os.path.join(test_dir, 'test1.txt'), 'wt') as tf:
                 tf.write("This file got changed in the filesystem")
 
@@ -397,7 +401,7 @@ class TestDatasetBackgroundJobs(object):
             dataset_dir = os.path.join(lb.root_dir, '.gigantum', 'datasets', 'tester', ds.name)
             ds = im.load_dataset_from_directory(dataset_dir)
 
-            test_dir = os.path.join(mock_dataset_with_local_dir[1], "local_data", "test_dir")
+            test_dir = os.path.join(ds.client_config.app_workdir, "local_data", "test_dir")
             with open(os.path.join(test_dir, 'test1.txt'), 'wt') as tf:
                 tf.write("This file got changed in the filesystem")
 
@@ -419,7 +423,7 @@ class TestDatasetBackgroundJobs(object):
             assert 'Validating contents of 3 files.' in job.meta['feedback']
 
     def test_complete_dataset_upload_transaction_simple(self, mock_config_file_background_tests):
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "new-ds", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
 
@@ -431,11 +435,11 @@ class TestDatasetBackgroundJobs(object):
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
-            'dataset_name': "new-ds",
-            'config_file': mock_config_file_background_tests[0]
+            'dataset_name': "new-ds"
         }
 
         assert len(m.manifest) == 0
+
         gtmcore.dispatcher.dataset_jobs.complete_dataset_upload_transaction(**dl_kwargs)
 
         m = Manifest(ds, 'default')
@@ -461,7 +465,7 @@ class TestDatasetBackgroundJobs(object):
         assert "Uploaded 2 new file(s)." in ds.git.log()[0]['message']
 
     def test_complete_dataset_upload_transaction_overflow_batches(self, mock_config_file_background_tests):
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "new-ds", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
 
@@ -479,8 +483,7 @@ class TestDatasetBackgroundJobs(object):
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
-            'dataset_name': "new-ds",
-            'config_file': mock_config_file_background_tests[0]
+            'dataset_name': "new-ds"
         }
 
         assert len(m.manifest) == 0
@@ -516,7 +519,7 @@ class TestDatasetBackgroundJobs(object):
         assert "Uploaded 8 new file(s)." in ds.git.log()[0]['message']
 
     def test_complete_dataset_upload_transaction_all_types(self, mock_config_file_background_tests):
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "new-ds", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
 
@@ -529,8 +532,7 @@ class TestDatasetBackgroundJobs(object):
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
-            'dataset_name': "new-ds",
-            'config_file': mock_config_file_background_tests[0]
+            'dataset_name': "new-ds"
         }
 
         assert len(m.manifest) == 0
@@ -570,7 +572,7 @@ class TestDatasetBackgroundJobs(object):
         assert "Uploaded 1 new file(s). Uploaded 1 modified file(s). 1 deleted file(s)." in ds.git.log()[0]['message']
 
     def test_complete_dataset_upload_transaction_failure(self, mock_config_file_background_tests):
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "new-ds", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
         dispatcher_obj = Dispatcher()
@@ -586,8 +588,7 @@ class TestDatasetBackgroundJobs(object):
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
-            'dataset_name': "new-ds",
-            'config_file': mock_config_file_background_tests[0]
+            'dataset_name': "new-ds"
         }
 
         job_metadata = {'dataset': f"default|default|new-ds",
@@ -632,7 +633,7 @@ class TestDatasetBackgroundJobs(object):
                job_status.meta['feedback']
 
     def test_complete_dataset_upload_transaction_prune_job(self, mock_config_file_background_tests):
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "new-ds", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
 
@@ -643,8 +644,7 @@ class TestDatasetBackgroundJobs(object):
             'logged_in_username': "default",
             'logged_in_email': "default@gigantum.com",
             'dataset_owner': "default",
-            'dataset_name': "new-ds",
-            'config_file': mock_config_file_background_tests[0]
+            'dataset_name': "new-ds"
         }
 
         assert len(m.manifest) == 0
@@ -666,28 +666,27 @@ class TestDatasetBackgroundJobs(object):
         assert "Uploaded 1 new file(s)." in ds.git.log()[0]['message']
 
     def test_check_and_import_dataset_exists(self, mock_config_file):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
 
         kwargs = {
             'logged_in_username': "default",
             'dataset_owner': "default",
             'dataset_name': "dataset100",
-            'remote_url': ds.remote,
-            'config_file': mock_config_file[0]
+            'remote_url': ds.remote
         }
 
         gtmcore.dispatcher.dataset_jobs.check_and_import_dataset(**kwargs)
 
     def test_check_and_import_dataset(self, mock_config_file):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'test', None, None)
+        helper_create_remote_repo(ds, 'test', None, None)
         remote_url = ds.remote
 
         im.delete_dataset('default', 'default', "dataset100")
@@ -699,8 +698,7 @@ class TestDatasetBackgroundJobs(object):
             'logged_in_username': "default",
             'dataset_owner': "default",
             'dataset_name': "dataset100",
-            'remote_url': remote_url,
-            'config_file': mock_config_file[0]
+            'remote_url': remote_url
         }
 
         gtmcore.dispatcher.dataset_jobs.check_and_import_dataset(**kwargs)
@@ -716,7 +714,7 @@ class TestDatasetBackgroundJobs(object):
 
         def dispatch_mock(self, method_reference, kwargs, metadata, persist):
             with aioresponses() as mocked_responses:
-                mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
+                mocked_responses.get(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
                                      payload={
                                              "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
                                              "namespace": ds.namespace,
@@ -733,7 +731,7 @@ class TestDatasetBackgroundJobs(object):
 
                 return "afakejobkey"
 
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
         iom = IOManager(ds, m)
@@ -756,31 +754,29 @@ class TestDatasetBackgroundJobs(object):
         # Clear out from linked dir
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
 
-        with patch.object(Configuration, 'find_default_config', lambda self: mock_config_file_background_tests[0]):
-            with patch.object(Dispatcher, 'dispatch_task', dispatch_mock):
-                with patch.object(Dispatcher, 'query_task', dispatch_query_mock):
-                    dl_kwargs = {
-                        'logged_in_username': "default",
-                        'access_token': "asdf",
-                        'id_token': "1234",
-                        'dataset_owner': "default",
-                        'dataset_name': "dataset100",
-                        'labbook_owner': None,
-                        'labbook_name': None,
-                        'keys': ["test1.txt"],
-                        'config_file': mock_config_file_background_tests[0]
-                    }
+        with patch.object(Dispatcher, 'dispatch_task', dispatch_mock):
+            with patch.object(Dispatcher, 'query_task', dispatch_query_mock):
+                dl_kwargs = {
+                    'logged_in_username': "default",
+                    'access_token': "asdf",
+                    'id_token': "1234",
+                    'dataset_owner': "default",
+                    'dataset_name': "dataset100",
+                    'labbook_owner': None,
+                    'labbook_name': None,
+                    'keys': ["test1.txt"]
+                }
 
-                    gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
-                    assert os.path.isfile(obj1_target) is True
+                gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
+                assert os.path.isfile(obj1_target) is True
 
-                    decompressor = snappy.StreamDecompressor()
-                    with open(obj1_source, 'rb') as dd:
-                        source1 = decompressor.decompress(dd.read())
-                        source1 += decompressor.flush()
-                    with open(obj1_target, 'rt') as dd:
-                        dest1 = dd.read()
-                    assert source1.decode("utf-8") == dest1
+                decompressor = snappy.StreamDecompressor()
+                with open(obj1_source, 'rb') as dd:
+                    source1 = decompressor.decompress(dd.read())
+                    source1 += decompressor.flush()
+                with open(obj1_target, 'rt') as dd:
+                    dest1 = dd.read()
+                assert source1.decode("utf-8") == dest1
 
     def test_download_dataset_files_file_fail(self, mock_config_file_background_tests):
         def dispatch_query_mock(self, job_key):
@@ -792,7 +788,7 @@ class TestDatasetBackgroundJobs(object):
                 gtmcore.dispatcher.dataset_jobs.pull_objects(**kwargs)
                 return "afakejobkey"
 
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
         iom = IOManager(ds, m)
@@ -815,24 +811,22 @@ class TestDatasetBackgroundJobs(object):
         # Clear out from linked dir
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
 
-        with patch.object(Configuration, 'find_default_config', lambda self: mock_config_file_background_tests[0]):
-            with patch.object(Dispatcher, 'dispatch_task', dispatch_mock):
-                with patch.object(Dispatcher, 'query_task', dispatch_query_mock):
-                    dl_kwargs = {
-                        'logged_in_username': "default",
-                        'access_token': "asdf",
-                        'id_token': "1234",
-                        'dataset_owner': "default",
-                        'dataset_name': "dataset100",
-                        'labbook_owner': None,
-                        'labbook_name': None,
-                        'keys': ["test1.txt"],
-                        'config_file': mock_config_file_background_tests[0]
-                    }
+        with patch.object(Dispatcher, 'dispatch_task', dispatch_mock):
+            with patch.object(Dispatcher, 'query_task', dispatch_query_mock):
+                dl_kwargs = {
+                    'logged_in_username': "default",
+                    'access_token': "asdf",
+                    'id_token': "1234",
+                    'dataset_owner': "default",
+                    'dataset_name': "dataset100",
+                    'labbook_owner': None,
+                    'labbook_name': None,
+                    'keys': ["test1.txt"]
+                }
 
-                    with pytest.raises(IOError):
-                        gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
-                    assert os.path.isfile(obj1_target) is False
+                with pytest.raises(IOError):
+                    gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
+                assert os.path.isfile(obj1_target) is False
 
     def test_download_dataset_files_job_fail(self, mock_config_file_background_tests):
         def dispatch_query_mock(self, job_key):
@@ -844,7 +838,7 @@ class TestDatasetBackgroundJobs(object):
                 gtmcore.dispatcher.dataset_jobs.pull_objects(**kwargs)
                 return "afakejobkey"
 
-        im = InventoryManager(mock_config_file_background_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         m = Manifest(ds, 'default')
         iom = IOManager(ds, m)
@@ -867,27 +861,25 @@ class TestDatasetBackgroundJobs(object):
         # Clear out from linked dir
         os.remove(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, 'test1.txt'))
 
-        with patch.object(Configuration, 'find_default_config', lambda self: mock_config_file_background_tests[0]):
-            with patch.object(Dispatcher, 'dispatch_task', dispatch_mock):
-                with patch.object(Dispatcher, 'query_task', dispatch_query_mock):
-                    dl_kwargs = {
-                        'logged_in_username': "default",
-                        'access_token': "asdf",
-                        'id_token': "1234",
-                        'dataset_owner': "default",
-                        'dataset_name': "dataset100",
-                        'labbook_owner': None,
-                        'labbook_name': None,
-                        'keys': ["test1.txt"],
-                        'config_file': mock_config_file_background_tests[0]
-                    }
+        with patch.object(Dispatcher, 'dispatch_task', dispatch_mock):
+            with patch.object(Dispatcher, 'query_task', dispatch_query_mock):
+                dl_kwargs = {
+                    'logged_in_username': "default",
+                    'access_token': "asdf",
+                    'id_token': "1234",
+                    'dataset_owner': "default",
+                    'dataset_name': "dataset100",
+                    'labbook_owner': None,
+                    'labbook_name': None,
+                    'keys': ["test1.txt"],
+                }
 
-                    with pytest.raises(IOError):
-                        gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
-                    assert os.path.isfile(obj1_target) is False
+                with pytest.raises(IOError):
+                    gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
+                assert os.path.isfile(obj1_target) is False
 
     def test_push_objects(self, mock_config_file, mock_dataset_head):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         manifest = Manifest(ds, 'default')
         iom = IOManager(ds, manifest)
@@ -936,7 +928,6 @@ class TestDatasetBackgroundJobs(object):
                 'access_token': "faketoken",
                 'id_token': "faketoken",
                 'dataset_owner': ds.namespace,
-                'dataset_name': ds.name,
-                'config_file': ds.client_config.config_file,
+                'dataset_name': ds.name
             }
             gtmcore.dispatcher.dataset_jobs.push_dataset_objects(**job_kwargs)

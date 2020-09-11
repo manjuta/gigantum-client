@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1435"
+changelog:
+  - type: NEW
+    description: Implement the baseline functionality for the new automated test framework with the ability to run 2 very simple tests (log-in test cases)

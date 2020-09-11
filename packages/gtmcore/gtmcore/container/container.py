@@ -463,12 +463,6 @@ class SidecarContainerOperations:
         return self.primary_container.query_container_ip(self.sidecar_container_name)
 
 
-# We only want to hit the filesystem once to get this value (otherwise, we parse the config file for every container
-# operation). This is used ONLY in container_for_context() below. Context-specific logic should otherwise be contained
-# in the subclasses.
-CONTEXT = Configuration().config['container']['context']
-
-
 def container_for_context(username: str, labbook: Optional[LabBook] = None, path: Optional[str] = None,
                           override_image_name: Optional[str] = None) -> ContainerOperations:
     """Instantiate an instance that can build images and run containers via Docker.
@@ -488,16 +482,17 @@ def container_for_context(username: str, labbook: Optional[LabBook] = None, path
     Returns:
         A subclass of ContainerOperations depending on the value of context (looked up in the above global var)
     """
-    if CONTEXT == 'local':
+    context = Configuration().config['container']['context']
+    if context == 'local':
         # We do the import here to (1) avoid circular dependencies and (2) allow for any crazy run-time logic for
         # the cloud
         from gtmcore.container.local_container import LocalProjectContainer
         return LocalProjectContainer(username, labbook, path, override_image_name)
-    elif CONTEXT == 'hub':
+    elif context == 'hub':
         from gtmcore.container.hub_container import HubProjectContainer
         return HubProjectContainer(username, labbook, path, override_image_name)
     else:
-        raise NotImplementedError(f'"{CONTEXT}" support for ContainerOperations not yet supported')
+        raise NotImplementedError(f'"{context}" support for ContainerOperations not yet supported')
 
 
 def _check_allowed_args(provided_args: Dict[str, Any], allowed_args: set):

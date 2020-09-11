@@ -666,7 +666,7 @@ button {
      background: $primary url('~Images/icons/edit.svg') no-repeat center center;
      background-size: 18px;
      &:hover, &:focus {
-       background: $primary url('~Images/icons/edit.svg') no-repeat right 7px center;
+       background: $primary url('~Images/icons/edit.svg') no-repeat right 6px center;
        background-size: 18px;
      }
      &--featurePosition {
@@ -858,4 +858,9 @@ button {
     box-shadow: none !important;
     cursor: auto;
   }
+  &--popup-blocked {
+    padding-left: 25px;
+    background: url('~Images/icons/offsite-azure.svg') no-repeat left 15px center;
+    background-size: 15px;
+   }
 }

@@ -12,24 +12,38 @@ from gtmcore.dispatcher import Dispatcher, default_redis_conn
 import gtmcore.dispatcher.jobs as bg_jobs
 
 from gtmcore.dispatcher.tests import RUNNING_ON_CI, BG_SKIP_MSG, BG_SKIP_TEST
+from gtmcore.dispatcher.tests.test_worker import wait_for_workers
+
+
+@pytest.fixture
+def redis_stop_start_fixture():
+    d = Dispatcher()
+    if not RUNNING_ON_CI:
+        assert d.ready_for_job(test_redis_not_running)
+        run(['supervisorctl', 'stop', 'redis'], check=True)
+        run(['supervisorctl', 'stop', 'rq-worker'], check=True)
+        run(['supervisorctl', 'stop', 'rqscheduler'], check=True)
+        time.sleep(2)
+
+    yield d
+
+    if not RUNNING_ON_CI:
+        run(['supervisorctl', 'start', 'redis'], check=True)
+        time.sleep(5)
+        run(['supervisorctl', 'start', 'rq-worker'], check=True)
+        run(['supervisorctl', 'start', 'rqscheduler'], check=True)
+        time.sleep(10)
 
 
 @pytest.mark.skipif(BG_SKIP_TEST, reason=BG_SKIP_MSG)
-def test_redis_not_running():
-    if not RUNNING_ON_CI:
-        run(['supervisorctl', 'stop', 'redis'], check=True)
-        time.sleep(0.5)
-    d = Dispatcher()
+def test_redis_not_running(redis_stop_start_fixture):
+    d = redis_stop_start_fixture
     assert not d.ready_for_job(test_redis_not_running)
-    if not RUNNING_ON_CI:
-        run(['supervisorctl', 'start', 'redis'], check=True)
-        time.sleep(0.5)
 
 
 @pytest.mark.skipif(BG_SKIP_TEST, reason=BG_SKIP_MSG)
 class TestDispatcher(object):
-
-    def test_ready_for_job(self):
+    def test_ready_for_job(self, wait_for_workers):
         """tests existing and non-existing queues, and redis not running"""
         bad_queue = rq.Queue('a-totally-nonexistent-queue', connection=default_redis_conn())
         with patch.object(Dispatcher, '_get_queue', return_value=bad_queue):
@@ -41,10 +55,10 @@ class TestDispatcher(object):
         # Since this is an unknown method, it'll go to the default queue
         assert d.ready_for_job(self.test_ready_for_job)
 
-    def test_simple_task(self):
+    def test_simple_task(self, wait_for_workers):
         d = Dispatcher()
         job_ref = d.dispatch_task(bg_jobs.test_exit_success)
-        time.sleep(1)
+        time.sleep(2)
         res = d.query_task(job_ref)
 
         assert res
@@ -53,16 +67,16 @@ class TestDispatcher(object):
         assert res.failure_message is None
         assert res.finished_at is not None
 
-    def test_failing_task(self):
+    def test_failing_task(self, wait_for_workers):
         d = Dispatcher()
         job_ref = d.dispatch_task(bg_jobs.test_exit_fail)
-        time.sleep(1)
+        time.sleep(2)
         res = d.query_task(job_ref)
         assert res
         assert res.status == 'failed'
         assert res.failure_message == 'Exception: Intentional Exception from job `test_exit_fail`'
 
-    def test_query_failed_tasks(self):
+    def test_query_failed_tasks(self, wait_for_workers):
         d = Dispatcher()
         job_ref = d.dispatch_task(bg_jobs.test_exit_fail)
         time.sleep(1)
@@ -71,17 +85,17 @@ class TestDispatcher(object):
         t = d.query_task(job_ref)
         assert t.failure_message == 'Exception: Intentional Exception from job `test_exit_fail`'
 
-    def test_query_complete_tasks(self):
+    def test_query_complete_tasks(self, wait_for_workers):
         d = Dispatcher()
         job_ref = d.dispatch_task(bg_jobs.test_exit_success)
-        time.sleep(1)
+        time.sleep(2)
         assert job_ref in [j.job_key for j in d.finished_jobs]
         assert job_ref not in [j.job_key for j in d.failed_jobs]
 
-    def test_abort(self):
+    def test_abort(self, wait_for_workers):
         d = Dispatcher()
         job_ref_1 = d.dispatch_task(bg_jobs.test_sleep, args=(3,))
-        time.sleep(1.2)
+        time.sleep(2)
         assert d.query_task(job_ref_1).status == 'started'
         workers = rq.Worker.all(connection=d._redis_conn)
         wk = [w for w in workers if w.state == 'busy']
@@ -109,7 +123,7 @@ class TestDispatcher(object):
         except OSError:
             assert False, "Worker process is killed"
 
-    def test_simple_dependent_job(self):
+    def test_simple_dependent_job(self, wait_for_workers):
         d = Dispatcher()
         job_ref_1 = d.dispatch_task(bg_jobs.test_sleep, args=(2,))
         job_ref_2 = d.dispatch_task(bg_jobs.test_exit_success, dependent_job=job_ref_1)
@@ -121,7 +135,7 @@ class TestDispatcher(object):
         n = d.query_task(job_ref_1)
         assert n.meta.get('sample') == 'test_sleep metadata'
 
-    def test_fail_dependent_job(self):
+    def test_fail_dependent_job(self, wait_for_workers):
         d = Dispatcher()
         job_ref_1 = d.dispatch_task(bg_jobs.test_exit_fail)
         job_ref_2 = d.dispatch_task(bg_jobs.test_exit_success, dependent_job=job_ref_1)
@@ -129,7 +143,7 @@ class TestDispatcher(object):
         assert d.query_task(job_ref_1).status == 'failed'
         assert d.query_task(job_ref_2).status == 'deferred'
 
-    def test_simple_scheduler(self):
+    def test_simple_scheduler(self, wait_for_workers):
         # Run a simple tasks that increments the integer contained in a file.
         d = Dispatcher()
         path = "/tmp/labmanager-unit-test-{}".format(os.getpid())
@@ -146,7 +160,7 @@ class TestDispatcher(object):
         except Exception as e:
             raise e
 
-    def test_run_only_once(self):
+    def test_run_only_once(self, wait_for_workers):
         # Assert that this method only gets called once.
         d = Dispatcher()
 
@@ -162,7 +176,7 @@ class TestDispatcher(object):
         with open(path) as fp:
             assert json.load(fp)['amt'] == 1
 
-    def test_schedule_with_repeat_is_zero(self):
+    def test_schedule_with_repeat_is_zero(self, wait_for_workers):
         # When repeat is zero, it should run only once.
         d = Dispatcher()
 
@@ -177,7 +191,7 @@ class TestDispatcher(object):
         with open(path) as fp:
             assert json.load(fp)['amt'] in [1], "When repeat=0, the task should run only once."
 
-    def test_unschedule_task(self):
+    def test_unschedule_task(self, wait_for_workers):
         d = Dispatcher()
         path = "/tmp/labmanager-unit-test-{}".format(os.getpid())
         if os.path.exists(path):
@@ -191,7 +205,7 @@ class TestDispatcher(object):
         time.sleep(5)
         assert not os.path.exists(path=path)
 
-    def test_unschedule_midway_through(self):
+    def test_unschedule_midway_through(self, wait_for_workers):
         d = Dispatcher()
 
         path = "/tmp/labmanager-unit-test-{}".format(os.getpid())

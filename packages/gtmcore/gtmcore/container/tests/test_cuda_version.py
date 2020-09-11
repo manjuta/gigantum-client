@@ -161,7 +161,7 @@ class TestCUDAVersion(object):
 
     def test_cuda_version_property(self, mock_config_with_repo):
         """Test getting the cuda version"""
-        im = InventoryManager(mock_config_with_repo[0])
+        im = InventoryManager()
         lb = im.create_labbook('test', 'test', 'labbook1', description="my first labbook")
 
         assert lb.cuda_version is None
