@@ -631,7 +631,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         # Pre-check auth so it gets cached and speeds up future requests
         object_service = dataset.client_config.get_server_configuration().object_service_url
         url = f"{object_service}{dataset.namespace}/{dataset.name}"
-        response = requests.head(url, headers=self._object_service_headers(), timeout=60)
+        response = requests.head(url, headers=self._object_service_headers(), timeout=60, verify=False)
         if response.status_code == 200:
             access_level = response.headers.get('x-access-level')
             if access_level is not None and access_level != 'r':
@@ -669,7 +669,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
             # Make sure trailing slash doesn't cause a problem by always including it in the object service URL
             object_service = object_service + "/"
         url = f"{object_service}{dataset.namespace}/{dataset.name}"
-        response = requests.head(url, headers=self._object_service_headers(), timeout=60)
+        response = requests.head(url, headers=self._object_service_headers(), timeout=60, verify=False)
         if response.status_code != 200:
             raise IOError("Failed to pull files from Gigantum Cloud. You either do not have access or "
                           "the Dataset does not exist.")
@@ -845,7 +845,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         # not timeout before they can be used if there are a lot of files.
         queue: asyncio.LifoQueue = asyncio.LifoQueue()
 
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             # Start workers
             workers = []
             for i in range(num_workers):
@@ -995,7 +995,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         timeout = aiohttp.ClientTimeout(total=None, connect=None,
                                         sock_connect=None, sock_read=None)
 
-        async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with aiohttp.ClientSession(timeout=timeout, connector=aiohttp.TCPConnector(ssl=False)) as session:
             workers = []
             for i in range(num_workers):
                 task = asyncio.ensure_future(self._pull_object_consumer(queue, session, progress_update_fn))
@@ -1067,7 +1067,7 @@ to Gigantum Cloud will count towards your storage quota and include all versions
         """
         server_config = dataset.client_config.get_server_configuration()
         url = f"{server_config.object_service_url}{dataset.namespace}/{dataset.name}"
-        response = requests.delete(url, headers=self._object_service_headers(), timeout=30)
+        response = requests.delete(url, headers=self._object_service_headers(), timeout=30, verify=False)
 
         if response.status_code != 200:
             logger.error(f"Failed to remove {dataset.namespace}/{dataset.name} from cloud index. "
