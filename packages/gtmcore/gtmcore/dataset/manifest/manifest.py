@@ -1,3 +1,4 @@
+import pickle
 from typing import TYPE_CHECKING
 from typing import List, Dict, Any, Tuple, Optional
 
@@ -41,23 +42,44 @@ StatusResult = namedtuple('StatusResult', ['created', 'modified', 'deleted'])
 class Manifest(object):
     """Class to handle a file manifest, including known hashes"""
 
-    def __init__(self, dataset: 'Dataset', logged_in_username: Optional[str] = None) -> None:
+    def __init__(self, dataset: 'Dataset', logged_in_username: Optional[str] = None):
         self.dataset = dataset
         self.logged_in_username = logged_in_username
 
         cache_mgr_class = get_cache_manager_class(self.dataset.client_config)
         self.cache_mgr: CacheManager = cache_mgr_class(self.dataset, logged_in_username)
 
+        # TODO DJWC - need to update file root for local or unmanaged datasets
         self.hasher = SmartHash(dataset.root_dir, self.cache_mgr.cache_root,
                                 self.dataset.git.repo.head.commit.hexsha)
 
         self._manifest_io = ManifestFileCache(dataset, logged_in_username)
+
+        self.fast_hash_data = self._load_fast_hash_file()
 
         # TODO: Support ignoring files
         # self.ignore_file = os.path.join(dataset.root_dir, ".gigantumignore")
         # self.ignored = self._load_ignored()
 
         self._legacy_manifest_file = os.path.join(self.dataset.root_dir, 'manifest', 'manifest0')
+
+    @property
+    def fast_hash_file(self):
+        current_sha = self.dataset.git.repo.head.commit.hexsha
+        hash_file_dir = os.path.join(self.cache_mgr.cache_root, current_sha)
+        return os.path.join(hash_file_dir, ".smarthash")
+
+    def _load_fast_hash_file(self) -> dict:
+        """Method to load the cached fast hash file
+
+        Returns:
+            dict
+        """
+        if os.path.exists(self.fast_hash_file):
+            with open(self.fast_hash_file, 'rb') as mf:
+                return pickle.load(mf)
+        else:
+            return dict()
 
     @property
     def dataset_revision(self) -> str:
@@ -329,6 +351,8 @@ class Manifest(object):
 
         # Update fast hash after objects have been moved/relinked
         fast_hash_result = self.hasher.fast_hash(update_files, save=True)
+        self.fast_hash_data.update((p, h) for p, h in zip(update_files, fast_hash_result) if h)
+        self._save_fast_hash_file()
 
         return hash_result, fast_hash_result
 
@@ -634,8 +658,19 @@ class Manifest(object):
                         continue
 
         # Completely re-compute the fast hash index
-        self.hasher.fast_hash_data = dict()
-        self.hasher.fast_hash(list(self.manifest.keys()))
+        paths = list(self.manifest.keys())
+        hash_result = self.hasher.fast_hash(paths)
+        self.fast_hash_data = {p: h for p, h in zip(paths, hash_result) if h}
+        self._save_fast_hash_file()
+
+    def _save_fast_hash_file(self) -> None:
+        """Method to save the cached fast hash file
+
+        Returns:
+            dict
+        """
+        with open(self.fast_hash_file, 'wb') as mf:
+            pickle.dump(self.fast_hash_data, mf, pickle.HIGHEST_PROTOCOL)
 
     def create_update_activity_record(self, status: StatusResult, upload: bool = False, extra_msg: str = None) -> None:
         """

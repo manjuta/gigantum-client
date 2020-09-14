@@ -10,49 +10,25 @@ logger = LMLogger.get_logger()
 
 
 class SmartHash(object):
-    """Class to handle file hashing that is operationally optimized for Gigantum"""
+    """Class to handle file hashing that is operationally optimized for Gigantum.
 
-    def __init__(self, root_dir: str, file_cache_root: str, current_revision: str) -> None:
+    Keeping track of hashes should be handled in calling code."""
+
+    def __init__(self, root_dir: str, files_root: str, current_revision: str) -> None:
         """
 
         Args:
             root_dir: The location of the dataset (either top-level or inside a Project)
-            file_cache_root:
+            file_cache_root: For Gigantum Datasets, the object cache. Otherwise, wherever the files are from the
+              perspective of the client.
             current_revision:
         """
         self.root_dir = root_dir
-        self.file_cache_root = file_cache_root
         self.current_revision = current_revision
-
-        self.fast_hash_data = self._load_fast_hash_file()
+        self.files_root = files_root
 
         self.hashing_block_size = 65536
 
-    @property
-    def fast_hash_file(self):
-        hash_file_dir = os.path.join(self.file_cache_root, self.current_revision)
-        return os.path.join(hash_file_dir, ".smarthash")
-
-    def _load_fast_hash_file(self) -> dict:
-        """Method to load the cached fast hash file
-
-        Returns:
-            dict
-        """
-        if os.path.exists(self.fast_hash_file):
-            with open(self.fast_hash_file, 'rb') as mf:
-                return pickle.load(mf)
-        else:
-            return dict()
-
-    def _save_fast_hash_file(self) -> None:
-        """Method to save the cached fast hash file
-
-        Returns:
-            dict
-        """
-        with open(self.fast_hash_file, 'wb') as mf:
-            pickle.dump(self.fast_hash_data, mf, pickle.HIGHEST_PROTOCOL)
 
     def get_abs_path(self, relative_path: str) -> str:
         """Method to generate the absolute path to the file
@@ -66,8 +42,10 @@ class SmartHash(object):
         if relative_path[0] == '/':
             relative_path = relative_path[1:]
 
-        return os.path.join(self.file_cache_root, self.current_revision, relative_path)
+        return os.path.join(self.files_root, self.current_revision, relative_path)
 
+    # TODO DJWC - need to complete refactor of items using self.fast_hash_data
+    #  which is now moved up a level to manifest.py (for now)
     def is_cached(self, path: str) -> bool:
         """Method to check if a file has been loaded into the file cache
 
@@ -135,30 +113,21 @@ class SmartHash(object):
             fast_hash_val = f"{relative_path}||{file_info.st_size}||{file_info.st_mtime}"
         return fast_hash_val
 
-    def fast_hash(self, path_list: list, save: bool = True) -> List[Optional[str]]:
-        """
+    # TODO DJWC - harmonize API WRT async
+    def fast_hash(self, path_list: list) -> List[Optional[str]]:
+        """Compute fast hashes for a list of paths
 
-        Note, the delimiter `||` is used as it's unlikely to be in a path. Hash structure:
-
-        relative file path || size in bytes || mtime
+        See SmarthHash._compute_fast_hash() for details
 
         Args:
             path_list: Strings specifying files in the dataset
-            save: Update the on-disk hash cache?
 
         Returns:
-
+            A list of hash results
         """
         fast_hash_result: List[Optional[str]] = list()
         if len(path_list) > 0:
             fast_hash_result = [self._compute_fast_hash(x) for x in path_list]
-
-            if save:
-                for p, h in zip(path_list, fast_hash_result):
-                    if h:
-                        self.fast_hash_data[p] = h
-
-                self._save_fast_hash_file()
 
         return fast_hash_result
 

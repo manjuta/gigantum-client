@@ -5,7 +5,11 @@ from gtmcore.dataset.cache.cache import CacheManager
 
 
 class HostFilesystemCache(CacheManager):
-    """A simple cache manager that just users the host filesystem mounted from the gigantum working directory
+    """A simple cache manager for Gigantum Dataset objects
+
+    DJWC TODO - make a simplified approach for unmanaged datasets (just hashes, locally stored credentials, etc.)
+
+    It uses the host filesystem mounted from the gigantum working directory
     """
 
     @property
