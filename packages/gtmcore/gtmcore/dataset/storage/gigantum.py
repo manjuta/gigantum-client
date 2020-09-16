@@ -547,8 +547,6 @@ class GigantumObjectStore(StorageBackend):
         Args:
             namespaced_name: usually dataset.namespace/dataset.name
         """
-        super().__init__(client_config)
-
         self.configuration = client_config.config['datasets']['backends']['gigantum_object_v1']
         object_service = client_config.get_server_configuration().object_service_url
         # The endpoint for the object service
@@ -558,14 +556,12 @@ class GigantumObjectStore(StorageBackend):
         self.successful_requests: List = list()
         self.failed_requests: List = list()
 
-    def _backend_metadata(self) -> dict:
-        """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
-
-        Simply implement this method in a child class. Note, 'icon' should be the name of the icon file saved in the
-        thumbnails directory. It should be a 128x128 px PNG image.
+    @staticmethod
+    def _backend_metadata() -> Dict[str, Any]:
+        """Storage Backend metadata used to render the UI.
 
         Returns:
-            dict
+            Info for use of GigantumObjectStore
         """
         return {"storage_type": "gigantum_object_v1",
                 "name": "Gigantum Cloud",

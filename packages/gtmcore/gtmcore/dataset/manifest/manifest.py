@@ -19,7 +19,7 @@ from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, 
 from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.dataset.manifest.hash import SmartHash
 from gtmcore.dataset.manifest.file import ManifestFileCache
-from gtmcore.dataset.cache import get_cache_manager_class, CacheManager
+from gtmcore.dataset.cache import get_cache_manager, CacheManager
 from gtmcore.logging import LMLogger
 
 if TYPE_CHECKING:
@@ -42,12 +42,11 @@ StatusResult = namedtuple('StatusResult', ['created', 'modified', 'deleted'])
 class Manifest(object):
     """Class to handle a file manifest, including known hashes"""
 
-    def __init__(self, dataset: 'Dataset', logged_in_username: Optional[str] = None):
+    def __init__(self, dataset: 'Dataset', logged_in_username: str):
         self.dataset = dataset
         self.logged_in_username = logged_in_username
 
-        cache_mgr_class = get_cache_manager_class(self.dataset.client_config)
-        self.cache_mgr: CacheManager = cache_mgr_class(self.dataset, logged_in_username)
+        self.cache_mgr = get_cache_manager(self.dataset.client_config, self.dataset, logged_in_username)
 
         # TODO DJWC - need to update file root for local or unmanaged datasets
         self.hasher = SmartHash(Path(self.cache_mgr.current_revision_dir))
@@ -382,7 +381,7 @@ class Manifest(object):
         Returns:
 
         """
-        source = os.path.join(self.cache_mgr.cache_root, self.dataset_revision, relative_path)
+        source = os.path.join(self.cache_mgr.current_revision_dir, relative_path)
         if os.path.isfile(source):
             level1, level2 = self._get_object_subdirs(hash_str)
 
@@ -404,6 +403,8 @@ class Manifest(object):
     async def hash_files(self, update_files: List[str]) -> Tuple[List[Optional[str]], List[Optional[str]]]:
         """Method to run the update process on the manifest based on change status (optionally computing changes if
         status is not set)
+
+        We've already determined that update_files have changed based on a fast hash.
 
         Args:
             update_files: The current change status of the dataset, of omitted, it will be computed

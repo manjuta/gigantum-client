@@ -8,7 +8,7 @@ import socket
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
-from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.dataset.cache import get_cache_manager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook import LabBook
 from gtmcore.gitlib.git import GitAuthor
@@ -465,8 +465,7 @@ class HubProjectContainer(ContainerOperations):
         datasets = InventoryManager().get_linked_datasets(self.labbook)
         for ds in datasets:
             try:
-                cm_class = get_cache_manager_class(ds.client_config)
-                cm = cm_class(ds, self.username)
+                cm = get_cache_manager(ds.client_config, ds, self.username)
                 ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
                 volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
             except InventoryException:

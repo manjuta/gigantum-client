@@ -41,7 +41,10 @@ class SmartHash(object):
         return self.files_root / relative_path
 
     def compute_fast_hash(self, relative_path: str) -> Optional[str]:
-        """
+        """Compute a hash that we use instead of a feature like inotify - thanks Windows!
+
+        Especially for local datasets, we cannot assume that mtime (or potentially even size) will be reported
+        identically across systems. So, this should only be used locally (and not synchronized to Hub/Server).
 
         Note, the delimiter `||` is used as it's unlikely to be in a path. Hash structure:
 

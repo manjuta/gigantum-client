@@ -32,7 +32,7 @@ def flush_redis_repo_cache():
     r.flushdb()
 
 
-def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True) -> (str, str):
+def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True) -> Tuple[Configuration, str]:
     """Helper method to create a temporary working directory and associated config file"""
 
     # Create a temporary working directory

@@ -1,13 +1,11 @@
 import abc
 import os
 from pkg_resources import resource_filename
-from typing import List, Callable, Dict
+from typing import List, Callable, Dict, Any
 import base64
-import asyncio
 
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.io import PullObject, PullResult
-from gtmcore.dataset.manifest.manifest import Manifest
 
 
 class StorageBackend(metaclass=abc.ABCMeta):
@@ -16,50 +14,47 @@ class StorageBackend(metaclass=abc.ABCMeta):
     The subclass should provide an ability to check current hashes of local files against known hashes (and optionally
     remote hashes). A StorageBackend will also provide the basic functionality required to copy data to or from a
     remote, including authentication."""
-
-    def __init__(self, client_config: Configuration):
-        """Subclasses should call this __init__() and handle client_config, but may add mandatory parameters to their __init__()"""
-        # Optional configuration data that is in the form of key-value pairs
-        # No nesting of values is supported
-        # Configuration is populated from the Dataset at runtime (via a file and in-memory secrets)
-        self.configuration = dict()
+    @abc.abstractmethod
+    def __init__(self, client_config: Configuration, **backend_config):
+        """Subclasses should generally handle client_config followed by additional arguments"""
+        pass
 
     @property
     def storage_type(self) -> str:
         """Return the string identifier for the dataset's storage class"""
         return self._backend_metadata()['storage_type']
 
+    @staticmethod
     @abc.abstractmethod
-    def _backend_metadata(self) -> dict:
+    def _backend_metadata() -> Dict[str, Any]:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
 
         Simply implement this method in a child class. Note, 'icon' should be the name of the icon file saved in the
         thumbnails directory. It should be a 128x128 px PNG image.
 
-        return {"storage_type": "a_unique_identifier",
-                "name": "My Dataset Type",
-                "description": "Short string",
-                "readme": "Long string",
-                "icon": "my_icon.png",
-                "url": "http://moreinfo.com"
-                }
-
         Returns:
-            dict
+            Info for use of the backend, something like:
+                {"storage_type": "a_unique_identifier",
+                 "name": "My Dataset Type",
+                 "description": "Short string",
+                 "readme": "Long string",
+                 "icon": "my_icon.png",
+                 "url": "http://moreinfo.com"
+                }
         """
         pass
 
-    @property
-    def metadata(self):
+    @classmethod
+    def metadata(cls) -> Dict[str, Any]:
         """
 
         Returns:
 
         """
-        metadata = self._backend_metadata()
+        metadata = cls._backend_metadata()
 
-        dataset_pkg = resource_filename('gtmcore', 'dataset')
-        icon_file = os.path.join(dataset_pkg, 'storage', 'thumbnails', metadata['icon'])
+        dataset_pkg_dir = resource_filename('gtmcore', 'dataset')
+        icon_file = os.path.join(dataset_pkg_dir, 'storage', 'thumbnails', metadata['icon'])
 
         with open(icon_file, 'rb') as icf:
             metadata['icon'] = base64.b64encode(icf.read()).decode("utf-8")
@@ -131,7 +126,7 @@ class ExternalProtectedStorage(StorageBackend):
         """Boolean property indicating if a storage backend has all required config items set.
 
         We may ultimately want a third option for invalid credentials."""
-        return 'credentials' in self.configuration
+        raise NotImplementedError
 
     def prepare_pull(self, dataset, objects: List[PullObject]) -> None:
         """Method to prepare a backend for pulling objects locally. It's optional to implement as not all back-ends

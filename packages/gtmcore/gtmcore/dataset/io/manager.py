@@ -163,9 +163,9 @@ class IOManager(object):
         objs: List[PullObject] = self._gen_pull_objects(keys)
 
         # Pull the object
-        backend.prepare_pull(self.dataset, objs)
-        result = backend.pull_objects(self.dataset, objs, progress_update_fn)
-        backend.finalize_pull(self.dataset)
+        backend.prepare_pull(objs)
+        result = backend.pull_objects(objs, progress_update_fn)
+        backend.finalize_pull()
 
         # Relink the revision
         if link_revision:

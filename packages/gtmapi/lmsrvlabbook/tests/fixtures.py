@@ -34,7 +34,7 @@ from lmsrvlabbook.api.mutation import LabbookMutations
 
 from gtmcore.fixtures.datasets import helper_append_file
 from gtmcore.fixtures.fixtures import _create_temp_work_dir
-from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.dataset.cache import get_cache_manager
 from gtmcore.dataset import Manifest
 import gtmcore
 
@@ -360,8 +360,7 @@ def fixture_single_dataset():
 
     ds = im.create_dataset('default', 'default', "test-dataset", storage_type="gigantum_object_v1", description="Cats 2")
     m = Manifest(ds, 'default')
-    cm_class = get_cache_manager_class(ds.client_config)
-    cache_mgr = cm_class(ds, 'default')
+    cache_mgr = get_cache_manager(ds.client_config, ds, 'default')
     revision = ds.git.repo.head.commit.hexsha
 
     os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))

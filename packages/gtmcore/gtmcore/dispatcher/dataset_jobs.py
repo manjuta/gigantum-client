@@ -11,6 +11,7 @@ from rq import get_current_job
 from gtmcore.configuration import Configuration
 from gtmcore.dataset import Manifest
 from gtmcore.dataset.manifest.job import generate_bg_hash_job_list
+from gtmcore.dataset.manifest.manifest import StatusResult
 from gtmcore.dataset.storage import GigantumObjectStore, LocalFilesystemBackend
 from gtmcore.dataset.storage.s3 import PublicS3Bucket
 from gtmcore.dispatcher import Dispatcher
@@ -191,7 +192,7 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
                                     has_failures=True, failure_detail=detail_msg)
 
             if status.deleted:
-                manifest.hasher.delete_fast_hashes(status.deleted)
+                manifest.delete_fast_hashes(status.deleted)
                 for relative_path in status.deleted:
                     manifest._manifest_io.remove(relative_path)
 
@@ -506,7 +507,7 @@ def verify_dataset_contents(logged_in_username: str, dataset_owner: str, dataset
 
 
 def update_local_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str) -> None:
-    """Method to update/populate a local dataset from it local state
+    """Method to update/populate a local dataset from its local state
 
     Args:
         logged_in_username: username for the currently logged in user
@@ -544,9 +545,10 @@ def update_local_dataset(logged_in_username: str, dataset_owner: str, dataset_na
         else:
             modified_keys = list()
 
-        if verify_contents:
-            modified_keys.extend(self.verify_contents(dataset, status_update_fn))
+        # if verify_contents:
+        #     modified_keys.extend(backend.verify_contents(ds, update_meta))
 
+        # TODO DJWC - the below seems pretty complex - not sure we need all these cases for a local dataset
         # Create StatusResult to force modifications
         if status_result:
             created_result = copy.deepcopy(status_result.created)
@@ -580,9 +582,7 @@ def update_local_dataset(logged_in_username: str, dataset_owner: str, dataset_na
         if os.path.isdir(os.path.join(m.cache_mgr.cache_root, previous_revision)):
             shutil.rmtree(os.path.join(m.cache_mgr.cache_root, previous_revision))
 
-        status_update_fn("Update complete.")
-        # XXX Original fn call
-        backend.update_from_local(ds, update_meta, verify_contents=True)
+        update_meta("Update complete.")
 
     except Exception as err:
         logger.exception(err)

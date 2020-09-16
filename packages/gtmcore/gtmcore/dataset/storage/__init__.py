@@ -1,5 +1,5 @@
 import importlib
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Type
 
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage.backend import StorageBackend, ExternalProtectedStorage
@@ -8,8 +8,8 @@ from gtmcore.dataset.storage.gigantum import GigantumObjectStore
 from gtmcore.dataset.storage.local import LocalFilesystemBackend
 
 # Based on Client configuration, this dict may eventually be updated at start-up time (though not currently)
-SUPPORTED_STORAGE_BACKENDS = {"gigantum_object_v1": GigantumObjectStore,
-                              "local_filesystem":   LocalFilesystemBackend}
+SUPPORTED_STORAGE_BACKENDS: Dict[str, Type[StorageBackend]] = {"gigantum_object_v1": GigantumObjectStore,
+                                                               "local_filesystem":   LocalFilesystemBackend}
 
 
 def get_storage_backend(client_config: Configuration, storage_type: str, backend_config: Optional[Dict[str, Any]] = None) -> StorageBackend:
@@ -47,27 +47,25 @@ def get_storage_backend(client_config: Configuration, storage_type: str, backend
         raise GigantumException(f"Please check backend_config arguments for {storage_type}: {provided_args} ")
 
 
-def storage_backend_metadata(storage_type: str) -> Dict[str, str]:
+def storage_backend_metadata(storage_type: str) -> Dict[str, Any]:
     """Retrieve the metadata from the class corresponding to storage_type
 
     Returns:
         Metadata about the storage_type
     """
 
-    module, package = SUPPORTED_STORAGE_BACKENDS[storage_type]
-    imported = importlib.import_module(module, package)
-    class_for_backend = getattr(imported, package)
-    return class_for_backend.metadata
+    class_for_backend = SUPPORTED_STORAGE_BACKENDS[storage_type]
+    return class_for_backend.metadata()
 
 
-def all_storage_backend_descriptions() -> List[Dict[str, str]]:
+def all_storage_backend_descriptions() -> List[Dict[str, Any]]:
     """Assemble metadata from backend classes
 
     Returns:
         A list of dictionaries with class metadata for each supported backend type
     """
     result = list()
-    for backend in SUPPORTED_STORAGE_BACKENDS:
-        result.append(storage_backend_metadata(backend))
+    for be in SUPPORTED_STORAGE_BACKENDS:
+        result.append(storage_backend_metadata(be))
 
     return result

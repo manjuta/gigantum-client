@@ -6,7 +6,7 @@ from typing import Optional, Callable, List, Dict, Any
 
 from gtmcore.configuration import Configuration
 from gtmcore.container.cuda import should_launch_with_cuda_support
-from gtmcore.dataset.cache import get_cache_manager_class
+from gtmcore.dataset.cache import get_cache_manager
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
@@ -201,8 +201,7 @@ class ContainerOperations(ABC):
         datasets = InventoryManager().get_linked_datasets(self.labbook)
         for ds in datasets:
             try:
-                cm_class = get_cache_manager_class(ds.client_config)
-                cm = cm_class(ds, self.username)
+                cm = get_cache_manager(ds.client_config, ds, self.username)
                 ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
                 volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
             except InventoryException:
