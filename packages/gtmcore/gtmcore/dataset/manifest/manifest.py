@@ -50,7 +50,7 @@ class Manifest(object):
         self.cache_mgr: CacheManager = cache_mgr_class(self.dataset, logged_in_username)
 
         # TODO DJWC - need to update file root for local or unmanaged datasets
-        self.hasher = SmartHash(self.cache_mgr.current_revision_dir)
+        self.hasher = SmartHash(Path(self.cache_mgr.current_revision_dir))
 
         self._manifest_io = ManifestFileCache(dataset, logged_in_username)
 
@@ -94,7 +94,7 @@ class Manifest(object):
             return dict()
 
     def has_changed_fast(self, path: str) -> bool:
-        """Method to check if a file has changed according to the fast hash
+        """Check if a file has changed according to the fast hash
 
         Args:
             path: Relative path to the file in the dataset
@@ -103,6 +103,21 @@ class Manifest(object):
 
         """
         return self.hasher.compute_fast_hash(path) != self.fast_hash_data.get(path)
+
+    def has_changed(self, path: str) -> bool:
+        """Check if a file has changed according to the fast hash
+
+        Args:
+            path: Relative path to the file in the dataset
+
+        Returns:
+
+        """
+        hash_task = asyncio.create_task(self.hasher.compute_file_hash(path))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(hash_task)
+        curr_hash = hash_task.result()
+        return curr_hash != self.fast_hash_data.get(path)
 
     def get_deleted_files(self, file_list: List[str]) -> list:
         """Method to list files that have previously been in the fast hash (exist locally) and have been removed
@@ -255,6 +270,7 @@ class Manifest(object):
         if fast_hash:
             has_changed = self.has_changed_fast
         else:
+            # TODO DJWC need to implement has_changed comparable to has_changed_fast, but on contents
             has_changed = self.has_changed
 
         if self.is_cached(path):
@@ -402,7 +418,7 @@ class Manifest(object):
         await asyncio.gather(*move_operations)
 
         # Update fast hash after objects have been moved/relinked
-        fast_hash_result = self.hasher.fast_hash(update_files, save=True)
+        fast_hash_result = self.hasher.fast_hash(update_files)
         self.fast_hash_data.update((p, h) for p, h in zip(update_files, fast_hash_result) if h)
         self._save_fast_hash_file()
 
@@ -669,15 +685,13 @@ class Manifest(object):
         """Method to link all the objects in the cache to the current revision directory, so that all files are
         accessible with the correct file names.
 
-        Note: This update the current revision in the hashing class
+        Note: This updates the current revision in the hashing class
 
         Returns:
             None
         """
-        current_revision = self.dataset_revision
-        self.hasher.current_revision = current_revision
-
-        revision_directory = os.path.join(self.cache_mgr.cache_root, current_revision)
+        revision_directory = self.cache_mgr.current_revision_dir
+        self.hasher.files_root = Path(revision_directory)
 
         if not os.path.exists(revision_directory):
             os.makedirs(revision_directory)

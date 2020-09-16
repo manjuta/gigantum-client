@@ -15,16 +15,14 @@ class SmartHash(object):
 
     Keeping track of hashes should be handled in calling code."""
 
-    def __init__(self, files_root: Union[Path, str]) -> None:
+    def __init__(self, files_root: Path) -> None:
         """
 
         Args:
             files_root: Where we can find file contents. For Gigantum Datasets, the object cache. Otherwise, wherever
               the files are from the perspective of the client.
         """
-        if isinstance(files_root, str):
-            files_root = Path(files_root)
-        self.files_root: Path = files_root
+        self.files_root = files_root
         self.hashing_block_size = 65536
 
 
@@ -110,7 +108,7 @@ class SmartHash(object):
 
         return h.hexdigest()
 
-    async def hash(self, path_list: List[str]) -> Awaitable[List[Optional[str]]]:
+    async def hash(self, path_list: List[str]) -> List[Optional[str]]:
         """Method to compute the blake2b hash of a file's contents.
 
         Args:
@@ -121,4 +119,4 @@ class SmartHash(object):
         """
         hashes = [self.compute_file_hash(path, self.hashing_block_size) for path in path_list]
 
-        return asyncio.gather(*hashes)
+        return await asyncio.gather(*hashes)
