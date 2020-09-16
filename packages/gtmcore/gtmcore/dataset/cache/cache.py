@@ -32,6 +32,8 @@ class CacheManager(metaclass=abc.ABCMeta):
         Returns:
             str
         """
+        # TODO DJWC - currently overridden with the same logic! Revisit as part of unmanaged refactor - this property is
+        #   likely specific to Gigantum Datasets
         return os.path.join(self.cache_root, self.dataset.git.repo.head.commit.hexsha)
 
     @property

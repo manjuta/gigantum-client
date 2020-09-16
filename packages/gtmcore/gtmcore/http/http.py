@@ -102,7 +102,8 @@ class ConcurrentRequestManager(object):
 
     async def _resolve_worker(self, url_objs: List[ConcurrentRequest]) -> List[ConcurrentRequest]:
         """Method to gather all resolve tasks"""
-        return [await self._bound_fetch(url_obj) for url_obj in url_objs]
+        fetches = [self._bound_fetch(url_obj) for url_obj in url_objs]
+        return await asyncio.gather(*fetches)
 
     def resolve(self, url_obj: ConcurrentRequest) -> ConcurrentRequest:
         """Method to resolve a single ConcurrentRequest object

@@ -50,8 +50,7 @@ class Manifest(object):
         self.cache_mgr: CacheManager = cache_mgr_class(self.dataset, logged_in_username)
 
         # TODO DJWC - need to update file root for local or unmanaged datasets
-        self.hasher = SmartHash(dataset.root_dir, self.cache_mgr.cache_root,
-                                self.dataset.git.repo.head.commit.hexsha)
+        self.hasher = SmartHash(self.cache_mgr.current_revision_dir)
 
         self._manifest_io = ManifestFileCache(dataset, logged_in_username)
 
@@ -63,11 +62,24 @@ class Manifest(object):
 
         self._legacy_manifest_file = os.path.join(self.dataset.root_dir, 'manifest', 'manifest0')
 
+    ## Hash file info
+
     @property
     def fast_hash_file(self):
         current_sha = self.dataset.git.repo.head.commit.hexsha
         hash_file_dir = os.path.join(self.cache_mgr.cache_root, current_sha)
         return os.path.join(hash_file_dir, ".smarthash")
+
+    def is_cached(self, path: str) -> bool:
+        """Method to check if a file has been loaded into the file cache
+
+        Args:
+            path: relative path to the file in the dataset
+
+        Returns:
+
+        """
+        return path in self.fast_hash_data
 
     def _load_fast_hash_file(self) -> dict:
         """Method to load the cached fast hash file
@@ -80,6 +92,44 @@ class Manifest(object):
                 return pickle.load(mf)
         else:
             return dict()
+
+    def has_changed_fast(self, path: str) -> bool:
+        """Method to check if a file has changed according to the fast hash
+
+        Args:
+            path: Relative path to the file in the dataset
+
+        Returns:
+
+        """
+        return self.hasher.compute_fast_hash(path) != self.fast_hash_data.get(path)
+
+    def get_deleted_files(self, file_list: List[str]) -> list:
+        """Method to list files that have previously been in the fast hash (exist locally) and have been removed
+
+        Args:
+            file_list: List of relative paths to files in the dataset
+
+        Returns:
+
+        """
+        return sorted(list(set(self.fast_hash_data.keys()).difference(file_list)))
+
+    def delete_fast_hashes(self, file_list: List[str]) -> None:
+        """Method to remove fast hashes from the stored hash file
+
+        Args:
+            file_list: list of relative paths to remove from the fast hash data
+
+        Returns:
+
+        """
+        for f in file_list:
+            del self.fast_hash_data[f]
+
+        self._save_fast_hash_file()
+
+    ## END hash file info
 
     @property
     def dataset_revision(self) -> str:
@@ -165,7 +215,8 @@ class Manifest(object):
         Returns:
 
         """
-        return self.hasher.get_abs_path(relative_path)
+        # TODO DJWC - code smell
+        return str(self.hasher.get_abs_path(relative_path))
 
     def queue_to_push(self, obj: str, rel_path: str, revision: str) -> None:
         """Method to queue and object for push to remote storage backend
@@ -202,11 +253,11 @@ class Manifest(object):
 
         """
         if fast_hash:
-            has_changed = self.hasher.has_changed_fast
+            has_changed = self.has_changed_fast
         else:
-            has_changed = self.hasher.has_changed
+            has_changed = self.has_changed
 
-        if self.hasher.is_cached(path):
+        if self.is_cached(path):
             if has_changed(path):
                 result = FileChangeType.MODIFIED
             else:
@@ -278,7 +329,7 @@ class Manifest(object):
 
         all_files = list(set(all_files))
         return StatusResult(created=status.get('created'), modified=status.get('modified'),
-                            deleted=self.hasher.get_deleted_files(all_files))
+                            deleted=self.get_deleted_files(all_files))
 
     @staticmethod
     async def _move_and_link(source, destination):
@@ -347,7 +398,8 @@ class Manifest(object):
         hash_result = await self.hasher.hash(update_files)
 
         # Move files into object cache and link back to the revision directory
-        await asyncio.gather(self._move_to_object_cache(f, h) for f, h in zip(update_files, hash_result))
+        move_operations = [self._move_to_object_cache(f, h) for f, h in zip(update_files, hash_result)]
+        await asyncio.gather(*move_operations)
 
         # Update fast hash after objects have been moved/relinked
         fast_hash_result = self.hasher.fast_hash(update_files, save=True)
@@ -390,7 +442,7 @@ class Manifest(object):
                 self._manifest_io.add_or_update(f, h, mtime, file_bytes)
 
         if status.deleted:
-            self.hasher.delete_fast_hashes(status.deleted)
+            self.delete_fast_hashes(status.deleted)
             for relative_path in status.deleted:
                 self._manifest_io.remove(relative_path)
 

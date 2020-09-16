@@ -22,7 +22,7 @@ class HostFilesystemCache(CacheManager):
         return os.path.join(self.cache_root, self.dataset.git.repo.head.commit.hexsha)
 
     @property
-    def cache_root(self):
+    def cache_root(self) -> str:
         """The location of the file cache root
 
         Returns:
