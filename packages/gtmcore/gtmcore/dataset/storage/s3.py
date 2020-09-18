@@ -1,3 +1,12 @@
+"""This dataset type simply loads data from a public S3 bucket. It supports automatic
+synchronization with S3 so you don't need to manually enter any information other than the bucket name.
+
+Due to the possibility of storing lots of data, when updating you can optionally keep all data locally or not. Because
+all files must be hashed when adding to the dataset, they all need to be downloaded by the creator. Once added
+to the dataset, partial downloads of the data is supported. To learn more, check out the docs here:
+[https://docs.gigantum.com](https://docs.gigantum.com)
+"""
+
 from gtmcore.dataset import Dataset
 from typing import List, Dict, Callable, Optional
 import os
@@ -24,7 +33,8 @@ class PublicS3Bucket(ExternalProtectedStorage):
     own classes.
     """
 
-    def _backend_metadata(self) -> dict:
+    @staticmethod
+    def _backend_metadata() -> dict:
         """Method to specify Storage Backend metadata for each implementation. This is used to render the UI
 
         Simply implement this method in a child class. Note, 'icon' should be the name of the icon file saved in the
@@ -39,14 +49,7 @@ class PublicS3Bucket(ExternalProtectedStorage):
                 "tags": ["unmanaged", "s3", "aws"],
                 "icon": "s3.png",
                 "url": "https://docs.gigantum.com",
-                "readme": """This dataset type simply loads data from a public S3 bucket. It supports automatic 
-synchronization with S3 so you don't need to manually enter any information other than the bucket name. 
-
-Due to the possibility of storing lots of data, when updating you can optionally keep all data locally or not. Because
- all files must be hashed when adding to the dataset, they all need to be downloaded by the creator. Once added
- to the dataset, partial downloads of the data is supported. To learn more, check out the docs here:
- [https://docs.gigantum.com](https://docs.gigantum.com)
-"""}
+                "readme": __doc__}
 
     def _required_configuration(self) -> List[Dict[str, str]]:
         """A private method to return a list of parameters that must be set for a backend to be fully configured
@@ -174,7 +177,7 @@ Due to the possibility of storing lots of data, when updating you can optionally
 
     def pull_objects(self, dataset: Dataset, objects: List[PullObject],
                      progress_update_fn: Callable) -> PullResult:
-        """High-level method to simply link files from the source dir to the object directory to the revision directory
+        """High-level method to simply link files from a public S3 bucket to some directory (TBD revision based?)
 
         Args:
             dataset: The current dataset
