@@ -6,7 +6,7 @@ all files must be hashed when adding to the dataset, they all need to be downloa
 to the dataset, partial downloads of the data is supported. To learn more, check out the docs here:
 [https://docs.gigantum.com](https://docs.gigantum.com)
 """
-
+from gtmcore.configuration import Configuration
 from gtmcore.dataset import Dataset
 from typing import List, Dict, Callable, Optional
 import os
@@ -32,6 +32,15 @@ class PublicS3Bucket(ExternalProtectedStorage):
     collect storage backends on HTTP, SSH, and potentially provide an extension point for individuals to implement their
     own classes.
     """
+
+    def __init__(self, client_config: Configuration, namespaced_name: str):
+        """Configure properties that are used by multiple methods below
+
+        Args:
+            client_config: An instance of the client Configuration object
+            namespaced_name: usually dataset.namespace/dataset.name
+        """
+        self.configuration = client_config.config['datasets']['backends']['XXX s3_backend?']
 
     @staticmethod
     def _backend_metadata() -> dict:
