@@ -1,12 +1,11 @@
 """Test call for Basic Create Project"""
-
 import pytest
 import random
 from configuration.configuration import ConfigurationManager
 from client_app.pages.landing.landing_page import LandingPage
 from client_app.pages.project_listing.project_listing_page import ProjectListingPage
 from framework.factory.models_enums.constants_enums import LoginUser
-from framework.helper.local_project_helper_utility import ProjectHelperUtility
+from tests.test_fixtures import clean_up_project
 
 
 @pytest.mark.createProjectTest
@@ -26,7 +25,7 @@ class TestCreateProject:
         assert project_list.project_listing_component.get_project_title() == "Projects"
 
     @pytest.mark.depends(on=['test_log_in_success'])
-    def test_create_project(self, remove_directory):
+    def test_create_project(self, clean_up_project):
         """Test method to create a project."""
         # Load Project Listing Page
         project_list = ProjectListingPage(self.driver)
@@ -53,16 +52,12 @@ class TestCreateProject:
         # Enter project title-(unique random name) and description
         # UUID is not given now, since it creates big string
         # This can be changed along with upcoming  text cases
-        project_title = f"p{str(random.random())}"
+        project_title = f"p-{str(random.random())}"
         project_title = project_title.replace(".", "")
         is_project_title_typed = project_list.type_project_title(project_title)
         is_project_desc_typed = project_list.type_new_project_desc_textarea(f"{project_title} -> Description ")
         assert is_project_title_typed, "Could not type project title"
         assert is_project_desc_typed, "Could not type project description"
-
-        # Set project name and username to the fixture
-        user_credentials = ConfigurationManager.getInstance().get_user_credentials(LoginUser.User1)
-        remove_directory.append({'project_title': project_title, 'username': user_credentials.user_name})
 
         # Click "Continue"
         is_submitted = project_list.click_submit_button()
@@ -109,11 +104,4 @@ class TestCreateProject:
         is_project_first_item = project_list.compare_project_title(1, project_title)
         assert is_project_first_item, "The new project is not added as first item."
 
-    @pytest.fixture()
-    def remove_directory(self):
-        """Remove directory fixture."""
-        project_info = []
-        yield project_info
-        for project in project_info:
-            ProjectHelperUtility().delete_local_project(project['project_title'], project['username'])
 

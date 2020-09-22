@@ -23,8 +23,6 @@ class ProjectListingPage(BasePage):
         super(ProjectListingPage, self).__init__(driver, page_config)
         self._project_listing_model = ComponentModel()
         self.__project_grid_model = ComponentModel(locator_type=LocatorType.XPath, locator="//div[@class='grid']")
-        self.__project_container_status_model = ComponentModel(locator_type=LocatorType.XPath,
-                                                               locator="//div[@class='ContainerStatus flex flex--row']")
         self.__project_listing_component = None
         self.__comp_project_grid_component = None
         self.__container_status_component = None
@@ -47,14 +45,6 @@ class ProjectListingPage(BasePage):
         if self.__project_listing_component is None:
             self.__project_listing_component = ProjectListingComponent(self.driver, self._project_listing_model)
         return self.__project_listing_component
-
-    @property
-    def project_container_status_component(self) -> ProjectContainerStatusComponent:
-        """Returns instance of the layout that holds container status"""
-        if self.__container_status_component is None:
-            self.__container_status_component = ProjectContainerStatusComponent(self.driver,
-                                                                                self.__project_container_status_model)
-        return self.__container_status_component
 
     @property
     def __create_button(self) -> WebElement:
@@ -185,17 +175,19 @@ class ProjectListingPage(BasePage):
 
     def monitor_container_status(self, compare_text: str, wait_timeout: int) -> bool:
         """Monitors the current container status."""
-        is_status_changed = self.project_container_status_component.monitor_container_status(compare_text, wait_timeout)
+        is_status_changed = ProjectContainerStatusComponent(self.driver).monitor_container_status(compare_text, wait_timeout)
         return is_status_changed
 
     def click_container_status(self) -> bool:
         """Clicks container status which changes the state."""
-        is_clicked = self.project_container_status_component.click_container_status()
+        is_clicked = ProjectContainerStatusComponent(self.driver).click_container_status()
+        self.move_to_element()
         return is_clicked
 
-    def move_to_element(self) -> None:
+    def move_to_element(self) -> bool:
         """Moves to a temporary element just to change the mouse focus."""
-        ActionChains(self.driver).move_to_element(self.__project_title).click().perform()
+        ActionChains(self.driver).move_to_element(self.__project_title).perform()
+        return True
 
     def compare_project_title(self, position, title) -> bool:
         """Compares the project title in arg with UI"""
@@ -227,10 +219,12 @@ class ProjectListingPage(BasePage):
         agent = self.driver.capabilities['browserName']
         css_property = None
 
-        if agent == 'chrome':
+        if agent.lower() in ['chrome', 'safari']:
             css_property = "background"
-        elif agent == 'firefox':
+        elif agent.lower() == 'firefox':
             css_property = "background-image"
+        else:
+            raise ValueError(f"Unsupported browser type while checking if guide is active: {agent}")
 
         slider_background = self.__click_helper_guide_slider.value_of_css_property(css_property)
         if "url" in slider_background:
