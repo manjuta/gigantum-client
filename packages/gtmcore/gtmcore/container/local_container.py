@@ -1,4 +1,3 @@
-import json
 import os
 import tarfile
 import tempfile
@@ -10,7 +9,10 @@ import docker.errors
 from docker.models.containers import Container
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
+from gtmcore.container.cuda import should_launch_with_cuda_support
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
+from gtmcore.gitlib import GitAuthor
+from gtmcore.inventory.inventory import InventoryManager, InventoryException
 
 from gtmcore.labbook import LabBook
 
@@ -222,6 +224,85 @@ class LocalProjectContainer(ContainerOperations):
                 logger.warning(f'Command ({cmd or "default CMD"}) in {image_name} took {ts - t0:.2f} sec')
 
             return result.decode()
+
+    def start_project_container(self, author: Optional[GitAuthor] = None) -> None:
+        """Start the Docker container for the Project connected to this ContainerOperation instance.
+
+        This method sets the Client IP to the environment variable `GIGANTUM_CLIENT_IP`
+
+        If author is provided, `GIGANTUM_EMAIL` and `GIGANTUM_USERNAME` env vars are set
+
+        All relevant configuration for a fully functional Project is set up here, then passed off to
+         self.run_container()
+
+        Args:
+             author: Optionally provide a GitAuthor instance to configure the save hook
+        """
+        if not self.labbook:
+            raise ValueError('labbook must be specified for run_container')
+
+
+        host_source = self.labbook.bind_source
+        volumes_dict = {
+            host_source: {'bind': '/mnt/labbook', 'mode': 'cached'},
+            'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
+        }
+
+        # Set up additional bind mounts for datasets if needed.
+        datasets = InventoryManager().get_linked_datasets(self.labbook)
+        for ds in datasets:
+            try:
+                host_source = ds.bind_source
+                volumes_dict[host_source] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+            except InventoryException:
+                logger.warning(f'Exception determining bind-mount for {ds.name}')
+                continue
+
+        # If re-mapping permissions, be sure to configure the container
+        if 'LOCAL_USER_ID' in os.environ:
+            env_var = [f"LOCAL_USER_ID={os.environ['LOCAL_USER_ID']}"]
+        else:
+            env_var = ["WINDOWS_HOST=1"]
+
+        # If an author is provided, configure env vars for the save hook
+        if author:
+            env_var.append(f'GIGANTUM_USERNAME={author.name}')
+            env_var.append(f'GIGANTUM_EMAIL={author.email}')
+
+        # Set the client IP in the project container
+        try:
+            gigantum_client_ip = self.get_gigantum_client_ip()
+        except ContainerException as e:
+            logger.warning(e)
+            gigantum_client_ip = ""
+
+        env_var.append(f"GIGANTUM_CLIENT_IP={gigantum_client_ip}")
+
+        # Get resource limits
+        resource_args = dict()
+        memory_limit = self.labbook.client_config.config['container']['memory']
+        cpu_limit = self.labbook.client_config.config['container']['cpu']
+        gpu_shared_mem = self.labbook.client_config.config['container']['gpu_shared_mem']
+        if memory_limit:
+            # If memory_limit not None, pass to Docker to limit memory allocation to container
+            resource_args["mem_limit"] = memory_limit
+        if cpu_limit:
+            # If cpu_limit not None, pass to Docker to limit CPU allocation to container
+            # "nano_cpus" is an integer in factional parts of a CPU
+            resource_args["nano_cpus"] = round(cpu_limit * 1e9)
+
+        # run with nvidia-docker if we have GPU support on the Host compatible with the project
+        should_run_nvidia, reason = should_launch_with_cuda_support(self.labbook.cuda_version)
+        if should_run_nvidia:
+            logger.info(f"Launching container with GPU support:{reason}")
+            if gpu_shared_mem:
+                resource_args["shm_size"] = gpu_shared_mem
+                resource_args['runtime'] = 'nvidia'
+
+        else:
+            logger.info(f"Launching container without GPU support. {reason}")
+
+        self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
 
     def stop_container(self, container_name: Optional[str] = None) -> bool:
         """ Stop the given labbook.

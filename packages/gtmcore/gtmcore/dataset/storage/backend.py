@@ -1,5 +1,7 @@
 import abc
 import os
+from pathlib import Path
+
 from pkg_resources import resource_filename
 from typing import List, Callable, Dict, Any
 import base64
@@ -15,7 +17,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
     remote hashes). A StorageBackend will also provide the basic functionality required to copy data to or from a
     remote, including authentication."""
     @abc.abstractmethod
-    def __init__(self, client_config: Configuration, **backend_config):
+    def __init__(self, client_config: Configuration, **backend_config: Dict[str, Any]):
         """Subclasses should generally handle client_config followed by additional arguments"""
         pass
 
@@ -60,6 +62,15 @@ class StorageBackend(metaclass=abc.ABCMeta):
             metadata['icon'] = base64.b64encode(icf.read()).decode("utf-8")
 
         return metadata
+
+    @abc.abstractmethod
+    def client_files_root(self, revision: str) -> Path:
+        """All backends must be able to provide a path on the client where files are located
+
+        Args:
+            revision: Will generally be the current revision of the Dataset git repo, OK to ignore but must accept!
+        """
+        pass
 
     # TODO DJWC delete these commented functions
     # def hash_file_key_list(self, dataset, keys):

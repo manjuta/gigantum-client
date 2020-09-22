@@ -6,9 +6,8 @@ import requests
 import urllib.parse
 import socket
 
-from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
-from gtmcore.container.exceptions import ContainerBuildException, ContainerException
-from gtmcore.dataset.cache import get_cache_manager
+from gtmcore.container.container import ContainerOperations, logger
+from gtmcore.container.exceptions import ContainerException
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.labbook import LabBook
 from gtmcore.gitlib.git import GitAuthor
@@ -451,13 +450,10 @@ class HubProjectContainer(ContainerOperations):
         if not self.labbook:
             raise ValueError('labbook must be specified for run_container')
 
-        if not os.environ.get('HOST_WORK_DIR'):
-            raise ValueError("Environment variable HOST_WORK_DIR must be set")
-
-        mnt_point = self.labbook.root_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
+        host_source = self.labbook.bind_source
 
         volumes_dict = {
-            mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
+            host_source: {'bind': '/mnt/labbook', 'mode': 'cached'},
             'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
         }
 
@@ -465,9 +461,8 @@ class HubProjectContainer(ContainerOperations):
         datasets = InventoryManager().get_linked_datasets(self.labbook)
         for ds in datasets:
             try:
-                cm = get_cache_manager(ds.client_config, ds, self.username)
-                ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
-                volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
+                host_source = ds.bind_source
+                volumes_dict[host_source] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
             except InventoryException:
                 continue
 

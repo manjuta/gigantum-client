@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema
 from gtmcore.activity import ActivityDetailType, ActivityType
-from gtmcore.dataset.storage import get_storage_backend, StorageBackend
+from gtmcore.dataset.storage import get_storage_backend
 
 from gtmcore.inventory.repository import Repository
 
@@ -30,7 +30,7 @@ class Dataset(Repository):
         super().__init__(author)
         self.namespace = namespace
         self._storage_type = storage_type
-        self._backend = get_storage_backend(self.client_config, storage_type, backend_config)
+        self.backend = get_storage_backend(self.client_config, storage_type, backend_config)
 
     def __str__(self):
         if self._root_dir:
@@ -96,6 +96,17 @@ class Dataset(Repository):
         return self._data["build_info"]
 
     @property
+    def bind_source(self) -> str:
+        try:
+            host_dir = os.environ['HOST_WORK_DIR']
+        except KeyError:
+            raise ValueError("Environment variable HOST_WORK_DIR must be set to enable Dataset bind-mounts")
+
+        relative_path = self.backend.client_files_root(self.current_revision).relative_to('/mnt/gigantum')
+
+        return str(host_dir / relative_path)
+
+    @property
     def description(self) -> str:
         if self._data:
             return self._data["description"]
@@ -126,11 +137,6 @@ class Dataset(Repository):
             self._data["storage_type"] = value
 
         self._save_gigantum_data()
-
-    @property
-    def backend(self) -> StorageBackend:
-        """Property to access the storage backend for this dataset"""
-        return self._backend
 
     def _save_gigantum_data(self) -> None:
         """Method to save changes to the LabBook

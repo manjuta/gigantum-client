@@ -7,6 +7,8 @@ to Gigantum Cloud will count towards your storage quota and include all versions
 """
 
 import asyncio
+from pathlib import Path
+
 import aiohttp
 import aiofiles
 import copy
@@ -15,6 +17,7 @@ import requests
 import math
 
 from gtmcore.configuration import Configuration
+from gtmcore.dataset.cache import HostFilesystemCache
 from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Optional, List, Dict, Callable, NamedTuple, Any
 import os
@@ -541,7 +544,7 @@ class PresignedS3Download(object):
 class GigantumObjectStore(StorageBackend):
     """Backend for fully-managed Gigantum Datasets"""
 
-    def __init__(self, client_config: Configuration, namespaced_name: str) -> None:
+    def __init__(self, client_config: Configuration, namespaced_name: str, username: str) -> None:
         """Configure properties that are used by multiple methods below
 
         Args:
@@ -551,6 +554,11 @@ class GigantumObjectStore(StorageBackend):
         object_service = client_config.get_server_configuration().object_service_url
         # The endpoint for the object service
         self.url = f"{object_service}{namespaced_name}"
+
+        # TODO DJWC: Do we need to keep this class or would self.cache_root be enough?
+        cache_root = Path(client_config.app_workdir, '.labmanager', 'datasets', username, namespaced_name).expanduser()
+        # Note - we don't use the get_cache_manager function because we're already in a specific backend
+        self.cache_manager = HostFilesystemCache(cache_root)
 
         # Additional attributes to track processed requests
         self.successful_requests: List = list()
@@ -581,6 +589,18 @@ class GigantumObjectStore(StorageBackend):
                 'Identity': self.configuration.get("gigantum_id_token"),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'}
+
+    def client_files_root(self, revision: str) -> Path:
+        """Provide a path to cached and linked files in the private dataset dir
+
+        Args:
+            revision: The (git) revision for a given set of linked files
+
+        Returns:
+            A path string on the host suitable for a bind-mount
+        """
+
+        return self.cache_manager.cache_root / revision
 
 
     def prepare_push(self, objects: List[PushObject]) -> None:

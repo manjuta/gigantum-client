@@ -77,8 +77,7 @@ class TestDatasetUploadFilesMutations(object):
 
         ds = InventoryManager().load_dataset('default', 'default', 'dataset1')
 
-        fsc = HostFilesystemCache(ds, 'default')
-        target_file = os.path.join(fsc.current_revision_dir, "myValidFile.dat")
+        target_file = os.path.join(ds.backend.client_files_root(ds.current_revision), "myValidFile.dat")
 
         txid = "000-unitest-transaction"
         with open(test_file, 'rb') as tf:

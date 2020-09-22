@@ -218,11 +218,28 @@ class Repository(object):
     def active_branch(self) -> str:
         return self.git.get_current_branch_name()
 
+    @property
+    def current_revision(self) -> str:
+        return self.git.repo.head.commit.hexsha
+
     @staticmethod
     def make_path_relative(path_str: str) -> str:
         while len(path_str or '') >= 1 and path_str[0] == os.path.sep:
             path_str = path_str[1:]
         return path_str
+
+    @property
+    def bind_source(self) -> str:
+        """The location of the folder on the host, for use in mounting, etc.
+
+        This property should be overridden for more complex Repositories, as done in Datasets.
+        """
+        try:
+            host_dir = os.environ['HOST_WORK_DIR']
+        except KeyError:
+            raise ValueError("Environment variable HOST_WORK_DIR must be set to enable Repository bind-mounts")
+
+        return self.root_dir.replace('/mnt/gigantum', host_dir)
 
     @property
     def checkout_id(self) -> str:

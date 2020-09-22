@@ -1,16 +1,22 @@
 import os
-import pathlib
-
-from gtmcore.dataset.cache.cache import CacheManager
+from pathlib import Path
 
 
-class HostFilesystemCache(CacheManager):
+class HostFilesystemCache:
     """A simple cache manager for Gigantum Dataset objects
-
-    DJWC TODO - make a simplified approach for unmanaged datasets (just hashes, locally stored credentials, etc.)
 
     It uses the host filesystem mounted from the gigantum working directory
     """
+
+    def __init__(self, cache_root: Path) -> None:
+        """
+
+        Args:
+            dataset: Current dataset object
+            username: Username of current logged in user, which may be required by the CacheManager implementation
+        """
+        self.cache_root = cache_root
+        self.initialize()
 
     @property
     def current_revision_dir(self):
@@ -22,19 +28,13 @@ class HostFilesystemCache(CacheManager):
         return os.path.join(self.cache_root, self.dataset.git.repo.head.commit.hexsha)
 
     @property
-    def cache_root(self) -> str:
-        """The location of the file cache root
+    def revision_cache_dir(self, revision: str):
+        """Method to return the directory containing files for the current dataset revision
 
         Returns:
             str
         """
-        if not self.username:
-            raise ValueError("Host Filesystem Object Cache requires logged in username to be set.")
-        if not self.dataset.namespace:
-            raise ValueError("Host Filesystem Object Cache requires the Dataset namespace to be set.")
-
-        return os.path.join(os.path.expanduser(self.dataset.client_config.app_workdir),
-                            '.labmanager', 'datasets', self.username, self.dataset.namespace, self.dataset.name)
+        return self.cache_root / revision
 
     def initialize(self):
         """Method to configure a file cache for use.
@@ -42,8 +42,6 @@ class HostFilesystemCache(CacheManager):
         Returns:
             None
         """
-        if not os.path.exists(self.cache_root):
-            pathlib.Path(self.cache_root).mkdir(parents=True, exist_ok=True)
-            pathlib.Path(os.path.join(self.cache_root, 'objects')).mkdir(parents=True, exist_ok=True)
+        (self.cache_root / 'objects').mkdir(parents=True, exist_ok=True)
 
         return self.cache_root

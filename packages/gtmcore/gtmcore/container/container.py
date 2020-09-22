@@ -5,9 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Callable, List, Dict, Any
 
 from gtmcore.configuration import Configuration
-from gtmcore.container.cuda import should_launch_with_cuda_support
-from gtmcore.dataset.cache import get_cache_manager
-from gtmcore.inventory.inventory import InventoryManager, InventoryException
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
 from gtmcore.gitlib.git import GitAuthor
@@ -110,9 +108,10 @@ class ContainerOperations(ABC):
             command: e.g., 'ls -la'. This will be tokenized
             container_name: ID string of container in which to run - currently not actually used!
             kwargs: see implementation for allowed keys, passed to `exec_run` in docker-py
+            get_results: Provide results of command
 
         Returns:
-            If detach is False (or unspecified), a str with output of the command.
+            If get_results is True, a str with output of the command.
             Otherwise, None.
         """
         raise NotImplementedError()
@@ -171,87 +170,21 @@ class ContainerOperations(ABC):
         """
         raise NotImplementedError()
 
+    @abstractmethod
     def start_project_container(self, author: Optional[GitAuthor] = None) -> None:
-        """Start the Docker container for the Project connected to this instance.
+        """Start the Docker container for the Project connected to this ContainerOperation instance.
 
         This method sets the Client IP to the environment variable `GIGANTUM_CLIENT_IP`
 
-        If author is provided, `GIGANTUM_EMAIL` and `GIGANTUM_USERNAME` env vars are set
+        If author is provided, `GIGANTUM_EMAIL` and `GIGANTUM_USERNAME` env vars should be set
 
         All relevant configuration for a fully functional Project is set up here, then passed off to
          self.run_container()
          
         Args:
              author: Optionally provide a GitAuthor instance to configure the save hook
-         
         """
-        if not self.labbook:
-            raise ValueError('labbook must be specified for run_container')
-
-        if not os.environ.get('HOST_WORK_DIR'):
-            raise ValueError("Environment variable HOST_WORK_DIR must be set")
-
-        mnt_point = self.labbook.root_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
-        volumes_dict = {
-            mnt_point: {'bind': '/mnt/labbook', 'mode': 'cached'},
-            'labmanager_share_vol': {'bind': '/mnt/share', 'mode': 'rw'}
-        }
-
-        # Set up additional bind mounts for datasets if needed.
-        datasets = InventoryManager().get_linked_datasets(self.labbook)
-        for ds in datasets:
-            try:
-                cm = get_cache_manager(ds.client_config, ds, self.username)
-                ds_cache_dir = cm.current_revision_dir.replace('/mnt/gigantum', os.environ['HOST_WORK_DIR'])
-                volumes_dict[ds_cache_dir] = {'bind': f'/mnt/labbook/input/{ds.name}', 'mode': 'ro'}
-            except InventoryException:
-                continue
-
-        # If re-mapping permissions, be sure to configure the container
-        if 'LOCAL_USER_ID' in os.environ:
-            env_var = [f"LOCAL_USER_ID={os.environ['LOCAL_USER_ID']}"]
-        else:
-            env_var = ["WINDOWS_HOST=1"]
-
-        # If an author is provided, configure env vars for the save hook
-        if author:
-            env_var.append(f'GIGANTUM_USERNAME={author.name}')
-            env_var.append(f'GIGANTUM_EMAIL={author.email}')
-
-        # Set the client IP in the project container
-        try:
-            gigantum_client_ip = self.get_gigantum_client_ip()
-        except ContainerException as e:
-            logger.warning(e)
-            gigantum_client_ip = ""
-
-        env_var.append(f"GIGANTUM_CLIENT_IP={gigantum_client_ip}")
-
-        # Get resource limits
-        resource_args = dict()
-        memory_limit = self.labbook.client_config.config['container']['memory']
-        cpu_limit = self.labbook.client_config.config['container']['cpu']
-        gpu_shared_mem = self.labbook.client_config.config['container']['gpu_shared_mem']
-        if memory_limit:
-            # If memory_limit not None, pass to Docker to limit memory allocation to container
-            resource_args["mem_limit"] = memory_limit
-        if cpu_limit:
-            # If cpu_limit not None, pass to Docker to limit CPU allocation to container
-            # "nano_cpus" is an integer in factional parts of a CPU
-            resource_args["nano_cpus"] = round(cpu_limit * 1e9)
-
-        # run with nvidia-docker if we have GPU support on the Host compatible with the project
-        should_run_nvidia, reason = should_launch_with_cuda_support(self.labbook.cuda_version)
-        if should_run_nvidia:
-            logger.info(f"Launching container with GPU support:{reason}")
-            if gpu_shared_mem:
-                resource_args["shm_size"] = gpu_shared_mem
-                resource_args['runtime'] = 'nvidia'
-
-        else:
-            logger.info(f"Launching container without GPU support. {reason}")
-
-        self.run_container(environment=env_var, volumes=volumes_dict, **resource_args)
+        pass
 
     @abstractmethod
     def stop_container(self, container_name: Optional[str] = None) -> bool:

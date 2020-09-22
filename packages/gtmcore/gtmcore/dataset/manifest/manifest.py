@@ -19,7 +19,7 @@ from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, 
 from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.dataset.manifest.hash import SmartHash
 from gtmcore.dataset.manifest.file import ManifestFileCache
-from gtmcore.dataset.cache import get_cache_manager, CacheManager
+from gtmcore.dataset.cache import get_cache_manager
 from gtmcore.logging import LMLogger
 
 if TYPE_CHECKING:
@@ -46,10 +46,12 @@ class Manifest(object):
         self.dataset = dataset
         self.logged_in_username = logged_in_username
 
-        self.cache_mgr = get_cache_manager(self.dataset.client_config, self.dataset, logged_in_username)
+        # TODO DJWC - all usages below are in code that needs to be moved to a backend-aware location
+        #  For now, commenting this obviously breaks things badly
+        # self.cache_mgr = get_cache_manager(self.dataset.client_config, self.dataset, logged_in_username)
 
         # TODO DJWC - need to update file root for local or unmanaged datasets
-        self.hasher = SmartHash(Path(self.cache_mgr.current_revision_dir))
+        self.hasher = SmartHash(Path(self.current_revision_dir))
 
         self._manifest_io = ManifestFileCache(dataset, logged_in_username)
 
@@ -64,9 +66,9 @@ class Manifest(object):
     ## Hash file info
 
     @property
-    def fast_hash_file(self):
+    def fast_hash_file(self) -> str:
         current_sha = self.dataset.git.repo.head.commit.hexsha
-        hash_file_dir = os.path.join(self.cache_mgr.cache_root, current_sha)
+        hash_file_dir = self.dataset.backend.client_files_root(current_sha)
         return os.path.join(hash_file_dir, ".smarthash")
 
     def is_cached(self, path: str) -> bool:
@@ -145,6 +147,7 @@ class Manifest(object):
 
     ## END hash file info
 
+    # TODO DJWC - this is now a useless intermediate method, should be removed (but it's used in many places)
     @property
     def dataset_revision(self) -> str:
         """Property to get the current revision hash of the dataset
@@ -152,7 +155,7 @@ class Manifest(object):
         Returns:
             str
         """
-        return self.dataset.git.repo.head.commit.hexsha
+        return self.dataset.current_revision
 
     @property
     def current_revision_dir(self) -> str:
@@ -162,7 +165,8 @@ class Manifest(object):
         Returns:
             str
         """
-        crd = self.cache_mgr.current_revision_dir
+        crd = self.dataset.backend.client_files_root(self.dataset.current_revision)
+        # TODO DJWC - This is probably not something we want to have happen every time we check the current revision
         if not os.path.exists(crd):
             self.link_revision()
         return crd
@@ -203,6 +207,7 @@ class Manifest(object):
         else:
             return int(config_val)
 
+    # TODO DJWC: Needs to be moved to a backend-specific location
     def dataset_to_object_path(self, dataset_path: str) -> str:
         """Helper method to compute the absolute object path from the relative dataset path
 
@@ -232,6 +237,7 @@ class Manifest(object):
         # TODO DJWC - code smell
         return str(self.hasher.get_abs_path(relative_path))
 
+    # TODO DJWC - needs to be moved to a backend-specific location
     def queue_to_push(self, obj: str, rel_path: str, revision: str) -> None:
         """Method to queue and object for push to remote storage backend
 
@@ -297,10 +303,9 @@ class Manifest(object):
         # TODO: think about how to send batches to get_change_type
         status: Dict[str, List] = {"created": [], "modified": [], "deleted": []}
         all_files = list()
-        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
 
-        for root, dirs, files in os.walk(revision_directory):
-            _, folder = root.split(revision_directory)
+        for root, dirs, files in os.walk(self.current_revision_dir):
+            _, folder = root.split(self.current_revision_dir)
             if len(folder) > 0:
                 if folder[0] == os.path.sep:
                     folder = folder[1:]
@@ -371,6 +376,7 @@ class Manifest(object):
         except PermissionError:
             os.symlink(destination, source)
 
+    # TODO DJWC - move to backend-specific location
     async def _move_to_object_cache(self, relative_path, hash_str):
         """Method to move a file to the object cache
 
@@ -381,7 +387,7 @@ class Manifest(object):
         Returns:
 
         """
-        source = os.path.join(self.cache_mgr.current_revision_dir, relative_path)
+        source = os.path.join(self.current_revision_dir, relative_path)
         if os.path.isfile(source):
             level1, level2 = self._get_object_subdirs(hash_str)
 
@@ -477,9 +483,10 @@ class Manifest(object):
         Returns:
             dict
         """
-        abs_path = os.path.join(self.cache_mgr.cache_root, self.dataset_revision, key)
+        abs_path = os.path.join(self.current_revision_dir, key)
         return {'key': key,
                 'size': item.get('b'),
+                # TODO DJWC - this is currently broken because the above property will create the path
                 'is_local': os.path.exists(abs_path),
                 'is_dir': True if abs_path[-1] == "/" else False,
                 'modified_at': float(item.get('m'))}
@@ -558,7 +565,7 @@ class Manifest(object):
         Returns:
 
         """
-        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
+        revision_directory = self.current_revision_dir
 
         for path in path_list:
             target_path = os.path.join(revision_directory, path)
@@ -579,11 +586,11 @@ class Manifest(object):
         Returns:
 
         """
-        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
+        initial_revision_directory = self.current_revision_dir
         src_rel_path = self.dataset.make_path_relative(src_path.replace('..', ''))
         dest_rel_path = self.dataset.make_path_relative(dest_path.replace('..', ''))
-        src_abs_path = os.path.join(revision_directory, src_rel_path)
-        dest_abs_path = os.path.join(revision_directory, dest_rel_path)
+        src_abs_path = os.path.join(initial_revision_directory, src_rel_path)
+        dest_abs_path = os.path.join(initial_revision_directory, dest_rel_path)
 
         src_type = 'directory' if os.path.isdir(src_abs_path) else 'file'
 
@@ -593,13 +600,12 @@ class Manifest(object):
         # Move
         result_path = shutil.move(src_abs_path, dest_abs_path)
         msg = f"Moved {src_type} `{src_rel_path}` to `{dest_rel_path}`"
-        previous_revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
         self.sweep_all_changes(extra_msg=msg)
 
         # Update paths due to relinking
-        revision_directory = os.path.join(self.cache_mgr.cache_root, self.dataset_revision)
-        final_rel_path = self.dataset.make_path_relative(result_path.replace(previous_revision_directory, ''))
-        dest_abs_path = os.path.join(revision_directory, final_rel_path)
+        updated_revision_directory = self.current_revision_dir
+        final_rel_path = self.dataset.make_path_relative(result_path.replace(initial_revision_directory, ''))
+        dest_abs_path = os.path.join(updated_revision_directory, final_rel_path)
 
         if os.path.isfile(dest_abs_path):
             manifest_data = self.manifest.get(final_rel_path)
@@ -609,7 +615,7 @@ class Manifest(object):
             moved_files.append(self.gen_file_info(final_rel_path))
             for root, dirs, files in os.walk(dest_abs_path):
                 dirs.sort()
-                rt = root.replace(revision_directory, '')
+                rt = root.replace(updated_revision_directory, '')
                 rt = self.dataset.make_path_relative(rt)
                 for d in dirs:
                     if d[-1] != os.path.sep:
@@ -634,10 +640,11 @@ class Manifest(object):
             dict
         """
         relative_path = self.dataset.make_path_relative(path)
-        new_directory_path = os.path.join(self.cache_mgr.cache_root, self.dataset_revision, relative_path)
+        new_directory_path = self.current_revision_dir
 
         previous_revision = self.dataset_revision
 
+        # TODO DJWC - I guess this is where directory creation should happen?
         if os.path.exists(new_directory_path):
             raise ValueError(f"Directory already exists: `{relative_path}`")
         else:
@@ -677,11 +684,14 @@ class Manifest(object):
 
             # Relink after the commit
             self.link_revision()
+            # TODO DJWC - It's unclear this is sound, don't we need reference counting or something?
+            #  Also if hardlinks are working, this isn't saving space
             if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
                 shutil.rmtree(os.path.join(self.cache_mgr.cache_root, previous_revision))
 
             return self.gen_file_info(relative_path)
 
+    # TODO DJWC - needs to be moved to a backend-specific location
     def link_revision(self) -> None:
         """Method to link all the objects in the cache to the current revision directory, so that all files are
         accessible with the correct file names.
@@ -691,7 +701,7 @@ class Manifest(object):
         Returns:
             None
         """
-        revision_directory = self.cache_mgr.current_revision_dir
+        revision_directory = self.current_revision_dir
         self.hasher.files_root = Path(revision_directory)
 
         if not os.path.exists(revision_directory):
@@ -814,6 +824,7 @@ class Manifest(object):
             ars = ActivityStore(self.dataset)
             ars.create_activity_record(ar)
 
+    # TODO DJWC - needs to be made backend-specific
     def sweep_all_changes(self, upload: bool = False, extra_msg: str = None,
                           status: Optional[StatusResult] = None) -> None:
         """
