@@ -480,7 +480,7 @@ class InventoryManager(object):
         return datasets_to_schedule
 
     def create_dataset(self, username: str, owner: str, dataset_name: str, storage_type: str,
-                       backend_config: Optional[Dict[str, Any]] = None, description: Optional[str] = None,
+                       backend_config_overrides: Optional[Dict[str, Any]] = None, description: Optional[str] = None,
                        author: Optional[GitAuthor] = None) -> Dataset:
         """Create a new Dataset in this Gigantum working directory.
 
@@ -489,7 +489,8 @@ class InventoryManager(object):
             owner: Namespace in which to place this Dataset
             dataset_name: Name of the Dataset
             storage_type: String identifying the type of Dataset to instantiate
-            backend_config: Keyword arguments to the backend storage class constructor
+            backend_config_overrides: Some arguments to the backend storage class constructor are generated
+             automatically, this allows to specify needed manual arguments as well as overrides
             description: Optional brief description of Dataset
             author: Optional Git Author
 
@@ -497,6 +498,18 @@ class InventoryManager(object):
             Newly created LabBook instance
 
         """
+        if storage_type == 'gigantum_object_v1':
+            # Because the Gigantum backend is highly controlled, we can automatically populate arguments to the backend
+            backend_config = {
+                'namespaced_name': f'{owner}/{dataset_name}',
+                'username': username
+            }
+        else:
+            backend_config = {}
+
+        if backend_config_overrides is not None:
+            backend_config.update(backend_config_overrides)
+
         dataset = Dataset(storage_type, backend_config=backend_config,
                           author=author, namespace=owner)
 

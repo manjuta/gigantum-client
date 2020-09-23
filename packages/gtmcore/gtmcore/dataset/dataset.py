@@ -5,6 +5,7 @@ import datetime
 
 from typing import Optional, Dict, Any
 
+from gtmcore.configuration import Configuration
 from gtmcore.gitlib import GitAuthor
 from gtmcore.dataset.schemas import validate_dataset_schema
 from gtmcore.activity import ActivityDetailType, ActivityType
@@ -97,11 +98,7 @@ class Dataset(Repository):
 
     @property
     def bind_source(self) -> str:
-        try:
-            host_dir = os.environ['HOST_WORK_DIR']
-        except KeyError:
-            raise ValueError("Environment variable HOST_WORK_DIR must be set to enable Dataset bind-mounts")
-
+        host_dir = Configuration.get_host_work_path()
         relative_path = self.backend.client_files_root(self.current_revision).relative_to('/mnt/gigantum')
 
         return str(host_dir / relative_path)

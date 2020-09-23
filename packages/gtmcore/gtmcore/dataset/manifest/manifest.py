@@ -51,7 +51,7 @@ class Manifest(object):
         # self.cache_mgr = get_cache_manager(self.dataset.client_config, self.dataset, logged_in_username)
 
         # TODO DJWC - need to update file root for local or unmanaged datasets
-        self.hasher = SmartHash(Path(self.current_revision_dir))
+        self.hasher = SmartHash(self.dataset.backend.client_files_root(self.dataset.current_revision))
 
         self._manifest_io = ManifestFileCache(dataset, logged_in_username)
 
@@ -701,7 +701,8 @@ class Manifest(object):
         Returns:
             None
         """
-        revision_directory = self.current_revision_dir
+        revision_directory = self.dataset.client_files_root(self.dataset.revision) # self.current_revision_dir
+        # revision_directory = self.current_revision_dir
         self.hasher.files_root = Path(revision_directory)
 
         if not os.path.exists(revision_directory):
@@ -734,6 +735,7 @@ class Manifest(object):
                         logger.exception(err)
                         continue
 
+        # XXX this for sure should be done in the manifest proper
         # Completely re-compute the fast hash index
         paths = list(self.manifest.keys())
         hash_result = self.hasher.fast_hash(paths)

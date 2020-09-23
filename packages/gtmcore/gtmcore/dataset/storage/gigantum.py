@@ -590,6 +590,55 @@ class GigantumObjectStore(StorageBackend):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'}
 
+    def prepare_mount_source(self, revision: str):
+        """Do needed steps so we're ready to mount files into Project containers
+
+        - Create revision dir
+        - Link available blobs to according to the Manifest
+
+        Maybe manifest_io is really backend IO?
+
+        """
+        revision_directory = self.client_files_root(revision) # self.current_revision_dir
+
+        # XXX this is still something we need to do from the manifest side
+        # self.hasher.files_root = Path(revision_directory)
+
+        revision_directory.mkdir(parents=True, exist_ok=True)
+
+        for f in self.manifest:
+            hash_str = self.manifest[f].get('h')
+            level1, level2 = self._get_object_subdirs(hash_str)
+
+            target = os.path.join(revision_directory, f)
+            if target[-1] == os.path.sep:
+                # Create directory from manifest
+                if not os.path.exists(target):
+                    os.makedirs(target)
+            else:
+                # Link file
+                source = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
+
+                target_dir = os.path.dirname(target)
+                if not os.path.exists(target_dir):
+                    os.makedirs(target_dir)
+
+                # Link if not already linked
+                if not os.path.exists(target):
+                    try:
+                        if os.path.exists(source):
+                            # Only try to link if the source object has been materialized
+                            os.link(source, target)
+                    except Exception as err:
+                        logger.exception(err)
+                        continue
+
+        # Completely re-compute the fast hash index
+        paths = list(self.manifest.keys())
+        hash_result = self.hasher.fast_hash(paths)
+        self.fast_hash_data = {p: h for p, h in zip(paths, hash_result) if h}
+        self._save_fast_hash_file()
+
     def client_files_root(self, revision: str) -> Path:
         """Provide a path to cached and linked files in the private dataset dir
 

@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Type, Dict
+from typing import Type, Dict, TYPE_CHECKING
 
-from gtmcore.dataset import Dataset
+if TYPE_CHECKING:
+    from gtmcore.dataset import Dataset
 from gtmcore.exceptions import GigantumException
 from gtmcore.dataset.cache.filesystem import HostFilesystemCache
 from gtmcore.configuration import Configuration
@@ -9,7 +10,7 @@ from gtmcore.configuration import Configuration
 SUPPORTED_CACHE_MANAGERS: Dict[str, Type] = {"host": HostFilesystemCache}
 
 
-def get_cache_manager(client_config: Configuration, dataset: Dataset, username: str) -> HostFilesystemCache:
+def get_cache_manager(client_config: Configuration, dataset: 'Dataset', username: str) -> HostFilesystemCache:
     """Instantiate a CacheManager for Dataset in the appropriate location(s) for the logged-in user
 
     Args:

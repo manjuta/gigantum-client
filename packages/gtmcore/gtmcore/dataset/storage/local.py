@@ -1,20 +1,14 @@
 """Local-only Datasets are mounted into your Projects from the host machine. This allows for great flexiblity, but you
 are responsible for managing data files - syncrhonization logic is implemented *only for metadata*.
 """
-
-import shutil
-import copy
 from pathlib import Path
 
-from gtmcore.dataset import Dataset
 from gtmcore.dataset.storage.backend import StorageBackend
-from typing import Callable, Optional, Dict, Any
-import os
+from typing import Optional, Dict, Any
 
 from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
-from gtmcore.dataset.manifest.manifest import Manifest, StatusResult
 
 logger = LMLogger.get_logger()
 
@@ -54,3 +48,6 @@ class LocalFilesystemBackend(StorageBackend):
                 "url": "https://docs.gigantum.com",
                 "readme": __doc__}
 
+    def client_files_root(self, revision: str) -> Path:
+        """In the local files case, the host mount path doesn't move around!"""
+        return self.host_mount_path

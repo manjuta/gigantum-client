@@ -1,5 +1,7 @@
 import os
 import uuid
+from pathlib import Path
+
 import yaml
 import time
 import datetime
@@ -234,12 +236,10 @@ class Repository(object):
 
         This property should be overridden for more complex Repositories, as done in Datasets.
         """
-        try:
-            host_dir = os.environ['HOST_WORK_DIR']
-        except KeyError:
-            raise ValueError("Environment variable HOST_WORK_DIR must be set to enable Repository bind-mounts")
+        host_dir = Configuration.get_host_work_path()
+        relative_path = Path(self.root_dir).relative_to('/mnt/gigantum')
 
-        return self.root_dir.replace('/mnt/gigantum', host_dir)
+        return str(host_dir / relative_path)
 
     @property
     def checkout_id(self) -> str:
