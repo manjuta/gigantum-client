@@ -50,15 +50,10 @@ class ManifestFileCache(object):
         self.dataset = dataset
         self.logged_in_username = logged_in_username
 
-        self.ignore_file = os.path.join(dataset.root_dir, ".gigantumignore")
-
         self._redis_client: Optional[redis.StrictRedis] = None
         self._manifest: OrderedDict = OrderedDict()
         self._current_checkout_id = self.dataset.checkout_id
         self._persist_queue: List[PersistTask] = list()
-
-        # TODO: Support ignoring files
-        # self.ignored = self._load_ignored()
 
         self._legacy_manifest_file = os.path.join(self.dataset.root_dir, 'manifest', 'manifest0')
 
@@ -96,7 +91,7 @@ class ManifestFileCache(object):
         if os.path.exists(self._legacy_manifest_file):
             with open(self._legacy_manifest_file, 'rb') as mf:
                 data = pickle.load(mf)
-                # Add the filename as an attribute to allow for reverse indexing on delete
+                # Add the filename ('fn') as an attribute to allow for reverse indexing on delete
                 [data[key].update(fn='manifest0') for key in data]
                 return data
         else:
@@ -154,7 +149,7 @@ class ManifestFileCache(object):
         manifest_data = OrderedDict()
         cache_bytes = self.redis_client.get(self.manifest_cache_key)
         if cache_bytes:
-            # Load from cache
+            # Use cache
             manifest_data = json.loads(cache_bytes.decode(),
                                        object_pairs_hook=OrderedDict)
             self.redis_client.expire(self.manifest_cache_key, 3600)

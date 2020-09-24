@@ -67,6 +67,11 @@ class Manifest(object):
 
     @property
     def fast_hash_file(self) -> str:
+        """The fast hash file is stored with the objects or local files
+
+        Generally speaking, the client (and host) files directories are not git-managed,
+        so this file won't get synced to GHub
+        """
         current_sha = self.dataset.git.repo.head.commit.hexsha
         hash_file_dir = self.dataset.backend.client_files_root(current_sha)
         return os.path.join(hash_file_dir, ".smarthash")
@@ -180,18 +185,6 @@ class Manifest(object):
         """
         return self._manifest_io.get_manifest()
 
-    @staticmethod
-    def _get_object_subdirs(object_id) -> Tuple[str, str]:
-        """Get the subdirectories when accessing an object ID
-
-        Args:
-            object_id:
-
-        Returns:
-
-        """
-        return object_id[0:8], object_id[8:16]
-
     def get_num_hashing_cpus(self) -> int:
         """
 
@@ -222,7 +215,7 @@ class Manifest(object):
             raise ValueError(f"{dataset_path} not found in Dataset manifest.")
 
         hash_str: str = data['h']
-        level1, level2 = self._get_object_subdirs(hash_str)
+        level1, level2 = self.dataset.backend._get_object_subdirs(hash_str)
         return os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
 
     def get_abs_path(self, relative_path: str) -> str:
@@ -389,7 +382,7 @@ class Manifest(object):
         """
         source = os.path.join(self.current_revision_dir, relative_path)
         if os.path.isfile(source):
-            level1, level2 = self._get_object_subdirs(hash_str)
+            level1, level2 = self.dataset.backend._get_object_subdirs(hash_str)
 
             os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1), exist_ok=True)
             os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2), exist_ok=True)
@@ -701,41 +694,9 @@ class Manifest(object):
         Returns:
             None
         """
-        revision_directory = self.dataset.client_files_root(self.dataset.revision) # self.current_revision_dir
-        # revision_directory = self.current_revision_dir
-        self.hasher.files_root = Path(revision_directory)
+        revision_directory = self.dataset.backend.prepare_mount_source(self.dataset.current_revision, self.manifest)
+        self.hasher.files_root = revision_directory
 
-        if not os.path.exists(revision_directory):
-            os.makedirs(revision_directory)
-
-        for f in self.manifest:
-            hash_str = self.manifest[f].get('h')
-            level1, level2 = self._get_object_subdirs(hash_str)
-
-            target = os.path.join(revision_directory, f)
-            if target[-1] == os.path.sep:
-                # Create directory from manifest
-                if not os.path.exists(target):
-                    os.makedirs(target)
-            else:
-                # Link file
-                source = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
-
-                target_dir = os.path.dirname(target)
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
-
-                # Link if not already linked
-                if not os.path.exists(target):
-                    try:
-                        if os.path.exists(source):
-                            # Only try to link if the source object has been materialized
-                            os.link(source, target)
-                    except Exception as err:
-                        logger.exception(err)
-                        continue
-
-        # XXX this for sure should be done in the manifest proper
         # Completely re-compute the fast hash index
         paths = list(self.manifest.keys())
         hash_result = self.hasher.fast_hash(paths)

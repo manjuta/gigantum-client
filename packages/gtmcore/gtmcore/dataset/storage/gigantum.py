@@ -19,7 +19,7 @@ import math
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.cache import HostFilesystemCache
 from gtmcore.dataset.storage.backend import StorageBackend
-from typing import Optional, List, Dict, Callable, NamedTuple, Any
+from typing import Optional, List, Dict, Callable, NamedTuple, Any, OrderedDict, Tuple
 import os
 
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
@@ -590,7 +590,7 @@ class GigantumObjectStore(StorageBackend):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'}
 
-    def prepare_mount_source(self, revision: str):
+    def prepare_mount_source(self, revision: str, manifest_dict: OrderedDict) -> Path:
         """Do needed steps so we're ready to mount files into Project containers
 
         - Create revision dir
@@ -600,44 +600,40 @@ class GigantumObjectStore(StorageBackend):
 
         """
         revision_directory = self.client_files_root(revision) # self.current_revision_dir
-
-        # XXX this is still something we need to do from the manifest side
-        # self.hasher.files_root = Path(revision_directory)
-
         revision_directory.mkdir(parents=True, exist_ok=True)
 
-        for f in self.manifest:
-            hash_str = self.manifest[f].get('h')
+        for pathname, info in manifest_dict.values():
+            hash_str = info.get('h')
             level1, level2 = self._get_object_subdirs(hash_str)
 
-            target = os.path.join(revision_directory, f)
-            if target[-1] == os.path.sep:
+            target = revision_directory / pathname
+            if pathname[-1] == '/':
                 # Create directory from manifest
-                if not os.path.exists(target):
-                    os.makedirs(target)
+                target.mkdir(parents=True, exist_ok=True)
             else:
                 # Link file
-                source = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
+                source = self.cache_manager.cache_root / 'objects' / level1 / level2 / hash_str
 
-                target_dir = os.path.dirname(target)
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
+                target.parent.mkdir(parents=True, exist_ok=True)
 
                 # Link if not already linked
-                if not os.path.exists(target):
-                    try:
-                        if os.path.exists(source):
-                            # Only try to link if the source object has been materialized
-                            os.link(source, target)
-                    except Exception as err:
-                        logger.exception(err)
-                        continue
+                if source.exists() and not target.exists():
+                    # Only try to link if the source object has been materialized
+                    os.link(source, target)
 
-        # Completely re-compute the fast hash index
-        paths = list(self.manifest.keys())
-        hash_result = self.hasher.fast_hash(paths)
-        self.fast_hash_data = {p: h for p, h in zip(paths, hash_result) if h}
-        self._save_fast_hash_file()
+        return revision_directory
+
+    @staticmethod
+    def _get_object_subdirs(object_id) -> Tuple[str, str]:
+        """Get the subdirectories when accessing an object ID
+
+        Args:
+            object_id:
+
+        Returns:
+
+        """
+        return object_id[0:8], object_id[8:16]
 
     def client_files_root(self, revision: str) -> Path:
         """Provide a path to cached and linked files in the private dataset dir

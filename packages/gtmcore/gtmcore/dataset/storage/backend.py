@@ -72,13 +72,13 @@ class StorageBackend(metaclass=abc.ABCMeta):
         """
         pass
 
-    def prepare_mount_source(self, revision: str):
+    def prepare_mount_source(self, revision: str) -> Path:
         """Do any needed steps so we're ready to mount files into Project containers
 
         Note that this may be revision-specific, but revision can also be ignored. It's fine not to override this
         method if no setup is needed!
         """
-        pass
+        return self.client_files_root(revision)
 
     # TODO DJWC delete these commented functions
     # def hash_file_key_list(self, dataset, keys):
