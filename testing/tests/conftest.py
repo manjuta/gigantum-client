@@ -59,7 +59,7 @@ def __setup_chrome() -> webdriver:
 
     Returns: A new local chrome driver.
     """
-
+    chrome_prefs = {}
     chrome_options = webdriver.ChromeOptions()
     if ConfigurationManager.getInstance().get_app_setting("incognito"):
         chrome_options.add_argument("--incognito")
@@ -67,6 +67,8 @@ def __setup_chrome() -> webdriver:
         chrome_options.add_argument("--kiosk")
     else:
         chrome_options.add_argument("--start-maximized")
+    chrome_options.experimental_options["prefs"] = chrome_prefs
+    chrome_prefs["profile.default_content_settings"] = {"popups": 1}
     driver_version = ConfigurationManager.getInstance().get_app_setting("chrome_driver_version")
     if driver_version.strip():
         return webdriver.Chrome(ChromeDriverManager
@@ -87,6 +89,7 @@ def __setup_firefox() -> webdriver:
     firefox_profile = webdriver.FirefoxProfile()
     firefox_profile.set_preference("browser.privatebrowsing.autostart",
                                    ConfigurationManager.getInstance().get_app_setting("incognito"))
+    firefox_profile.set_preference("dom.disable_open_during_load", False)
     driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(), firefox_profile=firefox_profile)
     driver.maximize_window()
     return driver
@@ -112,11 +115,12 @@ def __setup_safari() -> webdriver:
     """Setup Safari web driver.
 
     Returns:A new local Safari driver.
-    TODO - set private mode
     """
     capability = DesiredCapabilities.SAFARI
     capability[""] = {}
-    return webdriver.Safari()
+    driver = webdriver.Safari()
+    driver.maximize_window()
+    return driver
 
 
 def __take_screenshot(web_driver: webdriver, test_name: str):

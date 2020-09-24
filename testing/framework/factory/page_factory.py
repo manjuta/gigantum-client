@@ -16,7 +16,7 @@ from framework.factory.compare_utility import CompareUtility
 
 
 class PageFactory(object):
-    timeout = 15
+    timeout = 900
     highlight = True
 
     TYPE_OF_LOCATORS = {
@@ -38,6 +38,25 @@ class PageFactory(object):
             return None
         else:
             self.driver = instance.driver
+
+    def wait_for_new_tab_to_load(self, url: str, window_index: int = 1, timeout: int = 15) -> bool:
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if len(self.driver.window_handles) > 1 and len(self.driver.window_handles) >= window_index:
+                new_window = self.driver.window_handles[window_index]
+                self.driver.switch_to_window(new_window)
+                if self.driver.current_url.endswith(url):
+                    return True
+            time.sleep(0.25)
+        return False
+
+    def close_current_tab(self, current_window_url: str, parent_window_index: int) -> bool:
+        if len(self.driver.window_handles) > 1 and self.driver.current_url.endswith(current_window_url):
+            parent_window = self.driver.window_handles[parent_window_index]
+            self.driver.close()
+            self.driver.switch_to_window(parent_window)
+            return True
+        return False
 
     def get_locator(self, locator_type: LocatorType, locator_key: str) -> WebElement:
         """Get UI element based on given locator type and locator key.
@@ -179,11 +198,11 @@ class PageFactory(object):
         """
         return self.text
 
-    def clear_text(self)  -> None:
+    def clear_text(self) -> None:
         """Clears text from EditBox."""
         self.clear()
 
-    def hover(self)  -> None:
+    def hover(self) -> None:
         """Perform hover operation on webElement."""
         ActionChains(self.parent).move_to_element(self).perform()
 
@@ -286,6 +305,49 @@ class PageFactory(object):
         while time.time() < end_time:
             if getattr(CompareUtility, predicate.value)(self, *args): return True
             time.sleep(0.25)
+        return False
+
+    def check_element_presence(self, locator_type: LocatorType, locator_key: str, timeout: int) -> bool:
+        """Check for the presence of an element
+
+        Args:
+            locator_type: locator type ('css','id','name','xpath','link_text','partial_link_text','tag','class_name')
+            locator_key: unique key to identify we UI element
+            timeout: The time period for which the wait should continue
+
+        Returns: boolean value based on the result
+
+        """
+        end_time = time.time() + timeout
+        self.element_locator = (self.TYPE_OF_LOCATORS[locator_type.value], locator_key)
+        while time.time() < end_time:
+            try:
+                element = WebDriverWait(self.driver, 0.15).until(EC.presence_of_element_located(
+                    self.element_locator))
+                return True
+            except (StaleElementReferenceException, NoSuchElementException, TimeoutException) as ex:
+                pass
+        return False
+
+    def check_element_absence(self, locator_type: LocatorType, locator_key: str, timeout: int) -> bool:
+        """Check for the absence of an element
+
+                Args:
+                    locator_type: locator type ('css','id','name','xpath','link_text','partial_link_text','tag','class_name')
+                    locator_key: unique key to identify we UI element
+                    timeout: The time period for which the wait should continue
+
+                Returns: boolean value based on the result
+
+                """
+        end_time = time.time() + timeout
+        self.element_locator = (self.TYPE_OF_LOCATORS[locator_type.value], locator_key)
+        while time.time() < end_time:
+            try:
+                element = WebDriverWait(self.driver, 0.15).until(EC.presence_of_element_located(
+                    self.element_locator))
+            except (StaleElementReferenceException, NoSuchElementException, TimeoutException) as ex:
+                return True
         return False
 
 

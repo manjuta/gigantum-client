@@ -29,3 +29,4 @@ class LoginUser(enum.Enum):
 class CompareUtilityType(enum.Enum):
     """Indicates the compare function type."""
     CompareText = 'compare_text'
+    CheckElement = 'check_element'
