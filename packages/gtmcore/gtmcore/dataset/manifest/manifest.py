@@ -684,7 +684,6 @@ class Manifest(object):
 
             return self.gen_file_info(relative_path)
 
-    # TODO DJWC - needs to be moved to a backend-specific location
     def link_revision(self) -> None:
         """Method to link all the objects in the cache to the current revision directory, so that all files are
         accessible with the correct file names.
