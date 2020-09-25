@@ -50,8 +50,8 @@ class Manifest(object):
         #  For now, commenting this obviously breaks things badly
         # self.cache_mgr = get_cache_manager(self.dataset.client_config, self.dataset, logged_in_username)
 
-        # TODO DJWC - need to update file root for local or unmanaged datasets
-        self.hasher = SmartHash(self.dataset.backend.client_files_root(self.dataset.current_revision))
+        # Note - self.dataset needs to be set before this step!
+        self.hasher = SmartHash(self.current_revision_dir)
 
         self._manifest_io = ManifestFileCache(dataset, logged_in_username)
 
@@ -119,8 +119,8 @@ class Manifest(object):
         Returns:
 
         """
-        hash_task = asyncio.create_task(self.hasher.compute_file_hash(path))
         loop = asyncio.get_event_loop()
+        hash_task = loop.create_task(self.hasher.compute_file_hash(path))
         loop.run_until_complete(hash_task)
         curr_hash = hash_task.result()
         return curr_hash != self.fast_hash_data.get(path)
@@ -163,18 +163,14 @@ class Manifest(object):
         return self.dataset.current_revision
 
     @property
-    def current_revision_dir(self) -> str:
+    def current_revision_dir(self) -> Path:
         """Method to return the directory containing files for the current dataset revision. If the dir doesn't exist,
         relink it (updates to a dataset will remove a revision dir, but linked datasets may still need old revisions)
 
         Returns:
             str
         """
-        crd = self.dataset.backend.client_files_root(self.dataset.current_revision)
-        # TODO DJWC - This is probably not something we want to have happen every time we check the current revision
-        if not os.path.exists(crd):
-            self.link_revision()
-        return crd
+        return self.dataset.backend.client_files_root(self.dataset.current_revision)
 
     @property
     def manifest(self) -> OrderedDict:
@@ -200,8 +196,7 @@ class Manifest(object):
         else:
             return int(config_val)
 
-    # TODO DJWC: Needs to be moved to a backend-specific location
-    def dataset_to_object_path(self, dataset_path: str) -> str:
+    def hash_for_path(self, dataset_path: str) -> Path:
         """Helper method to compute the absolute object path from the relative dataset path
 
         Args:
@@ -210,13 +205,10 @@ class Manifest(object):
         Returns:
             str
         """
-        data: Optional[dict] = self.manifest.get(dataset_path)
-        if not data:
-            raise ValueError(f"{dataset_path} not found in Dataset manifest.")
-
-        hash_str: str = data['h']
-        level1, level2 = self.dataset.backend._get_object_subdirs(hash_str)
-        return os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
+        try:
+            return self.manifest[dataset_path]['h']
+        except KeyError:
+            raise ValueError(f"{dataset_path} not found in Dataset manifest for revision {self.dataset.current_revision}.")
 
     def get_abs_path(self, relative_path: str) -> str:
         """Method to generate the absolute path to a file in the cache at the current revision
@@ -298,7 +290,7 @@ class Manifest(object):
         all_files = list()
 
         for root, dirs, files in os.walk(self.current_revision_dir):
-            _, folder = root.split(self.current_revision_dir)
+            _, folder = root.split(str(self.current_revision_dir))
             if len(folder) > 0:
                 if folder[0] == os.path.sep:
                     folder = folder[1:]
@@ -393,7 +385,7 @@ class Manifest(object):
             await self._move_and_link(source, destination)
 
             # Queue new object for push
-            self.queue_to_push(destination, relative_path, self.dataset_revision)
+            self.queue_to_push(destination, relative_path, self.dataset.current_revision)
         else:
             destination = source
 
@@ -445,7 +437,7 @@ class Manifest(object):
             # TODO DJWC extract object store backend logic from hash_files,
             #  and move into the Gigantum backend.
             #  The below will also redundantly compute hashes, even though we've already done it.
-            hash_task = asyncio.create_task(self.hash_files(update_files))
+            hash_task = loop.create_task(self.hash_files(update_files))
             loop.run_until_complete(hash_task)
             hash_result, fast_hash_result = hash_task.result()
 
@@ -635,7 +627,7 @@ class Manifest(object):
         relative_path = self.dataset.make_path_relative(path)
         new_directory_path = self.current_revision_dir
 
-        previous_revision = self.dataset_revision
+        previous_revision = self.dataset.current_revision
 
         # TODO DJWC - I guess this is where directory creation should happen?
         if os.path.exists(new_directory_path):
@@ -799,7 +791,7 @@ class Manifest(object):
         Returns:
 
         """
-        previous_revision = self.dataset_revision
+        previous_revision = self.dataset.current_revision
 
         # If `status` is set, assume update() has been run already
         if not status:

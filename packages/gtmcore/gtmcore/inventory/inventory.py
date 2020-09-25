@@ -490,7 +490,7 @@ class InventoryManager(object):
             dataset_name: Name of the Dataset
             storage_type: String identifying the type of Dataset to instantiate
             backend_config_overrides: Some arguments to the backend storage class constructor are generated
-             automatically, this allows to specify needed manual arguments as well as overrides
+              automatically, this allows to specify needed manual arguments as well as overrides
             description: Optional brief description of Dataset
             author: Optional Git Author
 

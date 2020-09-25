@@ -270,7 +270,7 @@ class PublicS3Bucket(ExternalProtectedStorage):
         modified_files = list()
         print_cnt = 0
 
-        revision_dir = os.path.join(m.cache_mgr.cache_root, m.dataset_revision)
+        revision_dir = m.current_revision_dir
         for x in response_iterator:
             if print_cnt == 0:
                 status_update_fn("Processing Bucket Contents, please wait.")

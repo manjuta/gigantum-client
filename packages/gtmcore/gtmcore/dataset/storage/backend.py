@@ -84,7 +84,7 @@ class StorageBackend(metaclass=abc.ABCMeta):
     # def hash_file_key_list(self, dataset, keys):
     #     m = Manifest(dataset, self.configuration.get('username'))
     #     loop = asyncio.get_event_loop()
-    #     hash_task = asyncio.create_task(m.hasher.hash(keys))
+    #     hash_task = loop.create_task(m.hasher.hash(keys))
     #     loop.run_until_complete(hash_task)
     #     return hash_task.result()
 

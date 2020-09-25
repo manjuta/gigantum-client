@@ -555,7 +555,7 @@ class GigantumObjectStore(StorageBackend):
         # The endpoint for the object service
         self.url = f"{object_service}{namespaced_name}"
 
-        # TODO DJWC: Do we need to keep this class or would self.cache_root be enough?
+        # TODO DJWC: Do we need to keep this Cache class or would self.cache_root be enough?
         cache_root = Path(client_config.app_workdir, '.labmanager', 'datasets', username, namespaced_name).expanduser()
         # Note - we don't use the get_cache_manager function because we're already in a specific backend
         self.cache_manager = HostFilesystemCache(cache_root)
@@ -647,6 +647,17 @@ class GigantumObjectStore(StorageBackend):
 
         return self.cache_manager.cache_root / revision
 
+    def hash_to_object_path(self, hash_str: str) -> Path:
+        """Helper method to compute the absolute object path from the relative dataset path
+
+        Args:
+            dataset_path: relative dataset path
+
+        Returns:
+            str
+        """
+        level1, level2 = self._get_object_subdirs(hash_str)
+        return self.client_files_root('') / 'objects' / level1 / level2 / hash_str
 
     def prepare_push(self, objects: List[PushObject]) -> None:
         """Gigantum Object Service only requires that the user's tokens have been set

@@ -51,7 +51,7 @@ def hash_dataset_files(logged_in_username: str, dataset_owner: str, dataset_name
         manifest = Manifest(ds, logged_in_username)
 
         loop = asyncio.get_event_loop()
-        hash_task = asyncio.create_task(manifest.hash_files(file_list))
+        hash_task = loop.create_task(manifest.hash_files(file_list))
         loop.run_until_complete(hash_task)
         hash_result, fast_hash_result = hash_task.result()
 
@@ -452,8 +452,9 @@ def download_dataset_files(logged_in_username: str,
             for f in failure_keys:
                 # If any failed files partially downloaded, remove them.
                 abs_dataset_path = os.path.join(m.current_revision_dir, f)
-                abs_object_path = m.dataset_to_object_path(f)
-                if os.path.exists(abs_dataset_path):
+                path_hash = m.hash_for_path(f)
+                abs_object_path = ds.backend.hash_to_object_path(path_hash)
+                if abs_dataset_path.exists():
                     os.remove(abs_dataset_path)
                 if os.path.exists(abs_object_path):
                     os.remove(abs_object_path)

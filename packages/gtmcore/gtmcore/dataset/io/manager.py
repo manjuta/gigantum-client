@@ -8,6 +8,7 @@ from gtmcore.dataset.dataset import Dataset
 from gtmcore.dataset.manifest import Manifest
 from gtmcore.dataset.storage import GigantumObjectStore
 from gtmcore.dataset.io import PushObject, PushResult, PullResult, PullObject
+from gtmcore.exceptions import GigantumException
 
 from gtmcore.logging import LMLogger
 
@@ -18,10 +19,13 @@ class IOManager(object):
     """Class to manage file IO with remote storage backends and glue everything together"""
 
     def __init__(self, dataset: Dataset, manifest: Manifest) -> None:
+        if not isinstance(dataset.backend, GigantumObjectStore):
+            raise GigantumException("IOManager can only handle network operations for GgiantumObjectStore,"
+                                    f" not {type(dataset.backend)}")
         self.dataset = dataset
         self.manifest = manifest
 
-        self.push_dir = os.path.join(self.manifest.cache_mgr.cache_root, 'objects', '.push')
+        self.push_dir = os.path.join(self.dataset.backend.cache_root, 'objects', '.push')
 
         # Property to keep status state if needed when appending messages
         self._status_msg = ""
@@ -133,9 +137,10 @@ class IOManager(object):
 
         """
         result = list()
-        revision = self.manifest.dataset_revision
+        revision = self.dataset.current_revision
         for key in keys:
-            data = self.manifest.dataset_to_object_path(key)
+            path_hash = self.manifest.hash_for_path(key)
+            data = self.dataset.backend.hash_to_object_path(path_hash)
             result.append(PullObject(object_path=data, revision=revision, dataset_path=key))
 
         return result
@@ -193,7 +198,8 @@ class IOManager(object):
                 continue
 
             # Check if file exists in object cache and simply needs to be linked
-            obj_path = self.manifest.dataset_to_object_path(key)
+            path_hash = self.manifest.hash_for_path(key)
+            obj_path = self.dataset.backend.hash_to_object_path(path_hash)
             if os.path.isfile(obj_path):
                 os.link(obj_path, revision_path)
                 continue

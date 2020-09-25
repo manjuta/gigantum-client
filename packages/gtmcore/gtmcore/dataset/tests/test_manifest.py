@@ -533,54 +533,37 @@ class TestManifest(object):
     def test_delete(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
 
-        os.makedirs(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "other_dir"))
-        helper_append_file(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test1.txt", "asdfasdfdf")
-        helper_append_file(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test2.txt", "asdfdf")
-        helper_append_file(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test3.txt", "asdfasdf")
-        helper_append_file(manifest.cache_mgr.cache_root, manifest.dataset_revision, "other_dir/test4.txt",
-                           "dfasdfhfgjhg")
-        helper_append_file(manifest.cache_mgr.cache_root, manifest.dataset_revision, "other_dir/test5.txt",
-                           "fdghdfgsa")
+        # Wrte some stuff into files
+        (manifest.current_revision_dir / 'other_dir').mkdir(parents=True)
+        paths = [manifest.current_revision_dir / p for p in ["test1.txt", "test2.txt", "test3.txt", "other_dir/test4.txt", "other_dir/test5.txt"]]
+        contents = ["asdfasdfdf", "asdfdf", "asdfasdf", "dfasdfhfgjhg", "fdghdfgsa"]
+        for p, c in zip(paths, contents):
+            with (manifest.current_revision_dir / p).open('at') as fh:
+                fh.write(c)
+
         manifest.sweep_all_changes()
 
         num_records = len(ds.git.log())
         assert num_records == 6
 
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test1.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test2.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test3.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "other_dir", "test4.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "other_dir", "test5.txt")) is True
+        for p in paths:
+            assert p.exists() is True
 
         manifest.delete(["test1.txt"])
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test1.txt")) is False
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test2.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test3.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "other_dir", "test4.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "other_dir", "test5.txt")) is True
+
+        assert paths[0].exists() is False
+        for p in paths[1:]:
+            assert p.exists() is True
+
         assert len(ds.git.log()) == num_records + 2
 
         manifest.delete(["test2.txt", "other_dir/"])
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test1.txt")) is False
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test2.txt")) is False
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "test3.txt")) is True
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "other_dir", "test4.txt")) is False
-        assert os.path.exists(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                                           "other_dir", "test5.txt")) is False
+
+        for p in paths[:2]:
+            assert p.exists() is False
+        for p in paths[2:]:
+            assert p.exists() is True
+
         assert len(ds.git.log()) == num_records + 4
 
     def test_move_rename_file(self, mock_dataset_with_manifest):
@@ -751,7 +734,7 @@ class TestManifest(object):
         assert len(manifest.manifest) == 0
 
         previous_revision_dir = manifest.cache_mgr.current_revision_dir
-        assert os.path.isdir(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, 'test1')) is False
+        assert (manifest.current_revision_dir / 'test1').is_dir() is False
 
         manifest.create_directory("test1/")
 
@@ -759,7 +742,7 @@ class TestManifest(object):
         assert len(manifest.manifest) == 1
         assert 'test1/' in manifest.manifest
         assert previous_revision_dir != manifest.cache_mgr.current_revision_dir
-        assert os.path.isdir(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, 'test1')) is True
+        assert (manifest.current_revision_dir / 'test1').is_dir() is True
 
         assert "Created new empty directory `test1/`" in ds.git.log()[0]['message']
 
@@ -770,9 +753,8 @@ class TestManifest(object):
         assert 'test1/' in manifest.manifest
         assert 'test1/test2/' in manifest.manifest
         assert previous_revision_dir != manifest.cache_mgr.current_revision_dir
-        assert os.path.isdir(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, 'test1')) is True
-        assert os.path.isdir(os.path.join(manifest.cache_mgr.cache_root,
-                                          manifest.dataset_revision, 'test1', 'test2')) is True
+        assert (manifest.current_revision_dir / 'test1').is_dir() is True
+        assert (manifest.current_revision_dir / 'test1' / 'test2').is_dir() is True
 
         assert "Created new empty directory `test1/test2/`" in ds.git.log()[0]['message' ]
 
