@@ -11,6 +11,7 @@ from pathlib import Path
 
 import aiohttp
 import aiofiles
+import aiofiles.io
 import copy
 import snappy
 import requests
@@ -658,6 +659,79 @@ class GigantumObjectStore(StorageBackend):
         """
         level1, level2 = self._get_object_subdirs(hash_str)
         return self.client_files_root('') / 'objects' / level1 / level2 / hash_str
+
+    @staticmethod
+    async def _move_and_link(source, destination):
+        """Move a file and hard link it
+
+        Args:
+            source: source path
+            destination: destination path
+
+        Returns:
+
+        """
+        if os.path.isfile(destination):
+            # Object already exists, no need to store again
+            await aiofiles.os.remove(source)
+            # XXX above works? os.remove(source)
+        else:
+            # Move file to new object
+            await aiofiles.os.rename(source, destination)
+            # XXX above works? shutil.move(source, destination)
+        # Link object back
+        try:
+            os.link(destination, source)
+        except PermissionError:
+            os.symlink(destination, source)
+
+    def queue_to_push(self, obj: str, rel_path: str, revision: str) -> None:
+        """Method to queue and object for push to remote storage backend
+
+        Objects to push are stored in a file named with the revision at which the files were written. This is different
+        from the revision that contains the files (after written and untracked, changes are committed and then an
+        activity record is created with another commit)
+
+        Args:
+            obj: object path
+            revision: revision of the dataset the object exists in
+            rel_path: Objects relative file path in the dataset
+
+        Returns:
+
+        """
+        if not os.path.exists(obj):
+            raise ValueError("Object does not exist. Failed to add to push queue.")
+
+        # XXX delete once sure this is working
+        # push_dir = os.path.join(self.cache_mgr.cache_root, 'objects', '.push')
+        push_dir = self.client_files_root('objects/.push')
+        push_dir.mkdir(parents=True, exist_ok=True)
+
+        with open(os.path.join(push_dir, revision), 'at') as fh:
+            fh.write(f"{rel_path},{obj}\n")
+
+    async def move_to_object_cache(self, relative_source_path, hash_str, target_revision):
+        """Method to move a file to the object cache
+
+        Args:
+            relative_source_path: path where the file is currently located
+            hash_str: content hash of the file
+
+        Returns:
+
+        """
+        source_path = self.client_files_root(target_revision) / relative_source_path
+
+        object_path = self.hash_to_object_path(hash_str)
+        object_path.parent.mkdir(exist_ok=True, parents=True)
+
+        # Move file to new object
+        await self._move_and_link(source_path, object_path)
+
+        # TODO DJWC - still need to figure this out (from manifest)
+        # Queue new object for push
+        self.queue_to_push(object_path, relative_source_path, target_revision)
 
     def prepare_push(self, objects: List[PushObject]) -> None:
         """Gigantum Object Service only requires that the user's tokens have been set

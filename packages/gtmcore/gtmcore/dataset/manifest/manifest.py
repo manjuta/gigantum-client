@@ -8,7 +8,6 @@ import shutil
 import asyncio
 from collections import OrderedDict, namedtuple
 
-import aiofiles.os
 from natsort import natsorted
 import copy
 from pathlib import Path
@@ -19,7 +18,7 @@ from gtmcore.activity import ActivityStore, ActivityRecord, ActivityDetailType, 
 from gtmcore.activity.utils import ImmutableList, DetailRecordList, TextData
 from gtmcore.dataset.manifest.hash import SmartHash
 from gtmcore.dataset.manifest.file import ManifestFileCache
-from gtmcore.dataset.cache import get_cache_manager
+from gtmcore.dataset.storage import GigantumObjectStore
 from gtmcore.logging import LMLogger
 
 if TYPE_CHECKING:
@@ -46,9 +45,6 @@ class Manifest(object):
         self.dataset = dataset
         self.logged_in_username = logged_in_username
 
-        # TODO DJWC - all usages below are in code that needs to be moved to a backend-aware location
-        #  For now, commenting this obviously breaks things badly
-        # self.cache_mgr = get_cache_manager(self.dataset.client_config, self.dataset, logged_in_username)
 
         # Note - self.dataset needs to be set before this step!
         self.hasher = SmartHash(self.current_revision_dir)
@@ -222,32 +218,6 @@ class Manifest(object):
         # TODO DJWC - code smell
         return str(self.hasher.get_abs_path(relative_path))
 
-    # TODO DJWC - needs to be moved to a backend-specific location
-    def queue_to_push(self, obj: str, rel_path: str, revision: str) -> None:
-        """Method to queue and object for push to remote storage backend
-
-        Objects to push are stored in a file named with the revision at which the files were written. This is different
-        from the revision that contains the files (after written and untracked, changes are committed and then an
-        activity record is created with another commit)
-
-        Args:
-            obj: object path
-            revision: revision of the dataset the object exists in
-            rel_path: Objects relative file path in the dataset
-
-        Returns:
-
-        """
-        if not os.path.exists(obj):
-            raise ValueError("Object does not exist. Failed to add to push queue.")
-
-        push_dir = os.path.join(self.cache_mgr.cache_root, 'objects', '.push')
-        if not os.path.exists(push_dir):
-            os.makedirs(push_dir)
-
-        with open(os.path.join(push_dir, revision), 'at') as fh:
-            fh.write(f"{rel_path},{obj}\n")
-
     def get_change_type(self, path, fast_hash: bool = True) -> FileChangeType:
         """Helper method to get the type of change from the manifest/fast hash
 
@@ -336,61 +306,6 @@ class Manifest(object):
         return StatusResult(created=status.get('created'), modified=status.get('modified'),
                             deleted=self.get_deleted_files(all_files))
 
-    @staticmethod
-    async def _move_and_link(source, destination):
-        """Move a file and hard link it
-
-        Args:
-            source: source path
-            destination: destination path
-
-        Returns:
-
-        """
-        if os.path.isfile(destination):
-            # Object already exists, no need to store again
-            await aiofiles.os.remove(source)
-            # XXX above works? os.remove(source)
-        else:
-            # Move file to new object
-            await aiofiles.os.rename(source, destination)
-            # XXX above works? shutil.move(source, destination)
-        # Link object back
-        try:
-            os.link(destination, source)
-        except PermissionError:
-            os.symlink(destination, source)
-
-    # TODO DJWC - move to backend-specific location
-    async def _move_to_object_cache(self, relative_path, hash_str):
-        """Method to move a file to the object cache
-
-        Args:
-            relative_path: relative path to the file
-            hash_str: content hash of the file
-
-        Returns:
-
-        """
-        source = os.path.join(self.current_revision_dir, relative_path)
-        if os.path.isfile(source):
-            level1, level2 = self.dataset.backend._get_object_subdirs(hash_str)
-
-            os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1), exist_ok=True)
-            os.makedirs(os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2), exist_ok=True)
-
-            destination = os.path.join(self.cache_mgr.cache_root, 'objects', level1, level2, hash_str)
-
-            # Move file to new object
-            await self._move_and_link(source, destination)
-
-            # Queue new object for push
-            self.queue_to_push(destination, relative_path, self.dataset.current_revision)
-        else:
-            destination = source
-
-        return destination
-
     async def hash_files(self, update_files: List[str]) -> Tuple[List[Optional[str]], List[Optional[str]]]:
         """Method to run the update process on the manifest based on change status (optionally computing changes if
         status is not set)
@@ -405,9 +320,16 @@ class Manifest(object):
         """
         hash_result = await self.hasher.hash(update_files)
 
-        # Move files into object cache and link back to the revision directory
-        move_operations = [self._move_to_object_cache(f, h) for f, h in zip(update_files, hash_result)]
-        await asyncio.gather(*move_operations)
+        # IF we are using our spiffy fully-managed dataset, move files into object cache and link back to the revision
+        # directory
+        if isinstance(self.dataset.backend, GigantumObjectStore):
+            rev = self.dataset.current_revision
+            move_operations = []
+            for f, h in zip(update_files, hash_result):
+                full_path = self.current_revision_dir / f
+                if full_path.is_file():
+                    move_operations.append(self.dataset.backend.move_to_object_cache(full_path, h, rev))
+            await asyncio.gather(*move_operations)
 
         # Update fast hash after objects have been moved/relinked
         fast_hash_result = self.hasher.fast_hash(update_files)
@@ -791,7 +713,7 @@ class Manifest(object):
         Returns:
 
         """
-        previous_revision = self.dataset.current_revision
+        previous_revision_dir = self.current_revision_dir
 
         # If `status` is set, assume update() has been run already
         if not status:
@@ -802,8 +724,9 @@ class Manifest(object):
 
         # Re-link new revision
         self.link_revision()
-        if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
-            shutil.rmtree(os.path.join(self.cache_mgr.cache_root, previous_revision))
+        # TODO DJWC - doesn't this potentially delete versions that are currently being used?
+        if os.path.isdir(previous_revision_dir):
+            shutil.rmtree(os.path.join(previous_revision_dir))
 
     def force_reload(self) -> None:
         """Method to force reloading manifest data from the filesystem
