@@ -24,10 +24,23 @@ class Packages extends Component {
     this._loadMore();
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevProps
+      && prevProps.environment
+      && prevProps.environment.packageDependencies
+      && prevProps.environment.packageDependencies.pageInfo.hasNextPage
+      && !prevProps.relay.isLoading()
+    ) {
+      this._loadMore();
+    }
+  }
+
   componentWillUnmount = () => {
     const { props } = this;
     props.cancelRefetch();
   }
+
 
   /**
   *  @param{}
