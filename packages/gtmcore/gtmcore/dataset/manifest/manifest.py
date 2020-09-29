@@ -148,7 +148,7 @@ class Manifest(object):
 
     ## END hash file info
 
-    # TODO DJWC - this is now a useless intermediate method, should be removed (but it's used in many places)
+    # TODO: this is now a useless intermediate method, and should be removed (but it's used in almost 150 places)
     @property
     def dataset_revision(self) -> str:
         """Property to get the current revision hash of the dataset
@@ -230,7 +230,6 @@ class Manifest(object):
         if fast_hash:
             has_changed = self.has_changed_fast
         else:
-            # TODO DJWC need to implement has_changed comparable to has_changed_fast, but on contents
             has_changed = self.has_changed
 
         if self.is_cached(path):
@@ -240,7 +239,7 @@ class Manifest(object):
                 result = FileChangeType.NOCHANGE
         else:
             if path in self.manifest:
-                # XXX DJWC - is this logic relevant / valid?
+                # TODO DJWC - is this logic relevant / valid?
                 # No fast hash, but exists in manifest. User just edited a file that hasn't been pulled
                 result = FileChangeType.MODIFIED
             else:
@@ -356,9 +355,6 @@ class Manifest(object):
 
         if update_files:
             loop = asyncio.get_event_loop()
-            # TODO DJWC extract object store backend logic from hash_files,
-            #  and move into the Gigantum backend.
-            #  The below will also redundantly compute hashes, even though we've already done it.
             hash_task = loop.create_task(self.hash_files(update_files))
             loop.run_until_complete(hash_task)
             hash_result, fast_hash_result = hash_task.result()
@@ -393,7 +389,6 @@ class Manifest(object):
         abs_path = os.path.join(self.current_revision_dir, key)
         return {'key': key,
                 'size': item.get('b'),
-                # TODO DJWC - this is currently broken because the above property will create the path
                 'is_local': os.path.exists(abs_path),
                 'is_dir': True if abs_path[-1] == "/" else False,
                 'modified_at': float(item.get('m'))}
@@ -551,7 +546,6 @@ class Manifest(object):
 
         previous_revision = self.dataset.current_revision
 
-        # TODO DJWC - I guess this is where directory creation should happen?
         if os.path.exists(new_directory_path):
             raise ValueError(f"Directory already exists: `{relative_path}`")
         else:
@@ -591,7 +585,8 @@ class Manifest(object):
 
             # Relink after the commit
             self.link_revision()
-            # TODO DJWC - It's unclear this is sound, don't we need reference counting or something?
+            # TODO DJWC - It's unclear this is sound when multiple projects are/were running with the same revision of a
+            #  dataset, don't we need reference counting or something?
             #  Also if hardlinks are working, this isn't saving space
             if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
                 shutil.rmtree(os.path.join(self.cache_mgr.cache_root, previous_revision))

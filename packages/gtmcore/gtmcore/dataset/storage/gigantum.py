@@ -556,7 +556,6 @@ class GigantumObjectStore(StorageBackend):
         # The endpoint for the object service
         self.url = f"{object_service}{namespaced_name}"
 
-        # TODO DJWC: Do we need to keep this Cache class or would self.cache_root be enough?
         cache_root = Path(client_config.app_workdir, '.labmanager', 'datasets', username, namespaced_name).expanduser()
         # Note - we don't use the get_cache_manager function because we're already in a specific backend
         self.cache_manager = HostFilesystemCache(cache_root)
@@ -730,9 +729,8 @@ class GigantumObjectStore(StorageBackend):
         # Move file to new object
         await self._move_and_link(source_path, object_path)
 
-        # TODO DJWC - still need to figure this out (from manifest)
         # Queue new object for push
-        self.queue_to_push(object_path, relative_source_path, target_revision)
+        self.queue_to_push(str(object_path), str(relative_source_path), target_revision)
 
     def prepare_push(self, objects: List[PushObject]) -> None:
         """Gigantum Object Service only requires that the user's tokens have been set
