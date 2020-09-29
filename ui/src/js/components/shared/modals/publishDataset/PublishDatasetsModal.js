@@ -27,6 +27,7 @@ type Props = {
   name: string,
   owner: string,
   resetPublishState: Function,
+  resetState: Function,
   setPublishingState: Function,
   setRemoteSession: Function,
   setSyncingState: Function,
@@ -325,12 +326,12 @@ class PublishDatasetsModal extends Component<Props> {
       checkSessionIsValid,
       header,
       localDatasets,
+      resetState,
       resetPublishState,
       setPublishingState,
       setSyncingState,
     } = this.props;
     const { progress } = this.state;
-    const self = this;
     const conatinerStatus = store.getState().containerStatus.status;
     const isPublishing = header === 'Publish';
 
@@ -370,15 +371,11 @@ class PublishDatasetsModal extends Component<Props> {
               });
             }
           } else {
-            self.props.auth.renewToken(true, () => {
-              self.props.resetState();
-            }, () => {
-              self._publishLabbookMutation();
-            });
+            resetState();
           }
         }
       } else {
-        self.props.resetState();
+        resetState();
       }
     });
   }
@@ -531,7 +528,7 @@ class PublishDatasetsModal extends Component<Props> {
                           className="Btn--flat"
                           onClick={() => { toggleModal(false, true); }}
                         >
-                        Cancel
+                          Cancel
                         </button>
                         <button
                           type="button"

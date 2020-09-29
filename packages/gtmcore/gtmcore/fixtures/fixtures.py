@@ -324,6 +324,21 @@ def mock_config_file_with_auth_anon_review():
     shutil.rmtree(working_dir)
 
 @pytest.fixture(scope="module")
+def mock_config_file_with_auth_multi_anon_review():
+    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
+    overrides = {
+        'auth': {
+            'identity_manager': 'anon_review'
+        },
+        'anon_review_secret': ['1234', '4567', 'abcd']
+    }
+
+    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
+
+    yield conf_file
+    shutil.rmtree(working_dir)
+
+@pytest.fixture(scope="module")
 def mock_config_file_with_auth_anonymous():
     """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
     # Load auth config for testing

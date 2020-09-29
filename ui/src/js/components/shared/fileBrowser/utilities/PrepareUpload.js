@@ -163,12 +163,13 @@ const checkFileSize = (files, promptType, owner, labbookName, isUntracked) => {
     };
   }
 
+
   function filesRecursionCount(file) {
     const fileSize = file.file.size;
-    if (promptType === 'CodeBrowser_allFiles' && !isUntracked) {
+    if ((promptType === 'CodeBrowser_allFiles') && !isUntracked) {
       if (fileSize > oneHundredMB) {
         fileSizeNotAllowed.push(file);
-      } else if ((fileSize > tenMB) && (fileSize < oneHundredMB)) {
+      } else if ((fileSize > tenMB) && (fileSize <= oneHundredMB)) {
         fileSizePrompt.push(file);
       } else {
         filesAllowed.push(file);
@@ -178,14 +179,14 @@ const checkFileSize = (files, promptType, owner, labbookName, isUntracked) => {
       || (promptType === 'OutputBrowser_allFiles'))
       && !isUntracked
     ) {
-      if (fileSize > fiveHundredMB) {
+      if (fileSize >= fiveHundredMB) {
         fileSizeNotAllowed.push(file);
-      } else if ((fileSize > oneHundredMB) && (fileSize < fiveHundredMB)) {
+      } else if ((fileSize > oneHundredMB) && (fileSize <= fiveHundredMB)) {
         fileSizePrompt.push(file);
       } else {
         filesAllowed.push(file);
       }
-    } else if (promptType === 'DataBrowser_allFiles' || isUntracked) {
+    } else if ((promptType === 'DataBrowser_allFiles') || isUntracked) {
       if (fileSize > fifteenGigs) {
         fileSizeNotAllowed.push(file);
       } else {

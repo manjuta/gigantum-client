@@ -7,7 +7,8 @@ from gtmcore.logging import LMLogger
 from gtmcore.exceptions import GigantumException
 
 logger = LMLogger.get_logger()
-CURRENT_MITMPROXY_TAG = 'eab6f480'
+# Current tag for gigantum/mitmproxy_proxy image
+CURRENT_MITMPROXY_TAG = '2020-04-24'
 
 
 class MITMProxyOperations(object):
@@ -22,6 +23,7 @@ class MITMProxyOperations(object):
 
         Args:
             devtool_container: the specific target running a dev tool
+            new_rserver_session: is this for a freshly-launched rserver?
             router: The link to the configurable-proxy-router wrapper
             _retry: (internal use only) is this a recursive call after clean-up?
 
@@ -35,7 +37,7 @@ class MITMProxyOperations(object):
 
         # Note that the use of rserver is not intrinsically meaningful - we could make this more generic
         # if mitmproxy supports multiple dev tools
-        proxy_path = f'rserver/{devtool_container.image_tag}/'
+        proxy_path = f'/rserver/{devtool_container.image_tag}/'
 
         # existing route to MITM or not?
         matched_routes = router.get_matching_routes(mitm_endpoint, proxy_path)
@@ -44,15 +46,15 @@ class MITMProxyOperations(object):
             suffix = matched_routes[0]
         elif len(matched_routes) == 0:
             logger.info('Creating route for existing RStudio mitmproxy_proxy')
-            rt_prefix, _ = router.add(mitm_endpoint, proxy_path)
+            router.add(mitm_endpoint, proxy_path)
             # Warning: RStudio will break if there is a trailing slash!
-            suffix = f'/{rt_prefix}'
+            suffix = proxy_path
         else:
             raise ValueError(
                 f"Multiple routes to RStudio proxy for {str(devtool_container.labbook)}. Please restart Gigantum.")
 
         # The endpoint plus proxy target constitute the full URL for an MITM-reverse-proxied RStudio
-        return f"{mitm_endpoint}/{proxy_path}", suffix
+        return f"{mitm_endpoint}{proxy_path}", suffix
 
     @classmethod
     def get_mitmendpoint(cls, labbook_container: ContainerOperations) -> Optional[str]:
@@ -145,6 +147,7 @@ class MITMProxyOperations(object):
 
         Args:
             primary_container: the proxy target running a dev tool
+            new_rserver_session: create a new mitmproxy, don't re-use
 
         Returns:
             str that contains the proxy endpoint as http://{ip}:{port}
@@ -191,7 +194,7 @@ class MITMProxyOperations(object):
 
         Args:
             mitm_container: We'll also use this to get the primary_container
-            actual_devtool_endpoint: we'll use this to check our configuration
+            devtool_endpoint: we'll use this to check our configuration
 
         Returns:
             The endpoint target for this MITM proxy, otherwise None

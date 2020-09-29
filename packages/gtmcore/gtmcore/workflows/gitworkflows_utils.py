@@ -40,6 +40,7 @@ class GitLabRemoteError(WorkflowsException):
     pass
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def git_garbage_collect(repository: Repository) -> None:
     """Run "git gc" (garbage collect) over the repo. If run frequently enough, this only takes a short time
     even on large repos.
@@ -56,9 +57,6 @@ def git_garbage_collect(repository: Repository) -> None:
         subprocess.CalledProcessError when git gc fails.
         """
     logger.info(f"Running git gc (Garbage Collect) in {str(repository)}...")
-    if os.environ.get('WINDOWS_HOST'):
-        logger.warning(f"Avoiding `git gc` in {str(repository)} on Windows host fs")
-        return
 
     try:
         call_subprocess(['git', 'gc'], cwd=repository.root_dir)
@@ -96,6 +94,7 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
         raise GitLabRemoteError(e)
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def publish_to_remote(repository: Repository, username: str, remote: str,
                       feedback_callback: Callable) -> None:
     # TODO(billvb) - Refactor all (or part) to BranchManager
@@ -125,12 +124,14 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
     repository.git.clear_checkout_context()
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: Callable):
     # TODO(billvb) - Refactor to BranchManager
     set_upstream_tokens = ['git', 'push', '--set-upstream', 'origin', branch_name]
     call_subprocess(set_upstream_tokens, cwd=repository.root_dir)
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable,
           username: Optional[str] = None) -> None:
     # TODO(billvb) Refactor to BranchManager
@@ -198,6 +199,7 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
         return pulled_updates_count
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def migrate_labbook_schema(labbook: LabBook) -> None:
     # Fallback point in case of a problem
     initial_commit = labbook.git.commit_hash
@@ -230,6 +232,7 @@ def migrate_labbook_schema(labbook: LabBook) -> None:
     ars.create_activity_record(ar)
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def migrate_labbook_branches(labbook: LabBook) -> None:
     bm = BranchManager(labbook)
     if 'gm.workspace' not in bm.active_branch:
@@ -242,7 +245,7 @@ def migrate_labbook_branches(labbook: LabBook) -> None:
 
     bm.create_branch(master_branch)
 
-
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def _clone(remote_url: str, working_dir: str) -> str:
 
     clone_tokens = f"git clone {remote_url}".split()
@@ -269,6 +272,7 @@ def _clone(remote_url: str, working_dir: str) -> str:
     return p
 
 
+# TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
 def clone_repo(remote_url: str, username: str, owner: str,
                load_repository: Callable[[str], Any],
                put_repository: Callable[[str, str, str], Any],

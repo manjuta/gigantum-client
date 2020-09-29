@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1381"
+changelog:
+  - type: REMOVED
+    description: Removed check for Windows prior to doing git gc (now performed on all platforms)

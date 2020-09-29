@@ -7,6 +7,7 @@ from pathlib import Path
 from natsort import natsorted
 from pkg_resources import resource_filename
 import subprocess
+import shlex
 import glob
 
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
@@ -900,6 +901,11 @@ class InventoryManager(object):
                 # The following three commands may be null-ops, but they're local operations that should be very fast
                 call_subprocess(['git', 'submodule', 'init', '--', rel_submodule_dir],
                                 cwd=labbook.root_dir, check=True)
+
+                if os.environ.get('WINDOWS_HOST'):
+                    logger.info(f"Dataset {submodule} imported on Windows host as a submodule - set fileMode to false")
+                    call_subprocess(shlex.split("git config core.fileMode false"),
+                                    cwd=submodule_dir)
 
                 # We update the URL in our .gitconfig to include the username
                 # This shouldn't have a username in it, but it's OK if it does

@@ -7,7 +7,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install system level dependencies
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
-    wget \
     nginx \
     python3-pip \
     python3-setuptools \
@@ -15,9 +14,10 @@ RUN apt-get update && \
     apt-get clean 
 
 # add mitmproxy to track rstudio
-RUN pip3 install -U pip 
-RUN pip3 install wheel
-RUN pip install mitmproxy
+RUN python3 -m pip install --upgrade pip \
+    && pip3 install wheel \
+    && pip3 install mitmproxy==5.1.1 \
+    && rm -rf /root/.cache
     
 # Expose port for nginx
 EXPOSE 8079

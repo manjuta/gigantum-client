@@ -16,6 +16,7 @@ import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/act
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
 // components
+import PopupBlocked from 'Components/shared/modals/PopupBlocked';
 import ActionsMenu from './ActionsMenu';
 import DatasetActionsMenu from './dataset/DatasetActionsMenu';
 // utils
@@ -99,6 +100,7 @@ class File extends Component<Props> {
     renameEditMode: false,
     hover: false,
     forceUpdate: false,
+    showPopupBlocked: false,
   };
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -147,6 +149,13 @@ class File extends Component<Props> {
   }
 
   /**
+   * sets state for popup modal
+   */
+  _togglePopupModal = () => {
+    this.setState({ showPopupBlocked: false });
+  }
+
+  /**
     *  @param {}
     *  sets dragging state
     */
@@ -171,6 +180,7 @@ class File extends Component<Props> {
     if (process.env.BUILD_TYPE !== 'cloud') {
       const { props } = this;
       const { owner, name } = props;
+      const { showPopupBlocked } = this.state;
       const status = props.containerStatus;
       const tabName = `${devTool}-${owner}-${name}`;
 
@@ -210,6 +220,16 @@ class File extends Component<Props> {
               window[tabName] = window.open(path, tabName);
               window[tabName].close();
               window[tabName] = window.open(path, tabName);
+
+              if (
+                !window[tabName]
+                || window[tabName].closed
+                || typeof window[tabName].closed === 'undefined'
+              ) {
+                this.setState({ showPopupBlocked: true });
+              } else if (showPopupBlocked) {
+                this.setState({ showPopupBlocked: false });
+              }
             }
 
             if (error) {
@@ -367,6 +387,7 @@ class File extends Component<Props> {
       renameEditMode,
       isSelected,
       hover,
+      showPopupBlocked,
     } = this.state;
     const {
       connectDragSource,
@@ -420,7 +441,16 @@ class File extends Component<Props> {
         onMouseEnter={() => { this._mouseEnter(); }}
         className="File"
       >
-
+        {
+          showPopupBlocked
+          && (
+            <PopupBlocked
+              togglePopupModal={this._togglePopupModal}
+              devTool={devTool}
+              attemptRelaunch={() => this._validateFile(isLaunchable, devTool)}
+            />
+          )
+        }
         <div
           className={fileRowCSS}
           style={rowStyle}
@@ -449,11 +479,11 @@ class File extends Component<Props> {
               {
                 filename
                 && (
-                <MiddleTruncate
-                  ellipsis="..."
-                  text={filename}
-                  smartCopy
-                />
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={filename}
+                    smartCopy
+                  />
                 )
               }
             </div>

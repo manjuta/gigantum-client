@@ -9,7 +9,7 @@
   overflow: visible;
 }
 
-.Labbooks--demo{
+.Labbooks--disk-low {
   margin-top: 100px;
 }
 
@@ -46,11 +46,11 @@
   margin-top: 20px;
 }
 
-.Labbooks__search-container{
+.Labbooks__search-container {
   position: relative;
 }
 
-.Labbooks__search-cancel{
+.Labbooks__search-cancel {
   position: absolute;
   height: 24px;
   width: 24px;
@@ -61,7 +61,7 @@
   cursor: pointer;
 }
 
-.Labbooks__search-cancel--text{
+.Labbooks__search-cancel--text {
   color: $romanSilver;
   position: absolute;
   right: 40px;
@@ -101,24 +101,24 @@
   font-size: 24px;
 }
 
-.Labbooks__no-results{
+.Labbooks__no-results {
   color: $romanSilver;
   width: 100%;
   text-align: center;
   margin-top: 150px;
 }
 
-.Labbooks__h3{
+.Labbooks__h3 {
   font-weight: 100;
   font-size: 36px;
   margin-bottom: 10px;
 }
 
-.Labbooks__paragraph--margin{
+.Labbooks__paragraph--margin {
   margin-top: 10px;
 }
 
-.Labbooks__span{
+.Labbooks__span {
   font-weight: 100;
   cursor: pointer;
   text-decoration: underline;

@@ -1,6 +1,7 @@
 import argparse
 import sys
 import os
+import posixpath
 import subprocess
 
 from gtm import client
@@ -63,10 +64,12 @@ def client_actions(args):
                       "config_override_file": os.path.join("resources", "client",
                                                            "labmanager-config-override.yaml")}
 
-        docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
+        # Inside the docker build context, we need to use relative POSIX paths
+        posix_build_dir = build_args['build_dir'].replace('\\', '/')
+        docker_args = {"CLIENT_CONFIG_FILE": posixpath.join(posix_build_dir, "labmanager-config.yaml"),
                        "NGINX_UI_CONFIG": "resources/client/nginx_ui-local.conf",
                        "NGINX_API_CONFIG": "resources/client/nginx_api.conf",
-                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
+                       "SUPERVISOR_CONFIG": posixpath.join(posix_build_dir, "supervisord.conf"),
                        "ENTRYPOINT_FILE": "resources/client/entrypoint-local.sh",
                        "UI_BUILD_SCRIPT": "resources/docker/ui_build_script.sh"}
 
@@ -123,7 +126,8 @@ def client_actions(args):
                 launcher.launch()
                 print("*** Ran: {}".format(image_name))
             else:
-                print("Error: Docker container by name `{}' is already started.".format(builder.image_name), file=sys.stderr)
+                print("Error: Docker container by name `{}' is already started.".format(builder.image_name),
+                      file=sys.stderr)
                 sys.exit(1)
         elif args.action == "stop":
             remove_all = False
@@ -179,10 +183,12 @@ def cloud_actions(args):
             print("Honeycomb write key not found in environment. Aborting.")
             sys.exit(1)
 
-        docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
+        # Inside the docker build context, we need to use relative POSIX paths
+        posix_build_dir = build_args['build_dir'].replace('\\', '/')
+        docker_args = {"CLIENT_CONFIG_FILE": posixpath.join(posix_build_dir, "labmanager-config.yaml"),
                        "NGINX_UI_CONFIG": "resources/client/nginx_ui-cloud.conf",
                        "NGINX_API_CONFIG": "resources/client/nginx_api.conf",
-                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord-cloud.conf"),
+                       "SUPERVISOR_CONFIG": posixpath.join(posix_build_dir, "supervisord-cloud.conf"),
                        "ENTRYPOINT_FILE": "resources/client/entrypoint-cloud.sh",
                        "UI_BUILD_SCRIPT": ui_build_script,
                        "HONEYTAIL_INSTALLER": "resources/client/honeytail-installer-cloud.sh",
@@ -239,10 +245,12 @@ def developer_actions(args):
                       "config_override_file": os.path.join("resources", "developer",
                                                            "labmanager-config-override.yaml")}
 
-        docker_args = {"CLIENT_CONFIG_FILE": os.path.join(build_args['build_dir'], "labmanager-config.yaml"),
+        # Inside the docker build context, we need to use relative POSIX paths
+        posix_build_dir = build_args['build_dir'].replace('\\', '/')
+        docker_args = {"CLIENT_CONFIG_FILE": posixpath.join(posix_build_dir, "labmanager-config.yaml"),
                        "NGINX_UI_CONFIG": "resources/client/nginx_null",
                        "NGINX_API_CONFIG": "resources/client/nginx_null",
-                       "SUPERVISOR_CONFIG": os.path.join(build_args['build_dir'], "supervisord.conf"),
+                       "SUPERVISOR_CONFIG": posixpath.join(posix_build_dir, "supervisord.conf"),
                        "ENTRYPOINT_FILE": "resources/developer/entrypoint.sh",
                        "REDIS_CONFIG": "resources/client/redis-dev.conf"}
 
@@ -298,6 +306,7 @@ def circleci_actions(args):
     else:
         print("Error: Unsupported action provided: {}".format(args.action), file=sys.stderr)
         sys.exit(1)
+
 
 def mitm_actions(args):
     """Build and publish mitmproxy_proxy"""

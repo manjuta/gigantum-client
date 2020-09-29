@@ -15,7 +15,6 @@ type Props = {
   activityRecords: Array<Object>,
   clusterObject: Object,
   compressedElements: Array,
-  editorFullscreen: Boolean,
   hoveredRollback: Boolean,
   index: Number,
   isLocked: Boolean,
@@ -31,7 +30,6 @@ type Props = {
   timestamp: String,
 
   addCluster: Function,
-  changeFullscreenState: Function,
   compressExpanded: Function,
   hideAddActivity: Function,
   getOrCreateRef: Function,
@@ -51,10 +49,8 @@ class DateSection extends Component<Props> {
     } = this.state;
     const {
       activityRecords,
-      changeFullscreenState,
       clusterObject,
       compressedElements,
-      editorFullscreen,
       hideAddActivity,
       hoveredRollback,
       index,
@@ -115,9 +111,7 @@ class DateSection extends Component<Props> {
           <UserNoteWrapper
             modalVisible={modalVisible}
             hideLabbookModal={hideAddActivity}
-            changeFullScreenState={changeFullscreenState}
             labbookId={section.id}
-            editorFullscreen={editorFullscreen}
             {...this.props}
           />
           )

@@ -4,6 +4,7 @@ import time
 from typing import Optional, Callable, List, Dict, Tuple
 import requests
 import urllib.parse
+import socket
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
@@ -408,8 +409,11 @@ class HubProjectContainer(ContainerOperations):
         except AttributeError:
             raise ContainerException(f"No hostname attribute in response:"
                                      f" {response.json()}")
-        logger.info(f"HubProjectContainer.query_container_ip() found: {hostname}")
-        return hostname
+
+        container_ip = socket.gethostbyname(hostname)
+        logger.info(f"HubProjectContainer.query_container_ip() found: {hostname} - {container_ip}")
+
+        return container_ip
 
     def copy_into_container(self, src_path: str, dst_dir: str) -> None:
         """Copy the given file in src_path into the project's container.
@@ -496,6 +500,8 @@ class HubProjectContainer(ContainerOperations):
             raise ContainerException(f"Failed to opened ports {port_list} for {self.labbook.owner}/{self.labbook.name}"
                                      f":: {response.status_code} :: {response.json()}")
 
+        # Empirically, it seems we need to wait a few seconds before trying to connect to the ports.
+        time.sleep(2)
         logger.info(f"Opened ports {port_list} for {self.labbook.owner}/{self.labbook.name} dynamically.")
 
     def configure_dev_tool(self, dev_tool: str) -> None:

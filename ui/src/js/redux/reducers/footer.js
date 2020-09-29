@@ -323,7 +323,11 @@ export default (state = {
   } if (action.type === types.MULTIPART_INFO_MESSAGE) {
     const { owner, name } = action.payload;
     const { messageStack } = state;
-    let { messageStackHistory, messageListOpen } = state;
+    let {
+      messageStackHistory,
+      messageListOpen,
+      viewHistory,
+    } = state;
     let previousHistoryIndex = 0;
     let previousIndex = 0;
     let messageBodyOpen = false;
@@ -348,7 +352,6 @@ export default (state = {
 
       return message.id === action.payload.id;
     });
-
     if ((doesHistoryMessageExist.length > 0) && doesHistoryMessageExist[0].dismissed) {
       if (state.messageListOpen && state.viewHistory) {
         messageListOpen = true;
@@ -378,6 +381,7 @@ export default (state = {
         ? action.payload.messageBody
         : [],
       error: action.payload.error,
+      messageListOpen: false,
       messageBodyOpen,
       buildProgress,
       dismissed,
@@ -401,6 +405,16 @@ export default (state = {
     messageStackHistory = checkHistoryStackLength(messageStackHistory);
     window.sessionStorage.setItem('messageStackHistory', JSON.stringify(messageStackHistory));
 
+    if ((doesHistoryMessageExist.length > 0)) {
+      if (doesHistoryMessageExist[0] && doesHistoryMessageExist[0].dismissed) {
+        viewHistory = state.viewHistory;
+      } else {
+        viewHistory = state.viewHistory;
+      }
+    } else {
+      viewHistory = false;
+    }
+
     return {
       ...state,
       id: action.payload.id,
@@ -413,9 +427,7 @@ export default (state = {
       success: true,
       error: action.payload.error,
       messageListOpen,
-      viewHistory: ((doesHistoryMessageExist.length > 0)
-        && doesHistoryMessageExist[0].dismissed
-        && state.viewHistory),
+      viewHistory,
     };
   } if (action.type === types.RESET_FOOTER_STORE) {
     return {

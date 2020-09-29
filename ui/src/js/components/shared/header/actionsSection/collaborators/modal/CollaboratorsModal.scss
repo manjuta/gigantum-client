@@ -4,6 +4,10 @@
 .CollaboratorsModal__add {
   position: relative;
   @include flex(flex-start, row);
+
+  &--disabled {
+    opacity: 0.5;
+  }
 }
 
 .Modal__sizer {
@@ -23,6 +27,10 @@
 
   font-size: 24px !important;
   margin: 5px 15px 5px  0 !important;
+
+  &::-webkit-input-placeholder {
+    line-height:normal!important;
+  }
 }
 
 

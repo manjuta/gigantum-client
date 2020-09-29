@@ -70,7 +70,7 @@ def generate_updated_changelog(current_release_image_tag: str, current_release_i
 
     # Add to existing file
     record = OrderedDict()
-    record["date"] = str(date(2020, 4, 10))
+    record["date"] = str(date.today())
     record["id"] = current_release_image_hash
     record["changes"] = changes
     record["messages"] = messages

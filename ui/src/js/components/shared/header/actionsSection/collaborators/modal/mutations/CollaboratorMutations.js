@@ -45,16 +45,14 @@ class CollboratorsMutations {
     const { name, owner } = this.state;
     const {
       collaboratorName,
-      newCollaborator,
-      permissionOverride,
       newPermissions,
     } = data;
 
     AddCollaboratorMutation(
       name,
       owner,
-      collaboratorName || newCollaborator,
-      permissionOverride || newPermissions,
+      collaboratorName,
+      newPermissions,
       callback,
     );
   }
@@ -69,16 +67,14 @@ class CollboratorsMutations {
     const { name, owner } = this.state;
     const {
       collaboratorName,
-      newCollaborator,
-      permissionOverride,
       newPermissions,
     } = data;
 
     AddDatasetCollaboratorMutation(
       name,
       owner,
-      collaboratorName || newCollaborator,
-      permissionOverride || newPermissions,
+      collaboratorName,
+      newPermissions,
       callback,
     );
   }

@@ -238,7 +238,7 @@ class BranchManager(object):
             return 0
 
         bname = branch_name or self.active_branch
-        if bname not in self.branches_remote:
+        if not (bname in self.branches_remote and bname in self.branches_local):
             return 0
 
         git_cmd = f'git rev-list {remote_name}/{bname}..{bname} --count'
@@ -257,7 +257,7 @@ class BranchManager(object):
             return 0
 
         bname = branch_name or self.active_branch
-        if bname not in self.branches_remote:
+        if not (bname in self.branches_remote and bname in self.branches_local):
             return 0
 
         git_cmd = f'git rev-list {bname}..{remote_name}/{bname} --count'

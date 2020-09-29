@@ -1,0 +1,7 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1342"
+changelog:
+  - type: FIX
+    description: Disables copy url and visibility change in the actions menu when a project has not been published, before these buttons were hidden from view.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1332
+  - type: FIX
+    description: Fixes outdated text for branch deletion confirmation.

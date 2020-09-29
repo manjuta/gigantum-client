@@ -1,0 +1,6 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1365"
+changelog:
+  - type: FIX
+    description: Adds hash filter to route parameter when redirecting users to the Log In on gigantum.com
+  - type: FIX
+    description: Checks expire_at in local storage to make sure user has valid tokens before opening collaborator modal

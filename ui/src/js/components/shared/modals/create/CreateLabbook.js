@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React from 'react';
 import classNames from 'classnames';
@@ -10,7 +11,15 @@ import RepositoryNameIsAvailable from './queries/RepositoryNameIsAvailableQuery'
 // assets
 import './CreateLabbook.scss';
 
-export default class CreateLabbook extends React.Component {
+
+type Props = {
+  createLabbookCallback: Function,
+  datasets: Array<Object>,
+  setButtonState: Function,
+  toggleDisabledContinue: Function,
+};
+
+class CreateLabbook extends React.Component<Props> {
   state = {
     name: '',
     description: '',
@@ -28,27 +37,30 @@ export default class CreateLabbook extends React.Component {
   *   triggers setComponent to proceed to next view
   * */
   continueSave = () => {
-    const { props, state } = this;
-    const { name, description } = state;
+    const {
+      createLabbookCallback,
+      setButtonState,
+    } = this.props;
+    const { name, description } = this.state;
 
-    props.setButtonState('loading');
+    setButtonState('loading');
 
     RepositoryNameIsAvailable.checkRespositoryName(name).then((response) => {
       if (response.data.repositoryNameIsAvailable) {
-        props.createLabbookCallback(name, description);
-        props.setButtonState('');
+        createLabbookCallback(name, description);
+        setButtonState('');
       } else {
         this.setState({
           name: '',
           showError: true,
           errorType: 'validation',
         });
-        props.setButtonState('');
+        setButtonState('');
         this.createLabbookName.focus();
       }
     }).catch((error) => {
       console.log(error);
-      props.setButtonState('error');
+      setButtonState('error');
     });
   }
 
@@ -67,7 +79,7 @@ export default class CreateLabbook extends React.Component {
   */
   _updateTextState = (evt, field) => {
     const state = {};
-    const { props } = this;
+    const { toggleDisabledContinue } = this.props;
 
     state[field] = evt.target.value;
 
@@ -78,7 +90,7 @@ export default class CreateLabbook extends React.Component {
         errorType: '',
       });
 
-      props.toggleDisabledContinue((evt.target.value === '') || (isMatch === false));
+      toggleDisabledContinue((evt.target.value === '') || (isMatch === false));
     } else {
       const textLength = 80 - evt.target.value.length;
       if (textLength > 21) {
@@ -109,22 +121,29 @@ export default class CreateLabbook extends React.Component {
   }
 
   render() {
-    const { props, state } = this;
-    const type = props.datasets ? 'Dataset' : 'Project';
+    const { datasets } = this.props;
+    const {
+      showError,
+      showLoginPrompt,
+      textLength,
+      textWarning,
+    } = this.state;
+    const type = datasets ? 'Dataset' : 'Project';
     // declare css here
     const inputCSS = classNames({
-      invalid: state.showError,
+      invalid: showError,
     });
     const errorSpanCSS = classNames({
-      error: state.showError,
-      hidden: !state.showError,
+      error: showError,
+      hidden: !showError,
     });
 
     return (
       <div className="CreateLabbook">
-        { state.showLoginPrompt &&
-          <LoginPrompt closeModal={this._closeLoginPromptModal} />
-        }
+        <LoginPrompt
+          showLoginPrompt={showLoginPrompt}
+          closeModal={this._closeLoginPromptModal}
+        />
         <div>
           <div className="CreateLabbook__name">
             <label htmlFor="CreateLabbookName">
@@ -157,8 +176,8 @@ export default class CreateLabbook extends React.Component {
               />
             </label>
 
-            <p className={`CreateLabbook__warning ${state.textWarning}`}>
-              {`${this.state.textLength} characters remaining`}
+            <p className={`CreateLabbook__warning ${textWarning}`}>
+              {`${textLength} characters remaining`}
             </p>
           </div>
 
@@ -167,3 +186,5 @@ export default class CreateLabbook extends React.Component {
     );
   }
 }
+
+export default CreateLabbook;

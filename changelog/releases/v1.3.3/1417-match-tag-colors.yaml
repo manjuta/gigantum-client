@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1421"
+changelog:
+  - type: IMPROVEMENT
+    description: The color of the dropdown filter options in the select base modal match the color of the tags they add.

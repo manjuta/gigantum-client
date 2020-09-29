@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1370"
+changelog:
+  - type: NON_USER_FACING
+    description: Install codecov in CI directly instead of the docker image so the latest version is always available.

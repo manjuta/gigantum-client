@@ -56,8 +56,9 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
         <div
           className="Tooltip__toggle createLabbook"
           data-event="click focus"
-          data-for="Tooltip--createLabbook"
           data-tip="Clicking on the 'Create New' button will open the new Project window, letting you name and select a Base for the new Project."
+          onClick={[Function]}
+          role="presentation"
         >
           <div
             className="Tooltip__glow-container"
@@ -72,9 +73,8 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark"
+          className="__react_component_tooltip place-top type-dark "
           data-id="tooltip"
-          id="Tooltip--createLabbook"
         />
       </div>
       <div
@@ -84,10 +84,11 @@ exports[`LocalDatasets Renders a snapshot 1`] = `
         <div
           className="Tooltip__toggle importLabbook"
           data-event="click focus"
-          data-for="Tooltip--importLabbook"
           data-tip="Click on the 'Import Existing' button to import a Project into this Client instance.
 You can use a URL of a published Project or upload an exported Project.
 You can also import Projects that have been shared with you in by clicking on the 'Gigantum Hub' tab above."
+          onClick={[Function]}
+          role="presentation"
         >
           <div
             className="Tooltip__glow-container"
@@ -102,9 +103,8 @@ You can also import Projects that have been shared with you in by clicking on th
           </div>
         </div>
         <div
-          className="__react_component_tooltip place-top type-dark"
+          className="__react_component_tooltip place-top type-dark "
           data-id="tooltip"
-          id="Tooltip--importLabbook"
         />
       </div>
       <div

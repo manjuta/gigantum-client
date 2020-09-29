@@ -32,13 +32,15 @@
     }
   }
 
-  &--demo-mode{
+  &--disk-low {
     margin-top: 70px;
   }
+
   &--deprecated{
     margin-top: 70px;
   }
-  &--demo-deprecated{
+
+  &--disk-low--deprecated{
     margin-top: 120px;
   }
 }
@@ -108,7 +110,8 @@
     cursor: pointer;
     color: white;
   }
-  &--demo {
+
+  &--disk-low {
     top: 60px;
   }
 }

@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1343"
+changelog:
+  - type: IMPROVEMENT
+    description: Adds button to start the publish workflow in the collaborator modal.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1333

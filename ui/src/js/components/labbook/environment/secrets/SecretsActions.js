@@ -12,12 +12,14 @@ type Props = {
   filename: string,
   isEditing: boolean,
   id: string,
+  isLocked: boolean,
   name: string,
+  nodeMissing: boolean,
   owner: string,
   secretsMutations: {
     removeSecret: Function,
     deleteSecret: Function,
-  }
+  },
 }
 
 class SecretsAction extends Component<Props> {
@@ -78,6 +80,8 @@ class SecretsAction extends Component<Props> {
       editSecret,
       filename,
       isEditing,
+      isLocked,
+      nodeMissing,
     } = this.props;
     const { popupVisible } = this.state;
     const popupCSS = classNames({
@@ -85,6 +89,7 @@ class SecretsAction extends Component<Props> {
       hidden: !popupVisible || isEditing,
       Tooltip__message: true,
     });
+    const lockDelete = isEditing || isLocked;
     return (
       <div className="SecretsAction flex justify--space-around align-items--end">
         <div className="relative">
@@ -92,7 +97,7 @@ class SecretsAction extends Component<Props> {
             className="Btn Btn--medium Btn--noMargin Btn--round Btn__delete-secondary Btn__delete-secondary--medium"
             type="button"
             onClick={(evt) => { this._togglePopup(evt, true); }}
-            disabled={isEditing}
+            disabled={lockDelete}
           />
           <div className={popupCSS}>
             <div className="Tooltip__pointer" />
@@ -111,11 +116,17 @@ class SecretsAction extends Component<Props> {
             </div>
           </div>
         </div>
-        <button
-          className="Btn Btn--medium Btn--noMargin Btn--round Btn__edit-secondary Btn__edit-secondary--medium"
-          type="button"
-          onClick={() => editSecret(filename)}
-        />
+        {
+          !nodeMissing
+          && (
+          <button
+            className="Btn Btn--medium Btn--noMargin Btn--round Btn__edit-secondary Btn__edit-secondary--medium"
+            type="button"
+            disabled={isLocked}
+            onClick={() => editSecret(filename)}
+          />
+          )
+        }
       </div>
     );
   }

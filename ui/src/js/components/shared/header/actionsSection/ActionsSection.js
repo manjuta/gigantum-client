@@ -56,9 +56,10 @@ class ActionsSection extends Component<Props> {
           showLoginPrompt={this._showLoginPrompt}
         />
 
-        { showLoginPrompt
-         && <LoginPrompt closeModal={this._closeLoginPromptModal} />
-        }
+        <LoginPrompt
+          showLoginPrompt={showLoginPrompt}
+          closeModal={this._closeLoginPromptModal}
+        />
       </div>
     );
   }

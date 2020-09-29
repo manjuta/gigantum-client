@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1461"
+changelog:
+  - type: NON_USER_FACING
+    description: Changed the loader background color to match the filebrowser to prevent a flicker

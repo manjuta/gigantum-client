@@ -94,7 +94,7 @@ class TestConda3PackageManager(object):
         assert result[1].error is True
 
         assert result[2].package == "cdutil"
-        assert result[2].version == "8.2"
+        assert result[2].version == "8.2.1"
         assert result[2].error is False
 
         assert result[3].package == "asdfasdfasdf"
@@ -116,7 +116,7 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "cdutil"
-        assert result[1].version == "8.2"
+        assert result[1].version == "8.2.1"
         assert result[1].error is False
 
     def test_package_metadata(self, build_lb_image_for_env_conda):
@@ -134,10 +134,13 @@ class TestConda3PackageManager(object):
         assert result[1].package == "cdutil"
         assert result[1].description == 'A set of tools to manipulate climate data'
         assert result[1].docs_url == 'http://anaconda.org/conda-forge/cdutil'
-        assert result[1].latest_version == '8.2'
+        assert result[1].latest_version == '8.2.1'
         assert result[2].package == "numpy"
         assert result[2].description == 'Array processing for numbers, strings, records, and objects.'
-        assert result[2].docs_url == 'https://docs.scipy.org/doc/numpy/reference/'
+
+        # on June 6, 2020 conda-forge pushed a change that switched this URL from the actual docs url to conda forge.
+        # If you see this test failing again in the near future, probably just need to revert back.
+        assert result[2].docs_url == 'http://anaconda.org/conda-forge/numpy'
         assert isinstance(result[2].docs_url, str) is True
         assert result[3].package == "sadfasfasf"
         assert result[3].description is None
@@ -166,7 +169,7 @@ class TestConda3PackageManager(object):
         assert result[1].error is True
 
         assert result[2].package == "cdutil"
-        assert result[2].version == "8.2"
+        assert result[2].version == "8.2.1"
         assert result[2].error is False
 
         assert result[3].package == "asdfasdfasdf"
@@ -188,6 +191,6 @@ class TestConda3PackageManager(object):
         assert result[0].error is False
 
         assert result[1].package == "cdutil"
-        assert result[1].version == "8.2"
+        assert result[1].version == "8.2.1"
         assert result[1].error is False
     # *** CONDA2 PACKAGE MANAGER TESTS ***

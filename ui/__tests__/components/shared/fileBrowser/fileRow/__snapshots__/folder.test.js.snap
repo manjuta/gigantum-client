@@ -35,10 +35,42 @@ exports[`File component File Snapshot 1`] = `
         data-for="Tooltip--folder"
         data-tip="folder"
       >
-        folder
+        <div
+          className=""
+          end={0}
+          onCopy={[Function]}
+          start={0}
+          style={
+            Object {
+              "display": "block",
+              "overflow": "hidden",
+              "whiteSpace": "nowrap",
+            }
+          }
+        >
+          <span
+            style={
+              Object {
+                "display": "none",
+              }
+            }
+          >
+            folder
+          </span>
+          <span
+            style={
+              Object {
+                "display": "none",
+              }
+            }
+          >
+            ...
+          </span>
+          folder
+        </div>
       </div>
       <div
-        className="__react_component_tooltip place-bottom type-dark"
+        className="__react_component_tooltip place-bottom type-dark "
         data-id="tooltip"
         id="Tooltip--folder"
       />
@@ -93,9 +125,9 @@ exports[`File component File Snapshot 1`] = `
         data-selenium-id="ActionsMenu"
       >
         <button
-          className="ActionsMenu__item Btn Btn--fileBrowser Tooltip-data Tooltip-data--small Btn--round Btn__addFolder"
+          className="ActionsMenu__item Btn Btn--fileBrowser Btn--round Btn__addFolder"
           data-click-id="addFolder"
-          data-tooltip="Add Subfolder"
+          data-tip="Add Subfolder"
           onClick={[Function]}
           type="button"
         />
@@ -103,8 +135,8 @@ exports[`File component File Snapshot 1`] = `
           className="relative"
         >
           <button
-            className="ActionsMenu__item Btn Btn--fileBrowser Btn__delete-secondary Btn--round Tooltip-data Tooltip-data--small"
-            data-tooltip="Delete"
+            className="ActionsMenu__item Btn Btn--fileBrowser Btn__delete-secondary Btn--round"
+            data-tip="Delete"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -135,11 +167,15 @@ exports[`File component File Snapshot 1`] = `
           </div>
         </div>
         <button
-          className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename Tooltip-data Tooltip-data--small Btn--round"
-          data-tooltip="Rename"
+          className="ActionsMenu__item Btn Btn--fileBrowser Btn__rename  Btn--round"
+          data-tip="Rename"
           disabled={false}
           onClick={[Function]}
           type="button"
+        />
+        <div
+          className="__react_component_tooltip place-bottom type-dark "
+          data-id="tooltip"
         />
       </div>
     </div>

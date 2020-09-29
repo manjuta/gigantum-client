@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1420"
+changelog:
+  - type: FIX
+    description: Resolved an issue with checking for commits ahead or behind on branches that aren't checked out

@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1423"
+changelog:
+  - type: FIX
+    description: Resolved a CSS issue that caused the fullscreen editor to break the UI in Safari and Edge

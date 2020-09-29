@@ -58,9 +58,6 @@ const getCollaboratorFiltered = (collaborators, owner) => collaborators
   );
 
 type Props = {
-  auth: {
-    renewToken: Function,
-  },
   sectionType: string,
   showLoginPrompt: Function,
 }
@@ -68,6 +65,7 @@ type Props = {
 class CollaboratorButton extends Component<Props> {
   state = {
     collaboratorModalVisible: false,
+    visibilityModalVisible: false,
     canClickCollaborators: false,
     sessionValid: null,
   };
@@ -84,7 +82,7 @@ class CollaboratorButton extends Component<Props> {
 
   static getDerivedStateFromProps(nextProps, nextState) {
     if (nextProps.menuOpen) {
-      return nextProps.checkSessionIsValid().then((res) => {
+      nextProps.checkSessionIsValid().then((res) => {
         if (res.data && res.data.userIdentity && res.data.userIdentity.isSessionValid) {
           return {
             ...nextState,
@@ -101,26 +99,24 @@ class CollaboratorButton extends Component<Props> {
   }
 
   /**
-  *  @param {Function} retry
+  *  @param {} -
   *  shows hide collaborators modal
   *  @return {}
   */
-  _toggleCollaborators = (retry) => {
-    const { auth, showLoginPrompt } = this.props;
+  _toggleCollaborators = () => {
+    const { showLoginPrompt } = this.props;
     const { sessionValid, collaboratorModalVisible } = this.state;
-
+    const date = new Date();
+    const time = date.getTime();
+    const expiresAt = localStorage.getItem('expires_at')
+      ? parseInt(localStorage.getItem('expires_at'), 10) / 1000
+      : time - 100;
+    const isTokenNotExpired = expiresAt > time;
     if (navigator.onLine) {
-      if (sessionValid) {
+      if (sessionValid && isTokenNotExpired) {
         this.setState({ collaboratorModalVisible: !collaboratorModalVisible });
       } else {
-        auth.renewToken(true, () => {
-          showLoginPrompt();
-        }, () => {
-          if (retry) {
-            retry();
-          }
-          this.setState({ collaboratorModalVisible: !collaboratorModalVisible });
-        });
+        showLoginPrompt();
       }
     } else {
       showLoginPrompt();
@@ -226,10 +222,10 @@ class CollaboratorButton extends Component<Props> {
               <div className={collaboratorCSS}>
                 <button
                   type="button"
-                  onClick={() => this._toggleCollaborators(response.retry)}
+                  onClick={() => this._toggleCollaborators()}
                   className={collaboratorButtonCSS}
                 >
-                      Collaborators
+                  Collaborators
                   <p className="BranchMenu__collaborator-names">{collaboratorNames}</p>
 
                   { (collaboratorNames.length === 0)
@@ -243,21 +239,20 @@ class CollaboratorButton extends Component<Props> {
 
                 { collaboratorModalVisible
                     && (
-                    <CollaboratorsModal
-                      sectionType={sectionType}
-                      key="CollaboratorsModal"
-                      collaborators={section.collaborators}
-                      owner={owner}
-                      name={name}
-                      toggleCollaborators={this._toggleCollaborators}
-                      canManageCollaborators={section.canManageCollaborators}
-                    />
+                      <CollaboratorsModal
+                        sectionType={sectionType}
+                        key="CollaboratorsModal"
+                        collaborators={section.collaborators}
+                        owner={owner}
+                        name={name}
+                        toggleCollaborators={this._toggleCollaborators}
+                        canManageCollaborators={section.canManageCollaborators}
+                      />
                     )
-
                 }
               </div>
             );
-          } if (collaborators !== null && sessionChecked) {
+          } if ((collaborators !== null) && sessionChecked) {
             const collaboratorFilteredArr = getCollaboratorFiltered(collaborators, owner);
             const collaboratorNames = self._getCollaboratorList(
               collaborators,

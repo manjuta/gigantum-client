@@ -33,40 +33,23 @@ export default class Auth {
     scope: 'openid profile email user_metadata',
   });
 
-  constructor() {
-    this.login = this.login.bind(this);
-    this.logout = this.logout.bind(this);
-    this.handleAuthentication = this.handleAuthentication.bind(this);
-    this.isAuthenticated = this.isAuthenticated.bind(this);
-    this.renewToken = this.renewToken.bind(this);
-  }
-
   /**
-   * Renews auth token if possible, otherwise prompt login
+   * Reroutes to login screen
   */
-  renewToken(showModal, showModalCallback, successCallback, forceHistory, failureCallback) {
-    this.auth0.checkSession({}, (err, result) => {
-      if (err) {
-        if (showModal) {
-          showModalCallback();
-        } else {
-          failureCallback();
-        }
-      } else {
-        this.setSession(result, true, forceHistory);
-        if (successCallback) {
-          successCallback();
-        }
-      }
-    });
+  renewToken = () => {
+    const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
+    const baseURL = 'gigantum.com';
+    const route = window.location.href.replace('#', '');
+    const loginURL = `https://${baseURL}/client/login#route=${route}${freshLoginText}`;
+    window.open(loginURL, '_self');
   }
 
-  login() {
+  login = () => {
     setLogout(false);
     this.auth0.authorize();
   }
 
-  handleAuthentication() {
+  handleAuthentication = () => {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
@@ -77,12 +60,12 @@ export default class Auth {
         setLoginError(err);
         window.sessionStorage.setItem('LOGIN_ERROR_TYPE', err.error);
         window.sessionStorage.setItem('LOGIN_ERROR_DESCRIPTION', err.errorDescription);
-        //  alert(`Error: ${err.error}. Check the console for further details.`); TODO make this a modal or redirect to login failure page
+        // alert(`Error: ${err.error}. Check the console for further details.`); TODO make this a modal or redirect to login failure page
       }
     });
   }
 
-  setSession(authResult, silent, forceHistory) {
+  setSession = (authResult, silent, forceHistory) => {
     // Set the time that the access token will expire at
     const expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
     localStorage.setItem('access_token', authResult.accessToken);
@@ -106,7 +89,7 @@ export default class Auth {
     }
   }
 
-  logout() {
+  logout = () => {
     setLogout(true);
     RemoveUserIdentityMutation(() => {
       // redirect to root when user logs out
@@ -124,10 +107,11 @@ export default class Auth {
     });
   }
 
-  isAuthenticated() {
-    // Check whether the current time is past the
-    // access token's expiry time
-
-    return SessionCheck.getUserIdentity().then(response => response && response.data && response.data.userIdentity && response.data.userIdentity.isSessionValid);
-  }
+  // Check whether the current time is past the
+  // access token's expiry time
+  isAuthenticated = () => SessionCheck.getUserIdentity().then(
+    response => response && response.data
+      && response.data.userIdentity
+      && response.data.userIdentity.isSessionValid,
+  );
 }

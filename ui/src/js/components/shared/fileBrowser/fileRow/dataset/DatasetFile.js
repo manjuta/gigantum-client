@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Moment from 'moment';
 import fileIconsJs from 'file-icons-js';
 import classNames from 'classnames';
+import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // config
 import config from 'JS/config';
 // components
@@ -12,10 +13,17 @@ import './DatasetFile.scss';
 
 class File extends Component {
   render() {
-    const { props } = this;
-    const { node } = props.fileData.edge;
-    const { index } = props.fileData;
-    const fileName = props.filename;
+    const {
+      fileData,
+      filename,
+      style,
+      section,
+      isDownloading,
+      mutations,
+      mutationData,
+    } = this.props;
+    const { node } = fileData.edge;
+    const { index } = fileData;
     const fileRowCSS = classNames({
       File__row: true,
     });
@@ -30,7 +38,7 @@ class File extends Component {
     const rowStyle = { paddingLeft: `${paddingLeft}px` };
     return (
       <div
-        style={props.style}
+        style={style}
         className="File"
       >
         <div
@@ -40,10 +48,18 @@ class File extends Component {
 
           <div className={textIconsCSS}>
 
-            <div className={`File__icon ${fileIconsJs.getClass(fileName)}`} />
+            <div className={`File__icon ${fileIconsJs.getClass(filename)}`} />
 
             <div className="File__text">
-              {fileName}
+              { filename
+                && (
+                  <MiddleTruncate
+                    ellipsis="..."
+                    text={filename}
+                    smartCopy
+                  />
+                )
+              }
             </div>
 
           </div>
@@ -58,13 +74,13 @@ class File extends Component {
 
           <div className="File__cell File__cell--menu">
             <ActionsMenu
-              section={props.section}
-              edge={props.fileData.edge}
-              isLocal={props.fileData.edge.node.isLocal}
-              mutationData={props.mutationData}
-              mutations={props.mutations}
+              section={section}
+              edge={fileData.edge}
+              isLocal={fileData.edge.node.isLocal}
+              mutationData={mutationData}
+              mutations={mutations}
               renameEditMode={this._renameEditMode}
-              isDownloading={props.isDownloading}
+              isDownloading={isDownloading}
             />
           </div>
         </div>

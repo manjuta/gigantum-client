@@ -19,9 +19,14 @@ exports[`UserNote Renders a snapshot 1`] = `
   <div
     className="UserNote__summary"
   >
-    <textarea
-      id="markDown"
-    />
+    <div
+      id="markDown-wrapper"
+    >
+      
+      <textarea
+        id="markDown"
+      />
+    </div>
   </div>
   <div
     className="ReactTags__tags react-tags-wrapper"

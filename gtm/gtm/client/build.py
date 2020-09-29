@@ -9,13 +9,14 @@ from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
 
 from gtm.common.console import ask_question
-from gtm.utils import get_docker_client, dockerize_windows_path, get_current_commit_hash
+from gtm.utils import get_docker_client, get_current_commit_hash
 from gtm.common import get_client_root
 
 
 class ClientBuilder(object):
     """Class to manage building the gigantum client container
     """
+
     def __init__(self, image_name: str):
         """Constructor"""
         self.image_name = image_name
@@ -30,7 +31,7 @@ class ClientBuilder(object):
             directory(str) Root directory to walk
         """
         for filename in glob.glob('{}/**/*.pyc'.format(directory), recursive=True):
-                os.remove(filename)
+            os.remove(filename)
 
     @staticmethod
     def get_image_tag() -> str:
@@ -65,7 +66,8 @@ class ClientBuilder(object):
     def container_name(self, value: str) -> None:
         # Validate
         if not re.match("^(?![-.])(?!.*--)[A-Za-z0-9_.-]+(?<![-.])$", value):
-            raise ValueError("Invalid container name. Only A-Za-z0-9._- allowed w/ no leading/trailing hyphens/periods.")
+            raise ValueError(
+                "Invalid container name. Only A-Za-z0-9._- allowed w/ no leading/trailing hyphens/periods.")
 
         self._container_name = value
 
@@ -142,13 +144,13 @@ class ClientBuilder(object):
         except NotFound:
             pass
 
-    def build_image(self, no_cache: bool=False, build_args: dict=None, docker_args: dict=None) -> None:
+    def build_image(self, no_cache: bool = False, build_args: dict = None, docker_args: dict = None) -> None:
         """Method to build the Gigantum Client Docker Image
 
         Args:
-            no_cache(bool): Flag indicating if the docker cache should be ignored
-            build_args(dict): Variables to prepare files for build
-            docker_args(dict): Variables passed to docker during the build process
+            no_cache: Flag indicating if the docker cache should be ignored
+            build_args: Variables to prepare files for build
+            docker_args: Variables passed to docker during the build process
 
         build_args items:
             supervisor_file: The path to the target supervisor file to move into build dir
@@ -247,9 +249,7 @@ priority=0
 
         if is_windows:
             # This is a relative path from the *build context* (which is Linux)
-            dockerfile_path = dockerize_windows_path(os.path.relpath(dockerfile_path, client_root_dir))
-            for path_var in ['CLIENT_CONFIG_FILE', 'SUPERVISOR_CONFIG']:
-                docker_args[path_var] = dockerize_windows_path(docker_args[path_var])
+            dockerfile_path = os.path.relpath(dockerfile_path, client_root_dir).replace('\\', '/')
 
         build_lines = self.docker_client.api.build(path=client_root_dir, dockerfile=dockerfile_path, tag=named_image,
                                                    labels=labels, nocache=no_cache, pull=True, rm=True, decode=True,

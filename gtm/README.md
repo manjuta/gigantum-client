@@ -22,7 +22,8 @@ recommended that you create a virtualenv to install `gtm`.
 1. Install Docker
 
    The `gtm` tool requires Docker and Docker Compose on your host machine to
-   build and launch images. Follow Docker's instructions for your OS.
+   build and launch images. Follow Docker's instructions for your OS. If you are using Windows, you can use WSL
+   version 1 or 2.
 
 2. Install Git LFS
    
@@ -34,7 +35,7 @@ recommended that you create a virtualenv to install `gtm`.
 3. Install Python 3
 
    If your OS does not already have Python3 installed, you'll have to install
-   it. For example:
+   it (ensure you get Python 3.7 or later). For example:
 
    OSX
    ```
@@ -59,6 +60,12 @@ recommended that you create a virtualenv to install `gtm`.
    ```
    $ conda create -n gtm python=3
    ```
+   
+   Or, just use the built-in `venv` package, e.g.:
+   
+   ```
+   $ python3 -m venv env
+   ```
 
 5. Install `gtm` package from the `gigantum-client` repository
     
@@ -69,7 +76,7 @@ recommended that you create a virtualenv to install `gtm`.
    - `master` branch will be the last public release
    - `integration` branch will be the latest working updates
    
-   Next, install the `gtm` python package:
+   Next, install the `gtm` python package. First ensure that the correct python environment is activated, then run:
    
    ```
    cd gigantum-client/gtm

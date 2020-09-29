@@ -23,8 +23,6 @@ import { setInfoMessage } from 'JS/redux/actions/footer';
 // utils
 import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 import BranchMutations from 'Components/shared/utils/BranchMutations';
-// config
-import Config from 'JS/config';
 // mutations
 import LabbookContainerStatusMutation from 'Mutations/repository/labbook/LabbookContainerStatusMutation';
 import LabbookLookupMutation from 'Mutations/repository/labbook/LabbookLookupMutation';
@@ -49,7 +47,6 @@ import './Labbook.scss';
 
 let count = 0;
 const containerStatusList = [];
-
 /**
   scrolls to top of window
 */
@@ -621,7 +618,12 @@ class Labbook extends Component<Props> {
   // TODO move migration code into it's own component
   render() {
     const { props, state } = this;
-    const { isBuilding, isPublishing, isSyncing } = props;
+    const {
+      diskLow,
+      isBuilding,
+      isPublishing,
+      isSyncing,
+    } = props;
     const { owner, name } = props.labbook;
     const isLocked = isBuilding
       || isSyncing
@@ -632,7 +634,6 @@ class Labbook extends Component<Props> {
       const { labbook, branchesOpen } = props;
       const sidePanelVisible = !isLocked && props.sidePanelVisible;
       const branchName = '';
-      const isDemo = (window.location.hostname === Config.demoHostName) || props.diskLow;
       const { migrationText, showMigrationButton } = this._getMigrationInfo();
       const oldBranches = labbook.branches.filter((branch => branch.branchName.startsWith('gm.workspace') && branch.branchName !== labbook.activeBranchName));
       const migrationModalType = state.migrateComplete ? 'large' : 'large-long';
@@ -641,15 +642,15 @@ class Labbook extends Component<Props> {
         Labbook: true,
         'Labbook--detail-mode': props.detailMode,
         'Labbook--branch-mode': branchesOpen,
-        'Labbook--demo-mode': isDemo,
+        'Labbook--disk-low': diskLow,
         'Labbook--deprecated': state.isDeprecated,
-        'Labbook--demo-deprecated': state.isDeprecated && isDemo,
+        'Labbook--disk-low--deprecated': state.isDeprecated && diskLow,
         'Labbook--sidePanelVisible': sidePanelVisible,
         'Labbook--locked': state.isLocked,
       });
       const deprecatedCSS = classNames({
         Labbook__deprecated: true,
-        'Labbook__deprecated--demo': isDemo,
+        'Labbook__deprecated--disk-low': diskLow,
       });
       const migrationButtonCSS = classNames({
         'Tooltip-data': state.isLocked,

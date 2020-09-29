@@ -25,7 +25,6 @@ type Props = {
       modifiedOnUtc: string,
     }
   },
-  goToLabbook: Function,
   visibility: string,
   filterText: string,
 };
@@ -178,7 +177,6 @@ class LocalLabbookPanel extends Component<Props> {
     const { state } = this;
     const {
       edge,
-      goToLabbook,
       visibility,
       filterText,
     } = this.props;
@@ -203,7 +201,6 @@ class LocalLabbookPanel extends Component<Props> {
     return (
       <Link
         to={`/projects/${owner}/${name}`}
-        onClick={() => goToLabbook(name, owner)}
         key={`local${name}`}
         className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
       >
@@ -227,6 +224,8 @@ class LocalLabbookPanel extends Component<Props> {
               onClick={evt => this._stopStartContainer(evt, cssClass)}
               onMouseOver={evt => this._updateTextStatusOver(evt, true, status)}
               onMouseOut={evt => this._updateTextStatusOut(evt, false, status)}
+              onFocus={() => {}}
+              onBlur={() => {}}
               className={containerCSS}
             >
               <div className="ContainerStatus__text">{ textStatus }</div>
@@ -243,7 +242,6 @@ class LocalLabbookPanel extends Component<Props> {
 
           <div>
             <RepositoryTitle
-              action={() => goToLabbook(name, owner)}
               name={name}
               section="LocalLabbooks"
               filterText={filterText}

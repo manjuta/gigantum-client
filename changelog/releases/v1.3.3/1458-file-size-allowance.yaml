@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1458"
+changelog:
+  - type: FIX
+    description: Fixes file size warning not appearing when file size is exactly 500MB
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1390

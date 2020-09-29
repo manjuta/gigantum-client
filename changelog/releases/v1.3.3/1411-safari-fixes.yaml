@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1424"
+changelog:
+  - type: FIX
+    description: Fixed several minor styling issues for Safari that were captured during testing

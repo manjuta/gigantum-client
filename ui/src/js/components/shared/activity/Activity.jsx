@@ -55,7 +55,6 @@ class Activity extends Component<Props> {
       createBranchVisible: false,
       activityCardCount: 0,
       newActivityAvailable: false,
-      editorFullscreen: false,
       hoveredRollback: null,
       expandedClusterObject: new Map(),
       activityRecords: section.activityRecords
@@ -350,8 +349,9 @@ class Activity extends Component<Props> {
   */
   _setStickyDate = () => {
     const { props, state } = this;
-    let offsetAmount = ((window.location.hostname === config.demoHostName) || props.diskLow)
-      ? 50 : 0;
+    let offsetAmount = props.diskLow
+      ? 50
+      : 0;
     offsetAmount = props.isDeprecated ? offsetAmount + 70 : offsetAmount;
     const upperBound = offsetAmount + 120;
     let stickyDate = null;
@@ -468,21 +468,6 @@ class Activity extends Component<Props> {
   }
 
   /**
-  *   @param {boolean} isFullscreen
-  *   Changes editorFullscreen in state to true if
-  *   isFullscreen is true, else it swaps existing state
-  *   @return {}
-  */
-  _changeFullscreenState = (isFullscreen) => {
-    if (isFullscreen) {
-      this.setState({ editorFullscreen: isFullscreen });
-    } else {
-      const { editorFullscreen } = this.state;
-      this.setState({ editorFullscreen: !editorFullscreen });
-    }
-  }
-
-  /**
   *   @param {array} clusterElements
   *   modifies expandedClusterObject from state
   *   @return {}
@@ -545,7 +530,6 @@ class Activity extends Component<Props> {
       clusterObject,
       compressedElements,
       createBranchVisible,
-      editorFullscreen,
       hoveredRollback,
       isMainWorkspace,
       modalVisible,
@@ -563,17 +547,15 @@ class Activity extends Component<Props> {
       setBuildingState,
     } = this.props;
     const section = this.props[sectionType];
-    const isDemo = (window.location.hostname === config.demoHostName);
     // declare css here
     const activityCSS = classNames({
       Activity: true,
-      fullscreen: editorFullscreen,
     });
     const newActivityCSS = classNames({
       'Activity__new-record box-shadow': true,
-      'is-demo': (isDemo || diskLow),
-      'is-deprecated': isDeprecated,
-      'is-demo-deprecated': (isDemo || diskLow) && isDeprecated,
+      'Activity--disk-low': diskLow,
+      'Activity--deprecated': isDeprecated,
+      'Activity--disk-low--deprecated': (diskLow) && isDeprecated,
     });
 
     if (section && section.activityRecords) {
@@ -581,9 +563,9 @@ class Activity extends Component<Props> {
       const stickyDateCSS = classNames({
         'Activity__date-tab': true,
         fixed: stickyDate,
-        'is-demo': (isDemo || diskLow),
-        'is-deprecated': isDeprecated,
-        'is-demo-deprecated': (isDemo || diskLow) && isDeprecated,
+        'Activity--disk-low': diskLow,
+        'Activity--deprecated': isDeprecated,
+        'Activity--disk-low--deprecated': diskLow && isDeprecated,
       });
 
       return (
@@ -658,7 +640,6 @@ class Activity extends Component<Props> {
                       activityRecords={activityRecords}
                       clusterObject={clusterObject}
                       compressedElements={compressedElements}
-                      editorFullscreen={editorFullscreen}
                       hoveredRollback={hoveredRollback}
                       index={index}
                       isMainWorkspace={isMainWorkspace}
@@ -668,7 +649,6 @@ class Activity extends Component<Props> {
                       timestamp={timestamp}
 
                       addCluster={this._addCluster}
-                      changeFullscreenState={this._changeFullscreenState}
                       compressExpanded={this._compressExpanded}
                       getOrCreateRef={this._getOrCreateRef}
                       hideAddActivity={this._hideAddActivity}

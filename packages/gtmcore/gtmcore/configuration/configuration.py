@@ -1,7 +1,7 @@
 import os
 import yaml
 
-from typing import (Any, Dict, Optional, Tuple, Mapping, MutableMapping)
+from typing import (Any, Dict, Optional, Mapping, MutableMapping)
 from pkg_resources import resource_filename
 
 from gtmcore.logging import LMLogger
