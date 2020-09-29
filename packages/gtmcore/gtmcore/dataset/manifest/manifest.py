@@ -700,7 +700,6 @@ class Manifest(object):
             ars = ActivityStore(self.dataset)
             ars.create_activity_record(ar)
 
-    # TODO DJWC - needs to be made backend-specific
     def sweep_all_changes(self, upload: bool = False, extra_msg: str = None,
                           status: Optional[StatusResult] = None) -> None:
         """
@@ -724,7 +723,8 @@ class Manifest(object):
 
         # Re-link new revision
         self.link_revision()
-        # TODO DJWC - doesn't this potentially delete versions that are currently being used?
+
+        # this may delete versions that are currently being used
         if os.path.isdir(previous_revision_dir):
             shutil.rmtree(os.path.join(previous_revision_dir))
 

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import aiohttp
 import aiofiles
-import aiofiles.io
+import aiofiles.os
 import copy
 import snappy
 import requests
@@ -603,8 +603,8 @@ class GigantumObjectStore(StorageBackend):
         revision_directory = self.client_files_root(revision) # self.current_revision_dir
         revision_directory.mkdir(parents=True, exist_ok=True)
 
-        for pathname, info in manifest_dict.values():
-            hash_str = info.get('h')
+        for pathname, info in manifest_dict.items():
+            hash_str = info['h']
             level1, level2 = self._get_object_subdirs(hash_str)
 
             target = revision_directory / pathname
@@ -711,12 +711,13 @@ class GigantumObjectStore(StorageBackend):
         with open(os.path.join(push_dir, revision), 'at') as fh:
             fh.write(f"{rel_path},{obj}\n")
 
-    async def move_to_object_cache(self, relative_source_path, hash_str, target_revision):
+    async def move_to_object_cache(self, relative_source_path: Path, hash_str: str, target_revision:str) -> None:
         """Method to move a file to the object cache
 
         Args:
             relative_source_path: path where the file is currently located
             hash_str: content hash of the file
+            target_revision: The revision for these objects
 
         Returns:
 

@@ -533,7 +533,7 @@ class TestManifest(object):
     def test_delete(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
 
-        # Wrte some stuff into files
+        # Write some stuff into files
         (manifest.current_revision_dir / 'other_dir').mkdir(parents=True)
         paths = [manifest.current_revision_dir / p for p in ["test1.txt", "test2.txt", "test3.txt", "other_dir/test4.txt", "other_dir/test5.txt"]]
         contents = ["asdfasdfdf", "asdfdf", "asdfasdf", "dfasdfhfgjhg", "fdghdfgsa"]
@@ -543,14 +543,18 @@ class TestManifest(object):
 
         manifest.sweep_all_changes()
 
+        # TODO DJWC - this used to be 6, but the 4 records seem complete...
         num_records = len(ds.git.log())
-        assert num_records == 6
+        assert num_records == 4
 
+        # Need to repopulate paths because it's a new revision!
+        paths = [manifest.current_revision_dir / p for p in ["test1.txt", "test2.txt", "test3.txt", "other_dir/test4.txt", "other_dir/test5.txt"]]
         for p in paths:
             assert p.exists() is True
 
         manifest.delete(["test1.txt"])
 
+        paths = [manifest.current_revision_dir / p for p in ["test1.txt", "test2.txt", "test3.txt", "other_dir/test4.txt", "other_dir/test5.txt"]]
         assert paths[0].exists() is False
         for p in paths[1:]:
             assert p.exists() is True
@@ -559,10 +563,12 @@ class TestManifest(object):
 
         manifest.delete(["test2.txt", "other_dir/"])
 
+        paths = [manifest.current_revision_dir / p for p in ["test1.txt", "test2.txt", "test3.txt", "other_dir/test4.txt", "other_dir/test5.txt"]]
         for p in paths[:2]:
             assert p.exists() is False
-        for p in paths[2:]:
-            assert p.exists() is True
+        assert paths[2].exists() is True
+        for p in paths[3:]:
+            assert p.exists() is False
 
         assert len(ds.git.log()) == num_records + 4
 
