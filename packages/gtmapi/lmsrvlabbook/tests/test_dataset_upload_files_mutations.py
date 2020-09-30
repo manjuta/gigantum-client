@@ -11,7 +11,6 @@ from werkzeug.datastructures import FileStorage
 
 import gtmcore.dispatcher.dataset_jobs
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.dataset.cache.filesystem import HostFilesystemCache
 from gtmcore.dataset.manifest import Manifest
 from lmsrvcore.middleware import DataloaderMiddleware
 from lmsrvlabbook.tests.fixtures import fixture_working_dir
