@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 import os
 import time
@@ -9,16 +11,29 @@ from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_
 
 
 def helper_append_file(cache_dir, revision, rel_path, content):
-    with open(os.path.join(cache_dir, revision, rel_path), 'at') as fh:
+    # This isn't great function design, but it preserves backwards compatability
+    if revision:
+        path = os.path.join(cache_dir, revision, rel_path)
+    else:
+        path = os.path.join(cache_dir, rel_path)
+
+    with open(path, 'at') as fh:
         fh.write(content)
+
+def helper_run_async_update(manifest, update_files):
+    loop = asyncio.get_event_loop()
+    hash_task = loop.create_task(manifest.hash_files(update_files))
+    loop.run_until_complete(hash_task)
+    hashes, fast_hashes = hash_task.result()
+
+    return fast_hashes
 
 
 class TestHashing(object):
     def test_init(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
 
-        assert sh.fast_hash_data == {}
+        assert manifest.fast_hash_data == {}
 
     @pytest.mark.asyncio
     async def test_hash(self, event_loop, mock_dataset_with_manifest):
@@ -141,103 +156,97 @@ class TestHashing(object):
 
     def test_fast_hash_save(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
-        cache_dir = manifest.cache_mgr.cache_root
-        revision = manifest.dataset_revision
+        current_revision_dir = manifest.current_revision_dir
+        sh = SmartHash(current_revision_dir)
 
-        assert sh.fast_hash_data == {}
-        assert os.path.exists(os.path.join(cache_dir, revision, ".smarthash")) is False
+        assert manifest.fast_hash_data == {}
+        assert (current_revision_dir / ".smarthash").exists() is False
         filename = "test1.txt"
-        helper_append_file(cache_dir, revision, filename, "pupper")
+        helper_append_file(current_revision_dir, None, filename, "pupper")
 
-        hash_result1 = sh.fast_hash([filename], save=False)
-        assert sh.fast_hash_data == {}
-        assert os.path.exists(os.path.join(cache_dir, revision, ".smarthash")) is False
+        hash_result1 = sh.fast_hash([filename])
+        assert manifest.fast_hash_data == {}
+        assert os.path.exists(os.path.join(current_revision_dir, ".smarthash")) is False
         hash_result2 = sh.fast_hash([filename])
 
         assert hash_result1 == hash_result2
-        assert filename in sh.fast_hash_data
-        assert os.path.exists(os.path.join(cache_dir, revision, ".smarthash")) is True
+        assert filename in manifest.fast_hash_data
+        assert os.path.exists(os.path.join(current_revision_dir, ".smarthash")) is True
 
     def test_has_changed_fast(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
-        cache_dir = manifest.cache_mgr.cache_root
-        revision = manifest.dataset_revision
+        current_revision_dir = manifest.current_revision_dir
+        sh = SmartHash(current_revision_dir)
 
-        assert sh.fast_hash_data == {}
-        assert os.path.exists(os.path.join(cache_dir, revision, ".smarthash")) is False
+        assert manifest.fast_hash_data == {}
+        # The fixture already calls manifest.link_revision(), which populates the smarthash file
+        assert os.path.exists(os.path.join(current_revision_dir, ".smarthash")) is True
         filename = "test1.txt"
-        helper_append_file(cache_dir, revision, filename, "pupper")
+        helper_append_file(current_revision_dir, None, filename, "pupper")
 
-        assert sh.is_cached(filename) is False
+        assert manifest.is_cached(filename) is False
 
-        hash_result = sh.fast_hash([filename])
+        # Note that there is no way to selectively trigger an update of the fast hash.
+        # This is by design, as you should always ALSO update the "slow" hash in this case.
+        hash_result = helper_run_async_update(manifest, [filename])
         hash_result = hash_result[0]
         fname, fsize, mtime = hash_result.split("||")
         assert fname == "test1.txt"
         assert fsize == '6'
-        assert sh.fast_hash_data is not None
-        assert os.path.exists(os.path.join(cache_dir, revision, ".smarthash")) is True
-        assert sh.is_cached(filename) is True
+        assert manifest.fast_hash_data is not None
+        assert os.path.exists(os.path.join(current_revision_dir, ".smarthash")) is True
+        assert manifest.is_cached(filename) is True
 
-        assert sh.has_changed_fast(filename) is False
+        assert manifest.has_changed_fast(filename) is False
         time.sleep(1.1)
-        assert sh.has_changed_fast(filename) is False
+        assert manifest.has_changed_fast(filename) is False
 
         # Change file
-        helper_append_file(cache_dir, revision, filename, "jgfdjfdgsjfdgsj")
-        assert sh.has_changed_fast(filename) is True
-        assert sh.has_changed_fast(filename) is True
+        helper_append_file(current_revision_dir, None, filename, "jgfdjfdgsjfdgsj")
+        assert manifest.has_changed_fast(filename) is True
+        assert manifest.has_changed_fast(filename) is True
 
-        sh.fast_hash([filename])
-        assert sh.has_changed_fast(filename) is False
+        helper_run_async_update(manifest, [filename])
+        assert manifest.has_changed_fast(filename) is False
 
         # Touch file, so only change mtime
         time.sleep(1.1)
         Path(sh.get_abs_path(filename)).touch()
-        assert sh.has_changed_fast(filename) is True
+        assert manifest.has_changed_fast(filename) is True
 
-        sh.fast_hash([filename])
-        assert sh.has_changed_fast(filename) is False
+        helper_run_async_update(manifest, [filename])
+        assert manifest.has_changed_fast(filename) is False
 
     def test_has_changed_fast_from_loaded(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
-        cache_dir = manifest.cache_mgr.cache_root
-        revision = manifest.dataset_revision
+        current_dataset_revision = manifest.current_revision_dir
 
-        assert sh.fast_hash_data == {}
+        assert manifest.fast_hash_data == {}
         filename = "test1.txt"
-        helper_append_file(cache_dir, revision, filename, "pupper")
+        helper_append_file(current_dataset_revision, None, filename, "pupper")
 
-        hash_result = sh.fast_hash([filename])
+        hash_result = manifest.hash_files([filename])
         hash_result = hash_result[0]
         fname, fsize, mtime = hash_result.split("||")
         assert fname == "test1.txt"
         assert fsize == '6'
-        assert sh.fast_hash_data is not None
-        assert os.path.exists(os.path.join(cache_dir, revision, ".smarthash")) is True
-        assert sh.is_cached(filename) is True
-        assert sh.has_changed_fast(filename) is False
+        assert manifest.fast_hash_data is not None
+        assert os.path.exists(os.path.join(current_dataset_revision, ".smarthash")) is True
+        assert manifest.is_cached(filename) is True
+        assert manifest.has_changed_fast(filename) is False
 
-        sh2 = SmartHash(ds.root_dir, cache_dir, revision)
-        assert sh2.fast_hash_data is not None
-        assert sh2.is_cached(filename) is True
-        assert sh2.has_changed_fast(filename) is False
-        assert sh2.fast_hash_data[filename] == hash_result
+        assert manifest.fast_hash_data[filename] == hash_result
 
     def test_fast_hash_list(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
-        cache_dir = manifest.cache_mgr.cache_root
-        revision = manifest.dataset_revision
+        current_revision_dir = manifest.current_revision_dir
+        sh = SmartHash(current_revision_dir)
 
-        os.makedirs(os.path.join(cache_dir, revision, "test_dir"))
+        (current_revision_dir / "test_dir").mkdir()
 
         filenames = ["test1.txt", "test2.txt", "test3.txt", "test_dir/nested.txt"]
         for f in filenames:
-            helper_append_file(cache_dir, revision, f, "sdfadfgfdgh")
+            helper_append_file(current_revision_dir, None, f, "sdfadfgfdgh")
         filenames.append('test_dir/')  # Append the directory, since dirs can be stored in the manifest
 
         hash_results = sh.fast_hash(filenames)
@@ -257,14 +266,13 @@ class TestHashing(object):
 
     def test_fast_hash_big(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
-        cache_dir = manifest.cache_mgr.cache_root
-        revision = manifest.dataset_revision
+        current_revision_dir = manifest.current_revision_dir
+        sh = SmartHash(current_revision_dir)
 
-        helper_append_file(cache_dir, revision, 'test1.txt', "asdf " * 100000000)
-        helper_append_file(cache_dir, revision, 'test2.txt', "hgfd " * 100000000)
-        helper_append_file(cache_dir, revision, 'test3.txt', "jjh " * 10000000)
-        helper_append_file(cache_dir, revision, 'test4.txt', "jjh " * 10000000)
+        helper_append_file(current_revision_dir, None, 'test1.txt', "asdf " * 100000000)
+        helper_append_file(current_revision_dir, None, 'test2.txt', "hgfd " * 100000000)
+        helper_append_file(current_revision_dir, None, 'test3.txt', "jjh " * 10000000)
+        helper_append_file(current_revision_dir, None, 'test4.txt', "jjh " * 10000000)
 
         filenames = ['test1.txt', 'test2.txt', 'test3.txt', 'test4.txt']
         hash_results = sh.fast_hash(filenames)
@@ -288,24 +296,22 @@ class TestHashing(object):
 
     def test_get_deleted_files(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
-        sh = SmartHash(ds.root_dir, manifest.cache_mgr.cache_root, manifest.dataset_revision)
-        cache_dir = manifest.cache_mgr.cache_root
-        revision = manifest.dataset_revision
+        current_revision_dir = manifest.current_revision_dir
 
-        os.makedirs(os.path.join(cache_dir, revision, "test_dir"))
+        (current_revision_dir / "test_dir").mkdir()
 
         filenames = ["test1.txt", "test2.txt", "test3.txt", "test_dir/nested.txt"]
         for f in filenames:
-            helper_append_file(cache_dir, revision, f, "sdfadfgfdgh")
+            helper_append_file(current_revision_dir, None, f, "sdfadfgfdgh")
 
-        hash_results = sh.fast_hash(filenames)
+        hash_results = manifest.hash_files(filenames)
         assert len(hash_results) == 4
 
-        assert len(sh.get_deleted_files(filenames)) == 0
+        assert len(manifest.get_deleted_files(filenames)) == 0
 
         test_new_filenames = ["test1.txt", "test_dir/nested.txt"]
 
-        deleted = sh.get_deleted_files(test_new_filenames)
+        deleted = manifest.get_deleted_files(test_new_filenames)
 
         assert len(deleted) == 2
         assert deleted[0] == "test2.txt"

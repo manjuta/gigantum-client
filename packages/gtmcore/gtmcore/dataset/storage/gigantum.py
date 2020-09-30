@@ -18,7 +18,6 @@ import requests
 import math
 
 from gtmcore.configuration import Configuration
-from gtmcore.dataset.cache import HostFilesystemCache
 from gtmcore.dataset.storage.backend import StorageBackend
 from typing import Optional, List, Dict, Callable, NamedTuple, Any, OrderedDict, Tuple
 import os
@@ -557,8 +556,6 @@ class GigantumObjectStore(StorageBackend):
         self.url = f"{object_service}{namespaced_name}"
 
         self.cache_root = Path(client_config.app_workdir, '.labmanager', 'datasets', username, namespaced_name).expanduser()
-        # Note - we don't use the get_cache_manager function because we're already in a specific backend
-        self.cache_manager = HostFilesystemCache(self.cache_root)
 
         # Additional attributes to track processed requests
         self.successful_requests: List = list()
