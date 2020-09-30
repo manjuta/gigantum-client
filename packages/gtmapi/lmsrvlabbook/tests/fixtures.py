@@ -34,7 +34,6 @@ from lmsrvlabbook.api.mutation import LabbookMutations
 
 from gtmcore.fixtures.datasets import helper_append_file
 from gtmcore.fixtures.fixtures import _create_temp_work_dir
-from gtmcore.dataset.cache import get_cache_manager
 from gtmcore.dataset import Manifest
 import gtmcore
 
@@ -360,15 +359,14 @@ def fixture_single_dataset():
 
     ds = im.create_dataset('default', 'default', "test-dataset", storage_type="gigantum_object_v1", description="Cats 2")
     m = Manifest(ds, 'default')
-    cache_mgr = get_cache_manager(ds.client_config, ds, 'default')
     revision = ds.git.repo.head.commit.hexsha
 
-    os.makedirs(os.path.join(cache_mgr.cache_root, revision, "other_dir"))
-    helper_append_file(cache_mgr.cache_root, revision, "test1.txt", "asdfasdf")
-    helper_append_file(cache_mgr.cache_root, revision, "test2.txt", "rtg")
-    helper_append_file(cache_mgr.cache_root, revision, "test3.txt", "wer")
-    helper_append_file(cache_mgr.cache_root, revision, "other_dir/test4.txt", "dfasdfhfgjhg")
-    helper_append_file(cache_mgr.cache_root, revision, "other_dir/test5.txt", "fdghdfgsa")
+    os.makedirs(os.path.join(m.current_revision_dir, "other_dir"))
+    helper_append_file(m.current_revision_dir, "test1.txt", "asdfasdf")
+    helper_append_file(m.current_revision_dir, "test2.txt", "rtg")
+    helper_append_file(m.current_revision_dir, "test3.txt", "wer")
+    helper_append_file(m.current_revision_dir, "other_dir/test4.txt", "dfasdfhfgjhg")
+    helper_append_file(m.current_revision_dir, "other_dir/test5.txt", "fdghdfgsa")
     m.update()
 
     # Load User identity into app context

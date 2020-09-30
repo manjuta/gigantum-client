@@ -759,8 +759,7 @@ class TestDatasetMutations(object):
         lb = im.create_labbook('default', 'default', 'test-lb', 'testing dataset links')
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         manifest = Manifest(ds, 'default')
-        helper_append_file(manifest.cache_mgr.cache_root, manifest.dataset_revision,
-                           "test1.txt", "12345")
+        helper_append_file(manifest.current_revision_dir, "test1.txt", "12345")
         manifest.sweep_all_changes()
 
         # Fake publish to a local bare repo

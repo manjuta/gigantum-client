@@ -109,20 +109,20 @@ class TestDatasetFilesMutations(object):
                                storage_type="gigantum_object_v1", description="testing delete")
         m = Manifest(ds, 'default')
 
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, "other_dir"))
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt", "fdsfgfd")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test3.txt", "ghgdsr")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "other_dir/test3.txt", "hhgf")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "other_dir/test1.txt", "jkjghfg")
+        os.makedirs(os.path.join(m.current_revision_dir, "other_dir"))
+        helper_append_file(m.current_revision_dir, "test1.txt", "asdfadfsdf")
+        helper_append_file(m.current_revision_dir, "test2.txt", "fdsfgfd")
+        helper_append_file(m.current_revision_dir, "test3.txt", "ghgdsr")
+        helper_append_file(m.current_revision_dir, "other_dir/test3.txt", "hhgf")
+        helper_append_file(m.current_revision_dir, "other_dir/test1.txt", "jkjghfg")
         m.sweep_all_changes()
 
         revision = m.dataset_revision
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test1.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test2.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test3.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test3.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "test1.txt")) is True
 
         query = """
                    mutation myMutation {
@@ -137,11 +137,11 @@ class TestDatasetFilesMutations(object):
         assert result['data']['deleteDatasetFiles']['success'] is True
 
         revision = m.dataset_revision
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test1.txt")) is False
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test2.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test3.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test3.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "test1.txt")) is True
 
         query = """
                    mutation myMutation {
@@ -156,11 +156,11 @@ class TestDatasetFilesMutations(object):
         assert result['data']['deleteDatasetFiles']['success'] is True
 
         revision = m.dataset_revision
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test1.txt")) is False
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test2.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test3.txt")) is False
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test3.txt")) is False
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "test1.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test3.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "test3.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "test1.txt")) is False
 
     def test_delete_dataset_files_errors(self, fixture_working_dir, snapshot):
         im = InventoryManager()
@@ -168,13 +168,13 @@ class TestDatasetFilesMutations(object):
                                storage_type="gigantum_object_v1", description="testing delete")
         m = Manifest(ds, 'default')
 
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test1.txt", "asdfadfsdf")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test2.txt", "fdsfgfd")
+        helper_append_file(m.current_revision_dir, "test1.txt", "asdfadfsdf")
+        helper_append_file(m.current_revision_dir, "test2.txt", "fdsfgfd")
         m.sweep_all_changes()
 
         revision = m.dataset_revision
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test1.txt")) is True
-        assert os.path.exists(os.path.join(m.cache_mgr.cache_root, revision, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
 
         query = """
                    mutation myMutation {
@@ -193,13 +193,10 @@ class TestDatasetFilesMutations(object):
                                storage_type="gigantum_object_v1", description="testing move")
         m = Manifest(ds, 'default')
 
-        revision = m.dataset_revision
-        helper_append_file(m.cache_mgr.cache_root, revision, "test1.txt", "asdfasdghndfdf")
+        helper_append_file(m.current_revision_dir, "test1.txt", "asdfasdghndfdf")
         m.sweep_all_changes()
 
-        revision = m.dataset_revision
-        cr = m.cache_mgr.cache_root
-        assert os.path.exists(os.path.join(cr, revision, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is True
 
         query = """
                    mutation myMutation {
@@ -221,10 +218,8 @@ class TestDatasetFilesMutations(object):
         assert 'errors' not in result
         snapshot.assert_match(result)
 
-        revision = m.dataset_revision
-        cr = m.cache_mgr.cache_root
-        assert os.path.exists(os.path.join(cr, revision, "test1.txt")) is False
-        assert os.path.exists(os.path.join(cr, revision, "test1-renamed.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1-renamed.txt")) is True
 
     def test_move_dataset_dir(self, fixture_working_dir, snapshot):
         im = InventoryManager()
@@ -233,23 +228,21 @@ class TestDatasetFilesMutations(object):
         m = Manifest(ds, 'default')
 
         revision = m.dataset_revision
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, revision, "first_dir"))
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, revision, "other_dir"))
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, revision, "other_dir", "nested_dir"))
-        helper_append_file(m.cache_mgr.cache_root, revision, "test1.txt", "asdfasdghndfdf")
-        helper_append_file(m.cache_mgr.cache_root, revision, "test2.txt", "asdfdf")
-        helper_append_file(m.cache_mgr.cache_root, revision, "first_dir/test3.txt", "4456tyfg")
-        helper_append_file(m.cache_mgr.cache_root, revision, "other_dir/nested_dir/test6.txt", "4456tyfg")
-        helper_append_file(m.cache_mgr.cache_root, revision, "other_dir/nested_dir/test7.txt", "fgfyytr")
+        os.makedirs(os.path.join(m.current_revision_dir, "first_dir"))
+        os.makedirs(os.path.join(m.current_revision_dir, "other_dir"))
+        os.makedirs(os.path.join(m.current_revision_dir, "other_dir", "nested_dir"))
+        helper_append_file(m.current_revision_dir, "test1.txt", "asdfasdghndfdf")
+        helper_append_file(m.current_revision_dir, "test2.txt", "asdfdf")
+        helper_append_file(m.current_revision_dir, "first_dir/test3.txt", "4456tyfg")
+        helper_append_file(m.current_revision_dir, "other_dir/nested_dir/test6.txt", "4456tyfg")
+        helper_append_file(m.current_revision_dir, "other_dir/nested_dir/test7.txt", "fgfyytr")
         m.sweep_all_changes()
 
-        revision = m.dataset_revision
-        cr = m.cache_mgr.cache_root
-        assert os.path.exists(os.path.join(cr, revision, "test1.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "test2.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "first_dir", "test3.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "nested_dir", "test6.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "nested_dir", "test7.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "first_dir", "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "nested_dir", "test6.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "nested_dir", "test7.txt")) is True
 
         query = """
                    mutation myMutation {
@@ -271,14 +264,12 @@ class TestDatasetFilesMutations(object):
         assert 'errors' not in result
         snapshot.assert_match(result)
 
-        revision = m.dataset_revision
-        cr = m.cache_mgr.cache_root
-        assert os.path.exists(os.path.join(cr, revision, "test1.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "test2.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "first_dir", "test3.txt")) is False
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "first_dir", "test3.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "nested_dir", "test6.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "nested_dir", "test7.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "first_dir", "test3.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "first_dir", "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "nested_dir", "test6.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "nested_dir", "test7.txt")) is True
 
         query = """
                    mutation myMutation {
@@ -300,16 +291,14 @@ class TestDatasetFilesMutations(object):
         assert 'errors' not in result
         snapshot.assert_match(result)
 
-        revision = m.dataset_revision
-        cr = m.cache_mgr.cache_root
-        assert os.path.exists(os.path.join(cr, revision, "test1.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "test2.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "first_dir", "test3.txt")) is False
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "nested_dir", "test6.txt")) is False
-        assert os.path.exists(os.path.join(cr, revision, "other_dir", "nested_dir", "test7.txt")) is False
-        assert os.path.exists(os.path.join(cr, revision, "other_dir_renamed", "first_dir", "test3.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir_renamed", "nested_dir", "test6.txt")) is True
-        assert os.path.exists(os.path.join(cr, revision, "other_dir_renamed", "nested_dir", "test7.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test1.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "test2.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "first_dir", "test3.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "nested_dir", "test6.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir", "nested_dir", "test7.txt")) is False
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir_renamed", "first_dir", "test3.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir_renamed", "nested_dir", "test6.txt")) is True
+        assert os.path.exists(os.path.join(m.current_revision_dir, "other_dir_renamed", "nested_dir", "test7.txt")) is True
 
     def test_make_directory(self, fixture_working_dir, snapshot):
         im = InventoryManager()
@@ -341,7 +330,7 @@ class TestDatasetFilesMutations(object):
         assert result['data']['makeDatasetDirectory']['newDatasetFileEdge']['node']['isLocal'] is True
         assert result['data']['makeDatasetDirectory']['newDatasetFileEdge']['node']['size'] == '0'
 
-        assert os.path.isdir(os.path.join(m.cache_mgr.current_revision_dir, "test_dir1")) is True
+        assert os.path.isdir(os.path.join(m.current_revision_dir, "test_dir1")) is True
 
         query = """
                    mutation myMutation {
@@ -366,8 +355,8 @@ class TestDatasetFilesMutations(object):
         assert result['data']['makeDatasetDirectory']['newDatasetFileEdge']['node']['isLocal'] is True
         assert result['data']['makeDatasetDirectory']['newDatasetFileEdge']['node']['size'] == '0'
 
-        assert os.path.isdir(os.path.join(m.cache_mgr.current_revision_dir, "test_dir1")) is True
-        assert os.path.isdir(os.path.join(m.cache_mgr.current_revision_dir, "test_dir1", "test_dir2")) is True
+        assert os.path.isdir(os.path.join(m.current_revision_dir, "test_dir1")) is True
+        assert os.path.isdir(os.path.join(m.current_revision_dir, "test_dir1", "test_dir2")) is True
 
     def test_make_directory_error(self, fixture_working_dir, snapshot):
         im = InventoryManager()

@@ -26,7 +26,7 @@ class TestDatasetOverviewQueries(object):
         assert result['data']['dataset']['overview']['numFiles'] == 5
 
         m = Manifest(ds, 'default')
-        current_revision_dir = m.cache_mgr.current_revision_dir
+        current_revision_dir = m.current_revision_dir
         shutil.rmtree(current_revision_dir)
         os.makedirs(current_revision_dir)
         m.update()
@@ -52,7 +52,7 @@ class TestDatasetOverviewQueries(object):
         assert result['data']['dataset']['overview']['totalBytes'] == '35'
 
         m = Manifest(ds, 'default')
-        current_revision_dir = m.cache_mgr.current_revision_dir
+        current_revision_dir = m.current_revision_dir
         shutil.rmtree(current_revision_dir)
         os.makedirs(current_revision_dir)
 
@@ -84,7 +84,7 @@ class TestDatasetOverviewQueries(object):
 
         # Delete all files
         m = Manifest(ds, 'default')
-        current_revision_dir = m.cache_mgr.current_revision_dir
+        current_revision_dir = m.current_revision_dir
         shutil.rmtree(current_revision_dir)
         os.makedirs(current_revision_dir)
 
@@ -117,10 +117,10 @@ class TestDatasetOverviewQueries(object):
 
         # Delete all files
         m = Manifest(ds, 'default')
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test55.csv", "22222")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "df.csv", "33333")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hidden", "33333")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "noextension", "33333")
+        helper_append_file(m.current_revision_dir, "test55.csv", "22222")
+        helper_append_file(m.current_revision_dir, "df.csv", "33333")
+        helper_append_file(m.current_revision_dir, ".hidden", "33333")
+        helper_append_file(m.current_revision_dir, "noextension", "33333")
         m.update()
 
         result = fixture_single_dataset[2].execute(query)
@@ -151,7 +151,7 @@ class TestDatasetOverviewQueries(object):
 
         # Delete all files
         m = Manifest(ds, 'default')
-        current_revision_dir = m.cache_mgr.current_revision_dir
+        current_revision_dir = m.current_revision_dir
         shutil.rmtree(current_revision_dir)
         os.makedirs(current_revision_dir)
 
@@ -186,15 +186,15 @@ class TestDatasetOverviewQueries(object):
 
         # Delete all files
         m = Manifest(ds, 'default')
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir"))
-        os.makedirs(os.path.join(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir", "subdir"))
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "test55.csv", "22222")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "df.csv", "11")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hidden", "343")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, "noextension", "6t4")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir/tester.png", "8544")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir/subdir/blah.jpeg", "8544")
-        helper_append_file(m.cache_mgr.cache_root, m.dataset_revision, ".hiddendir/subdir/.hiddenfile", "jhg")
+        os.makedirs(os.path.join(m.current_revision_dir, ".hiddendir"))
+        os.makedirs(os.path.join(m.current_revision_dir, ".hiddendir", "subdir"))
+        helper_append_file(m.current_revision_dir, "test55.csv", "22222")
+        helper_append_file(m.current_revision_dir, "df.csv", "11")
+        helper_append_file(m.current_revision_dir, ".hidden", "343")
+        helper_append_file(m.current_revision_dir, "noextension", "6t4")
+        helper_append_file(m.current_revision_dir, ".hiddendir/tester.png", "8544")
+        helper_append_file(m.current_revision_dir, ".hiddendir/subdir/blah.jpeg", "8544")
+        helper_append_file(m.current_revision_dir, ".hiddendir/subdir/.hiddenfile", "jhg")
         m.update()
 
         result = fixture_single_dataset[2].execute(query)

@@ -556,9 +556,9 @@ class GigantumObjectStore(StorageBackend):
         # The endpoint for the object service
         self.url = f"{object_service}{namespaced_name}"
 
-        cache_root = Path(client_config.app_workdir, '.labmanager', 'datasets', username, namespaced_name).expanduser()
+        self.cache_root = Path(client_config.app_workdir, '.labmanager', 'datasets', username, namespaced_name).expanduser()
         # Note - we don't use the get_cache_manager function because we're already in a specific backend
-        self.cache_manager = HostFilesystemCache(cache_root)
+        self.cache_manager = HostFilesystemCache(self.cache_root)
 
         # Additional attributes to track processed requests
         self.successful_requests: List = list()
@@ -612,7 +612,7 @@ class GigantumObjectStore(StorageBackend):
                 target.mkdir(parents=True, exist_ok=True)
             else:
                 # Link file
-                source = self.cache_manager.cache_root / 'objects' / level1 / level2 / hash_str
+                source = self.cache_root / 'objects' / level1 / level2 / hash_str
 
                 target.parent.mkdir(parents=True, exist_ok=True)
 
@@ -645,7 +645,7 @@ class GigantumObjectStore(StorageBackend):
             A path string on the host suitable for a bind-mount
         """
 
-        return self.cache_manager.cache_root / revision
+        return self.cache_root / revision
 
     def hash_to_object_path(self, hash_str: str) -> Path:
         """Helper method to compute the absolute object path from the relative dataset path

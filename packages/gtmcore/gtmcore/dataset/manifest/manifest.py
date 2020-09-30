@@ -544,7 +544,7 @@ class Manifest(object):
         relative_path = self.dataset.make_path_relative(path)
         new_directory_path = self.current_revision_dir
 
-        previous_revision = self.dataset.current_revision
+        previous_revision_dir = self.current_revision_dir
 
         if os.path.exists(new_directory_path):
             raise ValueError(f"Directory already exists: `{relative_path}`")
@@ -588,8 +588,9 @@ class Manifest(object):
             # TODO DJWC - It's unclear this is sound when multiple projects are/were running with the same revision of a
             #  dataset, don't we need reference counting or something?
             #  Also if hardlinks are working, this isn't saving space
-            if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
-                shutil.rmtree(os.path.join(self.cache_mgr.cache_root, previous_revision))
+            # if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
+            if previous_revision_dir.is_dir():
+                shutil.rmtree(previous_revision_dir)
 
             return self.gen_file_info(relative_path)
 

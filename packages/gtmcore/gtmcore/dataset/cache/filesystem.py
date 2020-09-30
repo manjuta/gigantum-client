@@ -18,24 +18,6 @@ class HostFilesystemCache:
         self.cache_root = cache_root
         self.initialize()
 
-    @property
-    def current_revision_dir(self):
-        """Method to return the directory containing files for the current dataset revision
-
-        Returns:
-            str
-        """
-        return os.path.join(self.cache_root, self.dataset.git.repo.head.commit.hexsha)
-
-    @property
-    def revision_cache_dir(self, revision: str):
-        """Method to return the directory containing files for the current dataset revision
-
-        Returns:
-            str
-        """
-        return self.cache_root / revision
-
     def initialize(self):
         """Method to configure a file cache for use.
 

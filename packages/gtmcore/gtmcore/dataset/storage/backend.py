@@ -76,7 +76,8 @@ class StorageBackend(metaclass=abc.ABCMeta):
         """Do any needed steps so we're ready to mount files into Project containers
 
         Note that this may be revision-specific, but revision can also be ignored. It's fine not to override this
-        method if no setup is needed!
+        method if no setup is needed! Also note that this implementation IS redundant with client_files_root, but some subclass implemenations offer
+        distinct functionality.
         """
         return self.client_files_root(revision)
 
