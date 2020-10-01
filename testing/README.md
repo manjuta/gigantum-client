@@ -54,6 +54,13 @@ $ gtm client stop
    Open `pytest.ini`\
    Configure `markers` based on your test\
    Configure `report` file name
+   
+#### Setting up Safari
+Safari requires some additional configuration to enable automation.
+
+First, open a terminal and run `/usr/bin/safaridriver --enable`. This will ask for your password.
+
+Then, in the Safari preferences window, click on the "Advanced" tab and then check "Show Develop menu in menu bar"
 
 #### Pytest available configuration options
 

@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1473"
+changelog:
+  - type: FIX
+    description: Fixes notification tray showing the wrong view when initiating a build message.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1472
