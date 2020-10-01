@@ -289,9 +289,6 @@ class DatasetWorkflow(GitWorkflow):
             feedback_callback:
             access_token:
             id_token:
-
-        Returns:
-
         """
         dispatcher_obj = Dispatcher()
 

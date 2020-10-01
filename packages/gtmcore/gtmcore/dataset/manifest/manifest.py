@@ -192,7 +192,7 @@ class Manifest(object):
         else:
             return int(config_val)
 
-    def hash_for_path(self, dataset_path: str) -> Path:
+    def hash_for_path(self, dataset_path: str) -> str:
         """Helper method to compute the absolute object path from the relative dataset path
 
         Args:

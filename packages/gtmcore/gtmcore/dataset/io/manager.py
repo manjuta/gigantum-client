@@ -22,10 +22,11 @@ class IOManager(object):
         if not isinstance(dataset.backend, GigantumObjectStore):
             raise GigantumException("IOManager can only handle network operations for GgiantumObjectStore,"
                                     f" not {type(dataset.backend)}")
+        self.backend: GigantumObjectStore = dataset.backend
         self.dataset = dataset
         self.manifest = manifest
 
-        self.push_dir = os.path.join(self.dataset.backend.cache_root, 'objects', '.push')
+        self.push_dir = os.path.join(self.backend.cache_root, 'objects', '.push')
 
         # Property to keep status state if needed when appending messages
         self._status_msg = ""
@@ -140,8 +141,8 @@ class IOManager(object):
         revision = self.dataset.current_revision
         for key in keys:
             path_hash = self.manifest.hash_for_path(key)
-            data = self.dataset.backend.hash_to_object_path(path_hash)
-            result.append(PullObject(object_path=data, revision=revision, dataset_path=key))
+            data = self.backend.hash_to_object_path(path_hash)
+            result.append(PullObject(object_path=str(data), revision=revision, dataset_path=key))
 
         return result
 
@@ -199,7 +200,7 @@ class IOManager(object):
 
             # Check if file exists in object cache and simply needs to be linked
             path_hash = self.manifest.hash_for_path(key)
-            obj_path = self.dataset.backend.hash_to_object_path(path_hash)
+            obj_path = self.backend.hash_to_object_path(path_hash)
             if os.path.isfile(obj_path):
                 os.link(obj_path, revision_path)
                 continue
