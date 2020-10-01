@@ -1,5 +1,5 @@
 import graphene
-from gtmcore.dataset.storage import get_storage_backend, storage_backend_metadata
+from gtmcore.dataset.storage import storage_backend_metadata
 
 
 class DatasetType(graphene.ObjectType):

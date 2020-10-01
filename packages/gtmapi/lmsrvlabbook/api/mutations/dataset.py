@@ -346,19 +346,20 @@ class DeleteDataset(graphene.ClientIDMutation):
             dataset_delete_job = InventoryManager().delete_dataset(logged_in_user, owner, dataset_name)
             local_deleted = True
 
-            # Schedule Job to clear file cache if dataset is no longer in use
-            job_metadata = {'method': 'clean_dataset_file_cache'}
-            job_kwargs = {
-                'logged_in_username': logged_in_user,
-                'dataset_owner': dataset_delete_job.namespace,
-                'dataset_name': dataset_delete_job.name,
-                'cache_location': dataset_delete_job.cache_root
-            }
+            if dataset_delete_job is not None:
+                # Schedule Job to clear file cache if dataset is no longer in use
+                job_metadata = {'method': 'clean_dataset_file_cache'}
+                job_kwargs = {
+                    'logged_in_username': logged_in_user,
+                    'dataset_owner': dataset_delete_job.namespace,
+                    'dataset_name': dataset_delete_job.name,
+                    'cache_location': dataset_delete_job.cache_root
+                }
 
-            dispatcher = Dispatcher()
-            job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache, metadata=job_metadata,
-                                               kwargs=job_kwargs)
-            logger.info(f"Dispatched clean_dataset_file_cache({owner}/{dataset_name}) to Job {job_key}")
+                dispatcher = Dispatcher()
+                job_key = dispatcher.dispatch_task(gtmcore.dispatcher.dataset_jobs.clean_dataset_file_cache, metadata=job_metadata,
+                                                   kwargs=job_kwargs)
+                logger.info(f"Dispatched clean_dataset_file_cache({owner}/{dataset_name}) to Job {job_key}")
 
         return DeleteDataset(local_deleted=local_deleted, remote_deleted=remote_deleted)
 

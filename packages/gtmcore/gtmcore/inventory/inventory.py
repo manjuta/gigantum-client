@@ -13,6 +13,7 @@ import glob
 
 from typing import Any, NamedTuple, Optional, Callable, List, Tuple, Dict
 
+from gtmcore.dataset.storage import GigantumObjectStore
 from gtmcore.exceptions import GigantumException
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as LABBOOK_CURRENT_SCHEMA
 from gtmcore.dataset.schemas import CURRENT_SCHEMA as DATASET_CURRENT_SCHEMA
@@ -458,9 +459,10 @@ class InventoryManager(object):
                 m = Manifest(ds, username)
                 if not ds.namespace:
                     raise ValueError("Dataset namespace required to schedule for cleanup")
-                datasets_to_schedule.append(DatasetCleanupJob(namespace=ds.namespace,
-                                                              name=ds.name,
-                                                              cache_root=m.cache_mgr.cache_root))
+                if isinstance(ds.backend, GigantumObjectStore):
+                    datasets_to_schedule.append(DatasetCleanupJob(namespace=ds.namespace,
+                                                                  name=ds.name,
+                                                                  cache_root=str(ds.backend.cache_root)))
             except Exception as err:
                 # Skip errors
                 logger.warning(f"Error occurred and ignored while processing submodules during Project delete: {err}")
@@ -598,7 +600,7 @@ class InventoryManager(object):
 
             return dataset
 
-    def delete_dataset(self, username: str, owner: str, dataset_name: str) -> DatasetCleanupJob:
+    def delete_dataset(self, username: str, owner: str, dataset_name: str) -> Optional[DatasetCleanupJob]:
         """Delete a Dataset from this Gigantum working directory.
 
         Args:
@@ -615,7 +617,6 @@ class InventoryManager(object):
 
         # Delete dataset contents from file cache
         m = Manifest(ds, username)
-        cache_root = m.cache_mgr.cache_root
         m = None  # type: ignore
 
         if 'WINDOWS_HOST' in os.environ:
@@ -626,9 +627,12 @@ class InventoryManager(object):
         # Delete dataset repository from working dir
         shutil.rmtree(target_dir, ignore_errors=True)
 
-        return DatasetCleanupJob(namespace=owner,
-                                 name=dataset_name,
-                                 cache_root=cache_root)
+        if isinstance(ds.backend, GigantumObjectStore):
+            return DatasetCleanupJob(namespace=owner,
+                                     name=dataset_name,
+                                     cache_root=str(ds.backend.cache_root))
+        else:
+            return None
 
     def put_dataset(self, path: str, username: str, owner: str) -> Dataset:
         try:

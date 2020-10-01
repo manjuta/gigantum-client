@@ -326,7 +326,7 @@ class Manifest(object):
             move_operations = []
             for f, h in zip(update_files, hash_result):
                 full_path = self.current_revision_dir / f
-                if full_path.is_file():
+                if full_path.is_file() and h is not None:
                     move_operations.append(self.dataset.backend.move_to_object_cache(full_path, h, rev))
             await asyncio.gather(*move_operations)
 
@@ -517,7 +517,7 @@ class Manifest(object):
             moved_files.append(self.gen_file_info(final_rel_path))
             for root, dirs, files in os.walk(dest_abs_path):
                 dirs.sort()
-                rt = root.replace(updated_revision_directory, '')
+                rt = root.replace(str(updated_revision_directory), '')
                 rt = self.dataset.make_path_relative(rt)
                 for d in dirs:
                     if d[-1] != os.path.sep:

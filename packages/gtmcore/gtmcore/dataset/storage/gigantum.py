@@ -19,7 +19,8 @@ import math
 
 from gtmcore.configuration import Configuration
 from gtmcore.dataset.storage.backend import StorageBackend
-from typing import Optional, List, Dict, Callable, NamedTuple, Any, OrderedDict, Tuple
+from typing import Optional, List, Dict, Callable, NamedTuple, Any, Tuple
+from collections import OrderedDict
 import os
 
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject

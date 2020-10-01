@@ -4,6 +4,7 @@ from pathlib import Path
 
 from pkg_resources import resource_filename
 from typing import List, Callable, Dict, Any
+from collections import OrderedDict
 import base64
 
 from gtmcore.configuration import Configuration
@@ -72,10 +73,10 @@ class StorageBackend(metaclass=abc.ABCMeta):
         """
         pass
 
-    def prepare_mount_source(self, revision: str) -> Path:
+    def prepare_mount_source(self, revision: str, manifest_dict: OrderedDict) -> Path:
         """Do any needed steps so we're ready to mount files into Project containers
 
-        Note that this may be revision-specific, but revision can also be ignored. It's fine not to override this
+        Note that this may be revision-specific, but revision and manifest_dict can be ignored. It's fine not to override this
         method if no setup is needed! Also note that this implementation IS redundant with client_files_root, but some subclass implemenations offer
         distinct functionality.
         """
