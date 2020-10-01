@@ -4,4 +4,5 @@ PyYAML==5.3.1
 selenium==3.141.0
 selenium-page-factory==2.0
 webdriver-manager==3.2.1
+msedge-selenium-tools
 docker
