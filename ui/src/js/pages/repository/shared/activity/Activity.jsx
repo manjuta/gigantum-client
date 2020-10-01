@@ -647,7 +647,6 @@ class Activity extends Component<Props> {
                       recordDates={recordDates}
                       section={section}
                       timestamp={timestamp}
-
                       addCluster={this._addCluster}
                       compressExpanded={this._compressExpanded}
                       getOrCreateRef={this._getOrCreateRef}

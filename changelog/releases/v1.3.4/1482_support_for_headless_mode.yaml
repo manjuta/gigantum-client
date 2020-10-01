@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1484"
+changelog:
+  - type: NEW
+    description: Added support for headless mode in selenium.

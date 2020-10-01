@@ -269,10 +269,8 @@ class CollaboratorSearch extends Component<Props> {
           className="CollaboratorsModal__input--collaborators"
           disabled={disableAdd}
           ref={(ref) => { this.collaboratorSearch = ref; }}
-
           onChange={evt => this._getUsers(evt)}
           onKeyUp={evt => this._getUsers(evt)}
-
           type="text"
           placeholder="Add Collaborator"
         />
