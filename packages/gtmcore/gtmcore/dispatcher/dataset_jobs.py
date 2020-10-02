@@ -322,7 +322,8 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, datase
         raise
 
 
-def pull_objects(keys: List[str], logged_in_username: str, dataset_owner: str, dataset_name: str, labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None) -> None:
+def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id_token: str,
+                 dataset_owner: str, dataset_name: str, labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None) -> None:
     """Method to pull a collection of objects from a dataset's backend.
 
     This runs the IOManager.pull_objects() method with `link_revision=False`. This is because this job can be run in
@@ -332,6 +333,8 @@ def pull_objects(keys: List[str], logged_in_username: str, dataset_owner: str, d
     Args:
         keys: List if file keys to download
         logged_in_username: username for the currently logged in user
+        access_token: Gigantum API access token
+        id_token: Gigantum API ID token
         dataset_owner: Owner of the dataset containing the files to download
         dataset_name: Name of the dataset containing the files to download
         labbook_owner: Owner of the labbook if this dataset is linked
@@ -349,9 +352,19 @@ def pull_objects(keys: List[str], logged_in_username: str, dataset_owner: str, d
                     f" labbook_name={labbook_name}")
 
         ds = load_dataset(logged_in_username, dataset_owner, dataset_name,
-                          labbook_owner, labbook_name, check_isinstance=GigantumObjectStore)
+                          labbook_owner, labbook_name)
+
+        backend = ds.backend
+        if not isinstance(backend, GigantumObjectStore):
+            raise GigantumException("pull_objects only supported for GigantumObjectStore")
+
+        backend.credentials = {
+            'access_token': access_token,
+            'id_token': id_token,
+        }
 
         m = Manifest(ds, logged_in_username)
+
         iom = IOManager(ds, m)
 
         result = iom.pull_objects(keys=keys, progress_update_fn=progress_update_callback, link_revision=False)
@@ -368,6 +381,7 @@ def pull_objects(keys: List[str], logged_in_username: str, dataset_owner: str, d
 
 
 def download_dataset_files(logged_in_username: str,
+                           access_token: str, id_token: str,
                            dataset_owner: str, dataset_name: str,
                            labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None,
                            all_keys: Optional[bool] = False, keys: Optional[List[str]] = None) -> None:
@@ -378,6 +392,8 @@ def download_dataset_files(logged_in_username: str,
 
     Args:
         logged_in_username: username for the currently logged in user
+        access_token: Gigantum API access token
+        id_token: Gigantum API ID token
         dataset_owner: Owner of the dataset containing the files to download
         dataset_name: Name of the dataset containing the files to download
         labbook_owner: Owner of the labbook if this dataset is linked
@@ -399,6 +415,16 @@ def download_dataset_files(logged_in_username: str,
                     f" labbook_name={labbook_name}, all_keys={all_keys}, keys={keys}")
 
         ds = load_dataset(logged_in_username, dataset_owner, dataset_name, labbook_owner, labbook_name)
+
+        backend = ds.backend
+        if not isinstance(backend, GigantumObjectStore):
+            raise GigantumException("pull_objects only supported for GigantumObjectStore")
+
+        backend.credentials = {
+            'access_token': access_token,
+            'id_token': id_token,
+        }
+
         m = Manifest(ds, logged_in_username)
         iom = IOManager(ds, m)
 
@@ -412,6 +438,8 @@ def download_dataset_files(logged_in_username: str,
                 job_kwargs = {
                     'keys': keys,
                     'logged_in_username': logged_in_username,
+                    'access_token': access_token,
+                    'id_token': id_token,
                     'dataset_owner': dataset_owner,
                     'dataset_name': dataset_name,
                     'labbook_owner': labbook_owner,
@@ -736,8 +764,7 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
 ## Utility functions
 
 def load_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str,
-                 labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None,
-                 check_isinstance: Optional[Union[type, Tuple[type]]] = None):
+                 labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None):
     """Load a dataset in a variety of contexts
 
     Args:
@@ -759,11 +786,6 @@ def load_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str,
     else:
         # this is a normal dataset. Load repo from working dir
         ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name)
-
-    if check_isinstance is not None:
-        backend = ds.backend
-        if not isinstance(backend, check_isinstance):
-            raise GigantumException(f'Functionality not supported for {type(ds).__name__}.')
 
     ds.namespace = dataset_owner
 

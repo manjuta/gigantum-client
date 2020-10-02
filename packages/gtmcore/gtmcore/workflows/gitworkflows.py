@@ -325,8 +325,6 @@ class DatasetWorkflow(GitWorkflow):
                         'dataset_owner': self.dataset.namespace,
                         'dataset_name': self.dataset.name
                     }
-                    # TODO DJWC - here and for other gigantum dataset operations, we need to make sure the tokens are
-                    #  available - probably in job metadata
                     job_metadata = {'dataset': f"{logged_in_username}|{self.dataset.namespace}|{self.dataset.name}",
                                     'method': 'pull_objects'}
 
