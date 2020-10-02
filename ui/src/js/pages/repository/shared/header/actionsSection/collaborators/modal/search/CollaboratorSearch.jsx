@@ -5,6 +5,8 @@ import classNames from 'classnames';
 // config
 import config from 'JS/config';
 import fetchQuery from 'JS/fetch';
+// context
+import ServerContext from 'Pages/ServerContext';
 // components
 import ButtonLoader from 'Components/buttonLoader/ButtonLoader';
 
@@ -104,9 +106,14 @@ class CollaboratorSearch extends Component<Props> {
   */
   _getUsers = (evt) => {
     const userInput = evt.target.value;
+    const { currentServer } = this.context;
 
-    if ((userInput.length > 2) && (evt.key !== 'Enter')) {
-      const apiURL = evt.target.value.indexOf('@') > 0 ? config.userAPI.getUserEmailQueryString(evt.target.value) : config.userAPI.getUsersQueryString(evt.target.value);
+    if (
+      (userInput.length > 2)
+      && (evt.key !== 'Enter')
+      && currentServer.userSearchUrl
+    ) {
+      const apiURL = evt.target.value.indexOf('@') > 0 ? config.userAPI.getUserEmailQueryString(evt.target.value, currentServer.userSearchUrl) : config.userAPI.getUsersQueryString(evt.target.value, currentServer.userSearchUrl);
 
       fetchQuery(
         apiURL,
@@ -220,6 +227,8 @@ class CollaboratorSearch extends Component<Props> {
       },
     );
   }
+
+  static contextType = ServerContext;
 
   render() {
     const {

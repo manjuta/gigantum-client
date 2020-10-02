@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1485"
+changelog:
+  - type: NON_USER_FACING
+    description: User search endpoint updated to use response from currentServer
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1479
