@@ -37,6 +37,8 @@ class TestUserIdentityQueries(object):
         snapshot.assert_match(fixture_working_dir[2].execute(query))
 
     def test_no_logged_in_user(self, fixture_working_dir, snapshot):
+        config_instance, _, client, _ = fixture_working_dir
+
         query = """
                 {
                     userIdentity{
@@ -54,13 +56,15 @@ class TestUserIdentityQueries(object):
         flask.g.user_obj = None
         flask.g.access_token = None
         flask.g.id_token = None
-        user_dir = os.path.join(fixture_working_dir[1], '.labmanager', 'identity')
+        user_dir = os.path.join(config_instance.app_workdir, '.labmanager', 'identity')
         os.remove(os.path.join(user_dir, 'cached_id_jwt'))
 
         # Run query
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        snapshot.assert_match(client.execute(query))
 
     def test_invalid_token(self, fixture_working_dir, snapshot):
+        config_instance, _, client, _ = fixture_working_dir
+
         query = """
                 {
                     userIdentity{
@@ -78,8 +82,8 @@ class TestUserIdentityQueries(object):
         flask.g.user_obj = None
         flask.g.access_token = "adsfasdfasdfasdfasdf"
         flask.g.id_token = "gfdhfghjghfjhgfghj"
-        user_dir = os.path.join(fixture_working_dir[1], '.labmanager', 'identity')
+        user_dir = os.path.join(config_instance.app_workdir, '.labmanager', 'identity')
         os.remove(os.path.join(user_dir, 'cached_id_jwt'))
 
         # Run query
-        snapshot.assert_match(fixture_working_dir[2].execute(query))
+        snapshot.assert_match(client.execute(query))

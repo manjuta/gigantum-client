@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1469"
+changelog:
+  - type: NEW
+    description: On start, user data directories are migrated to new organization based on server id
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1395

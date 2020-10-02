@@ -1,7 +1,7 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-import FavoriteCard from 'Components/shared/filesShared/FavoriteCard';
+import FavoriteCard from 'Pages/repository/shared/filesShared/FavoriteCard';
 import { mount, shallow } from 'enzyme';
 import Auth from 'JS/Auth/Auth';
 import history from 'JS/history';

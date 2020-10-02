@@ -1,5 +1,5 @@
 // src/AppPrerenderer.js
-import Routes from 'Components/Routes';
+import Routes from 'Pages/Routes';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 

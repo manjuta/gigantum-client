@@ -16,12 +16,12 @@ class TestAsyncHTTP(object):
     def test_get_many(self):
         request_list = list()
         for _ in range(500):
-            request_list.append(ConcurrentRequest("https://httpstat.us/200?sleep=100"))
+            request_list.append(ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/200?sleep=100"))
 
-        request_list.append(ConcurrentRequest("https://httpstat.us/200?sleep=5000"))
-        request_list.append(ConcurrentRequest("https://httpstat.us/200?sleep=5000"))
-        request_list.append(ConcurrentRequest("https://httpstat.us/200?sleep=5000"))
-        request_list.append(ConcurrentRequest("https://httpstat.us/200?sleep=5000"))
+        request_list.append(ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/200?sleep=5000"))
+        request_list.append(ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/200?sleep=5000"))
+        request_list.append(ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/200?sleep=5000"))
+        request_list.append(ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/200?sleep=5000"))
 
         t_start = time.time()
         arm = ConcurrentRequestManager()
@@ -32,12 +32,11 @@ class TestAsyncHTTP(object):
         print((t_stop - t_start))
 
         # If the requests ran serially, it should take 70 seconds. If concurrent it should be faster.
-        # Check to make sure it's less than 30 seconds due to variability in httpstat.us when we slam it
         assert (t_stop - t_start) < 35
 
         for r in result:
             assert r.status_code == 200
-            assert r.text == '200 OK'
+            assert r.json == {}
 
     def test_resolve_200(self):
         request1 = ConcurrentRequest('https://jsonplaceholder.typicode.com/todos/1')
@@ -47,13 +46,11 @@ class TestAsyncHTTP(object):
         assert 'userId' in response.json
 
     def test_api_error(self):
-        req = ConcurrentRequest("https://httpstat.us/404?sleep=100")
+        req = ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/404?sleep=100")
         arm = ConcurrentRequestManager()
         response = arm.resolve(req)
-        assert "json" not in response.content_type
-        assert "text" in response.content_type
+        assert "json" in response.content_type
         assert response.status_code == 404
-        assert response.text == '404 Not Found'
 
     def test_resolve_extraction(self):
         def test_extractor(data):
@@ -65,7 +62,7 @@ class TestAsyncHTTP(object):
         assert response.extracted_json == 1
 
     def test_timeout(self):
-        req = ConcurrentRequest("https://httpstat.us/200?sleep=10000", timeout=1)
+        req = ConcurrentRequest("https://httpstatus.gtm-dev.cloud/v1/200?sleep=10000", timeout=1)
         arm = ConcurrentRequestManager()
         with pytest.raises(asyncio.TimeoutError):
             arm.resolve(req)

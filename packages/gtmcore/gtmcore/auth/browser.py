@@ -15,7 +15,7 @@ class BrowserIdentityManager(IdentityManager):
         """Constructor"""
         # Call super constructor
         IdentityManager.__init__(self, config_obj=config_obj)
-        self.auth_dir = os.path.join(self.config.config['git']['working_directory'], '.labmanager', 'identity')
+        self.auth_dir = os.path.join(self.config.app_workdir, '.labmanager', 'identity')
 
     def is_authenticated(self, access_token: Optional[str] = None, id_token: Optional[str] = None) -> bool:
         """Method to check if the user is currently authenticated in the context of this identity manager

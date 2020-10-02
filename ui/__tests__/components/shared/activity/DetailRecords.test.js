@@ -4,7 +4,7 @@ import renderer from 'react-test-renderer';
 import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 // components
-import DetailRecords from 'Components/shared/activity/wrappers/card/DetailRecords';
+import DetailRecords from 'Pages/repository/shared/activity/wrappers/card/DetailRecords';
 // data
 import json from './__relaydata__/DetailRecords.json';
 

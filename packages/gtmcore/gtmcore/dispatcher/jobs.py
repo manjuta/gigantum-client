@@ -20,6 +20,7 @@ from gtmcore.environment import RepositoryManager
 from gtmcore.environment.repository import RepositoryLock
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
+from gtmcore.configuration import Configuration
 
 from gtmcore.dataset.storage.backend import UnmanagedStorageBackend
 
@@ -102,7 +103,7 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
         raise
 
 
-def import_labbook_from_remote(remote_url: str, username: str, config_file: str = None) -> str:
+def import_labbook_from_remote(remote_url: str, username: str) -> str:
     """Return the root directory of the newly imported Project
 
     Args:
@@ -110,7 +111,6 @@ def import_labbook_from_remote(remote_url: str, username: str, config_file: str 
           actual network location for our repository, like "https://username@repo.domain/owner/project.git/", as
           robustly as we can manage.
         username: username for currently logged in user
-        config_file: a copy of the parsed config file
 
     Returns:
         Path to project root directory
@@ -133,7 +133,7 @@ def import_labbook_from_remote(remote_url: str, username: str, config_file: str 
     update_meta(f"Importing Project from {remote.owner_repo!r}...")
 
     try:
-        wf = LabbookWorkflow.import_from_remote(remote, username, config_file)
+        wf = LabbookWorkflow.import_from_remote(remote, username)
     except Exception as e:
         update_meta(f"Could not import Project from {remote.remote_location}.")
         logger.exception(f"(Job {p}) Error on import_labbook_from_remote: {e}")
@@ -175,15 +175,13 @@ def export_dataset_as_zip(dataset_path: str, ds_export_directory: str) -> str:
         raise
 
 
-def import_labboook_from_zip(archive_path: str, username: str, owner: str,
-                             config_file: Optional[str] = None) -> str:
+def import_labboook_from_zip(archive_path: str, username: str, owner: str) -> str:
     """Method to import a labbook from a zip file
 
     Args:
         archive_path(str): Path to the uploaded zip
         username(str): Username
         owner(str): Owner username
-        config_file(str): Optional path to a labmanager config file
 
     Returns:
         str: directory path of imported labbook
@@ -199,11 +197,10 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting import_labbook_from_zip(archive_path={archive_path},"
-                f"username={username}, owner={owner}, config_file={config_file})")
+                f"username={username}, owner={owner})")
 
     try:
         lb = ZipExporter.import_labbook(archive_path, username, owner,
-                                        config_file=config_file,
                                         update_meta=update_meta)
         return lb.root_dir
     except Exception as e:
@@ -214,15 +211,13 @@ def import_labboook_from_zip(archive_path: str, username: str, owner: str,
             os.remove(archive_path)
 
 
-def import_dataset_from_zip(archive_path: str, username: str, owner: str,
-                            config_file: Optional[str] = None) -> str:
+def import_dataset_from_zip(archive_path: str, username: str, owner: str) -> str:
     """Method to import a dataset from a zip file
 
     Args:
         archive_path(str): Path to the uploaded zip
         username(str): Username
         owner(str): Owner username
-        config_file(str): Optional path to a labmanager config file
 
     Returns:
         str: directory path of imported labbook
@@ -238,11 +233,10 @@ def import_dataset_from_zip(archive_path: str, username: str, owner: str,
     p = os.getpid()
     logger = LMLogger.get_logger()
     logger.info(f"(Job {p}) Starting import_dataset_from_zip(archive_path={archive_path},"
-                f"username={username}, owner={owner}, config_file={config_file})")
+                f"username={username}, owner={owner})")
 
     try:
         lb = ZipExporter.import_dataset(archive_path, username, owner,
-                                        config_file=config_file,
                                         update_meta=update_meta)
         return lb.root_dir
     except Exception as e:
@@ -518,7 +512,7 @@ def update_unmanaged_dataset_from_local(logged_in_username: str, access_token: s
 
 
 def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, dataset_name: str,
-                             cache_location: str, config_file: str = None) -> None:
+                             cache_location: str) -> None:
     """Method to import a dataset from a zip file
 
     Args:
@@ -526,7 +520,6 @@ def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, datase
         dataset_owner: Owner of the labbook if this dataset is linked
         dataset_name: Name of the labbook if this dataset is linked
         cache_location: Absolute path to the file cache (inside the container) for this dataset
-        config_file:
 
     Returns:
         None
@@ -538,7 +531,7 @@ def clean_dataset_file_cache(logged_in_username: str, dataset_owner: str, datase
         logger.info(f"(Job {p}) Starting clean_dataset_file_cache(logged_in_username={logged_in_username},"
                     f"dataset_owner={dataset_owner}, dataset_name={dataset_name}")
 
-        im = InventoryManager(config_file=config_file)
+        im = InventoryManager()
 
         # Check for dataset
         try:

@@ -139,7 +139,7 @@ class JupyterLabMonitor(DevEnvMonitor):
 class JupyterLabNotebookMonitor(ActivityMonitor):
     """Class to monitor a notebook kernel for activity to be processed."""
 
-    def __init__(self, user: str, owner: str, labbook_name: str, monitor_key: str, config_file: str = None,
+    def __init__(self, user: str, owner: str, labbook_name: str, monitor_key: str,
                  author_name: Optional[str] = None, author_email: Optional[str] = None) -> None:
         """Constructor requires info to load the lab book
 
@@ -152,7 +152,7 @@ class JupyterLabNotebookMonitor(ActivityMonitor):
             author_email(str): Email of the user starting this activity monitor
         """
         # Call super constructor
-        ActivityMonitor.__init__(self, user, owner, labbook_name, monitor_key, config_file,
+        ActivityMonitor.__init__(self, user, owner, labbook_name, monitor_key,
                                  author_name=author_name, author_email=author_email)
 
         # For now, register processors by default

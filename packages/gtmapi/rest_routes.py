@@ -108,3 +108,18 @@ def savehook(username: str, owner: str, labbook_name: str):
     except Exception as err:
         logger.error(err)
         return abort(400)
+
+
+@rest_routes.route(f"/servers")
+def servers():
+    """Unauthorized endpoint to check for configured servers. Returns the name and ID of the server for selection
+    when logging in. Also indicates the current server (if one is selected)
+    """
+    server_list = []
+    for s in current_app.config['LABMGR_CONFIG'].list_available_servers():
+        server_list.append({"server_id": s[0],
+                            "name": s[1],
+                            "login_url": s[2]})
+
+    return jsonify({"available_servers": server_list,
+                    "current_server": current_app.config['LABMGR_CONFIG'].get_current_server_id()})

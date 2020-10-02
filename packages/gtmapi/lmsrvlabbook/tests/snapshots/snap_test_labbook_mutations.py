@@ -289,3 +289,23 @@ This is my readme
         }
     }
 }
+
+snapshots['TestLabBookServiceMutations.test_create_labbook_already_exists 4'] = {
+    'data': {
+        'createLabbook': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 4
+                }
+            ],
+            'message': 'LabBook `test-lab-duplicate` already exists locally. Choose a new LabBook name',
+            'path': [
+                'createLabbook'
+            ]
+        }
+    ]
+}

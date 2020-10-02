@@ -30,7 +30,7 @@ class TestIdentity(object):
 
     def test_get_identity_manager_errors(self, mock_config_file_with_auth):
         """Testing get_identity_manager error handling"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         config.config['auth']['identity_manager'] = "asdfasdf"
 
         with pytest.raises(ValueError):
@@ -48,13 +48,13 @@ class TestIdentity(object):
 
     def test_get_identity_manager(self, mock_config_file_with_auth):
         """test getting an identity manager"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
 
         mgr = get_identity_manager(config)
 
         assert type(mgr) == LocalIdentityManager
         assert mgr.config == config
-        assert mgr.auth_dir == os.path.join(mock_config_file_with_auth[2], '.labmanager', 'identity')
+        assert mgr.auth_dir == os.path.join(config.app_workdir, '.labmanager', 'identity')
         assert mgr.user is None
         assert mgr.rsa_key is None
         assert mgr._user is None

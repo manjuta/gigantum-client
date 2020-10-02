@@ -4,7 +4,7 @@ import { configure, shallow, mount } from 'enzyme';
 import sinon from 'sinon';
 import history from 'JS/history';
 import { StaticRouter, Link } from 'react-router';
-import LocalLabbooksComp from 'Components/dashboard/labbooks/localLabbooks/LocalLabbooks';
+import LocalLabbooksComp from 'Pages/dashboard/labbooks/localLabbooks/LocalLabbooks';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 import { MemoryRouter } from 'react-router-dom';
 import environment from 'JS/createRelayEnvironment';

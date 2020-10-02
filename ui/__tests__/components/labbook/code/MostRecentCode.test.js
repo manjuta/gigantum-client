@@ -5,7 +5,7 @@
       import {mount} from 'enzyme';
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       // components;
-      import MostRecentCode from 'Components/labbook/code/MostRecentCode';
+      import MostRecentCode from 'Pages/repository/labbook/code/MostRecentCode';
 
       test('Test MostRecentCode', () => {
         const wrapper = renderer.create(<MostRecentCode />);

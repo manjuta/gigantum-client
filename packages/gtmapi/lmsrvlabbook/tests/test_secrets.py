@@ -35,7 +35,7 @@ def mock_upload_key():
 class TestSecretsQueries:
     def test_secrets_vault_query(self, fixture_working_dir_env_repo_scoped):
         client = fixture_working_dir_env_repo_scoped[2]
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "unittest-create-secret")
         sec_store = SecretStore(lb, "default")
         container_dst = '/tmp/secrets1'
@@ -86,7 +86,7 @@ class TestSecretsQueries:
 class TestSecretsMutations:
     def test_insert_secrets_entry(self, fixture_working_dir_env_repo_scoped):
         client = fixture_working_dir_env_repo_scoped[2]
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "unittest-mutation-create-secret")
         query = """
         mutation insert {
@@ -124,7 +124,7 @@ class TestSecretsMutations:
 
     def test_remove_secrets_entry(self, fixture_working_dir_env_repo_scoped):
         client = fixture_working_dir_env_repo_scoped[2]
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "unittest-mutation-remove-secret")
         SecretStore(lb, "default")['remove.key'] = '/mnt/nowhere'
         SecretStore(lb, "default")['absent.key'] = '/mnt/nowhere2'
@@ -153,7 +153,53 @@ class TestSecretsMutations:
         n = r['data']['removeSecretsEntry']['environment']['secretsFileMapping']['edges']
         assert len(n) == 1
         assert n[0]['node']['filename'] == 'absent.key'
-        assert n[0]['node']['isPresent'] == False
+        assert n[0]['node']['isPresent'] is False
+
+    def test_delete_secrets_file(self, fixture_working_dir_env_repo_scoped):
+        client = fixture_working_dir_env_repo_scoped[2]
+        im = InventoryManager()
+        lb = im.create_labbook("default", "default", "unittest-mutation-delete-secret")
+        secstore = SecretStore(lb, "default")
+        secstore['remove.key'] = '/mnt/nowhere'
+        secstore['absent.key'] = '/mnt/nowhere2'
+
+        with tempfile.TemporaryDirectory() as tdir:
+            path = os.path.join(tdir, 'remove.key')
+            f1 = open(path, 'w')
+            f1.write('<<<keydata>>>')
+            f1.close()
+            secstore.insert_file(f1.name)
+
+        query = """
+        mutation delete {
+            deleteSecretsFile(input: {
+                owner: "default",
+                labbookName: "unittest-mutation-delete-secret",
+                filename: "remove.key",
+            }) {
+                environment {
+                    secretsFileMapping {
+                        edges {
+                            node {
+                                filename
+                                mountPath
+                                isPresent
+                            }
+                        }
+                    }
+                }
+            }
+        }"""
+        r = client.execute(query)
+        assert 'errors' not in r
+        n = r['data']['deleteSecretsFile']['environment']['secretsFileMapping']['edges']
+        assert n[0]['node']['filename'] == 'absent.key'
+        assert n[0]['node']['isPresent'] is False
+        assert n[0]['node']['mountPath'] == '/mnt/nowhere2'
+
+        assert n[1]['node']['filename'] == 'remove.key'
+        assert n[1]['node']['isPresent'] is False
+        assert n[1]['node']['mountPath'] == '/mnt/nowhere'
 
     def test_upload_secrets_file(self, fixture_working_dir, mock_upload_key):
 
@@ -164,7 +210,7 @@ class TestSecretsMutations:
 
         client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "unittest-upload-secret")
         secret_store = SecretStore(lb, "default")
         secret_store['id_rsa'] = '/opt/secrets/location/in/container'
@@ -222,50 +268,3 @@ class TestSecretsMutations:
         d = secret_store.as_mount_dict
         uploaded_hash = hashlib.md5(open(f'{list(d.keys())[0]}', 'rb').read()).hexdigest()
         assert initial_hash == uploaded_hash
-
-    def test_delete_secrets_file(self, fixture_working_dir_env_repo_scoped):
-        client = fixture_working_dir_env_repo_scoped[2]
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
-        lb = im.create_labbook("default", "default", "unittest-mutation-delete-secret")
-        secstore = SecretStore(lb, "default")
-        secstore['remove.key'] = '/mnt/nowhere'
-        secstore['absent.key'] = '/mnt/nowhere2'
-
-        with tempfile.TemporaryDirectory() as tdir:
-            path = os.path.join(tdir, 'remove.key')
-            f1 = open(path, 'w')
-            f1.write('<<<keydata>>>')
-            f1.close()
-            secstore.insert_file(f1.name)
-
-        query = """
-        mutation delete {
-            deleteSecretsFile(input: {
-                owner: "default",
-                labbookName: "unittest-mutation-delete-secret",
-                filename: "remove.key",
-            }) {
-                environment {
-                    secretsFileMapping {
-                        edges {
-                            node {
-                                filename
-                                mountPath
-                                isPresent
-                            }
-                        }
-                    }
-                }
-            }
-        }"""
-        r = client.execute(query)
-        assert 'errors' not in r
-        n = r['data']['deleteSecretsFile']['environment']['secretsFileMapping']['edges']
-        assert n[0]['node']['filename'] == 'absent.key'
-        assert n[0]['node']['isPresent'] is False
-        assert n[0]['node']['mountPath'] == '/mnt/nowhere2'
-
-        assert n[1]['node']['filename'] == 'remove.key'
-        assert n[1]['node']['isPresent'] is False
-        assert n[1]['node']['mountPath'] == '/mnt/nowhere'
-

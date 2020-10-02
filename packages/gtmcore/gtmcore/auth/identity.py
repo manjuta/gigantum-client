@@ -13,6 +13,7 @@ from gtmcore.auth import User
 from gtmcore.dispatcher import (Dispatcher, jobs)
 from gtmcore.workflows.gitlab import check_and_add_user
 from gtmcore.workflows import ZipExporter
+from gtmcore.inventory.inventory import InventoryManager
 
 
 logger = LMLogger.get_logger()
@@ -97,7 +98,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
             None
         """
         demo_labbook_name = 'my-first-project.zip'
-        working_directory = self.config.config['git']['working_directory']
+        working_directory = InventoryManager().inventory_root
 
         if not username:
             raise ValueError("Cannot check first login without a username set")
@@ -139,8 +140,8 @@ class IdentityManager(metaclass=abc.ABCMeta):
                             f"Docker image for labbook `{demo_lb.name}`")
 
             # Add user to backend if needed
-            remote_config = self.config.get_remote_configuration()
-            check_and_add_user(hub_api=remote_config['hub_api'],
+            server_config = self.config.get_server_configuration()
+            check_and_add_user(hub_api=server_config.hub_api_url,
                                access_token=access_token, id_token=id_token)
 
     def _get_jwt_public_key(self, id_token: str) -> Optional[Dict[str, str]]:
@@ -152,7 +153,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
         Returns:
             dict
         """
-        key_path = os.path.join(self.config.config['git']['working_directory'], '.labmanager', 'identity')
+        key_path = os.path.join(self.config.app_workdir, '.labmanager', 'identity')
         if not os.path.exists(key_path):
             os.makedirs(key_path)
 
@@ -164,8 +165,8 @@ class IdentityManager(metaclass=abc.ABCMeta):
 
         else:
             try:
-                url = "https://" + self.config.config['auth']['provider_domain'] + "/.well-known/jwks.json"
-                response = requests.get(url)
+                auth_config = self.config.get_auth_configuration()
+                response = requests.get(auth_config.public_key_url)
             except Exception as err:
                 logger.info(type(err))
                 logger.info(err)
@@ -260,18 +261,19 @@ class IdentityManager(metaclass=abc.ABCMeta):
 
         if self.rsa_key:
             try:
+                auth_config = self.config.get_auth_configuration()
                 if limited_validation is False:
                     payload = jwt.decode(token, self.rsa_key,
-                                         algorithms=self.config.config['auth']['signing_algorithm'],
+                                         algorithms=auth_config.signing_algorithm,
                                          audience=audience,
-                                         issuer="https://" + self.config.config['auth']['provider_domain'] + "/",
+                                         issuer=auth_config.issuer,
                                          access_token=access_token,
                                          options={"verify_at_hash": self.validate_at_hash_claim})
                 else:
                     payload = jwt.decode(token, self.rsa_key,
-                                         algorithms=self.config.config['auth']['signing_algorithm'],
+                                         algorithms=auth_config.signing_algorithm,
                                          audience=audience,
-                                         issuer="https://" + self.config.config['auth']['provider_domain'] + "/",
+                                         issuer=auth_config.issuer,
                                          options={"verify_exp": False,
                                                   "verify_at_hash": False})
 
@@ -281,6 +283,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
                 raise AuthenticationError({"code": "token_expired",
                                            "description": "token is expired"}, 401)
             except jwt.JWTClaimsError as err:
+                auth_config = self.config.get_auth_configuration()
                 # Two-stage provider domain update. Can be removed after the second stage has been deployed
                 if err.args[0] == 'Invalid issuer':
                     # There was a problem with the issuer of the token. Assume issuer has been moved into the
@@ -288,16 +291,16 @@ class IdentityManager(metaclass=abc.ABCMeta):
                     try:
                         if limited_validation is False:
                             payload = jwt.decode(token, self.rsa_key,
-                                                 algorithms=self.config.config['auth']['signing_algorithm'],
+                                                 algorithms=auth_config.signing_algorithm,
                                                  audience=audience,
-                                                 issuer="https://auth.gigantum.com/",
+                                                 issuer="https://gigantum.auth0.com/",
                                                  access_token=access_token,
                                                  options={"verify_at_hash": self.validate_at_hash_claim})
                         else:
                             payload = jwt.decode(token, self.rsa_key,
-                                                 algorithms=self.config.config['auth']['signing_algorithm'],
+                                                 algorithms=auth_config.signing_algorithm,
                                                  audience=audience,
-                                                 issuer="https://auth.gigantum.com/",
+                                                 issuer="https://gigantum.auth0.com/",
                                                  options={"verify_exp": False,
                                                           "verify_at_hash": False})
 

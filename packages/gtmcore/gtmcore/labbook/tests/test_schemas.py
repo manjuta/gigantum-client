@@ -19,11 +19,11 @@ class TestLabBook(object):
             temp_lb_path = os.path.join(td, 'test')
 
             # Tests backwards compatibility (test.zip is a very old schema 1 LabBook)
-            lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(temp_lb_path)
+            lb = InventoryManager().load_labbook_from_directory(temp_lb_path)
             assert lb.schema < CURRENT_SCHEMA
 
             # Test schema migration -- migrate and then refresh.
             migrate_schema_to_current(lb.root_dir)
-            lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(lb.root_dir)
+            lb = InventoryManager().load_labbook_from_directory(lb.root_dir)
             assert validate_labbook_schema(CURRENT_SCHEMA, lb_data=lb.data)
             assert lb.schema == CURRENT_SCHEMA

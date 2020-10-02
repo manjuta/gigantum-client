@@ -1,5 +1,5 @@
 import React from 'react';
-import Overview from 'Components/labbook/overview/Overview';
+import Overview from 'Pages/repository/labbook/overview/Overview';
 import { shallow, mount } from 'enzyme';
 import renderer from 'react-test-renderer';
 import { MemoryRouter } from 'react-router-dom';

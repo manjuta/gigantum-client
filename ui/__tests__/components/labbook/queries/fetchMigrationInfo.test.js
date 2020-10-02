@@ -5,7 +5,7 @@
       import {mount} from 'enzyme';
       import relayTestingUtils from '@gigantum/relay-testing-utils';
       // components;
-      import fetchMigrationInfo from 'Components/labbook/queries/fetchMigrationInfo';
+      import fetchMigrationInfo from 'Pages/repository/labbook/queries/fetchMigrationInfo';
 
       test('Test fetchMigrationInfo', () => {
         const wrapper = renderer.create(<fetchMigrationInfo />);

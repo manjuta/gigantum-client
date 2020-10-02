@@ -3,7 +3,7 @@ import React from 'react';
 import renderer from 'react-test-renderer';
 import { mount } from 'enzyme';
 
-import Branches from 'Components/labbook/branches/Branches';
+import Branches from 'Pages/repository/labbook/branches/Branches';
 
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 import json from './__relaydata__/Branches.json';

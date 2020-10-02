@@ -20,7 +20,7 @@ class LocalIdentityManager(IdentityManager):
         # Call super constructor
         IdentityManager.__init__(self, config_obj=config_obj)
 
-        self.auth_dir = os.path.join(self.config.config['git']['working_directory'], '.labmanager', 'identity')
+        self.auth_dir = os.path.join(self.config.app_workdir, '.labmanager', 'identity')
 
         self._lock_redis_client: Optional[StrictRedis] = None
 
@@ -67,7 +67,8 @@ class LocalIdentityManager(IdentityManager):
             return False
         else:
             try:
-                _ = self.validate_jwt_token(access_token, self.config.config['auth']['audience'])
+                auth_config = self.config.get_auth_configuration()
+                _ = self.validate_jwt_token(access_token, auth_config.audience)
             except AuthenticationError:
                 return False
 
@@ -94,7 +95,8 @@ class LocalIdentityManager(IdentityManager):
                 raise AuthenticationError(err_dict, 401)
 
             # Validate JWT token
-            token_payload = self.validate_jwt_token(id_token, self.config.config['auth']['client_id'],
+            auth_config = self.config.get_auth_configuration()
+            token_payload = self.validate_jwt_token(id_token, auth_config.auth0_client_id,
                                                     access_token=access_token)
 
             # Create user identity instance
@@ -122,16 +124,17 @@ class LocalIdentityManager(IdentityManager):
         # Removed cached identity.
         data_file = os.path.join(self.auth_dir, 'cached_id_jwt')
         if os.path.exists(data_file):
+            logger.info("Removed cached user identity from local storage.")
             os.remove(data_file)
 
         # Remove the public key. If it even happens to get updated, this is a path to automatically fix
         data_file = os.path.join(self.auth_dir, 'jwks.json')
         if os.path.exists(data_file):
+            logger.info("Removed cached jwks file.")
             os.remove(data_file)
 
         self.user = None
         self.rsa_key = None
-        logger.info("Removed user identity from local storage.")
 
     def _load_user(self, id_token: Optional[str]) -> Optional[User]:
         """Method to load a users's ID token from disk
@@ -155,7 +158,8 @@ class LocalIdentityManager(IdentityManager):
                     return None
 
             # Load data from JWT with limited checks due to possible timeout and lack of access token
-            token_payload = self.validate_jwt_token(current_cached_id_token, self.config.config['auth']['client_id'],
+            auth_config = self.config.get_auth_configuration()
+            token_payload = self.validate_jwt_token(current_cached_id_token, auth_config.auth0_client_id,
                                                     limited_validation=True)
 
             # Create user identity instance

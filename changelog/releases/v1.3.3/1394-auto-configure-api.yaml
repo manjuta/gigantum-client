@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1438"
+changelog:
+  - type: NEW
+    description: Adds multi-server support to gigantum-client.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1394

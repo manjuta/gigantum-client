@@ -14,6 +14,7 @@ from configuration.configuration import ConfigurationManager
 from webdriver_manager.utils import ChromeType
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import platform
+from msedge.selenium_tools import Edge, EdgeOptions
 
 
 @pytest.yield_fixture(params=ConfigurationManager.getInstance().get_app_setting("browsers"), scope="class",
@@ -61,6 +62,11 @@ def __setup_chrome() -> webdriver:
     """
     chrome_prefs = {}
     chrome_options = webdriver.ChromeOptions()
+    if ConfigurationManager.getInstance().get_app_setting("headless"):
+        chrome_options.add_argument("headless")
+    if ConfigurationManager.getInstance().get_app_setting("window_size"):
+        window_size = ConfigurationManager.getInstance().get_app_setting("window_size")
+        chrome_options.add_argument(f"--window-size={window_size}")
     if ConfigurationManager.getInstance().get_app_setting("incognito"):
         chrome_options.add_argument("--incognito")
     if platform.system() == "Darwin" or platform.system() == "Linux":
@@ -90,7 +96,11 @@ def __setup_firefox() -> webdriver:
     firefox_profile.set_preference("browser.privatebrowsing.autostart",
                                    ConfigurationManager.getInstance().get_app_setting("incognito"))
     firefox_profile.set_preference("dom.disable_open_during_load", False)
-    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(), firefox_profile=firefox_profile)
+    firefox_options = webdriver.FirefoxOptions()
+    if ConfigurationManager.getInstance().get_app_setting("headless"):
+        firefox_options.add_argument('-headless')
+    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(), firefox_profile=firefox_profile,
+                               firefox_options=firefox_options)
     driver.maximize_window()
     return driver
 
@@ -100,13 +110,25 @@ def __setup_edge() -> webdriver:
 
     Returns: A new local edge driver.
     """
+    edge_options = EdgeOptions()
+    edge_options.use_chromium = True
     capability = DesiredCapabilities.EDGE
     capability["se:ieOptions"] = {}
     if ConfigurationManager.getInstance().get_app_setting("incognito"):
         capability["se:ieOptions"]['ie.forceCreateProcessApi'] = True
         capability["se:ieOptions"]['ie.browserCommandLineSwitches'] = '-private'
         capability["se:ieOptions"]["ie.ensureCleanSession"] = True
-    driver = webdriver.Edge(EdgeChromiumDriverManager().install(), capabilities=capability)
+    if ConfigurationManager.getInstance().get_app_setting("headless"):
+        edge_options.add_argument("headless")
+    if ConfigurationManager.getInstance().get_app_setting("window_size"):
+        window_size = ConfigurationManager.getInstance().get_app_setting("window_size")
+        edge_options.add_argument(f"--window-size={window_size}")
+    driver_version = ConfigurationManager.getInstance().get_app_setting("edge_driver_version")
+    if driver_version.strip():
+        driver = Edge(EdgeChromiumDriverManager(driver_version).install(), capabilities=capability,
+                      options=edge_options)
+    else:
+        driver = Edge(EdgeChromiumDriverManager().install(), capabilities=capability, options=edge_options)
     driver.maximize_window()
     return driver
 

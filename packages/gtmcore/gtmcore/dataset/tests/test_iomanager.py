@@ -9,7 +9,7 @@ import responses
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file,\
-    USERNAME, helper_compress_file, mock_dataset_with_manifest_bg_tests
+    USERNAME, helper_compress_file, mock_dataset_with_manifest_bg_tests, mock_dataset_head
 from gtmcore.fixtures.fixtures import _create_temp_work_dir, mock_config_file_background_tests
 from gtmcore.dataset.io import PushResult, PushObject
 
@@ -17,15 +17,6 @@ from gtmcore.dataset.io import PushResult, PushObject
 def chunk_update_callback(completed_chunk: bool):
     """Mock callback for collecting chunk feedback"""
     assert completed_chunk is True
-
-
-@pytest.fixture()
-def mock_dataset_head():
-    """A pytest fixture that creates a dataset in a temp working dir. Deletes directory after test"""
-    with responses.RequestsMock() as rsps:
-        rsps.add(responses.HEAD, 'https://api.gigantum.com/object-v1/tester/dataset-1',
-                 headers={'x-access-level': 'a'}, status=200)
-        yield
 
 
 class TestIOManager(object):
@@ -140,7 +131,7 @@ class TestIOManager(object):
         _, obj2 = obj_to_push[1].object_path.rsplit('/', 1)
 
         with aioresponses() as mocked_responses:
-            mocked_responses.head(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}',
+            mocked_responses.head(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}',
                                   headers={
                                          "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
                                          "namespace": ds.namespace,
@@ -149,7 +140,7 @@ class TestIOManager(object):
                                          "dataset": ds.name
                                   },
                                   status=200)
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
+            mocked_responses.put(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
                                          "namespace": ds.namespace,
@@ -162,7 +153,7 @@ class TestIOManager(object):
                                  headers={'Etag': 'asdfasdf'},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
+            mocked_responses.put(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
                                  payload={
                                   "presigned_url": f"https://dummyurl.com/{obj2}?params=1",
                                   "namespace": ds.namespace,
@@ -209,7 +200,7 @@ class TestIOManager(object):
         assert obj2 == obj3
 
         with aioresponses() as mocked_responses:
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
+            mocked_responses.put(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
                                  payload={
                                      "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
                                      "namespace": ds.namespace,
@@ -222,7 +213,7 @@ class TestIOManager(object):
                                  headers={'Etag': 'asdfasdf'},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
+            mocked_responses.put(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
                                  payload={
                                      "presigned_url": f"https://dummyurl.com/{obj2}?params=1",
                                      "namespace": ds.namespace,
@@ -266,7 +257,7 @@ class TestIOManager(object):
         _, obj2 = obj_to_push[1].object_path.rsplit('/', 1)
 
         with aioresponses() as mocked_responses:
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
+            mocked_responses.put(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj1}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj1}?params=1",
                                          "namespace": ds.namespace,
@@ -279,7 +270,7 @@ class TestIOManager(object):
                                  headers={'Etag': 'asdfasdf'},
                                  status=200)
 
-            mocked_responses.put(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
+            mocked_responses.put(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj2}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj2}?params=1",
                                          "namespace": ds.namespace,
@@ -346,7 +337,7 @@ class TestIOManager(object):
         assert os.path.isfile(obj2_source) is True
 
         with aioresponses() as mocked_responses:
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
+            mocked_responses.get(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_1}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj_id_1}?params=1",
                                          "namespace": ds.namespace,
@@ -360,7 +351,7 @@ class TestIOManager(object):
                                      body=data1.read(), status=200,
                                      content_type='application/octet-stream')
 
-            mocked_responses.get(f'https://api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
+            mocked_responses.get(f'https://test.api.gigantum.com/object-v1/{ds.namespace}/{ds.name}/{obj_id_2}',
                                  payload={
                                          "presigned_url": f"https://dummyurl.com/{obj_id_2}?params=1",
                                          "namespace": ds.namespace,

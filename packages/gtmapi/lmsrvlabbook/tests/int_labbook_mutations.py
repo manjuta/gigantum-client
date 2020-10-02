@@ -105,7 +105,7 @@ class TestLabbookMutation(object):
         assert api_server_proc.is_alive()
 
         lb_name = "mutation-export-import-unittest"
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", lb_name, description="Import/Export Mutation Testing.")
         cm = ComponentManager(lb)
         cm.add_base(ENV_UNIT_TEST_REPO, 'ut-busybox', 0)
