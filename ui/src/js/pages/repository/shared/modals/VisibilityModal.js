@@ -242,7 +242,8 @@ class VisibilityModal extends Component<Props> {
       visibility,
     } = this.props;
     const { isPublic } = this.state;
-    const publishStatement = header === 'Publish' ? 'Once published, the Project will be visible in the Gigantum Hub tab on the Projects listing Page.' : '';
+    const { currentServer } = this.context;
+    const publishStatement = header === 'Publish' ? `Once published, the Project will be visible in the '${currentServer.name}' tab on the Projects listing Page.` : '';
     const message = `You are about to change the visibility of the Project. ${publishStatement}`;
 
     return (

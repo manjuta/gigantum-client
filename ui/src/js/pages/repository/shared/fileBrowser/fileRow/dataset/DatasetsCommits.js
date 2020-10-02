@@ -1,6 +1,8 @@
 // vendor
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+// context
+import ServerContext from 'Pages/ServerContext';
 
 class DatasetsCommits extends PureComponent {
   state = {
@@ -76,6 +78,8 @@ class DatasetsCommits extends PureComponent {
     this.setState({ popupVisible: false });
   }
 
+  static contextType = ServerContext;
+
   render() {
     const { state } = this;
     const {
@@ -86,11 +90,12 @@ class DatasetsCommits extends PureComponent {
      toggleTooltip,
      isLocked,
     } = this.props;
+    const { currentServer } = this.context;
     const LinkText = (commitsBehind === null)
-      ? 'This Dataset has been deleted from Gigantum Hub. Click to unlink.'
+      ? `This Dataset has been deleted from ${currentServer.name}. Click to unlink.`
       : 'Link to Latest Version';
     const infoText = (commitsBehind === null)
-      ? 'This Dataset has been removed from Gigantum Hub, you can no longer download or sync this dataset. Unlinking this dataset is recommended.'
+      ? `This Dataset has been removed from ${currentServer.name}, you can no longer download or sync this dataset. Unlinking this dataset is recommended.`
       : `Dataset link is ${commitsBehind} commits behind. Select "Link to latest version" to update to the latest dataset version.`;
     // declare css here
     const commitsCSS = classNames({

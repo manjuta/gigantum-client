@@ -73,7 +73,7 @@ const CONFIG = {
       return encodeURI(apiURL);
     },
   },
-  getTooltipText: section => tips[section],
+  getTooltipText: (section, serverName) => tips[section].replace('Gigantum Hub', serverName),
   /**
     @param {number} bytes
     converts bytes into suitable units
