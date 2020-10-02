@@ -7,6 +7,7 @@ from typing import Optional, Callable, cast, List
 from humanfriendly import format_size
 
 from gtmcore.configuration.utils import call_subprocess
+from gtmcore.dataset.storage import GigantumObjectStore
 from gtmcore.gitlib import RepoLocation
 from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
@@ -267,6 +268,9 @@ class LabbookWorkflow(GitWorkflow):
 
 
 class DatasetWorkflow(GitWorkflow):
+    # We should always get a Dataset repository if we're using DatasetWorkflow
+    repository: Dataset
+
     @property
     def dataset(self):
         return cast(Dataset, self.repository)
@@ -278,6 +282,11 @@ class DatasetWorkflow(GitWorkflow):
         repo = gitworkflows_utils.clone_repo(remote_url=remote.remote_location, username=username, owner=remote.owner,
                                              load_repository=inv_manager.load_dataset_from_directory,
                                              put_repository=inv_manager.put_dataset)
+
+        # Mostly for mypy
+        if not isinstance(repo, Dataset):
+            raise GigantumException(f"Dataset import from {remote.remote_location} did not obtain a Dataset!")
+
         return cls(repo)
 
     def _push_dataset_objects(self, logged_in_username: str,
@@ -290,10 +299,15 @@ class DatasetWorkflow(GitWorkflow):
             access_token:
             id_token:
         """
+        # This could potentially be removed if we improve the typing somehow - perhaps by pushing this functionality
+        # into the backend
+        backend = self.dataset.backend
+        if not isinstance(backend, GigantumObjectStore):
+            raise GigantumException(f'Trying to push objects to {type(self.dataset.backend)}')
+
         dispatcher_obj = Dispatcher()
 
         try:
-            self.dataset.backend.set_default_configuration(logged_in_username, access_token, id_token)
             m = Manifest(self.dataset, logged_in_username)
             iom = IOManager(self.dataset, m)
 
@@ -380,14 +394,16 @@ class DatasetWorkflow(GitWorkflow):
                 public: bool = False, feedback_callback: Callable = lambda _ : None,
                 id_token: Optional[str] = None):
         super().publish(username, access_token, remote, public, feedback_callback, id_token)
-        self._push_dataset_objects(username, feedback_callback, access_token, id_token)
+        if isinstance(self.dataset.backend, GigantumObjectStore):
+            self._push_dataset_objects(username, feedback_callback, access_token, id_token)
 
     def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
              feedback_callback: Callable = lambda _ : None, pull_only: bool = False,
              access_token: Optional[str] = None, id_token: Optional[str] = None):
         v = super().sync(username, remote, override, feedback_callback, pull_only,
                          access_token, id_token)
-        self._push_dataset_objects(username, feedback_callback, access_token, id_token)
+        if isinstance(self.dataset.backend, GigantumObjectStore):
+            self._push_dataset_objects(username, feedback_callback, access_token, id_token)
 
         # Invalidate manifest cached data because the manifest can change on sync
         manifest = Manifest(self.dataset, username)

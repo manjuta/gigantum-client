@@ -119,9 +119,9 @@ class IOManager(object):
             raise TypeError("Cannot push objects using an Unmanaged dataset storage type")
 
         try:
-            backend.prepare_push(self.dataset, objs)  # type: ignore
-            result = backend.push_objects(self.dataset, objs, progress_update_fn)  # type: ignore
-            backend.finalize_push(self.dataset)  # type: ignore
+            backend.prepare_push(objs)
+            result = backend.push_objects(objs, progress_update_fn)
+            backend.finalize_push()
         except Exception as err:
             logger.exception(err)
             raise

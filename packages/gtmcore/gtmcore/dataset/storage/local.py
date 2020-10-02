@@ -40,11 +40,11 @@ class LocalFilesystemBackend(StorageBackend):
         Returns:
             Info for use of LocalFilesystemBackend
         """
-        return {"storage_type": "gigantum_object_v1",
-                "name": "Gigantum Cloud",
-                "description": "Dataset storage provided by your Gigantum account supporting files up to 5GB in size",
-                "tags": ["gigantum"],
-                "icon": "gigantum_object_storage.png",
+        return {"storage_type": "local_filesystem",
+                "name": "Local-only data",
+                "description": "Use any data you copy into the local_data directory",
+                "tags": ["local"],
+                "icon": "gigantum_object_storage.png",  # TODO DJWC change to something else
                 "url": "https://docs.gigantum.com",
                 "readme": __doc__}
 

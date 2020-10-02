@@ -693,7 +693,10 @@ class InventoryManager(object):
             Dataset
         """
         try:
-            ds = Dataset(storage_type='FIXME', author=author, namespace=owner)
+            # TODO DJWC - need to implement a config file inside the dataset that specifies the backend
+            backend_type = "gigantum_object_v1"
+            backend_config: Dict[str, Any] = {}
+            ds = Dataset(storage_type=backend_type, backend_config=backend_config, author=author, namespace=owner)
 
             ds_root = os.path.join(self.inventory_root, username,
                                    owner, 'datasets', dataset_name)
@@ -715,7 +718,10 @@ class InventoryManager(object):
             Dataset object
         """
         try:
-            ds = Dataset(storage_type='FIXME')
+            # TODO DJWC - need to implement a config file inside the dataset that specifies the backend
+            backend_type = "gigantum_object_v1"
+            backend_config: Dict[str, Any] = {}
+            ds = Dataset(storage_type=backend_type, backend_config=backend_config)
             ds._set_root_dir(path)
             ds._load_gigantum_data()
             ds._validate_gigantum_data()

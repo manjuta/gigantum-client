@@ -270,8 +270,8 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
         raise
 
 
-def push_dataset_objects(objs: List[PushObject], logged_in_username: str,
-                         dataset_owner: str, dataset_name: str) -> None:
+def push_dataset_objects(objs: List[PushObject], logged_in_username: str, dataset_owner: str, dataset_name: str,
+                         access_token: str, id_token: str) -> None:
     """Method to push a collection of objects from a dataset's backend
 
     Note that we currently only intend to support pushing to GigantumHub
@@ -281,6 +281,8 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str,
         logged_in_username: username for the currently logged in user
         dataset_owner: Owner of the dataset containing the files to download
         dataset_name: Name of the dataset containing the files to download
+        access_token: Gigantum API access token
+        id_token: Gigantum API ID token
 
     Returns:
         str: directory path of imported labbook
@@ -299,6 +301,11 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str,
         if not isinstance(backend, GigantumObjectStore):
             raise GigantumException(f'Can only push objects for Gigantum Datasets! (not {type(ds).__name__})')
 
+        ds.backend.credentials = {
+            'access_token': access_token,
+            'id_token': id_token,
+        }
+
         m = Manifest(ds, logged_in_username)
         iom = IOManager(ds, m)
 
@@ -315,8 +322,7 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str,
         raise
 
 
-def pull_objects(keys: List[str], logged_in_username: str, dataset_owner: str, dataset_name: str,
-                 labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None) -> None:
+def pull_objects(keys: List[str], logged_in_username: str, dataset_owner: str, dataset_name: str, labbook_owner: Optional[str] = None, labbook_name: Optional[str] = None) -> None:
     """Method to pull a collection of objects from a dataset's backend.
 
     This runs the IOManager.pull_objects() method with `link_revision=False`. This is because this job can be run in

@@ -24,6 +24,7 @@ from collections import OrderedDict
 import os
 
 from gtmcore.dataset.io import PushResult, PushObject, PullResult, PullObject
+from gtmcore.exceptions import GigantumException
 from gtmcore.logging import LMLogger
 
 logger = LMLogger.get_logger()
@@ -561,6 +562,12 @@ class GigantumObjectStore(StorageBackend):
         # Additional attributes to track processed requests
         self.successful_requests: List = list()
         self.failed_requests: List = list()
+        # self.credentials should be set ONLY when needed, with this structure:
+        # {
+        #     'access_token': access_token,
+        #     'id_token': id_token,
+        # }
+        self.credentials: Optional[Dict[str, str]] = None
 
     @staticmethod
     def _backend_metadata() -> Dict[str, Any]:
@@ -581,12 +588,15 @@ class GigantumObjectStore(StorageBackend):
         """Method to generate the request headers, including authorization information
 
         Returns:
-
-       """
-        return {'Authorization': f"Bearer {self.configuration.get('gigantum_bearer_token')}",
-                'Identity': self.configuration.get("gigantum_id_token"),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'}
+            A dictionary of header values to be used with the object service
+        """
+        try:
+            return {'Authorization': f"Bearer {self.credentials['bearer_token']}",
+                   'Identity': self.credentials["id_token"],
+                   'Content-Type': 'application/json',
+                   'Accept': 'application/json'}
+        except KeyError:
+            raise GigantumException("Credentials not configured for Gigantum Object Store backend")
 
     def prepare_mount_source(self, revision: str, manifest_dict: OrderedDict) -> Path:
         """Do needed steps so we're ready to mount files into Project containers
