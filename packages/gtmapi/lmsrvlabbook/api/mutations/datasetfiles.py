@@ -150,7 +150,7 @@ class DownloadDatasetFiles(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, labbook_name=None, labbook_owner=None,
                                all_keys=None, keys=None, client_mutation_id=None):
-        """TODO DJWC - what is API? E.g., what is interaction of all_keys and keys?"""
+        """What is API? E.g., what is interaction of all_keys and keys?"""
         logged_in_username = get_logged_in_username()
 
         d = Dispatcher()

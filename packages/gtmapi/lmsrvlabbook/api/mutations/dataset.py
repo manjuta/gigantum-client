@@ -33,81 +33,10 @@ from lmsrvcore.auth.identity import tokens_from_request_context
 logger = LMLogger.get_logger()
 
 
-class ConfigureDatasetBackend(graphene.relay.ClientIDMutation):
-    """Mutation to configure a dataset backend if needed.
-
-    TODO DJWC - I renamed this endpoint intentionally to ensure we revisit this in the front end. It's not clear this is
-     necessary at all for gigantum datasets. Maybe remove entirely? Code that may be useful for Externally Managed
-     Datasets should be retained. Should also be made generic but in a much simpler way than the current configuration
-     publishing mechanism.
-
-     The idea now is to configure the backend, and THEN pass that configuration into the Dataset Creation (directly
-     above). I'm not actually sure if this needs to be a mutation on the back-end. In terms of the client app, this
-     would correspond to the first screen after clicking "new dataset" where the user selects the backend using
-     something like the base-image selection tool.
-
-    """
-
-    class Input:
-        dataset_owner = graphene.String(required=True, description="Owner of the dataset to configure")
-        dataset_name = graphene.String(required=True, description="Name of the dataset to configure")
-        parameters = graphene.List(DatasetConfigurationParameterInput)
-        reset_parameters = graphene.Boolean(description="Set to true to clear the configuration to start over")
-
-    dataset = graphene.Field(Dataset)
-    is_configured = graphene.Boolean(description="If true, all parameters a set and OK to continue")
-    should_confirm = graphene.Boolean(description="If true, should confirm configuration with the user "
-                                                  "and resubmit with confirm=True to finalize")
-    error_message = graphene.String(description="Configuration error message to display to the user")
-    confirm_message = graphene.String(description="Confirmation message to display to the user")
-    has_background_job = graphene.Boolean(description="If true, this backend type requires background work"
-                                                      " after confirmation. Check complete_background_key for key to "
-                                                      "provide user feedback.")
-    background_job_key = graphene.String(description="Background job key to query on for feedback if needed")
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, parameters=None, reset_parameters=False,
-                               client_mutation_id=None):
-        logged_in_username = get_logged_in_username()
-        im = InventoryManager()
-        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
-        backend = ds.backend
-
-        if reset_parameters:
-            current_config = ds.backend_config
-            # TODO DJWC - do we clear credentials here?
-            # Need to delete to make .has_credentials() work, could make into a method
-            del current_config['credentials']
-            for param in parameters:
-                # TODO DJWC - and why not `del` here?
-                current_config[param.parameter] = None
-            ds.backend_config = current_config
-
-            if parameters is not None:
-                # Update the configuration
-                current_config = ds.backend_config
-                for param in parameters:
-                    current_config[param.parameter] = param.value
-                ds.backend_config = current_config
-
-        # TODO DJWC - This needs to get changed to a backend instead of a full dataset
-        return ConfigureDatasetBackend(dataset=Dataset(id="{}&{}".format(dataset_owner, dataset_name),
-                                                       name=dataset_name, owner=dataset_owner),
-                                       # TODO DJWC - keeping all params in for now to avoid breaking API too much
-                                       # We don't check, so None instead of False
-                                       is_configured=None,
-                                       # Should be true for external datasets, and maybe local, but is never true for now
-                                       should_confirm=False,
-                                       confirm_message=None,
-                                       error_message=None,
-                                       has_background_job=False,
-                                       background_job_key=None)
-
-
 class CreateDataset(graphene.relay.ClientIDMutation):
     """Mutation for creation of a new Dataset on disk
 
-    TODO DJWC - Workflow to create a dataset:
+    As-yet-unimplemented workflow to create a dataset:
     - Click "new dataset"
     - Backend selection modal -> backend configuration parameters
     - Backend configuration is passed to the
@@ -116,8 +45,9 @@ class CreateDataset(graphene.relay.ClientIDMutation):
     class Input:
         name = graphene.String(required=True)
         description = graphene.String(required=True)
-        # storage_type = graphene.String(required=True)
-        backend_configuration = graphene.Field(ConfigureDatasetBackend)
+        storage_type = graphene.String(required=True)
+        # TODO #1491 - create a UI front-end for dataset backend configuration
+        # backend_configuration = ... ?
 
     # Return the dataset instance
     dataset = graphene.Field(Dataset)
@@ -151,20 +81,13 @@ class UpdateLocalDataset(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, dataset_owner, dataset_name, client_mutation_id=None):
         logged_in_username = get_logged_in_username()
-        im = InventoryManager()
-        ds = im.load_dataset(logged_in_username, dataset_owner, dataset_name, get_logged_in_author())
 
         d = Dispatcher()
         kwargs = {
             'logged_in_username': logged_in_username,
-            # TODO DJWC - not clear what we need access and id tokens for at this stage. Evaluate and probably delete.
-            'access_token': flask.g.access_token,
-            'id_token': flask.g.id_token,
             'dataset_owner': dataset_owner,
             'dataset_name': dataset_name,
         }
-
-        background_job_key = None
 
         # Gen unique keys for tracking jobs
         metadata = {'dataset': f"{logged_in_username}|{dataset_owner}|{dataset_name}",

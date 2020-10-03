@@ -744,7 +744,7 @@ class GigantumObjectStore(StorageBackend):
         """Gigantum Object Service only requires that the user's tokens have been set
 
         Args:
-            objects: TODO DJWC CURRENTLY IGNORED A list of PushObjects to be pushed
+            objects: CURRENTLY IGNORED A list of PushObjects to be pushed
 
         Returns:
             None
@@ -767,7 +767,7 @@ class GigantumObjectStore(StorageBackend):
         """Gigantum Object Service only requires that the user's tokens have been set
 
         Args:
-            objects: TODO DJWC CURRENTLY IGNORED A list of PullObjects to be pulled
+            objects: CURRENTLY IGNORED A list of PullObjects to be pulled
 
         Returns:
             None

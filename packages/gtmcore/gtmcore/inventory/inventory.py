@@ -693,7 +693,7 @@ class InventoryManager(object):
             Dataset
         """
         try:
-            # TODO DJWC - need to implement a config file inside the dataset that specifies the backend
+            # TODO #1491 - need to implement a config file inside the dataset repo that specifies the backend
             backend_type = "gigantum_object_v1"
             backend_config: Dict[str, Any] = {}
             ds = Dataset(storage_type=backend_type, backend_config=backend_config, author=author, namespace=owner)
@@ -718,7 +718,7 @@ class InventoryManager(object):
             Dataset object
         """
         try:
-            # TODO DJWC - need to implement a config file inside the dataset that specifies the backend
+            # TODO #1491 - need to implement a config file inside the dataset that specifies the backend
             backend_type = "gigantum_object_v1"
             backend_config: Dict[str, Any] = {}
             ds = Dataset(storage_type=backend_type, backend_config=backend_config)

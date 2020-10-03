@@ -26,6 +26,8 @@ class TestManifest(object):
     def test_status_created_files(self, mock_dataset_with_manifest):
         ds, manifest, working_dir = mock_dataset_with_manifest
 
+        # TODO These and the many similar statements below need to be adjusted similarly to other fixes in this file,
+        #  see also test_hash.py
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test_dir"))
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "other_dir"))
         os.makedirs(os.path.join(manifest.cache_mgr.cache_root, manifest.dataset_revision, "test_dir", "nested"))
@@ -543,7 +545,6 @@ class TestManifest(object):
 
         manifest.sweep_all_changes()
 
-        # TODO DJWC - this used to be 6, but the 4 records seem complete...
         num_records = len(ds.git.log())
         assert num_records == 4
 

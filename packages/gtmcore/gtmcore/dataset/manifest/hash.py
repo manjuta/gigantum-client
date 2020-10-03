@@ -63,7 +63,6 @@ class SmartHash(object):
             fast_hash_val = f"{relative_path}||{file_info.st_size}||{file_info.st_mtime}"
         return fast_hash_val
 
-    # TODO DJWC - harmonize API WRT async
     def fast_hash(self, path_list: list) -> List[Optional[str]]:
         """Compute fast hashes for a list of paths
 

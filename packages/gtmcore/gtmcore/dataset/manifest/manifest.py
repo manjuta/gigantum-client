@@ -215,7 +215,6 @@ class Manifest(object):
         Returns:
 
         """
-        # TODO DJWC - code smell
         return str(self.hasher.get_abs_path(relative_path))
 
     def get_change_type(self, path, fast_hash: bool = True) -> FileChangeType:
@@ -239,7 +238,6 @@ class Manifest(object):
                 result = FileChangeType.NOCHANGE
         else:
             if path in self.manifest:
-                # TODO DJWC - is this logic relevant / valid?
                 # No fast hash, but exists in manifest. User just edited a file that hasn't been pulled
                 result = FileChangeType.MODIFIED
             else:
@@ -585,11 +583,10 @@ class Manifest(object):
 
             # Relink after the commit
             self.link_revision()
-            # TODO DJWC - It's unclear this is sound when multiple projects are/were running with the same revision of a
+            # It's unclear this is sound when multiple projects are/were running with the same revision of a
             #  dataset, don't we need reference counting or something?
             #  Also if hardlinks are working, this isn't saving space
-            # if os.path.isdir(os.path.join(self.cache_mgr.cache_root, previous_revision)):
-            if previous_revision_dir.is_dir():
+            if isinstance(self.dataset.backend, GigantumObjectStore) and previous_revision_dir.is_dir():
                 shutil.rmtree(previous_revision_dir)
 
             return self.gen_file_info(relative_path)

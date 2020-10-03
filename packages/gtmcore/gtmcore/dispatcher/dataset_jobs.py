@@ -244,8 +244,6 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
             config_obj = Configuration()
             server_config = config_obj.get_server_configuration()
 
-            # TODO DJWC: what? All datasets are stored as repositories on GitLab - only the contents are handled
-            #  differently by the backends
             # TODO gigantum/ideas#11: this token logic is NOT duplicated in the standard dataset or labbook flows. It
             #  could be handled in gitworkflows_utils.clone_repo below, or somewhere in a git auth logic module/object.
             #  Note that some complexity derives from the fact that we don't have access to the Flask session here.
@@ -744,10 +742,9 @@ def update_unmanaged_dataset_from_remote(logged_in_username: str, access_token: 
         if not isinstance(backend, PublicS3Bucket):
             raise ValueError("Can only auto-update externally-hosted remote dataset types")
 
-        # TODO DJWC - if we know the region, we don't need credentials
-        #  AND you can query for the region of a bucket
-        backend.set_credentials({'access_token': access_token,
-                                 'id_token': id_token})
+        # Note - if we know the region, we don't need credentials AND you can query for the region of a bucket
+        backend.credentials = {'access_token': access_token,
+                               'id_token': id_token}
 
         backend.update_from_remote(ds, update_meta)
 

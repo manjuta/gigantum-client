@@ -29,7 +29,7 @@ class LocalFilesystemBackend(StorageBackend):
             self.host_mount_path = host_dir / 'local_data'
             self.client_path = Path(client_config.app_workdir) / 'local_data'
         else:
-            raise GigantumException("TODO DJWC - still need to implement arbitrary mount configuration")
+            raise GigantumException("TODO - still need to implement arbitrary mount configuration")
 
         if subdirectory is not None:
             self.host_mount_path /= subdirectory
@@ -46,7 +46,7 @@ class LocalFilesystemBackend(StorageBackend):
                 "name": "Local-only data",
                 "description": "Use any data you copy into the local_data directory",
                 "tags": ["local"],
-                "icon": "gigantum_object_storage.png",  # TODO DJWC change to something else
+                "icon": "gigantum_object_storage.png",  # TODO change to something else
                 "url": "https://docs.gigantum.com",
                 "readme": __doc__}
 
