@@ -27,11 +27,13 @@ class LocalFilesystemBackend(StorageBackend):
         if mount == 'default':
             host_dir = client_config.get_host_work_path()
             self.host_mount_path = host_dir / 'local_data'
+            self.client_path = Path(client_config.app_workdir) / 'local_data'
         else:
             raise GigantumException("TODO DJWC - still need to implement arbitrary mount configuration")
 
         if subdirectory is not None:
             self.host_mount_path /= subdirectory
+            self.client_path /= subdirectory
 
     @staticmethod
     def _backend_metadata() -> Dict[str, Any]:
@@ -50,4 +52,4 @@ class LocalFilesystemBackend(StorageBackend):
 
     def client_files_root(self, revision: str) -> Path:
         """In the local files case, the host mount path doesn't move around!"""
-        return self.host_mount_path
+        return self.client_path

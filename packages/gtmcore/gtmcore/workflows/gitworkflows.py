@@ -361,12 +361,12 @@ class DatasetWorkflow(GitWorkflow):
                         # Background job hard failed. Assume entire batch should get re-uploaded
                         for obj in j.objs:
                             failure_keys.append(f"{obj.dataset_path} at {obj.revision[0:8]}")
-                            m.queue_to_push(obj.object_path, obj.dataset_path, obj.revision)
+                            backend.queue_to_push(obj.object_path, obj.dataset_path, obj.revision)
                     else:
                         for obj in j.get_failed_objects():
                             # Some individual objects failed
                             failure_keys.append(f"{obj.dataset_path} at {obj.revision[0:8]}")
-                            m.queue_to_push(obj.object_path, obj.dataset_path, obj.revision)
+                            backend.queue_to_push(obj.object_path, obj.dataset_path, obj.revision)
 
                 # Set final status for UI
                 if len(failure_keys) == 0:

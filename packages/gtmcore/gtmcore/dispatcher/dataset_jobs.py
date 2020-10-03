@@ -488,7 +488,7 @@ def download_dataset_files(logged_in_username: str,
                 abs_dataset_path = os.path.join(m.current_revision_dir, f)
                 path_hash = m.hash_for_path(f)
                 abs_object_path = ds.backend.hash_to_object_path(path_hash)
-                if abs_dataset_path.exists():
+                if os.path.exists(abs_dataset_path):
                     os.remove(abs_dataset_path)
                 if os.path.exists(abs_object_path):
                     os.remove(abs_object_path)
@@ -583,7 +583,6 @@ def update_local_dataset(logged_in_username: str, dataset_owner: str, dataset_na
         # if verify_contents:
         #     modified_keys.extend(backend.verify_contents(ds, update_meta))
 
-        # TODO DJWC - the below seems pretty complex - not sure we need all these cases for a local dataset
         # Create StatusResult to force modifications
         if status_result:
             created_result = copy.deepcopy(status_result.created)
@@ -607,15 +606,11 @@ def update_local_dataset(logged_in_username: str, dataset_owner: str, dataset_na
             status = StatusResult(created=[], modified=modified_keys, deleted=[])
 
         # Update the manifest
-        previous_revision = m.dataset_revision
-
         m.update(status)
         m.create_update_activity_record(status)
 
         # Link the revision dir
         m.link_revision()
-        if os.path.isdir(os.path.join(m.cache_mgr.cache_root, previous_revision)):
-            shutil.rmtree(os.path.join(m.cache_mgr.cache_root, previous_revision))
 
         update_meta("Update complete.")
 

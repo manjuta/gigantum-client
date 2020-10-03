@@ -567,7 +567,7 @@ class GigantumObjectStore(StorageBackend):
         #     'access_token': access_token,
         #     'id_token': id_token,
         # }
-        self.credentials: Optional[Dict[str, str]] = None
+        self.credentials: Dict[str, str] = {}
 
     @staticmethod
     def _backend_metadata() -> Dict[str, Any]:
