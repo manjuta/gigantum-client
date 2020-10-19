@@ -6,6 +6,7 @@ from framework.factory.models_enums.page_config import PageConfig
 from client_app.pages.project_listing.components.project_container_status_component \
     import ProjectContainerStatusComponent
 from selenium.webdriver.common.action_chains import ActionChains
+from framework.factory.models_enums.constants_enums import CompareUtilityType
 
 
 class JupyterLabPage(BasePage):
@@ -25,7 +26,6 @@ class JupyterLabPage(BasePage):
         self.__div_project_title = None
         self.__textarea_command = None
         self.__div_run_cell = None
-        self.__div_package_version = None
 
     @property
     def __click_div_jupyter_lab(self) -> WebElement:
@@ -52,15 +52,6 @@ class JupyterLabPage(BasePage):
                                                    "//div[@class='lm-Widget p-Widget jp-Toolbar "
                                                    "jp-NotebookPanel-toolbar']/div[6]")
         return self.__div_run_cell
-
-    @property
-    def __check_package_version(self) -> WebElement:
-        if self.__div_package_version is None:
-            self.__div_package_version = self.get_locator(LocatorType.XPath,
-                                                          "//div[@class='lm-Widget p-Widget jp-RenderedText "
-                                                          "jp-mod-trusted "
-                                                          "jp-OutputArea-output']/pre")
-        return self.__div_package_version
 
     @property
     def __project_title(self) -> WebElement:
@@ -126,15 +117,40 @@ class JupyterLabPage(BasePage):
             return True
         return False
 
-    def check_packages_version(self, package_list: list) -> bool:
-        """ Checks the package version """
-        if self.__check_package_version.is_displayed():
-            installed_package_output = self.__check_package_version.text
-            packages = re.split('[\n]', installed_package_output)
-            for package in package_list:
-                if package not in packages:
+    def is_packages_exist(self, packages: list) -> bool:
+        """ Checks whether the packages are present in the installed packages"""
+        installed_packages = self.__get_existing_packages()
+        if packages:
+            for package in packages:
+                if package not in installed_packages:
                     return False
-        return True
+            return True
+        else:
+            return False if installed_packages else True
+
+    def __get_existing_packages(self) -> list:
+        """ Function returns all the installed packages"""
+        element = "//div[@class='lm-Widget p-Widget jp-RenderedText jp-mod-trusted jp-OutputArea-output']"
+        if self.check_element_presence(LocatorType.XPath, element, 30):
+            check_package_version = self.get_locator(LocatorType.XPath, element)
+            # Wait until the 'Note:' appears in grep output
+            check_package_version.wait_until(CompareUtilityType.CheckContainsText, 30, 'Note:')
+            installed_package_output = check_package_version.text
+            packages = re.split('[\n]', installed_package_output)
+            if 'Note:' in packages[-1]:
+                packages = packages[:-1]
+            return packages
+        return []
+
+    def is_packages_only_exist(self, packages: list) -> bool:
+        """ Check only the provided packages are present in installed package list"""
+        installed_packages = self.__get_existing_packages()
+        if len(installed_packages) == len(packages):
+            for package in packages:
+                if package not in installed_packages:
+                    return False
+            return True
+        return False
 
     def close_tab(self, url, parent_tab) -> bool:
         """ Closes current tab and switches to parent"""

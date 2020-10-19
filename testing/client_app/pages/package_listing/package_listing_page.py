@@ -160,3 +160,56 @@ class PackageListingPage(BasePage):
         is_status_changed = ProjectContainerStatusComponent(self.driver).monitor_container_status(compare_text, wait_timeout)
         return is_status_changed
 
+    def verify_package_list(self, package_list: list) -> bool:
+        """Verify packages and it's version in add package page
+
+        Args:
+            package_list: List of package details
+
+        Returns: Returns the comparison result
+        """
+        return self.add_package_component.verify_package_list(package_list)
+
+    def delete_package(self, package_name: str) -> bool:
+        """Performs deletion of a package
+
+        Args:
+            package_name: Name of the package
+
+        Returns: Returns the result of package deletion
+
+        """
+        return self.package_listing_component.delete_package(package_name)
+
+    def delete_all_packages(self) -> bool:
+        """Performs deletion of all package
+
+        Returns: Returns the result of delete operation
+
+        """
+        return self.package_listing_component.delete_all_packages()
+
+    def monitor_package_list_status(self, compare_text: str, wait_timeout: int) -> bool:
+        """Monitors the text in the div of the component with the value in arg
+
+        Args:
+            compare_text: Text to be compared
+            wait_timeout: Time period for which the wait should continue
+
+        Returns: Returns the monitor status
+
+        """
+        return self.add_package_component.monitor_package_list_status(compare_text, wait_timeout)
+
+    def check_package(self, package_detail: tuple) -> bool:
+        """Check for a package and it's version
+
+        Args:
+            package_detail: Name of the package
+
+        Returns: Returns the result of verify package
+
+        """
+        return self.package_listing_component.check_package(package_detail)
+
+

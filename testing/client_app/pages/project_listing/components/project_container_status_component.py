@@ -16,7 +16,7 @@ class ProjectContainerStatusComponent(BaseComponent):
 
     def __init__(self, driver: webdriver) -> None:
         project_container_status_model = ComponentModel(locator_type=LocatorType.XPath,
-                                                               locator="//div[@class='ContainerStatus flex flex--row']")
+                                                        locator="//div[@class='ContainerStatus flex flex--row']")
         super(ProjectContainerStatusComponent, self).__init__(driver, project_container_status_model)
 
     def monitor_container_status(self, compare_text: str, wait_timeout: int) -> bool:
@@ -24,6 +24,7 @@ class ProjectContainerStatusComponent(BaseComponent):
 
         Args:
             compare_text: The text to compare with.
+            wait_timeout: Time period for which the wait should continue
 
         Returns:
             Returns the comparison result.

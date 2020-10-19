@@ -30,3 +30,4 @@ class CompareUtilityType(enum.Enum):
     """Indicates the compare function type."""
     CompareText = 'compare_text'
     CheckElement = 'check_element'
+    CheckContainsText = 'check_contains_text'
