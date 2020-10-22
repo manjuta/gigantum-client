@@ -7,6 +7,7 @@ import Category from './Category';
 // assets
 import './AdvancedSearch.scss';
 
+// gpg test
 export default class AdvancedSearch extends Component {
   state = {
     expandedIndex: null,

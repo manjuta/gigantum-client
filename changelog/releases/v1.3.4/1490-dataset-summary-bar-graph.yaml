@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1500"
+changelog:
+  - type: NEW
+    description: Adds horizontal bar graph to datset summary for file type distribution.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1490
