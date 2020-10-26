@@ -51,6 +51,10 @@
       left: calc(50% - 10px);
     }
   }
+
+  &__collaborator:disabled, &__collaborator:disabled:hover {
+    border: 1px solid $romanSilver !important;
+  }
 }
 
 .ButtonLoader__icon{
