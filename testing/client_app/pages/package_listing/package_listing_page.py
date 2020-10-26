@@ -212,4 +212,23 @@ class PackageListingPage(BasePage):
         """
         return self.package_listing_component.check_package(package_detail)
 
+    def click_requirements_tab(self) -> bool:
+        """Clicks on Add Requirements tab
+
+        Returns: returns the result of click action
+
+        """
+        return self.add_package_component.click_requirements_tab()
+
+    def drag_and_drop_file(self, packages: list) -> bool:
+        """ Drag and drop the requirement file
+
+        Args:
+            packages: Name of packages to be installed
+
+        Returns: returns the result of drag and drop action
+
+        """
+        return self.__add_package_component.drag_and_drop_text_file(packages)
+
 
