@@ -9,8 +9,10 @@ rq==0.13
 rq-scheduler==0.9
 jupyter_client==6.1.5
 requests==2.24.0
-cryptography~=2.9
-python-jose[cryptography]==3.1.0
+python-jose[cryptography]==3.2.0
+# mitm proxy pins on a range while python-jose floats to the latest
+# we need to update cryptography to >3.2 as soon as mitmproxy supports it
+cryptography==2.9.2
 schema==0.6.6
 blosc==1.5.1
 natsort==5.1.1

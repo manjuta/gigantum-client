@@ -1,8 +1,8 @@
 import pytest
 
 from gtmcore.configuration import Configuration
-from gtmcore.fixtures import mock_config_file_with_auth_anon_review, mock_config_file_with_auth_multi_anon_review
-from gtmcore.auth.identity import get_identity_manager, AuthenticationError
+from gtmcore.fixtures.auth import mock_config_file_with_auth_anon_review, mock_config_file_with_auth_multi_anon_review
+from gtmcore.auth.identity import get_identity_manager_class, AuthenticationError
 from gtmcore.auth.anon_review import AnonymousReviewIdentityManager
 from gtmcore.auth import User
 
@@ -14,7 +14,7 @@ class TestIdentityAnonReview(object):
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secret = config.config['anon_review_secret']
 
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == AnonymousReviewIdentityManager
 
         # Invalid with no token
@@ -33,7 +33,7 @@ class TestIdentityAnonReview(object):
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secret = config.config['anon_review_secret']
 
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == AnonymousReviewIdentityManager
 
         # Invalid with no token
@@ -47,7 +47,7 @@ class TestIdentityAnonReview(object):
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secret = config.config['anon_review_secret']
 
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == AnonymousReviewIdentityManager
 
         # Load User
@@ -70,7 +70,7 @@ class TestIdentityAnonReview(object):
         # We grab the string that was used to configure the AnonymousReviewIdentityManager
         anon_review_secrets = config.config['anon_review_secret']
 
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == AnonymousReviewIdentityManager
 
         # Load User

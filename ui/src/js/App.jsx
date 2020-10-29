@@ -3,16 +3,22 @@
 import React, { Component } from 'react';
 import { Router } from 'react-router-dom';
 import queryString from 'querystring';
-import fetchQuery from 'JS/fetch';
+import fetchAuthServerState from 'JS/Auth/AuthHandler';
 import { graphql, QueryRenderer } from 'react-relay';
 // environment
 import environment from 'JS/createRelayEnvironment';
 // history
 import history from 'JS/history';
-// queries
-import UserIdentity from 'JS/Auth/UserIdentity';
 // auth
 import Auth from 'JS/Auth/Auth';
+import stateMachine from 'JS/Auth/AuthStateMachine';
+import {
+  LOADING,
+  ERROR,
+  LOGGED_IN,
+  LOGGED_OUT,
+  BACK,
+} from 'JS/Auth/AuthMachineConstants';
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';
 // components
@@ -22,118 +28,122 @@ import Interstitial from 'Components/interstitial/Interstitial';
 // css
 import './App.scss';
 
-
 const AppQuery = graphql`
   query AppQuery {
     ...Routes_currentServer
   }
 `;
 
-
 class App extends Component {
   state = {
-    isLoggedIn: null,
     availableServers: [],
+    errors: [],
+    isLoggedIn: null,
+    machine: stateMachine.initialState,
   }
 
   auth = new Auth();
 
   componentDidMount() {
-    const overrideHeaders = {};
-    const values = queryString.parse(history.location.hash.slice(1));
-    const serverId = values.server_id;
-    if (serverId) {
-      overrideHeaders['GTM-SERVER-ID'] = serverId;
-    }
-    const apiHost = process.env.NODE_ENV === 'development'
-      ? 'localhost:10000'
-      : window.location.host;
-    fetchQuery(`${window.location.protocol}//${apiHost}${process.env.SERVER_API}`)
-      .then(serverResponse => {
-        const currentServer = serverResponse.current_server;
-        const availableServers = serverResponse.available_servers;
-        this.setState({ availableServers });
-
-        const authURL = availableServers.filter((server) => {
-          return server.server_id === currentServer;
-        })[0].login_url;
-
-        UserIdentity.getUserIdentity(overrideHeaders).then((response) => {
-          const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
-          let isLoggedIn = null;
-          if (response.data) {
-            if (
-              response.data.userIdentity
-                && ((response.data.userIdentity.isSessionValid && navigator.onLine)
-                || !navigator.onLine)
-            ) {
-              localStorage.setItem('family_name', response.data.userIdentity.familyName);
-              localStorage.setItem('given_name', response.data.userIdentity.givenName);
-              localStorage.setItem('email', response.data.userIdentity.email);
-              localStorage.setItem('username', response.data.userIdentity.username);
-              localStorage.setItem('expires_at', expiresAt);
-              isLoggedIn = true;
-            } else if (
-              (response.data.userIdentity)
-              && localStorage.getItem('access_token')
-            ) {
-              const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
-              const loginURL = `${authURL}#route=${window.location.href}${freshLoginText}`;
-              window.open(loginURL, '_self');
-              isLoggedIn = false;
-            } else if (
-              !response.data.userIdentity
-              && !localStorage.getItem('access_token')
-            ) {
-              localStorage.removeItem('family_name');
-              localStorage.removeItem('given_name');
-              localStorage.removeItem('email');
-              localStorage.removeItem('username');
-              localStorage.removeItem('expires_at');
-              localStorage.removeItem('access_token');
-              localStorage.removeItem('id_token');
-              isLoggedIn = false;
-            } else {
-              isLoggedIn = false;
-            }
-          } else {
-            isLoggedIn = false;
-          }
-
-          this.setState({
-            isLoggedIn,
-          });
+    const hash = queryString.parse(history.location.hash.slice(1));
+    const promise = new Promise((resolve, reject) => fetchAuthServerState(
+      resolve,
+      reject,
+      hash,
+      this.auth,
+    ));
+    promise.then((data) => {
+      if (data.isLoggedIn) {
+        this.transition(LOGGED_IN, {
+          availableServers: data.availableServers,
+          isLoggedIn: data.isLoggedIn,
         });
-      });
+      } else {
+        this.transition(LOGGED_OUT, {
+          availableServers: data.availableServers,
+          isLoggedIn: data.isLoggedIn,
+        });
+      }
+    }).catch((data) => {
+      if (data && data.availableServers && (data.availableServers.length > 0)) {
+        this.transition(LOGGED_OUT, {
+          isLoggedIn: false,
+          availableServers: data.availableServers,
+          errors: data && data.errors ? data.errors : [],
+        });
+      } else if (data && data.errors) {
+        const errors = (typeof data.errors === 'string')
+          ? [{ message: data.errors }]
+          : data.errors;
+        this.transition(ERROR, {
+          errors,
+        });
+      } else {
+        this.transition(ERROR, {
+          errors: [{ message: 'There was a problem fetching your data.' }],
+        });
+      }
+    });
   }
 
 
-  render() {
-    const { availableServers, isLoggedIn } = this.state;
-
-    if (isLoggedIn === false) {
-      return (
-        <Router history={history} basename={this.basename}>
-          <div className="App">
-            <header className="App__header">
-              <img
-                alt="Gigantum"
-                width="515"
-                src={gigantumLogo}
-              />
-            </header>
-            <Login
-              auth={this.auth}
-              history={history}
-              availableServers={availableServers}
-            />
-          </div>
-        </Router>
-      );
+  /**
+    @param {object} state
+    runs actions for the state machine on transition
+  */
+  runActions = state => {
+    if (state.actions.length > 0) {
+      state.actions.forEach(f => this[f]());
     }
+  };
 
-    if (isLoggedIn) {
-      return (
+  /**
+    @param {string} eventType
+    @param {object} nextState
+    sets transition of the state machine
+  */
+  transition = (eventType, nextState) => {
+    const { state } = this;
+    const { availableServers, machine } = this.state;
+
+    const newState = stateMachine.transition(machine.value, eventType, {
+      state,
+    });
+
+    this.runActions(newState);
+    // TODO use category / installNeeded
+
+    this.setState({
+      machine: newState,
+      availableServers: nextState && nextState.availableServers ? nextState.availableServers : availableServers,
+      errors: nextState && nextState.errors ? nextState.errors : [],
+    });
+  };
+
+
+  render() {
+    const {
+      availableServers,
+      errors,
+      isLoggedIn,
+      machine,
+    } = this.state;
+
+
+    const renderMap = {
+      [LOADING]: (
+        <Interstitial
+          message="Please wait. Loading server options..."
+          messageType="loader"
+        />
+      ),
+      [ERROR]: (
+        <Interstitial
+          message="There was problem loading app data. Refresh to try again, if the problem persists you may need to restart GigantumClient"
+          messageType="error"
+        />
+      ),
+      [LOGGED_IN]: (
         <QueryRenderer
           environment={environment}
           variables={{}}
@@ -143,8 +153,8 @@ class App extends Component {
               return (
                 <Routes
                   {...props}
-                  currentServer={props}
                   auth={this.auth}
+                  currentServer={props}
                   history={history}
                   isLoggedIn={isLoggedIn}
                 />
@@ -160,7 +170,6 @@ class App extends Component {
               );
             }
 
-
             return (
               <Interstitial
                 message="Please wait. Gigantum Client is starting…"
@@ -169,12 +178,29 @@ class App extends Component {
             );
           }}
         />
-      );
-    }
+      ),
+      [LOGGED_OUT]: (
+        <Router history={history} basename={this.basename}>
+          <div className="App">
+            <header className="App__header">
+              <img
+                alt="Gigantum"
+                width="515"
+                src={gigantumLogo}
+              />
+            </header>
+            <Login
+              auth={this.auth}
+              availableServers={availableServers}
+              errors={errors}
+              history={history}
+            />
+          </div>
+        </Router>
+      ),
+    };
 
-    return (
-      <Interstitial />
-    );
+    return (renderMap[machine.value]);
   }
 }
 

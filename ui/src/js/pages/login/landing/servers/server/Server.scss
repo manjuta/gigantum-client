@@ -37,5 +37,9 @@
         bottom: 9px;
       }
     }
+
+    &:disabled {
+      background-color: $romanSilver !important;
+    }
    }
  }

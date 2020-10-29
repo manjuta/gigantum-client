@@ -97,8 +97,8 @@ class Routes extends Component<Props> {
 
 
   /**
-    @param{}
-    logs user out in using auth0
+    Mehtod logs user in using session instance of auth
+    @param {} -
   */
   login = () => {
     const { auth } = this.props;
@@ -106,8 +106,8 @@ class Routes extends Component<Props> {
   }
 
   /**
-    @param{}
-    logs user out using auth0
+    Mehtod logs user out using session instance of auth
+    @param {} -
   */
   logout = () => {
     const { auth } = this.props;
@@ -281,6 +281,7 @@ const RoutesFragement = createFragmentContainer(
             issuer
             loginType
             loginUrl
+            logoutUrl
             publicKeyUrl
             serverId
             signingAlgorithm

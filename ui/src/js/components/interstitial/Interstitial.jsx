@@ -2,6 +2,8 @@
 // vendor
 import React from 'react';
 import classNames from 'classnames';
+// components
+import Loader from 'Components/loader/Loader'
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';
 import exclamationSVG from 'Images/icons/exclamation-orange.svg';
@@ -21,7 +23,7 @@ const Interstitial = (props: Props) => {
   });
 
   return (
-    <div className="App flex flex--column align-items--center">
+    <div className="App flex flex--column align-items--center relative">
       <header className="App__header">
         <img
           alt="Gigantum"
@@ -42,6 +44,13 @@ const Interstitial = (props: Props) => {
         )
       }
       <main className="App__loader relative">
+        { (messageType === 'loader')
+          && (
+            <div className="Interstitial__loader relative">
+              <Loader nested />
+            </div>
+          )
+        }
         <p className={messageCSS}>{message}</p>
       </main>
     </div>

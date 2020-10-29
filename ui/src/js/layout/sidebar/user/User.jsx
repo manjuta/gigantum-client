@@ -28,12 +28,13 @@ class User extends Component<Props> {
   }
 
   /**
-    @param {}
-    logout through Auth0
+    Mehtod logs user out using session instance of auth
+    @param {} -
   */
   logout = () => {
+    const { currentServer } = this.context;
     const { auth } = this.props;
-    auth.logout();
+    auth.logout(currentServer);
     localStorage.setItem('fresh_login', true);
     this._toggleDropdown();
   }
@@ -115,15 +116,20 @@ class User extends Component<Props> {
         <div className={arrowCSS} />
 
         <div className={userDropdownCSS}>
-          <a
-            id="profile"
-            href={`${baseUrl}${username}/settings`}
-            rel="noopener noreferrer"
-            target="_blank"
-            className="User__button"
-          >
-            Profile
-          </a>
+          { (currentServer.baseUrl === 'https://gigantum.com/')
+            || (currentServer.baseUrl === 'https://gtm-dev.cloud/')
+            && (
+              <a
+                id="profile"
+                href={`${baseUrl}${username}/settings`}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="User__button"
+              >
+                Profile
+              </a>
+            )
+          }
           {
             (process.env.BUILD_TYPE !== 'cloud')
             && (

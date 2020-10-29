@@ -1,6 +1,6 @@
 // @flow
 // vendors
-import React from 'react';
+import React, { Component } from 'react';
 // components
 import Server from './server/Server';
 // css
@@ -11,37 +11,59 @@ type Props = {
   availableServers: Array,
 }
 
-const AvailablesServers = (props: Props) => {
-  const {
-    auth,
-    availableServers,
-  } = props;
-  return (
-    <section className="AvailablesServers">
-      <h4 className="AvailablesServers__h4">Select a Server</h4>
+type State = {
+  loggingInServerId: null,
+}
 
-      <br />
-      { availableServers.map(server => (
-        <Server
-          auth={auth}
-          key={server.server_id}
-          server={server}
-        />
-      ))}
+class AvailablesServers extends Component<Props, State> {
+  state = {
+    loggingInServerId: null,
+  }
 
-      <br />
+  /**
+  * @param
+  *
+  */
+  setLoggingInServerId = (serverId) => {
+    this.setState({ loggingInServerId: serverId });
+  }
 
-      <div>
-        <a
-          href="https://docs.gigantum.com/docs/adding-self-hosted-servers"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          How to add a self-managed server
-        </a>
-      </div>
-    </section>
-  );
-};
+  render() {
+    const {
+      auth,
+      availableServers,
+    } = this.props;
+    const { loggingInServerId } = this.state;
+
+    return (
+      <section className="AvailablesServers">
+        <h4 className="AvailablesServers__h4">Select a Server</h4>
+
+        <br />
+        { availableServers.map(server => (
+          <Server
+            auth={auth}
+            key={server.server_id}
+            loggingInServerId={loggingInServerId}
+            server={server}
+            setLoggingInServerId={this.setLoggingInServerId}
+          />
+        ))}
+
+        <br />
+
+        <div>
+          <a
+            href="https://docs.gigantum.com/docs/adding-a-server-to-gigantum-client"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            How do I add a self-hosted server?
+          </a>
+        </div>
+      </section>
+    );
+  }
+}
 
 export default AvailablesServers;

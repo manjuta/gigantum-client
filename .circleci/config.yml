@@ -173,7 +173,7 @@ jobs:
           working_directory: /home/circleci/repo/
       - run:
           name: Enforce Fossa checks
-          command: fossa test --timeout 1200
+          command: fossa test --timeout 1200 --no-ansi
           working_directory: /home/circleci/repo/
 
   changelog-schema-check:

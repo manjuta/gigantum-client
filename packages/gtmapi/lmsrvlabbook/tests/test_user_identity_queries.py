@@ -3,8 +3,6 @@ import os
 from snapshottest import snapshot
 from lmsrvlabbook.tests.fixtures import fixture_working_dir
 
-import graphene
-from flask import current_app
 import flask
 
 

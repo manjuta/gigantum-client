@@ -9,7 +9,7 @@ from graphene.test import Client
 from mock import patch
 import responses
 
-from gtmcore.auth.identity import get_identity_manager
+from gtmcore.auth.identity import get_identity_manager_class
 from gtmcore.configuration import Configuration
 from gtmcore.gitlib import RepoLocation
 from gtmcore.inventory.branching import BranchManager
@@ -47,9 +47,9 @@ def mock_create_labbooks(fixture_working_dir):
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
     with app.app_context():
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware],
                         context_value=ContextMock())
         yield lb, client, schema

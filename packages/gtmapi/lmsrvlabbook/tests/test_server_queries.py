@@ -23,10 +23,13 @@ class TestServerQueries:
       id
       audience
       loginUrl
+      tokenUrl
+      logoutUrl
       loginType
       signingAlgorithm
       publicKeyUrl
       issuer
+      clientId
       typeSpecificFields{
         id
         parameter

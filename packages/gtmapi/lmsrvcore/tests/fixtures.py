@@ -9,7 +9,7 @@ from pkg_resources import resource_filename
 from unittest.mock import patch
 
 from gtmcore.configuration.configuration import Configuration
-from gtmcore.auth.identity import get_identity_manager
+from gtmcore.auth.identity import get_identity_manager_class
 from gtmcore.fixtures.fixtures import _create_temp_work_dir
 from gtmcore.auth.local import LocalIdentityManager
 
@@ -46,7 +46,7 @@ def fixture_working_dir_with_cached_user():
 
     # Load configuration class into the flask application
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app.
@@ -77,7 +77,7 @@ def fixture_working_dir_with_auth_middleware():
         # Load User identity into app context
         app = Flask("lmsrvlabbook")
         app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+        app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
         with app.app_context():
             # Create a test client

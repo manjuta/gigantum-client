@@ -112,7 +112,7 @@ snapshots['TestUserIdentityQueries.test_invalid_token 1'] = {
                     'line': 4
                 }
             ],
-            'message': "({'code': 'invalid_header', 'description': 'Unable to parse authentication token.'}, 400)",
+            'message': "('Error decoding token headers.', 401)",
             'path': [
                 'userIdentity',
                 'id'
@@ -125,7 +125,7 @@ snapshots['TestUserIdentityQueries.test_invalid_token 1'] = {
                     'line': 5
                 }
             ],
-            'message': "({'code': 'invalid_header', 'description': 'Unable to parse authentication token.'}, 400)",
+            'message': "('Error decoding token headers.', 401)",
             'path': [
                 'userIdentity',
                 'username'
@@ -138,7 +138,7 @@ snapshots['TestUserIdentityQueries.test_invalid_token 1'] = {
                     'line': 6
                 }
             ],
-            'message': "({'code': 'invalid_header', 'description': 'Unable to parse authentication token.'}, 400)",
+            'message': "('Error decoding token headers.', 401)",
             'path': [
                 'userIdentity',
                 'email'
@@ -151,7 +151,7 @@ snapshots['TestUserIdentityQueries.test_invalid_token 1'] = {
                     'line': 7
                 }
             ],
-            'message': "({'code': 'invalid_header', 'description': 'Unable to parse authentication token.'}, 400)",
+            'message': "('Error decoding token headers.', 401)",
             'path': [
                 'userIdentity',
                 'givenName'
@@ -164,7 +164,7 @@ snapshots['TestUserIdentityQueries.test_invalid_token 1'] = {
                     'line': 8
                 }
             ],
-            'message': "({'code': 'invalid_header', 'description': 'Unable to parse authentication token.'}, 400)",
+            'message': "('Error decoding token headers.', 401)",
             'path': [
                 'userIdentity',
                 'familyName'

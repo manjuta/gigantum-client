@@ -11,23 +11,21 @@ snapshots['TestServerQueries.test_current_server_config 1'] = {
     'data': {
         'currentServer': {
             'authConfig': {
-                'audience': 'io.gigantum.api.dev',
+                'audience': 'api.test.gigantum.com',
+                'clientId': 'Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy',
                 'id': 'U2VydmVyQXV0aDp0ZXN0LWdpZ2FudHVtLWNvbQ==',
-                'issuer': 'https://auth.gigantum.com',
+                'issuer': 'https://auth.gigantum.com/',
                 'loginType': 'auth0',
-                'loginUrl': 'https://test.gigantum.com/client/login',
+                'loginUrl': 'https://test.gigantum.com/auth/redirect?target=login',
+                'logoutUrl': 'https://test.gigantum.com/auth/redirect?target=logout',
                 'publicKeyUrl': 'https://auth.gigantum.com/.well-known/jwks.json',
                 'signingAlgorithm': 'RS256',
+                'tokenUrl': 'https://test.gigantum.com/auth/token',
                 'typeSpecificFields': [
-                    {
-                        'id': 'U2VydmVyQXV0aFR5cGVTcGVjaWZpY0ZpZWxkOnRlc3QtZ2lnYW50dW0tY29tJmF1dGgwX2NsaWVudF9pZA==',
-                        'parameter': 'auth0_client_id',
-                        'value': 'Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy'
-                    }
                 ]
             },
-            'gitServerType': 'gitlab',
             'baseUrl': 'https://test.gigantum.com/',
+            'gitServerType': 'gitlab',
             'gitUrl': 'https://test.repo.gigantum.com/',
             'hubApiUrl': 'https://test.gigantum.com/api/v1/',
             'id': 'U2VydmVyOnRlc3QtZ2lnYW50dW0tY29t',

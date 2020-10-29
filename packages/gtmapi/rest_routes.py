@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, abort, current_app
 from flask_cors import cross_origin
 import redis
+import requests
 
 from lmsrvcore import telemetry
 from lmsrvcore.auth.user import get_logged_in_username
@@ -117,9 +118,33 @@ def servers():
     """
     server_list = []
     for s in current_app.config['LABMGR_CONFIG'].list_available_servers():
-        server_list.append({"server_id": s[0],
-                            "name": s[1],
-                            "login_url": s[2]})
+        server_list.append({"server_id": s.id,
+                            "name": s.name,
+                            "login_url": s.login_url,
+                            "token_url": s.token_url,
+                            "logout_url": s.logout_url})
 
     return jsonify({"available_servers": server_list,
                     "current_server": current_app.config['LABMGR_CONFIG'].get_current_server_id()})
+
+
+@rest_routes.route(f"/server/<server_id>/exchange/<state_token>")
+def exchange_tokens(server_id: str, state_token: str):
+    """Unauthorized endpoint to exchange an opaque session token for a pair of JWTs
+    """
+    token_url = None
+    for s in current_app.config['LABMGR_CONFIG'].list_available_servers():
+        if s[0] == server_id:
+            token_url = s[3]
+            break
+
+    if not token_url:
+        return abort(403)
+
+    response = requests.get(f"{token_url}?state={state_token}")
+    if response.status_code != 200:
+        logger.error(f"Failed to exchange state token for JWTs: {response.status_code}")
+        return abort(response.status_code)
+
+    return jsonify(response.json())
+

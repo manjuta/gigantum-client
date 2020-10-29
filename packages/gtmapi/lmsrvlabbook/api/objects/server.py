@@ -1,7 +1,7 @@
 import graphene
 import flask
 
-from lmsrvlabbook.api.objects.serverauth import ServerAuth, ServerAuthTypeSpecificField
+from lmsrvlabbook.api.objects.serverauth import ServerAuth
 
 
 class Server(graphene.ObjectType):
@@ -42,17 +42,20 @@ def helper_get_current_server():
     auth_config = flask.current_app.config['LABMGR_CONFIG'].get_auth_configuration()
 
     if auth_config.login_type == "auth0":
-        type_specific_fields = [ServerAuthTypeSpecificField(server_id=server_config.id,
-                                                            parameter="auth0_client_id",
-                                                            value=auth_config.auth0_client_id)]
+        type_specific_fields = []
+    elif auth_config.login_type == "internal":
+        type_specific_fields = []
     else:
         raise ValueError(f"Unsupported authentication system type: {auth_config.login_type}")
 
     server_auth = ServerAuth(server_id=server_config.id,
                              login_type=auth_config.login_type,
                              login_url=auth_config.login_url,
+                             logout_url=auth_config.logout_url,
+                             token_url=auth_config.token_url,
                              audience=auth_config.audience,
                              issuer=auth_config.issuer,
+                             client_id=auth_config.client_id,
                              signing_algorithm=auth_config.signing_algorithm,
                              public_key_url=auth_config.public_key_url,
                              type_specific_fields=type_specific_fields)

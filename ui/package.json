@@ -16,7 +16,6 @@
     "@gigantum/relay-testing-utils": "^0.1.0",
     "@graphql-cli/codegen": "^1.17.0",
     "@graphql-codegen/schema-ast": "^1.17.0",
-    "auth0-js": "^9.13.2",
     "autoprefixer": "^9.4.7",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
@@ -143,7 +142,8 @@
     "whatwg-encoding": "1.0.5",
     "worker-loader": "^2.0.0",
     "worker-plugin": "^3.1.0",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "xstate": "^4.13.0"
   },
   "scripts": {
     "start": "node scripts/start.js NODE_ENV='development'",

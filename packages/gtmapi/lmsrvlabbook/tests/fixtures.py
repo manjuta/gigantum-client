@@ -16,7 +16,7 @@ from gtmcore.files import FileOperations
 from gtmcore.container.local_container import get_docker_client
 from gtmcore.environment import RepositoryManager
 from gtmcore.configuration.configuration import Configuration, deep_update
-from gtmcore.auth.identity import get_identity_manager
+from gtmcore.auth.identity import get_identity_manager_class
 from gtmcore.environment.bundledapp import BundledAppManager
 
 from gtmcore.inventory.inventory import InventoryManager
@@ -87,11 +87,11 @@ def fixture_working_dir():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         flask.g.access_token = "afakeaccesstoken"
         flask.g.id_token = "afakeidtoken"
 
@@ -130,11 +130,11 @@ def fixture_working_dir_lfs_disabled():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly(this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         flask.g.access_token = "afakeaccesstoken"
         flask.g.id_token = "afakeidtoken"
 
@@ -172,11 +172,11 @@ def fixture_working_dir_env_repo_scoped():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         flask.g.access_token = "afakeaccesstoken"
         flask.g.id_token = "afakeidtoken"
 
@@ -246,11 +246,11 @@ def fixture_working_dir_populated_scoped():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         flask.g.access_token = "afakeaccesstoken"
         flask.g.id_token = "afakeidtoken"
 
@@ -321,11 +321,11 @@ def fixture_working_dir_dataset_populated_scoped():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         flask.g.access_token = "afakeaccesstoken"
         flask.g.id_token = "afakeidtoken"
 
@@ -375,11 +375,11 @@ def fixture_single_dataset():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
         flask.g.access_token = "afakeaccesstoken"
         flask.g.id_token = "afakeidtoken"
 
@@ -412,11 +412,11 @@ def build_image_for_jupyterlab():
     # Load User identity into app context
     app = Flask("lmsrvlabbook")
     app.config["LABMGR_CONFIG"] = config = Configuration()
-    app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
     with app.app_context():
         # within this block, current_app points to app. Set current user explicitly (this is done in the middleware)
-        flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
 
         # Create a test client
         client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware, RepositoryCacheMiddleware()],

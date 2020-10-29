@@ -4,6 +4,8 @@ import json
 import jose
 import redis_lock
 from redis import StrictRedis
+from jose import jwt
+import glob
 
 from gtmcore.auth.identity import IdentityManager, User, AuthenticationError
 from gtmcore.configuration import Configuration
@@ -94,18 +96,16 @@ class LocalIdentityManager(IdentityManager):
                             "description": "JWT must be provided if no locally stored identity is available"}
                 raise AuthenticationError(err_dict, 401)
 
-            # Validate JWT token
+            # Verify ID JWT - audience is always the client ID per OpenID Connect spec
             auth_config = self.config.get_auth_configuration()
-            token_payload = self.validate_jwt_token(id_token, auth_config.auth0_client_id,
+            token_payload = self.validate_jwt_token(id_token, auth_config.client_id,
                                                     access_token=access_token)
 
             # Create user identity instance
-            user = User()
-            user.email = self._get_profile_attribute(token_payload, "email", required=True)
-            user.username = self._get_profile_attribute(token_payload, "nickname", required=True)
-            user.given_name = self._get_profile_attribute(token_payload, "given_name", required=False)
-            user.family_name = self._get_profile_attribute(token_payload, "family_name", required=False)
-            self.user = user
+            self.user = User(username=self._get_profile_attribute(token_payload, "nickname", required=True),
+                             email=self._get_profile_attribute(token_payload, "email", required=True),
+                             given_name=self._get_profile_attribute(token_payload, "given_name", required=False),
+                             family_name=self._get_profile_attribute(token_payload, "family_name", required=False))
 
             # Save User to local storage
             self._safe_cached_id_access(id_token)
@@ -128,10 +128,10 @@ class LocalIdentityManager(IdentityManager):
             os.remove(data_file)
 
         # Remove the public key. If it even happens to get updated, this is a path to automatically fix
-        data_file = os.path.join(self.auth_dir, 'jwks.json')
-        if os.path.exists(data_file):
-            logger.info("Removed cached jwks file.")
-            os.remove(data_file)
+        for f in glob.glob(os.path.join(self.auth_dir, '*jwks.json')):
+            if os.path.exists(f):
+                logger.info(f"Removed cached jwks file: {f}.")
+                os.remove(f)
 
         self.user = None
         self.rsa_key = None
@@ -157,9 +157,10 @@ class LocalIdentityManager(IdentityManager):
                     self._safe_cached_id_access("")
                     return None
 
-            # Load data from JWT with limited checks due to possible timeout and lack of access token
+            # Load data from cached JWT with limited checks due to possible timeout and lack of access token
+            # audience is always the client ID per OpenID Connect spec
             auth_config = self.config.get_auth_configuration()
-            token_payload = self.validate_jwt_token(current_cached_id_token, auth_config.auth0_client_id,
+            token_payload = self.validate_jwt_token(current_cached_id_token, auth_config.client_id,
                                                     limited_validation=True)
 
             # Create user identity instance

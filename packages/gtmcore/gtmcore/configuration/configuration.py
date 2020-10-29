@@ -1,4 +1,4 @@
-from typing import (Any, Dict, Optional, Mapping, Union, MutableMapping, List, Tuple)
+from typing import (Any, Dict, Optional, Mapping, Union, MutableMapping, List, Tuple, NamedTuple)
 import os
 import yaml
 import json
@@ -12,10 +12,18 @@ import requests
 from urllib.parse import urljoin
 
 from gtmcore.configuration.server import ServerConfigData, dict_to_server_config
-from gtmcore.configuration.authentication import Auth0AuthConfiguration, dict_to_auth_config
+from gtmcore.configuration.authentication import OAuth2AuthConfiguration, dict_to_auth_config
 
 from gtmcore.logging import LMLogger
 logger = LMLogger.get_logger()
+
+
+ServerInfo = NamedTuple('ServerInfo', [('id', str),
+                                       ('name', str),
+                                       ('login_url', str),
+                                       ('token_url', str),
+                                       ('logout_url', str),
+                                       ])
 
 
 def deep_update(destination: MutableMapping[str, Any], source: Mapping[str, Any]) -> None:
@@ -324,9 +332,11 @@ class Configuration:
         """
         return os.path.join(self.server_config_dir, f"{server_id}.json")
 
-    def list_available_servers(self) -> List[Tuple[str, str, str]]:
+    def list_available_servers(self) -> List[ServerInfo]:
         """Method to list the servers currently configured in this client in id, name pairs
-        
+
+        Tuple Contents: server ID, server name, login url, token url, logout url
+
         Returns:
             a list of tuples
         """
@@ -334,7 +344,12 @@ class Configuration:
         for server_file in glob.glob(os.path.join(self.server_config_dir, "*.json")):
             with open(server_file, 'rt') as f:
                 data = json.load(f)
-                configured_servers.append((data['server']['id'], data['server']['name'], data['auth']['login_url']))
+                configured_servers.append(ServerInfo(data['server']['id'],
+                                                     data['server']['name'],
+                                                     data['auth']['login_url'],
+                                                     data['auth']['token_url'],
+                                                     data['auth']['logout_url'],
+                                                     ))
 
         return configured_servers
 
@@ -504,7 +519,7 @@ class Configuration:
         # Make sure
         return dict_to_server_config(data)
 
-    def get_auth_configuration(self) -> Union[Auth0AuthConfiguration]:
+    def get_auth_configuration(self) -> OAuth2AuthConfiguration:
         """Method to load the auth configuration for a server
 
         Returns:

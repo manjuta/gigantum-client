@@ -19,7 +19,7 @@ from gtmcore.dispatcher import Dispatcher
 from gtmcore.dispatcher.jobs import update_environment_repositories
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.auth.identity import AuthenticationError, get_identity_manager
+from gtmcore.auth.identity import AuthenticationError, get_identity_manager_class
 from gtmcore.labbook.lock import reset_all_locks
 
 
@@ -101,7 +101,7 @@ random_bytes = os.urandom(32)
 app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
 app.config["LABMGR_CONFIG"] = config = Configuration(wait_for_cache=10)
 configure_default_server(config)
-app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
 # Set Debug mode
 app.config['DEBUG'] = config.config["flask"]["DEBUG"]

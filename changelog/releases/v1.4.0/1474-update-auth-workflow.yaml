@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1505"
+changelog:
+  - type: IMPROVEMENT
+    description: Update authentiaction workflow to improve security and support multiple servers
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1474

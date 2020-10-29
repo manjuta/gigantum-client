@@ -162,13 +162,15 @@ git:
                       status=200)
 
         responses.add(responses.GET, 'https://test.gigantum.com/.well-known/auth.json',
-                      json={"audience": "test.api.gigantum.io",
+                      json={"audience": "api.test.gigantum.com",
                             "issuer": "https://test-auth.gigantum.com",
                             "signing_algorithm": "RS256",
                             "public_key_url": "https://test-auth.gigantum.com/.well-known/jwks.json",
                             "login_url": "https://test.gigantum.com/client/login",
-                            "login_type": "auth0",
-                            "auth0_client_id": "asdf1234asdf1234"},
+                            "logout_url": "https://test.gigantum.com/client/logout",
+                            "token_url": "https://test.gigantum.com/gigantum/auth/token",
+                            "client_id": "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy",
+                            "login_type": "auth0"},
                       status=200)
 
         config_instance, working_dir = mock_config_file
@@ -195,13 +197,15 @@ git:
                       status=200)
 
         responses.add(responses.GET, 'https://test.gigantum.com/.well-known/auth.json',
-                      json={"audience": "test.api.gigantum.io",
+                      json={"audience": "api.test.gigantum.com",
                             "issuer": "https://test-auth.gigantum.com",
                             "signing_algorithm": "RS256",
                             "public_key_url": "https://test-auth.gigantum.com/.well-known/jwks.json",
                             "login_url": "https://test.gigantum.com/client/login",
-                            "login_type": "auth0",
-                            "auth0_client_id": "asdf1234asdf1234"},
+                            "logout_url": "https://test.gigantum.com/client/logout",
+                            "token_url": "https://test.gigantum.com/gigantum/auth/token",
+                            "client_id": "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy",
+                            "login_type": "auth0"},
                       status=200)
 
         config_instance, working_dir = mock_config_file
@@ -268,13 +272,15 @@ git:
         config_instance, working_dir = mock_config_file
 
         auth_config = config_instance.get_auth_configuration()
-        assert auth_config.audience == "io.gigantum.api.dev"
-        assert auth_config.issuer == "https://auth.gigantum.com"
+        assert auth_config.audience == "api.test.gigantum.com"
+        assert auth_config.issuer == "https://auth.gigantum.com/"
         assert auth_config.signing_algorithm == "RS256"
         assert auth_config.public_key_url == "https://auth.gigantum.com/.well-known/jwks.json"
-        assert auth_config.login_url == "https://test.gigantum.com/client/login"
+        assert auth_config.login_url == "https://test.gigantum.com/auth/redirect?target=login"
+        assert auth_config.logout_url == "https://test.gigantum.com/auth/redirect?target=logout"
+        assert auth_config.token_url == "https://test.gigantum.com/auth/token"
+        assert auth_config.client_id == "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
         assert auth_config.login_type == "auth0"
-        assert auth_config.auth0_client_id == "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
 
     def test_get_auth_configuration_from_file(self, mock_config_file):
         """Test trying to get_auth_configuration"""
@@ -282,13 +288,14 @@ git:
         config_instance.clear_cached_configuration()
 
         auth_config = config_instance.get_auth_configuration()
-        assert auth_config.audience == "io.gigantum.api.dev"
-        assert auth_config.issuer == "https://auth.gigantum.com"
+        assert auth_config.audience == "api.test.gigantum.com"
+        assert auth_config.issuer == "https://auth.gigantum.com/"
         assert auth_config.signing_algorithm == "RS256"
         assert auth_config.public_key_url == "https://auth.gigantum.com/.well-known/jwks.json"
-        assert auth_config.login_url == "https://test.gigantum.com/client/login"
+        assert auth_config.login_url == "https://test.gigantum.com/auth/redirect?target=login"
+        assert auth_config.logout_url == "https://test.gigantum.com/auth/redirect?target=logout"
+        assert auth_config.token_url == "https://test.gigantum.com/auth/token"
         assert auth_config.login_type == "auth0"
-        assert auth_config.auth0_client_id == "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
 
     @responses.activate
     def test_list_available_servers(self, mock_config_file):
@@ -307,20 +314,26 @@ git:
                       status=200)
 
         responses.add(responses.GET, 'https://test2.gigantum.com/.well-known/auth.json',
-                      json={"audience": "test2.api.gigantum.io",
+                      json={"audience": "api.test.gigantum.com",
                             "issuer": "https://test2-auth.gigantum.com",
                             "signing_algorithm": "RS256",
                             "public_key_url": "https://test2-auth.gigantum.com/.well-known/jwks.json",
-                            "login_url": "https://test2.gigantum.com/client/login",
-                            "login_type": "auth0",
-                            "auth0_client_id": "0000000000000000"},
+                            "login_url": "https://test2.gigantum.com/auth/login",
+                            "token_url": "https://test2.gigantum.com/auth/token",
+                            "logout_url": "https://test2.gigantum.com/auth/logout",
+                            "client_id": "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy",
+                            "login_type": "auth0"},
                       status=200)
 
         config_instance, working_dir = mock_config_file
 
         servers = config_instance.list_available_servers()
         assert len(servers) == 1
-        assert servers[0] == ('test-gigantum-com', "Gigantum Hub Test", "https://test.gigantum.com/client/login")
+        assert servers[0].id == 'test-gigantum-com'
+        assert servers[0].name == "Gigantum Hub Test"
+        assert servers[0].login_url == "https://test.gigantum.com/auth/redirect?target=login"
+        assert servers[0].token_url == "https://test.gigantum.com/auth/token"
+        assert servers[0].logout_url == "https://test.gigantum.com/auth/redirect?target=logout"
 
         config_instance.add_server('https://test2.gigantum.com/')
 

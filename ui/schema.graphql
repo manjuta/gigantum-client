@@ -1763,8 +1763,11 @@ type ServerAuth implements Node {
   serverId: String!
   loginType: String
   loginUrl: String
+  logoutUrl: String
+  tokenUrl: String
   audience: String
   issuer: String
+  clientId: String
   signingAlgorithm: String
   publicKeyUrl: String
   typeSpecificFields: [ServerAuthTypeSpecificField]
