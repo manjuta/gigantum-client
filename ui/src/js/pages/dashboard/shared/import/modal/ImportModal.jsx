@@ -6,8 +6,6 @@ import classNames from 'classnames';
 import Modal from 'Components/common/Modal';
 
 
-// TODO move this to it's own file and clean up import module
-
 const ImportModal = ({ self }) => {
   const { props, state } = self;
   const owner = state.ready ? state.ready.owner : '';
