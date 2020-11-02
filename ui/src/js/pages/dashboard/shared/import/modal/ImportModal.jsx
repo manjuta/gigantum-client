@@ -3,7 +3,7 @@
 import React from 'react';
 import classNames from 'classnames';
 // components
-import Modal from 'Components/common/Modal';
+import Modal from 'Components/modal/Modal';
 
 
 const ImportModal = ({ self }) => {
