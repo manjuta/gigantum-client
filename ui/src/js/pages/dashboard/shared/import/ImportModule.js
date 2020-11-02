@@ -14,7 +14,7 @@ import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 import Tooltip from 'Components/tooltip/Tooltip';
 import Modal from 'Components/modal/Modal';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
-import ImportModal from `./modal/ImportModal`;
+import ImportModal from './modal/ImportModal';
 // utilities
 import prepareUpload from './PrepareUpload';
 // assets
