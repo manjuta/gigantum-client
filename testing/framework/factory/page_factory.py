@@ -13,6 +13,8 @@ from framework.factory.models_enums.constants_enums import LocatorType, CompareU
 import time
 import pkg_resources
 from framework.factory.compare_utility import CompareUtility
+import tempfile
+import os
 
 
 class PageFactory(object):
@@ -271,20 +273,23 @@ class PageFactory(object):
         """
         return self.parent.execute_script(script, self)
 
-    def drag_drop_file_in_drop_zone(self, sleep_time=5, file_content="sample text"):
+    def drag_drop_text_file_in_drop_zone(self, sleep_time: int = 5, file_content: str = "sample text",
+                                         file_name: str = 'requirements.txt'):
         """Drag and drop a file into a file browser drop zone.
 
         Args:
             sleep_time: timeout interval to drop file
             file_content: content of the file
+            file_name: name of the file
         """
-        with open(pkg_resources.resource_filename('factory', 'resources/file_browser_drag_drop_script.js'), "r") \
+        with open(pkg_resources.resource_filename('framework', 'factory/resources/file_browser_drag_drop_script.js'), "r") \
                 as js_file:
             js_script = js_file.read()
-        file_path = pkg_resources.resource_filename('factory', 'resources/sample-upload.txt')
-        with open(file_path, "w") as example_file:
-            example_file.write(file_content)
-        file_input = self.execute_script(js_script, self, 0, 0)
+        temp_dir = tempfile.gettempdir()
+        with open(os.path.join(temp_dir, file_name), 'w') as temp_file:
+            temp_file.write(file_content)
+        file_path = os.path.join(temp_dir, file_name)
+        file_input = self.execute_script(js_script)
         file_input.send_keys(file_path)
         time.sleep(sleep_time)
 
@@ -373,3 +378,6 @@ WebElement.get_all_list_item = PageFactory.get_all_list_item
 WebElement.get_list_selected_item = PageFactory.get_list_selected_item
 WebElement.execute_script = PageFactory.execute_script
 setattr(WebElement, 'wait_until', PageFactory.wait_until)
+setattr(WebElement, 'drag_drop_file_in_drop_zone', PageFactory.drag_drop_text_file_in_drop_zone)
+
+

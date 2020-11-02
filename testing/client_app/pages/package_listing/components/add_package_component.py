@@ -158,4 +158,31 @@ class AddPackageComponent(BaseComponent):
                 raise ValueError(f"Unsupported browser type while verifying package version: {agent}")
         return False
 
+    def click_requirements_tab(self) -> bool:
+        """Performs the click action on Add requirements tab
 
+        Returns: returns the result of click action
+
+        """
+        requirement_tab = self.get_locator(LocatorType.XPath, "//h5[contains(text(),'Add Requirements File')]")
+        if requirement_tab.element_to_be_clickable():
+            requirement_tab.click()
+            return True
+        return False
+
+    def drag_and_drop_text_file(self, packages: list) -> bool:
+        """Drag and drop the requirements file
+
+        Args:
+            packages: Name of packages to be installed
+
+        Returns: returns the result of drag and drop action
+
+        """
+        drop_box = self.get_locator(LocatorType.XPath, "//div[@class='Dropbox flex flex--column align-items--center']")
+        if drop_box is not None:
+            # Create a new string by adding new line character to each package in the packages list
+            package_str = "\n".join(packages)
+            drop_box.drag_drop_file_in_drop_zone(file_content=package_str)
+            return True
+        return False

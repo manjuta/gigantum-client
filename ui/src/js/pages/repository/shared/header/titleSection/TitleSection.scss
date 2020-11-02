@@ -14,7 +14,7 @@
 
   font-size: 16px;
   line-height: 30px;
-}
+
 
 .TitleSection__namespace{
    color: $primaryText;
@@ -23,6 +23,8 @@
    font-size: 26px;
    @include flex(flex-start, row);
    align-items: center;
+   z-index: 30;
+ }
 }
 
 
@@ -35,6 +37,7 @@
 
   background: url(~Images/icons/lock-grey.svg) no-repeat center center;
   background-size: 16px;
+    z-index: 10;
 }
 
 .TitleSection__public {
@@ -47,4 +50,5 @@
 
   background: url(~Images/icons/earth-grey.svg) no-repeat center center;
   background-size: 20px;
+    z-index: 10;
 }

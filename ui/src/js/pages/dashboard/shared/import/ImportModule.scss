@@ -273,23 +273,21 @@ input.Import__input--paste{
 }
 
 .ImportDropzone{
-  @include flex(center, column);
   align-self: center;
-  width: 350px;
-  height: 150px;
-  border: 1px dashed $primaryText;
-  line-height: 20px;
-  word-break: break-word;
+  min-height: 200px !important;
+  width: 100%;
   text-align: center;
-  padding: 10px;
   margin-top: 0;
   min-height: 140px;
-
+  @include flex(center, column);
   hr {
     margin-bottom: 30px;
     align-self: center;
   }
+}
 
+.ImportDropzone.Dropbox {
+  background-position: center 10px;
 }
 
 .Import__dropzone {

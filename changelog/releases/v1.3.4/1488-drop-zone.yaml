@@ -1,0 +1,8 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1495"
+changelog:
+  - type: FIX
+    description: Fixes project and dataset import dropzones to looks like the other dropzones in the application. Adds improved functionality to the dropzone, better highlighing trigger and clears data when dropping a new file.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1489
+  - type: FIX
+    description: Fixes z-index issues with public/private tooltip. Fixes delete collaborator button css issues.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1488

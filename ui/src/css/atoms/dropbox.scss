@@ -19,6 +19,22 @@
       display: none;
     }
   }
+
+  &--project--hovered {
+    background: $lightBlue url('~Images/icons/cloud-upload-white.svg') no-repeat center 25px;
+    color: $white !important;
+    h5 {
+      color: $white !important;;
+    }
+    background-size: 40px;
+    border: 2px dashed $white;
+    span {
+      display: none;
+    }
+    label {
+      display: none;
+    }
+  }
   &--dropped {
     background: $white !important;
   }
@@ -47,4 +63,3 @@
   font-size: 20px;
   margin: 20px 0;
 }
-
