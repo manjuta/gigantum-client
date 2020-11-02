@@ -146,33 +146,13 @@ exports[`FileBrowser component Test FileBrowser Rendering 1`] = `
       </div>
     </div>
     <div
-      className="Dropbox Dropbox--fileBrowser flex flex--column align-items--center"
+      className="flex flex--column align-items--center"
     >
       <div
         className="Dropbox--menu"
       >
-        Drag and drop files here
-        <br />
-        <span>
-          or
-        </span>
+        Files are currently being processed. Please wait.
       </div>
-      <label
-        className="flex justify--center"
-        htmlFor="add_file"
-      >
-        <div
-          className="Btn Btn--allStyling"
-        >
-          Choose Files...
-        </div>
-        <input
-          className="hidden"
-          id="add_file"
-          onChange={[Function]}
-          type="file"
-        />
-      </label>
     </div>
   </div>
 </div>

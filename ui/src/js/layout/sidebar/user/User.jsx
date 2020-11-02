@@ -87,7 +87,6 @@ class User extends Component<Props> {
       'User__dropdown--arrow': true,
       hidden: !dropdownVisible,
     });
-
     return (
       <div
         id="user"
@@ -116,8 +115,8 @@ class User extends Component<Props> {
         <div className={arrowCSS} />
 
         <div className={userDropdownCSS}>
-          { (currentServer.baseUrl === 'https://gigantum.com/')
-            || (currentServer.baseUrl === 'https://gtm-dev.cloud/')
+          { ((baseUrl === 'https://gigantum.com/')
+            || (baseUrl === 'https://gtm-dev.cloud/'))
             && (
               <a
                 id="profile"

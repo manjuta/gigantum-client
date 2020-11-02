@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 // components
-import DetailRecords from './DetailRecords';
+import DetailRecordsWrapper from './records/DetailRecordsWrapper';
 
 /**
 *  Returns boolean if details should be shown
@@ -117,10 +117,11 @@ class ActivityDetailsList extends Component<Props> {
           )
           : <hr />
         }
+
         { show
           && (
             <div className="ActivtyDetail_list">
-              <DetailRecords
+              <DetailRecordsWrapper
                 keys={keys}
                 sectionType={sectionType}
                 owner={owner}

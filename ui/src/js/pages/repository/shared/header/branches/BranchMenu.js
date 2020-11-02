@@ -54,18 +54,27 @@ const extraxtActiveBranch = (branches) => {
   Gets sync tooltip
   @return {String}
 */
-const getSyncTooltip = (props, data, currentServer) => {
+const getSyncTooltip = (props, data, currentServer, isDataset) => {
   const {
     hasWriteAccess,
     syncOrPublish,
     sectionCollabs,
     activeBranch,
   } = data;
+  const repositoryType = isDataset ? 'Dataset' : 'Project';
   let syncTooltip = !hasWriteAccess ? 'Pull changes from Gignatum Hub' : `Sync changes to ${currentServer.name}`;
-  syncTooltip = !props.defaultRemote ? `Click Publish to push branch to ${currentServer.name}` : syncTooltip;
-  syncTooltip = props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : syncTooltip;
-  syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : syncTooltip;
-  syncTooltip = props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : syncTooltip;
+  syncTooltip = !props.defaultRemote
+    ? `Click Publish to push branch to ${currentServer.name}`
+    : syncTooltip;
+  syncTooltip = props.isLocked
+    ? `Cannot ${syncOrPublish} while ${repositoryType} is in use`
+    : syncTooltip;
+  syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote)
+    ? 'Must publish Master branch first'
+    : syncTooltip;
+  syncTooltip = props.defaultRemote && !sectionCollabs
+    ? `Please wait while ${repositoryType} data is being fetched`
+    : syncTooltip;
 
   return syncTooltip;
 };
@@ -637,6 +646,7 @@ class BranchMenu extends Component<Props> {
     const sectionCollabs = (collaborators && collaborators[section.name]) || null;
     const defaultDatasetMessage = 'Datasets currently does not support branching features';
     const isPullOnly = defaultRemote && !hasWriteAccess && sectionCollabs;
+
     let syncOrPublish = defaultRemote ? 'Sync' : 'Publish';
     syncOrPublish = isPullOnly ? 'Pull' : syncOrPublish;
 
@@ -666,7 +676,7 @@ class BranchMenu extends Component<Props> {
     };
     // TODO FIX this, nesting ternary operations is bad
     return {
-      syncTooltip: getSyncTooltip(props, data, currentServer),
+      syncTooltip: getSyncTooltip(props, data, currentServer, state.isDataset),
       manageTooltip: getManagedToolip(props, data),
       createTooltip,
       resetTooltip,

@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1507"
+changelog:
+  - type: FIX
+    description: Refactors detail records to fix issues with more/less buttons not functioning as expected.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1506

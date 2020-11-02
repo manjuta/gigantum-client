@@ -106,7 +106,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
         Created:
       </span>
        
-      Thu Jan 30 2020
+      01/30/20
     </p>
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
@@ -117,7 +117,7 @@ exports[`Test LocalLabbooks rendering 1`] = `
         Modified:
       </span>
        
-      Mon Feb 03 2020
+      9 months ago
     </p>
     <p
       className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"

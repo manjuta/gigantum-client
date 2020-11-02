@@ -1,5 +1,7 @@
 // vendor
 import React, { Component } from 'react';
+// context
+import ServerContext from 'Pages/ServerContext';
 // components
 import Modal from 'Components/modal/Modal';
 // auth
@@ -23,15 +25,10 @@ class LoginPrompt extends Component<Props> {
   */
   _login() {
     const { closeModal } = this.props;
-
+    const { currentServer } = this.context;
     auth.renewToken(
-      null,
-      () => {},
-      () => {
-      }, null,
-      (err) => {
-        console.log(err);
-      },
+      currentServer,
+      `#route=${window.location.href}`,
     );
 
     closeModal(true);
@@ -46,6 +43,8 @@ class LoginPrompt extends Component<Props> {
     const { closeModal } = this.props;
     closeModal(true);
   }
+
+  static contextType = ServerContext;
 
   render() {
     const { showLoginPrompt } = this.props;
