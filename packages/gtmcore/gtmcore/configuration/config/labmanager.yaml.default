@@ -7,8 +7,7 @@ core:
   # Should the app import a labbook into new user's working dirs on first login
   import_demo_on_first_login: true
   # Default server will be automatically configured on first boot
-  # TODO: when ready for release, switch to gigantum.com
-  default_server: "https://gtm-dev.cloud"
+  default_server: "https://gigantum.com"
 
 # Project Container Configuration
 container:

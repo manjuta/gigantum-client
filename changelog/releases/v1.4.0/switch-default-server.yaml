@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1511"
+changelog:
+  - type: NEW
+    description: Client automatically configures using gigantum.com on first start if no server configs are present
