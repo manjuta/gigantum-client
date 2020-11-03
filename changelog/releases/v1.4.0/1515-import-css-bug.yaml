@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1515"
+changelog:
+  - type: FIX
+    description: Fixes css overflow issue introduced by issue 1489.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1489

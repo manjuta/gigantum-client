@@ -21,6 +21,7 @@ const LoginError = (props: Props) => {
     const header = (errors[0].message === 'blocked')
       ? 'Account Activation Required'
       : 'Authentication Error';
+    const message = errors[0].message;
 
     return (
       <section className="LoginError">
@@ -33,7 +34,7 @@ const LoginError = (props: Props) => {
 
         <BlockedText
           admin={admin}
-          message={errors[0].message}
+          message={message}
         />
 
         { (errors[0].message !== 'blocked')
