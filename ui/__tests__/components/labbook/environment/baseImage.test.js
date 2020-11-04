@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseImage from 'Components/labbook/environment/BaseImage';
+import BaseImage from 'Pages/repository/labbook/environment/BaseImage';
 import renderer from 'react-test-renderer';
 import sinon from 'sinon';
 import { shallow, mount, render } from 'enzyme';

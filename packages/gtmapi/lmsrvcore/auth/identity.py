@@ -1,5 +1,4 @@
 from typing import Tuple, Optional
-from flask import current_app
 from gtmcore.auth.identity import AuthenticationError, IdentityManager
 import flask
 import base64
@@ -7,10 +6,12 @@ import base64
 
 def get_identity_manager_instance() -> IdentityManager:
     """Method to retrieve the id manager from the flask application"""
-    if "LABMGR_ID_MGR" not in current_app.config:
-        raise AuthenticationError("Application mis-configured. Missing identity manager instance.", 401)
-
-    return current_app.config["LABMGR_ID_MGR"]
+    id_mgr: Optional[IdentityManager] = flask.g.get('ID_MGR', None)
+    if not id_mgr:
+        # Instantiate and Identity Manager class for this request
+        id_mgr = flask.current_app.config["ID_MGR_CLS"](flask.current_app.config["LABMGR_CONFIG"])
+        flask.g.ID_MGR = id_mgr
+    return id_mgr
 
 
 def tokens_from_headers(headers: dict) -> Tuple[Optional[str], Optional[str]]:
@@ -49,7 +50,7 @@ def tokens_from_request_context(tokens_required=False) -> Tuple[Optional[str], O
     if access_token:
         parts = access_token.split('.')
         if len(parts) == 3:
-            header = base64.b64decode(parts[0]).decode()
+            header = base64.urlsafe_b64decode(f"{parts[0]}{'=' * (len(parts[0]) % 4)}").decode()
             if "GIGANTUM-ANONYMOUS-USER" == header:
                 access_token = None
                 id_token = None

@@ -21,7 +21,7 @@ from gtmcore.dispatcher import Dispatcher, jobs
 @pytest.fixture()
 def mock_create_dataset(fixture_working_dir):
     # Create a dataset in the temporary directory
-    im = InventoryManager(fixture_working_dir[0])
+    im = InventoryManager()
     ds = im.create_dataset("default", "default", "dataset1", storage_type="gigantum_object_v1",
                            description="my dataset")
 
@@ -44,9 +44,6 @@ class TestDatasetUploadFilesMutations(object):
             assert kwargs['logged_in_email'] == 'jane@doe.com'
             assert kwargs['dataset_owner'] == 'default'
             assert kwargs['dataset_name'] == 'dataset1'
-
-            # Inject mocked config file
-            kwargs['config_file'] = mock_create_dataset[0]
 
             # Stop patching so job gets scheduled for real
             dispatcher_patch.stop()
@@ -78,7 +75,7 @@ class TestDatasetUploadFilesMutations(object):
         file_size = int(file_info.st_size / 1000)
         total_chunks = int(math.ceil(file_info.st_size / chunk_size))
 
-        ds = InventoryManager(mock_create_dataset[0]).load_dataset('default', 'default', 'dataset1')
+        ds = InventoryManager().load_dataset('default', 'default', 'dataset1')
 
         fsc = HostFilesystemCache(ds, 'default')
         target_file = os.path.join(fsc.current_revision_dir, "myValidFile.dat")

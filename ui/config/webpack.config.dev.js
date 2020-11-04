@@ -61,10 +61,10 @@ module.exports = {
     // Finally, this is your app's code:
     appIndexJs: paths.appIndexJs,
     // dahshboardJs: paths.dahshboardJs,
-    // labbookJs: paths.labbookJs,
-    // labbookActivityJs: paths.labbookActivityJs,
-    // labbookEnvironmentJs: paths.labbookEnvironmentJs,
-    // labbookOverviewJs: paths.labbookOverviewJs,
+    labbookJs: paths.labbookJs,
+    labbookActivityJs: paths.labbookActivityJs,
+    labbookEnvironmentJs: paths.labbookEnvironmentJs,
+    labbookOverviewJs: paths.labbookOverviewJs,
     // uploadWorker: paths.uploadWorker,
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and

@@ -8,7 +8,7 @@ from gtmcore.inventory.inventory import InventoryManager
 
 class TestDataloaderFetch(object):
     def test_load_one_dataset(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_dataset("default", "default", "dataset1", storage_type="gigantum_object_v1",
                           description="a dataset")
         im.create_dataset("default", "default", "dataset2", storage_type="gigantum_object_v1",
@@ -21,7 +21,7 @@ class TestDataloaderFetch(object):
         assert promise1.get() is None
 
     def test_load_many_dataset(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_dataset("default", "default", "dataset1", storage_type="gigantum_object_v1",
                           description="a dataset")
         im.create_dataset("default", "default", "dataset2", storage_type="gigantum_object_v1",
@@ -38,7 +38,7 @@ class TestDataloaderFetch(object):
         promise1.get()
 
     def test_load_one_labbook(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook("default", "default", "lb1", description="a project")
         im.create_labbook("default", "default", "lb2", description="a project")
         loader = FetchLoader()
@@ -49,7 +49,7 @@ class TestDataloaderFetch(object):
         assert promise1.get() is None
 
     def test_load_labbook_multiple(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook("default", "default", "lb1", description="a project")
         im.create_labbook("default", "default", "lb2", description="a project")
         loader = FetchLoader()
@@ -64,7 +64,7 @@ class TestDataloaderFetch(object):
         assert promise3.get() is None
 
     def test_load_many_labbook(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook("default", "default", "lb1", description="a project")
         im.create_labbook("default", "default", "lb2", description="a project")
         im.create_labbook("default", "default", "lb3", description="a project")
@@ -78,7 +78,7 @@ class TestDataloaderFetch(object):
         promise1.get()
 
     def test_load_err(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook("default", "default", "lb1", description="a project")
         loader = FetchLoader()
 

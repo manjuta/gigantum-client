@@ -1,9 +1,9 @@
 import pytest
 import os
 
-from gtmcore.fixtures import mock_config_file_with_auth
+from gtmcore.fixtures.auth import mock_config_file_with_auth
 from gtmcore.configuration import Configuration
-from gtmcore.auth.identity import get_identity_manager, IdentityManager
+from gtmcore.auth.identity import get_identity_manager_class, IdentityManager
 from gtmcore.auth.local import LocalIdentityManager
 from gtmcore.auth import User
 
@@ -30,31 +30,31 @@ class TestIdentity(object):
 
     def test_get_identity_manager_errors(self, mock_config_file_with_auth):
         """Testing get_identity_manager error handling"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
         config.config['auth']['identity_manager'] = "asdfasdf"
 
         with pytest.raises(ValueError):
-            get_identity_manager(config)
+            get_identity_manager_class(config)
 
         del config.config['auth']['identity_manager']
 
         with pytest.raises(ValueError):
-            get_identity_manager(config)
+            get_identity_manager_class(config)
 
         del config.config['auth']
 
         with pytest.raises(ValueError):
-            get_identity_manager(config)
+            get_identity_manager_class(config)
 
     def test_get_identity_manager(self, mock_config_file_with_auth):
         """test getting an identity manager"""
-        config = Configuration(mock_config_file_with_auth[0])
+        config = Configuration()
 
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
 
         assert type(mgr) == LocalIdentityManager
         assert mgr.config == config
-        assert mgr.auth_dir == os.path.join(mock_config_file_with_auth[2], '.labmanager', 'identity')
+        assert mgr.auth_dir == os.path.join(config.app_workdir, '.labmanager', 'identity')
         assert mgr.user is None
         assert mgr.rsa_key is None
         assert mgr._user is None

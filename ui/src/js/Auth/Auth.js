@@ -1,99 +1,75 @@
-import history from 'JS/history';
-import auth0 from 'auth0-js';
+// mutations
 import RemoveUserIdentityMutation from 'Mutations/user/RemoveUserIdentityMutation';
 // queries
 import SessionCheck from 'JS/Auth/sessionCheck';
 // store
-import { setLogout, setLoginError } from 'JS/redux/actions/login';
-// variables
-import { AUTH_CONFIG } from './auth0-variables';
+import { setLogout } from 'JS/redux/actions/login';
 
-const getBasename = () => {
-  const globalObject = this || window;
-  const { pathname } = globalObject.location;
-  const pathList = pathname ? pathname.split('/') : [];
-  const uniqueClientString = (pathList.length > 2)
-    ? pathList[2]
-    : '';
-  const basename = process.env.BUILD_TYPE === 'cloud'
-    ? `/run/${uniqueClientString}`
-    : '';
-  return basename;
-};
-
-const basename = getBasename();
-
-export default class Auth {
-  auth0 = new auth0.WebAuth({
-    domain: AUTH_CONFIG.domain,
-    clientID: AUTH_CONFIG.clientId,
-    redirectUri: AUTH_CONFIG.callbackUrl,
-    audience: AUTH_CONFIG.audience,
-    responseType: 'token id_token',
-    scope: 'openid profile email user_metadata',
-  });
+class Auth {
+  /**
+   * Method reroutes to login screen
+   * @param {object} server
+   * @param {string} hash
+  */
+  renewToken = (server, hash) => {
+    const loginUrl = server.authConfig;
+    const url = hash ? `${loginUrl}${hash}` : loginUrl;
+    window.open(url, '_self');
+  }
 
   /**
-   * Reroutes to login screen
+   * Method logs user in and reroutes
+   * @param {object} server
+   * @param {string} hash
   */
-  renewToken = () => {
-    const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
-    const baseURL = 'gigantum.com';
-    const route = window.location.href.replace('#', '');
-    const loginURL = `https://${baseURL}/client/login#route=${route}${freshLoginText}`;
-    window.open(loginURL, '_self');
-  }
-
-  login = () => {
+  login = (server, hash) => {
+    const loginUrl = server.login_url;
+    const url = hash ? `${loginUrl}${hash}` : loginUrl;
     setLogout(false);
-    this.auth0.authorize();
+    window.open(url, '_self');
   }
 
-  handleAuthentication = () => {
-    this.auth0.parseHash((err, authResult) => {
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        this.setSession(authResult);
-        window.sessionStorage.removeItem('LOGIN_ERROR_DESCRIPTION');
-        window.sessionStorage.removeItem('LOGIN_ERROR_TYPE');
-      } else if (err) {
-        history.replace(`${basename}/login`);
-        setLoginError(err);
-        window.sessionStorage.setItem('LOGIN_ERROR_TYPE', err.error);
-        window.sessionStorage.setItem('LOGIN_ERROR_DESCRIPTION', err.errorDescription);
-        // alert(`Error: ${err.error}. Check the console for further details.`); TODO make this a modal or redirect to login failure page
-      }
-    });
-  }
-
-  setSession = (authResult, silent, forceHistory) => {
+  /**
+   * Method sets user session in local storage
+   * @param {object} userIdentity
+  */
+  setSession = (userIdentity) => {
     // Set the time that the access token will expire at
-    const expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
-    localStorage.setItem('access_token', authResult.accessToken);
-    localStorage.setItem('id_token', authResult.idToken);
+    const expiresAt = JSON.stringify((new Date().getTime() * 1000) + new Date().getTime());
+    localStorage.setItem('family_name', userIdentity.familyName);
+    localStorage.setItem('given_name', userIdentity.givenName);
+    localStorage.setItem('email', userIdentity.email);
+    localStorage.setItem('username', userIdentity.username);
     localStorage.setItem('expires_at', expiresAt);
-    localStorage.setItem('family_name', authResult.idTokenPayload.family_name);
-    localStorage.setItem('given_name', authResult.idTokenPayload.given_name);
-    localStorage.setItem('email', authResult.idTokenPayload.email);
-    localStorage.setItem('username', authResult.idTokenPayload.nickname);
-    // redirect to labbooks when user logs in
-    let route = window.sessionStorage.getItem('CALLBACK_ROUTE')
-      ? window.sessionStorage.getItem('CALLBACK_ROUTE')
-      : '/projects';
-
-    route = route === ''
-      ? '/projects'
-      : route;
-
-    if (!silent || forceHistory) {
-      history.replace(`${basename}${route}`);
-    }
   }
 
-  logout = () => {
+  /**
+   * Method sets resets session in local storage by remove session variables
+   * @param {object} userIdentity
+  */
+  resetSession = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('id_token');
+    localStorage.removeItem('expires_at');
+    localStorage.removeItem('family_name');
+    localStorage.removeItem('given_name');
+    localStorage.removeItem('email');
+    localStorage.removeItem('username');
+  }
+
+  /**
+   * Method sets revokes indentity
+   * Then removes all session variables
+   * Then reloads the application
+  */
+  logout = (currentServer) => {
     setLogout(true);
     RemoveUserIdentityMutation(() => {
+      const { origin } = window.location;
+      const hash = `#route=${origin}`;
+      const { logoutUrl } = currentServer.authConfig;
+      const url = `${logoutUrl}${hash}`;
       // redirect to root when user logs out
-
       localStorage.removeItem('access_token');
       localStorage.removeItem('id_token');
       localStorage.removeItem('expires_at');
@@ -102,16 +78,19 @@ export default class Auth {
       localStorage.removeItem('email');
       localStorage.removeItem('username');
       window.sessionStorage.removeItem('CALLBACK_ROUTE');
-
-      history.replace(`${basename}/`);
+      window.open(url, '_self');
     });
   }
 
-  // Check whether the current time is past the
-  // access token's expiry time
+  /**
+   * Method checks whether the current time is past the
+   * access token's expiry time
+  */
   isAuthenticated = () => SessionCheck.getUserIdentity().then(
     response => response && response.data
       && response.data.userIdentity
       && response.data.userIdentity.isSessionValid,
   );
 }
+
+export default Auth;

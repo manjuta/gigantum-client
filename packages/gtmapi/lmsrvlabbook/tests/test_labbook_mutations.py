@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import os
 import json
 from mock import patch
@@ -24,7 +5,7 @@ from mock import patch
 from gtmcore.fixtures import ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV
 
 from snapshottest import snapshot
-from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir
+from lmsrvlabbook.tests.fixtures import fixture_working_dir_env_repo_scoped, fixture_working_dir, mock_create_labbooks
 from gtmcore.dispatcher import Dispatcher
 
 import pytest
@@ -34,25 +15,8 @@ from gtmcore.fixtures import remote_labbook_repo, mock_config_file, flush_redis_
 from gtmcore.inventory.inventory import InventoryManager
 
 
-@pytest.fixture()
-def mock_create_labbooks(fixture_working_dir):
-    # Create a labbook in the temporary directory
-    # Create a temporary labbook
-    lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "labbook1",
-                                                                 description="Cats labbook 1")
-
-    # Create a file in the dir
-    with open(os.path.join(fixture_working_dir[1], 'sillyfile'), 'w') as sf:
-        sf.write("1234567")
-        sf.seek(0)
-    FileOperations.insert_file(lb, 'code', sf.name)
-
-    assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'sillyfile'))
-    # name of the config file, temporary working directory, the schema
-    yield fixture_working_dir
-
-
 class TestLabBookServiceMutations(object):
+
     def test_create_labbook(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
         # Mock the configuration class it it returns the same mocked config file
@@ -105,37 +69,14 @@ class TestLabBookServiceMutations(object):
         """
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query))
 
-    def test_delete_labbook(self, mock_create_labbooks, fixture_working_dir_env_repo_scoped):
-        """Test deleting a LabBook off disk. """
-        labbook_dir = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1')
-
-        assert os.path.exists(labbook_dir)
-
-        delete_query = f"""
-        mutation delete {{
-            deleteLabbook(input: {{
-                owner: "default",
-                labbookName: "labbook1",
-                confirm: true
-            }}) {{
-                success
-            }}
-        }}
-        """
-
-        r = fixture_working_dir_env_repo_scoped[2].execute(delete_query)
-        assert 'errors' not in r
-        assert r['data']['deleteLabbook']['success'] is True
-        assert not os.path.exists(labbook_dir)
-
     def test_delete_labbook_with_linked_dataset_exists(self, fixture_working_dir_env_repo_scoped):
         """Test deleting a LabBook with a linked dataset, while the dataset still exists (shouldn't clean up)"""
         def dispatcher_mock(self, function_ref, kwargs, metadata):
             # If you get here, a cleanup job was scheduled, which shouldn't have happened since dataset still there
             assert "CLEANUP SHOULD NOT HAVE BEEN SCHEDULED"
 
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
-        lb = im.create_labbook("default", "default", "labbook1", description="Cats labbook 1")
+        im = InventoryManager()
+        lb = im.create_labbook("default", "default", "labbook11", description="Cats labbook 11")
         lb_root_dir = lb.root_dir
         assert os.path.exists(lb_root_dir)
 
@@ -146,7 +87,7 @@ class TestLabBookServiceMutations(object):
         mutation delete {{
             deleteLabbook(input: {{
                 owner: "default",
-                labbookName: "labbook1",
+                labbookName: "labbook11",
                 confirm: true
             }}) {{
                 success
@@ -179,8 +120,8 @@ class TestLabBookServiceMutations(object):
 
             return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2dffcfdfb6b10")
 
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
-        lb = im.create_labbook("default", "default", "labbook1", description="Cats labbook 1")
+        im = InventoryManager()
+        lb = im.create_labbook("default", "default", "labbook111", description="Cats labbook 111")
         lb_root_dir = lb.root_dir
         assert os.path.exists(lb_root_dir)
         assert os.path.exists("/tmp/mock_reached") is False
@@ -194,7 +135,7 @@ class TestLabBookServiceMutations(object):
         mutation delete {{
             deleteLabbook(input: {{
                 owner: "default",
-                labbookName: "labbook1",
+                labbookName: "labbook111",
                 confirm: true
             }}) {{
                 success
@@ -213,66 +154,6 @@ class TestLabBookServiceMutations(object):
         finally:
             if os.path.exists("/tmp/mock_reached"):
                 os.remove("/tmp/mock_reached")
-
-    def test_update_labbook_description(self, mock_create_labbooks, fixture_working_dir_env_repo_scoped):
-        labbook_dir = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1')
-        assert os.path.exists(labbook_dir)
-
-        desc_md = f"# Titłe\n ## \"Subtitle\"\n{'æbčdęfghį:*&^&%$%$@!_t ' * 200}. ## Ænother Sübtitle's\n{'xyz.?/<>č ' * 300}.\n"
-        #desc_md = "abc"
-        description_query = f"""
-        mutation setDesc($content: String!) {{
-            setLabbookDescription(input: {{
-                owner: "default",
-                labbookName: "labbook1",
-                descriptionContent: $content
-            }}) {{
-                success
-            }}
-        }}
-        """
-        variables = {'content': desc_md}
-        r = fixture_working_dir_env_repo_scoped[2].execute(description_query, variable_values=variables)
-        assert 'errors' not in r
-        assert r['data']['setLabbookDescription']['success'] is True
-
-        # Get LabBook you just created
-        query = """
-        {
-          labbook(name: "labbook1", owner: "default") {
-            description
-            isRepoClean
-          }
-        }
-        """
-        r = fixture_working_dir_env_repo_scoped[2].execute(query)
-        assert 'errors' not in r
-        # There's a lot of weird characters getting filtered out, make sure the bulk of the text remains
-        assert abs(1.0 * len(r['data']['labbook']['description']) / len(desc_md)) > 0.75
-        assert r['data']['labbook']['isRepoClean'] == True
-
-    def test_delete_labbook_dry_run(self, mock_create_labbooks, fixture_working_dir_env_repo_scoped):
-        """Test deleting a LabBook off disk. """
-        labbook_dir = os.path.join(mock_create_labbooks[1], 'default', 'default', 'labbooks', 'labbook1')
-
-        assert os.path.exists(labbook_dir)
-
-        delete_query = f"""
-        mutation delete {{
-            deleteLabbook(input: {{
-                owner: "default",
-                labbookName: "labbook1",
-                confirm: false
-            }}) {{
-                success
-            }}
-        }}
-        """
-
-        r = fixture_working_dir_env_repo_scoped[2].execute(delete_query)
-        assert 'errors' not in r
-        assert r['data']['deleteLabbook']['success'] is False
-        assert os.path.exists(labbook_dir)
 
     def test_create_labbook_already_exists(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
@@ -308,6 +189,91 @@ class TestLabBookServiceMutations(object):
 
         # Second should fail with an error message
         snapshot.assert_match(fixture_working_dir_env_repo_scoped[2].execute(query, variable_values=variables))
+
+    def test_delete_labbook(self, fixture_working_dir_env_repo_scoped):
+        """Test deleting a LabBook off disk. """
+        lb = InventoryManager().create_labbook("default", "default", "labbook-delete", description="Cats labbook 1")
+        labbook_dir = lb.root_dir
+
+        assert os.path.exists(labbook_dir)
+
+        delete_query = f"""
+        mutation delete {{
+            deleteLabbook(input: {{
+                owner: "default",
+                labbookName: "labbook-delete",
+                confirm: true
+            }}) {{
+                success
+            }}
+        }}
+        """
+
+        r = fixture_working_dir_env_repo_scoped[2].execute(delete_query)
+        assert 'errors' not in r
+        assert r['data']['deleteLabbook']['success'] is True
+        assert not os.path.exists(labbook_dir)
+
+    def test_delete_labbook_dry_run(self, fixture_working_dir_env_repo_scoped):
+        """Test deleting a LabBook off disk. """
+        lb = InventoryManager().create_labbook("default", "default", "labbook-delete-dry", description="Cats labbook 1")
+        labbook_dir = lb.root_dir
+        assert os.path.exists(labbook_dir)
+
+        delete_query = f"""
+        mutation delete {{
+            deleteLabbook(input: {{
+                owner: "default",
+                labbookName: "labbook-delete-dry",
+                confirm: false
+            }}) {{
+                success
+            }}
+        }}
+        """
+
+        r = fixture_working_dir_env_repo_scoped[2].execute(delete_query)
+        assert 'errors' not in r
+        assert r['data']['deleteLabbook']['success'] is False
+        assert os.path.exists(labbook_dir)
+
+    def test_update_labbook_description(self, fixture_working_dir_env_repo_scoped):
+        lb = InventoryManager().create_labbook("default", "default", "labbook-description",
+                                               description="Cats labbook 1")
+        labbook_dir = lb.root_dir
+        assert os.path.exists(labbook_dir)
+
+        desc_md = f"# Titłe\n ## \"Subtitle\"\n{'æbčdęfghį:*&^&%$%$@!_t ' * 200}. ## Ænother Sübtitle's\n{'xyz.?/<>č ' * 300}.\n"
+        description_query = f"""
+        mutation setDesc($content: String!) {{
+            setLabbookDescription(input: {{
+                owner: "default",
+                labbookName: "labbook-description",
+                descriptionContent: $content
+            }}) {{
+                success
+            }}
+        }}
+        """
+        variables = {'content': desc_md}
+        r = fixture_working_dir_env_repo_scoped[2].execute(description_query, variable_values=variables)
+        assert 'errors' not in r
+        assert r['data']['setLabbookDescription']['success'] is True
+
+        # Get LabBook you just created
+        query = """
+        {
+          labbook(name: "labbook-description", owner: "default") {
+            description
+            isRepoClean
+          }
+        }
+        """
+        r = fixture_working_dir_env_repo_scoped[2].execute(query)
+        assert 'errors' not in r
+        # There's a lot of weird characters getting filtered out, make sure the bulk of the text remains
+        assert abs(1.0 * len(r['data']['labbook']['description']) / len(desc_md)) > 0.75
+        assert r['data']['labbook']['isRepoClean'] is True
 
     def test_move_file(self, mock_create_labbooks):
         """Test moving a file"""
@@ -489,7 +455,7 @@ class TestLabBookServiceMutations(object):
         assert os.path.exists(filepath) is False
 
     def test_delete_dir(self, mock_create_labbooks):
-        im = InventoryManager(mock_create_labbooks[0])
+        im = InventoryManager()
         lb = im.load_labbook('default', 'default', 'labbook1')
         FileOperations.makedir(lb, 'code/subdir')
 
@@ -590,4 +556,3 @@ class TestLabBookServiceMutations(object):
         assert 'errors' not in r
         assert r['data']['fetchLabbookEdge']['newLabbookEdge']['node']['owner'] == 'default'
         assert r['data']['fetchLabbookEdge']['newLabbookEdge']['node']['name'] == 'labbook1'
-

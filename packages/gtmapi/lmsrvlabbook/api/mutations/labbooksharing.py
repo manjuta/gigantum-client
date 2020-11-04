@@ -39,6 +39,7 @@ class PublishLabbook(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
+        lb.client_config.prepare_to_serialize()
 
         job_metadata = {'method': 'publish_labbook',
                         'labbook': lb.key}
@@ -71,7 +72,8 @@ class SyncLabbook(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
-
+        lb.client_config.prepare_to_serialize()
+        
         # Configure git credentials for user
         configure_git_credentials()
 
@@ -285,15 +287,15 @@ class DeleteRemoteLabbook(graphene.ClientIDMutation):
 
             # Get remote server configuration
             config = flask.current_app.config['LABMGR_CONFIG']
-            remote_config = config.get_remote_configuration()
+            server_config = config.get_server_configuration()
 
             # Perform delete operation
-            mgr = GitLabManager(remote_config['git_remote'],
-                                remote_config['hub_api'],
+            mgr = GitLabManager(server_config.git_url,
+                                server_config.hub_api_url,
                                 access_token=access_token,
                                 id_token=id_token)
             mgr.remove_repository(owner, labbook_name)
-            logger.info(f"Deleted {owner}/{labbook_name} from the remote repository {remote_config['git_remote']}")
+            logger.info(f"Deleted {owner}/{labbook_name} from the remote repository.")
 
             # Remove locally any references to that cloud repo that's just been deleted.
             try:
@@ -321,8 +323,7 @@ class ExportLabbook(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, labbook_name, client_mutation_id=None):
         username = get_logged_in_username()
-        config = flask.current_app.config['LABMGR_CONFIG']
-        working_directory = config.config['git']['working_directory']
+        working_directory = flask.current_app.config['LABMGR_CONFIG'].app_workdir
         lb = InventoryManager().load_labbook(username, owner, labbook_name,
                                              author=get_logged_in_author())
 

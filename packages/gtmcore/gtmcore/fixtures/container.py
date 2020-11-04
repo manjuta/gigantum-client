@@ -28,49 +28,48 @@ class ContainerFixture(object):
 
 @pytest.fixture(scope='function')
 def build_lb_image_for_jupyterlab(mock_config_with_repo):
-    with patch.object(Configuration, 'find_default_config', lambda self: mock_config_with_repo[0]):
-        im = InventoryManager(mock_config_with_repo[0])
-        lb = im.create_labbook('unittester', 'unittester', "containerunittestbook")
+    im = InventoryManager()
+    lb = im.create_labbook('unittester', 'unittester', "containerunittestbook")
 
-        cm = ComponentManager(lb)
-        cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
-        cm.add_packages("pip", [{"manager": "pip", "package": "requests", "version": "2.18.4"}])
+    cm = ComponentManager(lb)
+    cm.add_base(ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REV)
+    cm.add_packages("pip", [{"manager": "pip", "package": "requests", "version": "2.18.4"}])
 
-        ib = ImageBuilder(lb)
-        docker_lines = ib.assemble_dockerfile(write=True)
-        assert 'RUN pip install requests==2.18.4' in docker_lines
-        assert all(['==None' not in l for l in docker_lines.split()])
-        assert all(['=None' not in l for l in docker_lines.split()])
-        lb_container = container_for_context(username="unittester", labbook=lb)
-        client = lb_container._client
-        client.containers.prune()
+    ib = ImageBuilder(lb)
+    docker_lines = ib.assemble_dockerfile(write=True)
+    assert 'RUN pip install requests==2.18.4' in docker_lines
+    assert all(['==None' not in l for l in docker_lines.split()])
+    assert all(['=None' not in l for l in docker_lines.split()])
+    lb_container = container_for_context(username="unittester", labbook=lb)
+    client = lb_container._client
+    client.containers.prune()
 
-        assert os.path.exists(os.path.join(lb.root_dir, '.gigantum', 'env', 'entrypoint.sh'))
+    assert os.path.exists(os.path.join(lb.root_dir, '.gigantum', 'env', 'entrypoint.sh'))
 
+    try:
+        lb_container.build_image()
+        lb_container.start_project_container()
+
+        # Keeping some more low-level checks here for now, even though they may break tests on cloud
+        assert isinstance(lb_container._container.id, str)
+        yield lb, ib, client, lb_container._image_id, lb_container.image_tag, None, 'unittester'
+
+        lb_container.stop_container()
+    finally:
+        shutil.rmtree(lb.root_dir, ignore_errors=True)
+        # Stop and remove container if it's still there
         try:
-            lb_container.build_image()
-            lb_container.start_project_container()
+            client.containers.get(lb_container.image_tag).stop(timeout=2)
+            client.containers.get(lb_container.image_tag).remove()
+        except:
+            pass
 
-            # Keeping some more low-level checks here for now, even though they may break tests on cloud
-            assert isinstance(lb_container._container.id, str)
-            yield lb, ib, client, lb_container._image_id, lb_container.image_tag, None, 'unittester'
-
-            lb_container.stop_container()
-        finally:
-            shutil.rmtree(lb.root_dir, ignore_errors=True)
-            # Stop and remove container if it's still there
-            try:
-                client.containers.get(lb_container.image_tag).stop(timeout=2)
-                client.containers.get(lb_container.image_tag).remove()
-            except:
-                pass
-
-            # Remove image if it's still there
-            try:
-                if not lb_container.delete_image():
-                    client.images.remove(lb_container.image_tag, force=True, noprune=False)
-            except:
-                pass
+        # Remove image if it's still there
+        try:
+            if not lb_container.delete_image():
+                client.images.remove(lb_container.image_tag, force=True, noprune=False)
+        except:
+            pass
 
 
 @pytest.fixture(scope='function')
@@ -80,49 +79,48 @@ def build_lb_image_for_rstudio(mock_config_with_repo):
     Generally, given the extra complexity of RStudio, when we're beating on other parts of the system, we should default
     to Jupyter. For similar reasons, we don't do nearly as many checks as are done in the jupyterlab fixture.
     """
-    with patch.object(Configuration, 'find_default_config', lambda self: mock_config_with_repo[0]):
-        username = 'soycapitan'
-        im = InventoryManager(mock_config_with_repo[0])
-        lb = im.create_labbook(username, username, "containerunittestbookrstudio")
+    username = 'soycapitan'
+    im = InventoryManager()
+    lb = im.create_labbook(username, username, "containerunittestbookrstudio")
 
-        cm = ComponentManager(lb)
-        cm.add_base(ENV_UNIT_TEST_REPO, 'ut-rstudio-server', 1)
+    cm = ComponentManager(lb)
+    cm.add_base(ENV_UNIT_TEST_REPO, 'ut-rstudio-server', 1)
 
-        ib = ImageBuilder(lb)
-        docker_lines = ib.assemble_dockerfile(write=True)
-        lb_container = container_for_context(username=username, labbook=lb)
-        # Here and we use the private docker client for LocalProjectContainer that may fail on cloud
-        client = lb_container._client
-        client.containers.prune()
+    ib = ImageBuilder(lb)
+    docker_lines = ib.assemble_dockerfile(write=True)
+    lb_container = container_for_context(username=username, labbook=lb)
+    # Here and we use the private docker client for LocalProjectContainer that may fail on cloud
+    client = lb_container._client
+    client.containers.prune()
 
+    try:
+        lb_container.build_image()
+        lb_container.start_project_container()
+
+        yield lb_container, ib, username
+
+        lb_container.stop_container()
+    finally:
+        shutil.rmtree(lb.root_dir, ignore_errors=True)
+        # Stop and remove container if it's still there
         try:
-            lb_container.build_image()
-            lb_container.start_project_container()
+            client.containers.get(lb_container.image_tag).stop(timeout=2)
+            client.containers.get(lb_container.image_tag).remove()
+        except:
+            pass
 
-            yield lb_container, ib, username
-
-            lb_container.stop_container()
-        finally:
-            shutil.rmtree(lb.root_dir, ignore_errors=True)
-            # Stop and remove container if it's still there
-            try:
-                client.containers.get(lb_container.image_tag).stop(timeout=2)
-                client.containers.get(lb_container.image_tag).remove()
-            except:
-                pass
-
-            # Remove image if it's still there
-            try:
-                if not lb_container.delete_image():
-                    client.images.remove(lb_container.image_tag, force=True, noprune=False)
-            except:
-                pass
+        # Remove image if it's still there
+        try:
+            if not lb_container.delete_image():
+                client.images.remove(lb_container.image_tag, force=True, noprune=False)
+        except:
+            pass
 
 
 @pytest.fixture(scope='class')
 def build_lb_image_for_env(mock_config_with_repo):
     # Create a labook
-    im = InventoryManager(mock_config_with_repo[0])
+    im = InventoryManager()
     lb = im.create_labbook('unittester', 'unittester', "containerunittestbookenv",
                            description="Testing environment functions.")
 
@@ -155,7 +153,7 @@ def build_lb_image_for_env(mock_config_with_repo):
 @pytest.fixture(scope='class')
 def build_lb_image_for_env_conda(mock_config_with_repo):
     """A fixture that installs an old version of matplotlib and latest version of requests to increase code coverage"""
-    im = InventoryManager(mock_config_with_repo[0])
+    im = InventoryManager()
     lb = im.create_labbook('unittester', 'unittester', "containerunittestbookenvconda",
                            description="Testing environment functions.")
     cm = ComponentManager(lb)

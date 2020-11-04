@@ -13,15 +13,15 @@ from gtmcore.fixtures import mock_config_file
 
 class TestInventoryLabbooks(object):
     def test_uses_config(self, mock_config_file):
-        i = InventoryManager(mock_config_file[0])
+        i = InventoryManager()
         assert i.inventory_root == mock_config_file[1]
 
     def test_list_labbooks_empty(self, mock_config_file):
-        i = InventoryManager(mock_config_file[0])
+        i = InventoryManager()
         assert len(i.list_repository_ids(username="none", repository_type="labbook")) == 0
 
     def test_list_labbooks_wrong_base_dir(self, mock_config_file):
-        i = InventoryManager(mock_config_file[0])
+        i = InventoryManager()
         assert i.list_repository_ids(username="not-a-user", repository_type="labbook") == []
 
     def test_list_labbooks_full_set(self, mock_config_file):
@@ -29,15 +29,15 @@ class TestInventoryLabbooks(object):
         owners = [f"ut-owner-{i}" for i in range(4)]
         lbnames = [f'unittest-labbook-{i}' for i in range(6)]
         created_lbs = []
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         for ow in owners:
             for lbname in lbnames:
                 l = inv_manager.create_labbook(ut_username, ow, lbname)
                 created_lbs.append(l)
 
-        get_owner = lambda x: InventoryManager(mock_config_file[0]).query_owner(x)
+        get_owner = lambda x: InventoryManager().query_owner(x)
         condensed_lbs = [(ut_username, get_owner(l), l.name) for l in created_lbs]
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         t0 = time.time()
         result_under_test = inv_manager.list_repository_ids(username=ut_username, repository_type="labbook")
         assert time.time() - t0 < 1.0, "list_repository_ids should return in under 1 second"
@@ -48,7 +48,7 @@ class TestInventoryLabbooks(object):
 
     def test_list_labbooks_az(self, mock_config_file):
         """Test list az labbooks"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb1 = inv_manager.create_labbook("user1", "user1", "labbook0", description="my first labbook")
         lb2 = inv_manager.create_labbook("user1", "user1", "labbook12", description="my second labbook")
         lb3 = inv_manager.create_labbook("user1", "user2", "labbook3", description="my other labbook")
@@ -62,7 +62,7 @@ class TestInventoryLabbooks(object):
 
     def test_list_labbooks_create_date(self, mock_config_file):
         """Test list create dated sorted labbooks"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb1 = inv_manager.create_labbook("user1", "user1", "labbook3", description="my first labbook")
         time.sleep(1.5)
         lb2 = inv_manager.create_labbook("user1", "user1", "asdf", description="my second labbook")
@@ -77,7 +77,7 @@ class TestInventoryLabbooks(object):
 
     def test_list_labbooks_create_date_no_metadata(self, mock_config_file):
         """Test list create dated sorted labbooks"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb1 = inv_manager.create_labbook("user1", "user1", "labbook3", description="my first labbook")
         time.sleep(1.1)
         lb2 = inv_manager.create_labbook("user1", "user1", "asdf", description="my second labbook")
@@ -104,7 +104,7 @@ class TestInventoryLabbooks(object):
 
     def test_list_labbooks_modified_date(self, mock_config_file):
         """Test list modified dated sorted labbooks"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
 
         lb1 = inv_manager.create_labbook("user1", "user1", "labbook3", description="my first labbook")
         time.sleep(1.2)
@@ -114,7 +114,7 @@ class TestInventoryLabbooks(object):
         time.sleep(1.2)
         lb4 = inv_manager.create_labbook("user1", "user1", "hhghg", description="my other labbook")
 
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         labbooks = inv_manager.list_labbooks(username="user1", sort_mode="modified_on")
 
         assert len(labbooks) == 4
@@ -141,7 +141,7 @@ class TestInventoryLabbooks(object):
 
     def test_load_labbook_from_directory(self, mock_config_file):
         """Test loading a labbook from a directory"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         labbook_dir = lb.root_dir
         assert labbook_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
@@ -165,7 +165,7 @@ class TestInventoryLabbooks(object):
         assert data["description"] == "my first labbook"
         assert "id" in data
 
-        lb_loaded = InventoryManager(mock_config_file[0]).load_labbook_from_directory(labbook_dir)
+        lb_loaded = InventoryManager().load_labbook_from_directory(labbook_dir)
 
         assert lb_loaded.root_dir == os.path.join(mock_config_file[1], "test", "test", "labbooks", "labbook1")
         assert type(lb) == LabBook
@@ -178,7 +178,7 @@ class TestInventoryLabbooks(object):
 
     def test_load_labbook(self, mock_config_file):
         """Test loading a labbook from a directory"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         labbook_dir = lb.root_dir
 
@@ -217,12 +217,12 @@ class TestInventoryLabbooks(object):
         assert lb_loaded.key == 'test|test|labbook1'
 
     def test_query_owner(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         assert "test" == inv_manager.query_owner(lb)
 
     def test_query_owner_fail(self, mock_config_file):
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb = inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         new_location = shutil.move(lb.root_dir, '/tmp')
         try:
@@ -234,7 +234,7 @@ class TestInventoryLabbooks(object):
 
     def test_delete_labbook_no_linked_datasets(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         inv_manager.load_labbook("test", "test", "labbook1")
 
@@ -246,7 +246,7 @@ class TestInventoryLabbooks(object):
 
     def test_delete_labbook_linked_dataset(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         lb = inv_manager.load_labbook("test", "test", "labbook1")
 
@@ -270,7 +270,7 @@ class TestCreateLabbooks(object):
 
     def test_create_labbook_with_author(self, mock_config_file):
         """Test creating an empty labbook with the author set"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         auth =  GitAuthor(name="username", email="user1@test.com")
         lb = inv_manager.create_labbook("test", "test", "labbook1",
                                                  description="my first labbook",
@@ -284,7 +284,7 @@ class TestCreateLabbooks(object):
 
     def test_create_labbook(self, mock_config_file):
         """Test creating an empty labbook"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         lb = inv_manager.create_labbook("test", "test", "labbook1",
                                                  description="my first labbook")
         labbook_dir = lb.root_dir
@@ -316,7 +316,7 @@ class TestCreateLabbooks(object):
 
     def test_create_labbook_that_exists(self, mock_config_file):
         """Test trying to create a labbook with a name that already exists locally"""
-        inv_manager = InventoryManager(mock_config_file[0])
+        inv_manager = InventoryManager()
         inv_manager.create_labbook("test", "test", "labbook1", description="my first labbook")
         with pytest.raises(ValueError):
             inv_manager.create_labbook("test", "test", "labbook1",

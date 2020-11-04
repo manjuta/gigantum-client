@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 import { Provider } from 'react-redux';
 // componensts
-import DatasetActivityContainer from 'Components/dataset/activity/DatasetActivityContainer';
+import DatasetActivityContainer from 'Pages/repository/dataset/activity/DatasetActivityContainer';
 // store
 import store from 'JS/redux/store';
 // data

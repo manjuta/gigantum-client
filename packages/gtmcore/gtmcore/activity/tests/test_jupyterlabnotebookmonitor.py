@@ -1,5 +1,5 @@
 from gtmcore.activity.processors.jupyterlab import JupyterLabCellVisibilityProcessor
-from gtmcore.activity.tests.fixtures import redis_client, mock_kernel
+from gtmcore.activity.tests.fixtures import mock_redis_client, mock_kernel
 from gtmcore.fixtures import mock_labbook
 import uuid
 import os
@@ -13,7 +13,7 @@ from gtmcore.activity import ActivityStore, ActivityType, ActivityDetailType
 
 class TestJupyterLabNotebookMonitor(object):
 
-    def test_init(self, redis_client, mock_labbook):
+    def test_init(self, mock_redis_client, mock_labbook):
         """Test getting the supported names of the dev env monitor"""
         # Create dummy file in lab book
         dummy_file = os.path.join(mock_labbook[2].root_dir, 'Test.ipynb')
@@ -27,7 +27,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         assert len(monitor.processors) == 8
         assert type(monitor.processors[0]) == JupyterLabCodeProcessor
@@ -39,7 +39,7 @@ class TestJupyterLabNotebookMonitor(object):
         assert type(monitor.processors[6]) == ActivityDetailLimitProcessor
         assert type(monitor.processors[7]) == ActivityShowBasicProcessor
 
-    def test_start(self, redis_client, mock_labbook, mock_kernel):
+    def test_start(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity"""
         dummy_file = os.path.join(mock_labbook[2].root_dir, 'code', 'Test.ipynb')
         with open(dummy_file, 'wt') as tf:
@@ -52,7 +52,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         # Setup monitoring metadata
         metadata = {"kernel_id": "XXXX",
@@ -137,7 +137,7 @@ class TestJupyterLabNotebookMonitor(object):
         assert record.detail_objects[2].type.value == ActivityDetailType.CODE_EXECUTED.value
         assert record.detail_objects[2].importance == 255
 
-    def test_start_modify(self, redis_client, mock_labbook, mock_kernel):
+    def test_start_modify(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity and have it modify an existing file & create some files"""
         dummy_file = os.path.join(mock_labbook[2].root_dir, 'code', 'Test.ipynb')
         dummy_output = os.path.join(mock_labbook[2].root_dir, 'output', 'result.bin')
@@ -151,7 +151,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         # Setup monitoring metadata
         metadata = {"kernel_id": "XXXX",
@@ -308,7 +308,7 @@ class TestJupyterLabNotebookMonitor(object):
         assert len(detail.data) == 1
         assert detail.data['text/markdown'] == 'Modified Code file `code/Test.ipynb`'
 
-    def test_no_show(self, redis_client, mock_labbook, mock_kernel):
+    def test_no_show(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity that doesn't have any important detail items"""
         monitor_key = "dev_env_monitor:{}:{}:{}:{}:activity_monitor:{}".format('test',
                                                                                'test',
@@ -317,7 +317,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         # Setup monitoring metadata
         metadata = {"kernel_id": "XXXX",
@@ -377,7 +377,7 @@ class TestJupyterLabNotebookMonitor(object):
         assert record.detail_objects[0].type.value == ActivityDetailType.CODE_EXECUTED.value
         assert record.detail_objects[0].importance == 255
 
-    def test_gtm_comments(self, redis_client, mock_labbook, mock_kernel):
+    def test_gtm_comments(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity that's modified by gtm: comments
 
         Testing here is lighter than above - we only test aspects relevant to
@@ -389,7 +389,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         # Setup monitoring metadata
         metadata = {"kernel_id": "XXXX",
@@ -501,7 +501,7 @@ class TestJupyterLabNotebookMonitor(object):
             print("\t", elm.tags)
         assert record.num_detail_objects == 0
 
-    def test_add_many_files(self, redis_client, mock_labbook, mock_kernel):
+    def test_add_many_files(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity when lots of output files have been created"""
         for file_number in range(0, 260):
             with open(os.path.join(mock_labbook[2].root_dir, 'output', f"{file_number}.dat"), 'wt') as tf:
@@ -514,7 +514,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         # Setup monitoring metadata
         metadata = {"kernel_id": "XXXX",
@@ -609,7 +609,7 @@ class TestJupyterLabNotebookMonitor(object):
         assert record.detail_objects[255].type.value == ActivityDetailType.OUTPUT_DATA.value
         assert record.detail_objects[255].importance == 3
 
-    def test_no_record_on_error(self, redis_client, mock_labbook, mock_kernel):
+    def test_no_record_on_error(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity that didn't execute successfully"""
         monitor_key = "dev_env_monitor:{}:{}:{}:{}:activity_monitor:{}".format('test',
                                                                                'test',
@@ -618,7 +618,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         log = mock_labbook[2].git.log()
         assert len(log) == 2
@@ -684,7 +684,7 @@ class TestJupyterLabNotebookMonitor(object):
         assert len(log) == 2
         assert 'GTM' not in log[0]['message']
 
-    def test_multiple_cells(self, redis_client, mock_labbook, mock_kernel):
+    def test_multiple_cells(self, mock_redis_client, mock_labbook, mock_kernel):
         """Test processing notebook activity"""
         dummy_file = os.path.join(mock_labbook[2].root_dir, 'code', 'Test.ipynb')
         with open(dummy_file, 'wt') as tf:
@@ -697,7 +697,7 @@ class TestJupyterLabNotebookMonitor(object):
                                                                                uuid.uuid4())
 
         monitor = JupyterLabNotebookMonitor("test", "test", mock_labbook[2].name,
-                                            monitor_key, config_file=mock_labbook[0])
+                                            monitor_key)
 
         # Setup monitoring metadata
         metadata = {"kernel_id": "XXXX",

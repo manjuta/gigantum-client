@@ -7,7 +7,8 @@ import pytest
 from git import Repo
 
 from gtmcore.environment import RepositoryManager
-from gtmcore.fixtures import mock_config_file, setup_index, ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
+from gtmcore.fixtures import mock_config_file, mock_config_with_repo, \
+    ENV_UNIT_TEST_BASE, ENV_UNIT_TEST_REPO, ENV_UNIT_TEST_REV
 from gtmcore.fixtures.fixtures import _create_temp_work_dir
 from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 
@@ -16,13 +17,14 @@ from gtmcore.environment.tests import ENV_SKIP_MSG, ENV_SKIP_TEST
 class TestEnvironmentRepositoryManager(object):
     def test_clone_repositories_branch(self):
         """Test cloning a branch"""
-        conf_file, working_dir = _create_temp_work_dir(override_dict={'environment':
+        config_instance, _ = _create_temp_work_dir(override_dict={'environment':
                    {'repo_url': ["https://github.com/gigantum/base-images-testing.git@test-branch-DONOTDELETE"]}})
 
         # Run clone and index operation
-        erm = RepositoryManager(conf_file)
+        erm = RepositoryManager()
         erm.update_repositories()
 
+        working_dir = config_instance.app_workdir
         assert os.path.exists(os.path.join(working_dir, ".labmanager")) is True
         assert os.path.exists(os.path.join(working_dir, ".labmanager", "environment_repositories")) is True
         assert os.path.exists(os.path.join(working_dir, ".labmanager", "environment_repositories",
@@ -33,9 +35,11 @@ class TestEnvironmentRepositoryManager(object):
         r = Repo(os.path.join(working_dir, ".labmanager", "environment_repositories", ENV_UNIT_TEST_REPO))
         assert r.active_branch.name == "test-branch-DONOTDELETE"
 
-    def test_update_repositories(self, setup_index):
+    def test_update_repositories(self, mock_config_with_repo):
         """Test building the index"""
-        erm, working_dir, conf_file = setup_index[:3]
+        config_instance, _ = mock_config_with_repo
+
+        working_dir = config_instance.app_workdir
         gigantum_path = Path(working_dir)
         base_repo = gigantum_path / ".labmanager" / "environment_repositories" / ENV_UNIT_TEST_REPO
         # Existence of the README file implies all intermediate directories exist
@@ -45,15 +49,17 @@ class TestEnvironmentRepositoryManager(object):
                 b'3aa9bde4d2e03e28571e81d1ed099674dea8c7ad'
 
         # If the repositories are already checked out, this triggers a different code-path
+        erm = RepositoryManager()
         erm.update_repositories()
 
         assert run(['git', 'rev-parse', 'HEAD'], cwd=base_repo, capture_output=True).stdout.strip() == \
                b'3aa9bde4d2e03e28571e81d1ed099674dea8c7ad'
 
-    def test_index_repositories_base_image(self, setup_index):
+    def test_index_repositories_base_image(self, mock_config_with_repo):
         """Test creating and accessing the detail version of the base image index"""
         # Verify index file contents
-        with open(os.path.join(setup_index[0].local_repo_directory, "base_index.pickle"), 'rb') as fh:
+        erm = RepositoryManager()
+        with open(os.path.join(erm.local_repo_directory, "base_index.pickle"), 'rb') as fh:
             data = pickle.load(fh)
 
         assert ENV_UNIT_TEST_REPO in data
@@ -64,10 +70,11 @@ class TestEnvironmentRepositoryManager(object):
         assert "package_managers" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]
         assert "repository" in data[ENV_UNIT_TEST_REPO][ENV_UNIT_TEST_BASE][ENV_UNIT_TEST_REV]
 
-    def test_index_repositories_base_image_list(self, setup_index):
+    def test_index_repositories_base_image_list(self, mock_config_with_repo):
         """Test accessing the list version of the base image index"""
         # Verify index file contents
-        with open(os.path.join(setup_index[0].local_repo_directory, "base_list_index.pickle"), 'rb') as fh:
+        erm = RepositoryManager()
+        with open(os.path.join(erm.local_repo_directory, "base_list_index.pickle"), 'rb') as fh:
             data = pickle.load(fh)
 
         assert len(data) >= 2

@@ -1,0 +1,122 @@
+@import '~Styles/_imports.scss';
+
+.Record {
+  margin-bottom: 1px;
+  padding: 5px 15px 5px 75px;
+
+  img {
+    width: -moz-fit-content;
+    width: fit-content;
+
+  }
+
+  &--note {
+    margin-bottom: 1px;
+    border-bottom: 1px solid $lightGrey;
+    padding: 0 0 0 15px;
+
+    img {
+      width: -moz-fit-content;
+      width: fit-content;
+    }
+
+    @include flex(flex-start, column);
+  }
+
+  @include flex(flex-start, column);
+  & *,
+  &--note *, {
+    white-space: pre;
+    max-width: 100%;
+    line-height: 24px;
+  }
+
+  .ReactMarkdown p,
+  .ReactMarkdown ul,
+  &--note .ReactMarkdown p,
+  &--note .ReactMarkdown ul, {
+    line-height: 24px;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    white-space: pre-line;
+    overflow: hidden;
+    word-break: break-word;
+    line-clamp: 10;
+    -webkit-line-clamp: 10;
+    box-orient: vertical;
+    -webkit-box-orient: vertical;
+  }
+
+  .ReactMarkdown,
+  &--note .ReactMarkdown {
+    overflow: hidden;
+  }
+
+
+  &__action {
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    top: calc(50% - 15px);
+    left: 35px;
+    background-size: 22px !important;
+
+    &--create {
+      background: url('~Images/icons/action-create.svg') no-repeat center center;
+    }
+    &--edit {
+      background: url('~Images/icons/action-edit.svg') no-repeat center center;
+    }
+    &--delete {
+      background: url('~Images/icons/action-delete.svg') no-repeat center center;
+    }
+    &--execute {
+      background: url('~Images/icons/action-run.svg') no-repeat center center;
+    }
+    &--noaction {
+      background: url('~Images/icons/action-null.svg') no-repeat center center;
+    }
+
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      z-index: index($elements, card);
+      border-bottom: 1px dashed $grey;
+      height: 1px;
+      width: 14px;
+      top: 14px;
+      left: -8px
+    }
+  }
+
+  &__container {
+    position: relative;
+    overflow: visible;
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      z-index: 3;
+      border-right: 1px dashed $grey;
+      height: calc(100% + 0px);
+      width: 1px;
+      top: 0;
+      left: 25px;
+    }
+
+
+    &:last-child:before {
+      content: "";
+      display: block;
+      position: absolute;
+      z-index: 3;
+      border-right: 1px dashed $grey;
+      height: 50%;
+      width: 1px;
+      top: 0;
+      left: 25px;
+    }
+  }
+
+}

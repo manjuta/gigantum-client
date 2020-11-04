@@ -2,7 +2,7 @@
       import React from 'react';
       import renderer from 'react-test-renderer';
       import { mount } from 'enzyme';
-      import PackageDependencies from 'Components/labbook/environment/PackageDependencies';
+      import PackageDependencies from 'Pages/repository/labbook/environment/PackageDependencies';
 
       import relayTestingUtils from '@gigantum/relay-testing-utils';
 

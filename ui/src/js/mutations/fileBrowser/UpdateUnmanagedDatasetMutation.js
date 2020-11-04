@@ -4,7 +4,7 @@ import {
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
 // utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
+import FooterUtils from 'Components/footer/FooterUtils';
 
 const mutation = graphql`
   mutation UpdateUnmanagedDatasetMutation($input: UpdateUnmanagedDatasetInput!){

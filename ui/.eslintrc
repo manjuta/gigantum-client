@@ -106,6 +106,7 @@
     "semi": 1,
     "semi-spacing": 1,
     "arrow-body-style": 1,
+    "arrow-parens": 0,
     "keyword-spacing": 1,
     "padded-blocks": 1,
     "no-debugger": 1,
@@ -123,6 +124,7 @@
       "alias": [
         ["JS", "./src/js/"],
         ["Components", "./src/js/components/"],
+        ["Pages", "./src/js/pages/"],
         ["Mutations", "./src/js/mutations"],
         ["Submodules", "./submodules"],
         ["Images", "./src/images/"],

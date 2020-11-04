@@ -9,9 +9,12 @@ from gtmcore.gitlib import GitFilesystem, GitFilesystemShimmed, GitAuthor
 from git import Repo
 from git.exc import GitCommandError
 
+from gtmcore.fixtures.fixtures import _create_temp_work_dir
+
 
 def get_backend():
     return os.environ['GITLIB_FS_BACKEND']
+
 
 def get_fs_class():
     if get_backend() == 'filesystem':

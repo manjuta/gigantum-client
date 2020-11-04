@@ -12,13 +12,13 @@ from gtmcore.inventory.inventory import InventoryManager
 @pytest.fixture()
 def mock_create_dataset(fixture_working_dir):
     # Create a labbook in the temporary directory
-    im = InventoryManager(fixture_working_dir[0])
+    im = InventoryManager()
     im.create_dataset("default", "default", "dataset1",
                       storage_type="gigantum_object_v1", description="Test labbook 1")
 
-    responses.add(responses.POST, 'https://gigantum.com/api/v1',
+    responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
-    responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects?search=dataset1',
+    responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects?search=dataset1',
                   json=[{
                           "id": 22,
                           "description": "",
@@ -33,7 +33,7 @@ class TestDatasetCollaboratorMutations(object):
     def test_add_collaborator(self, mock_create_dataset):
         """Test adding a collaborator to a dataset"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -44,7 +44,7 @@ class TestDatasetCollaboratorMutations(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -55,7 +55,7 @@ class TestDatasetCollaboratorMutations(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json={
                                 "id": 100,
                                 "name": "New Person",
@@ -63,13 +63,13 @@ class TestDatasetCollaboratorMutations(object):
                                 "state": "active",
                             },
                       status=201)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -123,7 +123,7 @@ class TestDatasetCollaboratorMutations(object):
     @responses.activate
     def test_add_collaborator_as_owner(self, mock_create_dataset):
         """Test adding a collaborator to a LabBook"""
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -134,7 +134,7 @@ class TestDatasetCollaboratorMutations(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -145,7 +145,7 @@ class TestDatasetCollaboratorMutations(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json={
                                 "id": 100,
                                 "name": "New Person",
@@ -153,13 +153,13 @@ class TestDatasetCollaboratorMutations(object):
                                 "state": "active",
                             },
                       status=201)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -214,7 +214,7 @@ class TestDatasetCollaboratorMutations(object):
     def test_delete_collaborator(self, mock_create_dataset):
         """Test deleting a collaborator from a LabBook"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -224,15 +224,15 @@ class TestDatasetCollaboratorMutations(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members/100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members/100',
                       status=204)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -273,7 +273,7 @@ class TestDatasetCollaboratorMutations(object):
     def test_change_collaborator_permissions(self, mock_create_dataset):
         """Test adding a collaborator to a dataset"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -284,7 +284,7 @@ class TestDatasetCollaboratorMutations(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                               {
                                   "id": 29,
@@ -302,9 +302,9 @@ class TestDatasetCollaboratorMutations(object):
                               }
                             ],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members/100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members/100',
                       status=204)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json={
                                 "id": 100,
                                 "name": "New Person",
@@ -312,13 +312,13 @@ class TestDatasetCollaboratorMutations(object):
                                 "state": "active",
                             },
                       status=201)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset1/members',
                       json=[
                                 {
                                     "id": 29,

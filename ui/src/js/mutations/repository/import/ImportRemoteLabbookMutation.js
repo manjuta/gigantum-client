@@ -4,8 +4,8 @@ import {
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
 // utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
-import footerCallback from 'Components/common/footer/utils/ImportRemoteLabbook';
+import FooterUtils from 'Components/footer/FooterUtils';
+import footerCallback from 'Components/footer/utils/ImportRemoteLabbook';
 
 const mutation = graphql`
   mutation ImportRemoteLabbookMutation($input: ImportRemoteLabbookInput!){

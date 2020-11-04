@@ -5,7 +5,7 @@ import {
 import uuidv4 from 'uuid/v4';
 import environment from 'JS/createRelayEnvironment';
 
-import FooterUtils from 'Components/common/footer/FooterUtils';
+import FooterUtils from 'Components/footer/FooterUtils';
 
 const mutation = graphql`
 mutation ConfigureDatasetMutation($input: ConfigureDatasetInput!){

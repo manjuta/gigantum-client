@@ -9,8 +9,8 @@ import uuidv4 from 'uuid/v4';
 // redux
 import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 // Utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
-import footerCallback from 'Components/common/footer/utils/SyncLabbook';
+import FooterUtils from 'Components/footer/FooterUtils';
+import footerCallback from 'Components/footer/utils/SyncLabbook';
 
 const mutation = graphql`
   mutation SyncLabbookMutation($input: SyncLabbookInput!){

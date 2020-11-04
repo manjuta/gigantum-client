@@ -40,7 +40,7 @@ class TestEnvironmentMutations(object):
     @pytest.mark.parametrize('reset_images', ["labbook-build1"], indirect=['reset_images'])
     def test_build_image(self, fixture_working_dir_env_repo_scoped, reset_images):
         """Test building a labbook's image"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook-build1",
                                description="building an env")
         cm = ComponentManager(lb)
@@ -127,7 +127,7 @@ class TestEnvironmentMutations(object):
     @pytest.mark.parametrize('reset_images', ["labbook-build2"], indirect=['reset_images'])
     def test_build_image_no_cache(self, fixture_working_dir_env_repo_scoped, reset_images):
         """Test building a labbook's image"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook-build2",
                                description="building an env")
         cm = ComponentManager(lb)
@@ -191,7 +191,7 @@ class TestEnvironmentMutations(object):
 
     @pytest.mark.parametrize('reset_images', ["labbook-build2"], indirect=['reset_images'])
     def test_cancel_build(self, fixture_working_dir_env_repo_scoped, reset_images):
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "labbook-build-cancel",
                                description="building an env")
         cm = ComponentManager(lb)

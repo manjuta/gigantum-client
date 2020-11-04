@@ -1,7 +1,9 @@
 .git
 .circleci
 .idea
-docs
+.github
+changelog
+docs/
 gtm
 .DS_Store
 .pyc
@@ -12,12 +14,11 @@ ui/__tests__
 ui/build
 ui/resources
 .pytest_cache/
-.mypy_cache
+.mypy_cache/
 
-testing/testenv
-testing/test-env
-testing/credentials.txt
-testing/geckodriver.log
-testing/testutils/.DS_Store
-testing/testmaterial
+# ignore RStudio activity monitoring testing files
+*.dump
+
+testing/
+
 /packages/gtmcore/gtmcore/auth/tests/auth_config.json

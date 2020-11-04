@@ -7,7 +7,7 @@ import path from 'path';
 // data
 import codeData from 'Tests/components/labbook/code/__relaydata__/CodeBrowser.json';
 // components
-import Folder from 'Components/shared/fileBrowser/fileRow/Folder';
+import Folder from 'Pages/repository/shared/fileBrowser/fileRow/Folder';
 
 
 let edge = codeData.data.labbook.code.allFiles.edges[0];

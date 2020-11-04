@@ -30,7 +30,7 @@ class TestDataloaderLabBook(object):
 
     def test_load_one(self, fixture_working_dir):
         """Test loading 1 labbook"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook("default", "default", "labbook1", description="my first labbook1")
         im.create_labbook("default", "default", "labbook2", description="my first labbook2")
         loader = LabBookLoader()
@@ -45,7 +45,7 @@ class TestDataloaderLabBook(object):
 
     def test_load_many(self, fixture_working_dir):
         """Test loading many labbooks"""
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         im.create_labbook("default", "default", "labbook1", description="my first labbook1")
         im.create_labbook("default", "default", "labbook2", description="my first labbook2")
         im.create_labbook("default", "test3", "labbook2", description="my first labbook3")

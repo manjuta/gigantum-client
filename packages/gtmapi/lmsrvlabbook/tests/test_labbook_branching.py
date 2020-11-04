@@ -9,7 +9,7 @@ from graphene.test import Client
 from mock import patch
 import responses
 
-from gtmcore.auth.identity import get_identity_manager
+from gtmcore.auth.identity import get_identity_manager_class
 from gtmcore.configuration import Configuration
 from gtmcore.gitlib import RepoLocation
 from gtmcore.inventory.branching import BranchManager
@@ -20,7 +20,7 @@ from gtmcore.files import FileOperations
 from lmsrvcore.middleware import DataloaderMiddleware, error_middleware
 from lmsrvlabbook.tests.fixtures import ContextMock, fixture_working_dir, _create_temp_work_dir, \
     fixture_working_dir_lfs_disabled
-from gtmcore.fixtures import _MOCK_create_remote_repo2, flush_redis_repo_cache
+from gtmcore.fixtures import helper_create_remote_repo, flush_redis_repo_cache
 from lmsrvlabbook.api.query import LabbookQuery
 from lmsrvlabbook.api.mutation import LabbookMutations
 from gtmcore.workflows import LabbookWorkflow
@@ -32,8 +32,7 @@ UT_LBNAME = "unittest-workflow-branch-1"
 @pytest.fixture()
 def mock_create_labbooks(fixture_working_dir):
     # Create a labbook in the temporary directory
-    config_file = fixture_working_dir[0]
-    im = InventoryManager(fixture_working_dir[0])
+    im = InventoryManager()
     lb = im.create_labbook(UT_USERNAME, UT_USERNAME, UT_LBNAME, description="Cats labbook 1")
 
     # Create a file in the dir
@@ -46,15 +45,14 @@ def mock_create_labbooks(fixture_working_dir):
 
     # Create test client
     schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        app = Flask("lmsrvlabbook")
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
-        with app.app_context():
-            flask.g.user_obj = app.config["LABMGR_ID_MGR"].get_user_profile()
-            client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware],
-                            context_value=ContextMock())
-            yield lb, client, schema
+    app = Flask("lmsrvlabbook")
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
+    with app.app_context():
+        flask.g.user_obj = get_identity_manager_class(config)(config).get_user_profile()
+        client = Client(schema, middleware=[DataloaderMiddleware(), error_middleware],
+                        context_value=ContextMock())
+        yield lb, client, schema
     shutil.rmtree(fixture_working_dir, ignore_errors=True)
 
 
@@ -590,7 +588,7 @@ class TestWorkflowsBranching(object):
         flush_redis_repo_cache()
         lb, client = mock_create_labbooks[0], mock_create_labbooks[1]
 
-        im = InventoryManager(config_file=lb.client_config.config_file)
+        im = InventoryManager()
         ds = im.create_dataset(UT_USERNAME, UT_USERNAME, 'test-ds', storage_type='gigantum_object_v1')
 
         rollback_to = lb.git.commit_hash
@@ -633,16 +631,15 @@ class TestWorkflowsBranching(object):
 
         assert os.path.exists(dataset_dir) is False
 
-    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=helper_create_remote_repo)
     def test_commits_ahead_behind(self, fixture_working_dir_lfs_disabled):
         with responses.RequestsMock() as rsps:
-            rsps.add(responses.POST, 'https://gigantum.com/api/v1',
+            rsps.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                      json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
-            config_file, client = fixture_working_dir_lfs_disabled[0], \
-                                     fixture_working_dir_lfs_disabled[2]
+            client = fixture_working_dir_lfs_disabled[2]
 
-            im = InventoryManager(config_file)
+            im = InventoryManager()
             lb = im.create_labbook(UT_USERNAME, UT_USERNAME, UT_LBNAME, description="tester")
             bm = BranchManager(lb, username=UT_USERNAME)
             bm.create_branch('new-branch-1')
@@ -681,8 +678,7 @@ class TestWorkflowsBranching(object):
 
             other_user = 'other-test-user'
             remote = RepoLocation(wf.remote, other_user)
-            wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                          config_file=lb.client_config.config_file)
+            wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
             with open(os.path.join(wf_other.repository.root_dir, 'testfile'), 'w') as f:
                 f.write('filedata')
             wf_other.repository.sweep_uncommitted_changes()

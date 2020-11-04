@@ -70,24 +70,24 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
 
     Note: It may make more sense to factor this out later on. """
     config = Configuration()
-    remote_config = config.get_remote_configuration()
+    server_config = config.get_server_configuration()
 
     if not access_token or not id_token:
         raise ValueError("Creating a remote repository requires a valid session")
 
     try:
         # Add collaborator to remote service
-        mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['hub_api'],
+        mgr = GitLabManager(server_config.git_url,
+                            server_config.hub_api_url,
                             access_token=access_token,
                             id_token=id_token)
-        mgr.configure_git_credentials(remote_config['git_remote'], username)
+        mgr.configure_git_credentials(server_config.git_url, username)
         mgr.create_labbook(namespace=InventoryManager().query_owner(repository),
                            labbook_name=repository.name,
                            visibility=visibility)
 
         # URL construction logic doesn't belong at the level of Git workflows, but it works for now
-        remote = RepoLocation(f"https://{remote_config['git_remote']}/{username}/{repository.name}",
+        remote = RepoLocation(f"{server_config.git_url}{username}/{repository.name}",
                               current_username=username)
         repository.add_remote("origin", remote.remote_location)
     except Exception as e:
@@ -186,6 +186,7 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
         _pull(repository, branch_name, override, feedback_callback, username=username)
         should_push = not pull_only
         if should_push:
+            feedback_callback(f"Pushing changes to remote branch \"{branch_name}\"...")
             # Skip pushing back up if set to pull_only
             push_tokens = f'git push origin {branch_name}'.split()
             if branch_name not in bm.branches_remote:
@@ -307,7 +308,7 @@ def process_linked_datasets(labbook: LabBook, logged_in_username: str) -> None:
     Returns:
 
     """
-    im = InventoryManager(config_file=labbook.client_config.config_file)
+    im = InventoryManager()
 
     # Update linked datasets inside the Project or clean them out if needed
     im.update_linked_datasets(labbook, logged_in_username)

@@ -1,0 +1,9 @@
+projects:
+  labbook:
+    schema: "http://localhost:10000/api/labbook/"
+    extensions:
+     codegen:
+       generates:
+         ./schema.graphql:
+            plugins:
+              - schema-ast

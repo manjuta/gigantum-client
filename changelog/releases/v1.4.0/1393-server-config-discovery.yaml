@@ -1,0 +1,9 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1409"
+changelog:
+  - type: IMPROVEMENT
+    description: Client configuration is now cached, reducing file IO during API calls
+  - type: NEW
+    description: Server configuration is automatically discovered via new .well-known services
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1393
+  - type: IMPROVEMENT
+    description: User data is now organized by server ID

@@ -1,0 +1,48 @@
+@import '~Styles/_imports.scss';
+
+.LoginError {
+  width: 600px;
+  height: 200px;
+  margin: 30px auto;
+  font-weight: 100;
+
+  color: $white;
+
+  @include flex(space-around, column);
+
+  a {
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  p, a {
+    font-size: 17px !important;
+  }
+
+  &__a--underline {
+    text-decoration: underline !important;
+  }
+
+  &__p--orange {
+    color: $orange;
+  }
+
+  &--type {
+    align-items: center;
+    color: $white;
+    height: 6em;
+
+    @include flex(center, column);
+  }
+
+  &--exclamation {
+    margin-bottom: 1em;
+    font-size: $h4-fontsize;
+    line-height: 3rem;
+    border: 2px solid $orange;
+    border-radius: 2em;
+    color: $orange;
+    height: 3rem;
+    width: 3rem;
+  }
+}

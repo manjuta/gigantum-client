@@ -15,7 +15,7 @@ class BrowserIdentityManager(IdentityManager):
         """Constructor"""
         # Call super constructor
         IdentityManager.__init__(self, config_obj=config_obj)
-        self.auth_dir = os.path.join(self.config.config['git']['working_directory'], '.labmanager', 'identity')
+        self.auth_dir = os.path.join(self.config.app_workdir, '.labmanager', 'identity')
 
     def is_authenticated(self, access_token: Optional[str] = None, id_token: Optional[str] = None) -> bool:
         """Method to check if the user is currently authenticated in the context of this identity manager
@@ -39,7 +39,8 @@ class BrowserIdentityManager(IdentityManager):
             return False
         else:
             try:
-                _ = self.validate_jwt_token(access_token, self.config.config['auth']['audience'])
+                auth_config = self.config.get_auth_configuration()
+                _ = self.validate_jwt_token(access_token, auth_config.audience)
             except AuthenticationError:
                 return False
 
@@ -61,15 +62,15 @@ class BrowserIdentityManager(IdentityManager):
             raise AuthenticationError(err_dict, 401)
 
         # Validate JWT token
-        token_payload = self.validate_jwt_token(id_token, self.config.config['auth']['client_id'],
+        auth_config = self.config.get_auth_configuration()
+        token_payload = self.validate_jwt_token(id_token, auth_config.client_id,
                                                 access_token=access_token)
 
         # Create user identity instance
-        self.user = User()
-        self.user.email = self._get_profile_attribute(token_payload, "email", required=True)
-        self.user.username = self._get_profile_attribute(token_payload, "nickname", required=True)
-        self.user.given_name = self._get_profile_attribute(token_payload, "given_name", required=False)
-        self.user.family_name = self._get_profile_attribute(token_payload, "family_name", required=False)
+        self.user = User(username=self._get_profile_attribute(token_payload, "nickname", required=True),
+                         email=self._get_profile_attribute(token_payload, "email", required=True),
+                         given_name=self._get_profile_attribute(token_payload, "given_name", required=False),
+                         family_name=self._get_profile_attribute(token_payload, "family_name", required=False))
 
         # Check if it's the first time this user has logged into this instance
         self._check_first_login(self.user.username, access_token, id_token)

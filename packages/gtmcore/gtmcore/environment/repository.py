@@ -11,6 +11,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.configuration import Configuration
 from gtmcore.exceptions import GigantumLockedException
 
+
 class RepositoryLock(object):
     """Lock for base image repo fetching and indexing
 
@@ -21,12 +22,10 @@ class RepositoryLock(object):
     Can be used as a context manager to automatically acquire / release the lock
     Can be used as a function decorator to automatically acquire / release the lock
     """
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self):
         """
-        Args:
-            config_file (Optional[str]): Optional config file location if don't want to load from default location
         """
-        self.client_config = Configuration(config_file)
+        self.client_config: Configuration = Configuration()
 
         self.key = "base_repository_updates"
         self.lock_key = f'filesystem_lock|{self.key}'
@@ -112,14 +111,11 @@ class BaseRepository(object):
     """Class to interface with local indices of base image repositories
     """
 
-    def __init__(self, config_file: str=None) -> None:
+    def __init__(self) -> None:
         """Constructor
-
-        Args:
-            config_file(str): Optional config file location if don't want to load from default location
         """
-        self.config = Configuration(config_file=config_file)
-        self.local_repo_directory = os.path.expanduser(os.path.join(self.config.config["git"]['working_directory'],
+        self.config = Configuration()
+        self.local_repo_directory = os.path.expanduser(os.path.join(self.config.app_workdir,
                                                        ".labmanager", "environment_repositories"))
 
         # Dictionary to hold loaded index files in memory

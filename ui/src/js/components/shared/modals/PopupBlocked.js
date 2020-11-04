@@ -2,7 +2,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import { detect } from 'detect-browser';
 // component
-import Modal from 'Components/common/Modal';
+import Modal from 'Components/modal/Modal';
 // assets
 import firefoxSrc from 'Images/logos/Firefox-popup.png';
 import chromeSrc from 'Images/logos/Chrome-popup.png';

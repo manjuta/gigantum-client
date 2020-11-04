@@ -5,7 +5,7 @@ import renderer from 'react-test-renderer';
 import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 // components;
-import MostRecentOutput from 'Components/labbook/outputData/MostRecentOutput';
+import MostRecentOutput from 'Pages/repository/labbook/outputData/MostRecentOutput';
 
 test('Test MostRecentOutput', () => {
   const wrapper = renderer.create(<MostRecentOutput />);

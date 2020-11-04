@@ -6,7 +6,7 @@ import relayTestingUtils from '@gigantum/relay-testing-utils';
 // data
 import codeData from 'Tests/components/labbook/code/__relaydata__/CodeBrowser.json';
 // components
-import ActionsMenu from 'Components/shared/fileBrowser/fileRow/ActionsMenu';
+import ActionsMenu from 'Pages/repository/shared/fileBrowser/fileRow/ActionsMenu';
 
 let edge = codeData.data.labbook.code.allFiles.edges[1]
 

@@ -1,6 +1,6 @@
 
 // components
-import FileFormatter, { fileHandler } from 'Components/shared/fileBrowser/utilities/FileFormatter';
+import FileFormatter, { fileHandler } from 'Pages/repository/shared/fileBrowser/utilities/FileFormatter';
 
 let files = [
       { file: 'folder/file', entry: { name: 'file.js', isFile: true, fullPath: 'folder/file.js' } },
