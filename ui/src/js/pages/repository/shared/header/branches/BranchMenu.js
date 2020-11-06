@@ -570,7 +570,7 @@ class BranchMenu extends Component<Props> {
     const { owner } = section;
     const { isDataset } = this.state;
     const { buildImage } = this.state.branchMutations;
-
+    setSyncingState(true);
     this.setState({ syncMenuVisible: false });
 
     if (allowSync || (pullOnly && allowSyncPull)) {
@@ -713,6 +713,7 @@ class BranchMenu extends Component<Props> {
      isSticky,
      section,
      collaborators,
+     setSyncingState,
    } = this.props;
    const {
      showLoginPrompt,
@@ -1087,7 +1088,7 @@ class BranchMenu extends Component<Props> {
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
             setRemoteSession={this._setRemoteSession}
-
+            setSyncingState={setSyncingState}
           />
         )
        }

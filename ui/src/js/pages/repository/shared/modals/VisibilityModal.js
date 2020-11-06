@@ -140,6 +140,7 @@ class VisibilityModal extends Component<Props> {
       sectionType,
       setPublishingState,
       setRemoteSession,
+      setSyncingState,
       toggleModal,
     } = this.props;
 
@@ -173,8 +174,11 @@ class VisibilityModal extends Component<Props> {
                     error: false,
                   };
                   setMultiInfoMessage(owner, name, messageData);
-
                   setRemoteSession();
+
+                  if (setSyncingState) {
+                    setSyncingState(false);
+                  }
                 };
 
                 if (sectionType === 'labbook') {
@@ -192,6 +196,7 @@ class VisibilityModal extends Component<Props> {
                     },
                   );
                 } else {
+                  setSyncingState(true);
                   PublishDatasetMutation(
                     owner,
                     name,

@@ -83,7 +83,6 @@ class FooterNotificationList extends Component<Props, State> {
     const messageList = viewHistory
       ? messageStackHistory
       : messageStack;
-    console.trace(messageList, viewHistory);
     const height = getHeight(messageList, messageBodyOpenCount);
     // declare css here
     const footerMessageSectionClass = classNames({
