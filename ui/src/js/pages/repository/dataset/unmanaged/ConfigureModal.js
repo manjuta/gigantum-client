@@ -8,6 +8,7 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
 import Modal from 'Components/modal/Modal';
 import ButtonLoader from 'Components/buttonLoader/ButtonLoader';
+import ConfirmModal from './confirm/ConfirmModal';
 
 type Props = {
   dataset: {
@@ -160,109 +161,86 @@ class ConfigureModal extends Component<Props> {
   }
 
   render() {
-    const { dataset } = this.props;
-    const { state } = this;
+    const { dataset, latestError } = this.props;
+    const { confirmMessage } = this.state;
     const someFieldsFilled = (this.state.configValues.size > 0);
 
     return (
       <Modal
         header="Configure Dataset"
         size="large"
-        renderContent={() => (
-          <div className="Dataset__config-modal">
-            { state.confirmMessage
-              && (
-                <Modal
-                  size="small"
-                  renderContent={() => (
-                    <div>
-                      {state.confirmMessage}
-                      <div className="Dataset__confirm-buttons">
-                        <button
-                          type="button"
-                          onClick={() => this._confirmCancelConfigure()}
-                          className="Btn--flat"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => this._configureDataset(true)}
-                        >
-                          Confirm
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                />
-              )
-            }
-            <p>This dataset needs to be configured before it is ready for use.</p>
+      >
+        <div className="Dataset__config-modal">
+          <ConfirmModal
+            confirmMessage={confirmMessage}
+            confirmCancelConfigure={this._confirmCancelConfigure}
+            configureDataset={this._configureDataset}
+          />
+          <p>This dataset needs to be configured before it is ready for use.</p>
 
-            {
-              this.state.latestError
-              && <p className="Dataset__config-error">{this.state.latestError}</p>
-            }
+          {
+            latestError
+            && <p className="Dataset__config-error">{this.state.latestError}</p>
+          }
 
-            <div className="Dataset__config-container">
-              <div className="Dataset__configs">
-                {
-                  dataset.backendConfiguration.map(({
-                    description,
-                    parameter,
-                    parameterType,
-                  }) => (
-                    <div
-                      className="Dataset__config-section"
-                      key={parameter}
-                    >
-                      <div className="Dataset__config-parameter">
-                        {parameter}
-                        { (parameterType === 'bool')
-                          && (
-                            <input
-                              type="checkbox"
-                              onClick={evt => this._setDatasetConfig(evt, parameter, parameterType)}
-                            />
-                          )
-                        }
-                      </div>
-                      <div className="Dataset__config-description">{description}</div>
-                      { (parameterType === 'str')
+          <div className="Dataset__config-container">
+            <div className="Dataset__configs">
+              {
+                dataset.backendConfiguration.map(({
+                  description,
+                  parameter,
+                  parameterType,
+                }) => (
+                  <div
+                    className="Dataset__config-section"
+                    key={parameter}
+                  >
+                    <div className="Dataset__config-parameter">
+                      {parameter}
+                      { (parameterType === 'bool')
                         && (
                           <input
-                            type="text"
-                            className="Dataset__config-textInput"
-                            onKeyUp={(evt) => { this._setDatasetConfig(evt, parameter, parameterType); }}
-                            onChange={(evt) => { this._setDatasetConfig(evt, parameter, parameterType); }}
+                            type="checkbox"
+                            onClick={evt => this._setDatasetConfig(evt, parameter, parameterType)}
                           />
                         )
                       }
                     </div>
-                  ))
-                }
-              </div>
-              <div className="Dataset__config-buttons">
-                <button
-                  type="button"
-                  onClick={() => this._handleRedirect()}
-                  className="Btn--flat"
-                >
-                  Return to Datasets
-                </button>
-                <ButtonLoader
-                  buttonState={this.state.buttonState}
-                  buttonText="Save Configuration"
-                  className=""
-                  params={{}}
-                  buttonDisabled={!someFieldsFilled}
-                  clicked={() => this._configureDataset()}
-                />
-              </div>
+                    <div className="Dataset__config-description">{description}</div>
+                    { (parameterType === 'str')
+                      && (
+                        <input
+                          type="text"
+                          className="Dataset__config-textInput"
+                          onKeyUp={(evt) => { this._setDatasetConfig(evt, parameter, parameterType); }}
+                          onChange={(evt) => { this._setDatasetConfig(evt, parameter, parameterType); }}
+                        />
+                      )
+                    }
+                  </div>
+                ))
+              }
+            </div>
+            <div className="Dataset__config-buttons">
+              <button
+                type="button"
+                onClick={() => this._handleRedirect()}
+                className="Btn--flat"
+              >
+                Return to Datasets
+              </button>
+              <ButtonLoader
+                buttonState={this.state.buttonState}
+                buttonText="Save Configuration"
+                className=""
+                params={{}}
+                buttonDisabled={!someFieldsFilled}
+                clicked={() => this._configureDataset()}
+              />
             </div>
           </div>
-        )}
-      />
+        </div>
+      </Modal>
     );
   }
 }

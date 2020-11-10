@@ -8,7 +8,7 @@ export default props => (
   <Modal
     size="large-full"
     handleClose={() => props.setBuildId(null)}
-    renderContent={() => (
+  >
       <BuildProgress
         headerText="Building Project"
         toggleModal={props.setBuildId}
@@ -17,6 +17,5 @@ export default props => (
         owner={props.owner}
         name={props.name}
       />
-    )}
-  />
+  </Modal>
 );

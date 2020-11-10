@@ -155,33 +155,32 @@ class SelectBaseModal extends Component<Props> {
         preHeader="Modifying Environment"
         noPadding
         icon="change"
-        renderContent={() => (
-          <div className="SelectBaseModal">
-            <SelectBase
-              selectBaseCallback={this._selectBaseCallback}
-              toggleDisabledContinue={this._toggleDisabledContinue}
-              toggleMenuVisibility={this._toggleMenuVisibility}
+      >
+        <div className="SelectBaseModal">
+          <SelectBase
+            selectBaseCallback={this._selectBaseCallback}
+            toggleDisabledContinue={this._toggleDisabledContinue}
+            toggleMenuVisibility={this._toggleMenuVisibility}
+          />
+          <div className="SelectBaseModal__buttons flex justify--right">
+            <button
+              onClick={() => { toggleModal(); }}
+              className="Btn--flat"
+              type="button"
+            >
+              Cancel
+            </button>
+            <ButtonLoader
+              buttonState={changeBaseButtonState}
+              buttonText="Change Base"
+              className="Btn--last"
+              params={{}}
+              buttonDisabled={continueDisabled}
+              clicked={this._changeBaseMutation}
             />
-            <div className="SelectBaseModal__buttons flex justify--right">
-              <button
-                onClick={() => { toggleModal(); }}
-                className="Btn--flat"
-                type="button"
-              >
-                Cancel
-              </button>
-              <ButtonLoader
-                buttonState={changeBaseButtonState}
-                buttonText="Change Base"
-                className="Btn--last"
-                params={{}}
-                buttonDisabled={continueDisabled}
-                clicked={this._changeBaseMutation}
-              />
-            </div>
           </div>
-        )}
-      />
+        </div>
+      </Modal>
     );
   }
 }

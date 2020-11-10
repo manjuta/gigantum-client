@@ -1,11 +1,23 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component, Node } from 'react';
 import ReactDom from 'react-dom';
 import classNames from 'classnames';
 // assets
 import './Modal.scss';
 
-export default class Modal extends Component {
+type Props = {
+  children: Node,
+  handleClose: Function,
+  header: string,
+  icon: string,
+  noPadding: Boolean,
+  noPaddingModal: Boolean,
+  overlfow: Boolean,
+  preHeader: string,
+  size: string,
+}
+
+class Modal extends Component<Props> {
   componentDidMount() {
     if (document.getElementById('root')) {
       document.getElementById('root').classList.add('no-overflow');
@@ -19,18 +31,28 @@ export default class Modal extends Component {
   }
 
   render() {
-    const { props } = this;
-    const overflow = (props.overlfow === 'visible') ? 'visible' : 'hidden';
+    const {
+      children,
+      handleClose,
+      header,
+      icon,
+      noPadding,
+      noPaddingModal,
+      overlfow,
+      preHeader,
+      size,
+    } = this.props;
+    const overflow = (overlfow === 'visible') ? 'visible' : 'hidden';
     // declare css here
     const modalContentCSS = classNames({
       Modal__content: true,
-      'Modal__content--noPadding': props.noPaddingModal,
-      [`Modal__content--${props.size}`]: props.size, // large, medium, small
-      [props.icon]: !!props.icon,
+      'Modal__content--noPadding': noPaddingModal,
+      [`Modal__content--${size}`]: size, // large, medium, small
+      [icon]: !!icon,
     });
     const modalContainerCSS = classNames({
       'Modal__sub-container': true,
-      'Modal__sub-container--nopadding': props.noPadding,
+      'Modal__sub-container--nopadding': noPadding,
     });
 
     return (
@@ -38,35 +60,36 @@ export default class Modal extends Component {
         <div className="Modal">
           <div
             className="Modal__cover"
-            onClick={props.handleClose}
+            onClick={handleClose}
+            role="presentation"
           />
 
           <div className={modalContentCSS} style={{ overflow }}>
-            { props.handleClose
-              && (
+            { handleClose && (
               <button
                 type="button"
                 className="Btn Btn--flat Modal__close padding--small "
-                onClick={() => props.handleClose()}
+                onClick={() => handleClose()}
               />
-              )
-            }
+            )}
             <div className="Modal__container">
-              { props.preHeader
-                && <p className="Modal__pre-header">{props.preHeader}</p>
-              }
-              { props.header
-                && (
-                <Fragment>
+              { preHeader && (
+                <p className="Modal__pre-header">
+                  {preHeader}
+                </p>
+              )}
+              { header && (
+                <>
                   <h1 className="Modal__header">
-                    <div className={`Icon Icon--${props.icon}`} />
-                    {props.header}
+                    <div className={`Icon Icon--${icon}`} />
+                    {header}
                   </h1>
                   <hr />
-                </Fragment>
-                )
-              }
-              <div className={modalContainerCSS}>{props.renderContent()}</div>
+                </>
+              )}
+              <div className={modalContainerCSS}>
+                {children}
+              </div>
             </div>
           </div>
         </div>,
@@ -75,3 +98,5 @@ export default class Modal extends Component {
     );
   }
 }
+
+export default Modal;

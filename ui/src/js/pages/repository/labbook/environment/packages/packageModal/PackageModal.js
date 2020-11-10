@@ -10,7 +10,7 @@ type Props = {
   togglePackageModal: Function
 }
 
-export default class PackageModal extends Component<Props> {
+class PackageModal extends Component<Props> {
   state = {
     buildId: null,
   }
@@ -30,25 +30,25 @@ export default class PackageModal extends Component<Props> {
       <Modal
         size="large-full"
         handleClose={() => togglePackageModal(false)}
-        renderContent={() => {
-          if (!buildId) {
-            return (
-              <AddPackages
-                {...this.props}
-                setBuildId={this._setBuildId}
-              />
-            );
-          }
-          return (
-            <BuildProgress
-              {...this.props}
-              toggleModal={togglePackageModal}
-              headerText="Installing Packages"
-              buildId={buildId}
-            />
-          );
-        }}
-      />
+      >
+        {(!buildId) &&
+          <AddPackages
+            {...this.props}
+            setBuildId={this._setBuildId}
+          />
+        }
+
+        {(buildId) &&
+          <BuildProgress
+            {...this.props}
+            toggleModal={togglePackageModal}
+            headerText="Installing Packages"
+            buildId={buildId}
+          />
+        }
+      </Modal>
     );
   }
 }
+
+export default PackageModal;
