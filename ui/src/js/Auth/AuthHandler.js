@@ -71,7 +71,7 @@ const getTokens = (
 
   if (hash.state) {
     const apiUrl = `${window.location.protocol}//${apiHost}/api/server`;
-    const tokenUrl = `${apiUrl}/${hash.serverId}/exchange/${hash.state}`;
+    const tokenUrl = `${apiUrl}/${serverId}/exchange/${hash.state}`;
 
     // fetch tokens and write to local storage
     fetchQuery(tokenUrl).then(tokenResponse => {

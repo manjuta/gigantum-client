@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1527"
+changelog:
+  - type: FIX
+    description: Fixes token exchange when serverId does not come back.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1526
