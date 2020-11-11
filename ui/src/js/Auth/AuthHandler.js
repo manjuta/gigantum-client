@@ -127,6 +127,7 @@ const fetchAuthServerState = (
   reject,
   hash,
   auth,
+  refetchCount = 0,
 ) => {
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'
@@ -138,9 +139,18 @@ const fetchAuthServerState = (
   ).then(serverResponse => {
     const currentServer = serverResponse.current_server;
     const availableServers = serverResponse.available_servers;
-
-    if (availableServers === undefined) {
-      reject();
+    if (refetchCount > 60) {
+      reject([{ message: 'Api is not running, try restarting Gigantum Client' }]);
+    } else if (availableServers === undefined) {
+      setTimeout(() => {
+        fetchAuthServerState(
+          resolve,
+          reject,
+          hash,
+          auth,
+          refetchCount + 1,
+        );
+      }, 1000);
     } else {
       getTokens(
         resolve,
