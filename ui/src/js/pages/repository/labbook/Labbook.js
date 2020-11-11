@@ -94,6 +94,7 @@ type Props = {
     activeBranchName: string,
     branches: Array<Object>,
     defaultRemote: string,
+    description: string,
     canManageCollaborators: Boolean,
     collaborators: Array<Object>,
     environment: {
@@ -115,6 +116,7 @@ type Props = {
   relay: {
     refetch: Function,
   },
+  sectionType: string,
   sidePanelVisible: Boolean,
 }
 
@@ -622,7 +624,7 @@ class Labbook extends Component<Props> {
       const isSidePanelVisible = !isLocked && sidePanelVisible;
       const branchName = '';
       const { migrationText, showMigrationButton } = this._getMigrationInfo();
-      const { containerStatus } = labbook.environment;
+      const { containerStatus, imageStatus } = labbook.environment;
       // declare css here
       const labbookCSS = classNames({
         Labbook: true,
@@ -672,7 +674,7 @@ class Labbook extends Component<Props> {
                       disabled={migrationInProgress || isLocked}
                       type="button"
                     >
-                    Migrate
+                      Migrate
                     </button>
                   </div>
                   )
@@ -699,8 +701,8 @@ class Labbook extends Component<Props> {
               description={labbook.description}
               toggleBranchesView={this._toggleBranchesView}
               sectionType="labbook"
-              containerStatus={labbook.environment.containerStatus}
-              imageStatus={labbook.environment.imageStatus}
+              containerStatus={containerStatus}
+              imageStatus={imageStatus}
               isLocked={isLocked}
               collaborators={collaborators}
               canManageCollaborators={canManageCollaborators}
