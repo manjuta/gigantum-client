@@ -1,10 +1,11 @@
 // @flow
 // vendor
 import React, { Component } from 'react';
-// component
-import Modal from 'Components/modal/Modal';
 // context
 import ServerContext from 'Pages/ServerContext';
+// component
+import Modal from 'Components/modal/Modal';
+import VisibilityModalConent from './content/Content';
 // utilities
 import { publish, changeVisibility } from './utils/PublishMutations';
 // assets
@@ -63,8 +64,6 @@ class VisibilityModal extends Component<Props> {
     } = this.props;
     const { isPublic } = this.state;
     const { currentServer } = this.context;
-    const publishStatement = header === 'Publish' ? `Once published, the Project will be visible in the '${currentServer.name}' tab on the Projects listing Page.` : '';
-    const message = `You are about to change the visibility of the Project. ${publishStatement}`;
 
     return (
       <Modal
@@ -73,71 +72,17 @@ class VisibilityModal extends Component<Props> {
         size="large"
         icon={visibility}
       >
-        <div className="VisibilityModal">
-          <div>
-            <p>{message}</p>
-          </div>
-
-          <div>
-            <div className="VisibilityModal__private">
-              <label
-                className="Radio"
-                htmlFor="publish_private"
-              >
-                <input
-                  defaultChecked={(visibility === 'private') || !isPublic}
-                  type="radio"
-                  name="publish"
-                  id="publish_private"
-                  onClick={() => { this._setPublic(false); }}
-                />
-                <span><b>Private</b></span>
-              </label>
-
-              <p className="VisibilityModal__paragraph">Private projects are only visible to collaborators. Users that are added as a collaborator will be able to view and edit.</p>
-
-            </div>
-
-            <div className="VisibilityModal__public">
-
-              <label
-                className="Radio"
-                htmlFor="publish_public"
-              >
-                <input
-                  defaultChecked={visibility === 'public'}
-                  name="publish"
-                  type="radio"
-                  id="publish_public"
-                  onClick={() => { this._setPublic(true); }}
-                />
-                <span><b>Public</b></span>
-              </label>
-
-              <p className="VisibilityModal__paragraph">Public projects are visible to everyone. Users will be able to import a copy. Only users that are added as a collaborator will be able to edit.</p>
-
-            </div>
-
-          </div>
-
-          <div className="VisibilityModal__buttons">
-            <button
-              type="submit"
-              className="Btn--flat"
-              onClick={() => { toggleModal(modalStateValue); }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="Btn--last"
-              onClick={() => { this._modifyVisibility(); }}
-            >
-              {buttonText}
-            </button>
-          </div>
-
-        </div>
+        <VisibilityModalConent
+          buttonText={buttonText}
+          currentServer={currentServer}
+          header={header}
+          isPublic={isPublic}
+          modalStateValue={modalStateValue}
+          modifyVisibility={this._modifyVisibility}
+          setPublic={this._setPublic}
+          toggleModal={this._toggleModal}
+          visibility={visibility}
+        />
       </Modal>
     );
   }
