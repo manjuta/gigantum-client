@@ -351,7 +351,10 @@ class LocalProjectContainer(ContainerOperations):
             raise ContainerException('No LabBook provided at init')
 
         if not os.path.isfile(src_path):
-            raise ContainerException(f"Source file {src_path} is not a file")
+            basename = os.path.basename(src_path)
+            raise ContainerException(f"Warning: Sensitive file `{basename}` is missing. Please upload this file in the "
+                                     f"`Advanced Configuration` section on the environment tab for this Project "
+                                     f"and restart the Project.")
 
         self.exec_command(f"mkdir -p {dst_dir}", user='giguser')
 

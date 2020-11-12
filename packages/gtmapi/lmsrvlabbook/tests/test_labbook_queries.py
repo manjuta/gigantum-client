@@ -1425,11 +1425,11 @@ class TestLabBookServiceQueries(object):
         """Test getting a labbook's modifed date"""
         # Create labbooks
         im = InventoryManager()
-        lb = im.create_labbook('default', 'default', 'labbook1', description="my test description")
+        lb = im.create_labbook('default', 'default', 'labbook-mod', description="my test description")
 
         modified_query = """
         {
-          labbook(name: "labbook1", owner: "default") {
+          labbook(name: "labbook-mod", owner: "default") {
             modifiedOnUtc
           }
         }
@@ -1452,8 +1452,8 @@ class TestLabBookServiceQueries(object):
         modified_on_2 = aniso8601.parse_datetime(d)
 
         # On a local machine, this might take only 3 seconds! But on CI it can go very slow for unknown reasons
-        assert (datetime.datetime.now(tz=datetime.timezone.utc) - modified_on_1).total_seconds() < 45
-        assert (datetime.datetime.now(tz=datetime.timezone.utc) - modified_on_2).total_seconds() < 45
+        assert (datetime.datetime.now(tz=datetime.timezone.utc) - modified_on_1).total_seconds() < 10
+        assert (datetime.datetime.now(tz=datetime.timezone.utc) - modified_on_2).total_seconds() < 10
         assert modified_on_2 > modified_on_1
 
     @responses.activate
