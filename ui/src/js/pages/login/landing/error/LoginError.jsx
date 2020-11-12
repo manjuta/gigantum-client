@@ -40,7 +40,7 @@ const LoginError = (props: Props) => {
         { (errors[0].message !== 'blocked')
           && (
             <>
-              <p className="LoginError__p LoginError__p--orange">errors[0].message</p>
+              <p className="LoginError__p LoginError__p--orange">{errors[0].message}</p>
 
               <p className="LoginError__p">Please verify that that the Client is running by clicking on the Gigantum logo in your system tray to open Gigantum Desktop.</p>
               <p className="LoginError__p">
