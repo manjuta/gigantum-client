@@ -1,4 +1,0 @@
-prLink: "https://github.com/gigantum/gigantum-client/pull/1516"
-changelog:
-  - type: FIX
-    description: Catch unexpected error on Docker Desktop for Mac 2.5.0.0 when checking for a container that does not exist.
