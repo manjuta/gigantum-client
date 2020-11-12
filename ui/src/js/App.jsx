@@ -17,7 +17,6 @@ import {
   ERROR,
   LOGGED_IN,
   LOGGED_OUT,
-  BACK,
 } from 'JS/Auth/AuthMachineConstants';
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';
@@ -46,6 +45,7 @@ class App extends Component {
 
   componentDidMount() {
     const hash = queryString.parse(history.location.hash.slice(1));
+    console.log(hash);
     const promise = new Promise((resolve, reject) => fetchAuthServerState(
       resolve,
       reject,
