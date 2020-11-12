@@ -8,6 +8,7 @@ from typing import Optional, Callable, List, Dict
 import docker
 import docker.errors
 from docker.models.containers import Container
+import requests
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
@@ -409,6 +410,10 @@ class LocalProjectContainer(ContainerOperations):
                 self._container = self._client.containers.get(self.image_tag)
             except docker.errors.NotFound:
                 return None
+            except requests.exceptions.ChunkedEncodingError:
+                # Temporary fix due to docker 2.5.0.0 and docker-py failing when container doesn't exist
+                # See https://github.com/docker/docker-py/issues/2696
+                return None
             except docker.errors.NullResource:
                 raise ContainerException('No path, labbook, or override_image_name given at init. '
                                          'Explicit container_name required.')
@@ -416,6 +421,10 @@ class LocalProjectContainer(ContainerOperations):
         else:
             try:
                 return self._client.containers.get(container_name)
+            except requests.exceptions.ChunkedEncodingError:
+                # Temporary fix due to docker 2.5.0.0 and docker-py failing when container doesn't exist
+                # See https://github.com/docker/docker-py/issues/2696
+                return None
             except docker.errors.NotFound:
                 return None
 
