@@ -7,6 +7,7 @@ import os
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import mock_config_file
 from gtmcore.labbook import SecretStore, SecretStoreException
+from gtmcore.configuration import Configuration
 
 
 def init():
@@ -54,6 +55,9 @@ class TestLabbookSecret(object):
         secstore['ID_SSH.KEY'] = mnt_target
         secstore['ID_SSH.PUB'] = mnt_target
 
+        config = Configuration()
+        server_id = config.get_current_server_id()
+
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
                 t1.write('<<SUPER SECRET PRIVATE KEY>>')
@@ -64,7 +68,7 @@ class TestLabbookSecret(object):
             keyfile_dst_2 = secstore.insert_file(t2.name)
 
         parts = [secstore.labbook.client_config.app_workdir, '.labmanager',
-                 'secrets', 'test', secstore.labbook.owner, secstore.labbook.name,
+                 'secrets', server_id, 'test', secstore.labbook.owner, secstore.labbook.name,
                  os.path.basename(keyfile_dst_1)]
         assumed_path = os.path.join(*parts)
         assert assumed_path == keyfile_dst_1
@@ -82,7 +86,7 @@ class TestLabbookSecret(object):
 
         # Test clear_files works by making sure the vault itself doesn't exist
         secstore.clear_files()
-        toks = [secstore.labbook.client_config.app_workdir, '.labmanager', 'secrets',
+        toks = [secstore.labbook.client_config.app_workdir, '.labmanager', 'secrets', server_id,
                 'test', secstore.labbook.owner, secstore.labbook.name]
         assert not os.path.exists(os.path.join(*toks))
 
