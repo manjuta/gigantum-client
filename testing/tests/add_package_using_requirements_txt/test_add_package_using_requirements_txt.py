@@ -31,7 +31,7 @@ class TestAddPackage:
         """Test method to create a package using requirements file."""
         # Create project
         is_success_msg = ProjectUtility().create_project(self.driver)
-        assert is_success_msg != ProjectConstants.SUCCESS, is_success_msg
+        assert is_success_msg == ProjectConstants.SUCCESS.value, is_success_msg
 
         # Load Project Package Page
         package_list = PackageListingPage(self.driver)
@@ -90,7 +90,11 @@ class TestAddPackage:
         assert is_verified, "Could not verify packages"
 
         # Open Jupyter_lab and verify packages
-        is_success_msg = ProjectUtility().verify_package_version(
-            self.driver, ['gtmunit1==0.12.4', 'gtmunit2==2.0', 'gtmunit3==5.0'])
-        assert is_success_msg != ProjectConstants.SUCCESS, is_success_msg
+        commands = namedtuple('command', ('command_text', 'output', 'error_message'))
+        command_text = ['pip freeze | grep gtmunit']
+        output = ['gtmunit1==0.12.4', 'gtmunit2==2.1', 'gtmunit3==5.0']
+        error_message = 'Verification of package failed'
+        gtmunit_grep_command = commands(command_text, output, error_message)
+        verification_message = ProjectUtility().verify_command_execution(self.driver, [gtmunit_grep_command])
+        assert verification_message == ProjectConstants.SUCCESS.value, verification_message
 

@@ -160,3 +160,71 @@ class PackageGridComponent(BaseComponent):
                     return True
         return False
 
+    def click_advanced_configuration_settings(self) -> bool:
+        """Performs click action on Advanced configuration settings
+
+        Returns: returns the result of click action
+
+        """
+        element = "//button[contains(text(),'Advanced Configuration Settings')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            configuration_button = self.get_locator(LocatorType.XPath, element)
+            configuration_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def click_edit_dockerfile_button(self) -> bool:
+        """Performs click action on edit dockerfile button
+
+        Returns: returns the result of click action
+
+        """
+        element = "//button/span[contains(text(),'Edit Dockerfile')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            dockerfile_button = self.get_locator(LocatorType.XPath, element)
+            dockerfile_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def click_and_input_docker_text_area(self, command) -> bool:
+        """Performs click action and input command to docker text area
+
+        Args:
+            command: Command to be executed
+
+        Returns: returns the result of command input action
+
+        """
+        element = f"//textarea[@placeholder='Enter dockerfile commands here']"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            docker_text_area = self.get_locator(LocatorType.XPath, element)
+            docker_text_area.execute_script("arguments[0].click();")
+            docker_text_area.send_keys(command)
+            return True
+        return False
+
+    def click_save_button(self) -> bool:
+        """Performs click action on save button
+
+        Returns: return the result of click action
+
+        """
+        element = "//button[contains(text(),'Save')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            save_button = self.get_locator(LocatorType.XPath, element)
+            if save_button.element_to_be_clickable():
+                save_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def scroll_to_element(self) -> bool:
+        """Scroll down the window to Advanced configuration settings button
+
+        Returns: returns the result of scroll action
+
+        """
+        element = "//button[contains(text(),'Advanced Configuration Settings')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            save_button = self.get_locator(LocatorType.XPath, element)
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", save_button)
+            return True

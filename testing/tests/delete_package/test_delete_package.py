@@ -31,7 +31,7 @@ class TestDeletePackage:
         """Test method to delete a package."""
         # Create project
         is_success_msg = ProjectUtility().create_project(self.driver)
-        assert is_success_msg != ProjectConstants.SUCCESS, is_success_msg
+        assert is_success_msg == ProjectConstants.SUCCESS.value, is_success_msg
 
         # Load Project Package Page
         package_list = PackageListingPage(self.driver)
@@ -41,9 +41,13 @@ class TestDeletePackage:
         self.__add_packages(package_list)
 
         # Open Jupyter_lab and verify packages
-        is_success_msg = ProjectUtility().verify_package_version(
-            self.driver, ['gtmunit1==0.12.4', 'gtmunit2==12.2', 'gtmunit3==5.0'])
-        assert is_success_msg != ProjectConstants.SUCCESS, is_success_msg
+        commands = namedtuple('command', ('command_text', 'output', 'error_message'))
+        command_text = ['pip freeze | grep gtmunit']
+        output = ['gtmunit1==0.12.4', 'gtmunit2==12.2', 'gtmunit3==5.0']
+        error_message = 'Verification of package failed'
+        gtmunit_grep_command = commands(command_text, output, error_message)
+        verification_message = ProjectUtility().verify_command_execution(self.driver, [gtmunit_grep_command])
+        assert verification_message == ProjectConstants.SUCCESS.value, verification_message
 
         # Remove a package
         is_removed = package_list.delete_package('gtmunit1')
@@ -60,9 +64,13 @@ class TestDeletePackage:
         assert not is_checked, "Package is not removed"
 
         # Open Jupyter_lab and verify packages
-        is_success_msg = ProjectUtility().verify_package_version(
-            self.driver, ['gtmunit2==12.2', 'gtmunit3==5.0'], True)
-        assert is_success_msg != ProjectConstants.SUCCESS, is_success_msg
+        commands = namedtuple('command', ('command_text', 'output', 'error_message'))
+        command_text = ['pip freeze | grep gtmunit']
+        output = ['gtmunit2==12.2', 'gtmunit3==5.0']
+        error_message = 'Verification of package failed'
+        gtmunit_grep_command = commands(command_text, output, error_message)
+        verification_message = ProjectUtility().verify_command_execution(self.driver, [gtmunit_grep_command], True)
+        assert verification_message == ProjectConstants.SUCCESS.value, verification_message
 
         # Verify package and it's version
         package_gtmunit2 = package("gtmunit2", "12.2")
@@ -87,9 +95,13 @@ class TestDeletePackage:
         assert package_body_text == "No packages have been added to this project", "Package body text incorrect"
 
         # Open Jupyter_lab and verify packages
-        is_success_msg = ProjectUtility().verify_package_version(
-            self.driver)
-        assert is_success_msg != ProjectConstants.SUCCESS, is_success_msg
+        commands = namedtuple('command', ('command_text', 'output', 'error_message'))
+        command_text = ['pip freeze | grep gtmunit']
+        output = []
+        error_message = 'Verification of package failed'
+        gtmunit_grep_command = commands(command_text, output, error_message)
+        verification_message = ProjectUtility().verify_command_execution(self.driver, [gtmunit_grep_command], True)
+        assert verification_message == ProjectConstants.SUCCESS.value, verification_message
 
     def __add_packages(self, package_list) -> None:
         """ Logical separation of add package

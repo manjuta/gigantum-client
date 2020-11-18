@@ -231,4 +231,51 @@ class PackageListingPage(BasePage):
         """
         return self.__add_package_component.drag_and_drop_text_file(packages)
 
+    def scroll_window_to_bottom(self) -> bool:
+        """Scroll the window to the bottom
 
+        Returns: returns the result of scroll action
+
+        """
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        return True
+
+    def click_advanced_configuration_settings(self) -> bool:
+        """Performs click action on advanced configuration settings
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_advanced_configuration_settings()
+
+    def click_edit_dockerfile_button(self) -> bool:
+        """Performs click action on edit dockerfile button
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_edit_dockerfile_button()
+
+    def click_and_input_docker_text_area(self, value) -> bool:
+        """Performs click and input action on docker text area
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_and_input_docker_text_area(value)
+
+    def click_save_button(self) -> bool:
+        """Performs click action on save button
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_save_button()
+
+    def scroll_to_element(self) -> bool:
+        """Performs scroll action to a particular element
+
+        Returns: returns the result of scroll action
+
+        """
+        return self.package_listing_component.scroll_to_element()
