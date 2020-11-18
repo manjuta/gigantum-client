@@ -7,13 +7,14 @@ import warningSVG from 'Images/icons/warning.svg';
 import './PublishModalStatus.scss';
 
 type Props = {
+  failureMessage: string,
   name: string,
   owner: string,
 }
 
 const Error = (props: Props) => {
-  const { name, owner } = props;
-  const text = `There was a problem publishing ${owner}/${name}`;
+  const { failureMessage, name, owner } = props;
+  const headerText = `There was a problem publishing ${owner}/${name}`;
   return (
     <div className="PublishModalStatus">
       <div className="flex">
@@ -23,7 +24,8 @@ const Error = (props: Props) => {
           alt="Error"
           height="30"
         />
-        <h4 className="PublishModalStatus__h4 PublishModalStatus__h4--warning">{text}</h4>
+      <h4 className="PublishModalStatus__h4 PublishModalStatus__h4--warning">{headerText}</h4>
+        <p>{failureMessage}</p>
       </div>
     </div>
   );

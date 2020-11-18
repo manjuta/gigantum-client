@@ -9,7 +9,7 @@ import {
 } from './MachineConstants';
 
 const stateMachine = Machine({
-  initial: COMPLETE,
+  initial: CONTENT,
   states: {
     [CONTENT]: {
       meta: { message: 'Checking for Docker' },

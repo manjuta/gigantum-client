@@ -59,7 +59,6 @@ const getTokens = (
   reject,
   hash,
   apiHost,
-  serverId,
   auth,
   availableServers,
   currentServer,
@@ -80,7 +79,7 @@ const getTokens = (
 
       // check if user is logged in, calls user idenity query and initiates backend
       getIsLogginedIn(
-        serverId,
+        hash.serverId,
         loginUrl,
         auth,
       ).then((data) => {
@@ -103,7 +102,7 @@ const getTokens = (
   } else {
     // check if user is logged in, calls user idenity query and initiates backend
     getIsLogginedIn(
-      serverId,
+      currentServer,
       loginUrl,
       auth,
     ).then((data) => {
@@ -131,7 +130,6 @@ const fetchAuthServerState = (
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'
     : window.location.host;
-  const { serverId } = hash;
   // fetch current server and available servers
   fetchQuery(
     `${window.location.protocol}//${apiHost}${process.env.SERVER_API}`,
@@ -147,7 +145,6 @@ const fetchAuthServerState = (
         reject,
         hash,
         apiHost,
-        serverId,
         auth,
         availableServers,
         currentServer,

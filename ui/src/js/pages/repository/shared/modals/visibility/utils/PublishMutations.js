@@ -22,7 +22,7 @@ import store from 'JS/redux/store';
 *
 */
 const getStatus = (owner, name, response) => {
-  console.log(owner, name, publishResponse);
+  console.log(owner, name, response);
 };
 
 /**
@@ -59,7 +59,7 @@ const publish = (baseUrl, props, isPublic, callback) => {
               const failureCall = (error) => {
                 setPublishingState(owner, name, false);
                 resetPublishState(false);
-                callback(false, [{message: 'Error Publishing'}]);
+                callback(false, [{ message: 'Error Publishing' }]);
               };
 
               const successCall = () => {
@@ -85,11 +85,14 @@ const publish = (baseUrl, props, isPublic, callback) => {
                   name,
                   labbookId,
                   isPublic,
-                  successCall,
-                  failureCall,
+                  null,
+                  null,
                   (publishResponse, error) => {
-                    if (error) {
+                    if (publishResponse && publishResponse.publishLabbook) {
+                      callback(publishResponse.publishLabbook.jobKey, error);
+                    } else if (error) {
                       failureCall();
+                      callback(null, error)
                     }
                   },
                 );
@@ -99,11 +102,14 @@ const publish = (baseUrl, props, isPublic, callback) => {
                   owner,
                   name,
                   isPublic,
-                  successCall,
-                  failureCall,
+                  null,
+                  null,
                   (publishResponse, error) => {
-                    if (error) {
+                    if (publishResponse && publishResponse.publishDataset) {
+                      callback(publishResponse.publishDataset.jobKey, error);
+                    } else if (error) {
                       failureCall();
+                      callback(null, error)
                     }
                   },
                 );

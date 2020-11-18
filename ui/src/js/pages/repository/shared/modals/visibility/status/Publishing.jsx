@@ -1,25 +1,98 @@
 // @flow
 // vendor
-import React from 'react';
+import React, { Component } from 'react';
 import Loader from 'Components/loader/Loader';
+// job status
+import JobStatus from 'JS/utils/jobStatus';
 // css
 import './PublishModalStatus.scss';
 
 type Props = {
-  name: string
+  jobKey: string,
+  name: string,
+  owner: string,
+  transition: Function,
 }
 
-const Publishing = (props: Props) => {
-  const { name, owner } = props;
-  const text = `Publishing ${owner}/${name}`;
-  return (
-    <div className="PublishModalStatus">
-      <h4 className="PublishModalStatus__h4">{text}</h4>
+class Publishing extends Component<Props> {
+  state = {
+    message: null,
+  }
 
-      <Loader nested={true}/>
+  componentDidUpdate(prevProps) {
+    if (this.props.jobKey !== prevProps.jobKey) {
+      this._fetchData(this.props.jobKey);
+    }
+  }
 
-    </div>
-  );
-};
+  /**
+  * Method fetches job status and updates modal messaging
+  * @param {string} jobKey
+  */
+  _fetchData = (jobKey) => {
+    console.log(jobKey);
+    const { transition } = this.props;
+
+    JobStatus.updateFooterStatus(jobKey).then((response) => {
+      console.log(response);
+      const { status } = response.data.jobStatus;
+
+      if ((status === 'started') || (status === 'queued')) {
+        const { jobMetadata } = response.data.jobStatus;
+        const jobMetaDataParsed = JSON.parse(jobMetadata);
+        console.log(jobMetaDataParsed);
+        if (jobMetaDataParsed.feedback) {
+          const { message } = this.state
+          const newMessage = `${message} \n ${jobMetaDataParsed.feedback}`;
+          this.setState({ message: newMessage });
+        }
+        setTimeout(() => {
+          this._fetchData(jobKey);
+        }, 1000);
+      }
+
+      if (status === 'finished') {
+        transition(
+          "COMPLETE",
+          {},
+        );
+      }
+
+      if (status === 'failed') {
+        const { failureMessage } = response.data.jobStatus;
+        transition(
+          "ERROR",
+          {
+            failureMessage,
+          },
+        );
+      }
+    });
+  }
+
+  render() {
+    const { jobKey, name, owner } = this.props;
+    const { message } = this.state;
+
+    console.log(this.props, jobKey);
+    const text = `Publishing ${owner}/${name}`;
+    return (
+      <div className="PublishModalStatus">
+        <h4 className="PublishModalStatus__h4">{text}</h4>
+
+        { !message && (
+            <Loader nested={true}/>
+          )
+        }
+
+        { message && (
+            <h6>{message}</h6>
+          )
+        }
+
+      </div>
+    );
+  }
+}
 
 export default Publishing;

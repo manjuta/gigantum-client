@@ -26,12 +26,17 @@ type Props = {
   buttonText: string,
   header: string,
   modalStateValue: Object,
+  name: string,
+  owner: string,
+  resetPublishState: Function,
+  setPublishingState: Function,
   toggleModal: Function,
   visibility: bool,
 }
 
 class VisibilityModal extends Component<Props> {
   state = {
+    jobKey: null,
     isPublic: (this.props.visibility === 'public'),
     machine: stateMachine.initialState,
   }
@@ -69,6 +74,7 @@ class VisibilityModal extends Component<Props> {
     this.setState({
       machine: newState,
       message: nextState && nextState.message ? nextState.message : '',
+      failureMessage: nextState && nextState.failureMessage ? nextState.failureMessage : '',
     });
   };
 
@@ -91,21 +97,28 @@ class VisibilityModal extends Component<Props> {
   _modifyVisibility = () => {
     const { header } = this.props;
     const { isPublic } = this.state;
+    const {
+      name,
+      owner,
+      resetPublishState,
+      setPublishingState,
+    } = this.props;
 
-    const callback = (success, error) => {
-      if (success) {
-        this._transition(
-          COMPLETE,
-          {},
-        );
+    const callback = (jobKey, error) => {
+      console.log(jobKey, error);
+      if (jobKey) {
+        console.log(jobKey);
+        this.setState({ jobKey });
       } else {
         this._transition(
           ERROR,
           {},
         );
       }
+      if (setPublishingState) {
+        setPublishingState(owner, name, false);
+      }
 
-      setPublishingState(owner, name, false);
       resetPublishState(false);
     };
 
@@ -116,13 +129,13 @@ class VisibilityModal extends Component<Props> {
         PUBLISHING,
         {},
       );
-      // publish(baseUrl, this.props, isPublic, callback);
+      publish(baseUrl, this.props, isPublic, callback);
     } else {
       this._transition(
         PUBLISHING,
         {},
       );
-      // changeVisibility(this.props, isPublic, callback);
+      changeVisibility(this.props, isPublic, callback);
     }
   }
 
@@ -133,10 +146,17 @@ class VisibilityModal extends Component<Props> {
       buttonText,
       header,
       modalStateValue,
+      name,
+      owner,
       toggleModal,
       visibility,
     } = this.props;
-    const { isPublic, machine } = this.state;
+    const {
+      failureMessage,
+      isPublic,
+      jobKey,
+      machine,
+    } = this.state;
     const { currentServer } = this.context;
     const icon = header === 'Publish' ? 'publish' : 'sync';
 
@@ -157,20 +177,23 @@ class VisibilityModal extends Component<Props> {
       ),
       [PUBLISHING]: (
         <Publishing
-          {...this.props}
-          {...this.state}
+          jobKey={jobKey}
+          name={name}
+          owner={owner}
+          transition={this._transition}
         />
       ),
       [ERROR]: (
         <Error
-          {...this.props}
-          {...this.state}
+          failureMessage={failureMessage}
+          name={name}
+          owner={owner}
         />
       ),
       [COMPLETE]: (
         <Complete
-          {...this.props}
-          {...this.state}
+          name={name}
+          owner={owner}
         />
       ),
     };
