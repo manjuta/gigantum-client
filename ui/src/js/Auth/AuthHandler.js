@@ -59,7 +59,6 @@ const getTokens = (
   reject,
   hash,
   apiHost,
-  serverId,
   auth,
   availableServers,
   currentServer,
@@ -80,7 +79,7 @@ const getTokens = (
 
       // check if user is logged in, calls user idenity query and initiates backend
       getIsLogginedIn(
-        serverId,
+        hash.serverId,
         loginUrl,
         auth,
       ).then((data) => {
@@ -103,7 +102,7 @@ const getTokens = (
   } else {
     // check if user is logged in, calls user idenity query and initiates backend
     getIsLogginedIn(
-      serverId,
+      currentServer,
       loginUrl,
       auth,
     ).then((data) => {
@@ -127,37 +126,25 @@ const fetchAuthServerState = (
   reject,
   hash,
   auth,
-  refetchCount = 0,
 ) => {
   const apiHost = process.env.NODE_ENV === 'development'
     ? 'localhost:10000'
     : window.location.host;
-  const { serverId } = hash;
   // fetch current server and available servers
   fetchQuery(
     `${window.location.protocol}//${apiHost}${process.env.SERVER_API}`,
   ).then(serverResponse => {
     const currentServer = serverResponse.current_server;
     const availableServers = serverResponse.available_servers;
-    if (refetchCount > 60) {
-      reject([{ message: 'Api is not running, try restarting Gigantum Client' }]);
-    } else if (availableServers === undefined) {
-      setTimeout(() => {
-        fetchAuthServerState(
-          resolve,
-          reject,
-          hash,
-          auth,
-          refetchCount + 1,
-        );
-      }, 1000);
+
+    if (availableServers === undefined) {
+      reject();
     } else {
       getTokens(
         resolve,
         reject,
         hash,
         apiHost,
-        serverId,
         auth,
         availableServers,
         currentServer,
