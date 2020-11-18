@@ -570,13 +570,13 @@ class BranchMenu extends Component<Props> {
     const { owner } = section;
     const { isDataset } = this.state;
     const { buildImage } = this.state.branchMutations;
-    setSyncingState(true);
     this.setState({ syncMenuVisible: false });
 
     if (allowSync || (pullOnly && allowSyncPull)) {
       if (!defaultRemote) {
         this._togglePublishModal(!isDataset, false);
       } else {
+        setSyncingState(true);
         const self = this;
         const data = {
           successCall: () => {
