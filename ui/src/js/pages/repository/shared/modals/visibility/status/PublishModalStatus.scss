@@ -1,0 +1,26 @@
+@import '~Styles/_imports.scss';
+
+.PublishModalStatus {
+  width: 100%;
+  padding: 2em;
+
+  text-align: center;
+  align-items: center;
+
+  @include flex(flex-start, column);
+
+  &__h4 {
+    margin-bottom: 3em;
+
+    &--warning {
+      color: $orange;
+    }
+  }
+
+  &__image {
+    &--warning {
+      border-radius: 50%;
+      background-color: $orange;
+    }
+  }
+}

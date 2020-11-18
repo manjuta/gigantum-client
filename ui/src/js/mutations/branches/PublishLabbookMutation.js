@@ -47,7 +47,9 @@ export default function PublishLabbookMutation(
     error: false,
     messageBody: [{ message: startMessage }],
   };
+
   setMultiInfoMessage(owner, labbookName, messageData);
+
   commitMutation(
     environment,
     {
@@ -63,7 +65,7 @@ export default function PublishLabbookMutation(
       },
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
-        if (response) {
+        if (failureCall && response) {
           const footerData = {
             owner,
             name: labbookName,

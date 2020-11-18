@@ -13,12 +13,24 @@ import {
 } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
 
+
+/**
+* methd polls for background status of the publish job
+* @param {string} owner
+* @param {string} name
+* @param {object} response
+*
+*/
+const getStatus = (owner, name, response) => {
+  console.log(owner, name, publishResponse);
+};
+
 /**
 *  @param {}
 *  adds remote url to labbook
 *  @return {string}
 */
-const publish = (baseUrl, props, isPublic) => {
+const publish = (baseUrl, props, isPublic, callback) => {
   const id = uuidv4();
   const {
     checkSessionIsValid,
@@ -44,9 +56,10 @@ const publish = (baseUrl, props, isPublic) => {
             if (!remoteUrl) {
               setPublishingState(owner, name, true);
 
-              const failureCall = () => {
+              const failureCall = (error) => {
                 setPublishingState(owner, name, false);
                 resetPublishState(false);
+                callback(false, [{message: 'Error Publishing'}]);
               };
 
               const successCall = () => {
@@ -60,7 +73,7 @@ const publish = (baseUrl, props, isPublic) => {
                 };
                 setMultiInfoMessage(owner, name, messageData);
                 setRemoteSession();
-
+                callback(true, null);
                 if (setSyncingState) {
                   setSyncingState(false);
                 }
@@ -105,7 +118,7 @@ const publish = (baseUrl, props, isPublic) => {
       resetState();
     }
   });
-}
+};
 
 
 
@@ -114,7 +127,7 @@ const publish = (baseUrl, props, isPublic) => {
 *  adds remote url to labbook
 *  @return {string}
 */
-const changeVisibility = (props, isPublic) => {
+const changeVisibility = (props, isPublic, callback) => {
   const visibility = isPublic ? 'public' : 'private';
   const {
     checkSessionIsValid,
@@ -138,10 +151,11 @@ const changeVisibility = (props, isPublic) => {
                 visibility,
                 (visibilityResponse, error) => {
                   if (error) {
-                    console.log(error);
                     setErrorMessage(owner, name, 'Visibility change failed', error);
+                    callback(false, error);
                   } else {
                     setInfoMessage(owner, name, `Visibility changed to ${visibility}`);
+                    callback(true, null);
                   }
                 },
               );
@@ -154,8 +168,10 @@ const changeVisibility = (props, isPublic) => {
                   if (error) {
                     console.log(error);
                     setErrorMessage(owner, name, 'Visibility change failed', error);
+                    callback(false, error);
                   } else {
                     setInfoMessage(owner, name, `Visibility changed to ${visibility}`);
+                    callback(true, null);
                   }
                 },
               );
@@ -169,7 +185,7 @@ const changeVisibility = (props, isPublic) => {
       resetState();
     }
   });
-}
+};
 
 
 export {
