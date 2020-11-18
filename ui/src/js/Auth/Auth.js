@@ -26,7 +26,17 @@ class Auth {
     const loginUrl = server.login_url;
     const url = hash ? `${loginUrl}${hash}` : loginUrl;
     setLogout(false);
-    window.open(url, '_self');
+    RemoveUserIdentityMutation(() => {
+      // redirect to root when user logs out
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('id_token');
+      localStorage.removeItem('expires_at');
+      localStorage.removeItem('family_name');
+      localStorage.removeItem('given_name');
+      localStorage.removeItem('email');
+      localStorage.removeItem('username');
+      window.open(url, '_self');
+    });
   }
 
   /**
