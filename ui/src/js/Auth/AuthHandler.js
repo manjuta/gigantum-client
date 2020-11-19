@@ -53,7 +53,18 @@ const getIsLogginedIn = (serverId, loginUrl, auth) => {
   return promise;
 };
 
-// hash has state then perfrom token exchange
+/**
+* Method Initiates token exchange if a hash state is present
+* if a error is present then the cycle is rejected and the error is displayed
+* if none of the above then a login cycle is attempted.
+* @param {Function} resolve
+* @param {Function} reject
+* @param {Object} hash
+* @param {string} apiHost
+* @param {Object} auth
+* @param {Array} availableServers
+* @param {string} currentServer
+*/
 const getTokens = (
   resolve,
   reject,

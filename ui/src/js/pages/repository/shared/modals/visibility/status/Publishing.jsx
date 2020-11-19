@@ -26,6 +26,21 @@ class Publishing extends Component<Props> {
   }
 
   /**
+  * Method sets message state for publishing data.
+  * @param {Object} jobMetaDataParsed
+  *
+  */
+  _setMessage = (jobMetaDataParsed) => {
+    if (jobMetaDataParsed.feedback) {
+      const { message } = this.state;
+      if ((jobMetaDataParsed.feedback !== null) && (message.indexOf(jobMetaDataParsed.feedback) !== -1)) {
+        const newMessage = `${message} \n ${jobMetaDataParsed.feedback}`;
+        this.setState({ message: newMessage });
+      }
+    }
+  }
+
+  /**
   * Method fetches job status and updates modal messaging
   * @param {string} jobKey
   */
@@ -40,12 +55,7 @@ class Publishing extends Component<Props> {
       if ((status === 'started') || (status === 'queued')) {
         const { jobMetadata } = response.data.jobStatus;
         const jobMetaDataParsed = JSON.parse(jobMetadata);
-        console.log(jobMetaDataParsed);
-        if (jobMetaDataParsed.feedback) {
-          const { message } = this.state
-          const newMessage = `${message} \n ${jobMetaDataParsed.feedback}`;
-          this.setState({ message: newMessage });
-        }
+        this._setMessage({ jobMetaDataParsed });
         setTimeout(() => {
           this._fetchData(jobKey);
         }, 1000);
