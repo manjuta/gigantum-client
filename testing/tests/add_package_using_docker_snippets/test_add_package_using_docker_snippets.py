@@ -50,7 +50,7 @@ class TestAddPackageUsingDockerSnippets:
         assert is_clicked, "Could not click advanced configuration settings"
 
         # Scroll to an element
-        is_clicked = package_list.scroll_to_element()
+        is_clicked = package_list.scroll_to_advanced_configuration()
         assert is_clicked, "Could not scroll to element"
 
         # Click on Edit dockerfile button

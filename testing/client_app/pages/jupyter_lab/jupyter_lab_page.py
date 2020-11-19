@@ -148,12 +148,13 @@ class JupyterLabPage(BasePage):
         Returns: returns the jupyter notebook output as list
 
         """
-        element = "//div[@class='lm-Widget p-Widget jp-RenderedText jp-mod-trusted jp-OutputArea-output']"
+        element = f"//body/div[@id='main']/div[@id='jp-main-content-panel']/div[@id='jp-main-split-panel']" \
+                  f"/div[@id='jp-main-dock-panel']/div/div/div[{output_position}]/div[3]/div[2]/div[1]/div[2]"
         if self.check_element_presence(LocatorType.XPath, element, 30):
-            command_output_area = self.driver.find_elements_by_xpath(element)
-            # Wait until the 'Note:' appears in grep output
-            command_output_area[output_position].wait_until(CompareUtilityType.CheckContainsText, 10, 'Note:')
-            command_output_text = command_output_area[output_position].text
+            command_output_area = self.get_locator(LocatorType.XPath, element)
+            # Wait until the 'Note:' appears in output
+            command_output_area.wait_until(CompareUtilityType.CheckContainsText, 10, 'Note:')
+            command_output_text = command_output_area.text
             command_output = (re.split('[\n]', command_output_text))
             if command_output[-1].startswith('Note:'):
                 del command_output[-1]

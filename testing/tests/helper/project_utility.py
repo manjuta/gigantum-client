@@ -129,10 +129,10 @@ class ProjectUtility:
 
             # Verification of command output
             if not is_only_exist:
-                jupyter_notebook_output = jupyter_lab_page.is_jupyter_notebook_output_exist(command.output, index)
+                jupyter_notebook_output = jupyter_lab_page.is_jupyter_notebook_output_exist(command.output, index+1)
             else:
                 jupyter_notebook_output = jupyter_lab_page.is_jupyter_notebook_output_only_exist(
-                    command.output, index)
+                    command.output, index+1)
 
             # Return message if output verification is failed
             if not jupyter_notebook_output:
