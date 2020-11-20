@@ -26,7 +26,6 @@ class Auth {
     const loginUrl = server.login_url;
     const url = hash ? `${loginUrl}${hash}` : loginUrl;
     setLogout(false);
-
     RemoveUserIdentityMutation(() => {
       // redirect to root when user logs out
       localStorage.removeItem('access_token');
@@ -36,7 +35,6 @@ class Auth {
       localStorage.removeItem('given_name');
       localStorage.removeItem('email');
       localStorage.removeItem('username');
-      window.sessionStorage.removeItem('CALLBACK_ROUTE');
       window.open(url, '_self');
     });
   }

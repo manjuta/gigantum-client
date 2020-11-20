@@ -2,10 +2,11 @@ import os
 import pathlib
 
 from gtmcore.dataset.cache.cache import CacheManager
+from gtmcore.configuration import Configuration
 
 
 class HostFilesystemCache(CacheManager):
-    """A simple cache manager that just users the host filesystem mounted from the gigantum working directory
+    """A simple cache manager that just uses the host filesystem mounted from the gigantum working directory
     """
 
     @property
@@ -24,13 +25,15 @@ class HostFilesystemCache(CacheManager):
         Returns:
             str
         """
+        server_id = Configuration().get_current_server_id()
         if not self.username:
             raise ValueError("Host Filesystem Object Cache requires logged in username to be set.")
         if not self.dataset.namespace:
             raise ValueError("Host Filesystem Object Cache requires the Dataset namespace to be set.")
 
         return os.path.join(os.path.expanduser(self.dataset.client_config.app_workdir),
-                            '.labmanager', 'datasets', self.username, self.dataset.namespace, self.dataset.name)
+                            '.labmanager', 'datasets', server_id,
+                            self.username, self.dataset.namespace, self.dataset.name)
 
     def initialize(self):
         """Method to configure a file cache for use.

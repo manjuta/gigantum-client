@@ -2,6 +2,7 @@ from framework.base.component_base import BaseComponent
 from selenium import webdriver
 from framework.factory.models_enums.page_config import ComponentModel
 from framework.factory.models_enums.constants_enums import LocatorType
+from selenium.webdriver.common.keys import Keys
 
 
 class PackageGridComponent(BaseComponent):
@@ -32,8 +33,8 @@ class PackageGridComponent(BaseComponent):
         Returns: returns the result of click action
 
         """
-        if self.add_package_button is not None:
-            self.add_package_button.click()
+        if self.add_package_button is not None and self.add_package_button.element_to_be_clickable():
+            self.add_package_button.execute_script("arguments[0].click();")
             return True
         return False
 
@@ -156,7 +157,146 @@ class PackageGridComponent(BaseComponent):
                 package_name = package_detail[1]
                 package_version = package_detail[3]
                 # Compare package-details on page with the package-details from argument
-                if package_name == package_details.name and package_version == package_details.version:
-                    return True
+                if not package_details.version.strip():
+                    if package_name == package_details.name.strip():
+                        return True
+                else:
+                    if package_name == package_details.name.strip() and package_version == package_details.version.strip():
+                        return True
         return False
+
+    def click_advanced_configuration_settings(self) -> bool:
+        """Performs click action on Advanced configuration settings
+
+        Returns: returns the result of click action
+
+        """
+        element = "//button[contains(text(),'Advanced Configuration Settings')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            configuration_button = self.get_locator(LocatorType.XPath, element)
+            configuration_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def click_edit_dockerfile_button(self) -> bool:
+        """Performs click action on edit dockerfile button
+
+        Returns: returns the result of click action
+
+        """
+        element = "//button/span[contains(text(),'Edit Dockerfile')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            dockerfile_button = self.get_locator(LocatorType.XPath, element)
+            dockerfile_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def click_and_input_docker_text_area(self, command) -> bool:
+        """Performs click action and input command to docker text area
+
+        Args:
+            command: Command to be executed
+
+        Returns: returns the result of command input action
+
+        """
+        element = f"//textarea[@placeholder='Enter dockerfile commands here']"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            docker_text_area = self.get_locator(LocatorType.XPath, element)
+            docker_text_area.execute_script("arguments[0].click();")
+            docker_text_area.send_keys(command)
+            return True
+        return False
+
+    def click_save_button(self) -> bool:
+        """Performs click action on save button
+
+        Returns: return the result of click action
+
+        """
+        element = "//button[contains(text(),'Save')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            save_button = self.get_locator(LocatorType.XPath, element)
+            if save_button.element_to_be_clickable():
+                save_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def scroll_to_advanced_configuration(self) -> bool:
+        """Scroll down the window to Advanced configuration settings button
+
+        Returns: returns the result of scroll action
+
+        """
+        element = "//button[contains(text(),'Advanced Configuration Settings')]"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            save_button = self.get_locator(LocatorType.XPath, element)
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", save_button)
+            return True
+        return False
+
+    def check_rebuild_required(self) -> bool:
+        """Performs checking for rebuild required
+
+        Returns: returns the result of check element
+
+        """
+        element = "//div[@class='ContainerStatus__container-state Rebuild Tooltip-data']"
+        check_element = self.check_element_presence(LocatorType.XPath, element, 20)
+        if check_element:
+            return True
+        return False
+
+    def scroll_to_add_package_button(self) -> bool:
+        """Scroll down the window to add package button
+
+        Returns: returns the result of scroll action
+
+        """
+        if self.add_package_button is not None:
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", self.add_package_button)
+            return True
+        return False
+
+    def check_build_modal_fail(self) -> bool:
+        """Check for build modal fail
+
+        Returns: returns the result of build modal monitor
+
+        """
+        element = "//p[contains(text(),'Environment Build Failed')]"
+        check_element = self.check_element_presence(LocatorType.XPath, element, 60)
+        if check_element:
+            return True
+        return False
+
+    def click_modal_close_button(self):
+        """Performs click action on modal close button
+
+        Returns: returns the result of click action
+
+        """
+        modal_close_button_element = "//button[@class='Btn Btn--flat Modal__close padding--small ']"
+        if self.check_element_presence(LocatorType.XPath, modal_close_button_element, 20):
+            modal_close_button = self.get_locator(LocatorType.XPath, modal_close_button_element)
+            modal_close_button.execute_script("arguments[0].click();")
+            return True
+        return False
+
+    def clear_docker_text_area(self):
+        """Clear docker text area
+
+        Returns: returns the result of clear action
+
+        """
+        element = f"//textarea[@placeholder='Enter dockerfile commands here']"
+        if self.check_element_presence(LocatorType.XPath, element, 20):
+            docker_text_area = self.get_locator(LocatorType.XPath, element)
+            docker_text_area.execute_script("arguments[0].click();")
+            docker_text_area.clear_text()
+            docker_text_area.send_keys(Keys.SPACE)
+            return True
+        return False
+
+
 

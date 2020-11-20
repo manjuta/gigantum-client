@@ -24,7 +24,6 @@ class JupyterLabPage(BasePage):
         self.__div_jupyter_lab = None
         self.__div_python3_notebook = None
         self.__div_project_title = None
-        self.__textarea_command = None
         self.__div_run_cell = None
 
     @property
@@ -38,12 +37,6 @@ class JupyterLabPage(BasePage):
         if self.__div_python3_notebook is None:
             self.__div_python3_notebook = self.get_locator(LocatorType.CSS, ".jp-LauncherCard-icon")
         return self.__div_python3_notebook
-
-    @property
-    def __type_textarea_command(self) -> WebElement:
-        if self.__textarea_command is None:
-            self.__textarea_command = self.get_locator(LocatorType.CSS, ".jp-Notebook .CodeMirror")
-        return self.__textarea_command
 
     @property
     def __click_run_cell(self) -> WebElement:
@@ -94,21 +87,31 @@ class JupyterLabPage(BasePage):
             return True
         return False
 
-    def type_command(self, command: str) -> bool:
-        """ Clicks the textarea meant for command"""
-        try:
-            # Scroll to top of notebook internal scrollbar
-            self.__type_textarea_command.click()
+    def type_command(self, command: str, input_position: int) -> bool:
+        """ Clicks the textarea and type the command
+
+        Args:
+            command: Command to be typed
+            input_position: Position of the input textarea in UI
+
+        Returns: returns the result of command type action
+
+        """
+        element = f"//body/div[@id='main']/div[@id='jp-main-content-panel']/div[@id='jp-main-split-panel']/div" \
+                  f"[@id='jp-main-dock-panel']/div/div/div[{input_position}]/div[2]/div[2]/div[2]/" \
+                  f"div[1]"
+        if self.check_element_presence(LocatorType.XPath, element, 30):
+            type_textarea_command = self.get_locator(LocatorType.XPath, element)
+            type_textarea_command.click()
             agent = self.driver.capabilities['browserName']
             if agent.lower() in ['chrome', 'firefox']:
-                self.__type_textarea_command.find_element_by_tag_name("textarea").send_keys(command)
+                type_textarea_command.find_element_by_tag_name("textarea").send_keys(command)
             elif agent.lower() == 'safari':
-                self.__type_textarea_command.send_keys(command)
+                type_textarea_command.send_keys(command)
             else:
                 raise ValueError(f"Unsupported browser type while entering command in jupyterlab: {agent}")
             return True
-        except:
-            return False
+        return False
 
     def click_run_cell(self) -> bool:
         """ Clicks the run cell"""
@@ -117,37 +120,61 @@ class JupyterLabPage(BasePage):
             return True
         return False
 
-    def is_packages_exist(self, packages: list) -> bool:
-        """ Checks whether the packages are present in the installed packages"""
-        installed_packages = self.__get_existing_packages()
-        if packages:
-            for package in packages:
-                if package not in installed_packages:
+    def is_jupyter_notebook_output_exist(self, expected_output: list, output_position: int) -> bool:
+        """ Checks whether the expected output are present in the jupyter notebook output
+
+        Args:
+            expected_output: List of expected output
+            output_position: Position of the output area in UI
+
+        Returns: returns the result of output verification
+
+        """
+        jupyter_notebook_output = self.__get_jupyter_notebook_output(output_position)
+        if expected_output:
+            for output in expected_output:
+                if output not in jupyter_notebook_output:
                     return False
             return True
         else:
-            return False if installed_packages else True
+            return False if jupyter_notebook_output else True
 
-    def __get_existing_packages(self) -> list:
-        """ Function returns all the installed packages"""
-        element = "//div[@class='lm-Widget p-Widget jp-RenderedText jp-mod-trusted jp-OutputArea-output']"
+    def __get_jupyter_notebook_output(self, output_position: int) -> list:
+        """ Function returns output from the jupyter notebook output area
+
+        Args:
+            output_position: Position of the output area in UI
+
+        Returns: returns the jupyter notebook output as list
+
+        """
+        element = f"//body/div[@id='main']/div[@id='jp-main-content-panel']/div[@id='jp-main-split-panel']" \
+                  f"/div[@id='jp-main-dock-panel']/div/div/div[{output_position}]/div[3]/div[2]/div[1]/div[2]"
         if self.check_element_presence(LocatorType.XPath, element, 30):
-            check_package_version = self.get_locator(LocatorType.XPath, element)
-            # Wait until the 'Note:' appears in grep output
-            check_package_version.wait_until(CompareUtilityType.CheckContainsText, 30, 'Note:')
-            installed_package_output = check_package_version.text
-            packages = re.split('[\n]', installed_package_output)
-            if 'Note:' in packages[-1]:
-                packages = packages[:-1]
-            return packages
+            command_output_area = self.get_locator(LocatorType.XPath, element)
+            # Wait until the 'Note:' appears in output
+            command_output_area.wait_until(CompareUtilityType.CheckContainsText, 10, 'Note:')
+            command_output_text = command_output_area.text
+            command_output = (re.split('[\n]', command_output_text))
+            if command_output[-1].startswith('Note:'):
+                del command_output[-1]
+            return command_output
         return []
 
-    def is_packages_only_exist(self, packages: list) -> bool:
-        """ Check only the provided packages are present in installed package list"""
-        installed_packages = self.__get_existing_packages()
-        if len(installed_packages) == len(packages):
-            for package in packages:
-                if package not in installed_packages:
+    def is_jupyter_notebook_output_only_exist(self, expected_output: list, output_position: int) -> bool:
+        """ Check only the expected output are present in the jupyter notebook output
+
+        Args:
+            expected_output: List of expected output
+            output_position: Position of the output area in UI
+
+        Returns: returns the result of output verification
+
+        """
+        jupyter_notebook_output = self.__get_jupyter_notebook_output(output_position)
+        if len(jupyter_notebook_output) == len(expected_output):
+            for index, output_line in enumerate(expected_output):
+                if output_line not in jupyter_notebook_output:
                     return False
             return True
         return False

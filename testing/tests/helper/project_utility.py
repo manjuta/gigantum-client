@@ -84,13 +84,13 @@ class ProjectUtility:
                 return "Could not click helper close button"
         return ProjectConstants.SUCCESS.value
 
-    def verify_package_version(self, driver: webdriver, packages: list = None, is_only_exist: bool = False) -> str:
+    def verify_command_execution(self, driver: webdriver, commands_list: list, is_only_exist: bool = False) -> str:
         """ Logical separation of verify package using jupyter
 
         Args:
             driver: webdriver instance
-            packages: The page with UI elements
-            is_only_exist: Decision variable to determine whether to check for all packages or given packages only
+            is_only_exist: Decision variable to determine whether only the expected output exist
+            commands_list: List of tuples with commands, output and verification message
         """
         # Load Project Package Page
         jupyter_lab_page = JupyterLabPage(driver)
@@ -112,23 +112,32 @@ class ProjectUtility:
         if not is_clicked:
             return "Could not click python3 under notebook"
 
-        # Type command
-        command_typed = jupyter_lab_page.type_command("pip freeze | grep gtmunit")
-        if not command_typed:
-            return "Could not type the commands"
+        # Iterate through list of commands
+        for index, command in enumerate(commands_list):
+            # Join all commands and create a command string
+            command_input_str = '\n'.join(command.command_text)
 
-        # Click run cell to run the command
-        is_clicked = jupyter_lab_page.click_run_cell()
-        if not is_clicked:
-            return "Could not click run for command"
+            # Type command string to the input textarea
+            command_typed = jupyter_lab_page.type_command(command_input_str, index+1)
+            if not command_typed:
+                return "Could not type the commands"
 
-        # Checks packages_and_version and close tab
-        if not is_only_exist:
-            is_package_exist = jupyter_lab_page.is_packages_exist(packages)
-        else:
-            is_package_exist = jupyter_lab_page.is_packages_only_exist(packages)
-        if not is_package_exist:
-            return "Verification of installed package fails"
+            # Execution of command
+            is_clicked = jupyter_lab_page.click_run_cell()
+            if not is_clicked:
+                return "Could not click run for command"
+
+            # Verification of command output
+            if not is_only_exist:
+                jupyter_notebook_output = jupyter_lab_page.is_jupyter_notebook_output_exist(command.output, index+1)
+            else:
+                jupyter_notebook_output = jupyter_lab_page.is_jupyter_notebook_output_only_exist(
+                    command.output, index+1)
+
+            # Return message if output verification is failed
+            if not jupyter_notebook_output:
+                return command.error_message
+
         jupyter_lab_page.close_tab("/lab", 0)
 
         # Click on container status button to stop container

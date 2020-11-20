@@ -186,3 +186,24 @@ class AddPackageComponent(BaseComponent):
             drop_box.drag_drop_file_in_drop_zone(file_content=package_str)
             return True
         return False
+
+    def choose_package_manager_from_dropdown(self, package_manager) -> bool:
+        """ Select package manager from drop down list
+
+        Args:
+            package_manager: Name of the package manager to be selected from the drop down list
+
+        Returns: returns the result of selection
+
+        """
+        drop_down_element = "//div[@data-selenium-id='Dropdown']"
+        if self.check_element_presence(LocatorType.XPath, drop_down_element, 20):
+            drop_down_field = self.get_locator(LocatorType.XPath, drop_down_element)
+            drop_down_field.execute_script("arguments[0].click();")
+            menu_item_element = f"//li[contains(text(),'{package_manager}')]"
+            if self.check_element_presence(LocatorType.XPath, menu_item_element, 20):
+                menu_item = self.get_locator(LocatorType.XPath, menu_item_element)
+                if menu_item is not None:
+                    menu_item.execute_script("arguments[0].click();")
+                    return True
+        return False

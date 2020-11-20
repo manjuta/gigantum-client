@@ -231,4 +231,102 @@ class PackageListingPage(BasePage):
         """
         return self.__add_package_component.drag_and_drop_text_file(packages)
 
+    def scroll_window_to_bottom(self) -> bool:
+        """Scroll the window to the bottom
 
+        Returns: returns the result of scroll action
+
+        """
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        return True
+
+    def click_advanced_configuration_settings(self) -> bool:
+        """Performs click action on advanced configuration settings
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_advanced_configuration_settings()
+
+    def click_edit_dockerfile_button(self) -> bool:
+        """Performs click action on edit dockerfile button
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_edit_dockerfile_button()
+
+    def click_and_input_docker_text_area(self, value) -> bool:
+        """Performs click and input action on docker text area
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_and_input_docker_text_area(value)
+
+    def click_save_button(self) -> bool:
+        """Performs click action on save button
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_save_button()
+
+    def scroll_to_advanced_configuration(self) -> bool:
+        """Performs scroll action to a particular element
+
+        Returns: returns the result of scroll action
+
+        """
+        return self.package_listing_component.scroll_to_advanced_configuration()
+
+    def check_rebuild_required(self) -> bool:
+        """Performs checking for rebuild required
+
+        Returns: returns the result of check element
+
+        """
+        return self.package_listing_component.check_rebuild_required()
+
+    def scroll_to_add_package_button(self) -> bool:
+        """Performs scroll action to add package button
+
+        Returns: returns the result of scroll action
+
+        """
+        return self.package_listing_component.scroll_to_add_package_button()
+
+    def choose_package_manager_from_dropdown(self, package_manager) -> bool:
+        """ Select package manager from drop down list
+
+        Args:
+            package_manager: Name of the package manager to be selected from the drop down list
+
+        Returns: returns the result of selection
+
+        """
+        return self.__add_package_component.choose_package_manager_from_dropdown(package_manager)
+
+    def check_build_modal_fail(self) -> bool:
+        """ Check for build modal fail
+
+        Returns: returns the result of build modal monitor
+
+        """
+        return self.package_listing_component.check_build_modal_fail()
+
+    def click_modal_close_button(self) -> bool:
+        """Performs click action on modal close button
+
+        Returns: returns the result of click action
+
+        """
+        return self.package_listing_component.click_modal_close_button()
+
+    def clear_docker_text_area(self) -> bool:
+        """Clear docker text area
+
+        Returns: returns the result of clear action
+
+        """
+        return self.package_listing_component.clear_docker_text_area()
