@@ -28,8 +28,10 @@ type Props = {
   modalStateValue: Object,
   name: string,
   owner: string,
-  resetPublishState: Function,
+  resetState: Function,
   setPublishingState: Function,
+  setRemoteSession: Function,
+  setSyncingState: Function,
   toggleModal: Function,
   visibility: bool,
 }
@@ -148,6 +150,11 @@ class VisibilityModal extends Component<Props> {
       modalStateValue,
       name,
       owner,
+      resetPublishState,
+      resetState,
+      setPublishingState,
+      setRemoteSession,
+      setSyncingState,
       toggleModal,
       visibility,
     } = this.props;
@@ -180,6 +187,12 @@ class VisibilityModal extends Component<Props> {
           jobKey={jobKey}
           name={name}
           owner={owner}
+          resetPublishState={resetPublishState}
+          resetState={resetState}
+          setPublishingState={setPublishingState}
+          setRemoteSession={setRemoteSession}
+          setSyncingState={setSyncingState}
+          toggleModal={toggleModal}
           transition={this._transition}
         />
       ),

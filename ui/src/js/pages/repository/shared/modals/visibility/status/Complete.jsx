@@ -17,13 +17,15 @@ const Complete = (props: Props) => {
   return (
     <div className="PublishModalStatus">
       <h4 className="PublishModalStatus__h4">{text}</h4>
-      <img
-        src={checkSVG}
-        alt="Complete"
-        height="80"
-      />
+      <div className="PublishModalStatus__main">
+        <img
+          src={checkSVG}
+          alt="Complete"
+          height="80"
+        />
+      </div>
     </div>
-  )
+  );
 };
 
 export default Complete;

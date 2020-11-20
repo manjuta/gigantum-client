@@ -13,18 +13,6 @@ import {
 } from 'JS/redux/actions/footer';
 import store from 'JS/redux/store';
 
-
-/**
-* methd polls for background status of the publish job
-* @param {string} owner
-* @param {string} name
-* @param {object} response
-*
-*/
-const getStatus = (owner, name, response) => {
-  console.log(owner, name, response);
-};
-
 /**
 *  @param {}
 *  adds remote url to labbook
@@ -59,6 +47,9 @@ const publish = (baseUrl, props, isPublic, callback) => {
               const failureCall = (error) => {
                 setPublishingState(owner, name, false);
                 resetPublishState(false);
+                if (setSyncingState) {
+                  setSyncingState(false);
+                }
                 callback(false, [{ message: 'Error Publishing' }]);
               };
 

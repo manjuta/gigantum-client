@@ -17,14 +17,17 @@ const Error = (props: Props) => {
   const headerText = `There was a problem publishing ${owner}/${name}`;
   return (
     <div className="PublishModalStatus">
-      <div className="flex">
+      <div className="PublishModalStatus__error flex">
         <img
           className="PublishModalStatus__image--warning"
           src={warningSVG}
           alt="Error"
           height="30"
         />
-      <h4 className="PublishModalStatus__h4 PublishModalStatus__h4--warning">{headerText}</h4>
+        <h4 className="PublishModalStatus__h4 PublishModalStatus__h4--warning">{headerText}</h4>
+      </div>
+
+      <div className="PublishModalStatus__main">
         <p>{failureMessage}</p>
       </div>
     </div>
