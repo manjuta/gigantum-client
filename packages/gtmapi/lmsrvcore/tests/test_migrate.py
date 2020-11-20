@@ -3,6 +3,7 @@ from lmsrvcore.utilities.migrate import migrate_work_dir_structure_v2
 
 from lmsrvcore.tests.fixtures import fixture_working_dir_with_cached_user
 import pathlib
+import shutil
 
 
 class TestMigrate(object):
@@ -69,3 +70,13 @@ class TestMigrate(object):
                                           '.labmanager/datasets/test-gigantum-com/test-user2/test-user2/my-dataset3'))
         assert os.path.isdir(os.path.join(config.app_workdir,
                                           '.labmanager/datasets/test-gigantum-com/test-user2/test-user1/my-dataset1'))
+
+    def test_work_dir_migrate_fresh_install(self, fixture_working_dir_with_cached_user):
+        """Test having the migration function run on an empty work dir
+
+        This happens during the first run of a fresh install. The function should simply exit without error.
+        """
+        config, _ = fixture_working_dir_with_cached_user
+        shutil.rmtree(os.path.join(config.app_workdir, 'servers'))
+
+        migrate_work_dir_structure_v2('test-gigantum-com')

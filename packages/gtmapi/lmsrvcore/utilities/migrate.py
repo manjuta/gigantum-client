@@ -36,7 +36,7 @@ def __migrate_repository_data(server_id: str) -> None:
     config = Configuration()
     dirs_to_move = list()
     for d in os.listdir(config.app_workdir):
-        if d in ['.labmanager', 'export', 'local_data', 'certificates', 'servers']:
+        if d in ['.labmanager', 'export', 'local_data', 'certificates', 'servers', '.DS_Store']:
             # Ignore non-user directories
             continue
 
@@ -58,6 +58,9 @@ def __migrate_sensitive_file_data(server_id: str) -> None:
     """
     config = Configuration()
     old_root = os.path.join(config.app_workdir, '.labmanager', 'secrets')
+    if not os.path.isdir(old_root):
+        logger.info("No old sensitive file location while attempting to migrate. Skipping.")
+        return
 
     dirs_to_move = list()
     for d in os.listdir(old_root):
@@ -70,6 +73,7 @@ def __migrate_sensitive_file_data(server_id: str) -> None:
                     os.path.join(old_root, server_id, d))
         logger.info(f"Moved sensitive file user dir `{d}` into `{server_id}` dir")
 
+
 def __migrate_dataset_file_cache_data(server_id: str) -> None:
     """Function to reorganize dataset file cache data
 
@@ -79,6 +83,10 @@ def __migrate_dataset_file_cache_data(server_id: str) -> None:
     """
     config = Configuration()
     old_root = os.path.join(config.app_workdir, '.labmanager', 'datasets')
+
+    if not os.path.isdir(old_root):
+        logger.info("No old dataset file cache location while attempting to migrate. Skipping.")
+        return
 
     dirs_to_move = list()
     for d in os.listdir(old_root):

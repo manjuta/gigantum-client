@@ -53,7 +53,7 @@ def fixture_working_dir_with_cached_user():
         yield config_instance, temp_dir  # name of the config file, working directory (for the current server)
 
     # Remove the temp_dir
-    shutil.rmtree(temp_dir)
+    shutil.rmtree(config_instance.app_workdir)
 
 
 @pytest.fixture
@@ -91,4 +91,4 @@ def fixture_working_dir_with_auth_middleware():
 
         # Remove the temp_dir
         config_instance.clear_cached_configuration()
-        shutil.rmtree(temp_dir)
+        shutil.rmtree(config_instance.app_workdir)
