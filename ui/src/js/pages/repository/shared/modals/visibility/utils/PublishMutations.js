@@ -76,8 +76,8 @@ const publish = (baseUrl, props, isPublic, callback) => {
                   name,
                   labbookId,
                   isPublic,
-                  null,
-                  null,
+                  successCall,
+                  failureCall,
                   (publishResponse, error) => {
                     if (publishResponse && publishResponse.publishLabbook) {
                       callback(publishResponse.publishLabbook.jobKey, error);
@@ -93,8 +93,8 @@ const publish = (baseUrl, props, isPublic, callback) => {
                   owner,
                   name,
                   isPublic,
-                  null,
-                  null,
+                  successCall,
+                  failureCall,
                   (publishResponse, error) => {
                     if (publishResponse && publishResponse.publishDataset) {
                       callback(publishResponse.publishDataset.jobKey, error);
