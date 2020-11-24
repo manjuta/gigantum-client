@@ -32,6 +32,7 @@ const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cur
 type Props = {
   auth: Object,
   diskLow: boolean,
+  hash: Object,
   history: Object,
   match: Object,
   serverName: string,
@@ -40,7 +41,6 @@ type Props = {
 export default class DashboardContainer extends Component<Props> {
   constructor(props) {
     super(props);
-
     const { orderBy, sort } = queryString.parse(props.history.location.hash.slice(1));
 
     this.state = {
@@ -51,8 +51,9 @@ export default class DashboardContainer extends Component<Props> {
   }
 
   componentDidMount() {
-    const { props } = this;
-    setCallbackRoute(props.history.location.pathname);
+    const { history } = this.props;
+    window.location.hash = '';
+    setCallbackRoute(history.location.pathname);
   }
 
   /**
@@ -92,6 +93,7 @@ export default class DashboardContainer extends Component<Props> {
     const {
       auth,
       diskLow,
+      hash,
       history,
       match,
       serverName,
@@ -127,6 +129,7 @@ export default class DashboardContainer extends Component<Props> {
           const queryProps = response.props;
           if (error) {
             console.log(error);
+            return null;
           } else if (queryProps) {
             if (selectedComponent === '/datasets/:labbookSection') {
               if (sectionRoute === 'cloud') {
@@ -149,6 +152,7 @@ export default class DashboardContainer extends Component<Props> {
                   auth={auth}
                   datasetList={queryProps}
                   diskLow={diskLow}
+                  hash={hash}
                   history={history}
                   orderBy={orderBy}
                   refetchSort={this._refetchSort}
@@ -178,6 +182,7 @@ export default class DashboardContainer extends Component<Props> {
               <LocalLabbooksContainer
                 auth={auth}
                 diskLow={diskLow}
+                hash={hash}
                 history={history}
                 labbookList={queryProps}
                 orderBy={orderBy}
@@ -194,6 +199,7 @@ export default class DashboardContainer extends Component<Props> {
                   auth={auth}
                   datasetList={queryProps}
                   diskLow={diskLow}
+                  hash={hash}
                   history={history}
                   loading
                   orderBy={orderBy}
@@ -210,6 +216,7 @@ export default class DashboardContainer extends Component<Props> {
                 auth={auth}
                 diskLow={diskLow}
                 history={history}
+                hash={hash}
                 labbookList={queryProps}
                 loading
                 orderBy={orderBy}

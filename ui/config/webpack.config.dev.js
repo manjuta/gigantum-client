@@ -20,7 +20,7 @@ const publicPath = '/';
 // `publicUrl` is just like `publicPath`, but we will provide it to our app
 // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
 // Omit trailing slash as %PUBLIC_PATH%/xyz looks better than %PUBLIC_PATH%xyz.
-const publicUrl = '';
+const publicUrl = process.env.BUILD_TYPE === 'cloud' ? '/run/uuid-mock-addr-ess/' : '';
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(publicUrl);
 
@@ -59,7 +59,7 @@ module.exports = {
     // Errors should be considered fatal in development
     overlay: require.resolve('react-error-overlay'),
     // Finally, this is your app's code:
-    appIndexJs: paths.appIndexJs,
+    appIndexJs: process.env.BUILD_TYPE  === 'cloud' ? paths.cloudIndexJs : paths.appIndexJs,
     // dahshboardJs: paths.dahshboardJs,
     labbookJs: paths.labbookJs,
     labbookActivityJs: paths.labbookActivityJs,
@@ -92,7 +92,7 @@ module.exports = {
     // There are also additional JS chunk files if you use code splitting.
     chunkFilename: 'static/js/[name].chunk.js',
     // This is the URL that app is served from. We use "/" in development.
-    publicPath,
+    publicPath: process.env.BUILD_TYPE === 'cloud' ? '/run/uuid-mock-addr-ess/' : publicPath,
     // Point sourcemap entries to original disk location
     devtoolModuleFilenameTemplate: info =>
       path.resolve(info.absoluteResourcePath),

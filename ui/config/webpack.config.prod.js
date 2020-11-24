@@ -70,7 +70,7 @@ module.exports = {
   // },
   entry: [
     require.resolve('./polyfills'),
-    paths.appIndexJs,
+    process.env.BUILD_TYPE  === 'cloud' ? paths.cloudIndexJs : paths.appIndexJs,
     paths.dahshboardJs,
     paths.labbookJs,
     paths.labbookActivityJs,
