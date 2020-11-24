@@ -55,23 +55,40 @@ type Props = {
 };
 
 
+/**
+  @param {Boolean} exporting
+  @param {String} name
+  @param {String} owner
+  returns export text
+  @return {string}
+*/
+const getExportText = (exporting, sectionType) => {
+  if (!exporting) {
+    return 'Export to Zip';
+  }
+  const exportType = (sectionType === 'dataset') ? 'Dataset' : 'Project';
+  return `Exporting ${name} ${exportType}`;
+};
+
+
 class ActionsMenu extends Component<Props> {
   state = {
     addNoteEnabled: false,
-    isValid: true,
     createBranchVisible: false,
-    showLoginPrompt: false,
-    exporting: false,
     deleteModalVisible: false,
-    publishDisabled: false,
+    exporting: false,
+    exportPath: null,
+    isValid: true,
     justOpened: true,
-    setPublic: false,
-    syncWarningVisible: false,
-    publishWarningVisible: false,
-    visibilityModalVisible: false,
-    remoteUrl: this.props.remoteUrl,
-    owner: this.props.owner,
     name: this.props.owner,
+    owner: this.props.owner,
+    publishDisabled: false,
+    publishWarningVisible: false,
+    remoteUrl: this.props.remoteUrl,
+    setPublic: false,
+    showLoginPrompt: false,
+    syncWarningVisible: false,
+    visibilityModalVisible: false,
   };
 
 
@@ -363,6 +380,7 @@ class ActionsMenu extends Component<Props> {
       updateTransitionState(owner, name, '');
 
       if (data.jobStatus.result) {
+        this.setState({ exportPath: data.jobStatus.result });
         setInfoMessage(owner, name, `Export file ${data.jobStatus.result} is available in the export directory of your Gigantum working directory.`);
       }
 
@@ -398,11 +416,8 @@ class ActionsMenu extends Component<Props> {
     if (!isLocked) {
       this.setState({
         exporting: true,
-        menuOpen: false,
       });
-      const exportType = (sectionType === 'dataset') ? 'Dataset' : 'Project';
 
-      setInfoMessage(owner, name, `Exporting ${name} ${exportType}`);
       updateTransitionState(owner, name, 'Exporting');
 
       setExportingState(true);
@@ -580,9 +595,16 @@ class ActionsMenu extends Component<Props> {
       remoteUrl,
       justOpened,
       exporting,
+      exportPath,
     } = this.state;
     const deleteText = (sectionType === 'labbook') ? 'Delete Project' : 'Delete Dataset';
+    const exportText = getExportText(exporting, name, sectionType);
     // declare css here
+    const exportCSS = classNames({
+      ActionsMenu__item: true,
+      'ActionsMenu__item--export': !exporting,
+      'ActionsMenu__item--loading': exporting,
+    });
     const branchMenuCSS = classNames({
       'ActionsMenu__menu--animation': justOpened, // this is needed to stop animation from breaking position flow when collaborators modal is open
       hidden: !menuOpen,
@@ -638,7 +660,7 @@ class ActionsMenu extends Component<Props> {
 
           <ul className="ActionsMenu__list">
 
-            <li className="ActionsMenu__item ActionsMenu__item--export">
+            <li className={exportCSS}>
               <button
                 onClick={evt => this._exportLabbook(evt)}
                 disabled={exporting || isLocked}
@@ -646,7 +668,7 @@ class ActionsMenu extends Component<Props> {
                 type="button"
                 data-tooltip="Cannot export Project while in use"
               >
-                Export to Zip
+                {exportText}
               </button>
 
               <div
@@ -655,6 +677,18 @@ class ActionsMenu extends Component<Props> {
               />
 
             </li>
+            {
+              exportPath
+              && (
+                <CopyUrl
+                  showExport
+                  defaultRemote={exportPath}
+                  name={name}
+                  owner={owner}
+                  remoteUrl={exportPath}
+                />
+              )
+            }
 
 
             <li className="ActionsMenu__item ActionsMenu__item--delete">
