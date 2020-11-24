@@ -1,0 +1,10 @@
+@import '~Styles/_imports.scss';
+
+.HorizontalBar {
+  width: 100%;
+  height: 3em;
+
+  &__block {
+    color: $white;
+  }
+}
