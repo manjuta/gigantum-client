@@ -1,6 +1,7 @@
 // vendor
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import HorizontalBar from 'Components/visualization/horizontal/HorizontalBar';
 // assets
 import './Summary.scss';
 // config
@@ -58,23 +59,12 @@ export default class Summary extends PureComponent {
             </div>
             <div className="Summary__file-type">
               <div className="Summary__subheader">Common File Types</div>
-              <ul className="Summary__list">
                 {
-                  props.fileTypeDistribution.length
-                    ? props.fileTypeDistribution.slice(0, 6).map((type, index) => {
-                      const splitType = type.split('|');
-                      const adjustedType = splitType[1].length > 10 ? `${splitType[1].slice(0, 7)}...` : splitType[1];
-                      const percentage = Math.round(Number(splitType[0]) * 100);
-                      if ((index === 5) && (props.fileTypeDistribution.length !== 6)) {
-                        return <li key={type}>{`+ ${props.fileTypeDistribution.length - 6} other types`}</li>;
-                      }
-                      return (
-                        <li key={type}>{`${adjustedType} (${percentage}%)`}</li>
-                      );
-                    })
-                    : <li> No files found.</li>
+                  (props.fileTypeDistribution.length !== 0)
+                  && (
+                    <HorizontalBar fileTypeDistribution={props.fileTypeDistribution} />
+                  )
                 }
-              </ul>
             </div>
           </div>
         </div>
