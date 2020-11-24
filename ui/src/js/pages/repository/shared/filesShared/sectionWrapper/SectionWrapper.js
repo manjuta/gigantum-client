@@ -60,16 +60,29 @@ export default class SectionWrapper extends Component {
   }
 
   render() {
-    const { props, state } = this;
-    const sectionObject = props.labbook || props.dataset;
-    const innerSection = props.dataset ? sectionObject : sectionObject[props.section];
+    const { selectedFiles } = this.state;
+    const {
+      containerStatus,
+      dataset,
+      datasetId,
+      isLocked,
+      isManaged,
+      labbook,
+      labbookId,
+      lockFileBrowser,
+      name,
+      owner,
+      section,
+      uploadAllowed,
+    } = this.props;
+    const sectionObject = labbook || dataset;
+    const innerSection = dataset ? sectionObject : sectionObject[section];
     const {
       browserPath,
-    } = getComponetPaths(props);
+    } = getComponetPaths(this.props);
 
     if (sectionObject) {
-      const sectionId = props.labbookId || props.datasetId;
-      const { section } = props;
+      const sectionId = labbookId || datasetId;
       const Browser = require(`./../../../${browserPath}`).default;
 
       // declare css
@@ -88,27 +101,27 @@ export default class SectionWrapper extends Component {
 
         <div className="SectionWrapper">
           {
-            (props.section === 'input')
+            (section === 'input')
             && <h4 className="margin-bottom--0 regular">Datasets and Files</h4>
           }
           <div className="grid">
             <div className="SectionWrapper__file-browser column-1-span-12">
               <Browser
-                selectedFiles={state.selectedFiles}
+                selectedFiles={selectedFiles}
                 clearSelectedFiles={this._clearSelectedFiles}
                 labbookId={sectionId}
                 sectionId={innerSection.id}
                 section={section}
                 loadStatus={this._loadStatus}
-                isLocked={props.isLocked}
-                isManaged={props.isManaged}
-                owner={props.owner}
-                name={props.name}
+                isLocked={isLocked}
+                isManaged={isManaged}
+                owner={owner}
+                name={name}
                 {...sectionProps}
                 linkedDatasets={sectionObject.linkedDatasets || null}
-                containerStatus={props.containerStatus}
-                lockFileBrowser={props.lockFileBrowser}
-
+                containerStatus={containerStatus}
+                lockFileBrowser={lockFileBrowser}
+                uploadAllowed={uploadAllowed}
               />
             </div>
           </div>

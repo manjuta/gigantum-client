@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1556"
+changelog:
+  - type: IMPROVEMENT
+    description: Users with read-only permissions to a dataset will no longer be able to modify data files.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1510
