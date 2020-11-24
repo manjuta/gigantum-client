@@ -14,6 +14,7 @@ exports[`DashbboardDatasetsLocal Renders a snapshot 1`] = `
     >
       <div
         className="Import__main"
+        data-selenium-id="ImportModalx"
       />
       <div
         className="Import__header"
@@ -86,7 +87,7 @@ exports[`DashbboardDatasetsLocal Renders a snapshot 1`] = `
           data-event="click focus"
           data-tip="Click on the 'Import Existing' button to import a Project into this Client instance.
 You can use a URL of a published Project or upload an exported Project.
-You can also import Projects that have been shared with you in by clicking on the 'undefined' tab above."
+You can also import Projects that have been shared with you in by clicking on the '' tab above."
           onClick={[Function]}
           role="presentation"
         >

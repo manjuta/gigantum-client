@@ -433,6 +433,7 @@ class Labbooks extends Component<Props> {
       showLoginPrompt,
     } = this.state;
     const { currentServer } = this.context;
+    const currentServerName = currentServer && currentServer.name ? currentServer.name : 'gigantum'
     // declare css
     const labbooksCSS = classNames({
       Labbooks: true,
@@ -483,7 +484,7 @@ class Labbooks extends Component<Props> {
                   type="button"
                   onClick={() => this._setSection('cloud')}
                 >
-                  {currentServer.name}
+                  {currentServerName}
                 </button>
               </li>
 

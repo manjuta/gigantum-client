@@ -115,7 +115,7 @@ exports[`File component File Snapshot 1`] = `
     <div
       className="Folder__cell Folder__cell--date"
     >
-      9 months ago
+      10 months ago
     </div>
     <div
       className="Folder__cell Folder__cell--menu"

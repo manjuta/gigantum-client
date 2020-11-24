@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1562"
+changelog:
+  - type: NEW
+    description: Adds seperate build paths for cloud client and local client.
+    issueLink: https://github.com/gigantum/gigantum-client/pull/1562/
