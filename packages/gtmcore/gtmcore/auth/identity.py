@@ -5,7 +5,7 @@ import os
 import pathlib
 from jose import jwt
 import json
-from typing import (Optional, Dict)
+from typing import (Optional, Dict, Callable)
 
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
@@ -45,12 +45,6 @@ class IdentityManager(metaclass=abc.ABCMeta):
 
         # The User instance containing user details
         self._user: Optional[User] = None
-
-        # Always validate the at_hash claim, except when testing due to the password grant not returning the at_hash
-        # claim in Auth0 (which is used during testing)
-        # TODO #1289: This can be removed as jose has merged https://github.com/mpdavis/python-jose/pull/76
-        #  You will need to update python-jose to >= 3.1.0
-        self.validate_at_hash_claim = True
 
     @property
     def user(self) -> Optional[User]:
@@ -157,12 +151,12 @@ class IdentityManager(metaclass=abc.ABCMeta):
         if not os.path.exists(key_path):
             os.makedirs(key_path)
 
-        key_file = os.path.join(key_path, "jwks.json")
+        server_config = self.config.get_server_configuration()
+        key_file = os.path.join(key_path, f"{server_config.id}-jwks.json")
         # Check for local cached key data
         if os.path.exists(key_file):
             with open(key_file, 'rt') as jwk_file:
                 jwks = json.load(jwk_file)
-
         else:
             try:
                 auth_config = self.config.get_auth_configuration()
@@ -200,6 +194,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
                     "n": key["n"],
                     "e": key["e"]
                 }
+                break
 
         return rsa_key
 
@@ -267,8 +262,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
                                          algorithms=auth_config.signing_algorithm,
                                          audience=audience,
                                          issuer=auth_config.issuer,
-                                         access_token=access_token,
-                                         options={"verify_at_hash": self.validate_at_hash_claim})
+                                         access_token=access_token)
                 else:
                     payload = jwt.decode(token, self.rsa_key,
                                          algorithms=auth_config.signing_algorithm,
@@ -294,15 +288,13 @@ class IdentityManager(metaclass=abc.ABCMeta):
                                                  algorithms=auth_config.signing_algorithm,
                                                  audience=audience,
                                                  issuer="https://gigantum.auth0.com/",
-                                                 access_token=access_token,
-                                                 options={"verify_at_hash": self.validate_at_hash_claim})
+                                                 access_token=access_token)
                         else:
                             payload = jwt.decode(token, self.rsa_key,
                                                  algorithms=auth_config.signing_algorithm,
                                                  audience=audience,
                                                  issuer="https://gigantum.auth0.com/",
-                                                 options={"verify_exp": False,
-                                                          "verify_at_hash": False})
+                                                 options={"verify_exp": False})
 
                         return payload
 
@@ -364,36 +356,33 @@ class IdentityManager(metaclass=abc.ABCMeta):
         raise NotImplemented
 
 
-def get_identity_manager(config_obj: Configuration) -> IdentityManager:
-        """Factory method that instantiates a GitInterface implementation based on provided configuration information
+def get_identity_manager_class(config_obj: Configuration) -> Callable[..., IdentityManager]:
+    """Factory method that returns the proper identity manager class based on the provided configuration
 
-        Note: ['auth']['identity_manager'] is a required configuration parameter used to choose implementation
+    Note: ['auth']['identity_manager'] is a required configuration parameter used to choose implementation
 
-            Supported Implementations:
-                - "local" - Provides ability to work both online and offline
+        Supported Implementations:
+            - "local" - Provides ability to work both online and offline
 
-        Args:
-            config_obj(Configuration): Loaded configuration object
+    Args:
+        config_obj(Configuration): Loaded configuration object
 
-        Returns:
-            IdentityManager
-        """
-        if "auth" not in config_obj.config.keys():
-            raise ValueError("You must specify the `auth` parameter to instantiate an IdentityManager implementation")
+    Returns:
+        IdentityManager
+    """
+    if "auth" not in config_obj.config.keys():
+        raise ValueError("You must specify the `auth` parameter to instantiate an IdentityManager implementation")
 
-        if 'identity_manager' not in config_obj.config["auth"]:
-            raise ValueError("You must specify the desired identity manager class in the config file.")
+    if 'identity_manager' not in config_obj.config["auth"]:
+        raise ValueError("You must specify the desired identity manager class in the config file.")
 
-        if config_obj.config["auth"]["identity_manager"] not in SUPPORTED_IDENTITY_MANAGERS:
-            msg = f"Unsupported `identity_manager` parameter `{config_obj.config['auth']['identity_manager']}`"
-            msg = f"{msg}.  Valid identity managers: {', '.join(SUPPORTED_IDENTITY_MANAGERS.keys())}"
-            raise ValueError(msg)
+    if config_obj.config["auth"]["identity_manager"] not in SUPPORTED_IDENTITY_MANAGERS:
+        msg = f"Unsupported `identity_manager` parameter `{config_obj.config['auth']['identity_manager']}`"
+        msg = f"{msg}.  Valid identity managers: {', '.join(SUPPORTED_IDENTITY_MANAGERS.keys())}"
+        raise ValueError(msg)
 
-        # If you are here OK to import class
-        key = config_obj.config["auth"]["identity_manager"]
-        identity_mngr_class = getattr(importlib.import_module(SUPPORTED_IDENTITY_MANAGERS[key][0]),
-                                      SUPPORTED_IDENTITY_MANAGERS[key][1])
-
-        # Instantiate with the config dict and return to the user
-        logger.info(f"Created Identity Manager of type: {key}")
-        return identity_mngr_class(config_obj)
+    # If you are here OK to import class
+    key = config_obj.config["auth"]["identity_manager"]
+    identity_mngr_class = getattr(importlib.import_module(SUPPORTED_IDENTITY_MANAGERS[key][0]),
+                                  SUPPORTED_IDENTITY_MANAGERS[key][1])
+    return identity_mngr_class

@@ -74,9 +74,11 @@ class TestAuthorizationMiddleware(object):
                             "issuer": "https://test2-auth.gigantum.com",
                             "signing_algorithm": "RS256",
                             "public_key_url": "https://test2-auth.gigantum.com/.well-known/jwks.json",
-                            "login_url": "https://test2.gigantum.com/client/login",
+                            "login_url": "https://test2.gigantum.com/auth/login",
+                            "logout_url": "https://test2.gigantum.com/auth/logout",
+                            "token_url": "https://test2.gigantum.com/auth/exchange",
                             "login_type": "auth0",
-                            "auth0_client_id": "0000000000000000"},
+                            "client_id": "0000000000000000"},
                       status=200)
 
         config, working_dir, client = fixture_working_dir_with_auth_middleware

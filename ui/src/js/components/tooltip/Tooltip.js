@@ -7,6 +7,8 @@ import uuidv4 from 'uuid/v4';
 import store from 'JS/redux/store';
 // config
 import config from 'JS/config';
+// context
+import ServerContext from 'Pages/ServerContext';
 // assets
 import './Tooltip.scss';
 
@@ -88,10 +90,14 @@ class Tooltip extends Component<Props> {
     ReactTooltip.show(this[`tooltip_${this.id}`]);
   }
 
+  static contextType = ServerContext;
+
   render() {
     const { toolTipExpanded } = this.state;
     const { isVisible, section } = this.props;
+    const { currentServer } = this.context;
     const place = getPlace(section);
+    const serverName = currentServer && currentServer.name ? currentServer.name : '';
 
     // declare css here
     const toolTipCSS = classNames({
@@ -110,7 +116,7 @@ class Tooltip extends Component<Props> {
       <div className={toolTipCSS}>
         <div
           className={toggleCSS}
-          data-tip={config.getTooltipText(section)}
+          data-tip={config.getTooltipText(section, serverName)}
           ref={(ref) => { this[`tooltip_${this.id}`] = ref; }}
           onClick={evt => this.showToolTip(evt)}
           role="presentation"

@@ -9,29 +9,32 @@ type Props = {
     login: Function,
     logout: Function,
   },
+  loggingInServerId: string,
   server: {
     name: string,
     login_url: string,
     server_id: string,
-  }
+  },
+  setLoggingInServerId: string,
 }
 
 class Server extends Component<Props> {
   /**
-    @param {}
-    login through Auth0
+    Mehtod logs user in using session instance of auth
+    @param {} -
   */
   login = () => {
-    const { auth, server } = this.props;
+    const { auth, server, setLoggingInServerId } = this.props;
     const serverId = server.server_id;
     const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
     const hash = `#route=${window.location.origin}${freshLoginText}&serverId=${serverId}`;
+    setLoggingInServerId(serverId);
     auth.login(server, hash);
   }
 
   /**
-    @param {}
-    logout through Auth0
+    Mehtod logs user out using session instance of auth
+    @param {} -
   */
   logout() {
     const { auth } = this.props;
@@ -40,36 +43,26 @@ class Server extends Component<Props> {
 
   render() {
     const {
-      loadingRenew,
-      loginURL,
+      loggingInServerId,
       server,
     } = this.props;
     const {
       name,
-    } = server
+    } = server;
+    const serverId = server.server_id;
+    const buttonText = serverId === loggingInServerId
+      ? 'Please wait'
+      : name;
     return (
       <div className="grid-5 flex flex--column justify--center">
-        { loadingRenew
-          ? (
-            <button
-              type="button"
-              disabled
-              className="Server__button--loading"
-            >
-              Logging In
-              <div className="Code__loading" />
-            </button>
-          )
-          : (
-            <a
-              href={loginURL}
-              className="Btn Server__button"
-              onClick={() => this.login()}
-            >
-              {name}
-            </a>
-          )
-        }
+        <button
+          className="Btn Server__button"
+          disabled={loggingInServerId !== null}
+          onClick={() => this.login()}
+          type="button"
+        >
+          {buttonText}
+        </button>
       </div>
     );
   }

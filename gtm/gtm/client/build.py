@@ -7,6 +7,7 @@ import sys
 
 from docker.errors import ImageNotFound, NotFound, APIError
 import yaml
+import requests
 
 from gtm.common.console import ask_question
 from gtm.utils import get_docker_client, get_current_commit_hash
@@ -142,6 +143,8 @@ class ClientBuilder(object):
             build_container = self.docker_client.containers.get(container_name)
             build_container.remove()
         except NotFound:
+            pass
+        except requests.exceptions.ChunkedEncodingError:
             pass
 
     def build_image(self, no_cache: bool = False, build_args: dict = None, docker_args: dict = None) -> None:

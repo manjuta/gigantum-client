@@ -54,18 +54,27 @@ const extraxtActiveBranch = (branches) => {
   Gets sync tooltip
   @return {String}
 */
-const getSyncTooltip = (props, data) => {
+const getSyncTooltip = (props, data, currentServer, isDataset) => {
   const {
     hasWriteAccess,
     syncOrPublish,
     sectionCollabs,
     activeBranch,
   } = data;
-  let syncTooltip = !hasWriteAccess ? 'Pull changes from Gignatum Hub' : 'Sync changes to Gigantum Hub';
-  syncTooltip = !props.defaultRemote ? 'Click Publish to push branch to Gigantum Hub' : syncTooltip;
-  syncTooltip = props.isLocked ? `Cannot ${syncOrPublish} while Project is in use` : syncTooltip;
-  syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote) ? 'Must publish Master branch first' : syncTooltip;
-  syncTooltip = props.defaultRemote && !sectionCollabs ? 'Please wait while Project data is being fetched' : syncTooltip;
+  const repositoryType = isDataset ? 'Dataset' : 'Project';
+  let syncTooltip = !hasWriteAccess ? 'Pull changes from Gignatum Hub' : `Sync changes to ${currentServer.name}`;
+  syncTooltip = !props.defaultRemote
+    ? `Click Publish to push branch to ${currentServer.name}`
+    : syncTooltip;
+  syncTooltip = props.isLocked
+    ? `Cannot ${syncOrPublish} while ${repositoryType} is in use`
+    : syncTooltip;
+  syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote)
+    ? 'Must publish Master branch first'
+    : syncTooltip;
+  syncTooltip = props.defaultRemote && !sectionCollabs
+    ? `Please wait while ${repositoryType} data is being fetched`
+    : syncTooltip;
 
   return syncTooltip;
 };
@@ -561,13 +570,13 @@ class BranchMenu extends Component<Props> {
     const { owner } = section;
     const { isDataset } = this.state;
     const { buildImage } = this.state.branchMutations;
-
     this.setState({ syncMenuVisible: false });
 
     if (allowSync || (pullOnly && allowSyncPull)) {
       if (!defaultRemote) {
         this._togglePublishModal(!isDataset, false);
       } else {
+        setSyncingState(true);
         const self = this;
         const data = {
           successCall: () => {
@@ -632,10 +641,12 @@ class BranchMenu extends Component<Props> {
       isLocked,
       section,
     } = this.props;
+    const { currentServer } = this.context;
     // other variables
     const sectionCollabs = (collaborators && collaborators[section.name]) || null;
     const defaultDatasetMessage = 'Datasets currently does not support branching features';
     const isPullOnly = defaultRemote && !hasWriteAccess && sectionCollabs;
+
     let syncOrPublish = defaultRemote ? 'Sync' : 'Publish';
     syncOrPublish = isPullOnly ? 'Pull' : syncOrPublish;
 
@@ -665,7 +676,7 @@ class BranchMenu extends Component<Props> {
     };
     // TODO FIX this, nesting ternary operations is bad
     return {
-      syncTooltip: getSyncTooltip(props, data),
+      syncTooltip: getSyncTooltip(props, data, currentServer, state.isDataset),
       manageTooltip: getManagedToolip(props, data),
       createTooltip,
       resetTooltip,
@@ -702,6 +713,7 @@ class BranchMenu extends Component<Props> {
      isSticky,
      section,
      collaborators,
+     setSyncingState,
    } = this.props;
    const {
      showLoginPrompt,
@@ -1076,7 +1088,7 @@ class BranchMenu extends Component<Props> {
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
             setRemoteSession={this._setRemoteSession}
-
+            setSyncingState={setSyncingState}
           />
         )
        }

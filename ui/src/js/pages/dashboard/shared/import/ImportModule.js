@@ -4,16 +4,16 @@ import classNames from 'classnames';
 import uuidv4 from 'uuid/v4';
 // queries
 import UserIdentity from 'JS/Auth/UserIdentity';
-// components
-import Tooltip from 'Components/tooltip/Tooltip';
-import Modal from 'Components/modal/Modal';
-import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
 // store
 import store from 'JS/redux/store';
 // mutations
 import ImportRemoteDatasetMutation from 'Mutations/repository/import/ImportRemoteDatasetMutation';
 import ImportRemoteLabbookMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
+// components
+import Tooltip from 'Components/tooltip/Tooltip';
+import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
+import ImportModal from './modal/ImportModal';
 // utilities
 import prepareUpload from './PrepareUpload';
 // assets
@@ -53,7 +53,7 @@ type Props = {
 }
 
 
-export default class ImportModule extends Component<Props> {
+class ImportModule extends Component<Props> {
   constructor(props) {
     super(props);
 
@@ -63,6 +63,7 @@ export default class ImportModule extends Component<Props> {
       isImporting: false,
       remoteURL: '',
       showImportModal: false,
+      increment: 0,
       ready: null,
       isOver: false,
     };
@@ -162,9 +163,36 @@ export default class ImportModule extends Component<Props> {
 
   /**
   *  @param {Object} event
+  *  handles highlighting of drop zone
+  */
+  _dragLeaveHandler = (evt) => { // use evt, event is a reserved word in chrome
+    evt.preventDefault(); // this kicks the event up the event loop
+    const { increment } = this.state;
+    const newIncrement = increment - 1;
+    const isOver = newIncrement >= 1;
+    this.setState({ isOver, increment: newIncrement });
+  }
+
+  /**
+  *  @param {Object} event
+  *  handles highlighting of drop zone
+  */
+  _dragEnterHandler = (evt) => { // use evt, event is a reserved word in chrome
+    evt.preventDefault(); // this kicks the event up the event loop
+    const { increment } = this.state;
+    const newIncrement = increment + 1;
+    this.setState({ isOver: true, increment: newIncrement });
+  }
+
+  /**
+  *  @param {Object} event
   *  handle file drop and get file data
   */
   _dropHandler = (evt) => {
+    if (!evt.dataTransfer && evt.target.files) {
+      this._getBlob({ files: evt.target.files });
+      return;
+    }
     // use evt, event is a reserved word in chrome
     const dataTransfer = evt.dataTransfer;
     evt.preventDefault();
@@ -181,7 +209,7 @@ export default class ImportModule extends Component<Props> {
   */
   _dragendHandler = (evt) => { // use evt, event is a reserved word in chrome
     const dataTransfer = evt.dataTransfer;
-
+    this.setState({ isOver: false })
     evt.preventDefault();
     evt.dataTransfer.effectAllowed = 'none';
     evt.dataTransfer.dropEffect = 'none';
@@ -414,6 +442,12 @@ export default class ImportModule extends Component<Props> {
       document.getElementById('dropZone').classList.add('ImportModule__drop-area-highlight');
     }
 
+    this.setState({
+      files: [],
+      error: false,
+      ready: null,
+    });
+
     if (evt.target.classList && evt.target.classList.contains(dropZoneId) < 0) {
       evt.preventDefault();
       evt.dataTransfer.effectAllowed = 'none';
@@ -594,87 +628,4 @@ export default class ImportModule extends Component<Props> {
   }
 }
 
-// TODO move this to it's own file and clean up import module
-
-const ImportModal = ({ self }) => {
-  const { props, state } = self;
-  const owner = state.ready ? state.ready.owner : '';
-  const name = state.ready ? state.ready.name : '';
-  const section = props.section === 'labbook' ? 'Project' : 'Dataset';
-  const dropBoxCSS = classNames({
-    'ImportDropzone flex flex--column align-items--center': true,
-    'Dropbox--hovered': state.isOver,
-    'Dropbox--dropped': state.ready && state.files[0],
-  });
-  return (
-    <div className="Import__main">
-      {
-      state.showImportModal
-      && (
-      <Modal
-        header={`Import ${section}`}
-        handleClose={() => self._closeImportModal()}
-        size="large"
-        icon="add"
-        renderContent={() => (
-          <div className="ImportModal">
-            <p>{`Import a ${section} by either pasting a URL or drag & dropping below`}</p>
-            <input
-              className="Import__input"
-              type="text"
-              placeholder={`Paste ${section} URL`}
-              onChange={evt => self._updateRemoteUrl(evt)}
-              defaultValue={state.remoteUrl}
-            />
-
-            <div
-              id="dropZone"
-              className={dropBoxCSS}
-              ref={div => self.dropZone = div}
-              type="file"
-              onDragEnd={evt => self._dragendHandler(evt, false)}
-              onDrop={evt => self._dropHandler(evt)}
-              onDragOver={evt => self._dragoverHandler(evt, true)}
-            >
-              {
-                 (state.ready && state.files[0])
-                   ? (
-                     <div className="Import__ready">
-                       <div>{`Select Import to import the following ${section}`}</div>
-                       <hr />
-                       <div>{`${section} Owner: ${owner}`}</div>
-                       <div>{`${section} Name: ${name}`}</div>
-                     </div>
-                   ) : (
-                     <div className="DropZone">
-                       <p>{`Drag and drop an exported ${section} here`}</p>
-                     </div>
-                   )}
-            </div>
-
-            <div className="Import__buttonContainer">
-              <button
-                type="button"
-                onClick={() => self._closeImportModal()}
-                className="Btn--flat"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => { self._import(); }}
-                className="Btn--last"
-                disabled={!self.state.ready || self.state.isImporting}
-              >
-                Import
-              </button>
-            </div>
-          </div>
-        )
-        }
-      />
-      )
-    }
-    </div>
-  );
-};
+export default ImportModule;

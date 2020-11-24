@@ -3,87 +3,19 @@
 exports[`DetailRecords Renders a snapshot 1`] = `
 <div
   className="DetailsRecords"
+  data-selenium-id="DetailRecordsx"
 >
-  <ul
+  <div
     className="DetailsRecords__list"
   >
-    <div
-      className="DetailsRecords__container"
+    <ul
+      className="Record__container"
+      data-selenium-id="Recordx"
     >
       <div
-        className="DetailsRecords__action DetailsRecords__action--null"
+        className="Record__action Record__action--undefined"
       />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-    <div
-      className="DetailsRecords__container"
-    >
-      <div
-        className="DetailsRecords__action DetailsRecords__action--null"
-      />
-    </div>
-  </ul>
+    </ul>
+  </div>
 </div>
 `;

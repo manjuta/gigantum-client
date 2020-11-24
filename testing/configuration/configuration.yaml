@@ -1,5 +1,8 @@
 configuration:
   chrome_driver_version: "2.36"
+  edge_driver_version: "84.0.522.15"
+  window_size: "1440,900"
   test_environment: dev
-  browsers: ["chrome"]
+  browsers: ["chrome", "firefox"]
   incognito: True
+  headless: False

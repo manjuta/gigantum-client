@@ -1,18 +1,42 @@
+// @flow
 // vendor
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 // assets
 import './FooterUploadBar.scss';
 
-export default class FooterUploadBar extends PureComponent {
+type Props = {
+  closeFooter: Function,
+  openLabbook: Function,
+  parentState: {
+    labbookSuccess: boolean,
+    progessBarPercentage: number,
+    uploadError: boolean,
+    uploadMessage: string,
+    uploadOpen: boolean,
+  }
+}
+
+class FooterUploadBar extends PureComponent<Props> {
   render() {
-    const { props } = this;
-    const isNotZero = props.parentState.progessBarPercentage !== 0;
+    const {
+      closeFooter,
+      openLabbook,
+      parentState,
+    } = this.props;
+    const {
+      labbookSuccess,
+      progessBarPercentage,
+      uploadError,
+      uploadMessage,
+      uploadOpen,
+    } = parentState;
+    const isNotZero = progessBarPercentage !== 0;
     // declare css here
     const footerUploadClass = classNames({
-      hidden: !props.parentState.uploadOpen,
-      'FooterUploadBar--status': props.parentState.uploadOpen,
-      'FooterUploadBar--error': props.parentState.uploadError,
+      hidden: !uploadOpen,
+      'FooterUploadBar--status': uploadOpen,
+      'FooterUploadBar--error': uploadError,
     });
     const footerUploadBarClass = classNames({
       FooterUploadBar__progressBar: true,
@@ -22,32 +46,33 @@ export default class FooterUploadBar extends PureComponent {
     return (
       <div className={footerUploadClass}>
         <div className="FooterUploadBar__message">
-          {props.parentState.uploadMessage}
+          {uploadMessage}
         </div>
 
         <div
           id="footerProgressBar"
-          style={{ width: `${props.parentState.progessBarPercentage}%` }}
+          style={{ width: `${progessBarPercentage}%` }}
           className={footerUploadBarClass}
         />
 
         {
-          props.parentState.uploadError
+          uploadError
           && (
             <div
-              onClick={() => { props.closeFooter(); }}
               className="Footer__close"
+              onClick={() => { closeFooter(); }}
+              role="presentation"
             />
           )
         }
         {
-          props.parentState.labbookSuccess
+          labbookSuccess
           && (
           <button
+            onClick={() => openLabbook()}
             type="button"
-            onClick={() => props.openLabbook()}
           >
-              Open Project
+            Open Project
           </button>
           )
         }
@@ -55,3 +80,5 @@ export default class FooterUploadBar extends PureComponent {
     );
   }
 }
+
+export default FooterUploadBar;

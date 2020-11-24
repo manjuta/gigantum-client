@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1521"
+changelog:
+  - type: FIX
+    description: Fixes publish button not locking when publishing a dataset.

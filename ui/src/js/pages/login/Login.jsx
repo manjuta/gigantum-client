@@ -13,6 +13,7 @@ type Props = {
     login: Function,
     logout: Function,
   },
+  errors: Array,
   history: {
     location: {
       pathname: string,
@@ -23,15 +24,16 @@ type Props = {
 
 class Login extends Component<Props> {
   componentDidMount() {
-    const { history } = this.props;
-    if (!history.location.pathname.includes('/login')) {
+    const { errors, history } = this.props;
+    if (errors && (errors.length > 0)) {
+      history.push('/login/error');
+    } else {
       history.push('/login');
     }
   }
 
   render() {
-    const errorType = window.sessionStorage.getItem('LOGIN_ERROR_TYPE');
-    const errorDescription = window.sessionStorage.getItem('LOGIN_ERROR_DESCRIPTION');
+    const { errors } = this.props;
     return (
       <div className="Login flex flex--column">
         <Switch>
@@ -46,8 +48,7 @@ class Login extends Component<Props> {
             render={() => (
               <LoginError
                 {...this.props}
-                errorDescription={errorDescription}
-                errorType={errorType}
+                errors={errors}
               />
             )}
           />

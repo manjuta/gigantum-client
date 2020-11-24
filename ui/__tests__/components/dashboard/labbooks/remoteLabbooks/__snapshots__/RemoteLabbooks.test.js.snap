@@ -105,7 +105,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Tue Jul 09 2019
+          07/09/19
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -116,7 +116,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Tue Jul 09 2019
+          a year ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -222,7 +222,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Thu Jun 07 2018
+          06/08/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -233,7 +233,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Thu Jun 07 2018
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -345,7 +345,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Fri Jan 18 2019
+          01/18/19
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -356,7 +356,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Fri Jan 18 2019
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -462,7 +462,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Thu Jan 30 2020
+          01/30/20
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -473,7 +473,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Mon Feb 03 2020
+          10 months ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -579,7 +579,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Thu Aug 16 2018
+          08/16/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -590,7 +590,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Thu Aug 16 2018
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -702,7 +702,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Mon Jan 13 2020
+          01/13/20
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -713,7 +713,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Mon Jan 13 2020
+          10 months ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -825,7 +825,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Mon Apr 30 2018
+          04/30/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -836,7 +836,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Mon Apr 30 2018
+          3 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -948,7 +948,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Wed Aug 14 2019
+          08/14/19
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -959,7 +959,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Wed Aug 14 2019
+          a year ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1065,7 +1065,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Wed Aug 08 2018
+          08/08/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1076,7 +1076,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Wed Aug 08 2018
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1188,7 +1188,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Tue Apr 24 2018
+          04/24/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1199,7 +1199,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Tue Apr 24 2018
+          3 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1305,7 +1305,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Tue Mar 13 2018
+          03/13/18
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1316,7 +1316,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Tue Mar 13 2018
+          3 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1422,7 +1422,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Thu Mar 07 2019
+          03/07/19
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1433,7 +1433,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Fri Mar 22 2019
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1539,7 +1539,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Thu Feb 28 2019
+          02/28/19
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1550,7 +1550,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Thu Feb 28 2019
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1656,7 +1656,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Tue Jan 07 2020
+          01/07/20
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1667,7 +1667,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Tue Jan 07 2020
+          a year ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1773,7 +1773,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Created:
           </span>
            
-          Thu Apr 04 2019
+          04/04/19
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata"
@@ -1784,7 +1784,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          Thu Apr 04 2019
+          2 years ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1794,31 +1794,31 @@ exports[`Test RemoteLabbooks rendering 1`] = `
       </div>
     </div>
     <div
-      className="CardLoader--hidden"
+      className="Card Card--225 column-4-span-3 flex flex--column justify--space-between CardLoader CardLoader--0"
       data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
-      className="CardLoader--hidden"
+      className="Card Card--225 column-4-span-3 flex flex--column justify--space-between CardLoader CardLoader--1"
       data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
-      className="CardLoader--hidden"
+      className="Card Card--225 column-4-span-3 flex flex--column justify--space-between CardLoader CardLoader--2"
       data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
-      className="CardLoader--hidden"
+      className="Card Card--225 column-4-span-3 flex flex--column justify--space-between CardLoader CardLoader--3"
       data-selenium-id="CardLoader"
     >
       <div />
     </div>
     <div
-      className="CardLoader--hidden"
+      className="Card Card--225 column-4-span-3 flex flex--column justify--space-between CardLoader CardLoader--4"
       data-selenium-id="CardLoader"
     >
       <div />

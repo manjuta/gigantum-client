@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1497"
+changelog:
+  - type: NEW
+    description: Test case of package manager delete functionality.

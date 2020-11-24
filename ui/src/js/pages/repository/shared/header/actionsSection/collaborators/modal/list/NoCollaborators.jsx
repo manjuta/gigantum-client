@@ -3,6 +3,8 @@
 import React, { PureComponent } from 'react';
 // redux
 import { setPublishFromCollaborators } from 'JS/redux/actions/shared/collaborators/collaborators';
+// context
+import ServerContext from 'Pages/ServerContext';
 // css
 import './NoCollaborators.scss';
 
@@ -26,8 +28,11 @@ class NoCollaborators extends PureComponent<Props> {
     }, 100);
   }
 
+  static contextType = ServerContext;
+
   render() {
     const { collaborators } = this.props;
+    const { currentServer } = this.context;
 
     if (collaborators && collaborators.length) {
       return (
@@ -48,7 +53,11 @@ class NoCollaborators extends PureComponent<Props> {
         <div className="NoCollaborators__container flex flex--column">
           <div>
             <p>To add collaborators, you must first “publish” this Project.</p>
-            <p>Publishing uploads the Project to Gigantum Hub so that it can be downloaded in another Client. </p>
+            <p>
+              Publishing uploads the Project to
+              {` ${currentServer.name} `}
+              so that it can be downloaded in another Client.
+            </p>
           </div>
           <p className="NoCollaborators__p--margin">You can set the Project to be public or private when publishing.</p>
         </div>

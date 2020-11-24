@@ -387,7 +387,7 @@ class TestDatasetMutations(object):
             assert kwargs['logged_in_username'] == 'default'
             assert kwargs['dataset_owner'] == 'default'
             assert kwargs['dataset_name'] == 'dataset100'
-            assert ".labmanager/datasets/default/default/dataset100" in kwargs['cache_location']
+            assert ".labmanager/datasets/test-gigantum-com/default/default/dataset100" in kwargs['cache_location']
             assert metadata['method'] == 'clean_dataset_file_cache'
 
             return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2b66fdfdfb6b10")

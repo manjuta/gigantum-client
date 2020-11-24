@@ -101,7 +101,7 @@
     &:disabled:hover {
       cursor: default;
 
-      border: 0;
+      border: 1;
       background: $white url('~Images/icons/x-close.svg');
       background-size: 25px;
     }

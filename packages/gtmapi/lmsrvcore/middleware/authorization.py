@@ -13,19 +13,22 @@ class AuthorizationMiddleware(object):
     is only run once per request. If this attribute exists in info.context, the parsing and validation code is skipped.
 
     """
-    identity_mgr = None
-
     def resolve(self, next, root, info, **args):
-        if not self.identity_mgr:
-            self.identity_mgr = get_identity_manager_instance()
+        identity_mgr = get_identity_manager_instance()
 
         # If the `is_authenticated` field does not exist in the request context, process the headers
         if not hasattr(info.context, "is_authenticated"):
+
             # Change the server configuration if requested
             if "GTM-SERVER-ID" in info.context.headers:
                 logger.info(f"Processing change server request for server id: {info.context.headers['GTM-SERVER-ID']}")
                 config: Configuration = flask.current_app.config['LABMGR_CONFIG']
                 current_config = config.get_server_configuration()
+
+                # Force JWKS reload
+                # This will be improved in #1433, as right now every request will load the jwk from disk
+                identity_mgr.rsa_key = None
+
                 try:
                     config.set_current_server(info.context.headers['GTM-SERVER-ID'])
                 except Exception as err:
@@ -43,7 +46,7 @@ class AuthorizationMiddleware(object):
             flask.g.id_token = id_token
 
             # Check if you are authenticated, raising an AuthenticationError if you are not.
-            if self.identity_mgr.is_authenticated(access_token, id_token):
+            if identity_mgr.is_authenticated(access_token, id_token):
                 # We store the result of token validation in the request context so all resolvers don't need to
                 # repeat this process for no reason.
                 info.context.is_authenticated = True

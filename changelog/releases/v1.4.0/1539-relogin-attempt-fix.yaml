@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1539"
+changelog:
+  - type: FIX
+    description: Fixes login attempt not passing server id when tokens are expired.

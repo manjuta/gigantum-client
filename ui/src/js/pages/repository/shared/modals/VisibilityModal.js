@@ -140,6 +140,7 @@ class VisibilityModal extends Component<Props> {
       sectionType,
       setPublishingState,
       setRemoteSession,
+      setSyncingState,
       toggleModal,
     } = this.props;
 
@@ -173,8 +174,11 @@ class VisibilityModal extends Component<Props> {
                     error: false,
                   };
                   setMultiInfoMessage(owner, name, messageData);
-
                   setRemoteSession();
+
+                  if (setSyncingState) {
+                    setSyncingState(false);
+                  }
                 };
 
                 if (sectionType === 'labbook') {
@@ -192,6 +196,7 @@ class VisibilityModal extends Component<Props> {
                     },
                   );
                 } else {
+                  setSyncingState(true);
                   PublishDatasetMutation(
                     owner,
                     name,
@@ -242,7 +247,8 @@ class VisibilityModal extends Component<Props> {
       visibility,
     } = this.props;
     const { isPublic } = this.state;
-    const publishStatement = header === 'Publish' ? 'Once published, the Project will be visible in the Gigantum Hub tab on the Projects listing Page.' : '';
+    const { currentServer } = this.context;
+    const publishStatement = header === 'Publish' ? `Once published, the Project will be visible in the '${currentServer.name}' tab on the Projects listing Page.` : '';
     const message = `You are about to change the visibility of the Project. ${publishStatement}`;
 
     return (

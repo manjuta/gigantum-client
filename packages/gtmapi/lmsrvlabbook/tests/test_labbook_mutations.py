@@ -112,7 +112,7 @@ class TestLabBookServiceMutations(object):
             assert kwargs['logged_in_username'] == 'default'
             assert kwargs['dataset_owner'] == 'default'
             assert kwargs['dataset_name'] == 'dataset22'
-            assert ".labmanager/datasets/default/default/dataset22" in kwargs['cache_location']
+            assert ".labmanager/datasets/test-gigantum-com/default/default/dataset22" in kwargs['cache_location']
             assert metadata['method'] == 'clean_dataset_file_cache'
 
             with open("/tmp/mock_reached", 'wt') as tf:

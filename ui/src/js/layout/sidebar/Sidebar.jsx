@@ -44,8 +44,8 @@ class Sidebar extends Component<Props> {
   }
 
   /**
-    @param {}
-    logout through Auth0
+    Mehtod logs user out using session instance of auth
+    @param {} -
   */
   logout = () => {
     const { auth } = this.props;

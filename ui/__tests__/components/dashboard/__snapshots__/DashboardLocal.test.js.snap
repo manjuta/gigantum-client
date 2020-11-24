@@ -45,7 +45,7 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Gigantum Hub
+          gigantum
         </button>
       </li>
       <div

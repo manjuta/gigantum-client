@@ -16,7 +16,6 @@
     "@gigantum/relay-testing-utils": "^0.1.0",
     "@graphql-cli/codegen": "^1.17.0",
     "@graphql-codegen/schema-ast": "^1.17.0",
-    "auth0-js": "^9.13.2",
     "autoprefixer": "^9.4.7",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
@@ -97,7 +96,7 @@
     "graphql": "^14.1.1",
     "graphql-cli": "^4.0.0",
     "hard-source-webpack-plugin": "^0.13.1",
-    "history": "^4.10.1",
+    "history": "4.10.1",
     "html-tags": "^2.0.0",
     "ignore": "^5.0.4",
     "interpolate-html-plugin": "^3.0.0",
@@ -143,10 +142,13 @@
     "whatwg-encoding": "1.0.5",
     "worker-loader": "^2.0.0",
     "worker-plugin": "^3.1.0",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "xstate": "^4.13.0"
   },
   "scripts": {
     "start": "node scripts/start.js NODE_ENV='development'",
+    "start:local": "BUILD_TYPE='local' node scripts/start.js NODE_ENV='development'",
+    "start:cloud": "BUILD_TYPE='cloud' node scripts/start.js NODE_ENV='development'",
     "build": "node scripts/build.js",
     "build:local": "BUILD_TYPE='local' node scripts/build.js",
     "build:cloud": "BUILD_TYPE='cloud' node scripts/build.js",

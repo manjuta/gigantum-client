@@ -115,7 +115,7 @@ exports[`File component File Snapshot 1`] = `
     <div
       className="Folder__cell Folder__cell--date"
     >
-      Mon Feb 03 2020
+      10 months ago
     </div>
     <div
       className="Folder__cell Folder__cell--menu"

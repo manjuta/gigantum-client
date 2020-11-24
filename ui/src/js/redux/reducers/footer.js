@@ -361,7 +361,6 @@ export default (state = {
     } else {
       messageListOpen = (action.payload.messageListOpen === undefined)
         || action.payload.messageListOpen;
-      viewHistory = messageListOpen || viewHistory;
     }
 
     const buildProgress = action.payload.buildProgress
@@ -382,6 +381,7 @@ export default (state = {
         ? action.payload.messageBody
         : [],
       error: action.payload.error,
+      messageListOpen: false,
       messageBodyOpen,
       buildProgress,
       dismissed,
@@ -405,6 +405,16 @@ export default (state = {
     messageStackHistory = checkHistoryStackLength(messageStackHistory);
     window.sessionStorage.setItem('messageStackHistory', JSON.stringify(messageStackHistory));
 
+    if ((doesHistoryMessageExist.length > 0)) {
+      if (doesHistoryMessageExist[0] && doesHistoryMessageExist[0].dismissed) {
+        viewHistory = state.viewHistory;
+      } else {
+        viewHistory = state.viewHistory;
+      }
+    } else {
+      viewHistory = false;
+    }
+
     return {
       ...state,
       id: action.payload.id,
@@ -417,10 +427,7 @@ export default (state = {
       success: true,
       error: action.payload.error,
       messageListOpen,
-      viewHistory: ((doesHistoryMessageExist.length > 0)
-        && doesHistoryMessageExist[0].dismissed
-        && state.viewHistory)
-        || viewHistory,
+      viewHistory,
     };
   } if (action.type === types.RESET_FOOTER_STORE) {
     return {

@@ -31,6 +31,22 @@ import FileFormatter, { fileHandler } from './utilities/FileFormatter';
 
 
 /**
+  *  @param {Object} childrenState
+  *  @param {String} search
+  *  @param {Boolean} initialLoad
+  *  @param {String} section
+  *  checks to see if dropzone should be displayed
+  *  @return {Boolean}
+  */
+const getShowDropzone = (childrenState, search, initialLoad, section) => {
+  const fileAmount = (section === 'data') ? 0 : 1;
+  return (Object.keys(childrenState).length <= fileAmount)
+    && (search === '')
+    && (!initialLoad);
+};
+
+
+/**
   *  @param {Object} uploadData
   *  checks to see length of upload file
   *  @return {Object}
@@ -950,9 +966,7 @@ class FileBrowser extends Component {
     const downloadList = getDownloadList(props, state);
     const downloadDisabled = isLocked || downloadingEdges || downloadingAll;
     const { fileTooLarge, filePrompted } = getQueuedFiles(uploadData);
-    const showDropzone = (Object.keys(childrenState).length <= 1)
-      && (search === '')
-      && (!initialLoad);
+    const showDropzone = getShowDropzone(childrenState, search, initialLoad, section);
     // declare css here
     const fileBrowserCSS = classNames({
       FileBrowser: true,

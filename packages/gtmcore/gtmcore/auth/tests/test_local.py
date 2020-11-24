@@ -1,6 +1,5 @@
 import pytest
 import os
-import requests
 import responses
 import time
 import mock
@@ -9,8 +8,8 @@ import jose
 import json
 
 from gtmcore.configuration import Configuration
-from gtmcore.fixtures import mock_config_file_with_auth, mock_config_file_with_auth_first_login, cleanup_auto_import
-from gtmcore.auth.identity import get_identity_manager, AuthenticationError
+from gtmcore.fixtures.auth import mock_config_file_with_auth, mock_config_file_with_auth_first_login
+from gtmcore.auth.identity import get_identity_manager_class, AuthenticationError
 from gtmcore.auth.local import LocalIdentityManager
 from gtmcore.auth import User
 
@@ -22,7 +21,8 @@ def mock_import(archive_path: str, username: str, owner: str, base_filename: Opt
     if not base_filename:
         base_filename = "my-first-project"
 
-    lb_dir = os.path.join('/mnt', 'gigantum', username, owner, "labbooks", base_filename)
+    config = Configuration()
+    lb_dir = os.path.join(config.get_user_storage_dir(), username, owner, "labbooks", base_filename)
     os.makedirs(lb_dir, exist_ok=True)
     assert os.path.exists(lb_dir)
 
@@ -57,12 +57,10 @@ def clean_local_cache(mgr):
 
 
 class TestIdentityLocal(object):
-    # TODO: Possibly move to integration tests or fully mock since these tests make a call out to Auth0
-
     def test_load_user_no_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         # Load User
@@ -73,7 +71,7 @@ class TestIdentityLocal(object):
     def test_save_load_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         # Save User
@@ -99,7 +97,7 @@ class TestIdentityLocal(object):
         with mock.patch.object(jose.jwt, 'get_unverified_claims', lambda x: mock_jwt_claims(x)):
             with mock.patch.object(LocalIdentityManager, 'validate_jwt_token', mock_jwt_validate):
 
-                mgr = get_identity_manager(config)
+                mgr = get_identity_manager_class(config)(config)
                 assert type(mgr) == LocalIdentityManager
 
                 # Save User
@@ -133,7 +131,7 @@ class TestIdentityLocal(object):
         with mock.patch.object(jose.jwt, 'get_unverified_claims', lambda x: mock_jwt_claims(x)):
             with mock.patch.object(LocalIdentityManager, 'validate_jwt_token', mock_jwt_validate):
 
-                mgr = get_identity_manager(config)
+                mgr = get_identity_manager_class(config)(config)
                 assert type(mgr) == LocalIdentityManager
 
                 # Save User
@@ -150,7 +148,7 @@ class TestIdentityLocal(object):
     def test_load_corrupt(self, mock_config_file_with_auth):
         """handling a corrupted cached id token"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         os.makedirs(mgr.auth_dir, exist_ok=True)
@@ -170,19 +168,19 @@ class TestIdentityLocal(object):
     def test_logout_user(self, mock_config_file_with_auth):
         """test getting an identity manager"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         # Save User
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
         mgr._safe_cached_id_access(mock_config_file_with_auth[1]['id_token'])
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
-        assert os.path.exists(os.path.join(mgr.auth_dir, 'jwks.json')) is True
+        assert os.path.exists(os.path.join(mgr.auth_dir, 'test-gigantum-com-jwks.json')) is True
 
         # Load User
         mgr.logout()
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is False
-        assert os.path.exists(os.path.join(mgr.auth_dir, 'jwks.json')) is False
+        assert os.path.exists(os.path.join(mgr.auth_dir, 'test-gigantum-com-jwks.json')) is False
         assert mgr.user is None
         assert mgr.rsa_key is None
         assert mgr._load_user(None) is None
@@ -192,7 +190,7 @@ class TestIdentityLocal(object):
     def test_authenticate_user_exists_no_token(self, mock_config_file_with_auth):
         """test getting a user after stored locally already"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         # Save User
@@ -214,7 +212,7 @@ class TestIdentityLocal(object):
     def test_authenticate_user_exists_token(self, mock_config_file_with_auth):
         """test getting a user after stored locally already"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         # Save User
@@ -237,7 +235,7 @@ class TestIdentityLocal(object):
     def test_get_profile_attribute(self, mock_config_file_with_auth):
         """test getting profile attributes safely from the profile dictionary"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
 
         profile_data = {"username": "",
                         "email": "test@test.com"}
@@ -262,7 +260,7 @@ class TestIdentityLocal(object):
     def test_is_session_valid(self, mock_config_file_with_auth):
         """test check for valid session"""
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
 
         # Invalid with no token
@@ -281,13 +279,10 @@ class TestIdentityLocal(object):
         responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
                       status=200)
-        responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
 
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
-        # Don't check at_hash claim due to password grant not setting it in the token
-        mgr.validate_at_hash_claim = False
 
         # Invalid with no token
         assert mgr.is_authenticated() is False
@@ -299,7 +294,7 @@ class TestIdentityLocal(object):
                                     mock_config_file_with_auth[1]['id_token']) is True
 
         # Second access should load from disk and not need a token
-        mgr2 = get_identity_manager(config)
+        mgr2 = get_identity_manager_class(config)(config)
         assert mgr2.is_authenticated() is True
         assert mgr2.is_authenticated("asdfasdfa") is True  # An "expired" token will essentially do this
 
@@ -319,10 +314,8 @@ class TestIdentityLocal(object):
         responses.add_passthru('https://auth.gigantum.com/.well-known/jwks.json')
 
         config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config)(config)
         assert type(mgr) == LocalIdentityManager
-        # Don't check at_hash claim due to password grant not setting it in the token
-        mgr.validate_at_hash_claim = False
 
         # Load User
         with pytest.raises(AuthenticationError):
@@ -340,7 +333,7 @@ class TestIdentityLocal(object):
         assert u.family_name == "Doe"
 
         # Seccond access should load from disk and not need a token
-        mgr2 = get_identity_manager(config)
+        mgr2 = get_identity_manager_class(config)(config)
         u2 = mgr2.get_user_profile()
         assert type(u) == User
         assert os.path.exists(os.path.join(mgr.auth_dir, 'cached_id_jwt')) is True
@@ -360,15 +353,13 @@ class TestIdentityLocal(object):
 
         clean_local_cache(mgr)
 
-    def test_check_first_login_errors(self, mock_config_file_with_auth_first_login,
-                                            cleanup_auto_import):
+    def test_check_first_login_errors(self, mock_config_file_with_auth_first_login):
         """Test login, but the user already logged into this instance"""
         # fake the user already existing by creating the user directory
-        working_dir = mock_config_file_with_auth_first_login[1]
-        os.makedirs(os.path.join(working_dir, "johndoe"))
+        config_instance, tokens, work_dir = mock_config_file_with_auth_first_login
+        os.makedirs(os.path.join(config_instance.get_user_storage_dir(), "johndoe"))
 
-        config = Configuration()
-        mgr = get_identity_manager(config)
+        mgr = get_identity_manager_class(config_instance)(config_instance)
 
         with pytest.raises(ValueError):
             mgr._check_first_login("", "", "")
@@ -380,68 +371,56 @@ class TestIdentityLocal(object):
             mgr._check_first_login("", "asdf", "")
 
         with pytest.raises(ValueError):
-            mgr._check_first_login("", mock_config_file_with_auth_first_login[2]['access_token'], "")
+            mgr._check_first_login("", tokens['access_token'], "")
 
-    def test_check_first_login_user_locally(self, mock_config_file_with_auth_first_login,
-                                            cleanup_auto_import):
+    def test_check_first_login_user_locally(self, mock_config_file_with_auth_first_login):
         """Test login, but the user already logged into this instance"""
         # fake the user already existing by creating the user directory
-        config = mock_config_file_with_auth_first_login[0]
-        os.makedirs(os.path.join(config.get_user_storage_dir(), "johndoe"))
+        config_instance, tokens, work_dir = mock_config_file_with_auth_first_login
+        os.makedirs(os.path.join(config_instance.get_user_storage_dir(), "johndoe"))
+        mgr = get_identity_manager_class(config_instance)(config_instance)
 
-        config = Configuration()
-        mgr = get_identity_manager(config)
-
-        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
-                               id_token=mock_config_file_with_auth_first_login[2]['id_token'])
+        mgr._check_first_login("johndoe", access_token=tokens['access_token'],
+                               id_token=tokens['id_token'])
 
         # Should not import labbook - note we aren't mocking all the way to the workers
         time.sleep(5)
-        assert os.path.exists(os.path.join('/mnt', 'gigantum', "johndoe", "johndoe", "labbooks",
+        assert os.path.exists(os.path.join(config_instance.get_user_storage_dir(), "johndoe", "johndoe", "labbooks",
                                            "my-first-project")) is False
 
     @mock.patch('gtmcore.workflows.ZipExporter.import_labbook', side_effect=mock_import)
     @responses.activate
-    def test_check_first_login_no_user_locally_in_repo(self, mock_import, mock_config_file_with_auth_first_login,
-                                                       cleanup_auto_import):
+    def test_check_first_login_no_user_locally_in_repo(self, mock_import, mock_config_file_with_auth_first_login):
         """Test login with the user in the repo already"""
         responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': 123}}}, status=200)
 
-        config = Configuration()
-        mgr = get_identity_manager(config)
+        config_instance, tokens, work_dir = mock_config_file_with_auth_first_login
+        mgr = get_identity_manager_class(config_instance)(config_instance)
 
-        # Don't check at_hash claim due to password grant not setting it in the token
-        mgr.validate_at_hash_claim = False
-
-        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
-                               id_token=mock_config_file_with_auth_first_login[2]['id_token'])
+        mgr._check_first_login("johndoe", access_token=tokens['access_token'],
+                               id_token=tokens['id_token'])
 
         # Should import labbook - note we aren't mocking all the way to the workers
         time.sleep(5)
-        assert os.path.exists(os.path.join('/mnt', 'gigantum', "johndoe", "johndoe", "labbooks",
-                                           "my-first-project"))
-
-    @mock.patch('gtmcore.workflows.ZipExporter.import_labbook', side_effect=mock_import)
-    @responses.activate
-    def test_check_first_login_no_user_locally_no_repo(self, mock_import, mock_config_file_with_auth_first_login,
-                                                       cleanup_auto_import):
-
-        """Test login with the user in the repo alread"""
-        # Add mock for call to auth service
-        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
-                      json={'data': {'synchronizeUserAccount': {'gitUserId': 123}}}, status=200)
-
-        config = Configuration()
-        mgr = get_identity_manager(config)
-
-        # Don't check at_hash claim due to password grant not setting it in the token
-        mgr.validate_at_hash_claim = False
-
-        mgr._check_first_login("johndoe", access_token=mock_config_file_with_auth_first_login[2]['access_token'],
-                               id_token=mock_config_file_with_auth_first_login[2]['id_token'])
-
-        # Should import labbook - note we aren't mocking all the way to the workers
-        time.sleep(5)
-        assert os.path.exists(os.path.join('/mnt', 'gigantum', "johndoe", "johndoe", "labbooks",
+        assert os.path.exists(os.path.join(config_instance.get_user_storage_dir(), "johndoe", "johndoe", "labbooks",
                                            "my-first-project")) is True
+
+    def test_get_jwt_public_key(self, mock_config_file_with_auth):
+        def mock_jwt_header(x):
+            return {"alg": "RS256","typ": "JWT","kid": "NzkwQzEyMTNDRUMzQjI3RkQ2QkVEQ0M1ODBDNjExMjRGOUNCRDBBQg"}
+
+        config_instance, tokens, work_dir = mock_config_file_with_auth
+
+        # Remove jwks inserted in mock so it re-downloads for real.
+        jkws_path = os.path.join(config_instance.app_workdir, '.labmanager', 'identity', 'test-gigantum-com-jwks.json')
+        assert os.path.isfile(jkws_path) is True
+        os.remove(jkws_path)
+        assert os.path.isfile(jkws_path) is False
+
+        mgr = get_identity_manager_class(config_instance)(config_instance)
+
+        with mock.patch.object(jose.jwt, 'get_unverified_header', lambda x: mock_jwt_header(x)):
+            jwk_data = mgr._get_jwt_public_key(tokens['id_token'])
+            assert jwk_data['kid'] == "NzkwQzEyMTNDRUMzQjI3RkQ2QkVEQ0M1ODBDNjExMjRGOUNCRDBBQg"
+            assert os.path.isfile(jkws_path) is True

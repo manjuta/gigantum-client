@@ -14,6 +14,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
     >
       <div
         className="Import__main"
+        data-selenium-id="ImportModalx"
       />
       <div
         className="Import__header"
@@ -86,7 +87,7 @@ exports[`LocalLabbooks LocalLabbooks snapshot 1`] = `
           data-event="click focus"
           data-tip="Click on the 'Import Existing' button to import a Project into this Client instance.
 You can use a URL of a published Project or upload an exported Project.
-You can also import Projects that have been shared with you in by clicking on the 'Gigantum Hub' tab above."
+You can also import Projects that have been shared with you in by clicking on the '' tab above."
           onClick={[Function]}
           role="presentation"
         >
@@ -216,7 +217,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Created:
           </span>
            
-          Thu Jan 30 2020
+          01/30/20
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
@@ -227,7 +228,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Modified:
           </span>
            
-          Mon Feb 03 2020
+          10 months ago
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -343,7 +344,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Created:
           </span>
            
-          Mon Jan 13 2020
+          01/13/20
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
@@ -354,7 +355,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Modified:
           </span>
            
-          Mon Jan 13 2020
+          10 months ago
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -474,7 +475,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Created:
           </span>
            
-          Tue Jan 07 2020
+          01/07/20
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
@@ -485,7 +486,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Modified:
           </span>
            
-          Wed Jan 08 2020
+          10 months ago
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -601,7 +602,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Created:
           </span>
            
-          Wed Nov 06 2019
+          11/06/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
@@ -612,7 +613,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Modified:
           </span>
            
-          Mon Nov 11 2019
+          a year ago
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"
@@ -732,7 +733,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Created:
           </span>
            
-          Wed Sep 04 2019
+          09/04/19
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata"
@@ -743,7 +744,7 @@ You can also import Projects that have been shared with you in by clicking on th
             Modified:
           </span>
            
-          Fri Jan 17 2020
+          10 months ago
         </p>
         <p
           className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description"

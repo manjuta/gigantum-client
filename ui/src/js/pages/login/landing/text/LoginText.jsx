@@ -11,14 +11,26 @@ const LoginText = () => (
     <p>
       By logging in to Gigantum Hub you can easily sync up to 5GB of data for free, share your work with others, and
       {' '}
-      <a href="#">more</a>
+      <a
+        href="https://docs.gigantum.com/docs/gigantum-hub"
+        rel="noreferrer"
+        target="_blank"
+      >
+        more
+      </a>
       .
     </p>
     <p>Once you log in, you’ll be able to work offline.</p>
     <p>
       Learn more about
       {' '}
-      <a href="#">user accounts here</a>
+      <a
+        href="https://docs.gigantum.com/docs/frequently-asked-questions#why-do-i-need-to-log-in"
+        rel="noreferrer"
+        target="_blank"
+      >
+        user accounts here
+      </a>
       .
     </p>
   </section>

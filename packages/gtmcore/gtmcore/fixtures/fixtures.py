@@ -1,20 +1,17 @@
-from typing import Tuple, Dict, Iterator
+from typing import Tuple, Iterator, Optional
 
 import json
 import os
 import shutil
 import redis
 import tempfile
-import requests
-import responses
 import git
-from pkg_resources import resource_filename
 import pytest
 import uuid
 
 from gtmcore.configuration.configuration import Configuration, deep_update
 from gtmcore.environment import RepositoryManager
-from gtmcore.inventory.inventory  import InventoryManager
+from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.activity.detaildb import ActivityDetailDB
 from gtmcore.activity import ActivityStore
 from gtmcore.gitlib.git import GitAuthor
@@ -81,12 +78,14 @@ def _create_temp_work_dir(override_dict: dict = None, lfs_enabled: bool = True):
             },
             "auth": {
                 "login_type": "auth0",
-                "login_url": "https://test.gigantum.com/client/login",
-                "audience": "io.gigantum.api.dev",
-                "issuer": "https://auth.gigantum.com",
+                "login_url": "https://test.gigantum.com/auth/redirect?target=login",
+                "logout_url": "https://test.gigantum.com/auth/redirect?target=logout",
+                "token_url": "https://test.gigantum.com/auth/token",
+                "audience": "api.test.gigantum.com",
+                "client_id": "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy",
+                "issuer": "https://auth.gigantum.com/",
                 "signing_algorithm": "RS256",
-                "public_key_url": "https://auth.gigantum.com/.well-known/jwks.json",
-                "auth0_client_id": "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
+                "public_key_url": "https://auth.gigantum.com/.well-known/jwks.json"
             }
         }
         json.dump(data, f)
@@ -216,179 +215,6 @@ def mock_config_file_for_lock() -> Iterator[Tuple[Configuration, str]]:
 
     yield config_instance, working_dir
     config_instance.clear_cached_configuration()
-    shutil.rmtree(working_dir)
-
-# TODO: FIX WHEN FIXING AUTH
-@pytest.fixture(scope="module")
-def mock_config_file_with_auth() -> Iterator[Tuple[Configuration, Dict, str]]:
-    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
-    # Load auth config for testing
-    test_auth_file = os.path.join(resource_filename('gtmcore',
-                                                    'auth{}tests'.format(os.path.sep)), 'auth_config.json')
-    if not os.path.exists(test_auth_file):
-        test_auth_file = f"{test_auth_file}.example"
-
-    with open(test_auth_file, 'rt') as conf:
-        auth_data = json.load(conf)
-
-    overrides = {
-        'auth': {
-            'provider_domain': 'gigantum.auth0.com',
-            'signing_algorithm': 'RS256',
-            'client_id': auth_data['client_id'],
-            'audience': auth_data['audience'],
-            'identity_manager': 'local'
-        }
-    }
-
-    config_instance, working_dir = _create_temp_work_dir(override_dict=overrides)
-
-    # Go get a JWT for the test user from the dev auth client (real users are not in this DB)
-    response = requests.post("https://gigantum.auth0.com/oauth/token", json=auth_data)
-    token_data = response.json()
-
-    yield config_instance, token_data, working_dir
-    config_instance.clear_cached_configuration()
-    shutil.rmtree(working_dir)
-
-
-# TODO: FIX WHEN FIXING AUTH
-@pytest.fixture()
-def mock_config_file_with_auth_first_login():
-    """A pytest fixture that will run the first login workflow"""
-    # Load auth config for testing
-    test_auth_file = os.path.join(resource_filename('gtmcore',
-                                                    'auth{}tests'.format(os.path.sep)), 'auth_config.json')
-    if not os.path.exists(test_auth_file):
-        test_auth_file = f"{test_auth_file}.example"
-
-    with open(test_auth_file, 'rt') as conf:
-        auth_data = json.load(conf)
-
-    overrides = {
-        'auth': {
-            'provider_domain': 'gigantum.auth0.com',
-            'signing_algorithm': 'RS256',
-            'client_id': auth_data['client_id'],
-            'audience': auth_data['audience'],
-            'identity_manager': 'local'
-        },
-        'core': {
-            'import_demo_on_first_login': True
-        }
-    }
-
-    # Go get a JWT for the test user from the dev auth client (real users are not in this DB)
-    response = requests.post("https://gigantum.auth0.com/oauth/token", json=auth_data)
-    token_data = response.json()
-
-    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
-    yield conf_file, working_dir, token_data  # provide the fixture value
-    shutil.rmtree(working_dir)
-
-
-# TODO: MOVE UP INTO FIRST LOGIN FIXTURE
-@pytest.fixture()
-def cleanup_auto_import():
-    """A pytest fixture that cleans up after the auto-import of the demo"""
-    demo_dir = os.path.join('/mnt', 'gigantum', "johndoe", "johndoe", "labbooks", "my-first-project")
-    if os.path.exists(demo_dir) is True:
-        shutil.rmtree(demo_dir)
-
-
-# TODO: FIX WHEN FIXING AUTH
-@pytest.fixture(scope="module")
-def mock_config_file_with_auth_browser():
-    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
-    # Load auth config for testing
-    test_auth_file = os.path.join(resource_filename('gtmcore',
-                                                    'auth{}tests'.format(os.path.sep)), 'auth_config.json')
-    if not os.path.exists(test_auth_file):
-        test_auth_file = f"{test_auth_file}.example"
-
-    with open(test_auth_file, 'rt') as conf:
-        auth_data = json.load(conf)
-
-    overrides = {
-        'auth': {
-            'provider_domain': 'gigantum.auth0.com',
-            'signing_algorithm': 'RS256',
-            'client_id': auth_data['client_id'],
-            'audience': auth_data['audience'],
-            'identity_manager': 'browser'
-        }
-    }
-
-    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
-
-    # Go get a JWT for the test user from the dev auth client (real users are not in this DB)
-    response = requests.post("https://gigantum.auth0.com/oauth/token", json=auth_data)
-    token_data = response.json()
-
-    yield conf_file, working_dir, token_data
-    shutil.rmtree(working_dir)
-
-# TODO: FIX WHEN FIXING AUTH
-@pytest.fixture(scope="module")
-def mock_config_file_with_auth_anon_review():
-    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
-    overrides = {
-        'auth': {
-            'identity_manager': 'anon_review'
-        },
-        'anon_review_secret': '1234'
-    }
-
-    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
-
-    yield conf_file
-    shutil.rmtree(working_dir)
-
-# TODO: FIX WHEN FIXING AUTH
-@pytest.fixture(scope="module")
-def mock_config_file_with_auth_multi_anon_review():
-    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
-    overrides = {
-        'auth': {
-            'identity_manager': 'anon_review'
-        },
-        'anon_review_secret': ['1234', '4567', 'abcd']
-    }
-
-    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
-
-    yield conf_file
-    shutil.rmtree(working_dir)
-
-@pytest.fixture(scope="module")
-def mock_config_file_with_auth_anonymous():
-    """A pytest fixture that creates a temporary directory and a config file to match. Deletes directory after test"""
-    # Load auth config for testing
-    test_auth_file = os.path.join(resource_filename('gtmcore',
-                                                    'auth{}tests'.format(os.path.sep)), 'auth_config.json')
-    if not os.path.exists(test_auth_file):
-        test_auth_file = f"{test_auth_file}.example"
-
-    with open(test_auth_file, 'rt') as conf:
-        auth_data = json.load(conf)
-
-    overrides = {
-        'auth': {
-            'provider_domain': 'gigantum.auth0.com',
-            'signing_algorithm': 'RS256',
-            'client_id': auth_data['client_id'],
-            'audience': auth_data['audience'],
-            'identity_manager': 'anonymous'
-        }
-    }
-
-    conf_file, working_dir = _create_temp_work_dir(override_dict=overrides)
-
-    # Go get a JWT for the test user from the dev auth client (real users are not in this DB)
-    response = requests.post("https://gigantum.auth0.com/oauth/token", json=auth_data)
-    token_data = response.json()
-
-    yield conf_file, working_dir, token_data
     shutil.rmtree(working_dir)
 
 

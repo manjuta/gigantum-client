@@ -17,6 +17,10 @@
     width: 20px;
   }
 
+  &__loader {
+    height: 14em;
+  }
+
   &__message {
     color: $orange !important;
   }

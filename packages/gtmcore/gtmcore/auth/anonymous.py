@@ -3,6 +3,7 @@ from typing import Optional
 import pathlib
 import base64
 
+from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.auth.identity import IdentityManager, User, AuthenticationError
 from gtmcore.workflows.gitlab import check_and_add_user
@@ -95,7 +96,7 @@ class AnonymousIdentityManager(IdentityManager):
         if access_token:
             parts = access_token.split('.')
             if len(parts) == 3:
-                header = base64.b64decode(parts[0]).decode()
+                header = base64.urlsafe_b64decode(f"{parts[0]}{'=' * (len(parts[0]) % 4)}").decode()
                 if "GIGANTUM-ANONYMOUS-USER" == header:
                     is_anonymous = True
 
@@ -114,7 +115,8 @@ class AnonymousIdentityManager(IdentityManager):
                 is_token_valid = True
             else:
                 try:
-                    _ = self.validate_jwt_token(access_token, self.config.config['auth']['audience'])
+                    auth_config = self.config.get_auth_configuration()
+                    _ = self.validate_jwt_token(access_token, auth_config.audience)
                     # If you get here you are valid
                     is_token_valid = True
                 except AuthenticationError:
@@ -144,7 +146,8 @@ class AnonymousIdentityManager(IdentityManager):
             self.user = self.anon_user
         else:
             # Validate JWT token
-            token_payload = self.validate_jwt_token(id_token, self.config.config['auth']['client_id'],
+            auth_config = self.config.get_auth_configuration()
+            token_payload = self.validate_jwt_token(id_token, auth_config.client_id,
                                                     access_token=access_token)
 
             # Create user identity instance

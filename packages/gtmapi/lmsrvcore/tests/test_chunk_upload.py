@@ -6,7 +6,7 @@ from flask import Flask
 from lmsrvcore.tests.fixtures import fixture_working_dir_with_cached_user
 from lmsrvcore.api.mutations import ChunkUploadMutation
 from gtmcore.configuration import Configuration
-from gtmcore.auth.identity import get_identity_manager
+from gtmcore.auth.identity import get_identity_manager_class
 
 
 class MyMutation(graphene.relay.ClientIDMutation, ChunkUploadMutation):
@@ -25,7 +25,7 @@ class TestChunkUpload(object):
 
         # Load configuration class into the flask application
         app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+        app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
         with app.app_context():
             mut = MyMutation()

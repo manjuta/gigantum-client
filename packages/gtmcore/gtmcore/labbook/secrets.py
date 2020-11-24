@@ -180,9 +180,12 @@ def path_on_disk(labbook: LabBook, username: str, key: Optional[str] = None) -> 
     """Return the path (on host) for the secrets file."""
     if not labbook.owner:
         raise ValueError("Cannot retrieve absolute path to secret file if Project is not in working directory.")
+    server_id = labbook.client_config.get_current_server_id()
+    if not server_id:
+        raise ValueError("Select a server before accessing sensitive files.")
 
     tokens = [labbook.client_config.app_workdir, '.labmanager',
-              'secrets', username, labbook.owner, labbook.name]
+              'secrets', server_id, username, labbook.owner, labbook.name]
     if key:
         tokens.append(key)
     return os.path.join(*tokens)

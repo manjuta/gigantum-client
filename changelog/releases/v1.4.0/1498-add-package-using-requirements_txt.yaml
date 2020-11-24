@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1499"
+changelog:
+  - type: NEW
+    description: Test case to add python packages mentioned in requirements.txt

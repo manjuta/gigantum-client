@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1532"
+changelog:
+  - type: FIX
+    description: Fixes parsing of error message on the login screen.
