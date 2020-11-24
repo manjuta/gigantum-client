@@ -1,5 +1,5 @@
 // components
-import FileBrowserMutations from 'Components/shared/fileBrowser/utilities/FileBrowserMutations';
+import FileBrowserMutations from 'Pages/repository/shared/fileBrowser/utilities/FileBrowserMutations';
 // mutations
 import DeleteLabbookFilesMutation from 'Mutations/fileBrowser/DeleteLabbookFilesMutation';
 import MakeLabbookDirectoryMutation from 'Mutations/fileBrowser/MakeLabbookDirectoryMutation';

@@ -22,7 +22,7 @@ def helper_modify_dataset(dataset: Dataset):
 class TestDataset(object):
     def test_is_dataset_is_managed(self, mock_config_file):
         """Test getting the create date, both when stored in the buildinfo file and when using git fallback"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                description="my first dataset",
                                author=GitAuthor(name="test", email="test@test.com"))
@@ -31,7 +31,7 @@ class TestDataset(object):
 
     def test_is_dataset_create_date(self, mock_config_file):
         """Test getting the create date, both when stored in the buildinfo file and when using git fallback"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                description="my first dataset",
                                author=GitAuthor(name="test", email="test@test.com"))
@@ -45,7 +45,7 @@ class TestDataset(object):
 
     def test_is_dataset_modified_date(self, mock_config_file):
         """Test getting the modified date"""
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                description="my first dataset",
                                author=GitAuthor(name="test", email="test@test.com"))
@@ -68,7 +68,7 @@ class TestDataset(object):
         assert (datetime.datetime.now(datetime.timezone.utc) - modified_2).total_seconds() < 10
 
     def test_linked_to(self, mock_config_file):
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook("test", "test", "lb1", "testing")
         ds = im.create_dataset("test", "test", "dataset1", "gigantum_object_v1",
                                description="my first dataset",

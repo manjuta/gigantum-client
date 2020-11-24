@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1481"
+changelog:
+  - type: NEW
+    description: Implement the test case for entry of packages using the pip package manager.

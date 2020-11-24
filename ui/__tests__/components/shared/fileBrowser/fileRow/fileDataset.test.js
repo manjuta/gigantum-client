@@ -7,7 +7,7 @@ import path from 'path';
 // data
 import codeData from 'Tests/components/labbook/code/__relaydata__/CodeBrowser.json';
 // components
-import File from 'Components/shared/fileBrowser/fileRow/File';
+import File from 'Pages/repository/shared/fileBrowser/fileRow/File';
 import UserIdentity from 'JS/Auth/UserIdentity';
 
 jest.mock('JS/Auth/UserIdentity', () => {

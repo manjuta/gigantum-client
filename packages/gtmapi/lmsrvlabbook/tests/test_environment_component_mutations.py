@@ -1,22 +1,3 @@
-# Copyright (c) 2017 FlashX, LLC
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 import pytest
 import yaml
 import os
@@ -32,7 +13,7 @@ class TestAddComponentMutations(object):
 
     def test_add_package(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-package-tester',
                                description="LB to test package mutation")
 
@@ -63,7 +44,7 @@ class TestAddComponentMutations(object):
 
     def test_add_multiple_packages(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-package-tester-multi',
                                description="LB to test package mutation")
         labbook_dir = lb.root_dir
@@ -116,7 +97,7 @@ class TestAddComponentMutations(object):
 
     def test_add_packages_multiple_mgr_error(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-package-tester-mgr-errors',
                                description="LB to test package mutation")
 
@@ -150,7 +131,7 @@ class TestAddComponentMutations(object):
 
     def test_add_package_no_version(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test adding a package but omitting the version"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-package-no-version',
                                description="LB to test package mutation")
 
@@ -183,7 +164,7 @@ class TestAddComponentMutations(object):
 
     def test_remove_package(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test removing a package from a labbook"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-package-tester-remove',
                                description="LB to test package mutation")
         labbook_dir = lb.root_dir
@@ -236,7 +217,7 @@ class TestAddComponentMutations(object):
 
     def test_custom_docker_snippet_success(self, fixture_working_dir_env_repo_scoped):
         """Test adding a custom dependency"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'custom-docker-lb-unittest',
                                description="Testing custom docker and stuff")
         client = fixture_working_dir_env_repo_scoped[2]
@@ -280,9 +261,8 @@ class TestAddComponentMutations(object):
 
     def test_update_base(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test changing the revision of a base"""
-        config_file = fixture_working_dir_env_repo_scoped[0]
         gql_client = fixture_working_dir_env_repo_scoped[2]
-        im = InventoryManager(config_file)
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-update-base-tester',
                                description="LB to test package mutation")
 
@@ -322,9 +302,8 @@ class TestAddComponentMutations(object):
 
     def test_change_base(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test changing to a different base"""
-        config_file = fixture_working_dir_env_repo_scoped[0]
         gql_client = fixture_working_dir_env_repo_scoped[2]
-        im = InventoryManager(config_file)
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'catbook-change-base-tester',
                                description="LB to test package mutation")
 

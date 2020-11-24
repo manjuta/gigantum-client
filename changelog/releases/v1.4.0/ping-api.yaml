@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1525"
+changelog:
+  - type: FIX
+    description: The UI will now poll for an API response if it is not immediately available.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1523

@@ -7,10 +7,11 @@ import os
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.fixtures import mock_config_file
 from gtmcore.labbook import SecretStore, SecretStoreException
+from gtmcore.configuration import Configuration
 
 
-def init(config):
-    im = InventoryManager(config)
+def init():
+    im = InventoryManager()
     lb = im.create_labbook('test', 'test', 'labbook1')
     return SecretStore(lb, 'test')
 
@@ -20,12 +21,12 @@ class TestLabbookSecret(object):
         """
         Test a simple secret store that is empty.
         """
-        secstore = init(mock_config_file[0])
+        secstore = init()
         assert len(secstore) == 0
         assert [x for x in secstore] == []
 
     def test_create_registry_void_of_files(self, mock_config_file):
-        secstore = init(mock_config_file[0])
+        secstore = init()
         mnt_target = '/opt/.ssh'
 
         secstore['ID_SSH.KEY'] = mnt_target
@@ -48,11 +49,14 @@ class TestLabbookSecret(object):
         assert len(secstore.list_files()) == 0
 
     def test_insert_file_delete_files_list_files(self, mock_config_file):
-        secstore = init(mock_config_file[0])
+        secstore = init()
         mnt_target = '/opt/.ssh'
 
         secstore['ID_SSH.KEY'] = mnt_target
         secstore['ID_SSH.PUB'] = mnt_target
+
+        config = Configuration()
+        server_id = config.get_current_server_id()
 
         with tempfile.TemporaryDirectory() as tempdir:
             with open(os.path.join(tempdir, 'ID_SSH.KEY'), 'w') as t1:
@@ -64,7 +68,7 @@ class TestLabbookSecret(object):
             keyfile_dst_2 = secstore.insert_file(t2.name)
 
         parts = [secstore.labbook.client_config.app_workdir, '.labmanager',
-                 'secrets', 'test', secstore.labbook.owner, secstore.labbook.name,
+                 'secrets', server_id, 'test', secstore.labbook.owner, secstore.labbook.name,
                  os.path.basename(keyfile_dst_1)]
         assumed_path = os.path.join(*parts)
         assert assumed_path == keyfile_dst_1
@@ -82,12 +86,12 @@ class TestLabbookSecret(object):
 
         # Test clear_files works by making sure the vault itself doesn't exist
         secstore.clear_files()
-        toks = [secstore.labbook.client_config.app_workdir, '.labmanager', 'secrets',
+        toks = [secstore.labbook.client_config.app_workdir, '.labmanager', 'secrets', server_id,
                 'test', secstore.labbook.owner, secstore.labbook.name]
         assert not os.path.exists(os.path.join(*toks))
 
     def test_insert_must_be_for_valid_file(self, mock_config_file):
-        secstore = init(mock_config_file[0])
+        secstore = init()
         mnt_target = '/opt/.ssh'
 
         with tempfile.TemporaryDirectory() as tempdir:
@@ -103,7 +107,7 @@ class TestLabbookSecret(object):
         """
         Confirm that you cannot overwrite a given file.
         """
-        secstore = init(mock_config_file[0])
+        secstore = init()
         mnt_target = '/opt/.ssh'
 
         secstore['ID_SSH.KEY'] = mnt_target
@@ -124,7 +128,7 @@ class TestLabbookSecret(object):
         assert len(secstore.as_mount_dict) == 1
 
     def test_remove_keyfile_not_existing(self, mock_config_file):
-        secstore = init(mock_config_file[0])
+        secstore = init()
         mnt_target = '/opt/.ssh'
 
         with pytest.raises(SecretStoreException):
@@ -134,7 +138,7 @@ class TestLabbookSecret(object):
         assert len(secstore.as_mount_dict) == 0
 
     def test_clean(self, mock_config_file):
-        secstore = init(mock_config_file[0])
+        secstore = init()
         mnt_target = '/opt/.ssh'
         secstore['ID_SSH.KEY'] = mnt_target
         with tempfile.TemporaryDirectory() as tempdir:

@@ -4,8 +4,8 @@ import {
 } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
 // utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
-import footerCallback from 'Components/common/footer/utils/DownloadDatasetFiles';
+import FooterUtils from 'Components/footer/FooterUtils';
+import footerCallback from 'Components/footer/utils/DownloadDatasetFiles';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 
 const mutation = graphql`

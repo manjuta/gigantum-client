@@ -12,3 +12,8 @@ export const setUpdateAll = (owner, labbookName) => dispatcher(
   types.UPDATE_ALL,
   { owner, labbookName },
 );
+
+export const setCurrentServer = (currentServer) => dispatcher(
+  types.UPDATE_CURRENT_SERVER,
+  { currentServer },
+);

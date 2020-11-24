@@ -1,30 +1,29 @@
 import pytest
-import tempfile
+import graphene
+from graphene.test import Client
+from werkzeug.datastructures import EnvironHeaders
 import os
-import uuid
 import shutil
 from flask import Flask
-from mock import patch
 from pkg_resources import resource_filename
+from unittest.mock import patch
 
-from gtmcore.configuration import Configuration
-from gtmcore.auth.identity import get_identity_manager
+from gtmcore.configuration.configuration import Configuration
+from gtmcore.auth.identity import get_identity_manager_class
+from gtmcore.fixtures.fixtures import _create_temp_work_dir
+from gtmcore.auth.local import LocalIdentityManager
+
+from lmsrvcore.middleware import AuthorizationMiddleware
+from lmsrvlabbook.api.query import LabbookQuery
+from lmsrvlabbook.api.mutation import LabbookMutations
 
 
-def _create_temp_work_dir():
-    """Helper method to create a temporary working directory and associated config file"""
-    # Create a temporary working directory
-    temp_dir = os.path.join(tempfile.gettempdir(), uuid.uuid4().hex)
-    os.makedirs(temp_dir)
-
-    config = Configuration()
-    config.config["git"]["working_directory"] = temp_dir
-    config.config["auth"]["audience"] = "io.gigantum.api.dev"
-    config.config["auth"]["client_id"] = "Z6Wl854wqCjNY0D4uJx8SyPyySyfKmAy"
-    config_file = os.path.join(temp_dir, "temp_config.yaml")
-    config.save(config_file)
-
-    return config_file, temp_dir
+class ContextMock(object):
+    """A simple class to mock the Flask request context so you have a labbook_loader attribute"""
+    def __init__(self):
+        self.headers = EnvironHeaders({'HTTP_AUTHORIZATION': "Bearer afaketoken",
+                        'HTTP_IDENTITY': "afakeidtoken",
+                        'HTTP_GTM-SERVER-ID': "my-server"})
 
 
 def insert_cached_identity(working_dir):
@@ -40,19 +39,56 @@ def fixture_working_dir_with_cached_user():
     """A pytest fixture that creates a temporary working directory, config file, schema, and local user identity
     """
     # Create temp dir
-    config_file, temp_dir = _create_temp_work_dir()
-    insert_cached_identity(temp_dir)
+    config_instance, temp_dir = _create_temp_work_dir()
+    insert_cached_identity(config_instance.app_workdir)
 
-    with patch.object(Configuration, 'find_default_config', lambda self: config_file):
-        app = Flask("lmsrvlabbook")
+    app = Flask("lmsrvlabbook")
 
-        # Load configuration class into the flask application
-        app.config["LABMGR_CONFIG"] = config = Configuration()
-        app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
+    # Load configuration class into the flask application
+    app.config["LABMGR_CONFIG"] = config = Configuration()
+    app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
 
-        with app.app_context():
-            # within this block, current_app points to app.
-            yield config_file, temp_dir  # name of the config file, temporary working directory
+    with app.app_context():
+        # within this block, current_app points to app.
+        yield config_instance, temp_dir  # name of the config file, working directory (for the current server)
 
     # Remove the temp_dir
-    shutil.rmtree(temp_dir)
+    shutil.rmtree(config_instance.app_workdir)
+
+
+@pytest.fixture
+def fixture_working_dir_with_auth_middleware():
+    """A pytest fixture for testing the auth middleware
+    """
+    def fake_is_authenticated(access_token=None, id_token=None):
+        if access_token == "good_fake_token" and id_token == "good_fake_id_token":
+            return True
+        else:
+            return False
+
+    # Create temp dir
+    config_instance, temp_dir = _create_temp_work_dir()
+
+    # Create test client
+    schema = graphene.Schema(query=LabbookQuery, mutation=LabbookMutations)
+
+    with patch.object(LocalIdentityManager, 'is_authenticated') as mock_method:
+        mock_method.side_effect = fake_is_authenticated
+        # Load User identity into app context
+        app = Flask("lmsrvlabbook")
+        app.config["LABMGR_CONFIG"] = config = Configuration()
+        app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
+
+        with app.app_context():
+            # Create a test client
+            client = Client(schema, middleware=[AuthorizationMiddleware()])
+
+            # name of the config file, temporary working directory (for the current server), the schema
+            yield config_instance, temp_dir, client
+
+        # Make sure `is_authenticated` is only called once
+        assert mock_method.call_count == 1
+
+        # Remove the temp_dir
+        config_instance.clear_cached_configuration()
+        shutil.rmtree(config_instance.app_workdir)

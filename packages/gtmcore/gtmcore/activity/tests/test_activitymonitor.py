@@ -2,17 +2,19 @@ import logging
 import uuid
 from typing import (Any, Dict, List)
 
-from gtmcore.activity.tests.fixtures import redis_client
+from gtmcore.activity.tests.fixtures import mock_redis_client
 from gtmcore.fixtures import mock_labbook
 
 from gtmcore.activity import ActivityType, ActivityRecord
 from gtmcore.activity.monitors.activity import ActivityMonitor
 from gtmcore.activity.processors.processor import ActivityProcessor, ExecutionData
 
+
 class ProblemProcessor(ActivityProcessor):
     def process(self, result_obj: ActivityRecord, data: List[ExecutionData], status: Dict[str, Any],
                 metadata: Dict[str, Any]) -> ActivityRecord:
         raise Exception("This should be handled")
+
 
 class BasicProcessor(ActivityProcessor):
     def process(self, result_obj: ActivityRecord, data: List[ExecutionData], status: Dict[str, Any],
@@ -21,7 +23,7 @@ class BasicProcessor(ActivityProcessor):
 
 
 class TestActivityMonitor(object):
-    def test_processor_exception(self, redis_client, mock_labbook, caplog):
+    def test_processor_exception(self, mock_redis_client, mock_labbook, caplog):
         caplog.set_level(logging.INFO, logger='labmanager')
 
         monitor_key = "dev_env_monitor:{}:{}:{}:{}:activity_monitor:{}".format('test',
@@ -32,8 +34,7 @@ class TestActivityMonitor(object):
         monitor = ActivityMonitor('test',
                                   'test',
                                   mock_labbook[2].name,
-                                  monitor_key,
-                                  config_file=mock_labbook[0])
+                                  monitor_key)
 
         monitor.add_processor(ProblemProcessor())
         monitor.add_processor(BasicProcessor())

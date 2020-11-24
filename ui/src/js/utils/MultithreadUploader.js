@@ -13,7 +13,7 @@ import CompleteBatchUploadTransactionMutation
 import CompleteDatasetUploadTransactionMutation
   from 'Mutations/fileBrowser/CompleteDatasetUploadTransactionMutation';
 // footer utils
-import FooterUtils from 'Components/common/footer/FooterUtils';
+import FooterUtils from 'Components/footer/FooterUtils';
 import UpdateFileBrowserStore from 'Mutations/localCommits/FileBrowserStore';
 import UpdateSecretsStore from 'Mutations/localCommits/SecretsStore';
 

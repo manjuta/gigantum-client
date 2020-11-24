@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1471"
+changelog:
+  - type: FIX
+    description: Resolved an issue causing packages not to page when switching and merging branches.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1465

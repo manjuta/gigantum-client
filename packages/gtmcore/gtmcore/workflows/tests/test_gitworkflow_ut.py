@@ -17,7 +17,7 @@ from gtmcore.gitlib import RepoLocation
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeOverride
 from gtmcore.workflows.gitworkflows_utils import create_remote_gitlab_repo
-from gtmcore.fixtures import (_MOCK_create_remote_repo2 as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
+from gtmcore.fixtures import (helper_create_remote_repo as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
 from gtmcore.inventory.branching import BranchManager, MergeConflict
 
@@ -81,8 +81,7 @@ class TestGitWorkflowsMethods(object):
         other_user = 'other-test-user'
 
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
         lb_other = wf_other.repository
         assert lb_other.root_dir != lb.root_dir
 
@@ -96,8 +95,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user'
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
         with open(os.path.join(wf_other.repository.root_dir, 'testfile'), 'w') as f: f.write('filedata')
         wf_other.repository.sweep_uncommitted_changes()
 
@@ -119,8 +117,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user2'
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == remote.remote_location
         # The actual path on disk will be different, though
@@ -133,7 +130,7 @@ class TestGitWorkflowsMethods(object):
         """ test importing a published dataset """
         username = 'testuser'
         lb = mock_labbook_lfs_disabled[2]
-        im = InventoryManager(config_file=mock_labbook_lfs_disabled[0])
+        im = InventoryManager()
         ds = im.create_dataset(username, username, 'test-ds', storage_type='gigantum_object_v1')
 
         wf = DatasetWorkflow(ds)
@@ -141,8 +138,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user2'
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = DatasetWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = DatasetWorkflow.import_from_remote(remote, username=other_user)
 
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == remote.remote_location
@@ -159,9 +155,6 @@ class TestGitWorkflowsMethods(object):
             assert kwargs['dataset_owner'] == 'testuser'
             assert kwargs['dataset_name'] == 'test-ds'
 
-            # Inject mocked config file
-            kwargs['config_file'] = mock_config_file[0]
-
             # Stop patching so job gets scheduled for real
             dispatcher_patch.stop()
 
@@ -174,7 +167,7 @@ class TestGitWorkflowsMethods(object):
 
         username = 'testuser'
         lb = mock_labbook_lfs_disabled[2]
-        im = InventoryManager(config_file=mock_labbook_lfs_disabled[0])
+        im = InventoryManager()
         ds = im.create_dataset(username, username, 'test-ds', storage_type='gigantum_object_v1')
 
         # Publish dataset
@@ -195,8 +188,7 @@ class TestGitWorkflowsMethods(object):
         # Import project, triggering an auto-import of the dataset
         other_user = 'other-test-user2'
         remote = RepoLocation(labbook_wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
 
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == remote.remote_location
@@ -208,7 +200,7 @@ class TestGitWorkflowsMethods(object):
         cnt = 0
         while cnt < 20:
             try:
-                im_other_user = InventoryManager(config_file=mock_config_file[0])
+                im_other_user = InventoryManager()
                 ds = im_other_user.load_dataset(other_user, username, 'test-ds')
                 break
             except InventoryException:
@@ -228,9 +220,6 @@ class TestGitWorkflowsMethods(object):
             assert kwargs['dataset_owner'] == 'testuser'
             assert kwargs['dataset_name'] == 'test-ds'
 
-            # Inject mocked config file
-            kwargs['config_file'] = mock_config_file[0]
-
             # Stop patching so job gets scheduled for real
             dispatcher_patch.stop()
 
@@ -243,7 +232,7 @@ class TestGitWorkflowsMethods(object):
 
         username = 'testuser'
         lb = mock_labbook_lfs_disabled[2]
-        im = InventoryManager(config_file=mock_labbook_lfs_disabled[0])
+        im = InventoryManager()
         ds = im.create_dataset(username, username, 'test-ds', storage_type='gigantum_object_v1')
 
         # Publish dataset
@@ -257,8 +246,7 @@ class TestGitWorkflowsMethods(object):
         # Import project
         other_user = 'other-test-user2'
         remote = RepoLocation(labbook_wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
 
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == remote.remote_location
@@ -266,7 +254,7 @@ class TestGitWorkflowsMethods(object):
         assert f'{other_user}/{username}/labbooks/labbook1' in wf_other.repository.root_dir
 
         with pytest.raises(InventoryException):
-            im_other_user = InventoryManager(config_file=mock_config_file[0])
+            im_other_user = InventoryManager()
             ds = im_other_user.load_dataset(other_user, username, 'test-ds')
 
         # Link to project
@@ -285,7 +273,7 @@ class TestGitWorkflowsMethods(object):
         cnt = 0
         while cnt < 20:
             try:
-                im_other_user = InventoryManager(config_file=mock_config_file[0])
+                im_other_user = InventoryManager()
                 ds = im_other_user.load_dataset(other_user, username, 'test-ds')
                 break
             except InventoryException:
@@ -305,9 +293,6 @@ class TestGitWorkflowsMethods(object):
             assert kwargs['dataset_owner'] == 'testuser'
             assert kwargs['dataset_name'] == 'test-ds'
 
-            # Inject mocked config file
-            kwargs['config_file'] = mock_config_file[0]
-
             # Stop patching so job gets scheduled for real
             dispatcher_patch.stop()
 
@@ -320,7 +305,7 @@ class TestGitWorkflowsMethods(object):
 
         username = 'testuser'
         lb = mock_labbook_lfs_disabled[2]
-        im = InventoryManager(config_file=mock_labbook_lfs_disabled[0])
+        im = InventoryManager()
         ds = im.create_dataset(username, username, 'test-ds', storage_type='gigantum_object_v1')
 
         # Publish dataset
@@ -343,8 +328,7 @@ class TestGitWorkflowsMethods(object):
         # Import project
         other_user = 'other-test-user2'
         remote = RepoLocation(labbook_wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
 
         # The remotes must be the same, cause it's the same remote repo
         assert wf_other.remote == remote.remote_location
@@ -352,7 +336,7 @@ class TestGitWorkflowsMethods(object):
         assert f'{other_user}/{username}/labbooks/labbook1' in wf_other.repository.root_dir
 
         with pytest.raises(InventoryException):
-            im_other_user = InventoryManager(config_file=mock_config_file[0])
+            im_other_user = InventoryManager()
             ds = im_other_user.load_dataset(other_user, username, 'test-ds')
 
         # Patch dispatch_task so you can inject the mocked config file
@@ -366,7 +350,7 @@ class TestGitWorkflowsMethods(object):
         cnt = 0
         while cnt < 20:
             try:
-                im_other_user = InventoryManager(config_file=mock_config_file[0])
+                im_other_user = InventoryManager()
                 ds = im_other_user.load_dataset(other_user, username, 'test-ds')
                 break
             except InventoryException:
@@ -441,8 +425,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user2'
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
         bm_other = BranchManager(wf_other.labbook, username=other_user)
         bm_other.workon_branch('test-conflict-branch')
         with open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile'), 'w') as f:
@@ -474,8 +457,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user2'
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
         bm_other = BranchManager(wf_other.labbook, username=other_user)
         bm_other.workon_branch('test-conflict-branch')
         with open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile'), 'w') as f:
@@ -511,8 +493,7 @@ class TestGitWorkflowsMethods(object):
 
         other_user = 'other-test-user2'
         remote = RepoLocation(wf.remote, other_user)
-        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user,
-                                                      config_file=mock_config_file[0])
+        wf_other = LabbookWorkflow.import_from_remote(remote, username=other_user)
         bm_other = BranchManager(wf_other.labbook, username=other_user)
         bm_other.workon_branch('test-conflict-branch')
         with open(os.path.join(wf_other.labbook.root_dir, 'input', 'testfile'), 'w') as f:
@@ -575,7 +556,7 @@ class TestGitWorkflowsMethods(object):
             temp_lb_path = os.path.join(td, 'snappy')
 
             # Tests backwards compatibility (test.zip is a very old schema 1 LabBook)
-            lb = InventoryManager(mock_config_file[0]).load_labbook_from_directory(temp_lb_path)
+            lb = InventoryManager().load_labbook_from_directory(temp_lb_path)
             wf = LabbookWorkflow(lb)
 
             wf.labbook.remove_remote()
@@ -615,7 +596,7 @@ class TestGitWorkflowsMethods(object):
             subprocess.run(f'unzip lb-to-migrate.zip'.split(),
                            check=True, cwd=tempdir)
 
-            im = InventoryManager(mock_config_file[0])
+            im = InventoryManager()
             lb = im.load_labbook_from_directory(os.path.join(tempdir, 'lb-to-migrate'))
             wf = LabbookWorkflow(lb)
 
@@ -645,7 +626,7 @@ class TestGitWorkflowsMethods(object):
                 return "afakejobkey"
 
         username = 'test'
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset(username, username, 'dataset-1', 'gigantum_object_v1')
         m = Manifest(ds, username)
         wf = DatasetWorkflow(ds)
@@ -679,7 +660,7 @@ class TestGitWorkflowsMethods(object):
                 return "afakejobkey"
 
         username = 'test'
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         ds = im.create_dataset(username, username, 'dataset-1', 'gigantum_object_v1')
         m = Manifest(ds, username)
         wf = DatasetWorkflow(ds)
@@ -702,15 +683,15 @@ class TestGitWorkflowsMethods(object):
     @responses.activate
     @mock.patch('gtmcore.gitlib.git_fs_shim.GitFilesystemShimmed.fetch', new=_mock_fetch)
     def test_create_remote_gitlab_repo(self, mock_config_file):
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/test%2Flabbook-1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/test%2Flabbook-1',
                       status=404)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects', status=201)
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects', status=201)
 
         username = 'test'
-        im = InventoryManager(mock_config_file[0])
+        im = InventoryManager()
         lb = im.create_labbook(username, username, 'labbook-1')
 
         with pytest.raises(ValueError):
@@ -718,5 +699,5 @@ class TestGitWorkflowsMethods(object):
 
         create_remote_gitlab_repo(lb, username, 'private', 'afakeaccesstoken', "afakeidtoken")
 
-        assert lb.remote == 'https://test@repo.gigantum.io/test/labbook-1.git/'
+        assert lb.remote == 'https://test@test.repo.gigantum.com/test/labbook-1.git/'
 

@@ -23,11 +23,9 @@ class Dataset(Repository):
     _default_activity_detail_type = ActivityDetailType.DATASET
     _default_activity_section = "Dataset Root"
 
-    def __init__(self, config_file: Optional[str] = None, namespace: Optional[str] = None,
+    def __init__(self, namespace: Optional[str] = None,
                  author: Optional[GitAuthor] = None) -> None:
-        super().__init__(config_file, author)
-        # TODO - Need a more formalizes solution for differentiating Datasets from other repo types
-        self.client_config.config['git']['lfs_enabled'] = False
+        super().__init__(author)
         self.namespace = namespace
         self._backend: Optional[Union[ManagedStorageBackend, UnmanagedStorageBackend]] = None
 

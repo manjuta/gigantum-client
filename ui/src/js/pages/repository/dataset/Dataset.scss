@@ -1,0 +1,111 @@
+@import '~Styles/_imports.scss';
+
+.Dataset {
+  width: auto;
+  min-width: 860px;
+  max-width: 1235px;
+  height: auto;
+  min-height: calc(100% - 230px);
+  margin-bottom: 100px;
+
+  transition: width 0.25s;
+
+  &--detail-mode{
+    width: calc(100% - 350px);
+  }
+
+  &--branch-mode{
+    .Dataset__veil{
+      z-index: index($elements, veil);
+
+      display: block;
+
+      opacity: 0.5;
+    }
+
+    .Dataset__navigation-container {
+      margin-top: 450px;
+    }
+
+    .Dataset__view{
+      margin-top: 50px;
+    }
+  }
+
+  &--disk-low {
+    margin-top: 70px;
+  }
+}
+
+.Dataset__spacer {
+  width: calc(100% - 50px);
+  height: auto;
+  min-height: 100%;
+  margin: 10px 5px 20px 20px;
+}
+
+.Dataset__routes {
+  overflow: hidden;
+
+  height: 100%;
+  padding: 164px 0 20px;
+}
+
+.Dataset__veil{
+  position: fixed;
+  z-index: -1;
+  top: 450px;
+
+  width: 100%;
+  height: calc(100% - 450px);
+
+  transition: 0.25s opacity;
+
+  opacity: 0;
+  background: $primaryText;
+
+}
+
+
+.Dataset__config-parameter {
+  font-weight: bold;
+  font-size: 18px;
+  input {
+    margin-left: 10px;
+  }
+}
+
+.Dataset__config-description {
+  font-size: 14px;
+}
+
+.Dataset__config-textInput {
+  border: 1px solid $romanSilver !important;
+  height: 30px;
+}
+
+.Dataset__config-section{
+  margin-bottom: 10px;
+}
+
+.Dataset__configs {
+  height: 215px;
+  overflow: auto;
+  border-bottom: 1px solid $primary;
+}
+
+.Dataset__config-container{
+  height: 250px;
+  @include flex(space-between, column)
+}
+.Dataset__config-buttons{
+  @include flex(space-around, row);
+}
+.Dataset__config-error {
+  color: $crimson;
+}
+
+.Dataset__confirm-buttons{
+  display: flex;
+  margin-top: 25px;
+}

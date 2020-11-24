@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1528"
+changelog:
+  - type: NON_USER_FACING
+    description: Reverts changes to serviceId

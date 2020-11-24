@@ -6,6 +6,7 @@ export default (
     owner: '',
     labbookName: '',
     callbackRoute: '',
+    currentServer: null,
   },
   action,
 ) => {
@@ -30,6 +31,11 @@ export default (
       ...state,
       labbookName: action.payload.labbookName,
       owner: action.payload.owner,
+    };
+  } if (action.type === types.UPDATE_CURRENT_SERVER) {
+    return {
+      ...state,
+      currentServer: action.payload.currentServer,
     };
   }
 

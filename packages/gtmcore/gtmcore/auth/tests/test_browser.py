@@ -2,19 +2,17 @@ import pytest
 import responses
 
 from gtmcore.configuration import Configuration
-from gtmcore.fixtures import mock_config_file_with_auth_browser
-from gtmcore.auth.identity import get_identity_manager, AuthenticationError
+from gtmcore.fixtures.auth import mock_config_file_with_auth_browser
+from gtmcore.auth.identity import get_identity_manager_class, AuthenticationError
 from gtmcore.auth.browser import BrowserIdentityManager
 from gtmcore.auth import User
 
 
 class TestIdentityBrowser(object):
-    # TODO: Possibly move to integration tests or fully mock since these tests make a call out to Auth0
-
     def test_is_session_valid(self, mock_config_file_with_auth_browser):
         """test check for valid session"""
-        config = Configuration(mock_config_file_with_auth_browser[0])
-        mgr = get_identity_manager(config)
+        config_instance, tokens, work_dir = mock_config_file_with_auth_browser
+        mgr = get_identity_manager_class(config_instance)(config_instance)
         assert type(mgr) == BrowserIdentityManager
 
         # Invalid with no token
@@ -22,13 +20,13 @@ class TestIdentityBrowser(object):
         assert mgr.is_token_valid(None) is False
         assert mgr.is_token_valid("asdfasdfasdf") is False
 
-        assert mgr.is_token_valid(mock_config_file_with_auth_browser[2]['access_token']) is True
+        assert mgr.is_token_valid(tokens['access_token']) is True
         assert mgr.rsa_key is not None
 
     def test_is_authenticated_token(self, mock_config_file_with_auth_browser):
         """test checking if the user is authenticated via a token"""
-        config = Configuration(mock_config_file_with_auth_browser[0])
-        mgr = get_identity_manager(config)
+        config_instance, tokens, work_dir = mock_config_file_with_auth_browser
+        mgr = get_identity_manager_class(config_instance)(config_instance)
         assert type(mgr) == BrowserIdentityManager
 
         # Invalid with no token
@@ -36,26 +34,23 @@ class TestIdentityBrowser(object):
         assert mgr.is_authenticated(None) is False
         assert mgr.is_authenticated("asdfasdfa") is False
 
-        assert mgr.is_authenticated(mock_config_file_with_auth_browser[2]['access_token']) is True
+        assert mgr.is_authenticated(tokens['access_token']) is True
 
         # Second access should fail since not cached
-        mgr2 = get_identity_manager(config)
+        mgr2 = get_identity_manager_class(config_instance)(config_instance)
         assert mgr2.is_authenticated() is False
         assert mgr2.is_authenticated("asdfasdfa") is False  # An "expired" token will essentially do this
 
     @responses.activate
     def test_get_user_profile(self, mock_config_file_with_auth_browser):
         """test getting a user profile from Auth0"""
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'synchronizeUserAccount': {'gitUserId': "123"}}},
                       status=200)
-        responses.add_passthru('https://gigantum.auth0.com/.well-known/jwks.json')
 
-        config = Configuration(mock_config_file_with_auth_browser[0])
-        mgr = get_identity_manager(config)
+        config_instance, tokens, work_dir = mock_config_file_with_auth_browser
+        mgr = get_identity_manager_class(config_instance)(config_instance)
         assert type(mgr) == BrowserIdentityManager
-        # Don't check at_hash claim due to password grant not setting it in the token
-        mgr.validate_at_hash_claim = False
 
         # Load User
         with pytest.raises(AuthenticationError):
@@ -63,8 +58,8 @@ class TestIdentityBrowser(object):
             mgr.get_user_profile()
 
         # Load User
-        u = mgr.get_user_profile(mock_config_file_with_auth_browser[2]['access_token'],
-                                 mock_config_file_with_auth_browser[2]['id_token'])
+        u = mgr.get_user_profile(tokens['access_token'],
+                                 tokens['id_token'])
         assert type(u) == User
         assert u.username == "johndoe"
         assert u.email == "john.doe@gmail.com"
@@ -72,7 +67,7 @@ class TestIdentityBrowser(object):
         assert u.family_name == "Doe"
 
         # Second access should fail since not cached
-        mgr2 = get_identity_manager(config)
+        mgr2 = get_identity_manager_class(config_instance)(config_instance)
         with pytest.raises(AuthenticationError):
             # Should fail without a token
             mgr2.get_user_profile()

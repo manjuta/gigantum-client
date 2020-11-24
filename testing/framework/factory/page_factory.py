@@ -9,13 +9,16 @@ from selenium.common.exceptions import *
 from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
-from framework.factory.models_enums.constants_enums import LocatorType
+from framework.factory.models_enums.constants_enums import LocatorType, CompareUtilityType
 import time
 import pkg_resources
+from framework.factory.compare_utility import CompareUtility
+import tempfile
+import os
 
 
 class PageFactory(object):
-    timeout = 15
+    timeout = 900
     highlight = True
 
     TYPE_OF_LOCATORS = {
@@ -38,7 +41,26 @@ class PageFactory(object):
         else:
             self.driver = instance.driver
 
-    def get_locator(self, locator_type: LocatorType, locator_key: str) -> object:
+    def wait_for_new_tab_to_load(self, url: str, window_index: int = 1, timeout: int = 15) -> bool:
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if len(self.driver.window_handles) > 1 and len(self.driver.window_handles) >= window_index:
+                new_window = self.driver.window_handles[window_index]
+                self.driver.switch_to_window(new_window)
+                if self.driver.current_url.endswith(url):
+                    return True
+            time.sleep(0.25)
+        return False
+
+    def close_current_tab(self, current_window_url: str, parent_window_index: int) -> bool:
+        if len(self.driver.window_handles) > 1 and self.driver.current_url.endswith(current_window_url):
+            parent_window = self.driver.window_handles[parent_window_index]
+            self.driver.close()
+            self.driver.switch_to_window(parent_window)
+            return True
+        return False
+
+    def get_locator(self, locator_type: LocatorType, locator_key: str) -> WebElement:
         """Get UI element based on given locator type and locator key.
 
         Args:
@@ -178,11 +200,11 @@ class PageFactory(object):
         """
         return self.text
 
-    def clear_text(self)  -> None:
+    def clear_text(self) -> None:
         """Clears text from EditBox."""
         self.clear()
 
-    def hover(self)  -> None:
+    def hover(self) -> None:
         """Perform hover operation on webElement."""
         ActionChains(self.parent).move_to_element(self).perform()
 
@@ -251,22 +273,87 @@ class PageFactory(object):
         """
         return self.parent.execute_script(script, self)
 
-    def drag_drop_file_in_drop_zone(self, sleep_time=5, file_content="sample text"):
+    def drag_drop_text_file_in_drop_zone(self, sleep_time: int = 5, file_content: str = "sample text",
+                                         file_name: str = 'requirements.txt'):
         """Drag and drop a file into a file browser drop zone.
 
         Args:
             sleep_time: timeout interval to drop file
             file_content: content of the file
+            file_name: name of the file
         """
-        with open(pkg_resources.resource_filename('factory', 'resources/file_browser_drag_drop_script.js'), "r") \
+        with open(pkg_resources.resource_filename('framework', 'factory/resources/file_browser_drag_drop_script.js'), "r") \
                 as js_file:
             js_script = js_file.read()
-        file_path = pkg_resources.resource_filename('factory', 'resources/sample-upload.txt')
-        with open(file_path, "w") as example_file:
-            example_file.write(file_content)
-        file_input = self.execute_script(js_script, self, 0, 0)
+        temp_dir = tempfile.gettempdir()
+        with open(os.path.join(temp_dir, file_name), 'w') as temp_file:
+            temp_file.write(file_content)
+        file_path = os.path.join(temp_dir, file_name)
+        file_input = self.execute_script(js_script)
         file_input.send_keys(file_path)
         time.sleep(sleep_time)
+
+    def wait_until(self, predicate: CompareUtilityType, timeout: int, *args) -> bool:
+        """Monitor the ui element for a change
+
+        The function can return once the timeout period is reached or if it finds the
+        required element.
+
+        Args:
+            predicate: Indicates the function to execute while wait period.
+            timeout: The time period for which the wait should continue.
+            *args:Input to predicate.
+
+        Returns: boolean value based on the result
+        """
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if getattr(CompareUtility, predicate.value)(self, *args): return True
+            time.sleep(0.25)
+        return False
+
+    def check_element_presence(self, locator_type: LocatorType, locator_key: str, timeout: int) -> bool:
+        """Check for the presence of an element
+
+        Args:
+            locator_type: locator type ('css','id','name','xpath','link_text','partial_link_text','tag','class_name')
+            locator_key: unique key to identify we UI element
+            timeout: The time period for which the wait should continue
+
+        Returns: boolean value based on the result
+
+        """
+        end_time = time.time() + timeout
+        self.element_locator = (self.TYPE_OF_LOCATORS[locator_type.value], locator_key)
+        while time.time() < end_time:
+            try:
+                element = WebDriverWait(self.driver, 0.15).until(EC.presence_of_element_located(
+                    self.element_locator))
+                return True
+            except (StaleElementReferenceException, NoSuchElementException, TimeoutException) as ex:
+                pass
+        return False
+
+    def check_element_absence(self, locator_type: LocatorType, locator_key: str, timeout: int) -> bool:
+        """Check for the absence of an element
+
+                Args:
+                    locator_type: locator type ('css','id','name','xpath','link_text','partial_link_text','tag','class_name')
+                    locator_key: unique key to identify we UI element
+                    timeout: The time period for which the wait should continue
+
+                Returns: boolean value based on the result
+
+                """
+        end_time = time.time() + timeout
+        self.element_locator = (self.TYPE_OF_LOCATORS[locator_type.value], locator_key)
+        while time.time() < end_time:
+            try:
+                element = WebDriverWait(self.driver, 0.15).until(EC.presence_of_element_located(
+                    self.element_locator))
+            except (StaleElementReferenceException, NoSuchElementException, TimeoutException) as ex:
+                return True
+        return False
 
 
 WebElement.click_button = PageFactory.click
@@ -290,3 +377,7 @@ WebElement.get_list_item_count = PageFactory.get_list_item_count
 WebElement.get_all_list_item = PageFactory.get_all_list_item
 WebElement.get_list_selected_item = PageFactory.get_list_selected_item
 WebElement.execute_script = PageFactory.execute_script
+setattr(WebElement, 'wait_until', PageFactory.wait_until)
+setattr(WebElement, 'drag_drop_file_in_drop_zone', PageFactory.drag_drop_text_file_in_drop_zone)
+
+

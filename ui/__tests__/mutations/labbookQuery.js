@@ -1,4 +1,4 @@
-import { LabbookQuery } from 'Components/labbook/LabbookQueryContainer';
+import { LabbookQuery } from 'Pages/repository/labbook/LabbookQueryContainer';
 import { QueryRenderer } from 'react-relay';
 import environment from 'JS/createRelayEnvironment';
 import React from 'react';

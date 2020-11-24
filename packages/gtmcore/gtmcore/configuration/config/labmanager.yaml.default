@@ -1,16 +1,13 @@
 # Configuration File for the Gigantum LabManager
 
-# Extend/Modify an existing configuration file. If only file name provided, will assume in the same directory
-from: null
-
 # Core configuration
 core:
-  # Should the LabManager run in Team Mode (multi-user)
-  team_mode: false
   # Location of configuration file for the LabManager logger
   logging_config: "/etc/gigantum/logging.json"
   # Should the app import a labbook into new user's working dirs on first login
   import_demo_on_first_login: true
+  # Default server will be automatically configured on first boot
+  default_server: "https://gigantum.com"
 
 # Project Container Configuration
 container:
@@ -37,10 +34,6 @@ container:
 
 # Authentication Configuration
 auth:
-  client_id: 0Ajo8Ov6Qriafo0xVpSyejWy1pwNWdhk
-  provider_domain: gigantum.auth0.com
-  audience: api.gigantum.io
-  signing_algorithm: RS256
   # Set to `browser` for multi-tenant
   identity_manager: local
 
@@ -57,14 +50,6 @@ environment:
 git:
   backend: "filesystem-shim"
   working_directory: "~/gigantum"
-  default_remote: "repo.gigantum.io"
-  lfs_enabled: true
-  remotes:
-    repo.gigantum.io:
-      remote_type: gitlab
-      hub_api: https://gigantum.com/api/v1
-      object_service: api.gigantum.com/object-v1
-
 
 # Embedded Detail Object Database config
 detaildb:

@@ -17,7 +17,7 @@ from gtmcore.dataset.manifest import Manifest
 
 from gtmcore.fixtures.datasets import mock_dataset_with_cache_dir, mock_dataset_with_manifest, helper_append_file
 
-from gtmcore.fixtures import _MOCK_create_remote_repo2
+from gtmcore.fixtures import helper_create_remote_repo
 
 
 class TestDatasetMutations(object):
@@ -99,12 +99,12 @@ class TestDatasetMutations(object):
         assert "test-dataset-2" == result['data']['fetchDatasetEdge']['newDatasetEdge']['node']['name']
 
     def test_modify_dataset_link(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'test-lb', 'testing dataset links')
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'default', None, None)
+        helper_create_remote_repo(ds, 'default', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 
@@ -173,12 +173,12 @@ class TestDatasetMutations(object):
         assert len(data) == 0
 
     def test_modify_dataset_link_errors(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'test-lb', 'testing dataset links')
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1",
                                description="100")
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'default', None, None)
+        helper_create_remote_repo(ds, 'default', None, None)
 
         query = """
                    mutation myMutation($lo: String!, $ln: String!, $do: String!, $dn: String!,
@@ -205,7 +205,7 @@ class TestDatasetMutations(object):
         snapshot.assert_match(result)
 
     def test_modify_dataset_link_local(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'test-lb', 'testing dataset links')
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
 
@@ -387,12 +387,12 @@ class TestDatasetMutations(object):
             assert kwargs['logged_in_username'] == 'default'
             assert kwargs['dataset_owner'] == 'default'
             assert kwargs['dataset_name'] == 'dataset100'
-            assert ".labmanager/datasets/default/default/dataset100" in kwargs['cache_location']
+            assert ".labmanager/datasets/test-gigantum-com/default/default/dataset100" in kwargs['cache_location']
             assert metadata['method'] == 'clean_dataset_file_cache'
 
             return JobResponseMock("rq:job:00923477-d46b-479c-ad0c-2b66fdfdfb6b10")
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -418,29 +418,29 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset(self, fixture_working_dir):
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json={
                                 "message": "202 Accepted"
                             },
                       status=202)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json=[{
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
-        responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
+        responses.add(responses.DELETE, 'https://test.api.gigantum.com/object-v1/default/dataset100',
                       json=[{'status': 'queueing for delete'}],
                       status=200)
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -463,25 +463,25 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset_not_local(self, fixture_working_dir):
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json={
                                 "message": "202 Accepted"
                             },
                       status=202)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json=[{
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
-        responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
+        responses.add(responses.DELETE, 'https://test.api.gigantum.com/object-v1/default/dataset100',
                       json=[{'status': 'queueing for delete'}],
                       status=200)
 
@@ -501,7 +501,7 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset_no_session(self, fixture_working_dir):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -524,26 +524,26 @@ class TestDatasetMutations(object):
 
     @responses.activate
     def test_delete_remote_dataset_gitlab_error(self, fixture_working_dir):
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
 
-        responses.add(responses.DELETE, 'https://api.gigantum.com/object-v1/default/dataset100',
+        responses.add(responses.DELETE, 'https://test.api.gigantum.com/object-v1/default/dataset100',
                       json=[{'status': 'queueing for delete'}],
                       status=200)
 
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fdataset100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset100',
                       json={
                                 "message": "fail"
                             },
                       status=400)
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -564,7 +564,7 @@ class TestDatasetMutations(object):
         assert os.path.exists(dataset_dir) is True
 
     def test_configure_local(self, fixture_working_dir_dataset_tests, snapshot):
-        im = InventoryManager(fixture_working_dir_dataset_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -604,7 +604,7 @@ class TestDatasetMutations(object):
         snapshot.assert_match(result)
 
         # Create dir to fix validation issue
-        os.makedirs(os.path.join(fixture_working_dir_dataset_tests[1], 'local_data', 'test_local_dir'))
+        os.makedirs(os.path.join(ds.client_config.app_workdir, 'local_data', 'test_local_dir'))
 
         query = """
                     mutation myMutation{
@@ -641,7 +641,7 @@ class TestDatasetMutations(object):
         assert result['data']['configureDataset']['isConfigured'] is True
 
     def test_update_unmanaged_dataset_local_errors(self, fixture_working_dir_dataset_tests):
-        im = InventoryManager(fixture_working_dir_dataset_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -669,7 +669,7 @@ class TestDatasetMutations(object):
         assert "errors" in result
 
     def test_update_unmanaged_dataset_local(self, fixture_working_dir_dataset_tests):
-        im = InventoryManager(fixture_working_dir_dataset_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -698,7 +698,7 @@ class TestDatasetMutations(object):
         assert "rq:job" in result['data']['updateUnmanagedDataset']['backgroundJobKey']
 
     def test_update_unmanaged_dataset_remote(self, fixture_working_dir_dataset_tests):
-        im = InventoryManager(fixture_working_dir_dataset_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -727,7 +727,7 @@ class TestDatasetMutations(object):
         assert "rq:job" in result['data']['updateUnmanagedDataset']['backgroundJobKey']
 
     def test_verify_unmanaged_dataset(self, fixture_working_dir_dataset_tests):
-        im = InventoryManager(fixture_working_dir_dataset_tests[0])
+        im = InventoryManager()
         ds = im.create_dataset('default', 'default', "adataset", storage_type="local_filesystem", description="100")
         dataset_dir = ds.root_dir
         assert os.path.exists(dataset_dir) is True
@@ -755,7 +755,7 @@ class TestDatasetMutations(object):
         assert "rq:job" in result['data']['verifyDataset']['backgroundJobKey']
 
     def test_update_dataset_link(self, fixture_working_dir, snapshot):
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'test-lb', 'testing dataset links')
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
         manifest = Manifest(ds, 'default')
@@ -764,7 +764,7 @@ class TestDatasetMutations(object):
         manifest.sweep_all_changes()
 
         # Fake publish to a local bare repo
-        _MOCK_create_remote_repo2(ds, 'default', None, None)
+        helper_create_remote_repo(ds, 'default', None, None)
 
         assert os.path.exists(os.path.join(lb.root_dir, '.gitmodules')) is False
 

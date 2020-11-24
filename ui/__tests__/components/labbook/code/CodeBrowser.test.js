@@ -2,7 +2,7 @@
       import React, { Component } from 'react';
       import renderer from 'react-test-renderer';
       import { mount } from 'enzyme';
-      import CodeBrowser from 'Components/labbook/code/CodeBrowser';
+      import CodeBrowser from 'Pages/repository/labbook/code/CodeBrowser';
 
       import { DragDropContext } from 'react-dnd';
       import HTML5Backend from 'react-dnd-html5-backend';

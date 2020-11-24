@@ -3,10 +3,11 @@ version: 2.1
 executors:
   gig_client:
     docker:
-      - image: gigantum/circleci-client:5e336f4bc7-2020-07-11
+      - image: gigantum/circleci-client:22729ee812-2020-07-14
 
 orbs:
     codecov: codecov/codecov@1.1.0
+
 
 jobs:
   mypy-gtmcore:
@@ -172,7 +173,7 @@ jobs:
           working_directory: /home/circleci/repo/
       - run:
           name: Enforce Fossa checks
-          command: fossa test --timeout 1200
+          command: fossa test --timeout 1200 --no-ansi
           working_directory: /home/circleci/repo/
 
   changelog-schema-check:

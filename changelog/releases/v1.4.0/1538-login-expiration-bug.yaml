@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1538"
+changelog:
+  - type: FIX
+    description: Fixes login token expiration bug, clears out tokens and identity before attempting login.

@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1531"
+changelog:
+  - type: IMPROVEMENT
+    description: Added a more useful message on container launch when a sensitive file is missing locally.

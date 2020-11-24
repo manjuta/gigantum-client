@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1536"
+changelog:
+  - type: NEW
+    description: Sensitive files and dataset file cache directories are reorganized by server ID
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1518

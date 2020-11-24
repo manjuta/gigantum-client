@@ -15,7 +15,7 @@ logger = LMLogger.get_logger()
 class ActivityMonitor(metaclass=abc.ABCMeta):
     """Class to monitor a kernel/IDE for activity to be processed."""
 
-    def __init__(self, user: str, owner: str, labbook_name: str, monitor_key: str, config_file: str = None,
+    def __init__(self, user: str, owner: str, labbook_name: str, monitor_key: str,
                  author_name: Optional[str] = None, author_email: Optional[str] = None) -> None:
         """Constructor requires info to load the lab book
 
@@ -39,7 +39,7 @@ class ActivityMonitor(metaclass=abc.ABCMeta):
             author = None
 
         # Load Lab Book instance
-        im = InventoryManager(config_file)
+        im = InventoryManager()
         self.labbook = im.load_labbook(user, owner, labbook_name, author=author)
         self.user = user
         self.owner = owner

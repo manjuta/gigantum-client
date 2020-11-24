@@ -13,7 +13,7 @@ class TestBundledAppMutations(object):
 
     def test_add_bundled_app(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test adding a bundled app to a labbooks"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         im.create_labbook('default', 'default', 'test-app', description="testing 1")
 
         lookup_query = """
@@ -95,7 +95,7 @@ class TestBundledAppMutations(object):
 
     def test_remove_bundled_app(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test removing a bundled app from a labbook"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'test-app-2', description="testing 1")
         bam = BundledAppManager(lb)
         bam.add_bundled_app(9999, "dash app 1", "my example bundled app 1", "python /mnt/labbook/code/dash1.py")
@@ -149,7 +149,7 @@ class TestBundledAppMutations(object):
 
     def test_start_bundled_app(self, fixture_working_dir_env_repo_scoped, snapshot):
         """Test listing labbooks"""
-        im = InventoryManager(fixture_working_dir_env_repo_scoped[0])
+        im = InventoryManager()
         lb = im.create_labbook('default', 'default', 'test-app-1', description="testing 1")
         bam = BundledAppManager(lb)
         bam.add_bundled_app(9999, "dash app 1", "my example bundled app 1", "echo test")

@@ -3,7 +3,7 @@ import renderer from 'react-test-renderer';
 import { shallow, mount } from 'enzyme';
 import history from 'JS/history';
 
-import RemoteLabbooks from 'Components/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
+import RemoteLabbooks from 'Pages/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
 import relayTestingUtils from '@gigantum/relay-testing-utils';
 import json from './__relaydata__/RemoteLabbooks.json';
 

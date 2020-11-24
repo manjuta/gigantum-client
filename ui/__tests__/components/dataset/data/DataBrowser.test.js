@@ -4,7 +4,7 @@ import renderer from 'react-test-renderer';
 import { mount } from 'enzyme';
 import relayTestingUtils from '@gigantum/relay-testing-utils'
 // components
-import DataBrowser from 'Components/dataset/data/DataBrowser';
+import DataBrowser from 'Pages/repository/dataset/data/DataBrowser';
 
 
 test('Test DataBrowser', () => {

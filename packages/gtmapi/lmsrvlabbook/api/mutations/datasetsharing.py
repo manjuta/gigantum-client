@@ -40,6 +40,7 @@ class PublishDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
+        ds.client_config.prepare_to_serialize()
 
         access_token, id_token = tokens_from_request_context(tokens_required=True)
 
@@ -75,6 +76,7 @@ class SyncDataset(graphene.relay.ClientIDMutation):
         username = get_logged_in_username()
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
+        ds.client_config.prepare_to_serialize()
 
         # Get tokens from request context
         access_token, id_token = tokens_from_request_context()
@@ -190,14 +192,14 @@ class AddDatasetCollaborator(graphene.relay.ClientIDMutation):
 
         # Add collaborator to remote service
         config = flask.current_app.config['LABMGR_CONFIG']
-        remote_config = config.get_remote_configuration()
+        server_config = config.get_server_configuration()
 
         # Get tokens from request context
         access_token, id_token = tokens_from_request_context(tokens_required=True)
 
         # Add / Update collaborator
-        mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['hub_api'],
+        mgr = GitLabManager(server_config.git_url,
+                            server_config.hub_api_url,
                             access_token=access_token,
                             id_token=id_token)
 
@@ -246,13 +248,13 @@ class DeleteDatasetCollaborator(graphene.relay.ClientIDMutation):
 
         # Get remote server configuration
         config = flask.current_app.config['LABMGR_CONFIG']
-        remote_config = config.get_remote_configuration()
+        server_config = config.get_server_configuration()
 
         # Get tokens from request context
         access_token, id_token = tokens_from_request_context(tokens_required=True)
 
-        mgr = GitLabManager(remote_config['git_remote'],
-                            remote_config['hub_api'],
+        mgr = GitLabManager(server_config.git_url,
+                            server_config.hub_api_url,
                             access_token=access_token,
                             id_token=id_token)
         mgr.delete_collaborator(owner, dataset_name, username)
@@ -282,7 +284,7 @@ class ExportDataset(graphene.relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, owner, dataset_name, client_mutation_id=None):
         username = get_logged_in_username()
-        working_directory = flask.current_app.config['LABMGR_CONFIG'].config['git']['working_directory']
+        working_directory = flask.current_app.config['LABMGR_CONFIG'].app_workdir
         ds = InventoryManager().load_dataset(username, owner, dataset_name,
                                              author=get_logged_in_author())
 

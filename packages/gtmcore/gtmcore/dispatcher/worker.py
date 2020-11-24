@@ -16,6 +16,7 @@ logger = LMLogger.get_logger()
 QUEUE_DEFAULT = 'gigantum-default-queue'
 QUEUE_BUILD = 'gigantum-build-queue'
 QUEUE_PUBLISH = 'gigantum-publish-queue'
+DEFAULT_WORKER_DB = 13
 
 
 class WorkerService:
@@ -23,8 +24,8 @@ class WorkerService:
     allotment of queues and workers, as well as optional bursting of
     workers and jobs. """
 
-    def __init__(self, config_path: Optional[str] = None, db: Optional[int] = None):
-        self._config = Configuration(config_file=config_path).config
+    def __init__(self, db: int = DEFAULT_WORKER_DB):
+        self._config = Configuration().config
         self._redis_db = db
         self._worker_process_lock = Lock()
         self._worker_process_list: List[Process] = []
@@ -111,7 +112,7 @@ class WorkerService:
         Returns:
             Reference to the worker process itself.
         """
-        p = Process(target=start_rq_worker, args=(queue_name, burst))
+        p = Process(target=start_rq_worker, args=(queue_name, burst, self._redis_db))
         p.start()
         return p
 
@@ -121,10 +122,10 @@ class WorkerService:
             p.join()
 
 
-def start_rq_worker(queue_name: str, burst: bool = False) -> None:
+def start_rq_worker(queue_name: str, burst: bool = False, db: int = DEFAULT_WORKER_DB) -> None:
     """Start an RQ worker for the given queue. """
     try:
-        with Connection(connection=redis.Redis(db=13)):
+        with Connection(connection=redis.Redis(db=db)):
             q = Queue(name=queue_name)
             logger.info(f"Starting {'bursted ' if burst else ''}"
                         f"RQ worker for in {queue_name}")
@@ -157,7 +158,6 @@ class QueueLoader:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Launch RQ workers per config file')
-    parser.add_argument('--config', type=str, default=None, help='Path to config file')
     parser.add_argument('--db', type=int, default=None, help='Redis DB to use')
 
     try:
@@ -167,7 +167,7 @@ if __name__ == '__main__':
         raise
 
     try:
-        worker_service = WorkerService(args.config)
+        worker_service = WorkerService()
         worker_service.start()
         worker_service.monitor_burstable_queue()
         worker_service.stop()

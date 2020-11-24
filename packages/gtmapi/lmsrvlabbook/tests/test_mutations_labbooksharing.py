@@ -4,7 +4,6 @@ import math
 import tempfile
 import responses
 from graphene.test import Client
-from mock import patch
 from werkzeug.datastructures import FileStorage
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
@@ -15,41 +14,24 @@ from gtmcore.gitlib import RepoLocation
 
 from lmsrvcore.middleware import DataloaderMiddleware
 from lmsrvlabbook.tests.fixtures import (property_mocks_fixture, docker_socket_fixture,
-    fixture_working_dir, fixture_working_dir_lfs_disabled)
+    fixture_working_dir, fixture_working_dir_lfs_disabled, mock_create_labbooks)
 
 import pytest
 from mock import patch
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
-from gtmcore.fixtures import remote_labbook_repo, mock_config_file, _MOCK_create_remote_repo2
-from gtmcore.workflows import LabbookWorkflow, GitWorkflow
+from gtmcore.fixtures import remote_labbook_repo, mock_config_file, helper_create_remote_repo
+from gtmcore.workflows import LabbookWorkflow
 from gtmcore.inventory.inventory import InventoryManager
-from gtmcore.configuration import Configuration
 from gtmcore.dispatcher import Dispatcher, JobKey
 from gtmcore.files import FileOperations
-
-@pytest.fixture()
-def mock_create_labbooks(fixture_working_dir):
-    # Create a labbook in the temporary directory
-    lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "sample-repo-lb",
-                                                                 description="Cats labbook 1")
-
-    # Create a file in the dir
-    with open(os.path.join(fixture_working_dir[1], 'codefile.c'), 'w') as sf:
-        sf.write("1234567")
-        sf.seek(0)
-    FileOperations.insert_file(lb, 'code', sf.name)
-
-    assert os.path.isfile(os.path.join(lb.root_dir, 'code', 'codefile.c'))
-    # name of the config file, temporary working directory, the schema
-    yield fixture_working_dir, lb
 
 
 @pytest.fixture()
 def mock_create_labbooks_2(fixture_working_dir):
     # Create a labbook in the temporary directory
-    im = InventoryManager(fixture_working_dir[0])
+    im = InventoryManager()
     lb = im.create_labbook("default", "default", "labbook1", "Test labbook 1")
 
     yield fixture_working_dir
@@ -58,7 +40,7 @@ def mock_create_labbooks_2(fixture_working_dir):
 @pytest.fixture()
 def mock_create_labbooks_no_lfs(fixture_working_dir_lfs_disabled):
     # Create a labbook in the temporary directory
-    im = InventoryManager(fixture_working_dir_lfs_disabled[0])
+    im = InventoryManager()
     lb = im.create_labbook("default", "default", "labbook1",
                            description="Cats labbook 1")
 
@@ -84,8 +66,6 @@ class TestMutationsLabbookSharing(object):
         env = builder.get_environ()
         req = Request(environ=env)
 
-        monkeypatch.setattr(Configuration, 'find_default_config', lambda x : fixture_working_dir[0])
-
         def mock_dispatch(*args, **kwargs):
             return JobKey('rq:job:000-000-000')
         monkeypatch.setattr(Dispatcher, 'dispatch_task', mock_dispatch)
@@ -106,25 +86,25 @@ class TestMutationsLabbookSharing(object):
         assert 'errors' not in r
         assert r['data']['importRemoteLabbook']['jobKey'] == 'rq:job:000-000-000'
 
-    def test_can_checkout_branch(self, mock_create_labbooks, remote_labbook_repo, fixture_working_dir):
+    def test_can_checkout_branch(self, mock_create_labbooks):
         """Test whether there are uncommitted changes or anything that would prevent
         having a fresh branch checked out. """
 
-        f_dir, lb = mock_create_labbooks
+        config_instance, temp_dir, client, schema = mock_create_labbooks
 
         query = f"""
         {{
-            labbook(name: "sample-repo-lb", owner: "default") {{
+            labbook(name: "labbook1", owner: "default") {{
                 isRepoClean
             }}
         }}
         """
-        r = fixture_working_dir[2].execute(query)
+        r = client.execute(query)
         assert r['data']['labbook']['isRepoClean'] is True
 
-        os.remove(os.path.join(lb.root_dir, 'code', 'codefile.c'))
+        os.remove(os.path.join(temp_dir, 'default', 'default', 'labbooks', 'labbook1', 'code', 'sillyfile'))
 
-        r = fixture_working_dir[2].execute(query)
+        r = client.execute(query)
         # We back-door deleted a file in the LB. The repo should now be unclean - prove it.
         assert r['data']['labbook']['isRepoClean'] is False
 
@@ -151,32 +131,27 @@ class TestMutationsLabbookSharing(object):
     def test_delete_remote_labbook(self, fixture_working_dir):
         """Test deleting a LabBook on a remote server"""
         # Setup responses mock for this test
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fnew-labbook',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fnew-labbook',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Fnew-labbook',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fnew-labbook',
                       json={
                                 "message": "202 Accepted"
                             },
                       status=202)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Fnew-labbook',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fnew-labbook',
                       json=[{
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
-        responses.add(responses.DELETE, 'https://api.gigantum.com/read/index/default%2Fnew-labbook',
-                      json=[{
-                                "message": "success"
-                            }],
-                      status=204)
 
 
-        im = InventoryManager(fixture_working_dir[0])
+        im = InventoryManager()
         lb = im.create_labbook("default", "default", "new-labbook")
 
         delete_query = f"""
@@ -199,15 +174,15 @@ class TestMutationsLabbookSharing(object):
         r2 = fixture_working_dir[2].execute(delete_query)
         assert 'errors' in r2
 
-    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
-    def test_publish_basic(self, fixture_working_dir, mock_create_labbooks_no_lfs):
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=helper_create_remote_repo)
+    def test_publish_basic(self, mock_create_labbooks_no_lfs):
 
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
         env = builder.get_environ()
         req = Request(environ=env)
 
-        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        im = InventoryManager()
         test_user_lb = im.load_labbook('default', 'default', 'labbook1')
 
         publish_query = f"""
@@ -227,14 +202,14 @@ class TestMutationsLabbookSharing(object):
         #assert r['data']['publishLabbook']['success'] is True
 
     @responses.activate
-    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
-    def test_sync_1(self, mock_create_labbooks_no_lfs, mock_config_file):
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=helper_create_remote_repo)
+    def test_sync_1(self, mock_create_labbooks_no_lfs):
 
         # Setup responses mock for this test
-        responses.add(responses.POST, 'https://gigantum.com/api/v1',
+        responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
 
-        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        im = InventoryManager()
         test_user_lb = im.load_labbook('default', 'default', 'labbook1')
         test_user_wf = LabbookWorkflow(test_user_lb)
         test_user_wf.publish('default')
@@ -245,7 +220,7 @@ class TestMutationsLabbookSharing(object):
         req = Request(environ=env)
 
         remote = RepoLocation(test_user_wf.remote, 'sally')
-        sally_wf = LabbookWorkflow.import_from_remote(remote, 'sally', config_file=mock_config_file[0])
+        sally_wf = LabbookWorkflow.import_from_remote(remote, 'sally')
         sally_lb = sally_wf.labbook
         FileOperations.makedir(sally_lb, relative_path='code/sally-dir', create_activity_record=True)
         sally_wf.sync('sally')
@@ -265,14 +240,14 @@ class TestMutationsLabbookSharing(object):
         assert 'errors' not in r
         # TODO - Pause and wait for job to report finished
 
-    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo2)
+    @patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=helper_create_remote_repo)
     def test_reset_branch_to_remote(self, fixture_working_dir, mock_create_labbooks_no_lfs):
         # Mock the request context so a fake authorization header is present
         builder = EnvironBuilder(path='/labbook', method='POST', headers={'Authorization': 'Bearer AJDFHASD'})
         env = builder.get_environ()
         req = Request(environ=env)
 
-        im = InventoryManager(mock_create_labbooks_no_lfs[0])
+        im = InventoryManager()
         test_user_lb = im.load_labbook('default', 'default', 'labbook1')
         wf = LabbookWorkflow(test_user_lb)
         wf.publish(username='default')
@@ -313,7 +288,7 @@ class TestMutationsLabbookSharing(object):
         client = Client(fixture_working_dir[3], middleware=[DataloaderMiddleware()])
 
         # Create a temporary labbook
-        lb = InventoryManager(fixture_working_dir[0]).create_labbook("default", "default", "test-export",
+        lb = InventoryManager().create_labbook("default", "default", "test-export",
                                                                      description="Tester")
 
         # Create a largeish file in the dir
@@ -366,7 +341,7 @@ class TestMutationsLabbookSharing(object):
     def test_add_collaborator(self, mock_create_labbooks_2, property_mocks_fixture):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -377,7 +352,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -388,7 +363,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json={
                                 "id": 100,
                                 "name": "New Person",
@@ -396,13 +371,13 @@ class TestMutationsLabbookSharing(object):
                                 "state": "active",
                             },
                       status=201)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -457,7 +432,7 @@ class TestMutationsLabbookSharing(object):
     def test_add_collaborator_as_owner(self, mock_create_labbooks_2, property_mocks_fixture):
         """Test adding a collaborator to a LabBook"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -468,7 +443,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -479,7 +454,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json={
                                 "id": 100,
                                 "name": "New Person",
@@ -487,13 +462,13 @@ class TestMutationsLabbookSharing(object):
                                 "state": "active",
                             },
                       status=201)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -546,7 +521,7 @@ class TestMutationsLabbookSharing(object):
     def test_delete_collaborator(self, mock_create_labbooks_2, property_mocks_fixture):
         """Test deleting a collaborator from a LabBook"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -556,15 +531,15 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members/100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members/100',
                       status=204)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -605,7 +580,7 @@ class TestMutationsLabbookSharing(object):
     def test_change_collaborator_permissions(self, mock_create_labbooks_2, property_mocks_fixture):
         """Test changing the permissions of a collaborator"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/users?username=person100',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/users?username=person100',
                       json=[
                                 {
                                     "id": 100,
@@ -616,7 +591,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -634,7 +609,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.POST, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.POST, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json={
                                 "id": 100,
                                 "name": "New Person",
@@ -642,15 +617,15 @@ class TestMutationsLabbookSharing(object):
                                 "state": "active",
                             },
                       status=201)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.DELETE, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members/100',
+        responses.add(responses.DELETE, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members/100',
                       status=204)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -705,13 +680,13 @@ class TestMutationsLabbookSharing(object):
     def test_not_owner_permissions(self, mock_create_labbooks_2, property_mocks_fixture):
         """Test changing the permissions of a collaborator"""
         # Setup REST mocks
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1',
                       json=[{
                               "id": 27,
                               "description": "",
                             }],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -722,7 +697,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,
@@ -733,7 +708,7 @@ class TestMutationsLabbookSharing(object):
                                 }
                             ],
                       status=200)
-        responses.add(responses.GET, 'https://repo.gigantum.io/api/v4/projects/default%2Flabbook1/members',
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Flabbook1/members',
                       json=[
                                 {
                                     "id": 29,

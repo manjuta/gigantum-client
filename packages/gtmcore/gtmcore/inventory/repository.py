@@ -53,8 +53,8 @@ class Repository(object):
     _default_activity_detail_type = ActivityDetailType.LABBOOK
     _default_activity_section = "Default Section"
 
-    def __init__(self, config_file: Optional[str] = None, author: Optional[GitAuthor] = None) -> None:
-        self.client_config = Configuration(config_file)
+    def __init__(self, author: Optional[GitAuthor] = None) -> None:
+        self.client_config: Configuration = Configuration()
 
         # Create gitlib instance
         self.git = get_git_interface(self.client_config.config["git"])

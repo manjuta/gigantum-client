@@ -14,38 +14,16 @@ from confhttpproxy import ProxyRouter, ProxyRouterException
 from flask import Flask, jsonify
 
 import rest_routes
+from lmsrvcore.utilities.migrate import migrate_work_dir_structure_v2
 from gtmcore.dispatcher import Dispatcher
 from gtmcore.dispatcher.jobs import update_environment_repositories
 from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
-from gtmcore.auth.identity import AuthenticationError, get_identity_manager
+from gtmcore.auth.identity import AuthenticationError, get_identity_manager_class
 from gtmcore.labbook.lock import reset_all_locks
 
 
 logger = LMLogger.get_logger()
-app = Flask("lmsrvlabbook")
-
-# Load configuration class into the flask application
-if os.path.exists(Configuration.USER_LOCATION):
-    logger.info(f"Using custom user configuration from {Configuration.USER_LOCATION}")
-else:
-    logger.info("No custom user configuration found")
-
-random_bytes = os.urandom(32)
-app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
-app.config["LABMGR_CONFIG"] = config = Configuration()
-app.config["LABMGR_ID_MGR"] = get_identity_manager(config)
-
-# Set Debug mode
-app.config['DEBUG'] = config.config["flask"]["DEBUG"]
-app.register_blueprint(blueprint.complete_labbook_service)
-
-# Set starting flags
-# If flask is run in debug mode the service will restart when code is changed, and some tasks
-#   we only want to happen once (ON_FIRST_START)
-# The WERKZEUG_RUN_MAIN environmental variable is set only when running under debugging mode
-ON_FIRST_START = app.config['DEBUG'] == False or os.environ.get('WERKZEUG_RUN_MAIN') != 'true'
-ON_RESTART = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
 
 
 def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
@@ -69,7 +47,7 @@ def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
         try:
             # This property raises an exception if the underlying request doesn't yield a status code of 200
             proxy_router.routes  # noqa
-        except (requests.exceptions.ConnectionError, ProxyRouterException) as e:
+        except (requests.exceptions.ConnectionError, ProxyRouterException):
             sleep(0.5)
             continue
 
@@ -95,6 +73,47 @@ def configure_chp(proxy_dict: dict, is_hub_client: bool) -> str:
     return api_prefix
 
 
+def configure_default_server(config_instance: Configuration) -> None:
+    """Function to check if a server has been configured, and if not, configure and select the default server"""
+    try:
+        # Load the server configuration. If you get a FileNotFoundError there is no configured server
+        config_instance.get_server_configuration()
+    except FileNotFoundError:
+        default_server = config_instance.config['core']['default_server']
+        logger.info(f"Configuring Client with default server via auto-discovery: {default_server}")
+        try:
+            server_id = config_instance.add_server(default_server)
+            config_instance.set_current_server(server_id)
+
+            # Migrate any user dirs if needed. Here we assume all projects belong to the default server, since
+            # at the time it was the only available server.
+            migrate_work_dir_structure_v2(server_id)
+        except Exception as err:
+            logger.exception(f"Failed to configure default server! Restart Client to try again: {err}")
+            # Re-raise the exception so the API doesn't come up
+            raise
+
+
+# Start Flask Server Initialization and app configuration
+app = Flask("lmsrvlabbook")
+
+random_bytes = os.urandom(32)
+app.config["SECRET_KEY"] = base64.b64encode(random_bytes).decode('utf-8')
+app.config["LABMGR_CONFIG"] = config = Configuration(wait_for_cache=10)
+configure_default_server(config)
+app.config["ID_MGR_CLS"] = get_identity_manager_class(config)
+
+# Set Debug mode
+app.config['DEBUG'] = config.config["flask"]["DEBUG"]
+app.register_blueprint(blueprint.complete_labbook_service)
+
+# Set starting flags
+# If flask is run in debug mode the service will restart when code is changed, and some tasks
+#   we only want to happen once (ON_FIRST_START)
+# The WERKZEUG_RUN_MAIN environmental variable is set only when running under debugging mode
+ON_FIRST_START = app.config['DEBUG'] is False or os.environ.get('WERKZEUG_RUN_MAIN') != 'true'
+ON_RESTART = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+
 if os.environ.get('CIRCLECI') == 'true':
     try:
         url_prefix = configure_chp(config.config['proxy'], config.is_hub_client)
@@ -110,32 +129,6 @@ app.register_blueprint(rest_routes.rest_routes, url_prefix=url_prefix)
 if config.config["flask"]["allow_cors"]:
     # Allow CORS
     CORS(app, max_age=7200)
-
-
-# Set auth error handler
-@app.errorhandler(AuthenticationError)
-def handle_auth_error(ex):
-    response = jsonify(ex.error)
-    response.status_code = ex.status_code
-    return response
-
-
-# TEMPORARY KLUDGE
-# Due to GitPython implementation, resources leak. This block deletes all GitPython instances at the end of the request
-# Future work will remove GitPython, at which point this block should be removed.
-@app.after_request
-def cleanup_git(response):
-    loader = getattr(flask.request, 'labbook_loader', None)
-    if loader:
-        for key in loader.__dict__["_promise_cache"]:
-            try:
-                lb = loader.__dict__["_promise_cache"][key].value
-                lb.git.repo.__del__()
-            except AttributeError:
-                continue
-    return response
-# TEMPORARY KLUDGE
-
 
 if ON_FIRST_START:
     # Empty container-container share dir as it is ephemeral
@@ -177,7 +170,6 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
     with open(os.path.join(share_dir, 'jupyterhooks', '__init__.py'), 'w') as initpy:
         initpy.write(post_save_hook_code)
 
-
     # Reset distributed lock, if desired
     if config.config["lock"]["reset_on_start"]:
         logger.info("Resetting ALL distributed locks")
@@ -195,14 +187,12 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         os.makedirs(certificate_dir, exist_ok=True)
         logger.info(f'Created `certificates` dir for custom CA certificates: {certificate_dir}')
 
-
     # make sure temporary upload directory exists and is empty
     tempdir = config.upload_dir
     if os.path.exists(tempdir):
         shutil.rmtree(tempdir)
         logger.info(f'Cleared upload temp dir: {tempdir}')
     os.makedirs(tempdir)
-
 
     # Start background startup tasks
     d = Dispatcher()
@@ -217,7 +207,33 @@ def post_save_hook(os_path, model, contents_manager, **kwargs):
         logger.error(err_message)
         raise RuntimeError(err_message)
 
+    # Run job to update Base images in the background
     d.dispatch_task(update_environment_repositories, persist=True)
+
+
+# Set auth error handler
+@app.errorhandler(AuthenticationError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
+
+
+# TEMPORARY KLUDGE
+# Due to GitPython implementation, resources leak. This block deletes all GitPython instances at the end of the request
+# Future work will remove GitPython, at which point this block should be removed.
+@app.after_request
+def cleanup_git(response):
+    loader = getattr(flask.request, 'labbook_loader', None)
+    if loader:
+        for key in loader.__dict__["_promise_cache"]:
+            try:
+                lb = loader.__dict__["_promise_cache"][key].value
+                lb.git.repo.__del__()
+            except AttributeError:
+                continue
+    return response
+# TEMPORARY KLUDGE
 
 
 def main(debug=False) -> None:
