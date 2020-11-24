@@ -58,6 +58,7 @@ const getCollaboratorFiltered = (collaborators, owner) => collaborators
   );
 
 type Props = {
+  allowFileUpload: Function,
   sectionType: string,
   showLoginPrompt: Function,
 }
@@ -172,6 +173,7 @@ class CollaboratorButton extends Component<Props> {
       sessionValid,
     } = this.state;
     const {
+      allowFileUpload,
       showLoginPrompt,
       sectionType,
     } = this.props;
@@ -198,6 +200,9 @@ class CollaboratorButton extends Component<Props> {
             const section = (sectionType === 'dataset')
               ? props.dataset
               : props.labbook;
+            if (sectionType === 'dataset') {
+              allowFileUpload(props);
+            }
             const collaboratorFilteredArr = getCollaboratorFiltered(section.collaborators, owner);
             const collaboratorNames = self._getCollaboratorList(
               section.collaborators,
