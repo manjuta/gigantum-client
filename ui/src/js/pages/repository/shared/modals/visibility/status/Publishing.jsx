@@ -2,7 +2,7 @@
 // vendor
 import React, { Component } from 'react';
 // job status
-import JobStatus from 'JS/utils/jobStatus';
+import JobStatus from 'JS/utils/JobStatus';
 // State Machine
 import { ERROR, COMPLETE } from '../machine/MachineConstants';
 // css
@@ -10,6 +10,7 @@ import './PublishModalStatus.scss';
 
 type Props = {
   jobKey: string,
+  header: string,
   name: string,
   owner: string,
   resetPublishState: Function,
@@ -24,7 +25,7 @@ class Publishing extends Component<Props> {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.jobKey !== prevProps.jobKey) {
+    if ((this.props.jobKey !== prevProps.jobKey) && this.props.jobKey !== null) {
       this._fetchData(this.props.jobKey);
     }
   }
@@ -35,10 +36,8 @@ class Publishing extends Component<Props> {
   *
   */
   _setMessage = (jobMetaDataParsed) => {
-    console.log(jobMetaDataParsed);
     if (jobMetaDataParsed.feedback !== undefined) {
       const { message } = this.state;
-      console.log(message, jobMetaDataParsed.feedback);
       if ((jobMetaDataParsed.feedback !== null) && (message.indexOf(jobMetaDataParsed.feedback) === -1)) {
         const newMessage = `${message} ${jobMetaDataParsed.feedback} <br />`;
         this.setState({ message: newMessage });
@@ -62,7 +61,6 @@ class Publishing extends Component<Props> {
     } = this.props;
 
     JobStatus.updateFooterStatus(jobKey).then((response) => {
-      console.log(response);
       const { status } = response.data.jobStatus;
 
       if ((status === 'started') || (status === 'queued')) {
@@ -111,18 +109,24 @@ class Publishing extends Component<Props> {
   }
 
   render() {
-    const { name, owner } = this.props;
+    const { header, name, owner } = this.props;
     const { message } = this.state;
 
-    const text = `Publishing ${owner}/${name}`;
+    const text = (header === 'Publish')
+      ? `Publishing ${owner}/${name}`
+      : `Changing ${owner}/${name} visibility`;
+    const tempMessage = (header === 'Publish')
+      ? 'Publish task in queue'
+      : 'Visibility change task in queue';
+
     return (
       <div className="PublishModalStatus">
 
         <h4 className="PublishModalStatus__h4">{text}</h4>
 
-        <div className="PublishModalStatus__main">
+        <div className="PublishModalStatus__main PublishModalStatus__main--publishing flex flex--column justify--center">
           { !message && (
-              <h6 >Publish task in queue</h6>
+              <h6>{tempMessage}</h6>
             )
           }
 

@@ -29,5 +29,17 @@
 
   &__main {
     padding: 2em;
+
+    &--publishing {
+      width: 30em;
+      height: 10em;
+      border-radius: 3px;
+      text-shadow: rgba(0, 0, 0, 0.3) 0px 1px;
+      background-color: $slateBlue;
+
+      h6 {
+        color: $lightBlue;
+      }
+    }
   }
 }

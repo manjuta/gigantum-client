@@ -149,7 +149,7 @@ const changeVisibility = (props, isPublic, callback) => {
                 (visibilityResponse, error) => {
                   if (error) {
                     setErrorMessage(owner, name, 'Visibility change failed', error);
-                    callback(false, error);
+                    callback(null, error);
                   } else {
                     setInfoMessage(owner, name, `Visibility changed to ${visibility}`);
                     callback(true, null);
@@ -163,7 +163,6 @@ const changeVisibility = (props, isPublic, callback) => {
                 visibility,
                 (visibilityResponse, error) => {
                   if (error) {
-                    console.log(error);
                     setErrorMessage(owner, name, 'Visibility change failed', error);
                     callback(false, error);
                   } else {
@@ -173,13 +172,17 @@ const changeVisibility = (props, isPublic, callback) => {
                 },
               );
             }
+          } else {
+            callback(false, [{ message: 'Visibility not set' }]);
           }
         } else {
           resetState();
+          callback(false, [{ message: 'Visibility not set' }]);
         }
       }
     } else {
       resetState();
+      callback(false, [{ message: 'Visibility not set' }]);
     }
   });
 };

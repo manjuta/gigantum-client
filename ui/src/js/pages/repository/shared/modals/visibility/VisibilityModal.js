@@ -29,6 +29,7 @@ type Props = {
   name: string,
   owner: string,
   resetState: Function,
+  resetPublishState: Function,
   setPublishingState: Function,
   setRemoteSession: Function,
   setSyncingState: Function,
@@ -92,6 +93,68 @@ class VisibilityModal extends Component<Props> {
   }
 
   /**
+  * Method handles publish callback.
+  * @param {string} jobKey
+  * @param {Object} error
+  */
+  _publishCallback = (jobKey, error) => {
+    const {
+      name,
+      owner,
+      resetPublishState,
+      setPublishingState,
+    } = this.props;
+    if (jobKey) {
+      this.setState({ jobKey });
+    } else {
+      this._transition(
+        ERROR,
+        {
+          failureMessage: error[0].message,
+        },
+      );
+
+      if (setPublishingState) {
+        setPublishingState(owner, name, false);
+      }
+
+      resetPublishState(false);
+    }
+  };
+
+  /**
+  * Method handles modalVisibility callback.
+  * @param {boolean} success
+  * @param {Object} error
+  */
+  _modifyVisibilityCallback = (success, error) => {
+    const {
+      name,
+      owner,
+      resetPublishState,
+      setPublishingState,
+      toggleModal,
+    } = this.props;
+    if (success) {
+      this._transition(
+        COMPLETE,
+        {},
+      );
+
+      setTimeout(() => {
+        toggleModal();
+      }, 1000)
+    } else {
+      this._transition(
+        ERROR,
+        {
+          failureMessage: error[0].message,
+        },
+      );
+    }
+  };
+
+  /**
   *  @param {} -
   *  triggers publish or change visibility
   *  @return {}
@@ -99,30 +162,6 @@ class VisibilityModal extends Component<Props> {
   _modifyVisibility = () => {
     const { header } = this.props;
     const { isPublic } = this.state;
-    const {
-      name,
-      owner,
-      resetPublishState,
-      setPublishingState,
-    } = this.props;
-
-    const callback = (jobKey, error) => {
-      console.log(jobKey, error);
-      if (jobKey) {
-        console.log(jobKey);
-        this.setState({ jobKey });
-      } else {
-        this._transition(
-          ERROR,
-          {},
-        );
-      }
-      if (setPublishingState) {
-        setPublishingState(owner, name, false);
-      }
-
-      resetPublishState(false);
-    };
 
     if (header === 'Publish') {
       const { currentServer } = this.context;
@@ -131,13 +170,13 @@ class VisibilityModal extends Component<Props> {
         PUBLISHING,
         {},
       );
-      publish(baseUrl, this.props, isPublic, callback);
+      publish(baseUrl, this.props, isPublic, this._publishCallback);
     } else {
       this._transition(
         PUBLISHING,
         {},
       );
-      changeVisibility(this.props, isPublic, callback);
+      changeVisibility(this.props, isPublic, this._modifyVisibilityCallback);
     }
   }
 
@@ -185,6 +224,7 @@ class VisibilityModal extends Component<Props> {
       [PUBLISHING]: (
         <Publishing
           jobKey={jobKey}
+          header={header}
           name={name}
           owner={owner}
           resetPublishState={resetPublishState}
