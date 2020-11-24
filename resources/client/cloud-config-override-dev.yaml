@@ -3,7 +3,8 @@
 
 core:
   import_demo_on_first_login: false
-
+  default_server: "https://gtm-dev.cloud"
+  
 flask:
   DEBUG: false
   TESTING: false

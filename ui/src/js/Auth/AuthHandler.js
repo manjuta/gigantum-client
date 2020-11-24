@@ -9,7 +9,7 @@ import fetchQuery from 'JS/fetch';
 *
 * @return {Promise}
 */
-const getIsLogginedIn = (serverId, loginUrl, auth) => {
+const getIsLoggedIn = (serverId, loginUrl, auth) => {
   const overrideHeaders = {
     ...((typeof serverId === 'string') ? { 'GTM-SERVER-ID': serverId } : undefined),
   };
@@ -89,7 +89,7 @@ const getTokens = (
       localStorage.setItem('id_token', tokenResponse.IDToken);
 
       // check if user is logged in, calls user idenity query and initiates backend
-      getIsLogginedIn(
+      getIsLoggedIn(
         hash.serverId,
         loginUrl,
         auth,
@@ -112,7 +112,7 @@ const getTokens = (
     });
   } else {
     // check if user is logged in, calls user idenity query and initiates backend
-    getIsLogginedIn(
+    getIsLoggedIn(
       currentServer,
       loginUrl,
       auth,
@@ -162,6 +162,12 @@ const fetchAuthServerState = (
       );
     }
   });
+};
+
+
+export {
+  getIsLoggedIn,
+  fetchAuthServerState,
 };
 
 
