@@ -98,7 +98,6 @@
     "hard-source-webpack-plugin": "^0.13.1",
     "history": "4.10.1",
     "html-tags": "^2.0.0",
-    "https": "^1.0.0",
     "ignore": "^5.0.4",
     "interpolate-html-plugin": "^3.0.0",
     "jsdom": "^15.2.0",

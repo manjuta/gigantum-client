@@ -1,9 +1,4 @@
-// vendor
-import https from 'https';
 
-const agent = new https.Agent({
-  rejectUnauthorized: false,
-});
 
 function fetchQuery(apiURL) {
   const headers = {};
@@ -13,10 +8,7 @@ function fetchQuery(apiURL) {
 
   return fetch(apiURL, {
     method: 'GET',
-    headers: {
-      ...headers,
-      agent,
-    },
+    headers,
   }).then(response => response.json())
     .catch(error => error);
 }
