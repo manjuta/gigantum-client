@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1535"
+changelog:
+  - type: IMPROVEMENT
+    description: Updated export widget to have a loading state and allows the ability to view and copy export path
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1503

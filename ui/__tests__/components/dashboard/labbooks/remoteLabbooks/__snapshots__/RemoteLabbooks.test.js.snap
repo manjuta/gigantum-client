@@ -473,7 +473,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          9 months ago
+          10 months ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"
@@ -1667,7 +1667,7 @@ exports[`Test RemoteLabbooks rendering 1`] = `
             Modified:
           </span>
            
-          10 months ago
+          a year ago
         </p>
         <p
           className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description"

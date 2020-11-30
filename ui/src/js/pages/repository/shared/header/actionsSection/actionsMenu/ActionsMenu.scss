@@ -124,6 +124,16 @@
         background-size: 24px;
       }
     }
+    &--loading {
+      background: url('~Images/loaders/status-spinner.svg') no-repeat 7px center;
+      background-size: 24px;
+      cursor: auto;
+
+      &:hover {
+        background: $background-color url('~Images/loaders/status-spinner.svg') no-repeat 7px center;
+        background-size: 24px;
+      }
+    }
 
 
     &--delete {

@@ -15,6 +15,7 @@ type Props = {
   name: string,
   owner: string,
   remoteUrl: string,
+  showExport: boolean,
 };
 
 class CopyUrl extends Component<Props> {
@@ -44,13 +45,17 @@ class CopyUrl extends Component<Props> {
       name,
       owner,
       remoteUrl,
+      showExport,
     } = this.props;
     const { currentServer } = this.context;
     const { baseUrl } = currentServer;
     const doesNotHaveRemote = (defaultRemote === null) && (remoteUrl === null);
+    const text = showExport ? 'Export Path' : 'Get Share URL';
+    const copyValue = showExport ? remoteUrl : `${baseUrl}${owner}/${name}`;
     // declare css here
     const copyUrlCSS = classNames({
       'ActionsMenu__item ActionsMenu__item--copy': true,
+      'CopyUrl--export': showExport,
       'CopyUrl--disabled': doesNotHaveRemote,
     });
 
@@ -63,13 +68,14 @@ class CopyUrl extends Component<Props> {
         <div
           className={copyUrlCSS}
         >
-          <div className="ActionsMenu__item--label">Get Share URL</div>
+          <div className="ActionsMenu__item--label">{text}</div>
           <div className="ActionsMenu__copyRemote">
 
             <input
               id="ActionsMenu-copy"
               className="ActionsMenu__input"
-              defaultValue={`${baseUrl}${owner}/${name}`}
+              defaultValue={copyValue}
+              value={copyValue}
               disabled={doesNotHaveRemote}
               type="text"
             />

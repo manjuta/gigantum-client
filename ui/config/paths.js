@@ -50,6 +50,7 @@ module.exports = {
   appPublic: resolveApp('public'),
   appHtml: htmlPath,
   appIndexJs: resolveApp('src/js/index.js'),
+  cloudIndexJs: resolveApp('src/js/cloud/index.js'),
   dahshboardJs: resolveApp('src/js/pages/dashboard/Dashboard.js'),
   labbookJs: resolveApp('src/js/pages/repository/labbook/Labbook.js'),
   labbookActivityJs: resolveApp('src/js/pages/repository/shared/activity/Activity.jsx'),

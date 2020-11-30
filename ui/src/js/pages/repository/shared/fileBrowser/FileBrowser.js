@@ -954,6 +954,7 @@ class FileBrowser extends Component {
       owner,
       relay,
       section,
+      uploadAllowed,
     } = this.props;
     const { isSelected } = this._checkChildState();
     const allFilesLocal = checkLocalAll(files);
@@ -962,7 +963,7 @@ class FileBrowser extends Component {
     const folderKeys = this._getKeys(files, 'folder');
     const fileKeys = this._getKeys(files, 'files');
     const childrenKeys = folderKeys.concat(fileKeys);
-    const readOnly = section === 'data' && !isManaged;
+    const readOnly = section === 'data' && (!isManaged || !uploadAllowed);
     const downloadList = getDownloadList(props, state);
     const downloadDisabled = isLocked || downloadingEdges || downloadingAll;
     const { fileTooLarge, filePrompted } = getQueuedFiles(uploadData);
@@ -1074,6 +1075,7 @@ class FileBrowser extends Component {
             mutations={mutations}
             name={name}
             owner={owner}
+            uploadAllowed={uploadAllowed}
           />
 
           {
