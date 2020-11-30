@@ -141,7 +141,7 @@ def exchange_tokens(server_id: str, state_token: str):
     if not token_url:
         return abort(403)
 
-    response = requests.get(f"{token_url}?state={state_token}")
+    response = requests.get(f"{token_url}?state={state_token}", verify=False)
     if response.status_code != 200:
         logger.error(f"Failed to exchange state token for JWTs: {response.status_code}")
         return abort(response.status_code)

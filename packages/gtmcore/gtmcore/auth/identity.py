@@ -160,7 +160,7 @@ class IdentityManager(metaclass=abc.ABCMeta):
         else:
             try:
                 auth_config = self.config.get_auth_configuration()
-                response = requests.get(auth_config.public_key_url)
+                response = requests.get(auth_config.public_key_url, verify=False)
             except Exception as err:
                 logger.info(type(err))
                 logger.info(err)
