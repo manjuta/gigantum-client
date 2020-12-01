@@ -433,35 +433,33 @@ class CreateModal extends Component<Props> {
 
     return (
       <div>
-        { modalVisible
-          && (
-            <Modal
-              size={modalSize}
-              icon="add"
-              handleClose={() => this._hideModal()}
-              header={currentComponent.header}
-              preHeader={currentComponent.preHeader}
-              noPadding
-              renderContent={() => (
-                <div className="CreateModal">
+        { modalVisible && (
+          <Modal
+            size={modalSize}
+            icon="add"
+            handleClose={() => this._hideModal()}
+            header={currentComponent.header}
+            preHeader={currentComponent.preHeader}
+            noPadding
+          >
+              <div className="CreateModal">
 
-                  { modalBody }
+                { modalBody }
 
-                  <CreateNav
-                    self={this}
-                    createLabbookButtonState={createLabbookButtonState}
-                    selectedComponentId={selectedComponentId}
-                    continueDisabled={continueDisabled}
-                    setComponent={this._setComponent}
-                    hideModal={this._hideModal}
-                    continueSave={this._continueSave}
-                    isDataset={datasets}
-                  />
-                </div>
-              )}
-            />
-          )
-        }
+                <CreateNav
+                  self={this}
+                  createLabbookButtonState={createLabbookButtonState}
+                  selectedComponentId={selectedComponentId}
+                  continueDisabled={continueDisabled}
+                  setComponent={this._setComponent}
+                  hideModal={this._hideModal}
+                  continueSave={this._continueSave}
+                  isDataset={datasets}
+                />
+              </div>
+
+          </Modal>
+        )}
 
         { modalBlur && <Loader className={loaderCSS} /> }
       </div>

@@ -18,15 +18,13 @@ const ImportModal = ({ self }) => {
   });
   return (
     <div className="Import__main">
-      {
-      state.showImportModal
-      && (
-      <Modal
-        header={`Import ${section}`}
-        handleClose={() => self._closeImportModal()}
-        size="large"
-        icon="add"
-        renderContent={() => (
+      { state.showImportModal && (
+        <Modal
+          header={`Import ${section}`}
+          handleClose={() => self._closeImportModal()}
+          size="large"
+          icon="add"
+        >
           <div className="ImportModal">
             <p>{`Import a ${section} by either pasting a URL or drag & dropping below`}</p>
             <input
@@ -48,39 +46,39 @@ const ImportModal = ({ self }) => {
               onDragLeave={evt => self._dragLeaveHandler(evt, false)}
               onDragEnter={evt => self._dragEnterHandler(evt, false)}
             >
-              {
-                 (state.ready && state.files[0])
-                   ? (
-                     <div className="Import__ready">
-                       <div>{`Select Import to import the following ${section}`}</div>
-                       <hr />
-                       <div>{`${section} Owner: ${owner}`}</div>
-                       <div>{`${section} Name: ${name}`}</div>
+              { (state.ready && state.files[0])
+                 ? (
+                   <div className="Import__ready">
+                     <div>{`Select Import to import the following ${section}`}</div>
+                     <hr />
+                     <div>{`${section} Owner: ${owner}`}</div>
+                     <div>{`${section} Name: ${name}`}</div>
+                   </div>
+                 )
+                 : (
+                   <div className="DropZone">
+                     <div className="Dropbox--menu">
+                       <h5>{`Drag and drop an exported ${section} here`}</h5>
+                       <span>or</span>
                      </div>
-                   ) : (
-                     <div className="DropZone">
-                       <div className="Dropbox--menu">
-                         <h5>{`Drag and drop an exported ${section} here`}</h5>
-                         <span>or</span>
-                       </div>
-                       <label
-                         className="flex justify--center"
-                         htmlFor="zip__dropzone"
+                     <label
+                       className="flex justify--center"
+                       htmlFor="zip__dropzone"
+                     >
+                       <div
+                         className="Btn Btn--allStyling"
                        >
-                         <div
-                           className="Btn Btn--allStyling"
-                         >
-                           Choose Files...
-                         </div>
-                         <input
-                           id="zip__dropzone"
-                           className="hidden"
-                           type="file"
-                           onChange={evt => self._dropHandler(evt)}
-                         />
-                       </label>
-                     </div>
-                   )}
+                         Choose Files...
+                       </div>
+                       <input
+                         id="zip__dropzone"
+                         className="hidden"
+                         type="file"
+                         onChange={evt => self._dropHandler(evt)}
+                       />
+                     </label>
+                   </div>
+              )}
             </div>
 
             <div className="Import__buttonContainer">
@@ -101,11 +99,8 @@ const ImportModal = ({ self }) => {
               </button>
             </div>
           </div>
-        )
-        }
-      />
-      )
-    }
+        </Modal>
+      )}
     </div>
   );
 };

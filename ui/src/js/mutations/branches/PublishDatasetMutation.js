@@ -62,7 +62,7 @@ export default function PublishDatasetMutation(
       },
       onError: (err) => { console.error(err); },
       updater: (store, response) => {
-        if (response) {
+        if (failureCall && response) {
           const footerData = {
             owner,
             name: datasetName,

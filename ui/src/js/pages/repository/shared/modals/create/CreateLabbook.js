@@ -59,7 +59,6 @@ class CreateLabbook extends React.Component<Props> {
         this.createLabbookName.focus();
       }
     }).catch((error) => {
-      console.log(error);
       setButtonState('error');
     });
   }
