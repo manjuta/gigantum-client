@@ -2,7 +2,7 @@
 // vendor
 import React, { Component } from 'react';
 import ReactTooltip from 'react-tooltip';
-import VisibilityModal from 'Pages/repository/shared/modals/VisibilityModal';
+import VisibilityModal from 'Pages/repository/shared/modals/visibility/VisibilityModal';
 // css
 import './ChangeVisibility.scss';
 
