@@ -26,7 +26,6 @@ class Server extends Component<Props> {
   login = () => {
     const { auth, server, setLoggingInServerId } = this.props;
     const serverId = server.server_id;
-    console.log(server);
     const freshLoginText = localStorage.getItem('fresh_login') ? '&freshLogin=true' : '';
     const hash = `#route=${window.location.origin}${freshLoginText}&serverId=${serverId}`;
     setLoggingInServerId(serverId);
@@ -54,7 +53,6 @@ class Server extends Component<Props> {
     const buttonText = serverId === loggingInServerId
       ? 'Please wait'
       : name;
-    console.log(server);
     return (
       <div className="grid-5 flex flex--column justify--center">
         <button
