@@ -1,12 +1,24 @@
+// @flow
 // vendor
-import React, { Component, Fragment } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
-const DatasetPublish = (props) => {
+type Props = {
+  isProcessing: Boolean,
+  localDataset: {
+    name: string,
+    owner: string,
+  },
+  progress: Object,
+  setPublic: Function,
+}
+
+const DatasetPublish = (props: Props) => {
   const {
+    isProcessing,
     localDataset,
     progress,
-    isProcessing,
+    setPublic,
   } = props;
   const name = `${localDataset.owner}/${localDataset.name}`;
   const currentStepProgress = progress[name] ? progress[name].step : 2;
@@ -34,7 +46,7 @@ const DatasetPublish = (props) => {
       <div className="PublishDatasetsModal__Datasets-radio-container">
         { (!isProcessing)
           ? (
-            <Fragment>
+            <>
               <div className="PublishDatasetsModal__private">
                 <label
                   htmlFor={`${name}_private`}
@@ -44,7 +56,7 @@ const DatasetPublish = (props) => {
                     type="radio"
                     name={name}
                     id={`${name}_private`}
-                    onClick={() => { props.setPublic(name, false); }}
+                    onClick={() => { setPublic(name, false); }}
                   />
                   <span><b>Private</b></span>
                 </label>
@@ -58,12 +70,12 @@ const DatasetPublish = (props) => {
                     type="radio"
                     name={name}
                     id={`${name}_public`}
-                    onClick={() => { props.setPublic(name, true); }}
+                    onClick={() => { setPublic(name, true); }}
                   />
                   <span><b>Public</b></span>
                 </label>
               </div>
-            </Fragment>
+            </>
           )
           : (
             <div className="container-fluid">

@@ -65,31 +65,30 @@ class CollaboratorsModal extends Component<Props> {
         size="large-long"
         overflow="visible"
         handleClose={() => { toggleCollaborators(); }}
-        renderContent={() => (
-          <div className="Modal__sizer">
-            <CollaboratorSearch
+      >
+        <div className="Modal__sizer">
+          <CollaboratorSearch
+            {...this.props}
+            getPermissions={this._getPermissions}
+            mutations={this.mutations}
+          />
+
+          <div className="CollaboratorsModal__collaborators">
+
+            <h5 className="CollaboratorsModal__h5">Collaborators</h5>
+
+            <CollaboratorsList
               {...this.props}
+              setOverflow={this._setOverflow}
+              overflow={overflow}
+              canManageCollaborators={canManageCollaborators}
               getPermissions={this._getPermissions}
               mutations={this.mutations}
+              toggleCollaborators={toggleCollaborators}
             />
-
-            <div className="CollaboratorsModal__collaborators">
-
-              <h5 className="CollaboratorsModal__h5">Collaborators</h5>
-              <CollaboratorsList
-                {...this.props}
-                setOverflow={this._setOverflow}
-                overflow={overflow}
-                canManageCollaborators={canManageCollaborators}
-                getPermissions={this._getPermissions}
-                mutations={this.mutations}
-                toggleCollaborators={toggleCollaborators}
-              />
-            </div>
           </div>
-        )
-        }
-      />
+        </div>
+      </Modal>
     );
   }
 }

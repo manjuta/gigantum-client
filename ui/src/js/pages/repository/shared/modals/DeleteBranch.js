@@ -19,7 +19,7 @@ type Props = {
   toggleModal: Function,
 }
 
-export default class DeleteBranch extends Component<Props> {
+class DeleteBranch extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
@@ -80,44 +80,43 @@ export default class DeleteBranch extends Component<Props> {
     const deleteDisabled = cleanBranchName !== eneteredBranchName;
 
     return (
-
       <Modal
         handleClose={() => toggleModal('deleteModalVisible')}
         size="medium"
         header="Delete Branch"
         icon="delete"
-        renderContent={() => (
-          <Fragment>
-            <p className="DeleteBranch__text DeleteBranch__text--red">
-              {`You are going to delete ${owner}/${cleanBranchName}. Deleted branches cannot be restored. Are you sure?`}
-            </p>
+      >
+        <>
+          <p className="DeleteBranch__text DeleteBranch__text--red">
+            {`You are going to delete ${owner}/${cleanBranchName}. Deleted branches cannot be restored. Are you sure?`}
+          </p>
 
-            <p className="DeleteBranch__text">
-              This action can lead to data loss. Please type
-              <b>{cleanBranchName}</b>
-              to proceed.
-            </p>
+          <p className="DeleteBranch__text">
+            This action can lead to data loss. Please type
+            <b>{cleanBranchName}</b>
+            to proceed.
+          </p>
 
-            <input
-              onChange={(evt) => { this._updateBranchText(evt); }}
-              onKeyUp={(evt) => { this._updateBranchText(evt); }}
-              className="DeleteBranch__text"
-              type="text"
-              placeholder="Enter branch name here"
-            />
-            <div className="DeleteBranch__buttonContainer">
-              <button
-                type="button"
-                disabled={deleteDisabled}
-                onClick={() => this._deleteBranch()}
-              >
-                Confirm
-              </button>
-            </div>
-          </Fragment>
-        )
-        }
-      />
+          <input
+            onChange={(evt) => { this._updateBranchText(evt); }}
+            onKeyUp={(evt) => { this._updateBranchText(evt); }}
+            className="DeleteBranch__text"
+            type="text"
+            placeholder="Enter branch name here"
+          />
+          <div className="DeleteBranch__buttonContainer">
+            <button
+              type="button"
+              disabled={deleteDisabled}
+              onClick={() => this._deleteBranch()}
+            >
+              Confirm
+            </button>
+          </div>
+        </>
+      </Modal>
     );
   }
 }
+
+export default DeleteBranch;

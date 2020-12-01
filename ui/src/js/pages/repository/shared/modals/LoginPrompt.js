@@ -58,7 +58,8 @@ class LoginPrompt extends Component<Props> {
         size="small"
         handleClose={() => this.props.closeModal()}
         icon="login"
-        renderContent={() => (navigator.onLine
+      >
+        {(navigator.onLine)
           ? (
             <div className="LoginPrompt">
               <div>
@@ -87,9 +88,9 @@ class LoginPrompt extends Component<Props> {
                 <p>A valid internet connection is required to perform this action.</p>
               </div>
             </div>
-          ))
+          )
         }
-      />
+      </Modal>
     );
   }
 }

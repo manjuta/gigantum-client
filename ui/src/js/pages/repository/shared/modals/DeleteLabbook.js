@@ -227,39 +227,37 @@ export default class DeleteLabbook extends Component<Props> {
         handleClose={() => handleClose()}
         size="medium"
         icon="delete"
-        renderContent={() => (
-          <div className="DeleteLabbook">
-            {this._getExplanationText()}
+      >
+        <div className="DeleteLabbook">
+          {this._getExplanationText()}
 
-            <input
-              id="deleteInput"
-              placeholder={`Enter ${name} to delete`}
-              onKeyUp={(evt) => { this._setLabbookName(evt); }}
-              onChange={(evt) => { this._setLabbookName(evt); }}
-              type="text"
+          <input
+            id="deleteInput"
+            placeholder={`Enter ${name} to delete`}
+            onKeyUp={(evt) => { this._setLabbookName(evt); }}
+            onChange={(evt) => { this._setLabbookName(evt); }}
+            type="text"
+          />
+
+          <div className="DeleteProject__buttons">
+            <button
+              type="button"
+              className="Btn Btn--flat"
+              onClick={() => handleClose()}
+            >
+              Cancel
+            </button>
+            <ButtonLoader
+              className="Btn Btn--wide Btn--last"
+              buttonState={state.deleteLabbookButtonState}
+              buttonText={deleteText}
+              params={{}}
+              buttonDisabled={state.deletePending || name !== state.name}
+              clicked={this._deleteLabbook}
             />
-
-            <div className="DeleteProject__buttons">
-              <button
-                type="button"
-                className="Btn Btn--flat"
-                onClick={() => handleClose()}
-              >
-                Cancel
-              </button>
-              <ButtonLoader
-                className="Btn Btn--wide Btn--last"
-                buttonState={state.deleteLabbookButtonState}
-                buttonText={deleteText}
-                params={{}}
-                buttonDisabled={state.deletePending || name !== state.name}
-                clicked={this._deleteLabbook}
-              />
-            </div>
           </div>
-        )
-        }
-      />
+        </div>
+      </Modal>
     );
   }
 }

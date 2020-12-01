@@ -17,7 +17,6 @@ import {
   ERROR,
   LOGGED_IN,
   LOGGED_OUT,
-  BACK,
 } from 'JS/Auth/AuthMachineConstants';
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';

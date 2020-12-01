@@ -1,5 +1,5 @@
 // vendor
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 // mutations
 import SyncLabbookMutation from 'Mutations/branches/SyncLabbookMutation';
@@ -101,43 +101,42 @@ export default class ForceSync extends Component<Props> {
     const {
       toggleSyncModal,
     } = this.props;
+
     return (
       <Modal
         header="Sync Conflict"
         handleClose={() => toggleSyncModal()}
         size="medium"
         icon="sync"
-        renderContent={() => (
-          <Fragment>
-            <div>
-              <p>Your Project conflicts with changes already synced to the server. You can choose which changes to use</p>
-              <p><b>**Note: This will overwrite the unselected conflicting files.</b></p>
-              <p>Which changes would you like to use?</p>
-            </div>
-            <div className="ForceSync__buttonContainer">
-              <button
-                onClick={() => { this._forceSync('ours'); }}
-                type="button"
-              >
-                Use Mine
-              </button>
-              <button
-                onClick={() => { this._forceSync('theirs'); }}
-                type="button"
-              >
-                Use Theirs
-              </button>
-              <button
-                onClick={() => { toggleSyncModal(); }}
-                type="button"
-              >
-                Abort
-              </button>
-            </div>
-          </Fragment>
-        )
-        }
-      />
+      >
+        <>
+          <div>
+            <p>Your Project conflicts with changes already synced to the server. You can choose which changes to use</p>
+            <p><b>**Note: This will overwrite the unselected conflicting files.</b></p>
+            <p>Which changes would you like to use?</p>
+          </div>
+          <div className="ForceSync__buttonContainer">
+            <button
+              onClick={() => { this._forceSync('ours'); }}
+              type="button"
+            >
+              Use Mine
+            </button>
+            <button
+              onClick={() => { this._forceSync('theirs'); }}
+              type="button"
+            >
+              Use Theirs
+            </button>
+            <button
+              onClick={() => { toggleSyncModal(); }}
+              type="button"
+            >
+              Abort
+            </button>
+          </div>
+        </>
+      </Modal>
     );
   }
 }

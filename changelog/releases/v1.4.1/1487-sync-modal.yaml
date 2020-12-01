@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1567"
+changelog:
+  - type: NEW
+    description: Adds multiple status pages to the publish modal. This provides the user with an easier way of viewing feedback on a publish jobs failure or success.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1487
