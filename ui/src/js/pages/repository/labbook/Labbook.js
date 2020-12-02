@@ -6,7 +6,6 @@ import {
   graphql,
 } from 'react-relay';
 import { DragDropContext } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // store
@@ -20,7 +19,6 @@ import {
 } from 'JS/redux/actions/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/actions/routes';
 // utils
-import { getFilesFromDragEvent } from 'JS/utils/html-dir-content';
 import BranchMutations from 'Pages/repository/shared/utils/BranchMutations';
 // mutations
 import LabbookContainerStatusMutation from 'Mutations/repository/labbook/LabbookContainerStatusMutation';
@@ -39,6 +37,8 @@ import OutputData from './outputData/Output';
 import MigrationModal from './modals/migration/MigrationModal';
 // query
 import fetchMigrationInfoQuery from './queries/fetchMigrationInfoQuery';
+// backend
+import backend from './labbookBackend';
 // assets
 import './Labbook.scss';
 
@@ -988,23 +988,5 @@ const LabbookFragmentContainer = createRefetchContainer(
   `,
 );
 
-/** *
-  * @param {Object} manager
-  * data object for reactDND
-*/
-
-const backend = (manager) => {
-  const backend = HTML5Backend(manager);
-  const orgTopDropCapture = backend.handleTopDropCapture;
-
-  backend.handleTopDropCapture = (e) => {
-    if (backend.currentNativeSource) {
-      orgTopDropCapture.call(backend, e);
-      backend.currentNativeSource.item.dirContent = getFilesFromDragEvent(e, { recursive: true }); // returns a promise
-    }
-  };
-
-  return backend;
-};
 
 export default DragDropContext(backend)(LabbookFragmentContainer);

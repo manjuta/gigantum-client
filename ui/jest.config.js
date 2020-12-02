@@ -11,7 +11,7 @@ module.exports = {
     "<rootDir>/**/__tests__/**/*.test.js?(x)"
   ],
   "verbose": false,
-  "browser": true,
+  "browser": false,
   "globals": {
     "__DEV__": true
   },
@@ -50,6 +50,7 @@ module.exports = {
     "^react-markdown$": "react-markdown",
     "^Components[/](.+)": "<rootDir>/src/js/components/$1",
     "^Mutations[/](.+)": "<rootDir>/src/js/mutations/$1",
+    "^Styles[/](.+)": "<rootDir>/src/css/$1",
     "^Tests[/](.+)": "<rootDir>/__tests__/$1",
     "^JS[/](.+)": "<rootDir>/src/js/$1",
     '^dnd-core$': 'dnd-core/dist/cjs',
