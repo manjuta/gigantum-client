@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1571"
+changelog:
+  - type: NEW
+    description: Adds uri decoding for more complex error messages. Messages can now be encoded in standard uri format and rendered correctly in the ui.
