@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 // components
-import PopupBlocked from 'Components/shared/modals/PopupBlocked';
+import PopupBlocked from 'Components/modal/popup/PopupBlocked';
 // store
 import { setMergeMode, updateTransitionState } from 'JS/redux/actions/labbook/labbook';
 import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/actions/footer';

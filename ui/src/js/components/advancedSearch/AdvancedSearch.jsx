@@ -6,10 +6,45 @@ import { WithContext, WithOutContext } from 'react-tag-input';
 import Category from './Category';
 // assets
 import './AdvancedSearch.scss';
+import './AdvancedSearchOverrides.scss';
 
-export default class AdvancedSearch extends Component {
+
+type Props = {
+  autoHide: boolean,
+  customStyle: Object,
+  filterCategories: Array,
+  setTags: Function,
+  showButton: boolean,
+  tags: Array,
+  withoutContext: Function,
+}
+
+/**
+* Method filters categories and pushes data an object array and string array.
+* @param {Array} filterCategories
+*
+* @return {Object}
+*/
+const getSuggestions = (filterCategories) => {
+  const suggestions = [];
+  const rawKeys = [];
+
+  Object.keys(filterCategories).forEach((category) => {
+    filterCategories[category].forEach((key) => {
+      if (rawKeys.indexOf(key) === -1) {
+        rawKeys.push(key);
+        suggestions.push({ id: key, text: key, className: category });
+      }
+    });
+  });
+
+  return suggestions;
+};
+
+class AdvancedSearch extends Component<Props> {
   state = {
     expandedIndex: null,
+    focused: false,
     tooltipShown: false,
   }
 
@@ -63,7 +98,7 @@ export default class AdvancedSearch extends Component {
   */
   _addTag = () => {
     // TODO remove use of document.getElementById, use refs and state
-    const { value } = document.getElementById('AdvancedSearch');
+    const { value } = this.advancedSearch;
     if (value.length) {
       const tag = {
         id: value,
@@ -114,25 +149,21 @@ export default class AdvancedSearch extends Component {
 
   render() {
     const {
+      autoHide,
+      customStyle,
+      filterCategories,
+      showButton,
       tags,
       withoutContext,
-      customStyle,
-      autoHide,
-      showButton,
-      filterCategories,
     } = this.props;
-    const { state, props } = this;
-    const suggestions = [];
-    const rawKeys = [];
+    const {
+      expandedIndex,
+      focused,
+      tooltipShown,
+    } = this.state;
+    const suggestions = getSuggestions(filterCategories);
     const TagComponent = withoutContext ? WithOutContext : WithContext;
-    Object.keys(filterCategories).forEach((category) => {
-      filterCategories[category].forEach((key) => {
-        if (rawKeys.indexOf(key) === -1) {
-          rawKeys.push(key);
-          suggestions.push({ id: key, text: key, className: category });
-        }
-      });
-    });
+
     // declare css here
     const advancedSearchCSS = classNames({
       AdvancedSearch: true,
@@ -142,7 +173,7 @@ export default class AdvancedSearch extends Component {
     const filterCSS = classNames({
       AdvancedSearch__filters: true,
       'AdvancedSearch__filters--dropdown': autoHide,
-      hidden: autoHide && !state.focused,
+      hidden: autoHide && !focused,
     });
 
     return (
@@ -152,16 +183,16 @@ export default class AdvancedSearch extends Component {
         <div className="flex">
           <div className="flex-1">
             <TagComponent
-              id="AdvancedSearch"
-              tags={tags}
               autocomplete
               autofocus={false}
-              suggestions={suggestions}
-              placeholder="Search by keyword, tags or filters"
               data-resetselectedfilter-id="AdvancedSearch"
               handleDelete={(index) => { this._handleDelete(index); }}
               handleAddition={(tag) => { this._handleAddition(tag); }}
               handleInputFocus={() => this.setState({ focused: true })}
+              ref={(ref) => { this.advancedSearch = ref; }}
+              suggestions={suggestions}
+              tags={tags}
+              placeholder="Search by keyword, tags or filters"
             />
           </div>
           { showButton
@@ -175,17 +206,17 @@ export default class AdvancedSearch extends Component {
           }
         </div>
         <div className={filterCSS}>
-          { Object.keys(props.filterCategories).map((category, index) => (
+          { Object.keys(filterCategories).map((category, index) => (
             <Category
               category={category}
-              expandedIndex={state.expandedIndex}
-              filterCategories={props.filterCategories}
+              expandedIndex={expandedIndex}
+              filterCategories={filterCategories}
               handleAddition={this._handleAddition}
               index={index}
               key={category}
               setExpandedIndex={this._setExpandedIndex}
               toggleTooltip={this._toggleTooltip}
-              tooltipShown={state.tooltipShown}
+              tooltipShown={tooltipShown}
             />
           ))}
         </div>
@@ -193,3 +224,5 @@ export default class AdvancedSearch extends Component {
     );
   }
 }
+
+export default AdvancedSearch;

@@ -16,7 +16,7 @@ import { setErrorMessage, setInfoMessage, setWarningMessage } from 'JS/redux/act
 import StartContainerMutation from 'Mutations/container/StartContainerMutation';
 import StartDevToolMutation from 'Mutations/container/StartDevToolMutation';
 // components
-import PopupBlocked from 'Components/shared/modals/PopupBlocked';
+import PopupBlocked from 'Components/modal/popup/PopupBlocked';
 import ActionsMenu from './ActionsMenu';
 import DatasetActionsMenu from './dataset/DatasetActionsMenu';
 // utils

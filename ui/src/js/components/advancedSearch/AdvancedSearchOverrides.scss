@@ -1,0 +1,161 @@
+@import '~Styles/_imports.scss';
+/*********************
+  Overrides
+**********************/
+div.ReactTags__tags {
+    position: relative;
+
+    display:flex;
+    flex-direction: column-reverse;
+}
+
+.ReactTags__suggestions {
+    z-index: 1;
+}
+
+
+div.ReactTags__tagInput {
+    display: inline-block;
+
+    width: calc(100% - 2px);
+
+    border-radius: 2px;
+}
+div.ReactTags__tagInput input.ReactTags__tagInputField,
+div.ReactTags__tagInput input.ReactTags__tagInputField:focus {
+    width: calc(100% + 2px) !important;
+    width: 100%;
+    height: 48px;
+    margin: 0;
+
+    border: none !important;
+    box-shadow: none !important;
+
+    font-size: 16px;
+}
+
+div.ReactTags__selected span.ReactTags__tag {
+    display: inline-block;
+
+    height: 37px;
+    margin: 5px 5px;
+    padding: 7px 5px;
+
+    white-space: nowrap;
+
+    color: $primaryText;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    background: #eee;
+
+    font-size: 16px;
+}
+
+
+.AdvancedSearch {
+  span.ReactTags__tag:first-child{
+      margin-left: 0px !important;
+  }
+
+  div.ReactTags__selected a.ReactTags__remove {
+      margin-left: 5px;
+
+      cursor: pointer;
+
+      color: #aaa;
+  }
+
+  div.ReactTags__suggestions {
+      position: absolute;
+  }
+  div.ReactTags__suggestions ul {
+      width: 200px;
+
+      list-style-type: none;
+
+      background: white;
+      box-shadow: .05em .01em .5em rgba(0,0,0,.2);
+  }
+  div.ReactTags__suggestions li {
+      margin: 0;
+      padding: 5px 10px;
+
+      border-bottom: 1px solid #ddd;
+  }
+  div.ReactTags__suggestions li mark {
+      text-decoration: underline;
+
+      background: none;
+
+      font-weight: 600;
+  }
+  div.ReactTags__suggestions ul li.ReactTags__activeSuggestion {
+      cursor: pointer;
+
+      background: #b7cfe0;
+  }
+
+  .ReactTags__selected {
+      top: 100px;
+
+      display: flex;
+
+      height: auto;
+      padding: 0 10px;
+      background: $white;
+      border: 1px solid $romanSilver;
+    }
+
+  .AdvancedSearch__li.Languanges:hover,
+  .ReactTags__tag.Languages,
+  .ReactTags__tag.Dataset.Type,
+  .AdvancedSearch__li.Dataset.Type:hover,
+  .AdvancedSearch__li.Package.Managers:hover,
+  .ReactTags__tag.Package.Managers {
+      color: $white !important;
+      background: $primary !important;
+      a {
+          color: $white !important;
+      }
+  }
+
+  .AdvancedSearch__li.CUDA.Version:hover,
+  .ReactTags__tag.CUDA.Version {
+      color: $white !important;
+      background: $slateBlueOpaque !important;
+      a {
+          color: $white !important;
+      }
+  }
+
+  .AdvancedSearch__li.Development.Environments:hover,
+  .ReactTags__tag.Development.Environments,
+  .AdvancedSearch__li.Base.Type:hover,
+  .ReactTags__tag.Base.Type {
+      color: $white !important;
+      background: $slateBlue !important;
+      a {
+          color: $white !important;
+      }
+  }
+
+  .AdvancedSearch__li.Tags:hover,
+  .ReactTags__tag.Tags {
+      color: $white !important;
+      background: $lightblue !important;
+      a {
+          color: $white !important;
+      }
+  }
+}
+
+.Btn {
+    &__AdvancedSearch {
+        width: 50px;
+        height: 50px;
+        margin: 0;
+        background: $primary url(~Images/icons/search-white.svg) no-repeat center center;
+        background-size: 30px;
+        border-radius: 0;
+    }
+}
