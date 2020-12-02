@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1572"
+changelog:
+  - type: NEW
+    description: Adds instructions for resolving installation issues with requirements packages.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1496
