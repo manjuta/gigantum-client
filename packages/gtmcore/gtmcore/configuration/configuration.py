@@ -23,6 +23,7 @@ ServerInfo = NamedTuple('ServerInfo', [('id', str),
                                        ('login_url', str),
                                        ('token_url', str),
                                        ('logout_url', str),
+                                       ('git_url', str)
                                        ])
 
 
@@ -349,6 +350,7 @@ class Configuration:
                                                      data['auth']['login_url'],
                                                      data['auth']['token_url'],
                                                      data['auth']['logout_url'],
+                                                     data['server']['git_url']
                                                      ))
 
         return configured_servers

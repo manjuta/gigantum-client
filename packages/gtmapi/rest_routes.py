@@ -116,13 +116,20 @@ def servers():
     """Unauthorized endpoint to check for configured servers. Returns the name and ID of the server for selection
     when logging in. Also indicates the current server (if one is selected)
     """
+    gitlab_response = requests.get(f"{s.git_url}/api/v4/version")
+    if gitlab_response.status_code == 503 and "backup in progress" in str(response.content).lower():
+        backup_in_progress = True
+    else:
+        backup_in_progress = False
+
     server_list = []
     for s in current_app.config['LABMGR_CONFIG'].list_available_servers():
         server_list.append({"server_id": s.id,
                             "name": s.name,
                             "login_url": s.login_url,
                             "token_url": s.token_url,
-                            "logout_url": s.logout_url})
+                            "logout_url": s.logout_url,
+                            "backup_in_progress": backup_in_progress})
 
     return jsonify({"available_servers": server_list,
                     "current_server": current_app.config['LABMGR_CONFIG'].get_current_server_id()})
