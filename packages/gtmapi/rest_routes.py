@@ -116,7 +116,7 @@ def servers():
     """Unauthorized endpoint to check for configured servers. Returns the name and ID of the server for selection
     when logging in. Also indicates the current server (if one is selected)
     """
-    gitlab_response = requests.get(f"{s.git_url}/api/v4/version")
+    gitlab_response = requests.get(f"{s.git_url}/backup")
     if gitlab_response.status_code == 503 and "backup in progress" in str(response.content).lower():
         backup_in_progress = True
     else:
