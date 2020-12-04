@@ -20,6 +20,7 @@ class Server(graphene.ObjectType):
     user_search_url = graphene.String()
     lfs_enabled = graphene.Boolean()
     auth_config = graphene.Field(ServerAuth)
+    backup_in_progress = graphene.Boolean()
 
     @classmethod
     def get_node(cls, info, id):
@@ -60,6 +61,15 @@ def helper_get_current_server():
                              public_key_url=auth_config.public_key_url,
                              type_specific_fields=type_specific_fields)
 
+    try:
+        gitlab_response = requests.get(f"{server_config.git_url}/backup")
+        if gitlab_response.status_code == 503 and "backup in progress" in str(response.content).lower():
+            backup_in_progress = True
+        else:
+            backup_in_progress = False
+    except requests.exceptions.SSLError:
+        backup_in_progress = False
+
     return Server(server_id=server_config.id,
                   name=server_config.name,
                   base_url=server_config.base_url,
@@ -69,4 +79,5 @@ def helper_get_current_server():
                   object_service_url=server_config.object_service_url,
                   user_search_url=server_config.user_search_url,
                   lfs_enabled=server_config.lfs_enabled,
-                  auth_config=server_auth)
+                  auth_config=server_auth,
+                  backup_in_progress=backup_in_progress)
