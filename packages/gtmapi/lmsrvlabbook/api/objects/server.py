@@ -64,7 +64,7 @@ def helper_get_current_server():
 
     try:
         gitlab_response = requests.get(f"{server_config.git_url}/backup")
-        if gitlab_response.status_code == 503 and "backup in progress" in str(response.content).lower():
+        if gitlab_response.status_code == 503 and "backup in progress" in str(gitlab_response.content).lower():
             backup_in_progress = True
         else:
             backup_in_progress = False
