@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1568"
+changelog:
+  - type: NON_USER_FACING
+    description: Adds storybook, relay testing utils and integrated snapshots for ui tests.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1542

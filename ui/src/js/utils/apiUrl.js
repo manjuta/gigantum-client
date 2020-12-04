@@ -11,7 +11,9 @@ const getApiURL = (route) => {
   const globalObject = self || window;
   /* eslint-enable */
   const uuid = uuidv4();
-  const { pathname } = document.location;
+  const location = self ? self.location : document.location;
+
+  const { pathname } = location;
   const pathList = pathname ? pathname.split('/') : '';
   const cloudPath = pathList.length > 2 ? pathList[2] : '';
   const apiHost = (process.env.NODE_ENV === 'development')

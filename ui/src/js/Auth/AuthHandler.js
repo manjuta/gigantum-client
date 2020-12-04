@@ -106,7 +106,7 @@ const getTokens = (
       isLoggedIn: false,
       availableServers,
       errors: [{
-        message: hash.error,
+        message: decodeURI(hash.error),
         admin: decodeURI(hash.admin),
       }],
     });
