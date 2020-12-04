@@ -1,5 +1,6 @@
 import graphene
 import flask
+import requests
 
 from lmsrvlabbook.api.objects.serverauth import ServerAuth
 
