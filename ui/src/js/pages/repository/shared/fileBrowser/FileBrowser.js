@@ -16,12 +16,12 @@ import {
 import './FileBrowser.scss';
 // components
 import LinkModal from './LinkModal';
-import AddSubfolder from './fileRow/AddSubfolder';
+import AddSubfolder from './fileRow/addSubfolder/AddSubfolder';
 import FileSizePromptModal from './FileSizePromptModal';
 import FileBrowserToolbar from './FileBrowserToolbar';
 import FileBrowserTools from './FileBrowserTools';
-import File from './fileRow/File';
-import Folder from './fileRow/Folder';
+import File from './fileRow/file/File';
+import Folder from './fileRow/folder/Folder';
 import Datasets from './fileRow/dataset/Datasets';
 // util
 import prepareUpload from './utilities/PrepareUpload';
