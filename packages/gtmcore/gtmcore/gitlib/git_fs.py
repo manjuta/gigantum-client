@@ -710,6 +710,8 @@ class GitFilesystem(GitRepoInterface):
             self.repo.remotes[remote].fetch(refspec)
         except KeyError:
             raise ValueError(f'{remote} is not a remote in the repository')
+        except Exception as e:
+            raise
 
     def pull(self, refspec=None, remote="origin"):
         """Method fetch and integrate a remote

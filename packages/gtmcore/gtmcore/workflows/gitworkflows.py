@@ -3,6 +3,7 @@ import os
 import time
 from enum import Enum
 import glob
+import requests
 from typing import Optional, Callable, cast, List
 from humanfriendly import format_size
 
@@ -15,6 +16,7 @@ from gtmcore.workflows import gitworkflows_utils
 from gtmcore.exceptions import GigantumException
 from gtmcore.inventory import Repository
 from gtmcore.inventory.inventory import InventoryManager
+from gtmcore.configuration import Configuration
 from gtmcore.dataset import Dataset
 from gtmcore.inventory.branching import BranchManager
 from gtmcore.dataset.manifest import Manifest
@@ -27,7 +29,19 @@ logger = LMLogger.get_logger()
 
 
 class GitWorkflowException(GigantumException):
-    pass
+    def __init__(self, e):
+        config = Configuration()
+        server_config = config.get_server_configuration()
+        try:
+            gitlab_response = requests.get(f"{server_config.git_url}/backup")
+            if gitlab_response.status_code == 503 and "backup in progress" in str(gitlab_response.content).lower():
+                super().__init__("backup in progress")
+                return
+
+        except requests.exceptions.SSLError:
+            pass
+
+        super().__init__(e)
 
 
 class MergeOverride(Enum):
@@ -122,12 +136,15 @@ class GitWorkflow(ABC):
         """ Perform a Git reset to undo all local changes"""
         bm = BranchManager(self.repository, username)
         if self.remote and bm.active_branch in bm.branches_remote:
-            self.repository.git.fetch()
-            self.repository.sweep_uncommitted_changes()
-            call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
-                            cwd=self.repository.root_dir)
-            call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
-            self.repository.git.clear_checkout_context()
+            try:
+                self.repository.git.fetch()
+                self.repository.sweep_uncommitted_changes()
+                call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
+                                cwd=self.repository.root_dir)
+                call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
+                self.repository.git.clear_checkout_context()
+            except Exception as e:
+                raise GitWorkflowException(e)
 
 
 class LabbookWorkflow(GitWorkflow):
