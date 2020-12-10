@@ -8,6 +8,7 @@ from string import Template
 from gtmcore.logging import LMLogger
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.configuration import Configuration
+from gtmcore.workflows import GitLabException
 
 from lmsrvcore.caching import LabbookCacheController
 from lmsrvcore.auth.user import get_logged_in_username
@@ -226,10 +227,10 @@ class LabbookList(graphene.ObjectType):
                                           "Content-Type": "application/json"})
 
         if response.status_code != 200:
-            raise IOError(f"Failed to retrieve Project listing from remote server: {response.json()}")
+            raise GitLabException(f"Failed to retrieve Project listing from remote server: {response.json()}")
         response_data = response.json()
         if 'errors' in response_data:
-            raise IOError(f"Failed to retrieve Project listing from remote server: {response_data['errors']}")
+            raise GitLabException(f"Failed to retrieve Project listing from remote server: {response_data['errors']}")
 
         # Get Labbook instances
         edge_objs = []

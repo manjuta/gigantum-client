@@ -7,7 +7,7 @@ import requests
 from typing import Any, Optional, Callable
 
 from gtmcore.gitlib import RepoLocation
-from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, GitLabException
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
                              ActivityDetailType, ActivityDetailRecord, \
                              ActivityAction
@@ -35,22 +35,6 @@ class WorkflowsException(Exception):
 
 class MergeError(WorkflowsException):
     pass
-
-
-class GitLabRemoteError(WorkflowsException):
-    def __init__(self, e):
-        config = Configuration()
-        server_config = config.get_server_configuration()
-        try:
-            gitlab_response = requests.get(f"{server_config.git_url}/backup")
-            if gitlab_response.status_code == 503 and "backup in progress" in str(gitlab_response.content).lower():
-                super().__init__("backup in progress")
-                return
-
-        except requests.exceptions.SSLError:
-            pass
-
-        super().__init__(e)
 
 
 # TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
@@ -104,7 +88,7 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
                               current_username=username)
         repository.add_remote("origin", remote.remote_location)
     except Exception as e:
-        raise GitLabRemoteError(e)
+        raise GitLabException(e)
 
 
 # TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
@@ -128,14 +112,14 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
             logger.warning(f"Fetch attempt {tr+1}/5 failed for {str(repository)}: {e}")
             time.sleep(1)
     else:
-        raise GitLabRemoteError(f"Timed out trying to fetch repo for {str(repository)}")
+        raise GitLabException(f"Timed out trying to fetch repo for {str(repository)}")
 
     feedback_callback("Pushing up regular objects...")
     try:
         call_subprocess(['git', 'push', '--set-upstream', 'origin', bm.workspace_branch],
                         cwd=repository.root_dir)
     except Exception as e:
-        raise GitLabRemoteError(e)
+        raise GitLabException(e)
     feedback_callback(f"Publish complete.")
     repository.git.clear_checkout_context()
 
@@ -217,7 +201,7 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
             repository.git.clear_checkout_context()
             return pulled_updates_count
     except Exception as e:
-        raise GitLabRemoteError(e)
+        raise GitLabException(e)
 
 
 # TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
@@ -317,7 +301,7 @@ def clone_repo(remote_url: str, username: str, owner: str,
 
         return repository
     except Exception as e:
-        raise GitLabRemoteError(e)
+        raise GitLabException(e)
 
 
 def process_linked_datasets(labbook: LabBook, logged_in_username: str) -> None:
