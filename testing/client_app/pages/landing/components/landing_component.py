@@ -16,7 +16,7 @@ class LandingComponent(BaseComponent):
 
     def __init__(self, driver: webdriver, component_data: ComponentModel) -> None:
         super(LandingComponent, self).__init__(driver, component_data)
-        self.btn_sign_in = self.get_locator(LocatorType.XPath, "//a[@class='Btn Login__button']")
+        self.btn_server = self.get_locator(LocatorType.XPath, "//button[@class='Btn Server__button']")
 
     def load_log_in_page(self) -> LogInPage:
         """Performs navigation to login page.
@@ -27,10 +27,10 @@ class LandingComponent(BaseComponent):
         Returns:
             An instance of LoginPage.
         """
-        self.btn_sign_in.click()
+        self.btn_server.click()
         log_in_page = LogInPage(self.driver)
         return log_in_page
 
-    def get_login_button_text(self) -> str:
-        """Returns the title of sign-in button."""
-        return self.btn_sign_in.get_text()
+    def get_server_button_text(self) -> str:
+        """Returns the title of server button"""
+        return self.btn_server.get_text()

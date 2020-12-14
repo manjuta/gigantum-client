@@ -6,3 +6,4 @@ configuration:
   browsers: ["chrome", "firefox"]
   incognito: True
   headless: False
+  default_server: "gigantum-com"

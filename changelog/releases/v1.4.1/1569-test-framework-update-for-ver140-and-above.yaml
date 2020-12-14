@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1594"
+changelog:
+  - type: NEW
+    description: Test framework updated with support for gigantum client >=1.4.0.
