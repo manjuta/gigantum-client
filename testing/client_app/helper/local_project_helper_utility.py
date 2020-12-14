@@ -45,7 +45,13 @@ class ProjectHelperUtility(object):
         user_credentials = ConfigurationManager.getInstance().get_user_credentials(LoginUser.User1)
         username = user_credentials.user_name
         home_dir = Path('~/gigantum').expanduser()
-        user_directory = home_dir / username / username / directory_name
+        # Only the option for the default server set in configuration is taken up.
+        # Fetching the current server id is not included.
+        if ConfigurationManager.getInstance().get_app_setting("default_server"):
+            server_name = ConfigurationManager.getInstance().get_app_setting("default_server")
+        else:
+            return False
+        user_directory = home_dir / 'servers' / server_name / username / username / directory_name
         user_projects = user_directory.glob('p-*')
         if user_projects:
             for project in user_projects:

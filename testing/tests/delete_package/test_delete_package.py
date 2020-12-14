@@ -18,7 +18,7 @@ class TestDeletePackage:
     def test_log_in_success(self):
         """ Test method to check the successful log-in."""
         landing_page = LandingPage(self.driver)
-        assert landing_page.landing_component.get_login_button_text() == "Sign Up or Log In"
+        assert landing_page.landing_component.get_server_button_text() == "Gigantum Hub"
         log_in_page = landing_page.landing_component.load_log_in_page()
         assert log_in_page.sign_up_component.get_sign_up_title() == "Sign Up"
         user_credentials = ConfigurationManager.getInstance().get_user_credentials(LoginUser.User1)
