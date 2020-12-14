@@ -247,7 +247,7 @@ class ContainerOperations(ABC):
             logger.info(f"Launching container with GPU support:{reason}")
             if gpu_shared_mem:
                 resource_args["shm_size"] = gpu_shared_mem
-                resource_args['runtime'] = 'nvidia'
+            resource_args['runtime'] = 'nvidia'
 
         else:
             logger.info(f"Launching container without GPU support. {reason}")

@@ -1,5 +1,7 @@
 import os
 from typing import Tuple, Optional
+import redis
+
 
 # This table is a simplified version of https://github.com/NVIDIA/nvidia-docker/wiki/CUDA
 # To interpret this data, cuda version 10.0 requires driver > 410.58
@@ -69,3 +71,84 @@ def should_launch_with_cuda_support(cuda_version: Optional[str]) -> Tuple[bool, 
                                 f" driver version ({host_driver_version})"
 
     return launch_with_cuda, reason
+
+
+class GPUNotAvailable(Exception):
+    pass
+
+
+class GPUInventory:
+    """Class to track available GPUs
+    """
+    # Redis cache settings
+    REDIS_DB = 0
+    GPUS_AVAILABLE_KEY = "$GPUS_AVAILABLE$"
+    GPU_ASSIGNMENT_KEY = "$GPU_ASSIGNMENT$"
+
+    def __init__(self) -> None:
+        self._redis_client: Optional[redis.Redis] = None
+
+    def _get_redis_client(self) -> redis.Redis:
+        """Method to get a redis client
+
+        Returns:
+            redis.Redis
+        """
+        if not self._redis_client:
+            self._redis_client = redis.Redis(db=self.REDIS_DB, decode_responses=True)
+
+        return self._redis_client
+
+    def initialize(self) -> None:
+        """
+
+        Returns:
+
+        """
+        client = self._get_redis_client()
+        for idx in range(self._num_gpus()):
+            client.rpush(self.GPUS_AVAILABLE_KEY, idx)
+
+    def _num_gpus(self) -> int:
+        """
+
+        Returns:
+
+        """
+        return 4
+
+    def reserve(self, username, owner, project_name) -> int:
+        """
+
+        Args:
+            username:
+            owner:
+            project_name:
+
+        Returns:
+
+        """
+        client = self._get_redis_client()
+        available_idx = client.lpop(self.GPUS_AVAILABLE_KEY)
+        if available_idx:
+            client.hset(self.GPU_ASSIGNMENT_KEY, f"{username}&{owner}&{project_name}", available_idx)
+            return int(available_idx)
+        else:
+            raise GPUNotAvailable("All available GPUs are currently in use. Stop a running Project and try again.")
+
+    def release(self, username, owner, project_name):
+        """
+
+        Args:
+            username:
+            owner:
+            project_name:
+
+        Returns:
+
+        """
+        client = self._get_redis_client()
+        project_id = f"{username}&{owner}&{project_name}"
+        gpu_idx = client.hget(self.GPU_ASSIGNMENT_KEY, project_id)
+        client.rpush(self.GPUS_AVAILABLE_KEY, gpu_idx)
+        client.hdel(self.GPU_ASSIGNMENT_KEY, project_id)

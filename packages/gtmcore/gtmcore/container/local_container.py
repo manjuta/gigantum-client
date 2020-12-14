@@ -8,9 +8,12 @@ from typing import Optional, Callable, List, Dict
 import docker
 import docker.errors
 from docker.models.containers import Container
+from docker.types import DeviceRequest
+
 import requests
 
 from gtmcore.container.container import ContainerOperations, _check_allowed_args, logger
+from gtmcore.container.cuda import GPUInventory
 from gtmcore.container.exceptions import ContainerBuildException, ContainerException
 
 from gtmcore.labbook import LabBook
@@ -192,27 +195,52 @@ class LocalProjectContainer(ContainerOperations):
         Returns:
             If wait_for_output is specified, the stdout of the cmd. Otherwise, or if stdout cannot be obtained, None.
         """
-        # We move a number of optional arguments into a **kwargs construct because
-        #  no default value is specified in docker-py docs
-        if volumes:
-            run_args['volumes'] = volumes
-        if environment:
-            run_args['environment'] = environment
-        if cmd:
-            run_args['command'] = cmd
-
         image_name = image_name or self.image_tag
         if not image_name:
             raise ContainerException('No default image_name is available. Please specify at init or as a parameter.')
 
         if not wait_for_output:
             container_name = container_name or image_name
-            # We use negative logic because this branch is much simpler
-            container_object = self._client.containers.run(image_name, detach=True, init=True, name=container_name,
-                                                           **run_args)
-            if container_name == image_name:
-                self._container = container_object
-            return None
+
+            if 'runtime' in run_args:
+                # We move a number of optional arguments into a **kwargs construct because
+                #  no default value is specified in docker-py docs
+                if volumes:
+                    run_args['volumes'] = volumes
+                if environment:
+                    run_args['environment'] = environment
+                if cmd:
+                    run_args['command'] = cmd
+
+                # We use negative logic because this branch is much simpler
+                container_object = self._client.containers.run(image_name, detach=True, init=True, name=container_name,
+                                                               **run_args)
+                if container_name == image_name:
+                    self._container = container_object
+                return None
+            else:
+                # Use low-level API to start a container
+                gpu_inv = GPUInventory()
+                username, owner, project_name = self.labbook.key.split("|")
+                gpu_idx = gpu_inv.reserve(username, owner, project_name)
+
+                run_args['device_requests'] = [DeviceRequest(driver="nvidia", device_ids=[str(gpu_idx)],
+                                                             capabilities=[['gpu'], ['nvidia'], ['compute'],
+                                                                           ['compat32'], ['graphics'], ['utility'],
+                                                                           ['video'], ['display']])]
+                run_args['init'] = True
+                create_kwargs = self._client.api.create_host_config(**run_args)
+                print(create_kwargs)
+
+                resp = self._client.api.create_container(image=image_name, detach=True, name=container_name,
+                                                         volumes=volumes, environment=environment, command=cmd,
+                                                         host_config=create_kwargs)
+
+                c = self._client.containers.get(resp['Id'])
+
+                self._client.api.start(container=c.id)
+                self._container = c
+                return None
         else:
             t0 = time.time()
             result = self._client.containers.run(image_name, detach=False, init=True, remove=True, stderr=False,
@@ -250,6 +278,11 @@ class LocalProjectContainer(ContainerOperations):
 
         if not container_name:
             self._container = None
+
+        gpu_inv = GPUInventory()
+
+        username, owner, project_name = self.labbook.key.split("|")
+        gpu_inv.release(username, owner, project_name)
 
         return True
 

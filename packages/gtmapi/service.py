@@ -21,6 +21,7 @@ from gtmcore.configuration import Configuration
 from gtmcore.logging import LMLogger
 from gtmcore.auth.identity import AuthenticationError, get_identity_manager_class
 from gtmcore.labbook.lock import reset_all_locks
+from gtmcore.container.cuda import GPUInventory
 
 
 logger = LMLogger.get_logger()
@@ -131,6 +132,10 @@ if config.config["flask"]["allow_cors"]:
     CORS(app, max_age=7200)
 
 if ON_FIRST_START:
+    # Init GPU tracking
+    gpu_inv = GPUInventory()
+    gpu_inv.initialize()
+
     # Empty container-container share dir as it is ephemeral
     share_dir = os.path.join(os.path.sep, 'mnt', 'share')
     logger.info("Emptying container-container share folder: {}.".format(share_dir))
