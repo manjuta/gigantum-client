@@ -228,6 +228,11 @@ class LocalProjectContainer(ContainerOperations):
                                                              capabilities=[['gpu'], ['nvidia'], ['compute'],
                                                                            ['compat32'], ['graphics'], ['utility'],
                                                                            ['video'], ['display']])]
+                binds = list()
+                for v in volumes:
+                    binds.append(f"{v}:{volumes[v]['bind']}:{volumes[v]['mode']}")
+                run_args['binds'] = binds
+
                 run_args['init'] = True
                 create_kwargs = self._client.api.create_host_config(**run_args)
 
