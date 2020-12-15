@@ -202,7 +202,7 @@ class LocalProjectContainer(ContainerOperations):
         if not wait_for_output:
             container_name = container_name or image_name
 
-            if 'runtime' in run_args:
+            if 'runtime' not in run_args:
                 # We move a number of optional arguments into a **kwargs construct because
                 #  no default value is specified in docker-py docs
                 if volumes:
@@ -230,14 +230,12 @@ class LocalProjectContainer(ContainerOperations):
                                                                            ['video'], ['display']])]
                 run_args['init'] = True
                 create_kwargs = self._client.api.create_host_config(**run_args)
-                print(create_kwargs)
 
                 resp = self._client.api.create_container(image=image_name, detach=True, name=container_name,
                                                          volumes=volumes, environment=environment, command=cmd,
                                                          host_config=create_kwargs)
 
                 c = self._client.containers.get(resp['Id'])
-
                 self._client.api.start(container=c.id)
                 self._container = c
                 return None
@@ -280,7 +278,6 @@ class LocalProjectContainer(ContainerOperations):
             self._container = None
 
         gpu_inv = GPUInventory()
-
         username, owner, project_name = self.labbook.key.split("|")
         gpu_inv.release(username, owner, project_name)
 

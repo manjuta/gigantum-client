@@ -115,7 +115,7 @@ class GPUInventory:
         Returns:
 
         """
-        return 4
+        return 8
 
     def reserve(self, username, owner, project_name) -> int:
         """
@@ -150,5 +150,6 @@ class GPUInventory:
         client = self._get_redis_client()
         project_id = f"{username}&{owner}&{project_name}"
         gpu_idx = client.hget(self.GPU_ASSIGNMENT_KEY, project_id)
-        client.rpush(self.GPUS_AVAILABLE_KEY, gpu_idx)
-        client.hdel(self.GPU_ASSIGNMENT_KEY, project_id)
+        if gpu_idx:
+            client.rpush(self.GPUS_AVAILABLE_KEY, gpu_idx)
+            client.hdel(self.GPU_ASSIGNMENT_KEY, project_id)
