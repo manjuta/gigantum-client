@@ -33,7 +33,7 @@ const RenderDetail = (props: Props) => {
       return (
         <ReactMarkdown
           renderers={{ code: codeProps => <CodeBlock {...codeProps} /> }}
-          className="ReactMarkdown"
+          className="ReactMarkdown Markdown"
           source={item[1]}
         />
       );
