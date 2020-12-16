@@ -41,45 +41,43 @@ class PopupBlocked extends PureComponent<Props> {
       <Modal
         handleClose={() => togglePopupModal()}
         size="large-full"
-        renderContent={() => (
-          <div className="PopupBlocked flex flex--column align-items--center">
-            <div className="PopupBlocked__header">
-              <h2 className="PopupBlocked__header-text">Pop-up Blocked</h2>
-            </div>
-            <div className="PopupBlocked__message">
-              <p>
-                Gigantum opens
-                {` ${devTool} `}
-                in a new tab, which was blocked by your browser.
-              </p>
-              <p>
-                Please modify your browser settings to allow pop-ups, as shown below.
-              </p>
-            </div>
-            <img
-              alt="browser"
-              src={icon}
-            />
-            <div className="PopupBlocked__buttonContainer flex justify--right">
-              <button
-                className="Btn Btn--flat"
-                onClick={() => { togglePopupModal(); }}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className="Btn Btn--inverted Btn--popup-blocked"
-                onClick={attemptRelaunch}
-                type="button"
-              >
-                Launch Again
-              </button>
-            </div>
+      >
+        <div className="PopupBlocked flex flex--column align-items--center">
+          <div className="PopupBlocked__header">
+            <h2 className="PopupBlocked__header-text">Pop-up Blocked</h2>
           </div>
-        )
-        }
-      />
+          <div className="PopupBlocked__message">
+            <p>
+              Gigantum opens
+              {` ${devTool} `}
+              in a new tab, which was blocked by your browser.
+            </p>
+            <p>
+              Please modify your browser settings to allow pop-ups, as shown below.
+            </p>
+          </div>
+          <img
+            alt="browser"
+            src={icon}
+          />
+          <div className="PopupBlocked__buttonContainer flex justify--right">
+            <button
+              className="Btn Btn--flat"
+              onClick={() => { togglePopupModal(); }}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="Btn Btn--inverted Btn--popup-blocked"
+              onClick={attemptRelaunch}
+              type="button"
+            >
+              Launch Again
+            </button>
+          </div>
+        </div>
+      </Modal>
     );
   }
 }

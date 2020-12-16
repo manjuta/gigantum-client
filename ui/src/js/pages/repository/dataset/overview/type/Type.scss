@@ -1,0 +1,78 @@
+@import '~Styles/_imports.scss';
+
+.Type * {
+  font-weight: 100;
+  text-align: left;
+  color: $mineShaft;
+}
+
+
+.Type {
+
+  &__header {
+    color: $romanSilver;
+  }
+
+  &__card {
+    padding: 30px;
+
+    color: $romanSilver;
+    border-left: 3px solid $primary;
+    border-right: 1.5px solid $primary;
+    @include flex(space-between, row);
+  }
+
+  &__image {
+    min-width: 50px;
+    margin: 20px;
+  }
+
+
+  &__imageContainer {
+    width: 100px;
+    margin: 0 20px 0 0;
+
+    @include flex(space-between, row);
+  }
+
+  &__paragraph {
+     font-size: 15px;
+     font-weight: 400;
+  }
+
+  &__name {
+    font-size: 24px;
+    white-space: nowrap;
+  }
+
+  &__title {
+    flex: 1;
+
+    width: 160px;
+  }
+
+  &__cardText {
+    flex: 1;
+
+    p{
+      margin-top: 0px;
+    }
+  }
+
+  &__categories {
+    @include flex(flex-start, row);
+    // TODO Refactor
+    h6 {
+      font-size: 16px;
+      font-weight: 400;
+    }
+  }
+
+  &__languages {
+    width: 50%;
+  }
+
+  &__tools {
+    width: 50%;
+  }
+}
