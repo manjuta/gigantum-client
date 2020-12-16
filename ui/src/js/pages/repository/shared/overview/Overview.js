@@ -10,12 +10,12 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
 import MarkdownEditor from 'Components/markdownEditor/MarkdownEditor';
 import Base from 'Pages/repository/labbook/environment/Base';
-import Type from 'Pages/repository/dataset/overview/Type';
+import Type from 'Pages/repository/dataset/overview/type/Type';
 import RecentActivity from 'Pages/repository/labbook/overview/RecentActivity';
 import Loader from 'Components/loader/Loader';
 import CodeBlock from 'Pages/repository/labbook/renderers/CodeBlock';
 import Tooltip from 'Components/tooltip/Tooltip';
-import Summary from 'Pages/repository/dataset/overview/Summary';
+import Summary from 'Pages/repository/dataset/overview/summary/Summary';
 import EmptyReadme from './EmptyReadme';
 
 // assets
