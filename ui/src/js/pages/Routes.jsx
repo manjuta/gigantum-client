@@ -6,7 +6,7 @@ import Loadable from 'react-loadable';
 import { connect } from 'react-redux';
 import queryString from 'querystring';
 import {
-  Router,
+  BrowserRouter as Router,
   Route,
   Switch,
   Redirect,
@@ -14,6 +14,8 @@ import {
 // components
 import Dashboard from 'Pages/dashboard/Dashboard';
 import Layout from 'JS/layout/Layout';
+// history
+import history from 'JS/history';
 // utils
 import getApiURL from 'JS/utils/apiUrl';
 // context
@@ -39,12 +41,12 @@ const DatasetQueryContainer = Loadable({
 
 // getter functions
 const getBasename = () => {
-  const { pathname } = globalObject.location;
+  const { pathname } = document.location;
   const pathList = pathname.split('/');
   const uniqueClientString = (pathList.length > 2)
     ? pathList[2]
     : '';
-  const basename = process.env.BUILD_TYPE === 'cloud'
+  const basename = (process.env.BUILD_TYPE === 'cloud')
     ? `/run/${uniqueClientString}/`
     : '/';
   return basename;
@@ -59,12 +61,6 @@ type Props = {
   currentServer: {
     baseUrl: string,
   },
-  history: {
-    location: {
-      hash: string,
-    },
-      replace: Function,
-  },
 }
 
 class Routes extends Component<Props> {
@@ -77,19 +73,20 @@ class Routes extends Component<Props> {
 
   basename = getBasename();
 
-  componentDidMount() {
-    const { history } = this.props;
-    const values = queryString.parse(history.location.hash.slice(1));
-    const newPath = values.path;
+  componentWillMount() {
+    const hash = queryString.parse(window.location.hash.slice(1));
+    const newPath = hash.path;
 
     if (newPath) {
-      delete values.path;
-      values.redirect = false;
-      let stringifiedValues = queryString.stringify(values);
-      history.replace(`${this.basename}${newPath}#${stringifiedValues}`);
-      delete values.redirect;
-      stringifiedValues = queryString.stringify(values);
-      window.location.hash = stringifiedValues;
+      delete hash.path;
+      hash.redirect = false;
+      let stringifiedValues = queryString.stringify(hash);
+
+      delete hash.redirect;
+      stringifiedValues = queryString.stringify(hash);
+      const path = decodeURI(newPath)
+      history.replace(`/${path}#${stringifiedValues}`);
+      document.location.hash = stringifiedValues;
     }
 
     this._checkSysinfo();
@@ -166,28 +163,22 @@ class Routes extends Component<Props> {
   }
 
   render() {
-    const { props, state } = this;
     const {
       auth,
       currentServer,
-      history,
     } = this.props;
-    const { serverName } = this.state;
-    const showDiskLow = state.diskLow && !window.sessionStorage.getItem('hideDiskWarning');
-    if (!state.hasError) {
-      // declare csc
-
+    const { diskLow, hasError, serverName } = this.state;
+    const showDiskLow = diskLow && !window.sessionStorage.getItem('hideDiskWarning');
+    if (!hasError) {
       return (
         <ServerContext.Provider value={currentServer}>
           <Router
-            history={history}
             basename={this.basename}
           >
             <Layout
               {...this.props}
               auth={auth}
               diskLow={showDiskLow}
-              history={history}
             >
 
               <Switch>
@@ -201,15 +192,13 @@ class Routes extends Component<Props> {
                   ]}
                   render={parentProps => (
                     <Dashboard
-                      {...props}
+                      {...this.props}
                       {...parentProps}
                       auth={auth}
                       diskLow={showDiskLow}
-                      history={history}
                       serverName={serverName}
                     />
-                  )
-                  }
+                  )}
                 />
 
                 <Route
@@ -226,12 +215,11 @@ class Routes extends Component<Props> {
                   auth={auth}
                   render={(parentProps) => (
                     <DatasetQueryContainer
-                      {...props}
+                      {...this.props}
                       {...parentProps}
                       auth={auth}
                       datasetName={parentProps.match.params.datasetName}
                       diskLow={showDiskLow}
-                      history={history}
                       owner={parentProps.match.params.owner}
                       serverName={serverName}
                     />
@@ -243,11 +231,10 @@ class Routes extends Component<Props> {
                   auth={auth}
                   render={(parentProps) => (
                     <LabbookQueryContainer
-                      {...props}
+                      {...this.props}
                       {...parentProps}
                       auth={auth}
                       diskLow={showDiskLow}
-                      history={history}
                       labbookName={parentProps.match.params.labbookName}
                       owner={parentProps.match.params.owner}
                       serverName={serverName}

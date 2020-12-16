@@ -17,7 +17,7 @@ import LinkedLocalDatasetsQuery from 'Pages/repository/shared/header/actionsSect
 import CreateBranch from 'Pages/repository/shared/modals/CreateBranch';
 import ForceSync from 'Pages/repository/shared/modals/ForceSync';
 import Branches from 'Pages/repository/shared/sidePanel/Branches';
-import VisibilityModal from 'Pages/repository/shared/modals/VisibilityModal';
+import VisibilityModal from 'Pages/repository/shared/modals/visibility/VisibilityModal';
 import PublishDatasetsModal from 'Pages/repository/shared/modals/publishDataset/PublishDatasetsModal';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
 // context

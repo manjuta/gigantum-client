@@ -11,10 +11,12 @@ const getApiURL = (route) => {
   const globalObject = self || window;
   /* eslint-enable */
   const uuid = uuidv4();
-  const { pathname } = globalObject.location;
+  const location = self ? self.location : document.location;
+
+  const { pathname } = location;
   const pathList = pathname ? pathname.split('/') : '';
   const cloudPath = pathList.length > 2 ? pathList[2] : '';
-  const apiHost = process.env.NODE_ENV === 'development'
+  const apiHost = (process.env.NODE_ENV === 'development')
     ? 'localhost:10000'
     : globalObject.location.host;
   let routePath = route === 'ping'
@@ -23,7 +25,11 @@ const getApiURL = (route) => {
   routePath = route === 'sysinfo'
     ? process.env.SYSINFO_API
     : routePath;
-  const apiPath = (process.env.BUILD_TYPE === 'cloud')
+  routePath = route === 'server'
+    ? process.env.SERVER_API
+    : routePath;
+
+  const apiPath = (process.env.BUILD_TYPE === 'cloud') && (process.env.NODE_ENV !== 'development')
     ? `/run/${cloudPath}${routePath}`
     : `${routePath}`;
   const apiURL = `${globalObject.location.protocol}//${apiHost}${apiPath}`;

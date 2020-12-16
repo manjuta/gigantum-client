@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1597"
+changelog:
+  - type: FIX
+    description: Fixes negative value appearing under `to download` in the dataset summary section.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1557

@@ -75,10 +75,11 @@ class Dataset extends Component {
   }
 
   state = {
-    overviewSkip: true,
     activitySkip: true,
-    dataSkip: true,
+    uploadAllowed: false,
     datasetSkip: true,
+    dataSkip: true,
+    overviewSkip: true,
   };
 
   /**
@@ -202,9 +203,42 @@ class Dataset extends Component {
     }
   }
 
+  /**
+  *  @param {Object} props
+  *
+  *  checks to see if user can upload files
+  */
+  allowFileUpload = (props) => {
+    const { uploadAllowed } = this.state;
+    if (
+      props
+      && props.dataset
+      && props.dataset.collaborators
+    ) {
+      const { collaborators } = props.dataset;
+      if (collaborators.length) {
+        collaborators.forEach((collaborator) => {
+          const username = localStorage.getItem('username');
+          if (
+            (username === collaborator.collaboratorUsername)
+            && (collaborator.permission !== 'READ_ONLY')
+            && !uploadAllowed
+          ) {
+            this.setState({ uploadAllowed: true });
+          }
+        });
+      } else if (!uploadAllowed) {
+        this.setState({ uploadAllowed: true });
+      }
+    }
+  };
+
   render() {
     const { props, state } = this;
     const { owner, name } = props.dataset;
+    const {
+      uploadAllowed,
+    } = this.state;
     if (props.dataset) {
       const { dataset, diskLow } = props;
       const isLocked = getIsLocked(props);
@@ -221,6 +255,7 @@ class Dataset extends Component {
           <div className="Dataset__spacer flex flex--column">
 
             <Header
+              allowFileUpload={this.allowFileUpload}
               description={dataset.description}
               toggleBranchesView={() => {}}
               branchName=""
@@ -327,6 +362,7 @@ class Dataset extends Component {
                             section="data"
                             refetch={this._refetchDataset}
                             lockFileBrowser={props.globalIsUploading || isLocked}
+                            uploadAllowed={uploadAllowed}
                           />
 
                         </ErrorBoundary>

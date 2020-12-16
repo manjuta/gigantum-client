@@ -18,6 +18,7 @@ class FileBrowserTools extends PureComponent {
       allFilesLocal,
       section,
       mutations,
+      uploadAllowed,
     } = this.props;
 
     // declare css here
@@ -87,7 +88,7 @@ class FileBrowserTools extends PureComponent {
           )
         }
         {
-          readOnly
+          readOnly && uploadAllowed
           && (
           <div className="flex">
             <button

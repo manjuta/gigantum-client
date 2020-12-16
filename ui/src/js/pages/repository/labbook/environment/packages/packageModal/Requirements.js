@@ -139,7 +139,9 @@ class Requirements extends Component<Props> {
             {
               rejectedPackages.length > 0 && (
               <div className="Requirements__rejectedPackages">
-                The following packages could not be installed:
+                <p>Gigantum currently requires that all packages are pinned to a specific version.</p>
+
+                <p>The following packages could not be installed as specified and must be manually added.</p>
                 {
                   rejectedPackages.map(rejectedPackage => (
                     <div

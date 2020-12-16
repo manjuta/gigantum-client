@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { Router } from 'react-router-dom';
 import queryString from 'querystring';
-import fetchAuthServerState from 'JS/Auth/AuthHandler';
+import { fetchAuthServerState } from 'JS/Auth/AuthHandler';
 import { graphql, QueryRenderer } from 'react-relay';
 // environment
 import environment from 'JS/createRelayEnvironment';
@@ -17,7 +17,6 @@ import {
   ERROR,
   LOGGED_IN,
   LOGGED_OUT,
-  BACK,
 } from 'JS/Auth/AuthMachineConstants';
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';
@@ -45,7 +44,7 @@ class App extends Component {
   auth = new Auth();
 
   componentDidMount() {
-    const hash = queryString.parse(history.location.hash.slice(1));
+    const hash = queryString.parse(document.location.hash.slice(1));
     const promise = new Promise((resolve, reject) => fetchAuthServerState(
       resolve,
       reject,
@@ -155,7 +154,6 @@ class App extends Component {
                   {...props}
                   auth={this.auth}
                   currentServer={props}
-                  history={history}
                   isLoggedIn={isLoggedIn}
                 />
               );
@@ -191,9 +189,9 @@ class App extends Component {
             </header>
             <Login
               auth={this.auth}
+              history={history}
               availableServers={availableServers}
               errors={errors}
-              history={history}
             />
           </div>
         </Router>

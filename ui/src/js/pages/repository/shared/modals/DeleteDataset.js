@@ -242,37 +242,35 @@ class DeleteDataset extends Component<Props> {
         handleClose={() => handleClose()}
         size="medium"
         icon="delete"
-        renderContent={() => (
-          <div className="DeleteDataset">
-            {this._getExplanationText()}
-            <input
-              id="deleteInput"
-              placeholder={`Enter ${name} to delete`}
-              onKeyUp={(evt) => { this._setDatasetName(evt); }}
-              onChange={(evt) => { this._setDatasetName(evt); }}
-              type="text"
+      >
+        <div className="DeleteDataset">
+          {this._getExplanationText()}
+          <input
+            id="deleteInput"
+            placeholder={`Enter ${name} to delete`}
+            onKeyUp={(evt) => { this._setDatasetName(evt); }}
+            onChange={(evt) => { this._setDatasetName(evt); }}
+            type="text"
+          />
+          <div className="Modal__button-container">
+            <button
+              type="button"
+              className="Btn Btn--flat"
+              onClick={() => handleClose()}
+            >
+              Cancel
+            </button>
+            <ButtonLoader
+              buttonState={deleteDatasetButtonState}
+              buttonText={deleteText}
+              className="Btn Btn--wide Btn--last"
+              params={{}}
+              buttonDisabled={deleteDisabled}
+              clicked={this._deleteDataset}
             />
-            <div className="Modal__button-container">
-              <button
-                type="button"
-                className="Btn Btn--flat"
-                onClick={() => handleClose()}
-              >
-                Cancel
-              </button>
-              <ButtonLoader
-                buttonState={deleteDatasetButtonState}
-                buttonText={deleteText}
-                className="Btn Btn--wide Btn--last"
-                params={{}}
-                buttonDisabled={deleteDisabled}
-                clicked={this._deleteDataset}
-              />
-            </div>
           </div>
-        )
-      }
-      />
+        </div>
+      </Modal>
     );
   }
 }

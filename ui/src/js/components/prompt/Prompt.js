@@ -134,7 +134,7 @@ export default class Prompt extends Component {
         }
         if (response) {
           if (state.failureCount > 0) {
-            window.location.reload();
+            document.location.reload();
           }
 
           this.setState({
@@ -212,7 +212,7 @@ export default class Prompt extends Component {
             <button
               type="button"
               className="button--green"
-              onClick={() => window.location.reload()}
+              onClick={() => document.location.reload()}
             >
               Refresh
             </button>

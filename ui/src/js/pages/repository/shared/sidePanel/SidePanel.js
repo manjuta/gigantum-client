@@ -1,5 +1,5 @@
 // vendor
-import React, { Component } from 'react';
+import React, { Component, Node } from 'react';
 import ReactDom from 'react-dom';
 import classNames from 'classnames';
 // assets
@@ -7,10 +7,10 @@ import './SidePanel.scss';
 
 
 type Props = {
+  children: Node,
   diskLow: boolean,
   isDeprecated: boolean,
   isSticky: boolean,
-  renderContent: Function,
   toggleSidePanel: Function,
 };
 
@@ -33,10 +33,10 @@ class SidePanel extends Component<Props> {
 
   render() {
     const {
+      children,
       diskLow,
       isDeprecated,
       isSticky,
-      renderContent,
       toggleSidePanel,
     } = this.props;
 
@@ -65,7 +65,7 @@ class SidePanel extends Component<Props> {
             />
           </div>
           <div className="SidePanel__body">
-            { renderContent() }
+            { children }
           </div>
         </section>, document.getElementById('side_panel'),
       )

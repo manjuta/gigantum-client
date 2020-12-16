@@ -44,7 +44,9 @@ exports[`DashboardLocal Renders a snapshot 1`] = `
           className="Btn--noStyle"
           onClick={[Function]}
           type="button"
-        />
+        >
+          gigantum
+        </button>
       </li>
       <div
         className="hidden cloudLocal"

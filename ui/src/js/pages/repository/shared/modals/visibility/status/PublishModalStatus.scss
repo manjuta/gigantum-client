@@ -1,0 +1,45 @@
+@import '~Styles/_imports.scss';
+
+.PublishModalStatus {
+  width: 100%;
+  padding: 2em;
+
+  text-align: center;
+  align-items: center;
+
+  @include flex(flex-start, column);
+
+  &__h4 {
+    &--warning {
+      color: $orange;
+    }
+  }
+
+  &__image {
+    &--warning {
+      border-radius: 50%;
+      background-color: $orange;
+      margin-right: 1em;
+    }
+  }
+
+  &__error {
+    align-items: center;
+  }
+
+  &__main {
+    padding: 2em;
+
+    &--publishing {
+      width: 30em;
+      height: 10em;
+      border-radius: 3px;
+      text-shadow: rgba(0, 0, 0, 0.3) 0px 1px;
+      background-color: $slateBlue;
+
+      h6 {
+        color: $lightBlue;
+      }
+    }
+  }
+}

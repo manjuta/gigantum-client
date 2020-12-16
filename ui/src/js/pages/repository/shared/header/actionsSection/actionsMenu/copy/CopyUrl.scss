@@ -3,10 +3,13 @@
 .Header {
   .CopyUrl {
     .ActionsMenu__item {
-      border: 0 !important;
+      border: 0;
     }
     &--disabled {
       opacity: 0.5;
+    }
+    &--export {
+      border-bottom: 1px solid $grey !important;
     }
 
     &:hover button {

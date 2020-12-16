@@ -112,18 +112,19 @@ def log_in(driver: selenium.webdriver, user_index: int = 0) -> str:
         logging.info("Clicking 'Not your account?'")
         auth0_elts.not_your_account_button.wait_to_appear().click()
     auth0_elts.do_login(username, password)
-    time.sleep(5)
+    time.sleep(2)
     # Set the ID and ACCESS TOKENS -- Used as headers for GraphQL mutations
-    access_token = driver.execute_script("return window.localStorage.getItem('access_token')")
-    id_token = driver.execute_script("return window.localStorage.getItem('id_token')")
-    for _ in range(3):
+    for _ in range(5):
         active_username = driver.execute_script("return window.localStorage.getItem('username')")
         if active_username:
             break
         else:
-            time.sleep(2)
+            time.sleep(1)
     else:
         raise ValueError("Failed to extract username from Chrome cache to verify authentication.")
+
+    access_token = driver.execute_script("return window.localStorage.getItem('access_token')")
+    id_token = driver.execute_script("return window.localStorage.getItem('id_token')")
 
     assert active_username == username, \
         f"Username from credentials.txt ({username}) must match chrome cache ({active_username})"

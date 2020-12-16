@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1566"
+changelog:
+  - type: NON_USER_FACING
+    description: Minor updates to the legacy test harness to support Client >=1.4.0

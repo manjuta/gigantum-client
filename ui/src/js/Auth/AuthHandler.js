@@ -9,7 +9,7 @@ import fetchQuery from 'JS/fetch';
 *
 * @return {Promise}
 */
-const getIsLogginedIn = (serverId, loginUrl, auth) => {
+const getIsLoggedIn = (serverId, loginUrl, auth) => {
   const overrideHeaders = {
     ...((typeof serverId === 'string') ? { 'GTM-SERVER-ID': serverId } : undefined),
   };
@@ -53,7 +53,18 @@ const getIsLogginedIn = (serverId, loginUrl, auth) => {
   return promise;
 };
 
-// hash has state then perfrom token exchange
+/**
+* Method Initiates token exchange if a hash state is present
+* if a error is present then the cycle is rejected and the error is displayed
+* if none of the above then a login cycle is attempted.
+* @param {Function} resolve
+* @param {Function} reject
+* @param {Object} hash
+* @param {string} apiHost
+* @param {Object} auth
+* @param {Array} availableServers
+* @param {string} currentServer
+*/
 const getTokens = (
   resolve,
   reject,
@@ -78,7 +89,7 @@ const getTokens = (
       localStorage.setItem('id_token', tokenResponse.IDToken);
 
       // check if user is logged in, calls user idenity query and initiates backend
-      getIsLogginedIn(
+      getIsLoggedIn(
         hash.serverId,
         loginUrl,
         auth,
@@ -95,13 +106,13 @@ const getTokens = (
       isLoggedIn: false,
       availableServers,
       errors: [{
-        message: hash.error,
+        message: decodeURI(hash.error),
         admin: decodeURI(hash.admin),
       }],
     });
   } else {
     // check if user is logged in, calls user idenity query and initiates backend
-    getIsLogginedIn(
+    getIsLoggedIn(
       currentServer,
       loginUrl,
       auth,
@@ -151,6 +162,12 @@ const fetchAuthServerState = (
       );
     }
   });
+};
+
+
+export {
+  getIsLoggedIn,
+  fetchAuthServerState,
 };
 
 

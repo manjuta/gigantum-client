@@ -6,6 +6,8 @@ import queryString from 'querystring';
 import CreateLabbookMutation from 'Mutations/repository/create/CreateLabbookMutation';
 import CreateDatasetMutation from 'Mutations/repository/create/CreateDatasetMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
+// history
+import history from 'JS/history';
 // store
 import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
@@ -58,6 +60,9 @@ type Props = {
     name: string,
     owner: string,
   },
+  hash: {
+    createNew: string,
+  },
   history: {
     location: {
       hash: string,
@@ -67,6 +72,20 @@ type Props = {
   }
 }
 
+/**
+* Method checks hash arg create new and makes sure it is set to true.
+* @param {string} hash
+*
+* @return {boolean}
+*/
+const getModalVisible = (hash) => {
+  const { createNew } = queryString.parse(hash);
+  if ((createNew === 'true') || createNew === true) {
+    return true;
+  }
+  return false;
+};
+
 class CreateModal extends Component<Props> {
   state = {
     owner: localStorage.getItem('username'),
@@ -75,7 +94,7 @@ class CreateModal extends Component<Props> {
     repository: '',
     componentId: '',
     revision: '',
-    modalVisible: queryString.parse(this.props.history.location.hash.slice(1)).createNew || false,
+    modalVisible: getModalVisible(history.location.hash.slice(1)),
     selectedComponentId: 'createLabbook',
     continueDisabled: true,
     modalBlur: false,
@@ -83,13 +102,15 @@ class CreateModal extends Component<Props> {
   };
 
   componentDidMount = () => {
-    const { history } = this.props;
-    const values = queryString.parse(history.location.hash.slice(1));
-    if (values.createNew) {
-      delete values.createNew;
+    const hash = queryString.parse(history.location.hash.slice(1));
+    if (hash.createNew) {
+      delete hash.createNew;
+      const stringifiedValues = queryString.stringify(hash);
+
+      const path = hash.path ? decodeURI(hash.path) : history.location.pathname;
+
+      history.replace(`${path}#${stringifiedValues}`);
     }
-    const stringifiedValues = queryString.stringify(values);
-    history.replace(`${history.location.pathname}#${stringifiedValues}`);
   }
 
 
@@ -412,35 +433,33 @@ class CreateModal extends Component<Props> {
 
     return (
       <div>
-        { modalVisible
-          && (
-            <Modal
-              size={modalSize}
-              icon="add"
-              handleClose={() => this._hideModal()}
-              header={currentComponent.header}
-              preHeader={currentComponent.preHeader}
-              noPadding
-              renderContent={() => (
-                <div className="CreateModal">
+        { modalVisible && (
+          <Modal
+            size={modalSize}
+            icon="add"
+            handleClose={() => this._hideModal()}
+            header={currentComponent.header}
+            preHeader={currentComponent.preHeader}
+            noPadding
+          >
+              <div className="CreateModal">
 
-                  { modalBody }
+                { modalBody }
 
-                  <CreateNav
-                    self={this}
-                    createLabbookButtonState={createLabbookButtonState}
-                    selectedComponentId={selectedComponentId}
-                    continueDisabled={continueDisabled}
-                    setComponent={this._setComponent}
-                    hideModal={this._hideModal}
-                    continueSave={this._continueSave}
-                    isDataset={datasets}
-                  />
-                </div>
-              )}
-            />
-          )
-        }
+                <CreateNav
+                  self={this}
+                  createLabbookButtonState={createLabbookButtonState}
+                  selectedComponentId={selectedComponentId}
+                  continueDisabled={continueDisabled}
+                  setComponent={this._setComponent}
+                  hideModal={this._hideModal}
+                  continueSave={this._continueSave}
+                  isDataset={datasets}
+                />
+              </div>
+
+          </Modal>
+        )}
 
         { modalBlur && <Loader className={loaderCSS} /> }
       </div>

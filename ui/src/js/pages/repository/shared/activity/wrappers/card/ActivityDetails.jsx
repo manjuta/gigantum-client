@@ -5,6 +5,7 @@ import ActivityDetailList from './ActivityDetailList';
 
 type Props = {
   edge: Object,
+  isNote: Boolean,
   name: String,
   node: {
     show: Boolean,
@@ -84,6 +85,7 @@ class ActivtyDetails extends Component<Props> {
     const { showEllispsis } = this.state;
     const {
       edge,
+      isNote,
       name,
       node,
       owner,
@@ -97,17 +99,18 @@ class ActivtyDetails extends Component<Props> {
         {
           Object.keys(categorizedDetails.detailObjects).map((key, index) => (
             <ActivityDetailList
-              sectionType={sectionType}
-              hideElipsis={this._hideElipsis}
-              edge={edge}
               categorizedDetails={categorizedDetails}
+              edge={edge}
+              hideElipsis={this._hideElipsis}
+              isNote={isNote}
               itemKey={key}
               key={`${key}${index}`}
-              siblingCount={node.detailObjects.length}
+              name={name}
+              owner={owner}
+              sectionType={sectionType}
               show={show}
               showEllispsis={showEllispsis}
-              owner={owner}
-              name={name}
+              siblingCount={node.detailObjects.length}
             />
           ))
         }
