@@ -18,8 +18,8 @@ def test_delete_project(driver: selenium.webdriver, *args, **kwargs):
     username, project_name = r.username, r.project_name
 
     logging.info(f"Checking that project {project_name} file path exists")
-    project_path = os.path.join(os.environ['GIGANTUM_HOME'], username,
-                                username, 'labbooks', project_name)
+    project_path = os.path.join(os.environ['GIGANTUM_HOME'], 'servers', testutils.current_server_id(),
+                                username, username, 'labbooks', project_name)
 
     assert os.path.exists(project_path), \
         f"Project {project_name} should exist at file path {project_path}"
