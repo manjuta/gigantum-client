@@ -22,6 +22,7 @@ type Props = {
     detailObjects: Object,
   },
   hideElipsis: Function,
+  isNote: Boolean,
   itemKey: String,
   name: String,
   owner: String,
@@ -78,6 +79,7 @@ class ActivityDetailsList extends Component<Props> {
     } = this.state;
     const {
       categorizedDetails,
+      isNote,
       itemKey,
       name,
       owner,
@@ -89,7 +91,7 @@ class ActivityDetailsList extends Component<Props> {
     // decalre css here
     const activityDetailsCSS = classNames({
       ActivityDetail__details: true,
-      note: type === 'note',
+      note: isNote,
     });
     const activityDetailTitleCSS = classNames({
       'ActivityDetail__details-title': true,
@@ -99,7 +101,7 @@ class ActivityDetailsList extends Component<Props> {
     return (
 
       <div className={activityDetailsCSS}>
-        { showDetails && (type !== 'note')
+        { showDetails && (!isNote)
           ? (
             <div
               className={activityDetailTitleCSS}
@@ -115,21 +117,20 @@ class ActivityDetailsList extends Component<Props> {
 
             </div>
           )
-          : <hr />
-        }
+          : <hr />}
 
         { show
           && (
             <div className="ActivtyDetail_list">
               <DetailRecordsWrapper
+                isNote={isNote}
                 keys={keys}
-                sectionType={sectionType}
-                owner={owner}
                 name={name}
+                owner={owner}
+                sectionType={sectionType}
               />
             </div>
-          )
-        }
+          )}
 
         { showEllipsis
           && (
@@ -138,8 +139,7 @@ class ActivityDetailsList extends Component<Props> {
               onClick={() => { this._toggleDetailsView(); }}
               role="presentation"
             />
-          )
-        }
+          )}
       </div>
     );
   }

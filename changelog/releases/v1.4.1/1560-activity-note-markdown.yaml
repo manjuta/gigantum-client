@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1596"
+changelog:
+  - type: FIX
+    description: Standardizes markdown for the application and fixes markdown not displaying correctly in the activitiy notes.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1560
