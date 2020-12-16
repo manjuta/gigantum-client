@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 
 import selenium
 
@@ -104,8 +105,10 @@ def test_delete_file_project_file_browser(driver: selenium.webdriver, *args, **k
 
     # Expect to be empty
     file_contents = file_browser_elts.input_file_browser_contents_list
-    assert len(file_contents) == 1, "Expected file browser to be empty but more than 1 file/directory exists"
+    assert len(file_contents) == 3, "Expected file browser to be empty but more than 1 file/directory exists"
     assert file_contents[0] == 'untracked', "Expected file browser to be empty, but still have untracked folder"
+    assert file_contents[1] == 'Drag and drop files here', "Expected file browser to be empty, but still have untracked folder"
+    assert file_contents[2] == 'Choose Files...', "Expected file browser to be empty, but still have untracked folder"
 
                
 def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
@@ -126,6 +129,6 @@ def test_dataset_file_browser(driver: selenium.webdriver, *args, **kwargs):
     file_browser_elts.file_browser_area.wait_to_appear()
     logging.info(f"Dragging and dropping file into data for dataset {dataset_title}")
     file_browser_elts.drag_drop_file_in_drop_zone()
-
+    time.sleep(5)
     assert file_browser_elts.file_information.find().text == 'sample-upload.txt', \
         "Expected sample-upload.txt to be the first file in Data"

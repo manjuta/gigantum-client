@@ -1,4 +1,4 @@
-selenium==3.14.1
+selenium==3.141.0
 docker==4.0.1
 pillow==6.2.2
 boto3==1.9.130

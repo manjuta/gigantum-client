@@ -125,3 +125,4 @@ testing/chromedriver.exe
 /testing/reports
 /testing/g-venv
 /testing/configuration/credentials.json
+testing-legacy/credentials.txt
