@@ -1,0 +1,8 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1595"
+changelog:
+  - type: NEW
+    description: Add support for updated NVIDIA driver format supporting CUDA >= 11
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1508
+  - type: IMPROVEMENT
+    description: Updated cryptography package for CVE-2020-25659
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1565
