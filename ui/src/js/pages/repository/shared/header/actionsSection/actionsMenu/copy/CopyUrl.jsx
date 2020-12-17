@@ -72,12 +72,12 @@ class CopyUrl extends Component<Props> {
           <div className="ActionsMenu__copyRemote">
 
             <input
-              id="ActionsMenu-copy"
               className="ActionsMenu__input"
-              defaultValue={copyValue}
-              value={copyValue}
               disabled={doesNotHaveRemote}
+              id="ActionsMenu-copy"
+              readOnly
               type="text"
+              value={copyValue}
             />
 
             <button
@@ -97,8 +97,7 @@ class CopyUrl extends Component<Props> {
               id="Tooltip--noCache"
               delayShow={500}
             />
-          )
-        }
+          )}
       </li>
     );
   }
