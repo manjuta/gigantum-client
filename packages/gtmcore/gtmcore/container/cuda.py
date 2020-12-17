@@ -13,14 +13,16 @@ CUDA_DRIVER_VERSION_LOOKUP = {8: {0: (375, 51)},
                                   2: (396, 26)},
                               10: {0: (410, 58),
                                    1: (418, 39),
-                                   2: (440, 33)}}
+                                   2: (440, 33)},
+                              11: {0: (450, 36),
+                                   1: (450, 80)}}
 
 
 def _parse_version_str(version: Optional[str]) -> Optional[Tuple[int, int]]:
     result = None
     if version:
         version_nums = version.strip().split('.')
-        if len(version_nums) == 2:
+        if len(version_nums) == 2 or len(version_nums) == 3:
             try:
                 result = (int(version_nums[0]), int(version_nums[1]))
             except ValueError:
