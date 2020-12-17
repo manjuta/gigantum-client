@@ -12,7 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.action_chains import ActionChains
 
-from .testutils import load_credentials, unique_dataset_name, unique_project_description
+from .testutils import load_credentials, unique_dataset_name, unique_project_description, current_server_id
 
 
 class CssElement:
@@ -82,7 +82,7 @@ class UiComponent:
 class Auth0LoginElements(UiComponent):
     @property
     def login_green_button(self):
-        return CssElement(self.driver, ".Login__button")
+        return CssElement(self.driver, ".Server__button")
 
     @property
     def auth0_lock_widget(self):
@@ -671,7 +671,7 @@ class RStudioElements(UiComponent):
 class FileBrowserElements(UiComponent):
     @property
     def file_browser_area(self):
-        return CssElement(self.driver, ".FileBrowser")
+        return CssElement(self.driver, ".Dropbox--fileBrowser")
 
     @property
     def file_browser_message(self):
@@ -1020,7 +1020,7 @@ class CloudProjectElements(UiComponent):
 
     def check_cloud_project_remote_git_repo(self, username, project_title):
         """Obtain information regarding a remote Git repo for a given project."""
-        project_path = os.path.join(os.environ['GIGANTUM_HOME'], username, username,
+        project_path = os.path.join(os.environ['GIGANTUM_HOME'], "servers", current_server_id(), username, username,
                                     'labbooks', project_title)
         git_get_remote_command = Popen(['git', 'remote', 'get-url', 'origin'],
                                                     cwd=project_path, stdout=PIPE, stderr=PIPE)

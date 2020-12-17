@@ -41,6 +41,7 @@ query DetailRecordsWrapperDatasetsQuery($name: String!, $owner: String!, $keys: 
 }`;
 
 type Props = {
+  isNote: Boolean,
   keys: Array,
   name: String,
   owner: String,
@@ -49,43 +50,49 @@ type Props = {
 
 
 const DetailRecordsWrapper = (props: Props) => {
-    const {
-      keys,
-      name,
-      owner,
-      sectionType,
-    } = props;
+  const {
+    isNote,
+    keys,
+    name,
+    owner,
+    sectionType,
+  } = props;
 
-    const variables = {
-      keys,
-      name,
-      owner,
-    };
+  const variables = {
+    keys,
+    name,
+    owner,
+  };
 
-    const query = (sectionType === 'labbook')
-      ? DetailRecordsQuery
-      : DetailRecordsDatasetsQuery;
+  const query = (sectionType === 'labbook')
+    ? DetailRecordsQuery
+    : DetailRecordsDatasetsQuery;
 
-    return (
-      <QueryRenderer
-        environment={environment}
-        query={query}
-        variables={variables}
-        render={(response) => {
-          if (response && response.props) {
-            return <DetailsRecords {...response.props[sectionType]} />
-          }
-
+  return (
+    <QueryRenderer
+      environment={environment}
+      query={query}
+      variables={variables}
+      render={(response) => {
+        if (response && response.props) {
           return (
-            <div className="DetailsRecords__loader-group">
-              <div className="DetailsRecords__loader" />
-              <div className="DetailsRecords__loader" />
-              <div className="DetailsRecords__loader" />
-            </div>
+            <DetailsRecords
+              {...response.props[sectionType]}
+              isNote={isNote}
+            />
           );
-        }}
-      />
+        }
+
+        return (
+          <div className="DetailsRecords__loader-group">
+            <div className="DetailsRecords__loader" />
+            <div className="DetailsRecords__loader" />
+            <div className="DetailsRecords__loader" />
+          </div>
+        );
+      }}
+    />
   );
-}
+};
 
 export default DetailRecordsWrapper;

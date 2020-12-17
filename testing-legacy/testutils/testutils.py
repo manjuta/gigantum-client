@@ -8,6 +8,7 @@ import glob
 import uuid
 import sys
 import os
+import requests
 
 from functools import wraps
 
@@ -107,3 +108,13 @@ def project_title_correct(project_title: str, expected_project_title: str) -> bo
             return False
     else:
         return project_title == expected_project_title
+
+
+def current_server_id() -> str:
+    """Helper to get the current server id"""
+    rsp = requests.get("http://localhost:10000/api/servers")
+    if rsp.status_code != 200:
+        raise ValueError("Failed to fetch current server id")
+
+    return rsp.json()['current_server']
+

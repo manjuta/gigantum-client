@@ -137,7 +137,7 @@ export default (
       ...state,
       isUploading,
       [namespace]: {
-         ...state[namespace],
+        ...state[namespace],
         isUploading,
         forceUpdate: uuidv4(),
       },

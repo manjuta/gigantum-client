@@ -2,11 +2,13 @@
 // vendor
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import classNames from 'classnames';
 // Components
 import CodeBlock from 'Pages/repository/labbook/renderers/CodeBlock';
 
 type Props = {
   item: Array,
+  isNote: boolean,
 }
 
 /**
@@ -15,7 +17,12 @@ type Props = {
   @return {JSX}
 */
 const RenderDetail = (props: Props) => {
-  const { item } = props;
+  const { item, isNote } = props;
+  const markdownCSS = classNames({
+    ReactMarkdown: true,
+    Markdown: isNote,
+  });
+
   switch (item[0]) {
     case 'text/plain':
       return (<div className="ReactMarkdown"><p>{item[1]}</p></div>);
@@ -33,7 +40,7 @@ const RenderDetail = (props: Props) => {
       return (
         <ReactMarkdown
           renderers={{ code: codeProps => <CodeBlock {...codeProps} /> }}
-          className="ReactMarkdown"
+          className={markdownCSS}
           source={item[1]}
         />
       );

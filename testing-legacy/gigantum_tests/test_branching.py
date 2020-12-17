@@ -53,6 +53,9 @@ def test_delete_file_local_branch(driver: selenium.webdriver, *args, **kwargs):
     file_browser_elts.file_browser_area.wait_to_appear()
     file_browser_elts.drag_drop_file_in_drop_zone()
 
+    # Scroll to top. On low res screen this may be needed.
+    driver.execute_script("window.scrollTo(0, 0);")
+
     branch_elts = testutils.BranchElements(driver)
     branch_elts.create_local_branch("test-branch")
 
@@ -78,5 +81,7 @@ def test_delete_file_local_branch(driver: selenium.webdriver, *args, **kwargs):
     logging.info(f"Checking that file deleted in input data tab while on test-branch does not appear in master branch")
 
     contents = file_browser_elts.input_file_browser_contents_list
-    assert len(contents) == 1, "Expected sample-upload.txt to not appear in master branch"
-    assert contents[0] == 'untracked', "Expected sample-upload.txt to not appear in master branch"
+    assert len(contents) == 3, "Expected file browser to be empty but more than 1 file/directory exists"
+    assert contents[0] == 'untracked', "Expected file browser to be empty, but still have untracked folder"
+    assert contents[1] == 'Drag and drop files here', "Expected file browser to be empty, but still have untracked folder"
+    assert contents[2] == 'Choose Files...', "Expected file browser to be empty, but still have untracked folder"
