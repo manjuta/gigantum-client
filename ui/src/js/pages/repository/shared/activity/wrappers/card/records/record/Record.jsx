@@ -13,7 +13,7 @@ type Props = {
     data: Array<Object>,
     id: string,
     type: string,
-  }
+  },
 }
 
 const Record = (props: Props) => {
@@ -53,7 +53,10 @@ const Record = (props: Props) => {
             className={liCSS}
             key={key}
           >
-            <RenderDetail item={item} />
+            <RenderDetail
+              item={item}
+              isNote={isNote}
+            />
           </li>
         );
       })}

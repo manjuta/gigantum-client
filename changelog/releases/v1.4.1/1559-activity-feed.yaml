@@ -1,0 +1,11 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1600"
+changelog:
+  - type: FIX
+    description: Fixes collapsing records not allowing reload, and fixes issues with New Activity button.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1559
+  - type: FIX
+    description: Improves load and reload speed of the activity records.
+  - type: FIX
+    description: Fixes setting the sticky state of the header when scrolled down.
+  - type: FIX
+    description: Fixes issues with detail records having a min-height value that offsets the activiy records code view.

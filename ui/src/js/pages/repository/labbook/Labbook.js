@@ -14,7 +14,7 @@ import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environ
 import {
   setMergeMode,
   setBuildingState,
-  setStickyDate,
+  setStickyState,
   updateTransitionState,
 } from 'JS/redux/actions/labbook/labbook';
 import { setCallbackRoute } from 'JS/redux/actions/routes';
@@ -89,6 +89,7 @@ type Props = {
   diskLow: Boolean,
   isBuilding: Boolean,
   isPublishing: Boolean,
+  isSticky: Boolean,
   isSyncing: Boolean,
   labbook: {
     activeBranchName: string,
@@ -513,7 +514,7 @@ class Labbook extends Component<Props> {
 
     this.offsetDistance = window.pageYOffset;
     if (isSticky !== isPageOffsetAtThreshold) {
-      setStickyDate(owner, name, isSticky);
+      setStickyState(owner, name, window.pageYOffset >= sticky);
     }
 
     if (isSticky) {
@@ -596,6 +597,7 @@ class Labbook extends Component<Props> {
       isBuilding,
       isPublishing,
       isSyncing,
+      isSticky,
       labbook,
       labbookName,
       match,
@@ -704,6 +706,7 @@ class Labbook extends Component<Props> {
               containerStatus={containerStatus}
               imageStatus={imageStatus}
               isLocked={isLocked}
+              isSticky={isSticky}
               collaborators={collaborators}
               canManageCollaborators={canManageCollaborators}
               visibility={labbook.visibility}

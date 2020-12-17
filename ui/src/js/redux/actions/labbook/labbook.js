@@ -53,7 +53,7 @@ export const setModalVisible = (owner, name, modalVisible) => dispatcher(
   },
 );
 
-export const setStickyDate = (owner, name, isSticky) => dispatcher(
+export const setStickyState = (owner, name, isSticky) => dispatcher(
   types.UPDATE_STICKY_STATE,
   {
     namespace: `${owner}_${name}`,
