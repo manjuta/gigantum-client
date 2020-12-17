@@ -135,17 +135,17 @@ class Header extends Component<Props> {
     updates container status state
     updates labbook state
   */
- _setPublishingState = (owner, name, isPublishing) => {
-   const { props } = this;
+  _setPublishingState = (owner, name, isPublishing) => {
+    const { props } = this;
 
-   if ((props.isPublishing !== isPublishing)) {
-     setPublishingState(owner, name, isPublishing);
-   }
+    if ((props.isPublishing !== isPublishing)) {
+      setPublishingState(owner, name, isPublishing);
+    }
 
-   if (props.sectionType === 'dataset') {
-     setIsSyncing(owner, name, isPublishing);
-   }
- }
+    if (props.sectionType === 'dataset') {
+      setIsSyncing(owner, name, isPublishing);
+    }
+  }
 
  /** *
     @param {Node} element
@@ -156,7 +156,7 @@ class Header extends Component<Props> {
    if (element) {
      const curOverflow = element.style.overflow;
 
-     if (!curOverflow || curOverflow === 'visible') {
+     if (!curOverflow || (curOverflow === 'visible')) {
        element.style.overflow = 'hidden';
      }
 
@@ -284,8 +284,7 @@ class Header extends Component<Props> {
               />
 
               { isLabbookSection
-                && <Container {...this.props} />
-              }
+                && <Container {...this.props} />}
             </div>
           </div>
 

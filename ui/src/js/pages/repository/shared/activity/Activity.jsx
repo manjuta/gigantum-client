@@ -3,7 +3,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { setContainerMenuWarningMessage } from 'JS/redux/actions/labbook/environment/environment';
-import shallowCompare from 'react-addons-shallow-compare';
 import InfiniteScroll from 'react-infinite-scroller';
 // store
 import store from 'JS/redux/store';
@@ -34,6 +33,8 @@ type Props = {
     environment: {
       getStore: Function,
     },
+    isLoading: Function,
+    loadMore: Function,
     refetchConnection: Function,
   },
   sectionType: string,
@@ -48,7 +49,6 @@ class Activity extends Component<Props> {
     super(props);
     const section = props[props.sectionType];
     this.state = {
-      loadingMore: false,
       modalVisible: false,
       automaticRefetch: true,
       selectedNode: null,
@@ -63,6 +63,23 @@ class Activity extends Component<Props> {
       stickyDate: false,
       compressedElements: new Set(),
     };
+  }
+
+
+  componentDidMount() {
+    const { refetch } = this.props;
+    this.mounted = true;
+    refetch('activity');
+    this._isMounted = true;
+    window.addEventListener('visibilitychange', this._handleVisibilityChange);
+
+    window.addEventListener('focus', this._pollForActivity);
+    window.addEventListener('scroll', this._handleScroll);
+    this._pollForActivity();
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -104,36 +121,6 @@ class Activity extends Component<Props> {
       activityCardCount,
       expandableClusterObject,
     };
-  }
-
-  /**
-  *  @param {}
-  *   add scroll listener
-  *   add interval to poll for new activityRecords
-  */
-  componentDidMount() {
-    const { refetch } = this.props;
-
-    refetch('activity');
-    this._isMounted = true;
-    window.addEventListener('visibilitychange', this._handleVisibilityChange);
-
-    window.addEventListener('focus', this._pollForActivity);
-    window.addEventListener('scroll', this._handleScroll);
-    this._pollForActivity();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
-
-  componentDidUpdate(previousProps) {
-    const { activityRecords } = previousProps[previousProps.sectionType];
-    if (activityRecords && activityRecords.pageInfo
-      && activityRecords.pageInfo.hasNextPage
-      && (this._countExpandedRecords() < 10)) {
-      this._loadMore();
-    }
   }
 
   /**
@@ -207,7 +194,6 @@ class Activity extends Component<Props> {
    * @return {}
    */
   _pollForActivity = () => {
-    const self = this;
     const {
       sectionType,
       name,
@@ -233,7 +219,7 @@ class Activity extends Component<Props> {
 
         if ((firstRecordCommitId !== newRecordCommitId)
           && (firstRecordCommitId !== null)) {
-          const { automaticRefetch } = self.state;
+          const { automaticRefetch } = this.state;
           if (automaticRefetch) {
             this._refetch();
           } else {
@@ -241,7 +227,7 @@ class Activity extends Component<Props> {
           }
         }
 
-        if (self._isMounted && document.hasFocus()) {
+        if (this.isMounted && document.hasFocus()) {
           setTimeout(() => { getNewActivity(); }, 3000);
         }
       }).catch(error => console.log(error));
@@ -265,8 +251,16 @@ class Activity extends Component<Props> {
      relay.refetchConnection(
        5,
        (response, error) => {
+         const { sectionType } = this.props;
+         const section = this.props[sectionType];
+         const { activityRecords } = section;
          if (error) {
-           console.log(response, error);
+           console.log(error);
+         } else if (
+           (this._countExpandedRecords() < 10)
+           && activityRecords.pageInfo.hasNextPage
+         ) {
+           this._loadMore();
          }
        },
        {
@@ -281,27 +275,27 @@ class Activity extends Component<Props> {
   *  pagination container loads more items
   */
   _loadMore = () => {
-    const { loadingMore } = this.state;
     const { sectionType, relay } = this.props;
     const section = this.props[sectionType];
     const { activityRecords } = section;
     const cursor = activityRecords && activityRecords.pageInfo
       ? activityRecords.pageInfo.endCursor
       : null;
-
-    if (relay.isLoading() || loadingMore) {
+    if (relay.isLoading()) {
       return;
     }
-
-    this.setState({ loadingMore: true });
 
     relay.loadMore(
       5, // Fetch the next 5 feed items
       (error) => {
         if (error) {
           console.error(error);
+        } else if (
+          (this._countExpandedRecords() < 10)
+          && activityRecords.pageInfo.hasNextPage
+        ) {
+          this._loadMore();
         }
-        this.setState({ loadingMore: false });
       }, {
         name: section,
         cursor,
@@ -317,8 +311,9 @@ class Activity extends Component<Props> {
   _countExpandedRecords = () => {
     const { sectionType } = this.props;
     const section = this.props[sectionType];
-    const records = (section.activityRecords !== undefined) ? section.activityRecords.edges : [];
-
+    const records = (section.activityRecords !== undefined)
+      ? section.activityRecords.edges
+      : [];
     let hiddenCount = 0;
     let recordCount = 0;
 

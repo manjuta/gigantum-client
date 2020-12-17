@@ -80,7 +80,13 @@ class DetailRecords extends Component<Props> {
           className={listCSS}
           ref={(ref) => { this.recordList = ref; }}
         >
-          { detailRecords.map((detailRecord) => (<Record detailRecord={detailRecord} />))}
+          { detailRecords.map((detailRecord) => (
+            <Record
+              detailRecord={detailRecord}
+              isNote={isNote}
+              key={detailRecord.id}
+            />
+          ))}
         </div>
 
         { hasOverflow && (!isImage)
