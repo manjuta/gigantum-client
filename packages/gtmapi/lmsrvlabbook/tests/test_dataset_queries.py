@@ -22,6 +22,8 @@ class TestDatasetQueries(object):
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'afaketoken'}}}, status=200)
         responses.add(responses.GET, 'https://test.repo.gigantum.com/api/v4/projects/default%2Fdataset8', status=404)
 
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+
         query = """{
                     dataset(name: "dataset8", owner: "default") {
                       id
