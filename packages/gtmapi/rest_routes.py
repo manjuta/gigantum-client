@@ -121,7 +121,7 @@ def servers():
     for s in current_app.config['LABMGR_CONFIG'].list_available_servers():
 
         try:
-            gitlab_response = requests.get(f"{s.git_url}/backup")
+            gitlab_response = requests.get(f"{s.git_url}backup")
             if gitlab_response.status_code == 503 and "backup in progress" in str(gitlab_response.content).lower():
                 backup_in_progress = True
             else:

@@ -33,7 +33,7 @@ class GitWorkflowException(GigantumException):
         config = Configuration()
         server_config = config.get_server_configuration()
         try:
-            gitlab_response = requests.get(f"{server_config.git_url}/backup")
+            gitlab_response = requests.get(f"{server_config.git_url}backup")
             if gitlab_response.status_code == 503 and "backup in progress" in str(gitlab_response.content).lower():
                 super().__init__("backup in progress")
                 return

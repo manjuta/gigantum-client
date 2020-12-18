@@ -542,6 +542,7 @@ class TestDatasetMutations(object):
                                 "message": "fail"
                             },
                       status=400)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
 
         im = InventoryManager()
         ds = im.create_dataset('default', 'default', "dataset100", storage_type="gigantum_object_v1", description="100")
