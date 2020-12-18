@@ -1,5 +1,5 @@
 pyyaml==5.3.1
-GitPython==3.1.7
+GitPython==3.1.11
 gitdb-speedups==0.1.0
 docker==4.2.2
 redis==3.3.0
@@ -10,15 +10,13 @@ rq-scheduler==0.9
 jupyter_client==6.1.5
 requests==2.24.0
 python-jose[cryptography]==3.2.0
-# mitm proxy pins on a range while python-jose floats to the latest
-# we need to update cryptography to >3.2 as soon as mitmproxy supports it
-cryptography==2.9.2
+cryptography==3.2.1
 schema==0.6.6
 blosc==1.5.1
 natsort==5.1.1
 pillow==7.2.0
 click~=7.1
-mitmproxy==5.1.1
+mitmproxy==5.3.0
 pandas==1.0.5
 aiohttp==3.6.2
 aiofiles==0.5.0
