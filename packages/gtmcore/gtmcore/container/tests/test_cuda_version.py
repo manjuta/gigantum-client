@@ -91,6 +91,33 @@ class TestCUDAVersion(object):
         os.environ['NVIDIA_DRIVER_VERSION'] = '411.8'
         assert(should_launch_with_cuda_support('10.0')[0]) is True
 
+        # For CUDA 11
+        os.environ['NVIDIA_DRIVER_VERSION'] = '450.36.06'
+        assert(should_launch_with_cuda_support('11.0')[0]) is True
+        assert(should_launch_with_cuda_support('11.1')[0]) is False
+        assert(should_launch_with_cuda_support('10.2')[0]) is True
+        os.environ['NVIDIA_DRIVER_VERSION'] = '440.33'
+        assert(should_launch_with_cuda_support('11.0')[0]) is False
+        assert(should_launch_with_cuda_support('11.1')[0]) is False
+        os.environ['NVIDIA_DRIVER_VERSION'] = '418.39'
+        assert(should_launch_with_cuda_support('11.0')[0]) is False
+        assert(should_launch_with_cuda_support('11.1')[0]) is False
+        os.environ['NVIDIA_DRIVER_VERSION'] = '409.59'
+        assert(should_launch_with_cuda_support('11.0')[0]) is False
+        assert(should_launch_with_cuda_support('11.1')[0]) is False
+        os.environ['NVIDIA_DRIVER_VERSION'] = '411.8'
+        assert(should_launch_with_cuda_support('11.0')[0]) is False
+        assert(should_launch_with_cuda_support('11.1')[0]) is False
+
+        # For CUDA 11.1
+        os.environ['NVIDIA_DRIVER_VERSION'] = '450.80.02'
+        assert(should_launch_with_cuda_support('11.0')[0]) is True
+        assert(should_launch_with_cuda_support('11.1')[0]) is True
+        assert(should_launch_with_cuda_support('10.2')[0]) is True
+        os.environ['NVIDIA_DRIVER_VERSION'] = '440.33'
+        assert(should_launch_with_cuda_support('11.0')[0]) is False
+        assert(should_launch_with_cuda_support('11.1')[0]) is False
+
     def test_should_launch_with_cuda_support_bad_input(self):
         """ Check that all version checking logic works """
 
@@ -104,7 +131,6 @@ class TestCUDAVersion(object):
 
         os.environ['NVIDIA_DRIVER_VERSION'] = '410.58'
         assert(should_launch_with_cuda_support('2.17')[0]) is False
-        assert(should_launch_with_cuda_support('10.0.1')[0]) is False
         assert(should_launch_with_cuda_support('asdf')[0]) is False
         assert(should_launch_with_cuda_support('ab.cd')[0]) is False
 
@@ -114,15 +140,8 @@ class TestCUDAVersion(object):
         assert(should_launch_with_cuda_support('10.0')[0]) is False
         os.environ['NVIDIA_DRIVER_VERSION'] = '100'
         assert(should_launch_with_cuda_support('10.0')[0]) is False
-        os.environ['NVIDIA_DRIVER_VERSION'] = '410.58.8'
-        assert(should_launch_with_cuda_support('10.0')[0]) is False
 
     def test_should_launch_with_cuda_support_reason(self):
-        launch, reason = should_launch_with_cuda_support('10.0')
-        assert launch is False
-        assert reason == "Host does not have NVIDIA drivers configured"
-
-        os.environ['NVIDIA_DRIVER_VERSION'] = '410.58.1'
         launch, reason = should_launch_with_cuda_support('10.0')
         assert launch is False
         assert reason == "Host does not have NVIDIA drivers configured"
@@ -131,11 +150,6 @@ class TestCUDAVersion(object):
         launch, reason = should_launch_with_cuda_support(None)
         assert launch is False
         assert reason == "Project is not GPU enabled"
-
-        os.environ['NVIDIA_DRIVER_VERSION'] = '410.58'
-        launch, reason = should_launch_with_cuda_support('10.0.1')
-        assert launch is False
-        assert reason == "Failed to parse required CUDA version from Project configuration"
 
         os.environ['NVIDIA_DRIVER_VERSION'] = '410.58'
         launch, reason = should_launch_with_cuda_support('4.0')
