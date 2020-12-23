@@ -7,6 +7,11 @@ from framework.factory.models_enums.page_config import PageConfig
 from framework.factory.models_enums.page_config import ComponentModel
 from client_app.pages.project_listing.components.project_listing_component import ProjectListingComponent
 from selenium.webdriver.common.action_chains import ActionChains
+from client_app.pages.project_listing.components.project_delete_component import ProjectDeleteComponent
+from client_app.pages.project_listing.components.gigantum_hub_component import GigantumHubComponent
+from client_app.pages.project_listing.components.project_menu_component import ProjectMenuComponent
+from client_app.pages.project_listing.components.project_code_input_output_data_component import \
+    ProjectCodeInputOutputDataComponent
 
 
 class ProjectListingPage(BasePage):
@@ -22,6 +27,7 @@ class ProjectListingPage(BasePage):
         page_config = PageConfig()
         super(ProjectListingPage, self).__init__(driver, page_config)
         self._project_listing_model = ComponentModel()
+        self.component_model = ComponentModel()
         self.__project_grid_model = ComponentModel(locator_type=LocatorType.XPath, locator="//div[@class='grid']")
         self.__project_listing_component = None
         self.__comp_project_grid_component = None
@@ -38,6 +44,38 @@ class ProjectListingPage(BasePage):
         self.__but_got_it = None
         self.__slider_helper_guide = None
         self.__but_helper_close = None
+        self._project_delete_component = None
+        self._gigantum_hub_component = None
+        self._code_input_output_component = None
+        self._project_menu_component = None
+
+    @property
+    def project_delete_component(self) -> ProjectDeleteComponent:
+        """ Returns an instance of project output delete window component."""
+        if self._project_delete_component is None:
+            self._project_delete_component = ProjectDeleteComponent(self.driver, self.component_model)
+        return self._project_delete_component
+
+    @property
+    def gigantum_hub_component(self) -> GigantumHubComponent:
+        """ Returns an instance of Gigantum Hub window component."""
+        if self._gigantum_hub_component is None:
+            self._gigantum_hub_component = GigantumHubComponent(self.driver, self.component_model)
+        return self._gigantum_hub_component
+
+    @property
+    def code_input_output_component(self) -> ProjectCodeInputOutputDataComponent:
+        """ Returns an instance of Code data, Input data and Output data window component."""
+        if self._code_input_output_component is None:
+            self._code_input_output_component = ProjectCodeInputOutputDataComponent(self.driver, self.component_model)
+        return self._code_input_output_component
+
+    @property
+    def project_menu_component(self) -> ProjectMenuComponent:
+        """ Returns an instance of menu component."""
+        if self._project_menu_component is None:
+            self._project_menu_component = ProjectMenuComponent(self.driver, self.component_model)
+        return self._project_menu_component
 
     @property
     def project_listing_component(self) -> ProjectListingComponent:
@@ -230,3 +268,4 @@ class ProjectListingPage(BasePage):
         if "url" in slider_background:
             return True
         return False
+

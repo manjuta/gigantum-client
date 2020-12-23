@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1599"
+changelog:
+  - type: NEW
+    description: Test case for publishing syncing and importing a project.
