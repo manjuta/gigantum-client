@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1613"
+changelog:
+  - type: IMPROVEMENT
+    description: All available authentication providers now supported in the Client
