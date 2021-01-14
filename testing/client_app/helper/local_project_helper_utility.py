@@ -6,6 +6,9 @@ from configuration.configuration import ConfigurationManager
 from framework.factory.models_enums.constants_enums import LoginUser
 from client_app.constant_enums.constants_enums import GigantumConstants
 from collections import namedtuple
+from typing import Optional
+from string import Template
+import requests
 
 
 class ProjectHelperUtility(object):
@@ -33,9 +36,12 @@ class ProjectHelperUtility(object):
     def __delete_local_images(self) -> bool:
         """Removes the local project images"""
         images = docker.from_env().images.list()
+        user_credentials = ConfigurationManager.getInstance().get_user_credentials(LoginUser.User1)
+        username = user_credentials.user_name
+        username_str = f"{username}-{username}"
         for image in images:
             for tag in image.tags:
-                if 'gmlb-' in tag and 'p-' in tag:
+                if 'gmlb-' in tag and 'p-' in tag and username_str in tag:
                     docker.from_env().images.remove(image.id, force=True, noprune=False)
         return True
 
@@ -130,20 +136,26 @@ class ProjectHelperUtility(object):
                 return False
         return True
 
-    def verify_file_content(self, folder_name, file_content, project_title):
+    def verify_file_content(self, folder_name, file_content, project_title, is_collaborator=False):
         """ Verify file content in the project folders
 
         Args:
             folder_name: Name of the folder in which file is kept
             file_content: Content of the file
             project_title: Title of the current project
+            is_collaborator: Decision variable to determine whether user is a collaborator or not
 
         Returns:
 
         """
         project_folder_names = self.__get_folder_names()
+        if is_collaborator:
+            collaborator_credentials = ConfigurationManager.getInstance().get_user_credentials(LoginUser.User2)
+            username = collaborator_credentials.user_name
+        else:
+            username = project_folder_names.username
         file_directory = project_folder_names.home_dir / GigantumConstants.SERVERS_FOLDER.value / project_folder_names.\
-            default_server / project_folder_names.username / project_folder_names.username / GigantumConstants.\
+            default_server / username / project_folder_names.username / GigantumConstants.\
             PROJECTS_FOLDER.value / project_title / folder_name / GigantumConstants.DEFAULT_FILE_NAME.value
         file = open(file_directory, "r")
         file_content_in_folder = str(file.read()).strip()
@@ -169,3 +181,45 @@ class ProjectHelperUtility(object):
             raise Exception("Unable to identify default server from configuration")
         project_folder_names = folder_names(username, home_dir, default_server)
         return project_folder_names
+
+    def delete_remote_project(self, project_title, driver) -> None:
+        """Method to remove remote project if it exists in the hub.
+
+        Args:
+            project_title: name of the Project to delete
+            driver: driver instance
+
+        Returns:
+            bool
+        """
+        if ConfigurationManager.getInstance().get_app_setting("api_url"):
+            api_url = ConfigurationManager.getInstance().get_app_setting("api_url")
+        else:
+            raise Exception("Unable to identify api url from configuration")
+        user_credentials = ConfigurationManager.getInstance().get_user_credentials(LoginUser.User1)
+        namespace = user_credentials.user_name
+        # Set headers
+        access_token = driver.execute_script("return window.localStorage.getItem('access_token')")
+        id_token = driver.execute_script("return window.localStorage.getItem('id_token')")
+        headers = {
+            'Identity': id_token,
+            'Authorization': f'Bearer {access_token}'
+        }
+        # Build query
+        query_template = Template("""
+                            mutation DeleteRemoteProject {
+                            deleteRemoteLabbook(input: {owner: "$owner", labbookName: "$project", confirm: true}) {
+                            success
+                                }
+                                }
+                            """)
+        query_str = query_template.substitute(owner=namespace, project=project_title)
+        result = requests.post(api_url, json={'query': query_str}, headers=headers)
+        if result.status_code != 200:
+            raise Exception(f"Request to hub API failed. Status Code: {result.status_code}")
+        result_data = result.json()
+        if 'errors' in result_data:
+            raise Exception("Failed to delete remote project")
+        else:
+            if result_data['data']['deleteRemoteLabbook']['success'] is False:
+                raise Exception("Failed to delete remote project")

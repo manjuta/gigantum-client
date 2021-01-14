@@ -12,6 +12,9 @@ from client_app.pages.project_listing.components.gigantum_hub_component import G
 from client_app.pages.project_listing.components.project_menu_component import ProjectMenuComponent
 from client_app.pages.project_listing.components.project_code_input_output_data_component import \
     ProjectCodeInputOutputDataComponent
+from client_app.pages.project_listing.components.collaborators_modal_component import CollaboratorsModalComponent
+from client_app.pages.project_listing.components.project_sync_conflict_modal_component import \
+    ProjectSyncConflictModalComponent
 
 
 class ProjectListingPage(BasePage):
@@ -48,6 +51,22 @@ class ProjectListingPage(BasePage):
         self._gigantum_hub_component = None
         self._code_input_output_component = None
         self._project_menu_component = None
+        self._collaborators_modal_component = None
+        self._project_sync_conflict_modal_component = None
+
+    @property
+    def collaborators_modal_component(self) -> CollaboratorsModalComponent:
+        """ Returns an instance of Collaborators window component."""
+        if self._collaborators_modal_component is None:
+            self._collaborators_modal_component = CollaboratorsModalComponent(self.driver, self.component_model)
+        return self._collaborators_modal_component
+
+    @property
+    def project_sync_conflict_modal_component(self) -> ProjectSyncConflictModalComponent:
+        """ Returns an instance of project sync conflict modal component."""
+        if self._project_sync_conflict_modal_component is None:
+            self._project_sync_conflict_modal_component = ProjectSyncConflictModalComponent(self.driver, self.component_model)
+        return self._project_sync_conflict_modal_component
 
     @property
     def project_delete_component(self) -> ProjectDeleteComponent:

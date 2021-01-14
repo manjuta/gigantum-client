@@ -126,7 +126,7 @@ class ProjectMenuComponent(BaseComponent):
         element = "//div[contains(text(), 'Sync')]"
         if self.check_element_presence(LocatorType.XPath, element, 20):
             sync_button = self.get_locator(LocatorType.XPath, element)
-            if sync_button is not None:
+            if sync_button is not None and sync_button.element_to_be_clickable():
                 sync_button.click()
                 return True
         return False
@@ -153,5 +153,18 @@ class ProjectMenuComponent(BaseComponent):
         menu_project_delete = self.get_locator(LocatorType.XPath, element)
         if menu_project_delete is not None:
             menu_project_delete.click()
+            return True
+        return False
+
+    def click_collaborators_button(self) -> bool:
+        """Performs click action on Collaborators button
+
+        Returns: returns the result of click action
+
+        """
+        element = f"//button[contains(text(), 'Collaborators')]"
+        btn_collaborators = self.get_locator(LocatorType.XPath, element)
+        if btn_collaborators is not None:
+            btn_collaborators.click()
             return True
         return False
