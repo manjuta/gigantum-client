@@ -1,0 +1,62 @@
+@import '~Styles/_imports.scss';
+$dropBoxWidth: 250px;
+
+.BranchButtons {
+  align-items: center;
+  flex-wrap: nowrap;
+  margin: 0 0 0 10px;
+  @include flex(space-around, row);
+ 
+  &__action {
+
+    margin: 10px;
+
+    &:after {
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: bottom;
+      -webkit-animation: ellipsis steps(4,end) 900ms infinite;
+      animation: ellipsis steps(4,end) 900ms infinite;
+      content: "\2026";
+      width: 0px;
+    }
+  }
+}
+
+.Btn--branch {
+  height: 40px;
+  line-height: 30px;
+  color: $primary;
+  background-color: transparent;
+  border: 1px solid $primary;
+  margin: 0 2px;
+  border-radius: 3px;
+
+  padding: 0 10px 0 30px;
+
+  &:hover {
+    color: $white;
+    background-color: $primary;
+    border: 1px solid $primary;
+    padding: 0 10px 0 30px;
+  }
+  &:disabled {
+    background-color: $background-color !important;
+    border: 1px solid $romanSilver !important;
+  }
+
+}
+
+
+
+@media screen and (max-width: 1280px) and (min-width: 0px) {
+  .BranchButtons {
+    font-size: 0 !important;
+  }
+  .Btn--branch {
+    padding-right: 5px !important;
+    &--sync {
+      background-position: center center !important;
+    }
+  }
+}

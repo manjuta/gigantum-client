@@ -1,0 +1,25 @@
+@import '~Styles/_imports.scss';
+
+.BranchStatus {
+  cursor: auto;
+  width: auto;
+  align-items: flex-end;
+  @include flex(flex-start, row);
+
+  &--margin {
+    margin: 0 35px 0 10px;
+  }
+
+  &__icon {
+    width: 24px;
+    height: 24px;
+    &--local {
+        background: url('~Images/icons/branches/local.png') no-repeat center center;
+        background-size: cover;
+    }
+    &--remote {
+        background: url('~Images/icons/branches/remote.png') no-repeat center center;
+        background-size: cover;
+    }
+  }
+}

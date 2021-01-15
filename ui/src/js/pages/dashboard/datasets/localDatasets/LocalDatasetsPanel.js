@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import Moment from 'moment';
-import ReactTooltip from 'react-tooltip';
-import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // components
 import RepositoryTitle from 'Pages/dashboard/shared/title/RepositoryTitle';
 // store

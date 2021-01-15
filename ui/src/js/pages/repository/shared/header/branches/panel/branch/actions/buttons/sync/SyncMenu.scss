@@ -1,0 +1,49 @@
+@import '~Styles/_imports.scss';
+
+
+.SyncMenu {
+  &__dropdown {
+    position: relative;
+    overflow: visible;
+    z-index: index($elements, popup) + 2;
+    &--menu {
+      position: absolute;
+      background: $white;
+      top: 30px;
+      padding: 10px;
+      width: 175px;
+      animation: slide-down-fade-in forwards .25s;
+      @include boxShadow();
+    }
+  }
+
+  &__h5 {
+    margin: 0;
+    font-size: 14px;
+    border-bottom: 2px solid $romanSilver;
+  }
+
+  &__list {
+    margin: 1px 0;
+  }
+
+  &__item {
+    padding: 10px 10px;
+    color: $primaryText;
+    cursor: pointer;
+    align-items: center;
+    font-size: 1em !important;
+    border-bottom: 1px solid $grey;
+
+    @include flex(space-between, row);
+
+    &:hover {
+      background-color: $primary;
+      color: $white;
+    }
+
+    &:last-child {
+      border-bottom: 0px solid $white;
+    }
+  }
+}

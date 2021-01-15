@@ -1,0 +1,104 @@
+@import '~Styles/_imports.scss';
+
+.BranchesSidePanel {
+  padding: 20px 20px;
+
+  &__header {
+    @include flex(space-between, row);
+  }
+
+  &__title{
+      font-size: 18px;
+  }
+
+  &__label {
+      margin: 10px 0 5px 0;
+      font-size: 12px;
+  }
+
+  &__label {
+      padding-left: 13px;
+      &--local{
+          background: url('~Images/icons/branches/local.png') no-repeat left 25px center;
+          background-size: cover;
+          background-size: 20px;
+      }
+      &--remote{
+          background: url('~Images/icons/branches/remote.png') no-repeat left 25px center;
+          background-size: cover;
+          background-size: 20px;
+      }
+      &--disabled{
+          color: $romanSilver;
+          cursor: auto;
+      }
+  }
+
+  &__Modal-cover {
+      transition: all 0.25s;
+      position: absolute;
+      z-index: index($elements, modalCover);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.5;
+      background: $slateBlue;
+      &--coverall {
+          z-index: index($elements, modal) + 1;
+          text-align: center;
+          @include flex(flex-start, column);
+          div {
+              margin-top: 10px;
+              color: $white;
+          }
+      }
+  }
+
+  &__loadMore {
+    margin: 0;
+    border-radius: 0;
+    width: 250px;
+    background: $primary;
+    height: 30px;
+    align-items: center;
+
+    &:hover {
+
+      &:before {
+        text-decoration: underline;
+      }
+
+      .BranchesSidePanel__icon {
+        background-size: 22px;
+      }
+    }
+  }
+
+
+  &__icon {
+    height: 20px;
+    width: 20px;
+    margin-left: 10px;
+    &--up {
+      background: url('~Images/icons/up-arrow-white.svg') no-repeat  center center;
+      background-size: 20px;
+    }
+
+    &--down {
+      background: url('~Images/icons/down-arrow-white.svg') no-repeat center center;
+      background-size: 20px;
+    }
+  }
+
+}
+
+
+@keyframes  overflow-change{
+    0% {
+        overflow: hidden;
+    }
+    100% {
+        overflow: visible;
+    }
+  }

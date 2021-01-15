@@ -1,0 +1,189 @@
+@import '~Styles/_imports.scss';
+
+.BranchActions {
+
+  animation: slide-up-fade-in forwards 0.25s;
+  position: relative;
+  padding: 5px 5px 0 5px;
+  z-index: 0;
+
+  @include flex(flex-start, row);
+
+
+  &__btn {
+    border: 1px solid $primary;
+    margin: 0 5px 0 0;
+    background: $background-color;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    position: relative;
+
+    &--sync-dropdown {
+        margin-left: -4px;
+        width: 15px;
+        border-radius: 0 4px 4px 0;
+        background: url(~Images/icons/branches/chevron.svg) no-repeat center center;
+        background-size: 20px;
+
+        &:hover, &:focus {
+          background: $primary url(~Images/icons/branches/chevron-hover.svg) no-repeat center center;
+          background-size: 20px;
+          border: 1px solid $primary;
+          margin-left: -4px;
+        }
+        &:hover:disabled,
+        &:disabled{
+            background: $background-color url(~Images/icons/branches/chevron-disabled.svg) no-repeat center center;
+            background-size: 20px;
+            border: 1px solid $romanSilver;
+            color: $romanSilver;
+            cursor: auto;
+        }
+    }
+
+
+    &--create {
+        background: $white url('~Images/icons/branches/create.svg') no-repeat center center;
+        background-size: cover;
+        border: 1px solid $primary;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/create-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/create-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--reset {
+        background: $white url('~Images/icons/branches/reset.svg') no-repeat center center;
+        background-size: cover;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/reset-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/reset-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--switch {
+        background: $white url('~Images/icons/branches/switch.svg') no-repeat center center;
+        background-size: cover;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/switch-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/switch-disabled.svg') no-repeat center center !important;
+            background-size: 22x !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--merge {
+        background: $white url('~Images/icons/branches/merge.svg') no-repeat center center;
+        background-size: cover;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &--selected {
+            background: $primary url('~Images/icons/branches/merge-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/merge-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--delete {
+        background: $white url('~Images/icons/branches/delete.svg') no-repeat center center;
+        background-size: cover;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &--selected {
+            background: $primary url('~Images/icons/branches/delete-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/delete-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--sync {
+        background: $white url('~Images/icons/branches/sync.svg') no-repeat center center;
+        background-size: cover;
+        border-radius: 4px 0 0 4px;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/sync-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/sync-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--push {
+        background: $white url('~Images/icons/branches/push.svg') no-repeat center center;
+        background-size: cover;
+        border-radius: 4px 0 0 4px;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/push-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/push-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+
+    &--pull {
+        background: $white url('~Images/icons/branches/pull.svg') no-repeat center center;
+        background-size: cover;
+        border-radius: 4px 0 0 4px;
+        &:hover, &:focus {
+            background: $primary url('~Images/icons/branches/pull-hover.svg') no-repeat center center;
+            background-size: cover;
+            border: 1px solid $primary;
+        }
+        &:disabled{
+            background: $background-color url('~Images/icons/branches/pull-disabled.svg') no-repeat center center !important;
+            background-size: cover !important;
+            border: 1px solid $romanSilver !important;
+            cursor: auto !important;
+        }
+    }
+  }
+}

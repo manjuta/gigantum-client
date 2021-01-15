@@ -1,0 +1,38 @@
+@import '~Styles/_imports.scss';
+
+.BranchDropdownItem {
+
+  &__icons {
+    align-items: center;
+    @include flex(space-between, row);
+  }
+
+  &__icon {
+    height: 30px;
+    width: 30px;
+    &--local {
+       background: url(~Images/icons/branches/local.png) no-repeat center center;
+       background-size: 20px;
+
+       &:hover {
+         background: url(~Images/icons/branches/local.png) no-repeat center center;
+         background-size: 20px;
+       }
+    }
+
+    &--remote {
+      background: url(~Images/icons/branches/remote.png) no-repeat center center;
+      background-size: 20px;
+
+      &:hover {
+        background: url(~Images/icons/branches/remote.png) no-repeat center center;
+        background-size: 20px;
+      }
+    }
+
+    &--empty {
+      background: url('') no-repeat center center;
+      background-size: 20px;
+    }
+  }
+}

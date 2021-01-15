@@ -133,11 +133,6 @@
 
 .Modal__close{
   @include close();
-
-  &:hover {
-    background-size: 32px;
-    padding: 7px 20px;
-  }
 }
 
 .Modal__pre-header{

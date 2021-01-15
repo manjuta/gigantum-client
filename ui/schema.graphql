@@ -1752,6 +1752,7 @@ type Server implements Node {
   userSearchUrl: String
   lfsEnabled: Boolean
   authConfig: ServerAuth
+  backupInProgress: Boolean
 }
 
 """

@@ -1,0 +1,59 @@
+@import '~Styles/_imports.scss';
+
+.BranchMenu {
+  z-index: index($elements, popup) - 1;
+  @include flex(flex-start, row);
+
+  &__h5 {
+    margin: 0;
+    font-size: 16px;
+    border-bottom: 2px solid $romanSilver;
+  }
+
+  &__ul{
+    margin: 1px 0;
+  }
+
+  &__text {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  &__list-item {
+    padding: 10px 10px;
+    color: $primaryText;
+    cursor: pointer;
+    align-items: center;
+    font-size: 16px !important;
+    @include flex(space-between, row);
+
+    &--create {
+      flex-direction: column;
+      font-size: 14px !important;
+      &:hover > button {
+        color: $secondary;
+      }
+    }
+
+    &:hover {
+      background-color: $primary;
+      color: $white;
+    }
+
+    border-bottom: 1px solid $grey;
+
+    &:last-child {
+      border-bottom: 0px solid $white;
+    }
+  }
+}
+
+
+@keyframes ellipsis {
+  to {
+    width: 1.25em;
+  }
+}

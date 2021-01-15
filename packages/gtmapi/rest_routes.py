@@ -151,4 +151,3 @@ def exchange_tokens(server_id: str, state_token: str):
         return abort(response.status_code)
 
     return jsonify(response.json())
-

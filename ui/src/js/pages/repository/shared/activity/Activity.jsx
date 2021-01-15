@@ -11,7 +11,7 @@ import config from 'JS/config';
 // Components
 import Loader from 'Components/loader/Loader';
 import Tooltip from 'Components/tooltip/Tooltip';
-import CreateBranch from 'Pages/repository/shared/modals/CreateBranch';
+import CreateBranch from 'Pages/repository/shared/modals/createBranch/CreateBranch';
 import PaginationLoader from './loaders/PaginationLoader';
 import DateSection from './date/DateSection';
 // utils

@@ -53,7 +53,7 @@ class Tooltip extends Component<Props> {
     * subscribe to store to update state
   */
   componentDidMount() {
-    window.addEventListener('click', this._hideTooltip);
+    window.addEventListener('click', this.hideTooltip);
   }
 
   /**
@@ -61,7 +61,7 @@ class Tooltip extends Component<Props> {
     unsubscribe from event listeners
   */
   componentWillUnmount() {
-    window.removeEventListener('click', this._hideTooltip);
+    window.removeEventListener('click', this.hideTooltip);
   }
 
   /**
@@ -69,7 +69,7 @@ class Tooltip extends Component<Props> {
    *  closes tooltip box when tooltip is open and the tooltip has not been clicked on
    *
   */
-  _hideTooltip = (evt) => {
+  hideTooltip = (evt) => {
     const { section } = this.props;
     const { toolTipExpanded } = this.state;
     if (toolTipExpanded

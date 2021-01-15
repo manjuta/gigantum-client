@@ -218,6 +218,7 @@ class Routes extends Component<Props> {
                       {...this.props}
                       {...parentProps}
                       auth={auth}
+                      currentServer={currentServer}
                       datasetName={parentProps.match.params.datasetName}
                       diskLow={showDiskLow}
                       owner={parentProps.match.params.owner}
@@ -234,6 +235,7 @@ class Routes extends Component<Props> {
                       {...this.props}
                       {...parentProps}
                       auth={auth}
+                      currentServer={currentServer}
                       diskLow={showDiskLow}
                       labbookName={parentProps.match.params.labbookName}
                       owner={parentProps.match.params.owner}
@@ -279,6 +281,7 @@ const RoutesFragement = createFragmentContainer(
               value
             }
           }
+          backupInProgress
           baseUrl
           gitServerType
           gitUrl

@@ -1,0 +1,28 @@
+@import '~Styles/_imports.scss';
+
+.BranchesCommits {
+    align-items: center;
+    flex-wrap: nowrap;
+    color: $white;
+    font-weight: 100;
+    font-size: 12px;
+    margin: 0 3px;
+    padding: 2px;
+    background: $primary;
+    border-radius: 10px;
+    height: 20px;
+
+    @include flex(space-around, row);
+
+    &__commits-behind {
+        padding: 2px 15px 2px 2px;
+        background: url(~Images/icons/branches/commit-behind.svg) no-repeat right -6px bottom;
+        background-size: 25px;
+    }
+
+    &__commits-ahead {
+        padding: 2px 15px 2px 2px;
+        background: url(~Images/icons/branches/commit-ahead.svg) no-repeat right -4px bottom;
+        background-size: 25px;
+    }
+  }

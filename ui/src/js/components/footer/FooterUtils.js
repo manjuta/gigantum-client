@@ -14,7 +14,7 @@ import FetchDatasetEdgeMutation from 'Mutations/repository/fetch/FetchDatasetEdg
 import FetchDatasetFilesMutation from 'Mutations/repository/fetch/FetchDatasetFilesMutation';
 import FetchLabbookDatasetFilesMutation from 'Mutations/repository/fetch/FetchLabbookDatasetFilesMutation';
 // Queries
-import UpdateDasetCommits from 'Pages/repository/shared/header/branches/UpdateDatasetCommits';
+import UpdateDasetCommits from 'Pages/repository/shared/header/branches/menu/UpdateDatasetCommits';
 
 const ansiUp = new AnsiUp();
 

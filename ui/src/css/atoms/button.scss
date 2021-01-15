@@ -369,41 +369,6 @@ button {
    *
    *
    *********************************/
-  &__loadMore{
-    margin: 0;
-    border-radius: 0;
-    width: 250px;
-    background: $primary;
-    height: 30px;
-    box-shadow: none;
-
-    &:hover {
-      box-shadow: none;
-      &:before {
-        text-decoration: underline;
-      }
-    }
-    &--up {
-      background: $primary url('~Images/icons/up-arrow-white.svg') no-repeat  calc(50% + 50px) 5px;
-      background-size: 20px;
-
-      &:before {
-        color: $white;
-        line-height: 16px;
-        content: "Previous";
-      }
-    }
-    &--down {
-      background: $primary url('~Images/icons/down-arrow-white.svg') no-repeat calc(50% + 50px) 5px;
-      background-size: 20px;
-
-      &:before {
-        color: $white;
-        line-height: 16px;
-        content: "Next";
-      }
-    }
-  }
 
   &__delete {
      background: url(~Images/icons/trash-azure.svg) no-repeat center center;

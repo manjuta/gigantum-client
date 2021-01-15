@@ -1,0 +1,71 @@
+@import '~Styles/_imports.scss';
+
+
+.Branch {
+    transition: all 0.25s;
+    cursor: auto;
+    border: 1px solid $romanSilver;
+    padding: 0 10px;
+    font-size: 14px;
+    height: 75px;
+    // position: relative;
+    overflow: visible;
+
+    @include flex(center, column);
+
+
+    &__header {
+      align-items: center;
+      @include flex(space-between, row);
+    }
+
+    &__branchname {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        word-break: break-all;
+        overflow: hidden;
+    }
+
+    &__details {
+      @include flex(space-between, row);
+    }
+
+    &--active {
+      animation: overflow-change forwards 0.5s;
+    }
+
+    &--current {
+        cursor: auto;
+        border: 2px solid $primary;
+        margin: 0;
+        z-index: index($elements, modalCover) + 10;
+
+        .Branch__branchname {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            overflow: hidden;
+            font-size: 20px;
+        }
+        &--selected{
+            z-index: index($elements, modalCover) + 1;
+            pointer-events: none;
+            position: relative;
+            background: $white !important;
+            border: 2px solid $primary;
+        }
+    }
+    &--selected {
+        z-index: index($elements, modalCover) + 1;
+        position: relative;
+        background: $fileBrowserHover;
+        color: $primary;
+        font-size: 1em;
+        border: 1px solid $primary;
+    }
+    &:hover {
+        background: $fileBrowserHover;
+        color: $primary;
+        font-size: 15px;
+    }
+}

@@ -28,7 +28,7 @@ import LinkedLocalDatasetsQuery from 'Pages/repository/shared/header/actionsSect
 // context
 import ServerContext from 'Pages/ServerContext';
 // components
-import CreateBranch from 'Pages/repository/shared/modals/CreateBranch';
+import CreateBranch from 'Pages/repository/shared/modals/createBranch/CreateBranch';
 import Tooltip from 'Components/tooltip/Tooltip';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
 import DeleteLabbook from 'Pages/repository/shared/modals/DeleteLabbook';
@@ -629,8 +629,7 @@ class ActionsMenu extends Component<Props> {
               remoteAdded={defaultRemote}
               remoteDelete={false}
             />
-          )
-        }
+          )}
 
         { (deleteModalVisible && (sectionType === 'dataset'))
           && (
@@ -641,8 +640,7 @@ class ActionsMenu extends Component<Props> {
               owner={owner}
               remoteAdded={defaultRemote}
             />
-          )
-        }
+          )}
 
         <CreateBranch
           description={description}

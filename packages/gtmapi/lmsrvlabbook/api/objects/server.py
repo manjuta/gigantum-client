@@ -63,6 +63,7 @@ def helper_get_current_server():
                              public_key_url=auth_config.public_key_url,
                              type_specific_fields=type_specific_fields)
 
+
     return Server(server_id=server_config.id,
                   name=server_config.name,
                   base_url=server_config.base_url,

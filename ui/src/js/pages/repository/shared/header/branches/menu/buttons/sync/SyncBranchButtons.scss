@@ -1,0 +1,151 @@
+@import '~Styles/_imports.scss';
+$dropBoxWidth: 250px;
+
+.SyncBranchButtons {
+  position: relative;
+  @include flex(flex-start, row);
+
+  &__dropdown {
+    margin-left: 0px;
+    width: 24px !important;
+    padding: 2px !important;
+    background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
+    background-size: 20px;
+    border-radius: 0 3px 3px 0;
+
+    &:hover, &:focus, &:hover:focus {
+      width: 24px !important;
+      background: $primary url(~Images/icons/down-arrow-white.svg) no-repeat center center;
+      background-size: 20px;
+      margin-left: 0px;
+      padding: 2px;
+    }
+
+    &:disabled {
+      background: $background-color url(~Images/icons/down-arrow-silver.svg) no-repeat center center;
+      background-size: 20px !important;
+      border: 1px solid $romanSilver;
+      color: $romanSilver;
+      cursor: auto;
+    }
+
+    &--open {
+      width: 24px !important;
+      background: url(~Images/icons/up-arrow-azure.svg) no-repeat center center;
+      background-size: 20px;
+
+      &:hover, &:focus, &:hover:focus {
+        width: 24px !important;
+        background: $primary url(~Images/icons/up-arrow-white.svg) no-repeat center center;
+        background-size: 20px;
+      }
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    background: $white;
+    top: 40px;
+    padding: 10px;
+    width: $dropBoxWidth + 50px;
+    animation: slide-down-fade-in forwards .25s;
+    @include boxShadow();
+  }
+
+
+  &__sync-status {
+    align-items: center;
+    flex-wrap: nowrap;
+    color: $white;
+    font-weight: 100;
+    font-size: 12px;
+    margin: 0 3px;
+    padding: 2px;
+    background: $primary;
+    border-radius: 10px;
+    height: 20px;
+    @include flex(space-around, row);
+  }
+
+  &__commits-behind {
+    padding: 2px 15px 2px 2px;
+    background: url(~Images/icons/branches/commit-behind.svg) no-repeat right -6px bottom 8px;
+    background-size: 25px;
+  }
+
+  &__commits-ahead {
+    padding: 2px 15px 2px 2px;
+    background: url(~Images/icons/branches/commit-ahead.svg) no-repeat right -4px top 1px;
+    background-size: 25px;
+  }
+
+  &__btn {
+    align-items: center;
+    padding: .5em !important;
+
+    @include flex(flext-start, row);
+
+    &--upToDate {
+      background: url('~Images/icons/branches/sync.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      padding: 0 10px 0 30px !important;
+
+      &:hover, &:focus {
+        background: $primary url('~Images/icons/branches/sync-hover.svg') no-repeat left 5px center;
+        background-size: 25px !important;
+        color: $white;
+      }
+
+      &:disabled {
+        background: $background-color url(~Images/icons/branches/sync-disabled.svg) no-repeat 5px center;
+        background-size: 25px !important;
+        border: 1px solid $romanSilver;
+        color: $romanSilver;
+        padding: 0 10px 0 30px !important;
+        cursor: auto;
+      }
+    }
+
+    &--publish {
+      background: url('~Images/icons/branches/push.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      padding: 0 10px 0 30px !important;
+
+      &:hover, &:focus {
+        background: $primary url('~Images/icons/branches/push-hover.svg') no-repeat left 5px center;
+        background-size: 25px !important;
+        color: $white;
+      }
+
+      &:disabled {
+        background: $background-color url(~Images/icons/branches/push-disabled.svg) no-repeat 5px center;
+        background-size: 25px !important;
+        border: 1px solid $romanSilver;
+        color: $romanSilver;
+        padding: 0 10px 0 30px !important;
+        cursor: auto;
+      }
+    }
+
+    &--pull {
+      background: url('~Images/icons/branches/pull.svg') no-repeat left 5px center;
+      background-size: 25px !important;
+      padding: 0 10px 0 30px !important;
+
+      &:hover, &:focus {
+        background: $primary url('~Images/icons/branches/pull-hover.svg') no-repeat left 5px center;
+        background-size: 25px !important;
+        color: $white;
+      }
+
+      &:disabled {
+        background: $background-color url(~Images/icons/branches/pull-disabled.svg) no-repeat 5px center;
+        background-size: 25px !important;
+        border: 1px solid $romanSilver;
+        color: $romanSilver;
+        padding: 0 10px 0 30px !important;
+        cursor: auto;
+      }
+    }
+  }
+}

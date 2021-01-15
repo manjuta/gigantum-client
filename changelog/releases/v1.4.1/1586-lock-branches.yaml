@@ -1,0 +1,7 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1602"
+changelog:
+  - type: NEW
+    description: Adds locking to menu items when back up is in progress.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1586
+  - type: NON_USER_FACING
+    description: Refactors Branhces code. Breaks up into multiple components, updates to use react hooks, reduces code complexity and improves rendering.

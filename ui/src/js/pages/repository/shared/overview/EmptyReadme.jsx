@@ -1,13 +1,18 @@
 import React from 'react';
 import classNames from 'classnames';
 
+type Props = {
+  editingReadme: boolean,
+  setEditingReadme: Function,
+  sectionType: string,
+};
 
-const EmptyReadme = ({ editingReadme, setEditingReadme, sectionType }) => {
+const EmptyReadme = ({ editingReadme, setEditingReadme, sectionType }: Props) => {
   const overviewReadmeButtonCSS = classNames({
     'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
     hidden: editingReadme,
   });
-  const section = sectionType === 'labbook' ? 'Project' : 'Dataset'
+  const section = sectionType === 'labbook' ? 'Project' : 'Dataset';
   return (
     <div className="grid">
       <div className="Overview__empty column-1-span-12">

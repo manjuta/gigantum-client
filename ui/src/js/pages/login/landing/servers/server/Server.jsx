@@ -1,6 +1,8 @@
 // @flow
 // vendor
 import React, { Component } from 'react';
+// components
+import ReactTooltip from 'react-tooltip';
 // css
 import './Server.scss';
 
@@ -11,6 +13,7 @@ type Props = {
   },
   loggingInServerId: string,
   server: {
+    backup_in_progress: string,
     name: string,
     login_url: string,
     server_id: string,
@@ -36,7 +39,7 @@ class Server extends Component<Props> {
     Mehtod logs user out using session instance of auth
     @param {} -
   */
-  logout() {
+  logout = () => {
     const { auth } = this.props;
     auth.logout();
   }
@@ -54,14 +57,28 @@ class Server extends Component<Props> {
       ? 'Please wait'
       : name;
     return (
-      <div className="grid-5 flex flex--column justify--center">
+      <div className="Server grid-5 flex flex--column justify--center">
         <button
-          className="Btn Server__button"
-          disabled={loggingInServerId !== null}
+          className="Btn Server__button flex justify--center"
+          disabled={(loggingInServerId !== null) || server.backup_in_progress}
           onClick={() => this.login()}
           type="button"
         >
           {buttonText}
+          { server.backup_in_progress && (
+            <>
+              <button
+                className="Server__button-icon"
+                data-tip="Backup is in progess, and the remote server is unavailable untill the backup has been complete. Backing up your data is neccesary to avoid loss of data. This process can take between 15 mins to an hour, but can take longer."
+                data-for="tooltip-server"
+              />
+              <ReactTooltip
+                delayShow={100}
+                id="tooltip-server"
+                place="bottom"
+              />
+            </>
+          )}
         </button>
       </div>
     );

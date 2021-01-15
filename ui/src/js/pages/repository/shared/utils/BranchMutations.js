@@ -252,13 +252,18 @@ class BranchesMutations {
      *  @param {function} callback
      *  merge branch
      */
-  mergeBranch(data, callback) {
+  mergeBranch = (data, callback) => {
     const {
       branchName,
       overrideMethod,
     } = data;
     const { owner, name } = this.state;
-
+    console.log(
+      branchName,
+      overrideMethod,
+      name,
+      owner,
+    );
     MergeFromBranchMutation(
       owner,
       name,

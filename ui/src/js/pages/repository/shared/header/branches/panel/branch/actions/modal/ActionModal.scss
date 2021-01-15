@@ -1,0 +1,74 @@
+@import '~Styles/_imports.scss';
+
+
+.ActionModal {
+    word-break: break-word;
+    animation: slide-down-fade-in 0.25s;
+    &--merge {
+        &:before {
+            content: '';
+            @include triangle('up', 9px, $white);
+            position: absolute;
+            top: -6px;
+            left: 50px;
+          }
+    }
+    &--delete {
+        &:before {
+            content: '';
+            @include triangle('up', 9px, $white);
+            position: absolute;
+            top: -6px;
+            left: 77px;
+          }
+    }
+    font-size: 14px;
+    z-index: index($elements, modal);
+    top: 34px;
+    left: -15px;
+    border-radius: 10px;
+    color: $primaryText;
+    background: $white;
+    position: absolute;
+    width: 260px;
+    font-weight: 100;
+    text-align: center;
+    padding: 15px;
+    cursor: auto;
+    pointer-events: all;
+    @include boxShadow();
+    label {
+        margin: 0 5px;
+        input {
+            margin: 0 20px 0 0;
+        }
+    }
+
+
+    &__header{
+      color: $primary;
+      font-size: 16px;
+      padding: 5px;
+    }
+
+
+    &__buttons {
+        margin-top: 20px;
+        .Btn--flat {
+            color: $primary;
+            font-weight: bold
+        }
+    }
+
+    &__btn--confirm {
+        margin: 5px 0 0 0;
+        padding: 5px 30px;
+    }
+
+    &__close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      @include close();
+    }
+}

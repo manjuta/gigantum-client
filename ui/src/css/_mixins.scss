@@ -47,8 +47,8 @@
 
 @mixin close() {
   position: absolute;
-  height: 28px;
-  width: 28px;
+  height: 34px;
+  width: 34px;
   top: 7px;
   right: 7px;
   background: url('~Images/icons/close.svg') no-repeat center center !important;
@@ -58,7 +58,6 @@
   &:hover {
     background: url('~Images/icons/close.svg') no-repeat center center;
     background-size: 34px !important;
-    padding: 1rem !important;
   }
 }
 

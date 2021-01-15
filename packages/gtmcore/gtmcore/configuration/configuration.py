@@ -57,7 +57,7 @@ class Configuration:
 
     def __init__(self, config_file: Optional[str] = None, wait_for_cache: int = 10) -> None:
         """
-        
+
         Args:
             config_file(str): Absolute path to the configuration file to load
             wait_for_cache: integer indicating the number of seconds to wait for redis to be available
@@ -231,7 +231,7 @@ class Configuration:
     @staticmethod
     def find_default_config() -> str:
         """Method to find the default client configuration file
-        
+
         Returns:
             (str): Absolute path to the file to load
         """

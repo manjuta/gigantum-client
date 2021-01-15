@@ -1,0 +1,21 @@
+@import '~Styles/_imports.scss';
+
+
+.ManageBranchButton {
+  background: url(~Images/icons/branches/manage.svg) no-repeat center center;
+  background-size: 25px;
+
+  &:hover, &:focus {
+    color: $white;
+    background: $primary url(~Images/icons/branches/manage-hover.svg) no-repeat center center;
+    background-size: 25px;
+  }
+
+  &:disabled {
+    background: $background-color url(~Images/icons/branches/manage-disabled.svg) no-repeat center center;
+    background-size: 25px;
+    border: 1px solid $romanSilver;
+    color: $romanSilver;
+    cursor: auto;
+  }
+}

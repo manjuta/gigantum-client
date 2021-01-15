@@ -13,7 +13,7 @@ import { setIsSyncing, setIsExporting } from 'JS/redux/actions/dataset/dataset';
 import ErrorBoundary from 'Components/errorBoundary/ErrorBoundary';
 import TitleSection from './titleSection/TitleSection';
 import ActionsSection from './actionsSection/ActionsSection';
-import BranchMenu from './branches/BranchMenu';
+import Branches from './branches/Branches';
 import Container from './container/Container';
 import Navigation from './navigation/Navigation';
 // assets
@@ -244,25 +244,25 @@ class Header extends Component<Props> {
                 type={branchesErrorCSS}
                 key="branches"
               >
-                <BranchMenu
+                <Branches
                   {...this.props}
-                  defaultRemote={section.defaultRemote}
-                  branchesOpen={branchesOpen}
-                  section={section}
-                  branches={branches}
-                  sectionId={section.id}
                   activeBranch={section.activeBranchName || 'master'}
-                  toggleBranchesView={toggleBranchesView}
-                  mergeFilter={mergeFilter}
-                  isSticky={isSticky}
-                  visibility={visibility}
-                  sectionType={sectionType}
                   auth={auth}
-                  setSyncingState={this._setSyncingState}
-                  setPublishingState={this._setPublishingState}
-                  setExportingState={this._setExportingState}
+                  branches={branches}
+                  branchesOpen={branchesOpen}
+                  defaultRemote={section.defaultRemote}
                   isLocked={isLocked}
+                  isSticky={isSticky}
+                  mergeFilter={mergeFilter}
+                  section={section}
+                  sectionId={section.id}
+                  sectionType={sectionType}
+                  setExportingState={this._setExportingState}
                   setBranchUptodate={setBranchUptodate}
+                  setPublishingState={this._setPublishingState}
+                  setSyncingState={this._setSyncingState}
+                  toggleBranchesView={toggleBranchesView}
+                  visibility={visibility}
                 />
               </ErrorBoundary>
 
