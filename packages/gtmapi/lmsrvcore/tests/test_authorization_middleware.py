@@ -32,8 +32,11 @@ class TestAuthorizationMiddleware(object):
         assert 'errors' in r
         snapshot.assert_match(r)
 
+    @responses.activate
     def test_authorized(self, fixture_working_dir_with_auth_middleware, snapshot):
         """Test making a request with valid tokens"""
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+
         config, working_dir, client = fixture_working_dir_with_auth_middleware
 
         current_query = """
@@ -80,6 +83,7 @@ class TestAuthorizationMiddleware(object):
                             "login_type": "auth0",
                             "client_id": "0000000000000000"},
                       status=200)
+        responses.add(responses.GET, 'https://test2.repo.gigantum.com/backup', status=404)
 
         config, working_dir, client = fixture_working_dir_with_auth_middleware
 

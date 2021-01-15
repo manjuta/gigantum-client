@@ -3,6 +3,7 @@ import os
 import time
 from enum import Enum
 import glob
+import requests
 from typing import Optional, Callable, cast, List
 from humanfriendly import format_size
 
@@ -12,7 +13,7 @@ from gtmcore.logging import LMLogger
 from gtmcore.labbook import LabBook
 from gtmcore.labbook.schemas import CURRENT_SCHEMA as CURRENT_LABBOOK_SCHEMA
 from gtmcore.workflows import gitworkflows_utils
-from gtmcore.exceptions import GigantumException
+from gtmcore.workflows.gitlab import GitLabException
 from gtmcore.inventory import Repository
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.dataset import Dataset
@@ -24,10 +25,6 @@ import gtmcore.dispatcher.dataset_jobs
 from gtmcore.dataset.io.job import BackgroundUploadJob
 
 logger = LMLogger.get_logger()
-
-
-class GitWorkflowException(GigantumException):
-    pass
 
 
 class MergeOverride(Enum):
@@ -74,11 +71,11 @@ class GitWorkflow(ABC):
 
         logger.info(f"Publishing {str(self.repository)} for user {username} to remote {remote}")
         if self.remote:
-            raise GitWorkflowException("Cannot publish Labbook when remote already set.")
+            raise GitLabException("Cannot publish Labbook when remote already set.")
 
         branch_mgr = BranchManager(self.repository, username=username)
         if branch_mgr.active_branch != branch_mgr.workspace_branch:
-            raise GitWorkflowException(f"Must be on branch {branch_mgr.workspace_branch} to publish")
+            raise GitLabException(f"Must be on branch {branch_mgr.workspace_branch} to publish")
 
         try:
             self.repository.sweep_uncommitted_changes()
@@ -122,12 +119,15 @@ class GitWorkflow(ABC):
         """ Perform a Git reset to undo all local changes"""
         bm = BranchManager(self.repository, username)
         if self.remote and bm.active_branch in bm.branches_remote:
-            self.repository.git.fetch()
-            self.repository.sweep_uncommitted_changes()
-            call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
-                            cwd=self.repository.root_dir)
-            call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
-            self.repository.git.clear_checkout_context()
+            try:
+                self.repository.git.fetch()
+                self.repository.sweep_uncommitted_changes()
+                call_subprocess(['git', 'reset', '--hard', f'origin/{bm.active_branch}'],
+                                cwd=self.repository.root_dir)
+                call_subprocess(['git', 'clean', '-fd'], cwd=self.repository.root_dir)
+                self.repository.git.clear_checkout_context()
+            except Exception as e:
+                raise GitLabException(e)
 
 
 class LabbookWorkflow(GitWorkflow):
@@ -187,7 +187,7 @@ class LabbookWorkflow(GitWorkflow):
             return False
 
         if 'gm.workspace' not in BranchManager(self.labbook).active_branch:
-            raise GitWorkflowException('Must be on a gm.workspace branch to migrate')
+            raise GitLabException('Must be on a gm.workspace branch to migrate')
 
         im = InventoryManager()
         gitworkflows_utils.migrate_labbook_branches(self.labbook)

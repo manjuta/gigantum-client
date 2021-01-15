@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1604"
+changelog:
+  - type: NEW
+    description: Adds backup-in-progress field to server endpoint and currentserver object. Checks if gitlab errors are due to an in-progress backup and provides appropriate error messaging if so.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1575

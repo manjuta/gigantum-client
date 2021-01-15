@@ -11,11 +11,13 @@ import time
 import glob
 from mock import patch
 from collections import namedtuple
+import responses
 
 from gtmcore.configuration.utils import call_subprocess
 from gtmcore.gitlib import RepoLocation
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
-from gtmcore.workflows import GitWorkflowException, LabbookWorkflow, DatasetWorkflow, MergeOverride
+from gtmcore.workflows import LabbookWorkflow, DatasetWorkflow, MergeOverride
+from gtmcore.workflows.gitlab import GitLabException
 from gtmcore.workflows.gitworkflows_utils import create_remote_gitlab_repo
 from gtmcore.fixtures import (helper_create_remote_repo as _MOCK_create_remote_repo, mock_labbook_lfs_disabled,
                               mock_config_file)
@@ -34,9 +36,12 @@ def _mock_fetch(self, remote):
 
 
 class TestGitWorkflowsMethods(object):
+    @responses.activate
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_publish__simple(self, mock_labbook_lfs_disabled):
         """Test a simple publish and ensuring master is active branch. """
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
         bm = BranchManager(lb, username)
@@ -47,7 +52,7 @@ class TestGitWorkflowsMethods(object):
         wf = LabbookWorkflow(lb)
 
         # Test you can only publish on master.
-        with pytest.raises(GitWorkflowException):
+        with pytest.raises(GitLabException):
             wf.publish(username=username)
         assert wf.remote is None
 
@@ -60,14 +65,17 @@ class TestGitWorkflowsMethods(object):
         assert bm.branches_local == ['master', 'test-local-only']
         assert bm.branches_remote == ['master']
 
+    @responses.activate
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_publish__cannot_overwrite(self, mock_labbook_lfs_disabled):
         """ Test cannot publish a project already published. """
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
         wf = LabbookWorkflow(lb)
         wf.publish(username=username)
-        with pytest.raises(GitWorkflowException):
+        with pytest.raises(GitLabException):
             wf.publish(username=username)
 
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
@@ -409,9 +417,12 @@ class TestGitWorkflowsMethods(object):
         lb.sweep_uncommitted_changes()
         wf.sync(username=username)
 
+    @responses.activate
     @mock.patch('gtmcore.workflows.gitworkflows_utils.create_remote_gitlab_repo', new=_MOCK_create_remote_repo)
     def test_sync___detect_merge_conflict(self, mock_labbook_lfs_disabled, mock_config_file):
         """ test import_from_remote method """
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+
         username = 'test'
         lb = mock_labbook_lfs_disabled[2]
         wf = LabbookWorkflow(lb)

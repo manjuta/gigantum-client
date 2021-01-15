@@ -1,3 +1,11 @@
 # Ignore all differences in line endings
 
 * text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.icns binary
+*.gif binary
+*.zip binary
+*.dump binary

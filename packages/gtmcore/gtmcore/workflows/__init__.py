@@ -20,7 +20,7 @@
 
 from gtmcore.workflows.zipworkflow import ZipWorkflowException, ZipExporter
 from gtmcore.workflows.gitworkflows import (GitWorkflow, LabbookWorkflow, DatasetWorkflow,
-                                            GitWorkflowException, MergeOverride)
-from gtmcore.workflows.gitworkflows_utils import (WorkflowsException, MergeError,
-                                                  GitLabRemoteError)
+                                            MergeOverride)
+from gtmcore.workflows.gitworkflows_utils import (WorkflowsException, MergeError)
+from gtmcore.workflows.gitlab import GitLabException, check_backup_in_progress
 from gtmcore.workflows.container import ContainerWorkflows

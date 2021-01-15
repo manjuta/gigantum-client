@@ -3,10 +3,11 @@ import time
 import os
 import shutil
 import uuid
+import requests
 from typing import Any, Optional, Callable
 
 from gtmcore.gitlib import RepoLocation
-from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, GitLabException
 from gtmcore.activity import ActivityStore, ActivityType, ActivityRecord, \
                              ActivityDetailType, ActivityDetailRecord, \
                              ActivityAction
@@ -33,10 +34,6 @@ class WorkflowsException(Exception):
 
 
 class MergeError(WorkflowsException):
-    pass
-
-
-class GitLabRemoteError(WorkflowsException):
     pass
 
 
@@ -91,7 +88,7 @@ def create_remote_gitlab_repo(repository: Repository, username: str, visibility:
                               current_username=username)
         repository.add_remote("origin", remote.remote_location)
     except Exception as e:
-        raise GitLabRemoteError(e)
+        raise GitLabException(e)
 
 
 # TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
@@ -115,11 +112,14 @@ def publish_to_remote(repository: Repository, username: str, remote: str,
             logger.warning(f"Fetch attempt {tr+1}/5 failed for {str(repository)}: {e}")
             time.sleep(1)
     else:
-        raise ValueError(f"Timed out trying to fetch repo for {str(repository)}")
+        raise GitLabException(f"Timed out trying to fetch repo for {str(repository)}")
 
     feedback_callback("Pushing up regular objects...")
-    call_subprocess(['git', 'push', '--set-upstream', 'origin', bm.workspace_branch],
-                    cwd=repository.root_dir)
+    try:
+        call_subprocess(['git', 'push', '--set-upstream', 'origin', bm.workspace_branch],
+                        cwd=repository.root_dir)
+    except Exception as e:
+        raise GitLabException(e)
     feedback_callback(f"Publish complete.")
     repository.git.clear_checkout_context()
 
@@ -163,41 +163,47 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
     if not repository.has_remote:
         return 0
 
-    repository.sweep_uncommitted_changes()
-    repository.git.fetch()
+    try:
 
-    bm = BranchManager(repository)
-    branch_name = bm.active_branch
+        repository.sweep_uncommitted_changes()
+        repository.git.fetch()
 
-    if pull_only and branch_name not in bm.branches_remote:
-        # Cannot pull when remote branch doesn't exist.
-        feedback_callback("Pull complete - nothing to pull")
-        repository.git.clear_checkout_context()
-        return 0
+        bm = BranchManager(repository)
+        branch_name = bm.active_branch
 
-    if branch_name not in bm.branches_remote:
-        # Branch does not exist, so push it to remote.
-        _set_upstream_branch(repository, bm.active_branch, feedback_callback)
-        repository.git.clear_checkout_context()
-        feedback_callback("Synced current branch up to remote")
-        return 0
-    else:
-        pulled_updates_count = bm.get_commits_behind()
-        _pull(repository, branch_name, override, feedback_callback, username=username)
-        should_push = not pull_only
-        if should_push:
-            feedback_callback(f"Pushing changes to remote branch \"{branch_name}\"...")
-            # Skip pushing back up if set to pull_only
-            push_tokens = f'git push origin {branch_name}'.split()
-            if branch_name not in bm.branches_remote:
-                push_tokens.insert(2, "--set-upstream")
-            call_subprocess(push_tokens, cwd=repository.root_dir)
-            feedback_callback("Sync complete")
+        if pull_only and branch_name not in bm.branches_remote:
+            # Cannot pull when remote branch doesn't exist.
+            feedback_callback("Pull complete - nothing to pull")
+            repository.git.clear_checkout_context()
+            return 0
+
+        if branch_name not in bm.branches_remote:
+            # Branch does not exist, so push it to remote.
+            _set_upstream_branch(repository, bm.active_branch, feedback_callback)
+            repository.git.clear_checkout_context()
+            feedback_callback("Synced current branch up to remote")
+            return 0
         else:
-            feedback_callback("Pull complete")
+            pulled_updates_count = bm.get_commits_behind()
+            _pull(repository, branch_name, override, feedback_callback, username=username)
+            should_push = not pull_only
+            if should_push:
+                feedback_callback(f"Pushing changes to remote branch \"{branch_name}\"...")
+                # Skip pushing back up if set to pull_only
+                push_tokens = f'git push origin {branch_name}'.split()
+                if branch_name not in bm.branches_remote:
+                    push_tokens.insert(2, "--set-upstream")
+                call_subprocess(push_tokens, cwd=repository.root_dir)
+                feedback_callback("Sync complete")
+            else:
+                feedback_callback("Pull complete")
 
-        repository.git.clear_checkout_context()
-        return pulled_updates_count
+            repository.git.clear_checkout_context()
+            return pulled_updates_count
+    except MergeConflict as e:
+        raise e
+    except Exception as e:
+        raise GitLabException(e)
 
 
 # TODO #1456: Subprocess calls to Git should be consolidated in the internal Git API - currently git_fs_shim.py
@@ -279,22 +285,25 @@ def clone_repo(remote_url: str, username: str, owner: str,
                put_repository: Callable[[str, str, str], Any],
                make_owner: bool = False) -> Repository:
 
-    # Clone into a temporary directory, such that if anything
-    # gets messed up, then this directory will be cleaned up.
-    tempdir = os.path.join(Configuration().upload_dir, f"{username}_{owner}_clone_{uuid.uuid4().hex[0:10]}")
-    os.makedirs(tempdir)
-    path = _clone(remote_url=remote_url, working_dir=tempdir)
-    candidate_repo = load_repository(path)
+    try:
+        # Clone into a temporary directory, such that if anything
+        # gets messed up, then this directory will be cleaned up.
+        tempdir = os.path.join(Configuration().upload_dir, f"{username}_{owner}_clone_{uuid.uuid4().hex[0:10]}")
+        os.makedirs(tempdir)
+        path = _clone(remote_url=remote_url, working_dir=tempdir)
+        candidate_repo = load_repository(path)
 
-    if os.environ.get('WINDOWS_HOST'):
-        logger.warning("Imported on Windows host - set fileMode to false")
-        call_subprocess("git config core.fileMode false".split(),
-                        cwd=candidate_repo.root_dir)
+        if os.environ.get('WINDOWS_HOST'):
+            logger.warning("Imported on Windows host - set fileMode to false")
+            call_subprocess("git config core.fileMode false".split(),
+                            cwd=candidate_repo.root_dir)
 
-    repository = put_repository(candidate_repo.root_dir, username, owner)
-    shutil.rmtree(tempdir)
+        repository = put_repository(candidate_repo.root_dir, username, owner)
+        shutil.rmtree(tempdir)
 
-    return repository
+        return repository
+    except Exception as e:
+        raise GitLabException(e)
 
 
 def process_linked_datasets(labbook: LabBook, logged_in_username: str) -> None:

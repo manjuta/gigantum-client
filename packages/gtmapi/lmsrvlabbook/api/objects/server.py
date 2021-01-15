@@ -1,7 +1,9 @@
 import graphene
 import flask
+import requests
 
 from lmsrvlabbook.api.objects.serverauth import ServerAuth
+from gtmcore.workflows.gitlab import check_backup_in_progress
 
 
 class Server(graphene.ObjectType):
@@ -20,6 +22,7 @@ class Server(graphene.ObjectType):
     user_search_url = graphene.String()
     lfs_enabled = graphene.Boolean()
     auth_config = graphene.Field(ServerAuth)
+    backup_in_progress = graphene.Boolean()
 
     @classmethod
     def get_node(cls, info, id):
@@ -69,4 +72,5 @@ def helper_get_current_server():
                   object_service_url=server_config.object_service_url,
                   user_search_url=server_config.user_search_url,
                   lfs_enabled=server_config.lfs_enabled,
-                  auth_config=server_auth)
+                  auth_config=server_auth,
+                  backup_in_progress=check_backup_in_progress())

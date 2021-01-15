@@ -2,10 +2,11 @@ import pytest
 import responses
 
 from gtmcore.workflows.gitlab import GitLabManager, ProjectPermissions, GitLabException
+from gtmcore.fixtures import mock_config_file
 
 
 @pytest.fixture()
-def gitlab_mngr_fixture():
+def gitlab_mngr_fixture(mock_config_file):
     """A pytest fixture that returns a GitLabRepositoryManager instance"""
     yield GitLabManager("https://test.repo.gigantum.com/",
                         "https://test.gigantum.com/api/v1/", "fakeaccesstoken", "fakeidtoken")
@@ -61,6 +62,7 @@ class TestGitLabManager(object):
         # Setup responses mock for this test
         responses.add(responses.POST, 'https://test.gigantum.com/api/v1/',
                       json={'data': {'additionalCredentials': {'gitServiceToken': 'NOTTHERIGHTTOKEN'}}}, status=500)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
 
         # Make sure error is raised when getting the key fails and returns !=200
         with pytest.raises(GitLabException):
@@ -117,9 +119,10 @@ class TestGitLabManager(object):
     @responses.activate
     def test_create_errors(self, gitlab_mngr_fixture, property_mocks_fixture):
         """test the create method"""
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
 
         # Should fail because the repo "already exists"
-        with pytest.raises(ValueError):
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.create_labbook("testuser", "test-labbook", visibility="private")
 
         # Should fail because the call to gitlab failed
@@ -129,7 +132,8 @@ class TestGitLabManager(object):
                               "description": "",
                             },
                       status=400)
-        with pytest.raises(ValueError):
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.create_labbook("testuser", "test-labbook", visibility="private")
 
     @responses.activate
@@ -249,11 +253,13 @@ class TestGitLabManager(object):
                                 "state": "active",
                             },
                       status=400)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.add_collaborator("testuser", "test-labbook", "person100", ProjectPermissions.OWNER)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.add_collaborator("testuser", "test-labbook", "person100", ProjectPermissions.READ_ONLY)
 
     @responses.activate
@@ -370,13 +376,16 @@ class TestGitLabManager(object):
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.get_collaborators("testuser", "test-labbook")
-        with pytest.raises(ValueError):
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.add_collaborator("testuser", "test-labbook", "test", ProjectPermissions.READ_ONLY)
-        with pytest.raises(ValueError):
-            gitlab_mngr_fixture.delete_collaborator("testuser", "test-labbook", 100)
+        with pytest.raises(GitLabException):
+            gitlab_mngr_fixture.delete_collaborator("testuser", "test-labbook", "test")
 
     @responses.activate
     def test_configure_git_credentials(self, gitlab_mngr_fixture):
@@ -526,6 +535,7 @@ class TestGitLabManager(object):
                                 "message": "404 Project Not Found"
                             }],
                       status=404)
+        responses.add(responses.GET, 'https://test.repo.gigantum.com/backup', status=404)
 
         assert gitlab_mngr_fixture.repository_exists("testuser", "new-labbook") is True
 
@@ -533,5 +543,5 @@ class TestGitLabManager(object):
 
         assert gitlab_mngr_fixture.repository_exists("testuser", "new-labbook") is False
 
-        with pytest.raises(ValueError):
+        with pytest.raises(GitLabException):
             gitlab_mngr_fixture.remove_repository("testuser", "new-labbook")

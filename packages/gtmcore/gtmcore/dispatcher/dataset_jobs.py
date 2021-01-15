@@ -14,7 +14,7 @@ from gtmcore.gitlib import GitAuthor, RepoLocation
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import gitworkflows_utils
-from gtmcore.workflows.gitlab import GitLabManager
+from gtmcore.workflows.gitlab import GitLabManager, GitLabException
 from gtmcore.dataset.io.manager import IOManager
 from gtmcore.dataset.io.job import BackgroundDownloadJob
 from gtmcore.dataset.io import PushObject
@@ -210,7 +210,7 @@ def complete_dataset_upload_transaction(logged_in_username: str, logged_in_email
     except Exception as err:
         logger.error(f"(Job {p}) Error in clean_dataset_file_cache job")
         logger.exception(err)
-        raise
+        raise GitLabException(err)
 
 
 def check_and_import_dataset(logged_in_username: str, dataset_owner: str, dataset_name: str, remote_url: str,
@@ -271,7 +271,7 @@ def check_and_import_dataset(logged_in_username: str, dataset_owner: str, datase
     except Exception as err:
         logger.error(f"(Job {p}) Error in check_and_import_dataset job")
         logger.exception(err)
-        raise
+        raise GitLabException(err)
 
 
 def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access_token: str, id_token: str,
@@ -325,7 +325,7 @@ def push_dataset_objects(objs: List[PushObject], logged_in_username: str, access
 
     except Exception as err:
         logger.exception(err)
-        raise
+        raise GitLabException(err)
 
 
 def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id_token: str,
@@ -395,7 +395,7 @@ def pull_objects(keys: List[str], logged_in_username: str, access_token: str, id
 
     except Exception as err:
         logger.exception(err)
-        raise
+        raise GitLabException(err)
 
 
 def download_dataset_files(logged_in_username: str, access_token: str, id_token: str,
@@ -535,8 +535,8 @@ def download_dataset_files(logged_in_username: str, access_token: str, id_token:
 
         if len(failure_keys) > 0:
             # If any downloads failed, exit non-zero to the UI knows there was an error
-            raise IOError(f"{len(failure_keys)} file(s) failed to download. Check message detail and try again.")
+            raise GitLabException(f"{len(failure_keys)} file(s) failed to download. Check message detail and try again.")
 
     except Exception as err:
         logger.exception(err)
-        raise
+        raise GitLabException(err)

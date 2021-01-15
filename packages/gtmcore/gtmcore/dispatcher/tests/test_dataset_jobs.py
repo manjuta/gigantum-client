@@ -20,6 +20,7 @@ from gtmcore.dataset.tests.test_storage_local import mock_dataset_with_local_dir
 from gtmcore.fixtures import mock_config_file, mock_config_file_background_tests, helper_create_remote_repo
 from gtmcore.fixtures.datasets import helper_append_file, helper_compress_file, helper_write_big_file, \
     mock_enable_unmanaged_for_testing, mock_dataset_with_cache_dir_local
+from gtmcore.workflows.gitlab import GitLabException
 
 
 from gtmcore.inventory.inventory import InventoryManager, InventoryException
@@ -778,7 +779,7 @@ class TestDatasetBackgroundJobs(object):
                     dest1 = dd.read()
                 assert source1.decode("utf-8") == dest1
 
-    def test_download_dataset_files_file_fail(self, mock_config_file_background_tests):
+    def test_download_dataset_files_file_fail(self, mock_dataset_head, mock_config_file_background_tests):
         def dispatch_query_mock(self, job_key):
             # mock the job actually running and returning status
             JobStatus = namedtuple("JobStatus", ['status', 'meta'])
@@ -824,11 +825,11 @@ class TestDatasetBackgroundJobs(object):
                     'keys': ["test1.txt"]
                 }
 
-                with pytest.raises(IOError):
+                with pytest.raises(GitLabException):
                     gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
                 assert os.path.isfile(obj1_target) is False
 
-    def test_download_dataset_files_job_fail(self, mock_config_file_background_tests):
+    def test_download_dataset_files_job_fail(self, mock_dataset_head, mock_config_file_background_tests):
         def dispatch_query_mock(self, job_key):
             # mock the job actually running and returning status
             JobStatus = namedtuple("JobStatus", ['status', 'meta'])
@@ -874,7 +875,7 @@ class TestDatasetBackgroundJobs(object):
                     'keys': ["test1.txt"],
                 }
 
-                with pytest.raises(IOError):
+                with pytest.raises(GitLabException):
                     gtmcore.dispatcher.dataset_jobs.download_dataset_files(**dl_kwargs)
                 assert os.path.isfile(obj1_target) is False
 

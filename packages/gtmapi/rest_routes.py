@@ -8,6 +8,7 @@ from lmsrvcore.auth.user import get_logged_in_username
 from gtmcore.inventory.inventory import InventoryManager
 from gtmcore.logging import LMLogger
 from gtmcore.gitlib.git import GitAuthor
+from gtmcore.workflows.gitlab import check_backup_in_progress
 
 
 logger = LMLogger.get_logger()
@@ -116,13 +117,16 @@ def servers():
     """Unauthorized endpoint to check for configured servers. Returns the name and ID of the server for selection
     when logging in. Also indicates the current server (if one is selected)
     """
+
     server_list = []
     for s in current_app.config['LABMGR_CONFIG'].list_available_servers():
+
         server_list.append({"server_id": s.id,
                             "name": s.name,
                             "login_url": s.login_url,
                             "token_url": s.token_url,
-                            "logout_url": s.logout_url})
+                            "logout_url": s.logout_url,
+                            "backup_in_progress": check_backup_in_progress()})
 
     return jsonify({"available_servers": server_list,
                     "current_server": current_app.config['LABMGR_CONFIG'].get_current_server_id()})
