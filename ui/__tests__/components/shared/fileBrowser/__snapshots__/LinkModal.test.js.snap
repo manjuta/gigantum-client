@@ -3,11 +3,12 @@
 exports[`Test LinkModal 1`] = `
 <div
   className="Modal"
-  data-selenium-id="Modal"
+  data-selenium-id="Modalx"
 >
   <div
     className="Modal__cover"
     onClick={[Function]}
+    role="presentation"
   />
   <div
     className="Modal__content Modal__content--noPadding Modal__content--large-long"
@@ -77,7 +78,7 @@ exports[`Test LinkModal 1`] = `
             </button>
             <button
               className="Btn ButtonLoader Btn Btn--last"
-              data-selenium-id="ButtonLoader"
+              data-selenium-id="ButtonLoaderx"
               disabled={true}
               onClick={[Function]}
               type="submit"

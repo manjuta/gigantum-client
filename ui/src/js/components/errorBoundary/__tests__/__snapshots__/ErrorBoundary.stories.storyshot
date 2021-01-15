@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/ErrorBoundary ErrorBoundary 1`] = `
+<ErrorBoundary
+  type="containerStatusError"
+>
+  <ErrorComp>
+    <div
+      data-selenium-id="ErrorBoundary.storiesx"
+    >
+      JSX to be rendered
+    </div>
+  </ErrorComp>
+</ErrorBoundary>
+`;
+
+exports[`Storyshots Components/ErrorBoundary ErrorBoundary Passes 1`] = `
+<ErrorBoundary
+  type="packageError"
+>
+  <ErrorComp>
+    <div
+      data-selenium-id="ErrorBoundary.storiesx"
+    >
+      JSX to be rendered
+    </div>
+  </ErrorComp>
+</ErrorBoundary>
+`;
+
+exports[`Storyshots Components/ErrorBoundary ErrorBoundary containerStatusError 1`] = `
+<ErrorBoundary
+  type="containerStatusError"
+>
+  <ErrorComp>
+    <div
+      data-selenium-id="ErrorBoundary.storiesx"
+    >
+      JSX to be rendered
+    </div>
+  </ErrorComp>
+</ErrorBoundary>
+`;

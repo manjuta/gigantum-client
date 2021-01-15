@@ -272,4 +272,8 @@ const FooterUtils = {
   },
 };
 
+export {
+  messageParser,
+};
+
 export default FooterUtils;

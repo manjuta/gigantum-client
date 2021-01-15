@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/MarkdownEditor MarkdownEditor 1`] = `
+<MarkdownEditor
+  markdown="
+    ### This is a header
+    **bold**
+  "
+  updateMarkdownText={[Function]}
+>
+  <SimpleMDEEditor
+    events={Object {}}
+    getMdeInstance={[Function]}
+    id="markDown"
+    label=""
+    onChange={[Function]}
+    options={
+      Object {
+        "autofocus": true,
+        "spellChecker": true,
+      }
+    }
+    value="
+    ### This is a header
+    **bold**
+  "
+  >
+    <div
+      id="markDown-wrapper"
+    >
+      <textarea
+        id="markDown"
+      />
+    </div>
+  </SimpleMDEEditor>
+</MarkdownEditor>
+`;

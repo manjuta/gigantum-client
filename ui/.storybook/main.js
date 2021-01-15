@@ -58,6 +58,7 @@ module.exports = {
   stories: ['../stories', '../src/js/**/*.stories.js', '../src/js/**/*.stories.jsx'],
   addons: [
     '@storybook/addon-essentials',
+    '@storybook/addon-knobs',
     '@storybook/addon-storysource',
     '@storybook/addon-a11y',
     '@storybook/addon-jest',

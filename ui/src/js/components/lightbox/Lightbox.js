@@ -1,10 +1,16 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import ReactDom from 'react-dom';
 // assets
 import './Lightbox.scss';
 
-export default class Lightbox extends Component {
+type Props = {
+  imageMetadata: string,
+  onClose: Function,
+}
+
+class Lightbox extends Component<Props> {
   componentDidMount() {
     if (document.getElementById('root')) {
       document.getElementById('root').classList.add('no-overflow');
@@ -26,11 +32,13 @@ export default class Lightbox extends Component {
             <div
               className="Lightbox__cover"
               onClick={onClose}
+              role="presentation"
             />
             <div className="Lightbox__container">
               <button
                 className="Btn__expandable-close"
                 onClick={onClose}
+                type="button"
               >
                 <span>Close</span>
               </button>
@@ -42,3 +50,6 @@ export default class Lightbox extends Component {
     );
   }
 }
+
+
+export default Lightbox;

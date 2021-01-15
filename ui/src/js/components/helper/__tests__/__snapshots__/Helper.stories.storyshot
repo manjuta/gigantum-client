@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/Helper Snapshots: Helper Default 1`] = `
+<HelperWrapped>
+  <Provider
+    store={
+      Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(Symbol.observable): [Function],
+      }
+    }
+  >
+    <Connect(Helper)
+      auth={
+        Object {
+          "isAuthenticated": [Function],
+        }
+      }
+      footerVisible={false}
+      isVisible={false}
+      setHelperVisibility={[Function]}
+      setResizeHelper={[Function]}
+      uploadOpen={false}
+    >
+      <Helper
+        auth={
+          Object {
+            "isAuthenticated": [Function],
+          }
+        }
+        footerVisible={false}
+        isVisible={true}
+        resize=""
+        setHelperVisibility={[Function]}
+        setResizeHelper={[Function]}
+        uploadOpen={false}
+      >
+        <div
+          className="Helper"
+          data-selenium-id="Helperx"
+        >
+          <div
+            className="Helper__button"
+            onClick={[Function]}
+            role="presentation"
+          />
+          <div
+            className="hidden"
+          >
+            <a
+              className="Helper__menu-feedback"
+              href="https://feedback.gigantum.com"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <h5>
+                Feedback
+              </h5>
+              <div
+                className="Helper__feedback-button"
+              />
+            </a>
+            <a
+              className="Helper__menu-discussion"
+              href="https://spectrum.chat/gigantum"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <h5>
+                Discuss
+              </h5>
+              <div
+                className="Helper__discussion-button"
+              />
+            </a>
+            <a
+              className="Helper__menu-docs"
+              href="https://docs.gigantum.com/docs"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <h5>
+                Docs
+              </h5>
+              <div
+                className="Helper__docs-button"
+              />
+            </a>
+            <div
+              className="Helper__menu-guide"
+            >
+              <h5>
+                Guide
+              </h5>
+              <label
+                className="Helper-guide-switch"
+                htmlFor="guideShown"
+              >
+                <input
+                  defaultChecked={false}
+                  id="guideShown"
+                  onClick={[Function]}
+                  type="checkbox"
+                />
+                <span
+                  className="Helper-guide-slider"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      </Helper>
+    </Connect(Helper)>
+  </Provider>
+</HelperWrapped>
+`;

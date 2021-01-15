@@ -1,0 +1,683 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/BuildProgress BuildProgress Complete 1`] = `
+<BuildProgressWrapped>
+  <Provider
+    store={
+      Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(Symbol.observable): [Function],
+      }
+    }
+  >
+    <Connect(BuildProgress)
+      buildId="id"
+      headerText="This is the header"
+      keepOpen={true}
+      messageStackHistory={Array []}
+      name="project-name"
+      owner="owner-name"
+      toggleModal={[Function]}
+    >
+      <BuildProgress
+        buildId="id"
+        buildProgress={false}
+        currentId=""
+        currentMessage=""
+        currentUploadId=""
+        error={null}
+        fileCount={0}
+        headerText="This is the header"
+        helperVisible={false}
+        id="id"
+        isLast={true}
+        keepOpen={true}
+        labbookName=""
+        labbookSuccess={false}
+        message="
+Container build complete"
+        messageListOpen={true}
+        messageStack={
+          Array [
+            Object {
+              "buildProgress": true,
+              "className": "FooterMessage",
+              "date": 2021-01-15T03:42:50.466Z,
+              "dismissed": false,
+              "error": null,
+              "id": "id",
+              "isLast": true,
+              "isMultiPart": true,
+              "message": "
+Container build complete",
+              "messageBody": Array [
+                Object {
+                  "message": "Build task in queue
+Starting Project container build. Please wait.
+
+
+Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+
+Built cross stage deps: map[]                
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Executing 0 build triggers                   
+ Checking for cached layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44... 
+ No cached layer found for cmd RUN mkdir -p /etc/jupyter/custom/ 
+ cmd: EXPOSE                                  
+ Adding exposed port: 30000-65535/tcp         
+ Unpacking rootfs as cmd RUN mkdir -p /etc/jupyter/custom/ requires it. 
+
+RUN mkdir -p /etc/jupyter/custom/            
+ Taking snapshot of full filesystem...        
+
+cmd: /bin/sh                                 
+ args: [-c mkdir -p /etc/jupyter/custom/]     
+ Running: [/bin/sh -c mkdir -p /etc/jupyter/custom/] 
+ Taking snapshot of full filesystem...        
+
+RUN echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py 
+ cmd: /bin/sh                                 
+ args: [-c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Running: [/bin/sh -c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Pushing layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44 to cache now 
+ Taking snapshot of full filesystem...        
+
+EXPOSE 30000-65535                           
+ cmd: EXPOSE                                  
+ Pushing layer registry/cbutler/test-ere/cache:a2a66a4cf2399c7bc2a546aea7f1fe996f0eabc0d2f394ef2e8a2115b762049d to cache now 
+ Adding exposed port: 30000-65535/tcp         
+ No files changed in this command, skipping snapshotting. 
+ COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+ Taking snapshot of files...                  
+ RUN chmod u+x /usr/local/bin/entrypoint.sh   
+ cmd: /bin/sh                                 
+ args: [-c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Running: [/bin/sh -c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Pushing layer registry/cbutler/test-ere/cache:92f9eb8bfb94df28454faaa3450fd1b5c979eb06eac3ecbc5b524e28ccefc8fa to cache now 
+ Taking snapshot of full filesystem...        
+
+Pushing layer registry/cbutler/test-ere/cache:f31f99892d13a8a03db1afe23ace19fc6f0be5dad849e486df932116d5c4c40e to cache now 
+ ENV LB_HOME=/mnt/labbook PROJECT_ROOT=/mnt/labbook PROJECT_CODE=/mnt/labbook/code PROJECT_INPUT=/mnt/labbook/input PROJECT_OUTPUT=/mnt/labbook/output 
+ No files changed in this command, skipping snapshotting. 
+ ENTRYPOINT [\\"/usr/local/bin/entrypoint.sh\\"]  
+ No files changed in this command, skipping snapshotting. 
+ WORKDIR /mnt/labbook                         
+ cmd: workdir                                 
+ Changed working directory to /mnt/labbook    
+ Creating directory /mnt/labbook              
+ Taking snapshot of files...                  
+ CMD [\\"tail\\", \\"-f\\", \\"/dev/null\\"]              
+ No files changed in this command, skipping snapshotting. 
+ Deleting filesystem...                       
+
+Container build complete",
+                },
+              ],
+              "messageBodyOpen": false,
+              "messageListOpen": false,
+              "name": "project-name",
+              "owner": "owner-name",
+              "status": "building",
+            },
+          ]
+        }
+        messageStackHistory={
+          Array [
+            Object {
+              "buildProgress": true,
+              "className": "FooterMessage",
+              "date": 2021-01-15T03:42:50.466Z,
+              "dismissed": false,
+              "error": null,
+              "id": "id",
+              "isLast": true,
+              "isMultiPart": true,
+              "message": "
+Container build complete",
+              "messageBody": Array [
+                Object {
+                  "message": "Build task in queue
+Starting Project container build. Please wait.
+
+
+Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+
+Built cross stage deps: map[]                
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Executing 0 build triggers                   
+ Checking for cached layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44... 
+ No cached layer found for cmd RUN mkdir -p /etc/jupyter/custom/ 
+ cmd: EXPOSE                                  
+ Adding exposed port: 30000-65535/tcp         
+ Unpacking rootfs as cmd RUN mkdir -p /etc/jupyter/custom/ requires it. 
+
+RUN mkdir -p /etc/jupyter/custom/            
+ Taking snapshot of full filesystem...        
+
+cmd: /bin/sh                                 
+ args: [-c mkdir -p /etc/jupyter/custom/]     
+ Running: [/bin/sh -c mkdir -p /etc/jupyter/custom/] 
+ Taking snapshot of full filesystem...        
+
+RUN echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py 
+ cmd: /bin/sh                                 
+ args: [-c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Running: [/bin/sh -c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Pushing layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44 to cache now 
+ Taking snapshot of full filesystem...        
+
+EXPOSE 30000-65535                           
+ cmd: EXPOSE                                  
+ Pushing layer registry/cbutler/test-ere/cache:a2a66a4cf2399c7bc2a546aea7f1fe996f0eabc0d2f394ef2e8a2115b762049d to cache now 
+ Adding exposed port: 30000-65535/tcp         
+ No files changed in this command, skipping snapshotting. 
+ COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+ Taking snapshot of files...                  
+ RUN chmod u+x /usr/local/bin/entrypoint.sh   
+ cmd: /bin/sh                                 
+ args: [-c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Running: [/bin/sh -c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Pushing layer registry/cbutler/test-ere/cache:92f9eb8bfb94df28454faaa3450fd1b5c979eb06eac3ecbc5b524e28ccefc8fa to cache now 
+ Taking snapshot of full filesystem...        
+
+Pushing layer registry/cbutler/test-ere/cache:f31f99892d13a8a03db1afe23ace19fc6f0be5dad849e486df932116d5c4c40e to cache now 
+ ENV LB_HOME=/mnt/labbook PROJECT_ROOT=/mnt/labbook PROJECT_CODE=/mnt/labbook/code PROJECT_INPUT=/mnt/labbook/input PROJECT_OUTPUT=/mnt/labbook/output 
+ No files changed in this command, skipping snapshotting. 
+ ENTRYPOINT [\\"/usr/local/bin/entrypoint.sh\\"]  
+ No files changed in this command, skipping snapshotting. 
+ WORKDIR /mnt/labbook                         
+ cmd: workdir                                 
+ Changed working directory to /mnt/labbook    
+ Creating directory /mnt/labbook              
+ Taking snapshot of files...                  
+ CMD [\\"tail\\", \\"-f\\", \\"/dev/null\\"]              
+ No files changed in this command, skipping snapshotting. 
+ Deleting filesystem...                       
+
+Container build complete",
+                },
+              ],
+              "messageBodyOpen": false,
+              "messageListOpen": false,
+              "name": "project-name",
+              "owner": "owner-name",
+              "status": "building",
+            },
+          ]
+        }
+        name="project-name"
+        open={true}
+        owner="owner-name"
+        status="building"
+        success={true}
+        toggleModal={[Function]}
+        totalBytes={0}
+        totalFiles={0}
+        uploadError={false}
+        uploadMessage=""
+        uploadOpen={false}
+        uploadStack={Array []}
+        uuid=""
+        viewHistory={false}
+      >
+        <div
+          className="BuildProgress"
+          data-selenium-id="BuildProgress"
+        >
+          <div
+            className="BuildProgress__header"
+          >
+            <h4
+              className="BuildProgress__header-text"
+            >
+              This is the header
+            </h4>
+          </div>
+          <div
+            className="BuildProgress__output"
+          >
+            <div
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Build task in queue
+Starting Project container build. Please wait.
+
+
+Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+
+Built cross stage deps: map[]                
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Executing 0 build triggers                   
+ Checking for cached layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44... 
+ No cached layer found for cmd RUN mkdir -p /etc/jupyter/custom/ 
+ cmd: EXPOSE                                  
+ Adding exposed port: 30000-65535/tcp         
+ Unpacking rootfs as cmd RUN mkdir -p /etc/jupyter/custom/ requires it. 
+
+RUN mkdir -p /etc/jupyter/custom/            
+ Taking snapshot of full filesystem...        
+
+cmd: /bin/sh                                 
+ args: [-c mkdir -p /etc/jupyter/custom/]     
+ Running: [/bin/sh -c mkdir -p /etc/jupyter/custom/] 
+ Taking snapshot of full filesystem...        
+
+RUN echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py 
+ cmd: /bin/sh                                 
+ args: [-c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Running: [/bin/sh -c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Pushing layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44 to cache now 
+ Taking snapshot of full filesystem...        
+
+EXPOSE 30000-65535                           
+ cmd: EXPOSE                                  
+ Pushing layer registry/cbutler/test-ere/cache:a2a66a4cf2399c7bc2a546aea7f1fe996f0eabc0d2f394ef2e8a2115b762049d to cache now 
+ Adding exposed port: 30000-65535/tcp         
+ No files changed in this command, skipping snapshotting. 
+ COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+ Taking snapshot of files...                  
+ RUN chmod u+x /usr/local/bin/entrypoint.sh   
+ cmd: /bin/sh                                 
+ args: [-c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Running: [/bin/sh -c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Pushing layer registry/cbutler/test-ere/cache:92f9eb8bfb94df28454faaa3450fd1b5c979eb06eac3ecbc5b524e28ccefc8fa to cache now 
+ Taking snapshot of full filesystem...        
+
+Pushing layer registry/cbutler/test-ere/cache:f31f99892d13a8a03db1afe23ace19fc6f0be5dad849e486df932116d5c4c40e to cache now 
+ ENV LB_HOME=/mnt/labbook PROJECT_ROOT=/mnt/labbook PROJECT_CODE=/mnt/labbook/code PROJECT_INPUT=/mnt/labbook/input PROJECT_OUTPUT=/mnt/labbook/output 
+ No files changed in this command, skipping snapshotting. 
+ ENTRYPOINT [\\"/usr/local/bin/entrypoint.sh\\"]  
+ No files changed in this command, skipping snapshotting. 
+ WORKDIR /mnt/labbook                         
+ cmd: workdir                                 
+ Changed working directory to /mnt/labbook    
+ Creating directory /mnt/labbook              
+ Taking snapshot of files...                  
+ CMD [\\"tail\\", \\"-f\\", \\"/dev/null\\"]              
+ No files changed in this command, skipping snapshotting. 
+ Deleting filesystem...                       
+
+Container build complete",
+                }
+              }
+            />
+          </div>
+          <div
+            className="BuildProgress__buttons flex justify--right"
+          >
+            <button
+              className="align-self--end"
+              onClick={[Function]}
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </BuildProgress>
+    </Connect(BuildProgress)>
+  </Provider>
+</BuildProgressWrapped>
+`;
+
+exports[`Storyshots Components/BuildProgress BuildProgress Default 1`] = `
+<BuildProgressWrapped>
+  <Provider
+    store={
+      Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(Symbol.observable): [Function],
+      }
+    }
+  >
+    <Connect(BuildProgress)
+      buildId="id"
+      headerText="This is the header"
+      keepOpen={true}
+      messageStackHistory={Array []}
+      name="project-name"
+      owner="owner-name"
+      toggleModal={[Function]}
+    >
+      <BuildProgress
+        buildId="id"
+        buildProgress={false}
+        currentId=""
+        currentMessage=""
+        currentUploadId=""
+        error={null}
+        fileCount={0}
+        headerText="This is the header"
+        helperVisible={false}
+        id="id"
+        isLast={true}
+        keepOpen={true}
+        labbookName=""
+        labbookSuccess={false}
+        message="
+Container build complete"
+        messageListOpen={true}
+        messageStack={
+          Array [
+            Object {
+              "buildProgress": true,
+              "className": "FooterMessage",
+              "date": 2021-01-15T03:42:50.394Z,
+              "dismissed": false,
+              "error": null,
+              "id": "id",
+              "isLast": true,
+              "isMultiPart": true,
+              "message": "
+Container build complete",
+              "messageBody": Array [
+                Object {
+                  "message": "Build task in queue
+Starting Project container build. Please wait.
+
+
+Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+
+Built cross stage deps: map[]                
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Executing 0 build triggers                   
+ Checking for cached layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44... 
+ No cached layer found for cmd RUN mkdir -p /etc/jupyter/custom/ 
+ cmd: EXPOSE                                  
+ Adding exposed port: 30000-65535/tcp         
+ Unpacking rootfs as cmd RUN mkdir -p /etc/jupyter/custom/ requires it. 
+
+RUN mkdir -p /etc/jupyter/custom/            
+ Taking snapshot of full filesystem...        
+
+cmd: /bin/sh                                 
+ args: [-c mkdir -p /etc/jupyter/custom/]     
+ Running: [/bin/sh -c mkdir -p /etc/jupyter/custom/] 
+ Taking snapshot of full filesystem...        
+
+RUN echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py 
+ cmd: /bin/sh                                 
+ args: [-c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Running: [/bin/sh -c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Pushing layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44 to cache now 
+ Taking snapshot of full filesystem...        
+
+EXPOSE 30000-65535                           
+ cmd: EXPOSE                                  
+ Pushing layer registry/cbutler/test-ere/cache:a2a66a4cf2399c7bc2a546aea7f1fe996f0eabc0d2f394ef2e8a2115b762049d to cache now 
+ Adding exposed port: 30000-65535/tcp         
+ No files changed in this command, skipping snapshotting. 
+ COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+ Taking snapshot of files...                  
+ RUN chmod u+x /usr/local/bin/entrypoint.sh   
+ cmd: /bin/sh                                 
+ args: [-c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Running: [/bin/sh -c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Pushing layer registry/cbutler/test-ere/cache:92f9eb8bfb94df28454faaa3450fd1b5c979eb06eac3ecbc5b524e28ccefc8fa to cache now 
+ Taking snapshot of full filesystem...        
+
+Pushing layer registry/cbutler/test-ere/cache:f31f99892d13a8a03db1afe23ace19fc6f0be5dad849e486df932116d5c4c40e to cache now 
+ ENV LB_HOME=/mnt/labbook PROJECT_ROOT=/mnt/labbook PROJECT_CODE=/mnt/labbook/code PROJECT_INPUT=/mnt/labbook/input PROJECT_OUTPUT=/mnt/labbook/output 
+ No files changed in this command, skipping snapshotting. 
+ ENTRYPOINT [\\"/usr/local/bin/entrypoint.sh\\"]  
+ No files changed in this command, skipping snapshotting. 
+ WORKDIR /mnt/labbook                         
+ cmd: workdir                                 
+ Changed working directory to /mnt/labbook    
+ Creating directory /mnt/labbook              
+ Taking snapshot of files...                  
+ CMD [\\"tail\\", \\"-f\\", \\"/dev/null\\"]              
+ No files changed in this command, skipping snapshotting. 
+ Deleting filesystem...                       
+
+Container build complete",
+                },
+              ],
+              "messageBodyOpen": false,
+              "messageListOpen": false,
+              "name": "project-name",
+              "owner": "owner-name",
+              "status": "building",
+            },
+          ]
+        }
+        messageStackHistory={
+          Array [
+            Object {
+              "buildProgress": true,
+              "className": "FooterMessage",
+              "date": 2021-01-15T03:42:50.394Z,
+              "dismissed": false,
+              "error": null,
+              "id": "id",
+              "isLast": true,
+              "isMultiPart": true,
+              "message": "
+Container build complete",
+              "messageBody": Array [
+                Object {
+                  "message": "Build task in queue
+Starting Project container build. Please wait.
+
+
+Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+
+Built cross stage deps: map[]                
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Executing 0 build triggers                   
+ Checking for cached layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44... 
+ No cached layer found for cmd RUN mkdir -p /etc/jupyter/custom/ 
+ cmd: EXPOSE                                  
+ Adding exposed port: 30000-65535/tcp         
+ Unpacking rootfs as cmd RUN mkdir -p /etc/jupyter/custom/ requires it. 
+
+RUN mkdir -p /etc/jupyter/custom/            
+ Taking snapshot of full filesystem...        
+
+cmd: /bin/sh                                 
+ args: [-c mkdir -p /etc/jupyter/custom/]     
+ Running: [/bin/sh -c mkdir -p /etc/jupyter/custom/] 
+ Taking snapshot of full filesystem...        
+
+RUN echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py 
+ cmd: /bin/sh                                 
+ args: [-c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Running: [/bin/sh -c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Pushing layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44 to cache now 
+ Taking snapshot of full filesystem...        
+
+EXPOSE 30000-65535                           
+ cmd: EXPOSE                                  
+ Pushing layer registry/cbutler/test-ere/cache:a2a66a4cf2399c7bc2a546aea7f1fe996f0eabc0d2f394ef2e8a2115b762049d to cache now 
+ Adding exposed port: 30000-65535/tcp         
+ No files changed in this command, skipping snapshotting. 
+ COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+ Taking snapshot of files...                  
+ RUN chmod u+x /usr/local/bin/entrypoint.sh   
+ cmd: /bin/sh                                 
+ args: [-c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Running: [/bin/sh -c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Pushing layer registry/cbutler/test-ere/cache:92f9eb8bfb94df28454faaa3450fd1b5c979eb06eac3ecbc5b524e28ccefc8fa to cache now 
+ Taking snapshot of full filesystem...        
+
+Pushing layer registry/cbutler/test-ere/cache:f31f99892d13a8a03db1afe23ace19fc6f0be5dad849e486df932116d5c4c40e to cache now 
+ ENV LB_HOME=/mnt/labbook PROJECT_ROOT=/mnt/labbook PROJECT_CODE=/mnt/labbook/code PROJECT_INPUT=/mnt/labbook/input PROJECT_OUTPUT=/mnt/labbook/output 
+ No files changed in this command, skipping snapshotting. 
+ ENTRYPOINT [\\"/usr/local/bin/entrypoint.sh\\"]  
+ No files changed in this command, skipping snapshotting. 
+ WORKDIR /mnt/labbook                         
+ cmd: workdir                                 
+ Changed working directory to /mnt/labbook    
+ Creating directory /mnt/labbook              
+ Taking snapshot of files...                  
+ CMD [\\"tail\\", \\"-f\\", \\"/dev/null\\"]              
+ No files changed in this command, skipping snapshotting. 
+ Deleting filesystem...                       
+
+Container build complete",
+                },
+              ],
+              "messageBodyOpen": false,
+              "messageListOpen": false,
+              "name": "project-name",
+              "owner": "owner-name",
+              "status": "building",
+            },
+          ]
+        }
+        name="project-name"
+        open={true}
+        owner="owner-name"
+        status="building"
+        success={true}
+        toggleModal={[Function]}
+        totalBytes={0}
+        totalFiles={0}
+        uploadError={false}
+        uploadMessage=""
+        uploadOpen={false}
+        uploadStack={Array []}
+        uuid=""
+        viewHistory={false}
+      >
+        <div
+          className="BuildProgress"
+          data-selenium-id="BuildProgress"
+        >
+          <div
+            className="BuildProgress__header"
+          >
+            <h4
+              className="BuildProgress__header-text"
+            >
+              This is the header
+            </h4>
+          </div>
+          <div
+            className="BuildProgress__output"
+          >
+            <div
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Build task in queue
+Starting Project container build. Please wait.
+
+
+Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+
+Built cross stage deps: map[]                
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image manifest gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Retrieving image gigantum/python3-data-science:b4b4d267e0-2020-06-29 
+ Executing 0 build triggers                   
+ Checking for cached layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44... 
+ No cached layer found for cmd RUN mkdir -p /etc/jupyter/custom/ 
+ cmd: EXPOSE                                  
+ Adding exposed port: 30000-65535/tcp         
+ Unpacking rootfs as cmd RUN mkdir -p /etc/jupyter/custom/ requires it. 
+
+RUN mkdir -p /etc/jupyter/custom/            
+ Taking snapshot of full filesystem...        
+
+cmd: /bin/sh                                 
+ args: [-c mkdir -p /etc/jupyter/custom/]     
+ Running: [/bin/sh -c mkdir -p /etc/jupyter/custom/] 
+ Taking snapshot of full filesystem...        
+
+RUN echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py 
+ cmd: /bin/sh                                 
+ args: [-c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Running: [/bin/sh -c echo \\"c.NotebookApp.tornado_settings = {'headers': {'Content-Security-Policy': \\\\\\"frame-ancestors gigantum.com 'self'; report-uri /api/security/csp-report\\\\\\"}}\\" &gt;&gt; /etc/jupyter/jupyter_notebook_config.py] 
+ Pushing layer registry/cbutler/test-ere/cache:6d0f6b52abbafd53e5cecbf6990e7a559fed259ff4341865017a41124ca7df44 to cache now 
+ Taking snapshot of full filesystem...        
+
+EXPOSE 30000-65535                           
+ cmd: EXPOSE                                  
+ Pushing layer registry/cbutler/test-ere/cache:a2a66a4cf2399c7bc2a546aea7f1fe996f0eabc0d2f394ef2e8a2115b762049d to cache now 
+ Adding exposed port: 30000-65535/tcp         
+ No files changed in this command, skipping snapshotting. 
+ COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+ Taking snapshot of files...                  
+ RUN chmod u+x /usr/local/bin/entrypoint.sh   
+ cmd: /bin/sh                                 
+ args: [-c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Running: [/bin/sh -c chmod u+x /usr/local/bin/entrypoint.sh] 
+ Pushing layer registry/cbutler/test-ere/cache:92f9eb8bfb94df28454faaa3450fd1b5c979eb06eac3ecbc5b524e28ccefc8fa to cache now 
+ Taking snapshot of full filesystem...        
+
+Pushing layer registry/cbutler/test-ere/cache:f31f99892d13a8a03db1afe23ace19fc6f0be5dad849e486df932116d5c4c40e to cache now 
+ ENV LB_HOME=/mnt/labbook PROJECT_ROOT=/mnt/labbook PROJECT_CODE=/mnt/labbook/code PROJECT_INPUT=/mnt/labbook/input PROJECT_OUTPUT=/mnt/labbook/output 
+ No files changed in this command, skipping snapshotting. 
+ ENTRYPOINT [\\"/usr/local/bin/entrypoint.sh\\"]  
+ No files changed in this command, skipping snapshotting. 
+ WORKDIR /mnt/labbook                         
+ cmd: workdir                                 
+ Changed working directory to /mnt/labbook    
+ Creating directory /mnt/labbook              
+ Taking snapshot of files...                  
+ CMD [\\"tail\\", \\"-f\\", \\"/dev/null\\"]              
+ No files changed in this command, skipping snapshotting. 
+ Deleting filesystem...                       
+
+Container build complete",
+                }
+              }
+            />
+          </div>
+          <div
+            className="BuildProgress__buttons flex justify--right"
+          >
+            <button
+              className="align-self--end"
+              onClick={[Function]}
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </BuildProgress>
+    </Connect(BuildProgress)>
+  </Provider>
+</BuildProgressWrapped>
+`;

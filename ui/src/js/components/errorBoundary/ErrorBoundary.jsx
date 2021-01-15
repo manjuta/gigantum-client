@@ -1,9 +1,14 @@
 // vendor
-import React, { Component } from 'react';
+import React, { Component, Node } from 'react';
 // assets
 import './ErrorBoundary.scss';
 
-export default class ErrorBoundary extends Component {
+type Props = {
+  children: Node,
+  type: string,
+};
+
+class ErrorBoundary extends Component<Props> {
   constructor() {
     super();
     this.state = {
@@ -12,15 +17,14 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.log(error, info);
     this.setState({ hasError: true });
   }
 
   render() {
-    let text = 'There was an error fetching data for this component. Refresh the page and try again.';
-    if (this.props.type === 'containerStatusError') {
-      text = 'Error';
-    }
+    const text = (this.props.type !== 'containerStatusError')
+      ? 'There was an error fetching data for this component. Refresh the page and try again.'
+      : 'Error';
+
     if (this.state.hasError) {
       return (
         <div className={`ErrorBoundary ErrorBoundary--${this.props.type}`}>
@@ -31,3 +35,5 @@ export default class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;

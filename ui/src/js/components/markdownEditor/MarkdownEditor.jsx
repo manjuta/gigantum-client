@@ -35,6 +35,8 @@ class MarkdownEditor extends Component<Props> {
       return;
     }
 
+    this.simpleInstance = instance;
+
     instance.toolbarElements.fullscreen.addEventListener('click', (() => {
       const { isFullscreen } = this.state;
       this._setFullscreen(!isFullscreen, false);

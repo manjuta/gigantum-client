@@ -1,7 +1,27 @@
 module.exports = {
-  "collectCoverageFrom": [
-    "src/js/**/*.js"
+  "configurations": [
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "--runInBand"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "port": 9229
+    }
   ],
+  "collectCoverageFrom": [
+    "src/js/components/**/*.js",
+    "src/js/components/**/*.jsx",
+    "!src/js/components/**/__tests__/**.js",
+    "!src/js/components/**/__tests__/**.jsx",
+  ],
+  "coverageReporters": ["text","html", "JSON"],
+  "coverageDirectory": "<rootDir>/coverage/",
   "setupFiles": [
     "<rootDir>/__tests__/setupTests.js",
     "<rootDir>/config/polyfills.js",
@@ -58,6 +78,9 @@ module.exports = {
     '^react-dnd-html5-backend$': 'react-dnd-html5-backend-cjs',
     "^easymde/dist/easymde.min.css$": "<rootDir>/node_modules/easymde/dist/easymde.min.css",
   },
-  "testEnvironment": "jsdom"
-  // "testEnvironmentOptions": "<!DOCTYPE html><html><body><div id='root'></div></body></html>"
+  "testEnvironment": "jsdom",
+  "testEnvironmentOptions": {
+      html: "<html lang=\"en\"><body><div id=\"modal__cover\" class=\"modal__cover hidden\"><div><div id=\"modal\" class=\"ReactDom\"></div><div id=\"header\" class=\"ReactDom\"></div><div id=\"side_panel\"></div><div id=\"lightbox\" class=\"lightbox\"></div><div id=\"loader\" class=\"Loader fixed--important hidden\"></div></body></html>",
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.71 Safari/534.24',
+    },
 }

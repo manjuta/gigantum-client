@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/Modal Modal 1`] = `
+<Modal
+  handleClose={[Function]}
+  header="Sync Branch"
+  icon="create"
+  noPadding={false}
+  noPaddingModal={false}
+  overlfow="visible"
+  preHeader="Create a Branch"
+  size="large"
+>
+  <Portal
+    containerInfo={
+      <div
+        id="modal"
+      >
+        <div
+          class="Modal"
+          data-selenium-id="Modalx"
+        >
+          <div
+            class="Modal__cover"
+            role="presentation"
+          />
+          <div
+            class="Modal__content Modal__content--noPadding Modal__content--large add"
+            style="overflow: visible;"
+          >
+            <button
+              class="Btn Btn--flat Modal__close padding--small "
+              type="button"
+            />
+            <div
+              class="Modal__container"
+            >
+              <p
+                class="Modal__pre-header"
+              >
+                Preheader text
+              </p>
+              <h1
+                class="Modal__header"
+              >
+                <div
+                  class="Icon Icon--add"
+                />
+                Sync Branch
+              </h1>
+              <hr />
+              <div
+                class="Modal__sub-container Modal__sub-container--nopadding"
+              >
+                <div>
+                  content
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="Modal"
+          data-selenium-id="Modalx"
+        >
+          <div
+            class="Modal__cover"
+            role="presentation"
+          />
+          <div
+            class="Modal__content Modal__content--large create"
+            style="overflow: visible;"
+          >
+            <button
+              class="Btn Btn--flat Modal__close padding--small "
+              type="button"
+            />
+            <div
+              class="Modal__container"
+            >
+              <p
+                class="Modal__pre-header"
+              >
+                Create a Branch
+              </p>
+              <h1
+                class="Modal__header"
+              >
+                <div
+                  class="Icon Icon--create"
+                />
+                Sync Branch
+              </h1>
+              <hr />
+              <div
+                class="Modal__sub-container"
+              >
+                <div
+                  data-selenium-id="Modal.storiesx"
+                >
+                  content
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  >
+    <div
+      className="Modal"
+      data-selenium-id="Modalx"
+    >
+      <div
+        className="Modal__cover"
+        onClick={[Function]}
+        role="presentation"
+      />
+      <div
+        className="Modal__content Modal__content--large create"
+        style={
+          Object {
+            "overflow": "visible",
+          }
+        }
+      >
+        <button
+          className="Btn Btn--flat Modal__close padding--small "
+          onClick={[Function]}
+          type="button"
+        />
+        <div
+          className="Modal__container"
+        >
+          <p
+            className="Modal__pre-header"
+          >
+            Create a Branch
+          </p>
+          <h1
+            className="Modal__header"
+          >
+            <div
+              className="Icon Icon--create"
+            />
+            Sync Branch
+          </h1>
+          <hr />
+          <div
+            className="Modal__sub-container"
+          >
+            <div
+              data-selenium-id="Modal.storiesx"
+            >
+              content
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Portal>
+</Modal>
+`;

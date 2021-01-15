@@ -13,9 +13,21 @@ const indexHTML =
     </body>
   </html>`;
 
-const dom = new JSDOM(indexHTML);
+jsdom.env({
+    html: indexHTML,
+    headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.71 Safari/534.24'},
+    scripts: ['http://code.jquery.com/jquery-1.5.min.js'],
+    done: function(errors, window) {
+        console.log('Probably lat,lng for Paris', window.$('.geo').eq(0).text());
+    }
+});
+
+console.log('adsasddass')
+
 global.document = dom.window.document;
 global.window = dom.window;
-global.navigator = {userAgent: "jest"};
+global.navigator = {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.71 Safari/534.24'};
+
+global.body = {createTextRange: jest.fn()}
 
 global.fetch = fetch;

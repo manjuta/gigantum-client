@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots Components/AdvancedSearch Snapshots: AdvancedSearch Default 1`] = `
+exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
 <DragDropContext(AdvancedSearchWrapped)>
   <AdvancedSearchWrapped>
     <AdvancedSearch
@@ -20,1405 +20,6 @@ exports[`Storyshots Components/AdvancedSearch Snapshots: AdvancedSearch Default 
             "python",
             "r",
             "cobol",
-          ],
-        }
-      }
-      setTags={[Function]}
-      showButton={true}
-      tags={Array []}
-      withoutContext={[Function]}
-    >
-      <div
-        className="AdvancedSearch"
-        data-selenium-id="AdvancedSearchx"
-      >
-        <div
-          className="flex"
-        >
-          <div
-            className="flex-1"
-          >
-            <ReactTags
-              allowAdditionFromPaste={true}
-              allowDeleteFromEmptyInput={true}
-              allowDragDrop={true}
-              allowUnique={true}
-              autocomplete={true}
-              autofocus={false}
-              data-resetselectedfilter-id="AdvancedSearch"
-              delimiters={
-                Array [
-                  13,
-                  9,
-                ]
-              }
-              handleAddition={[Function]}
-              handleDelete={[Function]}
-              handleInputFocus={[Function]}
-              inline={true}
-              inputFieldPosition="inline"
-              labelField="text"
-              placeholder="Search by keyword, tags or filters"
-              readOnly={false}
-              resetInputOnDelete={true}
-              suggestions={
-                Array [
-                  Object {
-                    "className": "Languages",
-                    "id": "python",
-                    "text": "python",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "r",
-                    "text": "r",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "cobol",
-                    "text": "cobol",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyter",
-                    "text": "jupyter",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyterlab",
-                    "text": "jupyterlab",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "salmon",
-                    "text": "salmon",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "trout",
-                    "text": "trout",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "pike",
-                    "text": "pike",
-                  },
-                ]
-              }
-              tags={Array []}
-            >
-              <div
-                className="ReactTags__tags react-tags-wrapper"
-              >
-                <div
-                  className="ReactTags__selected"
-                >
-                  <div
-                    className="ReactTags__tagInput"
-                  >
-                    <input
-                      aria-label="Search by keyword, tags or filters"
-                      className="ReactTags__tagInputField"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onPaste={[Function]}
-                      placeholder="Search by keyword, tags or filters"
-                      type="text"
-                    />
-                    <Suggestions
-                      classNames={
-                        Object {
-                          "activeSuggestion": "ReactTags__activeSuggestion",
-                          "remove": "ReactTags__remove",
-                          "selected": "ReactTags__selected",
-                          "suggestions": "ReactTags__suggestions",
-                          "tag": "ReactTags__tag",
-                          "tagInput": "ReactTags__tagInput",
-                          "tagInputField": "ReactTags__tagInputField",
-                          "tags": "ReactTags__tags",
-                        }
-                      }
-                      handleClick={[Function]}
-                      handleHover={[Function]}
-                      isFocused={false}
-                      labelField="text"
-                      minQueryLength={2}
-                      query=""
-                      selectedIndex={-1}
-                      suggestions={
-                        Array [
-                          Object {
-                            "className": "Languages",
-                            "id": "python",
-                            "text": "python",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "r",
-                            "text": "r",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "cobol",
-                            "text": "cobol",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyter",
-                            "text": "jupyter",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyterlab",
-                            "text": "jupyterlab",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "salmon",
-                            "text": "salmon",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "trout",
-                            "text": "trout",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "pike",
-                            "text": "pike",
-                          },
-                        ]
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </ReactTags>
-          </div>
-          <button
-            className="Btn Btn__AdvancedSearch"
-            onClick={[Function]}
-            type="button"
-          />
-        </div>
-        <div
-          className="AdvancedSearch__filters"
-        >
-          <Category
-            category="Languages"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={0}
-            key="Languages"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Languages"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Languages"
-                onClick={[Function]}
-              >
-                Languages
-              </div>
-            </div>
-          </Category>
-          <Category
-            category="CUDA Version"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={1}
-            key="CUDA Version"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="CUDA Version"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="CUDA Version"
-                onClick={[Function]}
-              >
-                CUDA Version
-              </div>
-              <div
-                className="AdvancedSearch__info"
-                data-resetselectedfilter-id="AdvancedSearch__info"
-                onClick={[Function]}
-              />
-            </div>
-          </Category>
-          <Category
-            category="Development Environments"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={2}
-            key="Development Environments"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Development Environments"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Development Environments"
-                onClick={[Function]}
-              >
-                Development Environments
-              </div>
-            </div>
-          </Category>
-        </div>
-      </div>
-    </AdvancedSearch>
-  </AdvancedSearchWrapped>
-</DragDropContext(AdvancedSearchWrapped)>
-`;
-
-exports[`Storyshots Components/AdvancedSearch Snapshots: AdvancedSearch Packages 1`] = `
-<DragDropContext(AdvancedSearchWrapped)
-  customStyle="packages"
->
-  <AdvancedSearchWrapped
-    customStyle="packages"
-  >
-    <AdvancedSearch
-      autoHide={false}
-      customStyle="packages"
-      filterCategories={
-        Object {
-          "CUDA Version": Array [
-            "jupyter",
-            "jupyterlab",
-          ],
-          "Development Environments": Array [
-            "salmon",
-            "trout",
-            "pike",
-          ],
-          "Languages": Array [
-            "python",
-            "r",
-            "cobol",
-          ],
-        }
-      }
-      setTags={[Function]}
-      showButton={true}
-      tags={Array []}
-      withoutContext={[Function]}
-    >
-      <div
-        className="AdvancedSearch AdvancedSearch--packages"
-        data-selenium-id="AdvancedSearchx"
-      >
-        <div
-          className="flex"
-        >
-          <div
-            className="flex-1"
-          >
-            <ReactTags
-              allowAdditionFromPaste={true}
-              allowDeleteFromEmptyInput={true}
-              allowDragDrop={true}
-              allowUnique={true}
-              autocomplete={true}
-              autofocus={false}
-              data-resetselectedfilter-id="AdvancedSearch"
-              delimiters={
-                Array [
-                  13,
-                  9,
-                ]
-              }
-              handleAddition={[Function]}
-              handleDelete={[Function]}
-              handleInputFocus={[Function]}
-              inline={true}
-              inputFieldPosition="inline"
-              labelField="text"
-              placeholder="Search by keyword, tags or filters"
-              readOnly={false}
-              resetInputOnDelete={true}
-              suggestions={
-                Array [
-                  Object {
-                    "className": "Languages",
-                    "id": "python",
-                    "text": "python",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "r",
-                    "text": "r",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "cobol",
-                    "text": "cobol",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyter",
-                    "text": "jupyter",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyterlab",
-                    "text": "jupyterlab",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "salmon",
-                    "text": "salmon",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "trout",
-                    "text": "trout",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "pike",
-                    "text": "pike",
-                  },
-                ]
-              }
-              tags={Array []}
-            >
-              <div
-                className="ReactTags__tags react-tags-wrapper"
-              >
-                <div
-                  className="ReactTags__selected"
-                >
-                  <div
-                    className="ReactTags__tagInput"
-                  >
-                    <input
-                      aria-label="Search by keyword, tags or filters"
-                      className="ReactTags__tagInputField"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onPaste={[Function]}
-                      placeholder="Search by keyword, tags or filters"
-                      type="text"
-                    />
-                    <Suggestions
-                      classNames={
-                        Object {
-                          "activeSuggestion": "ReactTags__activeSuggestion",
-                          "remove": "ReactTags__remove",
-                          "selected": "ReactTags__selected",
-                          "suggestions": "ReactTags__suggestions",
-                          "tag": "ReactTags__tag",
-                          "tagInput": "ReactTags__tagInput",
-                          "tagInputField": "ReactTags__tagInputField",
-                          "tags": "ReactTags__tags",
-                        }
-                      }
-                      handleClick={[Function]}
-                      handleHover={[Function]}
-                      isFocused={false}
-                      labelField="text"
-                      minQueryLength={2}
-                      query=""
-                      selectedIndex={-1}
-                      suggestions={
-                        Array [
-                          Object {
-                            "className": "Languages",
-                            "id": "python",
-                            "text": "python",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "r",
-                            "text": "r",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "cobol",
-                            "text": "cobol",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyter",
-                            "text": "jupyter",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyterlab",
-                            "text": "jupyterlab",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "salmon",
-                            "text": "salmon",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "trout",
-                            "text": "trout",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "pike",
-                            "text": "pike",
-                          },
-                        ]
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </ReactTags>
-          </div>
-          <button
-            className="Btn Btn__AdvancedSearch"
-            onClick={[Function]}
-            type="button"
-          />
-        </div>
-        <div
-          className="AdvancedSearch__filters"
-        >
-          <Category
-            category="Languages"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={0}
-            key="Languages"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Languages"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Languages"
-                onClick={[Function]}
-              >
-                Languages
-              </div>
-            </div>
-          </Category>
-          <Category
-            category="CUDA Version"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={1}
-            key="CUDA Version"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="CUDA Version"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="CUDA Version"
-                onClick={[Function]}
-              >
-                CUDA Version
-              </div>
-              <div
-                className="AdvancedSearch__info"
-                data-resetselectedfilter-id="AdvancedSearch__info"
-                onClick={[Function]}
-              />
-            </div>
-          </Category>
-          <Category
-            category="Development Environments"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={2}
-            key="Development Environments"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Development Environments"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Development Environments"
-                onClick={[Function]}
-              >
-                Development Environments
-              </div>
-            </div>
-          </Category>
-        </div>
-      </div>
-    </AdvancedSearch>
-  </AdvancedSearchWrapped>
-</DragDropContext(AdvancedSearchWrapped)>
-`;
-
-exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: AdvancedSearch Default 1`] = `
-<DragDropContext(AdvancedSearchWrapped)>
-  <AdvancedSearchWrapped>
-    <AdvancedSearch
-      autoHide={false}
-      filterCategories={
-        Object {
-          "CUDA Version": Array [
-            "jupyter",
-            "jupyterlab",
-          ],
-          "Development Environments": Array [
-            "salmon",
-            "trout",
-            "pike",
-          ],
-          "Languages": Array [
-            "python",
-            "r",
-            "cobol",
-          ],
-        }
-      }
-      setTags={[Function]}
-      showButton={true}
-      tags={Array []}
-      withoutContext={[Function]}
-    >
-      <div
-        className="AdvancedSearch"
-        data-selenium-id="AdvancedSearchx"
-      >
-        <div
-          className="flex"
-        >
-          <div
-            className="flex-1"
-          >
-            <ReactTags
-              allowAdditionFromPaste={true}
-              allowDeleteFromEmptyInput={true}
-              allowDragDrop={true}
-              allowUnique={true}
-              autocomplete={true}
-              autofocus={false}
-              data-resetselectedfilter-id="AdvancedSearch"
-              delimiters={
-                Array [
-                  13,
-                  9,
-                ]
-              }
-              handleAddition={[Function]}
-              handleDelete={[Function]}
-              handleInputFocus={[Function]}
-              inline={true}
-              inputFieldPosition="inline"
-              labelField="text"
-              placeholder="Search by keyword, tags or filters"
-              readOnly={false}
-              resetInputOnDelete={true}
-              suggestions={
-                Array [
-                  Object {
-                    "className": "Languages",
-                    "id": "python",
-                    "text": "python",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "r",
-                    "text": "r",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "cobol",
-                    "text": "cobol",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyter",
-                    "text": "jupyter",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyterlab",
-                    "text": "jupyterlab",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "salmon",
-                    "text": "salmon",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "trout",
-                    "text": "trout",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "pike",
-                    "text": "pike",
-                  },
-                ]
-              }
-              tags={Array []}
-            >
-              <div
-                className="ReactTags__tags react-tags-wrapper"
-              >
-                <div
-                  className="ReactTags__selected"
-                >
-                  <div
-                    className="ReactTags__tagInput"
-                  >
-                    <input
-                      aria-label="Search by keyword, tags or filters"
-                      className="ReactTags__tagInputField"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onPaste={[Function]}
-                      placeholder="Search by keyword, tags or filters"
-                      type="text"
-                    />
-                    <Suggestions
-                      classNames={
-                        Object {
-                          "activeSuggestion": "ReactTags__activeSuggestion",
-                          "remove": "ReactTags__remove",
-                          "selected": "ReactTags__selected",
-                          "suggestions": "ReactTags__suggestions",
-                          "tag": "ReactTags__tag",
-                          "tagInput": "ReactTags__tagInput",
-                          "tagInputField": "ReactTags__tagInputField",
-                          "tags": "ReactTags__tags",
-                        }
-                      }
-                      handleClick={[Function]}
-                      handleHover={[Function]}
-                      isFocused={false}
-                      labelField="text"
-                      minQueryLength={2}
-                      query=""
-                      selectedIndex={-1}
-                      suggestions={
-                        Array [
-                          Object {
-                            "className": "Languages",
-                            "id": "python",
-                            "text": "python",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "r",
-                            "text": "r",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "cobol",
-                            "text": "cobol",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyter",
-                            "text": "jupyter",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyterlab",
-                            "text": "jupyterlab",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "salmon",
-                            "text": "salmon",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "trout",
-                            "text": "trout",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "pike",
-                            "text": "pike",
-                          },
-                        ]
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </ReactTags>
-          </div>
-          <button
-            className="Btn Btn__AdvancedSearch"
-            onClick={[Function]}
-            type="button"
-          />
-        </div>
-        <div
-          className="AdvancedSearch__filters"
-        >
-          <Category
-            category="Languages"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={0}
-            key="Languages"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Languages"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Languages"
-                onClick={[Function]}
-              >
-                Languages
-              </div>
-            </div>
-          </Category>
-          <Category
-            category="CUDA Version"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={1}
-            key="CUDA Version"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="CUDA Version"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="CUDA Version"
-                onClick={[Function]}
-              >
-                CUDA Version
-              </div>
-              <div
-                className="AdvancedSearch__info"
-                data-resetselectedfilter-id="AdvancedSearch__info"
-                onClick={[Function]}
-              />
-            </div>
-          </Category>
-          <Category
-            category="Development Environments"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={2}
-            key="Development Environments"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Development Environments"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Development Environments"
-                onClick={[Function]}
-              >
-                Development Environments
-              </div>
-            </div>
-          </Category>
-        </div>
-      </div>
-    </AdvancedSearch>
-  </AdvancedSearchWrapped>
-</DragDropContext(AdvancedSearchWrapped)>
-`;
-
-exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: AdvancedSearch Packages 1`] = `
-<DragDropContext(AdvancedSearchWrapped)
-  customStyle="packages"
->
-  <AdvancedSearchWrapped
-    customStyle="packages"
-  >
-    <AdvancedSearch
-      autoHide={false}
-      customStyle="packages"
-      filterCategories={
-        Object {
-          "CUDA Version": Array [
-            "jupyter",
-            "jupyterlab",
-          ],
-          "Development Environments": Array [
-            "salmon",
-            "trout",
-            "pike",
-          ],
-          "Languages": Array [
-            "python",
-            "r",
-            "cobol",
-          ],
-        }
-      }
-      setTags={[Function]}
-      showButton={true}
-      tags={Array []}
-      withoutContext={[Function]}
-    >
-      <div
-        className="AdvancedSearch AdvancedSearch--packages"
-        data-selenium-id="AdvancedSearchx"
-      >
-        <div
-          className="flex"
-        >
-          <div
-            className="flex-1"
-          >
-            <ReactTags
-              allowAdditionFromPaste={true}
-              allowDeleteFromEmptyInput={true}
-              allowDragDrop={true}
-              allowUnique={true}
-              autocomplete={true}
-              autofocus={false}
-              data-resetselectedfilter-id="AdvancedSearch"
-              delimiters={
-                Array [
-                  13,
-                  9,
-                ]
-              }
-              handleAddition={[Function]}
-              handleDelete={[Function]}
-              handleInputFocus={[Function]}
-              inline={true}
-              inputFieldPosition="inline"
-              labelField="text"
-              placeholder="Search by keyword, tags or filters"
-              readOnly={false}
-              resetInputOnDelete={true}
-              suggestions={
-                Array [
-                  Object {
-                    "className": "Languages",
-                    "id": "python",
-                    "text": "python",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "r",
-                    "text": "r",
-                  },
-                  Object {
-                    "className": "Languages",
-                    "id": "cobol",
-                    "text": "cobol",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyter",
-                    "text": "jupyter",
-                  },
-                  Object {
-                    "className": "CUDA Version",
-                    "id": "jupyterlab",
-                    "text": "jupyterlab",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "salmon",
-                    "text": "salmon",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "trout",
-                    "text": "trout",
-                  },
-                  Object {
-                    "className": "Development Environments",
-                    "id": "pike",
-                    "text": "pike",
-                  },
-                ]
-              }
-              tags={Array []}
-            >
-              <div
-                className="ReactTags__tags react-tags-wrapper"
-              >
-                <div
-                  className="ReactTags__selected"
-                >
-                  <div
-                    className="ReactTags__tagInput"
-                  >
-                    <input
-                      aria-label="Search by keyword, tags or filters"
-                      className="ReactTags__tagInputField"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onPaste={[Function]}
-                      placeholder="Search by keyword, tags or filters"
-                      type="text"
-                    />
-                    <Suggestions
-                      classNames={
-                        Object {
-                          "activeSuggestion": "ReactTags__activeSuggestion",
-                          "remove": "ReactTags__remove",
-                          "selected": "ReactTags__selected",
-                          "suggestions": "ReactTags__suggestions",
-                          "tag": "ReactTags__tag",
-                          "tagInput": "ReactTags__tagInput",
-                          "tagInputField": "ReactTags__tagInputField",
-                          "tags": "ReactTags__tags",
-                        }
-                      }
-                      handleClick={[Function]}
-                      handleHover={[Function]}
-                      isFocused={false}
-                      labelField="text"
-                      minQueryLength={2}
-                      query=""
-                      selectedIndex={-1}
-                      suggestions={
-                        Array [
-                          Object {
-                            "className": "Languages",
-                            "id": "python",
-                            "text": "python",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "r",
-                            "text": "r",
-                          },
-                          Object {
-                            "className": "Languages",
-                            "id": "cobol",
-                            "text": "cobol",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyter",
-                            "text": "jupyter",
-                          },
-                          Object {
-                            "className": "CUDA Version",
-                            "id": "jupyterlab",
-                            "text": "jupyterlab",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "salmon",
-                            "text": "salmon",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "trout",
-                            "text": "trout",
-                          },
-                          Object {
-                            "className": "Development Environments",
-                            "id": "pike",
-                            "text": "pike",
-                          },
-                        ]
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </ReactTags>
-          </div>
-          <button
-            className="Btn Btn__AdvancedSearch"
-            onClick={[Function]}
-            type="button"
-          />
-        </div>
-        <div
-          className="AdvancedSearch__filters"
-        >
-          <Category
-            category="Languages"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={0}
-            key="Languages"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Languages"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Languages"
-                onClick={[Function]}
-              >
-                Languages
-              </div>
-            </div>
-          </Category>
-          <Category
-            category="CUDA Version"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={1}
-            key="CUDA Version"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="CUDA Version"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="CUDA Version"
-                onClick={[Function]}
-              >
-                CUDA Version
-              </div>
-              <div
-                className="AdvancedSearch__info"
-                data-resetselectedfilter-id="AdvancedSearch__info"
-                onClick={[Function]}
-              />
-            </div>
-          </Category>
-          <Category
-            category="Development Environments"
-            expandedIndex={null}
-            filterCategories={
-              Object {
-                "CUDA Version": Array [
-                  "jupyter",
-                  "jupyterlab",
-                ],
-                "Development Environments": Array [
-                  "salmon",
-                  "trout",
-                  "pike",
-                ],
-                "Languages": Array [
-                  "python",
-                  "r",
-                  "cobol",
-                ],
-              }
-            }
-            handleAddition={[Function]}
-            index={2}
-            key="Development Environments"
-            setExpandedIndex={[Function]}
-            toggleTooltip={[Function]}
-            tooltipShown={false}
-          >
-            <div
-              className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="Development Environments"
-            >
-              <div
-                className="AdvancedSearch__filter-section"
-                data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="Development Environments"
-                onClick={[Function]}
-              >
-                Development Environments
-              </div>
-            </div>
-          </Category>
-        </div>
-      </div>
-    </AdvancedSearch>
-  </AdvancedSearchWrapped>
-</DragDropContext(AdvancedSearchWrapped)>
-`;
-
-exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: AdvancedSearch Page 1`] = `
-<DragDropContext(AdvancedSearchWrapped)>
-  <AdvancedSearchWrapped>
-    <AdvancedSearch
-      autoHide={false}
-      customStyle={Object {}}
-      filterCategories={
-        Object {
-          "code": Array [
-            "python",
-            "r",
-            "cobol",
-          ],
-          "fish": Array [
-            "salmon",
-            "trout",
-            "pike",
-          ],
-          "notebook": Array [
-            "jupyter",
-            "jupyterlab",
           ],
         }
       }
@@ -1426,11 +27,13 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
       showButton={true}
       tags={
         Array [
-          "jupyter",
-          "node",
+          Object {
+            "id": "jupyter",
+            "text": "jupyter",
+          },
         ]
       }
-      withoutContext={[Function]}
+      withoutContext={true}
     >
       <div
         className="AdvancedSearch AdvancedSearch--tagsExist"
@@ -1464,46 +67,45 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
               labelField="text"
               placeholder="Search by keyword, tags or filters"
               readOnly={false}
-              resetInputOnDelete={true}
               suggestions={
                 Array [
                   Object {
-                    "className": "code",
+                    "className": "Languages",
                     "id": "python",
                     "text": "python",
                   },
                   Object {
-                    "className": "code",
+                    "className": "Languages",
                     "id": "r",
                     "text": "r",
                   },
                   Object {
-                    "className": "code",
+                    "className": "Languages",
                     "id": "cobol",
                     "text": "cobol",
                   },
                   Object {
-                    "className": "notebook",
+                    "className": "CUDA Version",
                     "id": "jupyter",
                     "text": "jupyter",
                   },
                   Object {
-                    "className": "notebook",
+                    "className": "CUDA Version",
                     "id": "jupyterlab",
                     "text": "jupyterlab",
                   },
                   Object {
-                    "className": "fish",
+                    "className": "Development Environments",
                     "id": "salmon",
                     "text": "salmon",
                   },
                   Object {
-                    "className": "fish",
+                    "className": "Development Environments",
                     "id": "trout",
                     "text": "trout",
                   },
                   Object {
-                    "className": "fish",
+                    "className": "Development Environments",
                     "id": "pike",
                     "text": "pike",
                   },
@@ -1511,14 +113,32 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
               }
               tags={
                 Array [
-                  "jupyter",
-                  "node",
+                  Object {
+                    "id": "jupyter",
+                    "text": "jupyter",
+                  },
                 ]
               }
             >
               <div
                 className="ReactTags__tags react-tags-wrapper"
               >
+                <p
+                  className="sr-only"
+                  role="alert"
+                  style={
+                    Object {
+                      "border": 0,
+                      "clip": "rect(0 0 0 0)",
+                      "height": "1px",
+                      "margin": "-1px",
+                      "overflow": "hidden",
+                      "padding": 0,
+                      "position": "absolute",
+                      "width": "1px",
+                    }
+                  }
+                />
                 <div
                   className="ReactTags__selected"
                 >
@@ -1537,12 +157,18 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
                       }
                     }
                     index={0}
+                    key="0"
                     labelField="text"
                     moveTag={[Function]}
                     onDelete={[Function]}
                     onTagClicked={[Function]}
                     readOnly={false}
-                    tag="jupyter"
+                    tag={
+                      Object {
+                        "id": "jupyter",
+                        "text": "jupyter",
+                      }
+                    }
                   >
                     <DragSource(Tag)
                       allowDragDrop={true}
@@ -1565,7 +191,12 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
                       onDelete={[Function]}
                       onTagClicked={[Function]}
                       readOnly={false}
-                      tag="jupyter"
+                      tag={
+                        Object {
+                          "id": "jupyter",
+                          "text": "jupyter",
+                        }
+                      }
                     >
                       <Tag
                         allowDragDrop={true}
@@ -1590,112 +221,16 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
                         onDelete={[Function]}
                         onTagClicked={[Function]}
                         readOnly={false}
-                        tag="jupyter"
-                      >
-                        <span
-                          className="tag-wrapper ReactTags__tag"
-                          onClick={[Function]}
-                          onKeyDown={[Function]}
-                          onTouchStart={[Function]}
-                          style={
-                            Object {
-                              "cursor": "move",
-                              "opacity": 1,
-                            }
-                          }
-                        >
-                          <RemoveComponent
-                            className="ReactTags__remove"
-                            onClick={[Function]}
-                            readOnly={false}
-                            tag="jupyter"
-                          >
-                            <a
-                              className="ReactTags__remove"
-                              onClick={[Function]}
-                              onKeyDown={[Function]}
-                            >
-                              ×
-                            </a>
-                          </RemoveComponent>
-                        </span>
-                      </Tag>
-                    </DragSource(Tag)>
-                  </DropTarget(DragSource(Tag))>
-                  <DropTarget(DragSource(Tag))
-                    allowDragDrop={true}
-                    classNames={
-                      Object {
-                        "activeSuggestion": "ReactTags__activeSuggestion",
-                        "remove": "ReactTags__remove",
-                        "selected": "ReactTags__selected",
-                        "suggestions": "ReactTags__suggestions",
-                        "tag": "ReactTags__tag",
-                        "tagInput": "ReactTags__tagInput",
-                        "tagInputField": "ReactTags__tagInputField",
-                        "tags": "ReactTags__tags",
-                      }
-                    }
-                    index={1}
-                    labelField="text"
-                    moveTag={[Function]}
-                    onDelete={[Function]}
-                    onTagClicked={[Function]}
-                    readOnly={false}
-                    tag="node"
-                  >
-                    <DragSource(Tag)
-                      allowDragDrop={true}
-                      classNames={
-                        Object {
-                          "activeSuggestion": "ReactTags__activeSuggestion",
-                          "remove": "ReactTags__remove",
-                          "selected": "ReactTags__selected",
-                          "suggestions": "ReactTags__suggestions",
-                          "tag": "ReactTags__tag",
-                          "tagInput": "ReactTags__tagInput",
-                          "tagInputField": "ReactTags__tagInputField",
-                          "tags": "ReactTags__tags",
-                        }
-                      }
-                      connectDropTarget={[Function]}
-                      index={1}
-                      labelField="text"
-                      moveTag={[Function]}
-                      onDelete={[Function]}
-                      onTagClicked={[Function]}
-                      readOnly={false}
-                      tag="node"
-                    >
-                      <Tag
-                        allowDragDrop={true}
-                        classNames={
+                        tag={
                           Object {
-                            "activeSuggestion": "ReactTags__activeSuggestion",
-                            "remove": "ReactTags__remove",
-                            "selected": "ReactTags__selected",
-                            "suggestions": "ReactTags__suggestions",
-                            "tag": "ReactTags__tag",
-                            "tagInput": "ReactTags__tagInput",
-                            "tagInputField": "ReactTags__tagInputField",
-                            "tags": "ReactTags__tags",
+                            "id": "jupyter",
+                            "text": "jupyter",
                           }
                         }
-                        connectDragSource={[Function]}
-                        connectDropTarget={[Function]}
-                        index={1}
-                        isDragging={false}
-                        labelField="text"
-                        moveTag={[Function]}
-                        onDelete={[Function]}
-                        onTagClicked={[Function]}
-                        readOnly={false}
-                        tag="node"
                       >
                         <span
                           className="tag-wrapper ReactTags__tag"
                           onClick={[Function]}
-                          onKeyDown={[Function]}
                           onTouchStart={[Function]}
                           style={
                             Object {
@@ -1704,19 +239,28 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
                             }
                           }
                         >
+                          jupyter
                           <RemoveComponent
                             className="ReactTags__remove"
-                            onClick={[Function]}
+                            index={0}
+                            onKeyDown={[Function]}
+                            onRemove={[Function]}
                             readOnly={false}
-                            tag="node"
+                            tag={
+                              Object {
+                                "id": "jupyter",
+                                "text": "jupyter",
+                              }
+                            }
                           >
-                            <a
+                            <button
+                              aria-label="Tag at index 0 with value jupyter focussed. Press backspace to remove"
                               className="ReactTags__remove"
                               onClick={[Function]}
                               onKeyDown={[Function]}
                             >
                               ×
-                            </a>
+                            </button>
                           </RemoveComponent>
                         </span>
                       </Tag>
@@ -1759,42 +303,42 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
                       suggestions={
                         Array [
                           Object {
-                            "className": "code",
+                            "className": "Languages",
                             "id": "python",
                             "text": "python",
                           },
                           Object {
-                            "className": "code",
+                            "className": "Languages",
                             "id": "r",
                             "text": "r",
                           },
                           Object {
-                            "className": "code",
+                            "className": "Languages",
                             "id": "cobol",
                             "text": "cobol",
                           },
                           Object {
-                            "className": "notebook",
+                            "className": "CUDA Version",
                             "id": "jupyter",
                             "text": "jupyter",
                           },
                           Object {
-                            "className": "notebook",
+                            "className": "CUDA Version",
                             "id": "jupyterlab",
                             "text": "jupyterlab",
                           },
                           Object {
-                            "className": "fish",
+                            "className": "Development Environments",
                             "id": "salmon",
                             "text": "salmon",
                           },
                           Object {
-                            "className": "fish",
+                            "className": "Development Environments",
                             "id": "trout",
                             "text": "trout",
                           },
                           Object {
-                            "className": "fish",
+                            "className": "Development Environments",
                             "id": "pike",
                             "text": "pike",
                           },
@@ -1816,131 +360,649 @@ exports[`Storyshots Components/AdvancedSearch/AdvancedSearch Snapshots: Advanced
           className="AdvancedSearch__filters"
         >
           <Category
-            category="code"
+            category="Languages"
             expandedIndex={null}
             filterCategories={
               Object {
-                "code": Array [
-                  "python",
-                  "r",
-                  "cobol",
+                "CUDA Version": Array [
+                  "jupyter",
+                  "jupyterlab",
                 ],
-                "fish": Array [
+                "Development Environments": Array [
                   "salmon",
                   "trout",
                   "pike",
                 ],
-                "notebook": Array [
-                  "jupyter",
-                  "jupyterlab",
+                "Languages": Array [
+                  "python",
+                  "r",
+                  "cobol",
                 ],
               }
             }
             handleAddition={[Function]}
             index={0}
-            key="code"
+            key="Languages"
             setExpandedIndex={[Function]}
             toggleTooltip={[Function]}
             tooltipShown={false}
           >
             <div
               className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="code"
+              data-selenium-id="Categoryx"
+              key="Languages"
             >
               <div
                 className="AdvancedSearch__filter-section"
                 data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="code"
+                key="Languages"
                 onClick={[Function]}
+                role="presentation"
               >
-                code
+                Languages
               </div>
             </div>
           </Category>
           <Category
-            category="notebook"
+            category="CUDA Version"
             expandedIndex={null}
             filterCategories={
               Object {
-                "code": Array [
-                  "python",
-                  "r",
-                  "cobol",
+                "CUDA Version": Array [
+                  "jupyter",
+                  "jupyterlab",
                 ],
-                "fish": Array [
+                "Development Environments": Array [
                   "salmon",
                   "trout",
                   "pike",
                 ],
-                "notebook": Array [
-                  "jupyter",
-                  "jupyterlab",
+                "Languages": Array [
+                  "python",
+                  "r",
+                  "cobol",
                 ],
               }
             }
             handleAddition={[Function]}
             index={1}
-            key="notebook"
+            key="CUDA Version"
             setExpandedIndex={[Function]}
             toggleTooltip={[Function]}
             tooltipShown={false}
           >
             <div
               className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="notebook"
+              data-selenium-id="Categoryx"
+              key="CUDA Version"
             >
               <div
                 className="AdvancedSearch__filter-section"
                 data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="notebook"
+                key="CUDA Version"
                 onClick={[Function]}
+                role="presentation"
               >
-                notebook
+                CUDA Version
               </div>
+              <div
+                className="AdvancedSearch__info"
+                data-resetselectedfilter-id="AdvancedSearch__info"
+                onClick={[Function]}
+                role="presentation"
+              />
             </div>
           </Category>
           <Category
-            category="fish"
+            category="Development Environments"
             expandedIndex={null}
             filterCategories={
               Object {
-                "code": Array [
-                  "python",
-                  "r",
-                  "cobol",
+                "CUDA Version": Array [
+                  "jupyter",
+                  "jupyterlab",
                 ],
-                "fish": Array [
+                "Development Environments": Array [
                   "salmon",
                   "trout",
                   "pike",
                 ],
-                "notebook": Array [
-                  "jupyter",
-                  "jupyterlab",
+                "Languages": Array [
+                  "python",
+                  "r",
+                  "cobol",
                 ],
               }
             }
             handleAddition={[Function]}
             index={2}
-            key="fish"
+            key="Development Environments"
             setExpandedIndex={[Function]}
             toggleTooltip={[Function]}
             tooltipShown={false}
           >
             <div
               className="AdvancedSearch__filter-container"
-              data-selenium-id="Category"
-              key="fish"
+              data-selenium-id="Categoryx"
+              key="Development Environments"
             >
               <div
                 className="AdvancedSearch__filter-section"
                 data-resetselectedfilter-id="AdvancedSearch__filter-section"
-                key="fish"
+                key="Development Environments"
                 onClick={[Function]}
+                role="presentation"
               >
-                fish
+                Development Environments
+              </div>
+            </div>
+          </Category>
+        </div>
+      </div>
+    </AdvancedSearch>
+  </AdvancedSearchWrapped>
+</DragDropContext(AdvancedSearchWrapped)>
+`;
+
+exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
+<DragDropContext(AdvancedSearchWrapped)
+  customStyle="packages"
+>
+  <AdvancedSearchWrapped
+    customStyle="packages"
+  >
+    <AdvancedSearch
+      autoHide={false}
+      customStyle="packages"
+      filterCategories={
+        Object {
+          "CUDA Version": Array [
+            "jupyter",
+            "jupyterlab",
+          ],
+          "Development Environments": Array [
+            "salmon",
+            "trout",
+            "pike",
+          ],
+          "Languages": Array [
+            "python",
+            "r",
+            "cobol",
+          ],
+        }
+      }
+      setTags={[Function]}
+      showButton={true}
+      tags={
+        Array [
+          Object {
+            "id": "jupyter",
+            "text": "jupyter",
+          },
+        ]
+      }
+      withoutContext={true}
+    >
+      <div
+        className="AdvancedSearch AdvancedSearch--packages AdvancedSearch--tagsExist"
+        data-selenium-id="AdvancedSearchx"
+      >
+        <div
+          className="flex"
+        >
+          <div
+            className="flex-1"
+          >
+            <ReactTags
+              allowAdditionFromPaste={true}
+              allowDeleteFromEmptyInput={true}
+              allowDragDrop={true}
+              allowUnique={true}
+              autocomplete={true}
+              autofocus={false}
+              data-resetselectedfilter-id="AdvancedSearch"
+              delimiters={
+                Array [
+                  13,
+                  9,
+                ]
+              }
+              handleAddition={[Function]}
+              handleDelete={[Function]}
+              handleInputFocus={[Function]}
+              inline={true}
+              inputFieldPosition="inline"
+              labelField="text"
+              placeholder="Search by keyword, tags or filters"
+              readOnly={false}
+              suggestions={
+                Array [
+                  Object {
+                    "className": "Languages",
+                    "id": "python",
+                    "text": "python",
+                  },
+                  Object {
+                    "className": "Languages",
+                    "id": "r",
+                    "text": "r",
+                  },
+                  Object {
+                    "className": "Languages",
+                    "id": "cobol",
+                    "text": "cobol",
+                  },
+                  Object {
+                    "className": "CUDA Version",
+                    "id": "jupyter",
+                    "text": "jupyter",
+                  },
+                  Object {
+                    "className": "CUDA Version",
+                    "id": "jupyterlab",
+                    "text": "jupyterlab",
+                  },
+                  Object {
+                    "className": "Development Environments",
+                    "id": "salmon",
+                    "text": "salmon",
+                  },
+                  Object {
+                    "className": "Development Environments",
+                    "id": "trout",
+                    "text": "trout",
+                  },
+                  Object {
+                    "className": "Development Environments",
+                    "id": "pike",
+                    "text": "pike",
+                  },
+                ]
+              }
+              tags={
+                Array [
+                  Object {
+                    "id": "jupyter",
+                    "text": "jupyter",
+                  },
+                ]
+              }
+            >
+              <div
+                className="ReactTags__tags react-tags-wrapper"
+              >
+                <p
+                  className="sr-only"
+                  role="alert"
+                  style={
+                    Object {
+                      "border": 0,
+                      "clip": "rect(0 0 0 0)",
+                      "height": "1px",
+                      "margin": "-1px",
+                      "overflow": "hidden",
+                      "padding": 0,
+                      "position": "absolute",
+                      "width": "1px",
+                    }
+                  }
+                />
+                <div
+                  className="ReactTags__selected"
+                >
+                  <DropTarget(DragSource(Tag))
+                    allowDragDrop={true}
+                    classNames={
+                      Object {
+                        "activeSuggestion": "ReactTags__activeSuggestion",
+                        "remove": "ReactTags__remove",
+                        "selected": "ReactTags__selected",
+                        "suggestions": "ReactTags__suggestions",
+                        "tag": "ReactTags__tag",
+                        "tagInput": "ReactTags__tagInput",
+                        "tagInputField": "ReactTags__tagInputField",
+                        "tags": "ReactTags__tags",
+                      }
+                    }
+                    index={0}
+                    key="0"
+                    labelField="text"
+                    moveTag={[Function]}
+                    onDelete={[Function]}
+                    onTagClicked={[Function]}
+                    readOnly={false}
+                    tag={
+                      Object {
+                        "id": "jupyter",
+                        "text": "jupyter",
+                      }
+                    }
+                  >
+                    <DragSource(Tag)
+                      allowDragDrop={true}
+                      classNames={
+                        Object {
+                          "activeSuggestion": "ReactTags__activeSuggestion",
+                          "remove": "ReactTags__remove",
+                          "selected": "ReactTags__selected",
+                          "suggestions": "ReactTags__suggestions",
+                          "tag": "ReactTags__tag",
+                          "tagInput": "ReactTags__tagInput",
+                          "tagInputField": "ReactTags__tagInputField",
+                          "tags": "ReactTags__tags",
+                        }
+                      }
+                      connectDropTarget={[Function]}
+                      index={0}
+                      labelField="text"
+                      moveTag={[Function]}
+                      onDelete={[Function]}
+                      onTagClicked={[Function]}
+                      readOnly={false}
+                      tag={
+                        Object {
+                          "id": "jupyter",
+                          "text": "jupyter",
+                        }
+                      }
+                    >
+                      <Tag
+                        allowDragDrop={true}
+                        classNames={
+                          Object {
+                            "activeSuggestion": "ReactTags__activeSuggestion",
+                            "remove": "ReactTags__remove",
+                            "selected": "ReactTags__selected",
+                            "suggestions": "ReactTags__suggestions",
+                            "tag": "ReactTags__tag",
+                            "tagInput": "ReactTags__tagInput",
+                            "tagInputField": "ReactTags__tagInputField",
+                            "tags": "ReactTags__tags",
+                          }
+                        }
+                        connectDragSource={[Function]}
+                        connectDropTarget={[Function]}
+                        index={0}
+                        isDragging={false}
+                        labelField="text"
+                        moveTag={[Function]}
+                        onDelete={[Function]}
+                        onTagClicked={[Function]}
+                        readOnly={false}
+                        tag={
+                          Object {
+                            "id": "jupyter",
+                            "text": "jupyter",
+                          }
+                        }
+                      >
+                        <span
+                          className="tag-wrapper ReactTags__tag"
+                          onClick={[Function]}
+                          onTouchStart={[Function]}
+                          style={
+                            Object {
+                              "cursor": "move",
+                              "opacity": 1,
+                            }
+                          }
+                        >
+                          jupyter
+                          <RemoveComponent
+                            className="ReactTags__remove"
+                            index={0}
+                            onKeyDown={[Function]}
+                            onRemove={[Function]}
+                            readOnly={false}
+                            tag={
+                              Object {
+                                "id": "jupyter",
+                                "text": "jupyter",
+                              }
+                            }
+                          >
+                            <button
+                              aria-label="Tag at index 0 with value jupyter focussed. Press backspace to remove"
+                              className="ReactTags__remove"
+                              onClick={[Function]}
+                              onKeyDown={[Function]}
+                            >
+                              ×
+                            </button>
+                          </RemoveComponent>
+                        </span>
+                      </Tag>
+                    </DragSource(Tag)>
+                  </DropTarget(DragSource(Tag))>
+                  <div
+                    className="ReactTags__tagInput"
+                  >
+                    <input
+                      aria-label="Search by keyword, tags or filters"
+                      className="ReactTags__tagInputField"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      onPaste={[Function]}
+                      placeholder="Search by keyword, tags or filters"
+                      type="text"
+                    />
+                    <Suggestions
+                      classNames={
+                        Object {
+                          "activeSuggestion": "ReactTags__activeSuggestion",
+                          "remove": "ReactTags__remove",
+                          "selected": "ReactTags__selected",
+                          "suggestions": "ReactTags__suggestions",
+                          "tag": "ReactTags__tag",
+                          "tagInput": "ReactTags__tagInput",
+                          "tagInputField": "ReactTags__tagInputField",
+                          "tags": "ReactTags__tags",
+                        }
+                      }
+                      handleClick={[Function]}
+                      handleHover={[Function]}
+                      isFocused={false}
+                      labelField="text"
+                      minQueryLength={2}
+                      query=""
+                      selectedIndex={-1}
+                      suggestions={
+                        Array [
+                          Object {
+                            "className": "Languages",
+                            "id": "python",
+                            "text": "python",
+                          },
+                          Object {
+                            "className": "Languages",
+                            "id": "r",
+                            "text": "r",
+                          },
+                          Object {
+                            "className": "Languages",
+                            "id": "cobol",
+                            "text": "cobol",
+                          },
+                          Object {
+                            "className": "CUDA Version",
+                            "id": "jupyter",
+                            "text": "jupyter",
+                          },
+                          Object {
+                            "className": "CUDA Version",
+                            "id": "jupyterlab",
+                            "text": "jupyterlab",
+                          },
+                          Object {
+                            "className": "Development Environments",
+                            "id": "salmon",
+                            "text": "salmon",
+                          },
+                          Object {
+                            "className": "Development Environments",
+                            "id": "trout",
+                            "text": "trout",
+                          },
+                          Object {
+                            "className": "Development Environments",
+                            "id": "pike",
+                            "text": "pike",
+                          },
+                        ]
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </ReactTags>
+          </div>
+          <button
+            className="Btn Btn__AdvancedSearch"
+            onClick={[Function]}
+            type="button"
+          />
+        </div>
+        <div
+          className="AdvancedSearch__filters"
+        >
+          <Category
+            category="Languages"
+            expandedIndex={null}
+            filterCategories={
+              Object {
+                "CUDA Version": Array [
+                  "jupyter",
+                  "jupyterlab",
+                ],
+                "Development Environments": Array [
+                  "salmon",
+                  "trout",
+                  "pike",
+                ],
+                "Languages": Array [
+                  "python",
+                  "r",
+                  "cobol",
+                ],
+              }
+            }
+            handleAddition={[Function]}
+            index={0}
+            key="Languages"
+            setExpandedIndex={[Function]}
+            toggleTooltip={[Function]}
+            tooltipShown={false}
+          >
+            <div
+              className="AdvancedSearch__filter-container"
+              data-selenium-id="Categoryx"
+              key="Languages"
+            >
+              <div
+                className="AdvancedSearch__filter-section"
+                data-resetselectedfilter-id="AdvancedSearch__filter-section"
+                key="Languages"
+                onClick={[Function]}
+                role="presentation"
+              >
+                Languages
+              </div>
+            </div>
+          </Category>
+          <Category
+            category="CUDA Version"
+            expandedIndex={null}
+            filterCategories={
+              Object {
+                "CUDA Version": Array [
+                  "jupyter",
+                  "jupyterlab",
+                ],
+                "Development Environments": Array [
+                  "salmon",
+                  "trout",
+                  "pike",
+                ],
+                "Languages": Array [
+                  "python",
+                  "r",
+                  "cobol",
+                ],
+              }
+            }
+            handleAddition={[Function]}
+            index={1}
+            key="CUDA Version"
+            setExpandedIndex={[Function]}
+            toggleTooltip={[Function]}
+            tooltipShown={false}
+          >
+            <div
+              className="AdvancedSearch__filter-container"
+              data-selenium-id="Categoryx"
+              key="CUDA Version"
+            >
+              <div
+                className="AdvancedSearch__filter-section"
+                data-resetselectedfilter-id="AdvancedSearch__filter-section"
+                key="CUDA Version"
+                onClick={[Function]}
+                role="presentation"
+              >
+                CUDA Version
+              </div>
+              <div
+                className="AdvancedSearch__info"
+                data-resetselectedfilter-id="AdvancedSearch__info"
+                onClick={[Function]}
+                role="presentation"
+              />
+            </div>
+          </Category>
+          <Category
+            category="Development Environments"
+            expandedIndex={null}
+            filterCategories={
+              Object {
+                "CUDA Version": Array [
+                  "jupyter",
+                  "jupyterlab",
+                ],
+                "Development Environments": Array [
+                  "salmon",
+                  "trout",
+                  "pike",
+                ],
+                "Languages": Array [
+                  "python",
+                  "r",
+                  "cobol",
+                ],
+              }
+            }
+            handleAddition={[Function]}
+            index={2}
+            key="Development Environments"
+            setExpandedIndex={[Function]}
+            toggleTooltip={[Function]}
+            tooltipShown={false}
+          >
+            <div
+              className="AdvancedSearch__filter-container"
+              data-selenium-id="Categoryx"
+              key="Development Environments"
+            >
+              <div
+                className="AdvancedSearch__filter-section"
+                data-resetselectedfilter-id="AdvancedSearch__filter-section"
+                key="Development Environments"
+                onClick={[Function]}
+                role="presentation"
+              >
+                Development Environments
               </div>
             </div>
           </Category>

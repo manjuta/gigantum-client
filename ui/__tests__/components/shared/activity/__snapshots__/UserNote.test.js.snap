@@ -31,6 +31,24 @@ exports[`UserNote Renders a snapshot 1`] = `
   <div
     className="ReactTags__tags react-tags-wrapper"
   >
+    <p
+      className="sr-only"
+      role="alert"
+      style={
+        Object {
+          "border": 0,
+          "clip": "rect(0 0 0 0)",
+          "height": "1px",
+          "margin": "-1px",
+          "overflow": "hidden",
+          "padding": 0,
+          "position": "absolute",
+          "width": "1px",
+        }
+      }
+    >
+      
+    </p>
     <div
       className="ReactTags__selected"
     >
@@ -38,7 +56,7 @@ exports[`UserNote Renders a snapshot 1`] = `
         className="ReactTags__tagInput"
       >
         <input
-          aria-label="Add new tag"
+          aria-label="Press enter to add new tag"
           className="ReactTags__tagInputField"
           id="TagsInput"
           onBlur={[Function]}
@@ -46,7 +64,7 @@ exports[`UserNote Renders a snapshot 1`] = `
           onFocus={[Function]}
           onKeyDown={[Function]}
           onPaste={[Function]}
-          placeholder="Add new tag"
+          placeholder="Press enter to add new tag"
           type="text"
         />
       </div>

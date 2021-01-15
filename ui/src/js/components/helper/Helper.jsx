@@ -1,4 +1,6 @@
-import React, { Component, Fragment } from 'react';
+// @flow
+// vendor
+import React, { Component } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 // store
@@ -10,8 +12,19 @@ import { setHelperVisible } from 'JS/redux/actions/footer';
 // assets
 import './Helper.scss';
 
+type Props = {
+  auth: {
+    isAuthenticated: Function,
+  },
+  footerVisible: boolean,
+  isVisible: boolean,
+  setResizeHelper: Function,
+  setHelperVisibility: Function,
+  uploadOpen: boolean,
+}
 
-class Helper extends Component {
+
+class Helper extends Component<Props> {
   state = {
     helperMenuOpen: false,
     showPopup: false,
@@ -22,10 +35,10 @@ class Helper extends Component {
     * subscribe to store to update state
   */
   componentDidMount() {
-    const { props } = this;
+    const { auth } = this.props;
     window.addEventListener('resize', this._resize);
 
-    props.auth.isAuthenticated().then((response) => {
+    auth.isAuthenticated().then((response) => {
       const guideShown = localStorage.getItem('guideShown');
       if (!guideShown && response) {
         this.setState({ showPopup: true });
@@ -41,8 +54,8 @@ class Helper extends Component {
     * update store
   */
   _toggleIsVisible = () => {
-    const { props } = this;
-    props.setHelperVisibility(!props.isVisible);
+    const { isVisible } = this.props;
+    this.props.setHelperVisibility(!isVisible);
   }
 
   /**
@@ -50,9 +63,9 @@ class Helper extends Component {
     * toggles menu view
   */
   _toggleMenuView = () => {
-    const { state } = this;
-    setHelperVisible(!state.helperMenuOpen);
-    this.setState({ helperMenuOpen: !state.helperMenuOpen });
+    const { helperMenuOpen } = this.state;
+    setHelperVisible(!helperMenuOpen);
+    this.setState({ helperMenuOpen: !helperMenuOpen });
   }
 
   /**
@@ -60,29 +73,35 @@ class Helper extends Component {
     * update store to risize component
   */
   _resize = () => {
-    const { props } = this;
-    props.setResizeHelper();
+    this.props.setResizeHelper();
   }
 
   render() {
-    const { props, state } = this;
+    const {
+      helperMenuOpen,
+      showPopup,
+    } = this.state;
+    const {
+      footerVisible,
+      uploadOpen,
+    } = this.props;
     // declare css here
     const menuCSS = classNames({
-      Helper__menu: state.helperMenuOpen,
-      hidden: !state.helperMenuOpen,
-      'Helper__men--footer-open': props.footerVisible,
+      Helper__menu: helperMenuOpen,
+      hidden: !helperMenuOpen,
+      'Helper__men--footer-open': footerVisible,
     });
     const helperButtonCSS = classNames({
       Helper__button: true,
-      'Helper__button--open': state.helperMenuOpen,
-      'Helper__button--bottom': props.uploadOpen && !state.helperMenuOpen,
+      'Helper__button--open': helperMenuOpen,
+      'Helper__button--bottom': uploadOpen && !helperMenuOpen,
     });
 
     return (
       <div className="Helper">
-        { state.showPopup
+        { showPopup
         && (
-          <Fragment>
+          <>
             <div className="Helper__prompt">
               <div>
                 <p>Use the guide to view tips on how to use Gigantum. The guide can be toggled in the Help menu below.</p>
@@ -99,39 +118,45 @@ class Helper extends Component {
               </div>
             </div>
             <div className="Helper__prompt-pointer" />
-          </Fragment>
-        )
-        }
+          </>
+        )}
 
         <div
           className={helperButtonCSS}
           onClick={() => this._toggleMenuView()}
+          role="presentation"
         />
 
         <div className={menuCSS}>
-          <div
+          <a
             className="Helper__menu-feedback"
-            onClick={() => window.open('https://feedback.gigantum.com')}
+            href="https://feedback.gigantum.com"
+            rel="noreferrer"
+            target="_blank"
           >
             <h5>Feedback</h5>
             <div className="Helper__feedback-button" />
-          </div>
-          <div
+          </a>
+          <a
             className="Helper__menu-discussion"
-            onClick={() => window.open('https://spectrum.chat/gigantum')}
+            href="https://spectrum.chat/gigantum"
+            rel="noreferrer"
+            target="_blank"
           >
             <h5>Discuss</h5>
             <div
               className="Helper__discussion-button"
             />
-          </div>
-          <div
+          </a>
+          <a
             className="Helper__menu-docs"
-            onClick={() => window.open('https://docs.gigantum.com/docs')}
+            href="https://docs.gigantum.com/docs"
+            rel="noreferrer"
+            target="_blank"
           >
             <h5>Docs</h5>
             <div className="Helper__docs-button" />
-          </div>
+          </a>
 
           <div className="Helper__menu-guide">
             <h5>Guide</h5>

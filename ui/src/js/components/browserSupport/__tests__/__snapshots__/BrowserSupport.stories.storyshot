@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/BrowserSupport BrowserSupport Packages 1`] = `
+<BrowserSupport>
+  <div
+    className="BrowserSupport"
+    data-selenium-id="BrowserSupportx"
+  >
+    <img
+      alt="Gigantum"
+      className="BrowserSupport__img"
+      src="gigantum-client.svg"
+    />
+    <p>
+      Gigantum currently only supports Chrome, Safari and Firefox
+    </p>
+    <p>
+      We intend on supporting all major browsers in the near future
+    </p>
+  </div>
+</BrowserSupport>
+`;

@@ -27,7 +27,6 @@ class Category extends PureComponent<Props> {
       toggleTooltip,
       tooltipShown,
     } = this.props;
-
     const expandedIndexToSet = (expandedIndex === index)
       ? null
       : index;
@@ -44,9 +43,10 @@ class Category extends PureComponent<Props> {
       >
         <div
           className={filterSecionCSS}
-          onClick={() => setExpandedIndex(expandedIndexToSet) }
-          key={category}
           data-resetselectedfilter-id="AdvancedSearch__filter-section"
+          key={category}
+          onClick={() => setExpandedIndex(expandedIndexToSet)}
+          role="presentation"
         >
           {category}
         </div>
@@ -57,6 +57,7 @@ class Category extends PureComponent<Props> {
             className="AdvancedSearch__info"
             data-resetselectedfilter-id="AdvancedSearch__info"
             onClick={() => toggleTooltip(!tooltipShown)}
+            role="presentation"
           >
             { tooltipShown
               && (
@@ -70,11 +71,9 @@ class Category extends PureComponent<Props> {
                   Learn more.
                 </a>
               </div>
-              )
-            }
+              )}
           </div>
-          )
-        }
+          )}
 
         { (expandedIndex === index)
           && (
@@ -85,14 +84,14 @@ class Category extends PureComponent<Props> {
                     key={filter}
                     className={`AdvancedSearch__li ${category}`}
                     onClick={() => handleAddition({ id: filter, text: filter }, category)}
+                    role="presentation"
                   >
                     {filter}
                   </li>
                 ))
                 }
             </ul>
-          )
-         }
+          )}
       </div>
     );
   }

@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { WithContext, WithOutContext } from 'react-tag-input';
 // component
-import Category from './Category';
+import Category from './category/Category';
 // assets
 import './AdvancedSearch.scss';
 import './AdvancedSearchOverrides.scss';
@@ -16,7 +16,7 @@ type Props = {
   setTags: Function,
   showButton: boolean,
   tags: Array,
-  withoutContext: Function,
+  withoutContext: boolean,
 }
 
 /**
@@ -202,8 +202,7 @@ class AdvancedSearch extends Component<Props> {
                 onClick={() => this._addTag()}
                 type="button"
               />
-            )
-          }
+            )}
         </div>
         <div className={filterCSS}>
           { Object.keys(filterCategories).map((category, index) => (

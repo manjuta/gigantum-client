@@ -3,7 +3,7 @@
 import React from 'react';
 import classNames from 'classnames';
 // components
-import Loader from 'Components/loader/Loader'
+import Loader from 'Components/loader/Loader';
 // assets
 import gigantumLogo from 'Images/logos/gigantum-client.svg';
 import exclamationSVG from 'Images/icons/exclamation-orange.svg';
@@ -41,16 +41,16 @@ const Interstitial = (props: Props) => {
             />
             <span>{messageType}</span>
           </h2>
-        )
-      }
+        )}
       <main className="App__loader relative">
         { (messageType === 'loader')
           && (
-            <div className="Interstitial__loader relative">
+            <div
+              className="Interstitial__loader relative"
+            >
               <Loader nested />
             </div>
-          )
-        }
+          )}
         <p className={messageCSS}>{message}</p>
       </main>
     </div>

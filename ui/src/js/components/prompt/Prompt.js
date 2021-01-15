@@ -4,81 +4,13 @@ import uuidv4 from 'uuid/v4';
 import classNames from 'classnames';
 // utils
 import getApiURL from 'JS/utils/apiUrl';
+// components
+import Cloud from './cloud/Cloud';
+import Localhost from './localhost/Localhost';
 // assets
 import './Prompt.scss';
 
 let updateAvailable = false;
-
-const Localhost = () => (
-  <div>
-    <div className="Prompt__header">
-      <p>Cannot connect to Gigantum Client</p>
-    </div>
-    <p>
-      Please verify that that the Client is running by clicking on the Gigantum logo in your system tray to open Gigantum Desktop.
-    </p>
-    <p>
-      If the problem persists, try the steps outlined
-      {' '}
-      <a
-        href="https://docs.gigantum.com/docs/client-interface-fails-to-load"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        here
-      </a>
-      {' '}
-      , contact
-      {' '}
-      <a
-        href="mailto:support@gigantum.com"
-      >
-        support@gigantum.com
-      </a>
-      , or visit our
-      {' '}
-      <a
-        href="https://spectrum.chat/gigantum/"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        forum
-      </a>
-      {' '}
-      and post a question.
-    </p>
-  </div>
-);
-
-const Cloud = () => (
-  <div>
-    <div className="Prompt__header">
-      <p>Cannot connect to your Gigantum Hub Client</p>
-    </div>
-    <p>
-      Please verify that you are connected to the internet and have a running Client.
-    </p>
-    <p>
-        If the problem persists, contact
-      {' '}
-      <a
-        href="mailto:support@gigantum.com"
-      >
-        support@gigantum.com
-      </a>
-      , or visit our
-      {' '}
-      <a
-        href="https://spectrum.chat/gigantum/"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        forum
-      </a>
-      .
-    </p>
-  </div>
-);
 
 const pingServer = () => {
   const apiURL = getApiURL('ping');
@@ -87,7 +19,10 @@ const pingServer = () => {
   return fetch(apiURL, {
     method: 'GET',
   }).then((response) => {
-    if (response.status === 200 && (response.headers.get('content-type') === 'application/json')) {
+    if (
+      (response.status === 200)
+      && ((response.headers.get('content-type') === 'application/json'))
+    ) {
       if (!updateAvailable) {
         response.json().then((res) => {
           if (!currentVersion) {
@@ -104,7 +39,7 @@ const pingServer = () => {
   }).catch(() => false);
 };
 
-export default class Prompt extends Component {
+class Prompt extends Component {
   constructor(props) {
     super(props);
 
@@ -161,14 +96,18 @@ export default class Prompt extends Component {
 
 
   render() {
-    const { state } = this;
+    const {
+      failureCount,
+      promptState,
+      updateAvailable,
+    } = this.state;
     // variables here
-    const failedEightTimesOrMore = (state.failureCount >= 8);
-    const lessThanEight = (state.failureCount < 8);
+    const failedEightTimesOrMore = (failureCount >= 8);
+    const lessThanEight = (failureCount < 8);
     // decalre css here
     const promptInfoCSS = classNames({
       Prompt__info: true,
-      hidden: state.promptState,
+      hidden: promptState,
     });
     const propmptLogoCSS = classNames({
       Prompt__logo: true,
@@ -183,8 +122,8 @@ export default class Prompt extends Component {
       hidden: !failedEightTimesOrMore,
     });
     const updateAvailableCSS = classNames({
-      Prompt__refresh: state.updateAvailable,
-      hidden: !state.updateAvailable,
+      Prompt__refresh: updateAvailable,
+      hidden: !updateAvailable,
     });
 
     return (
@@ -222,3 +161,9 @@ export default class Prompt extends Component {
     );
   }
 }
+
+export {
+  pingServer,
+};
+
+export default Prompt;

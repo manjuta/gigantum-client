@@ -1,0 +1,248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/PopupBlocked PopupBlocked 1`] = `
+<PopupBlocked
+  attemptRelaunch={[Function]}
+  devTool="jupyter"
+  togglePopupModal={[Function]}
+>
+  <Modal
+    handleClose={[Function]}
+    size="large-full"
+  >
+    <Portal
+      containerInfo={
+        <div
+          id="modal"
+        >
+          <div
+            class="Modal"
+            data-selenium-id="Modalx"
+          >
+            <div
+              class="Modal__cover"
+              role="presentation"
+            />
+            <div
+              class="Modal__content Modal__content--large-full"
+              style="overflow: hidden;"
+            >
+              <button
+                class="Btn Btn--flat Modal__close padding--small "
+                type="button"
+              />
+              <div
+                class="Modal__container"
+              >
+                <div
+                  class="Modal__sub-container"
+                >
+                  <div
+                    class="PopupBlocked flex flex--column align-items--center"
+                    data-selenium-id="PopupBlockedx"
+                  >
+                    <div
+                      class="PopupBlocked__header"
+                    >
+                      <h2
+                        class="PopupBlocked__header-text"
+                      >
+                        Pop-up Blocked
+                      </h2>
+                    </div>
+                    <div
+                      class="PopupBlocked__message"
+                    >
+                      <p>
+                        Gigantum opens
+                         jupyter 
+                        in a new tab, which was blocked by your browser.
+                      </p>
+                      <p>
+                        Please modify your browser settings to allow pop-ups, as shown below.
+                      </p>
+                    </div>
+                    <img
+                      alt="browser"
+                      src="Chrome-popup.png"
+                    />
+                    <div
+                      class="PopupBlocked__buttonContainer flex justify--right"
+                    >
+                      <button
+                        class="Btn Btn--flat"
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        class="Btn Btn--inverted Btn--popup-blocked"
+                        type="button"
+                      >
+                        Launch Again
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="Modal"
+            data-selenium-id="Modalx"
+          >
+            <div
+              class="Modal__cover"
+              role="presentation"
+            />
+            <div
+              class="Modal__content Modal__content--large-full"
+              style="overflow: hidden;"
+            >
+              <button
+                class="Btn Btn--flat Modal__close padding--small "
+                type="button"
+              />
+              <div
+                class="Modal__container"
+              >
+                <div
+                  class="Modal__sub-container"
+                >
+                  <div
+                    class="PopupBlocked flex flex--column align-items--center"
+                    data-selenium-id="PopupBlockedx"
+                  >
+                    <div
+                      class="PopupBlocked__header"
+                    >
+                      <h2
+                        class="PopupBlocked__header-text"
+                      >
+                        Pop-up Blocked
+                      </h2>
+                    </div>
+                    <div
+                      class="PopupBlocked__message"
+                    >
+                      <p>
+                        Gigantum opens
+                         jupyter 
+                        in a new tab, which was blocked by your browser.
+                      </p>
+                      <p>
+                        Please modify your browser settings to allow pop-ups, as shown below.
+                      </p>
+                    </div>
+                    <img
+                      alt="browser"
+                      src="Chrome-popup.png"
+                    />
+                    <div
+                      class="PopupBlocked__buttonContainer flex justify--right"
+                    >
+                      <button
+                        class="Btn Btn--flat"
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        class="Btn Btn--inverted Btn--popup-blocked"
+                        type="button"
+                      >
+                        Launch Again
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <div
+        className="Modal"
+        data-selenium-id="Modalx"
+      >
+        <div
+          className="Modal__cover"
+          onClick={[Function]}
+          role="presentation"
+        />
+        <div
+          className="Modal__content Modal__content--large-full"
+          style={
+            Object {
+              "overflow": "hidden",
+            }
+          }
+        >
+          <button
+            className="Btn Btn--flat Modal__close padding--small "
+            onClick={[Function]}
+            type="button"
+          />
+          <div
+            className="Modal__container"
+          >
+            <div
+              className="Modal__sub-container"
+            >
+              <div
+                className="PopupBlocked flex flex--column align-items--center"
+                data-selenium-id="PopupBlockedx"
+              >
+                <div
+                  className="PopupBlocked__header"
+                >
+                  <h2
+                    className="PopupBlocked__header-text"
+                  >
+                    Pop-up Blocked
+                  </h2>
+                </div>
+                <div
+                  className="PopupBlocked__message"
+                >
+                  <p>
+                    Gigantum opens
+                     jupyter 
+                    in a new tab, which was blocked by your browser.
+                  </p>
+                  <p>
+                    Please modify your browser settings to allow pop-ups, as shown below.
+                  </p>
+                </div>
+                <img
+                  alt="browser"
+                  src="Chrome-popup.png"
+                />
+                <div
+                  className="PopupBlocked__buttonContainer flex justify--right"
+                >
+                  <button
+                    className="Btn Btn--flat"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="Btn Btn--inverted Btn--popup-blocked"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    Launch Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Portal>
+  </Modal>
+</PopupBlocked>
+`;

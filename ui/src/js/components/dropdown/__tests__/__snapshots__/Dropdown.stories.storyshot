@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/Dropdown Category Default 1`] = `
+<Dropdown
+  customStyle="open"
+  itemAction={[Function]}
+  label="Dropdowm title"
+  listAction={[Function]}
+  listItems={
+    Array [
+      "item 1",
+      "item 2",
+      "item 3",
+    ]
+  }
+  visibility={true}
+>
+  <div
+    className="Dropdown relative Dropdown--open"
+    data-selenium-id="Dropdownx"
+    onClick={[Function]}
+    role="presentation"
+  >
+    Dropdowm title
+    <ul
+      className="Dropdown__menu"
+    >
+      <li
+        className="Dropdown__item"
+        key="item 1"
+        onClick={[Function]}
+        role="presentation"
+      >
+        item 1
+      </li>
+      <li
+        className="Dropdown__item"
+        key="item 2"
+        onClick={[Function]}
+        role="presentation"
+      >
+        item 2
+      </li>
+      <li
+        className="Dropdown__item"
+        key="item 3"
+        onClick={[Function]}
+        role="presentation"
+      >
+        item 3
+      </li>
+    </ul>
+  </div>
+</Dropdown>
+`;

@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/AdvancedSearch/Category Category Default 1`] = `
+<Category
+  category="CUDA Version"
+  expandedIndex={1}
+  filterCategories={
+    Object {
+      "CUDA Version": Array [
+        "jupyter",
+        "jupyterlab",
+      ],
+      "Development Environments": Array [
+        "salmon",
+        "trout",
+        "pike",
+      ],
+      "Languages": Array [
+        "python",
+        "r",
+        "cobol",
+      ],
+    }
+  }
+  handleAddition={[Function]}
+  index={1}
+  setExpandedIndex={[Function]}
+  toggleTooltip={[Function]}
+  tooltipShown={true}
+>
+  <div
+    className="AdvancedSearch__filter-container"
+    data-selenium-id="Categoryx"
+    key="CUDA Version"
+  >
+    <div
+      className="AdvancedSearch__filter-section selected"
+      data-resetselectedfilter-id="AdvancedSearch__filter-section"
+      key="CUDA Version"
+      onClick={[Function]}
+      role="presentation"
+    >
+      CUDA Version
+    </div>
+    <div
+      className="AdvancedSearch__info"
+      data-resetselectedfilter-id="AdvancedSearch__info"
+      onClick={[Function]}
+      role="presentation"
+    >
+      <div
+        className="InfoTooltip"
+      >
+        CUDA enabled bases will automatically use the NVIDIA Container Runtime when NVIDIA drivers on the host are compatible with the CUDA version installed in the Base.  
+        <a
+          href="https://docs.gigantum.com/docs/using-cuda-with-nvidia-gpus"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Learn more.
+        </a>
+      </div>
+    </div>
+    <ul
+      className="AdvancedSearch__filter-list"
+    >
+      <li
+        className="AdvancedSearch__li CUDA Version"
+        key="jupyter"
+        onClick={[Function]}
+        role="presentation"
+      >
+        jupyter
+      </li>
+      <li
+        className="AdvancedSearch__li CUDA Version"
+        key="jupyterlab"
+        onClick={[Function]}
+        role="presentation"
+      >
+        jupyterlab
+      </li>
+    </ul>
+  </div>
+</Category>
+`;

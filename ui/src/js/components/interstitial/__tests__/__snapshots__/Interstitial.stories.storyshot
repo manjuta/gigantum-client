@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Components/Interstitial Interstitial Error 1`] = `
+<Interstitial
+  message="Error: Cannot read error."
+  messageType="error"
+>
+  <div
+    className="App flex flex--column align-items--center relative"
+    data-selenium-id="Interstitialx"
+  >
+    <header
+      className="App__header"
+    >
+      <img
+        alt="Gigantum"
+        src="gigantum-client.svg"
+        width="600"
+      />
+    </header>
+    <h2
+      className="Interstitial--type flex"
+    >
+      <img
+        alt="Error"
+        className="Interstitial--exclamation"
+        src="exclamation-orange.svg"
+      />
+      <span>
+        error
+      </span>
+    </h2>
+    <main
+      className="App__loader relative"
+    >
+      <p
+        className="Interstitial__message"
+      >
+        Error: Cannot read error.
+      </p>
+    </main>
+  </div>
+</Interstitial>
+`;
+
+exports[`Storyshots Components/Interstitial Interstitial Loader 1`] = `
+<Interstitial
+  message="Error: Cannot read error."
+  messageType="loader"
+>
+  <div
+    className="App flex flex--column align-items--center relative"
+    data-selenium-id="Interstitialx"
+  >
+    <header
+      className="App__header"
+    >
+      <img
+        alt="Gigantum"
+        src="gigantum-client.svg"
+        width="600"
+      />
+    </header>
+    <main
+      className="App__loader relative"
+    >
+      <div
+        className="Interstitial__loader relative"
+      >
+        <Loader
+          nested={true}
+        >
+          <div
+            className="Loader--nested"
+            data-selenium-id="Loader"
+          />
+        </Loader>
+      </div>
+      <p
+        className=""
+      >
+        Error: Cannot read error.
+      </p>
+    </main>
+  </div>
+</Interstitial>
+`;
