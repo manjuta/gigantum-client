@@ -6,7 +6,7 @@ $dropBoxWidth: 250px;
   flex-wrap: nowrap;
   margin: 0 0 0 10px;
   @include flex(space-around, row);
- 
+
   &__action {
 
     margin: 10px;
@@ -40,7 +40,8 @@ $dropBoxWidth: 250px;
     border: 1px solid $primary;
     padding: 0 10px 0 30px;
   }
-  &:disabled {
+  &:disabled,
+  &:hover:disabled {
     background-color: $background-color !important;
     border: 1px solid $romanSilver !important;
   }

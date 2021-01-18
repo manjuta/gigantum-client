@@ -11,13 +11,16 @@ import {
   Switch,
   Redirect,
 } from 'react-router-dom'; // keep browser router, reloads page with Router in labbook view
-// components
-import Dashboard from 'Pages/dashboard/Dashboard';
-import Layout from 'JS/layout/Layout';
 // history
 import history from 'JS/history';
 // utils
 import getApiURL from 'JS/utils/apiUrl';
+import { pollForServerAvalability } from 'JS/utils/currentServerStatus';
+// mutations
+import { updateCurrentServer } from 'Mutations/localCommits/CurrentServer';
+// components
+import Dashboard from 'Pages/dashboard/Dashboard';
+import Layout from 'JS/layout/Layout';
 // context
 import ServerContext from './ServerContext';
 // assets
@@ -59,6 +62,7 @@ type Props = {
     logout: Function,
   },
   currentServer: {
+    backupInProgress: boolean,
     baseUrl: string,
   },
 }
@@ -84,12 +88,32 @@ class Routes extends Component<Props> {
 
       delete hash.redirect;
       stringifiedValues = queryString.stringify(hash);
-      const path = decodeURI(newPath)
+      const path = decodeURI(newPath);
       history.replace(`/${path}#${stringifiedValues}`);
       document.location.hash = stringifiedValues;
     }
 
     this._checkSysinfo();
+  }
+
+  componentDidMount() {
+    const { currentServer } = this.props;
+    const { backupInProgress } = currentServer.currentServer;
+    if (backupInProgress) {
+      this._pollForBackupStatus();
+    }
+  }
+
+  _pollForBackupStatus = () => {
+    const callback = (backupInProgress, error) => {
+      const { currentServer, relay } = this.props;
+      const { environment } = relay;
+      const { id } = currentServer.currentServer;
+
+      updateCurrentServer(id, backupInProgress, environment);
+    };
+
+    pollForServerAvalability(callback);
   }
 
 
@@ -218,7 +242,7 @@ class Routes extends Component<Props> {
                       {...this.props}
                       {...parentProps}
                       auth={auth}
-                      currentServer={currentServer}
+                      currentServer={currentServer.currentServer}
                       datasetName={parentProps.match.params.datasetName}
                       diskLow={showDiskLow}
                       owner={parentProps.match.params.owner}
@@ -235,7 +259,7 @@ class Routes extends Component<Props> {
                       {...this.props}
                       {...parentProps}
                       auth={auth}
-                      currentServer={currentServer}
+                      currentServer={currentServer.currentServer}
                       diskLow={showDiskLow}
                       labbookName={parentProps.match.params.labbookName}
                       owner={parentProps.match.params.owner}
@@ -298,12 +322,10 @@ const RoutesFragement = createFragmentContainer(
   },
 );
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    ...state.routes,
-    ...ownProps,
-  };
-};
+const mapStateToProps = (state, ownProps) => ({
+  ...state.routes,
+  ...ownProps,
+});
 
 const mapDispatchToProps = () => ({});
 

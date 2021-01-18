@@ -44,6 +44,7 @@ type Props = {
     owner: string,
     description: string,
   },
+  sectionId: string,
   sectionType: string,
   setBranchUptodate: Function,
   setSyncingState: Function,

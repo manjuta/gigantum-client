@@ -69,7 +69,7 @@ const BranchButtons = (props: Props) => {
 
   return (
     <ServerContext.Consumer>
-      {currentServer => (
+      {value => (
         <div className="BranchButtons">
           <ManageBranchesButton
             defaultDatasetMessage={defaultDatasetMessage}
@@ -90,7 +90,7 @@ const BranchButtons = (props: Props) => {
           <ResetBranchButton
             activeBranch={activeBranch}
             branchMutations={branchMutations}
-            currentServer={currentServer}
+            currentServer={value.currentServer}
             defaultDatasetMessage={defaultDatasetMessage}
             isDataset={isDataset}
             isLocked={isLocked}
@@ -105,7 +105,7 @@ const BranchButtons = (props: Props) => {
             activeBranch={activeBranch}
             allowSync={allowSync}
             allowSyncPull={allowSyncPull}
-            currentServer={currentServer}
+            currentServer={value.currentServer}
             defaultRemote={defaultRemote}
             disableDropdown={disableDropdown}
             handleSyncButton={handleSyncButton}

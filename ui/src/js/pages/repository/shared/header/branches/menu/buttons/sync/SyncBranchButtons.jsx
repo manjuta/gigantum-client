@@ -73,7 +73,6 @@ const SyncBranchButtons = (props: Props) => {
   const { backupInProgress } = currentServer;
   const [menuVisible, updateMenuVisible] = useState(false);
   const [commitsHovered, updateCommitsHovered] = useState(false);
-
   const syncMenu = useRef();
 
   const syncButtonText = getSyncButtonText(defaultRemote, showPullOnly);

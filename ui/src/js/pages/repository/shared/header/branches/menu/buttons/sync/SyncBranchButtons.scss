@@ -6,12 +6,12 @@ $dropBoxWidth: 250px;
   @include flex(flex-start, row);
 
   &__dropdown {
-    margin-left: 0px;
+    margin-left: 0 !important;
     width: 24px !important;
     padding: 2px !important;
     background: url(~Images/icons/down-arrow-azure.svg) no-repeat center center;
     background-size: 20px;
-    border-radius: 0 3px 3px 0;
+    border-radius: 0 4px 4px 0 !important;
 
     &:hover, &:focus, &:hover:focus {
       width: 24px !important;
@@ -21,11 +21,11 @@ $dropBoxWidth: 250px;
       padding: 2px;
     }
 
-    &:disabled {
+    &:disabled, &:disabled:hover {
       background: $background-color url(~Images/icons/down-arrow-silver.svg) no-repeat center center;
       background-size: 20px !important;
       border: 1px solid $romanSilver;
-      color: $romanSilver;
+      color: $romanSilver!important;
       cursor: auto;
     }
 
@@ -82,6 +82,7 @@ $dropBoxWidth: 250px;
   &__btn {
     align-items: center;
     padding: .5em !important;
+    border-radius: 4px 0 0 4px !important;
 
     @include flex(flext-start, row);
 
@@ -100,7 +101,7 @@ $dropBoxWidth: 250px;
         background: $background-color url(~Images/icons/branches/sync-disabled.svg) no-repeat 5px center;
         background-size: 25px !important;
         border: 1px solid $romanSilver;
-        color: $romanSilver;
+        color: $romanSilver !important;
         padding: 0 10px 0 30px !important;
         cursor: auto;
       }
@@ -121,7 +122,7 @@ $dropBoxWidth: 250px;
         background: $background-color url(~Images/icons/branches/push-disabled.svg) no-repeat 5px center;
         background-size: 25px !important;
         border: 1px solid $romanSilver;
-        color: $romanSilver;
+        color: $romanSilver !important;
         padding: 0 10px 0 30px !important;
         cursor: auto;
       }

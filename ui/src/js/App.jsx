@@ -151,7 +151,6 @@ class App extends Component {
             if (props) {
               return (
                 <Routes
-                  {...props}
                   auth={this.auth}
                   currentServer={props}
                   isLoggedIn={isLoggedIn}

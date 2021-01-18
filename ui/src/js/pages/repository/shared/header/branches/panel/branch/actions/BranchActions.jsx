@@ -115,7 +115,7 @@ const BranchActions = ({
   if (branch.isActive) {
     return (
       <ServerContext.Consumer>
-        {(currentServer) => (
+        {value => (
           <div className="BranchActions">
             <button
               type="button"
@@ -135,7 +135,7 @@ const BranchActions = ({
               className="BranchActions__btn BranchActions__btn--reset"
               data-tip={resetTooltip}
               data-for="Tooltip--reset"
-              disabled={!branch.isRemote || upToDate || currentServer.backupInProgress}
+              disabled={!branch.isRemote || upToDate || value.currentServer.backupInProgress}
               onClick={() => setResetModalVisible(!resetModalVisible)}
             />
             <ReactTooltip
@@ -147,7 +147,7 @@ const BranchActions = ({
             <SyncMenu
               allowSync={allowSync}
               allowSyncPull={allowSyncPull}
-              currentServer={currentServer}
+              currentServer={value.currentServer}
               defaultRemote={defaultRemote}
               disableDropdown={disableDropdown}
               handleSyncButton={handleSyncButton}
@@ -182,7 +182,7 @@ const BranchActions = ({
   const branchActionsCSS = classNames({
     BranchActions: true,
     hidden: !isOver,
-  })
+  });
   return (
     <ServerContext.Consumer>
       {(currentServer) => (

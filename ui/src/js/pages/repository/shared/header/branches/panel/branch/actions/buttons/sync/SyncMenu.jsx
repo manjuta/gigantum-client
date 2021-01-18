@@ -55,7 +55,7 @@ const SyncMenu = ({
   });
 
   return (
-    <div className="BrnchActions">
+    <div className="SyncMenu">
       <button
         type="button"
         className={syncButtonCSS}

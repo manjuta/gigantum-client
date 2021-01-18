@@ -127,8 +127,7 @@ class User extends Component<Props> {
               >
                 Profile
               </a>
-            )
-          }
+            )}
           {
             (process.env.BUILD_TYPE !== 'cloud')
             && (

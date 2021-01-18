@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1615"
+changelog:
+  - type: NEW
+    description: Adds polling when backup in progress is flagged as true, blocks remote operations and polls for backup to finish before allowing remote operations.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1573

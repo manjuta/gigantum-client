@@ -194,9 +194,11 @@ class ContainerStatus extends Component<Props> {
       setCloseEnvironmentMenus();
       setPackageMenuVisible(false);
     }
-    let cssClass = status;
+
     const constainerStatus = (status === 'Rebuild') ? 'Stopped' : status;
-    cssClass = ((cssClass === 'Building') && (state.status === 'Canceling')) ? 'Canceling' : cssClass;
+    const cssClass = ((status === 'Building') && (state.status === 'Canceling'))
+      ? 'Canceling'
+      : cssClass;
 
     return { constainerStatus, cssClass };
   }
@@ -395,7 +397,10 @@ class ContainerStatus extends Component<Props> {
 
     setContainerMenuVisibility(false);
 
-    this.setState({ imageStatus: 'BUILD_IN_PROGRESS', attemptingRebuild: true });
+    this.setState({
+      imageStatus: 'BUILD_IN_PROGRESS',
+      attemptingRebuild: true,
+    });
 
     containerMutations.buildImage(
       data,
@@ -422,7 +427,6 @@ class ContainerStatus extends Component<Props> {
     } = this.state;
     const { props, state } = this;
     const { constainerStatus, cssClass } = this._getContainerStatusText(this.props);
-    const key = 'setStatus';
     const excludeStatuses = ['Stopping', 'Starting', 'Publishing', 'Syncing'];
     const notExcluded = (excludeStatuses.indexOf(constainerStatus) === -1);
     const status = this._getStatusText(constainerStatus);
@@ -449,13 +453,14 @@ class ContainerStatus extends Component<Props> {
       <div className="ContainerStatus flex flex--row">
 
         <div
-          role="presentation"
-          data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
-          onClick={evt => this._containerAction(status, cssClass, key)}
-          key={key}
           className={containerStatusCss}
+          data-tooltip="Rebuild Required, container will attempt to rebuild before starting."
+          onBlur={() => {}}
+          onClick={(evt) => this._containerAction(status, cssClass, evt)}
+          onFocus={() => {}}
           onMouseOver={() => { this._setMouseOverState(true); }}
           onMouseOut={() => { this._setMouseOverState(false); }}
+          role="presentation"
         >
 
           <div className="ContainerStatus__text">{ status }</div>
@@ -465,16 +470,14 @@ class ContainerStatus extends Component<Props> {
         </div>
 
         { containerMenuOpen
-          && <div className="ContainerStatus__menu-pointer" />
-        }
+          && <div className="ContainerStatus__menu-pointer" />}
 
         { containerMenuOpen
           && (
           <div className="ContainerStatus__button-menu" data-container-popup="true">
             { store.getState().environment.containerMenuWarning }
           </div>
-          )
-        }
+          )}
 
         <Tooltip
           section="containerStatus"

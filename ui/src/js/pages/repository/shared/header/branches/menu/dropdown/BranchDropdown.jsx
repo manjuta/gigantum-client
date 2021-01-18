@@ -225,6 +225,7 @@ class BranchDropdown extends Component<Props> {
             { branchMenuList.map((branch) => (
               <BranchDropdownItem
                 branch={branch}
+                key={branch.id}
                 switchBranch={this._switchBranch}
               />
             ))}
