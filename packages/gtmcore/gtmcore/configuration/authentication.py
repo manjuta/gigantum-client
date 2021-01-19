@@ -38,17 +38,14 @@ def dict_to_auth_config(data: dict) -> OAuth2AuthConfiguration:
     Returns:
         auth config data class
     """
-    if data['login_type'] in ["auth0", "internal"]:
-        auth_config = OAuth2AuthConfiguration(login_type=data['login_type'],
-                                              login_url=data['login_url'],
-                                              audience=data['audience'],
-                                              issuer=data['issuer'],
-                                              signing_algorithm=data['signing_algorithm'],
-                                              public_key_url=data['public_key_url'],
-                                              client_id=data['client_id'],
-                                              token_url=data['token_url'],
-                                              logout_url=data['logout_url'])
-    else:
-        raise ValueError(f"Unsupported Auth system type `{data['login_type']}`")
+    auth_config = OAuth2AuthConfiguration(login_type=data['login_type'],
+                                          login_url=data['login_url'],
+                                          audience=data['audience'],
+                                          issuer=data['issuer'],
+                                          signing_algorithm=data['signing_algorithm'],
+                                          public_key_url=data['public_key_url'],
+                                          client_id=data['client_id'],
+                                          token_url=data['token_url'],
+                                          logout_url=data['logout_url'])
 
     return auth_config
