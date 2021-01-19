@@ -153,3 +153,41 @@ class ProjectUtility:
 
         return ProjectConstants.SUCCESS.value
 
+    def delete_project(self, driver: webdriver) -> str:
+        """ Logical separation of delete project functionality
+
+        Args:
+            driver: webdriver instance
+        """
+        # Delete a local project
+        # Load Project Listing Page
+        project_list = ProjectListingPage(driver)
+        if not project_list:
+            return "Could not load Project Listing Page"
+
+        # Click project menu button
+        is_clicked = project_list.project_menu_component.click_project_menu_button()
+        if not is_clicked:
+            return "Could not click project menu button"
+
+        # Click delete project menu
+        is_checked = project_list.project_menu_component.click_delete_project_menu()
+        if not is_checked:
+            return "Could not click delete project menu"
+
+        # Get project title from delete project window
+        project_title = project_list.project_delete_component.get_project_title()
+        if project_title is None:
+            return "Could not get project title"
+
+        # Input project title
+        is_typed = project_list.project_delete_component.input_project_title(project_title)
+        if not is_typed:
+            return "Could not type project title"
+
+        # Click delete project button
+        is_clicked = project_list.project_delete_component.click_delete_button()
+        if not is_clicked:
+            return "Could not click delete project button"
+
+        return ProjectConstants.SUCCESS.value

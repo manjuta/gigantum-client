@@ -7,3 +7,4 @@ configuration:
   incognito: True
   headless: False
   default_server: "gigantum-com"
+  api_url: "http://localhost:10000/api/labbook"
