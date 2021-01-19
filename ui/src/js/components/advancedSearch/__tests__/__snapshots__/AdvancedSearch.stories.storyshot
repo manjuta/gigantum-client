@@ -67,6 +67,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
               labelField="text"
               placeholder="Search by keyword, tags or filters"
               readOnly={false}
+              resetInputOnDelete={true}
               suggestions={
                 Array [
                   Object {
@@ -123,22 +124,6 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
               <div
                 className="ReactTags__tags react-tags-wrapper"
               >
-                <p
-                  className="sr-only"
-                  role="alert"
-                  style={
-                    Object {
-                      "border": 0,
-                      "clip": "rect(0 0 0 0)",
-                      "height": "1px",
-                      "margin": "-1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "absolute",
-                      "width": "1px",
-                    }
-                  }
-                />
                 <div
                   className="ReactTags__selected"
                 >
@@ -157,7 +142,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
                       }
                     }
                     index={0}
-                    key="0"
+                    key="jupyter"
                     labelField="text"
                     moveTag={[Function]}
                     onDelete={[Function]}
@@ -231,6 +216,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
                         <span
                           className="tag-wrapper ReactTags__tag"
                           onClick={[Function]}
+                          onKeyDown={[Function]}
                           onTouchStart={[Function]}
                           style={
                             Object {
@@ -242,9 +228,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
                           jupyter
                           <RemoveComponent
                             className="ReactTags__remove"
-                            index={0}
-                            onKeyDown={[Function]}
-                            onRemove={[Function]}
+                            onClick={[Function]}
                             readOnly={false}
                             tag={
                               Object {
@@ -253,14 +237,13 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Default 1`] = `
                               }
                             }
                           >
-                            <button
-                              aria-label="Tag at index 0 with value jupyter focussed. Press backspace to remove"
+                            <a
                               className="ReactTags__remove"
                               onClick={[Function]}
                               onKeyDown={[Function]}
                             >
                               ×
-                            </button>
+                            </a>
                           </RemoveComponent>
                         </span>
                       </Tag>
@@ -576,6 +559,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
               labelField="text"
               placeholder="Search by keyword, tags or filters"
               readOnly={false}
+              resetInputOnDelete={true}
               suggestions={
                 Array [
                   Object {
@@ -632,22 +616,6 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
               <div
                 className="ReactTags__tags react-tags-wrapper"
               >
-                <p
-                  className="sr-only"
-                  role="alert"
-                  style={
-                    Object {
-                      "border": 0,
-                      "clip": "rect(0 0 0 0)",
-                      "height": "1px",
-                      "margin": "-1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "absolute",
-                      "width": "1px",
-                    }
-                  }
-                />
                 <div
                   className="ReactTags__selected"
                 >
@@ -666,7 +634,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
                       }
                     }
                     index={0}
-                    key="0"
+                    key="jupyter"
                     labelField="text"
                     moveTag={[Function]}
                     onDelete={[Function]}
@@ -740,6 +708,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
                         <span
                           className="tag-wrapper ReactTags__tag"
                           onClick={[Function]}
+                          onKeyDown={[Function]}
                           onTouchStart={[Function]}
                           style={
                             Object {
@@ -751,9 +720,7 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
                           jupyter
                           <RemoveComponent
                             className="ReactTags__remove"
-                            index={0}
-                            onKeyDown={[Function]}
-                            onRemove={[Function]}
+                            onClick={[Function]}
                             readOnly={false}
                             tag={
                               Object {
@@ -762,14 +729,13 @@ exports[`Storyshots Components/AdvancedSearch AdvancedSearch Packages 1`] = `
                               }
                             }
                           >
-                            <button
-                              aria-label="Tag at index 0 with value jupyter focussed. Press backspace to remove"
+                            <a
                               className="ReactTags__remove"
                               onClick={[Function]}
                               onKeyDown={[Function]}
                             >
                               ×
-                            </button>
+                            </a>
                           </RemoveComponent>
                         </span>
                       </Tag>
