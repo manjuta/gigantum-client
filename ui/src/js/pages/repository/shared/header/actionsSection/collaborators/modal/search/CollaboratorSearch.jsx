@@ -5,14 +5,15 @@ import classNames from 'classnames';
 // config
 import config from 'JS/config';
 import fetchQuery from 'JS/fetch';
-// context
-import ServerContext from 'Pages/ServerContext';
 // components
 import ButtonLoader from 'Components/buttonLoader/ButtonLoader';
 
 type Props = {
   canManageCollaborators: boolean,
   collaborators: Array,
+  currentServer: {
+    backupInProgress: boolean,
+  },
   getPermissions: Function,
   mutations: {
     addCollaborator: Function,
@@ -106,7 +107,7 @@ class CollaboratorSearch extends Component<Props> {
   */
   _getUsers = (evt) => {
     const userInput = evt.target.value;
-    const { currentServer } = this.context;
+    const { currentServer } = this.props;
 
     if (
       (userInput.length > 2)
@@ -228,15 +229,17 @@ class CollaboratorSearch extends Component<Props> {
     );
   }
 
-  static contextType = ServerContext;
-
   render() {
     const {
       canManageCollaborators,
       collaborators,
+      currentServer,
       getPermissions,
       sectionType,
     } = this.props;
+    const {
+      backupInProgress,
+    } = currentServer;
     const {
       addCollaboratorButtonDisabled,
       buttonLoaderAddCollaborator,
@@ -247,7 +250,8 @@ class CollaboratorSearch extends Component<Props> {
       selectedIndex,
     } = this.state;
     const disableAdd = (canManageCollaborators === false)
-      || (collaborators && collaborators.length === 0);
+      || (collaborators && collaborators.length === 0)
+      || backupInProgress;
     const collaboratorSearchListSliced = colloboratorSearchList.slice(0, 7);
     const disableAddButton = addCollaboratorButtonDisabled
       || (newCollaborator.length < 3) || disableAdd;

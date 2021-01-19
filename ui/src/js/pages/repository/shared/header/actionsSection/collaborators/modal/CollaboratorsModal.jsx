@@ -1,6 +1,8 @@
 // @flow
 // vendor
 import React, { Component } from 'react';
+// context
+import ServerContext from 'Pages/ServerContext';
 // components
 import Modal from 'Components/modal/Modal';
 import CollaboratorsList from './list/CollaboratorList';
@@ -66,28 +68,35 @@ class CollaboratorsModal extends Component<Props> {
         overflow="visible"
         handleClose={() => { toggleCollaborators(); }}
       >
-        <div className="Modal__sizer">
-          <CollaboratorSearch
-            {...this.props}
-            getPermissions={this._getPermissions}
-            mutations={this.mutations}
-          />
+        <ServerContext.Consumer>
+          {value => (
+            <div className="Modal__sizer">
+              <CollaboratorSearch
+                {...this.props}
+                currentServer={value.currentServer}
+                getPermissions={this._getPermissions}
+                mutations={this.mutations}
 
-          <div className="CollaboratorsModal__collaborators">
+              />
 
-            <h5 className="CollaboratorsModal__h5">Collaborators</h5>
+              <div className="CollaboratorsModal__collaborators">
 
-            <CollaboratorsList
-              {...this.props}
-              setOverflow={this._setOverflow}
-              overflow={overflow}
-              canManageCollaborators={canManageCollaborators}
-              getPermissions={this._getPermissions}
-              mutations={this.mutations}
-              toggleCollaborators={toggleCollaborators}
-            />
-          </div>
-        </div>
+                <h5 className="CollaboratorsModal__h5">Collaborators</h5>
+
+                <CollaboratorsList
+                  {...this.props}
+                  canManageCollaborators={canManageCollaborators}
+                  currentServer={value.currentServer}
+                  getPermissions={this._getPermissions}
+                  mutations={this.mutations}
+                  overflow={overflow}
+                  setOverflow={this._setOverflow}
+                  toggleCollaborators={toggleCollaborators}
+                />
+              </div>
+            </div>
+          )}
+        </ServerContext.Consumer>
       </Modal>
     );
   }

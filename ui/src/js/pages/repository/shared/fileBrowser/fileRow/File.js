@@ -2,7 +2,7 @@
 // vendor
 import React, { Component } from 'react';
 import Moment from 'moment';
-import fileIconsJs from 'file-icons-js/dist/file-icons';
+import { getClass } from 'file-icons-js/dist/file-icons';
 import classNames from 'classnames';
 import { DragSource } from 'react-dnd';
 import ReactTooltip from 'react-tooltip';
@@ -23,6 +23,8 @@ import DatasetActionsMenu from './dataset/DatasetActionsMenu';
 import Connectors from '../utilities/Connectors';
 // assets
 import './File.scss';
+
+console.log(getClass);
 
 /**
 *  @param {String} fileName
@@ -467,7 +469,7 @@ class File extends Component<Props> {
           }
           <div className={textIconsCSS}>
 
-            <div className={`File__icon ${fileIconsJs.getClass(filename)}`} />
+            <div className={`File__icon ${getClass(filename)}`} />
 
             <div
               className="File__text"
