@@ -18,7 +18,9 @@ const updateCurrentServer = (
     environment,
     (store) => {
       const node = store.get(id);
-      node.setValue(backupInProgress, 'backupInProgress');
+      if (node) {
+        node.setValue(backupInProgress, 'backupInProgress');
+      }
     },
   );
 };

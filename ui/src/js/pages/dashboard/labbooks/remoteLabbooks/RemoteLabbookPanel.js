@@ -1,3 +1,4 @@
+// @flow
 // vendor
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
@@ -239,8 +240,7 @@ class RemoteLabbookPanel extends Component<Props> {
               data-tooltip={`${edge.node.visibility}`}
               className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
             />
-            )
-          }
+            )}
           { existsLocally
             ? (
               <button
@@ -261,8 +261,7 @@ class RemoteLabbookPanel extends Component<Props> {
               >
                 Import
               </button>
-            )
-          }
+            )}
 
           <button
             type="button"
@@ -310,8 +309,7 @@ class RemoteLabbookPanel extends Component<Props> {
                   textToHighlight={edge.node.description}
                 />
               )
-              : 'No description provided'
-           }
+              : 'No description provided'}
           </p>
         </div>
 
@@ -320,8 +318,7 @@ class RemoteLabbookPanel extends Component<Props> {
             <div className="RemoteLabbooks__loader">
               <Loader />
             </div>
-          )
-        }
+          )}
 
         <LoginPrompt
           showLoginPrompt={showLoginPrompt}

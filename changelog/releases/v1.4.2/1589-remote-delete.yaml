@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1621"
+changelog:
+  - type: NEW
+    description: Adds check when polling fails. Checks for backup in progress and polls until backup returns true and updates relay store.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1589

@@ -8,6 +8,7 @@ import {
   setUploadMessageUpdate,
   setUploadMessageRemove,
 } from 'JS/redux/actions/footer';
+import { checkBackupMode } from 'JS/utils/checkBackupMode';
 // mutations
 import FetchLabbookEdgeMutation from 'Mutations/repository/fetch/FetchLabbookEdgeMutation';
 import FetchDatasetEdgeMutation from 'Mutations/repository/fetch/FetchDatasetEdgeMutation';
@@ -99,7 +100,7 @@ const FooterUtils = {
       };
 
       if (resultKey) {
-        JobStatus.updateFooterStatus(result[type][key]).then((response) => {
+        JobStatus.updateFooterStatus(result[type][key]).then((response, error) => {
           if (response.data
               && response.data.jobStatus
               && response.data.jobStatus.jobMetadata
@@ -154,7 +155,6 @@ const FooterUtils = {
               let reportedFailureMessage = response.data.jobStatus.failureMessage;
               let errorMessage = response.data.jobStatus.failureMessage;
               hideModal();
-
               if (footerCallback && footerCallback.failed) {
                 const callbackData = {
                   response,
@@ -177,6 +177,8 @@ const FooterUtils = {
                 buildProgress: type === 'buildImage',
               };
               setMultiInfoMessage(owner, name, messageData);
+
+              checkBackupMode();
             } else {
               // refetch status data not ready
               refetch();

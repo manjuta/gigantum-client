@@ -62,9 +62,15 @@ type Props = {
     logout: Function,
   },
   currentServer: {
-    backupInProgress: boolean,
-    baseUrl: string,
+    currentServer: {
+      backupInProgress: boolean,
+      baseUrl: string,
+      id: string,
+    }
   },
+  relay: {
+    environment: Object,
+  }
 }
 
 class Routes extends Component<Props> {
@@ -104,11 +110,15 @@ class Routes extends Component<Props> {
     }
   }
 
+  /**
+    Mehtod logs user in using session instance of auth
+    @param {} -
+  */
   _pollForBackupStatus = () => {
-    const callback = (backupInProgress, error) => {
-      const { currentServer, relay } = this.props;
+    const callback = (currentServer, error) => {
+      const { relay } = this.props;
       const { environment } = relay;
-      const { id } = currentServer.currentServer;
+      const { id, backupInProgress } = currentServer;
 
       updateCurrentServer(id, backupInProgress, environment);
     };

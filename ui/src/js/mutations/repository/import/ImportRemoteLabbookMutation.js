@@ -52,7 +52,11 @@ export default function ImportRemoteLabbookMutation(
           successCall,
           failureCall,
         };
-        FooterUtils.getJobStatus(owner, labbookName, footerData);
+        FooterUtils.getJobStatus(
+          owner,
+          labbookName,
+          footerData,
+        );
 
         callback(response, error);
       },

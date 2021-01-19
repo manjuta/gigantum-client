@@ -6,6 +6,7 @@ import { fetchQuery } from 'JS/createRelayEnvironment';
 const currentServerStatusQuery = graphql`
   query currentServerStatusQuery {
     currentServer {
+      id
       serverId
       name
       baseUrl
@@ -49,18 +50,17 @@ const pollForServerAvalability = (callback, count = 1) => {
 
   promise.then((response) => {
     if ((count % 5) === 0) {
-      callback(false, null);
+      callback(response.data.currentServer, null);
     } else {
-      callback(true, null);
+      callback(response.data.currentServer, null);
     }
 
     count++;
-
     if (
       response.data && response.data.currentServer
       && !response.data.currentServer.backupInProgress
     ) {
-      callback(true, null);
+      callback(response.data.currentServer, null);
     } else {
       setTimeout(() => {
         pollForServerAvalability(callback, count);
