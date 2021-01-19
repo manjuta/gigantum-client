@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1620"
+changelog:
+  - type: NEW
+    description: Adds option to provide specific git url when checking if backup is in progress instead of always using current server's git url, necessary for the /api/servers endpoint.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1575

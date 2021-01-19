@@ -47,11 +47,16 @@ def check_and_add_user(hub_api: str, access_token: str, id_token: str) -> None:
         raise GitLabException(f"Failed to synchronize user account with git backend: {result.get('errors')}")
 
 
-def check_backup_in_progress():
-    config = Configuration()
-    server_config = config.get_server_configuration()
+def check_backup_in_progress(git_url=None):
+
+    # if git url isn't provided, use current server's git url
+    if not git_url:
+        config = Configuration()
+        server_config = config.get_server_configuration()
+        git_url = server_config.git_url
+
     try:
-        gitlab_response = requests.get(f"{server_config.git_url}backup")
+        gitlab_response = requests.get(f"{git_url}backup")
         if gitlab_response.status_code == 503 and "backup in progress" in str(gitlab_response.content).lower():
             return True
         else:

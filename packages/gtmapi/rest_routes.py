@@ -126,7 +126,7 @@ def servers():
                             "login_url": s.login_url,
                             "token_url": s.token_url,
                             "logout_url": s.logout_url,
-                            "backup_in_progress": check_backup_in_progress()})
+                            "backup_in_progress": check_backup_in_progress(s.git_url)})
 
     return jsonify({"available_servers": server_list,
                     "current_server": current_app.config['LABMGR_CONFIG'].get_current_server_id()})
