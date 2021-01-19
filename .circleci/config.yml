@@ -154,7 +154,7 @@ jobs:
           no_output_timeout: 15m
           command: |
             cd /home/circleci/repo/ui
-            jest --maxWorkers=2 shared/fileBrowser activity dashboard -u
+            TZ='Europe/London' jest --maxWorkers=2 src -u
 
   fossa:
     executor: gig_client
@@ -251,4 +251,3 @@ workflows:
           requires:
             - mypy-gtmcore
             - mypy-gtmapi
-

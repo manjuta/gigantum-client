@@ -7,7 +7,7 @@ ShallowWrapper {
     footerWorkerCallback={[Function]}
     history={
       Object {
-        "action": "POP",
+        "action": "REPLACE",
         "block": [Function],
         "createHref": [Function],
         "go": [Function],
@@ -17,7 +17,8 @@ ShallowWrapper {
         "listen": [Function],
         "location": Object {
           "hash": "",
-          "pathname": "/",
+          "key": "5lwia9",
+          "pathname": "/projects/local",
           "search": "",
           "state": undefined,
         },
@@ -35,6 +36,7 @@ ShallowWrapper {
   />,
   Symbol(enzyme.__renderer__): Object {
     "batchedUpdates": [Function],
+    "checkPropTypes": [Function],
     "getNode": [Function],
     "render": [Function],
     "simulateError": [Function],
@@ -49,57 +51,333 @@ ShallowWrapper {
       "children": <div
         className="Dashboard__view flex-1-0-auto"
       >
+        <div
+          className="Dashboard__cover hidden"
+          id="dashboard__cover"
+        >
+          <Loader />
+        </div>
         <ReactRelayQueryRenderer
-          environment={
-            RelayModernEnvironment {
-              "__setNet": [Function],
-              "_deferrableSelections": Set {},
-              "_network": Object {
-                "execute": [Function],
+          environment={"RelayModernEnvironment()"}
+          query={
+            Object {
+              "fragment": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Fragment",
+                "metadata": null,
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "args": null,
+                    "kind": "FragmentSpread",
+                    "name": "LocalLabbooksContainer_labbookList",
+                  },
+                ],
+                "type": "LabbookQuery",
               },
-              "_publishQueue": RelayPublishQueue {
-                "_appliedOptimisticUpdates": Set {},
-                "_backup": Object {},
-                "_handlerProvider": [Function],
-                "_pendingBackupRebase": false,
-                "_pendingData": Set {},
-                "_pendingOptimisticUpdates": Set {},
-                "_pendingUpdaters": Set {},
-                "_store": RelayMarkSweepStore {
-                  "_gcEnabled": true,
-                  "_hasScheduledGC": false,
-                  "_index": 0,
-                  "_recordSource": Object {},
-                  "_roots": Map {},
-                  "_subscriptions": Set {},
-                  "_updatedRecordIDs": Object {},
-                },
+              "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+              "kind": "Request",
+              "operation": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Operation",
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "LabbookList",
+                    "kind": "LinkedField",
+                    "name": "labbookList",
+                    "plural": false,
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "id",
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "concreteType": "LabbookConnection",
+                        "kind": "LinkedField",
+                        "name": "localLabbooks",
+                        "plural": false,
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "LabbookEdge",
+                            "kind": "LinkedField",
+                            "name": "edges",
+                            "plural": true,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "Labbook",
+                                "kind": "LinkedField",
+                                "name": "node",
+                                "plural": false,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "id",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "name",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "description",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "owner",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "creationDateUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "modifiedOnUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "__typename",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "cursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "PageInfo",
+                            "kind": "LinkedField",
+                            "name": "pageInfo",
+                            "plural": false,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "endCursor",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasNextPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasPreviousPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "startCursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                        ],
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "filters": Array [],
+                        "handle": "connection",
+                        "key": "LocalLabbooks_localLabbooks",
+                        "kind": "LinkedHandle",
+                        "name": "localLabbooks",
+                      },
+                    ],
+                    "storageKey": null,
+                  },
+                ],
               },
-              "_store": RelayMarkSweepStore {
-                "_gcEnabled": true,
-                "_hasScheduledGC": false,
-                "_index": 0,
-                "_recordSource": Object {},
-                "_roots": Map {},
-                "_subscriptions": Set {},
-                "_updatedRecordIDs": Object {},
-              },
-              "configName": undefined,
-              "unstable_internal": Object {
-                "areEqualSelectors": [Function],
-                "createFragmentSpecResolver": [Function],
-                "createOperationSelector": [Function],
-                "getDataIDsFromObject": [Function],
-                "getFragment": [Function],
-                "getRequest": [Function],
-                "getSelector": [Function],
-                "getSelectorList": [Function],
-                "getSelectorsFromObject": [Function],
-                "getVariablesFromObject": [Function],
+              "params": Object {
+                "id": null,
+                "metadata": Object {},
+                "name": "DashboardLocalQuery",
+                "operationKind": "query",
+                "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
               },
             }
           }
-          query={[Function]}
           render={[Function]}
           variables={
             Object {
@@ -112,6 +390,7 @@ ShallowWrapper {
         />
       </div>,
       "className": "Dashboard flex flex-column",
+      "data-selenium-id": "Dashboard",
     },
     "ref": null,
     "rendered": Object {
@@ -119,135 +398,706 @@ ShallowWrapper {
       "key": undefined,
       "nodeType": "host",
       "props": Object {
-        "children": <ReactRelayQueryRenderer
-          environment={
-            RelayModernEnvironment {
-              "__setNet": [Function],
-              "_deferrableSelections": Set {},
-              "_network": Object {
-                "execute": [Function],
-              },
-              "_publishQueue": RelayPublishQueue {
-                "_appliedOptimisticUpdates": Set {},
-                "_backup": Object {},
-                "_handlerProvider": [Function],
-                "_pendingBackupRebase": false,
-                "_pendingData": Set {},
-                "_pendingOptimisticUpdates": Set {},
-                "_pendingUpdaters": Set {},
-                "_store": RelayMarkSweepStore {
-                  "_gcEnabled": true,
-                  "_hasScheduledGC": false,
-                  "_index": 0,
-                  "_recordSource": Object {},
-                  "_roots": Map {},
-                  "_subscriptions": Set {},
-                  "_updatedRecordIDs": Object {},
+        "children": Array [
+          <div
+            className="Dashboard__cover hidden"
+            id="dashboard__cover"
+          >
+            <Loader />
+          </div>,
+          <ReactRelayQueryRenderer
+            environment={"RelayModernEnvironment()"}
+            query={
+              Object {
+                "fragment": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Fragment",
+                  "metadata": null,
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "args": null,
+                      "kind": "FragmentSpread",
+                      "name": "LocalLabbooksContainer_labbookList",
+                    },
+                  ],
+                  "type": "LabbookQuery",
                 },
-              },
-              "_store": RelayMarkSweepStore {
-                "_gcEnabled": true,
-                "_hasScheduledGC": false,
-                "_index": 0,
-                "_recordSource": Object {},
-                "_roots": Map {},
-                "_subscriptions": Set {},
-                "_updatedRecordIDs": Object {},
-              },
-              "configName": undefined,
-              "unstable_internal": Object {
-                "areEqualSelectors": [Function],
-                "createFragmentSpecResolver": [Function],
-                "createOperationSelector": [Function],
-                "getDataIDsFromObject": [Function],
-                "getFragment": [Function],
-                "getRequest": [Function],
-                "getSelector": [Function],
-                "getSelectorList": [Function],
-                "getSelectorsFromObject": [Function],
-                "getVariablesFromObject": [Function],
-              },
+                "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                "kind": "Request",
+                "operation": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Operation",
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "LabbookList",
+                      "kind": "LinkedField",
+                      "name": "labbookList",
+                      "plural": false,
+                      "selections": Array [
+                        Object {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "id",
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "concreteType": "LabbookConnection",
+                          "kind": "LinkedField",
+                          "name": "localLabbooks",
+                          "plural": false,
+                          "selections": Array [
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "LabbookEdge",
+                              "kind": "LinkedField",
+                              "name": "edges",
+                              "plural": true,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "concreteType": "Labbook",
+                                  "kind": "LinkedField",
+                                  "name": "node",
+                                  "plural": false,
+                                  "selections": Array [
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "id",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "name",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "description",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "owner",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "creationDateUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "modifiedOnUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "__typename",
+                                      "storageKey": null,
+                                    },
+                                  ],
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "cursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "PageInfo",
+                              "kind": "LinkedField",
+                              "name": "pageInfo",
+                              "plural": false,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "endCursor",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasNextPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasPreviousPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "startCursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                          ],
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "filters": Array [],
+                          "handle": "connection",
+                          "key": "LocalLabbooks_localLabbooks",
+                          "kind": "LinkedHandle",
+                          "name": "localLabbooks",
+                        },
+                      ],
+                      "storageKey": null,
+                    },
+                  ],
+                },
+                "params": Object {
+                  "id": null,
+                  "metadata": Object {},
+                  "name": "DashboardLocalQuery",
+                  "operationKind": "query",
+                  "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                },
+              }
             }
-          }
-          query={[Function]}
-          render={[Function]}
-          variables={
-            Object {
+            render={[Function]}
+            variables={
+              Object {
+                "cursor": null,
+                "first": 100,
+                "orderBy": "modified_on",
+                "sort": "desc",
+              }
+            }
+          />,
+        ],
+        "className": "Dashboard__view flex-1-0-auto",
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": <Loader />,
+            "className": "Dashboard__cover hidden",
+            "id": "dashboard__cover",
+          },
+          "ref": null,
+          "rendered": Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "function",
+            "props": Object {},
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          "type": "div",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "class",
+          "props": Object {
+            "environment": "RelayModernEnvironment()",
+            "query": Object {
+              "fragment": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Fragment",
+                "metadata": null,
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "args": null,
+                    "kind": "FragmentSpread",
+                    "name": "LocalLabbooksContainer_labbookList",
+                  },
+                ],
+                "type": "LabbookQuery",
+              },
+              "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+              "kind": "Request",
+              "operation": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Operation",
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "LabbookList",
+                    "kind": "LinkedField",
+                    "name": "labbookList",
+                    "plural": false,
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "id",
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "concreteType": "LabbookConnection",
+                        "kind": "LinkedField",
+                        "name": "localLabbooks",
+                        "plural": false,
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "LabbookEdge",
+                            "kind": "LinkedField",
+                            "name": "edges",
+                            "plural": true,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "Labbook",
+                                "kind": "LinkedField",
+                                "name": "node",
+                                "plural": false,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "id",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "name",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "description",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "owner",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "creationDateUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "modifiedOnUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "__typename",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "cursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "PageInfo",
+                            "kind": "LinkedField",
+                            "name": "pageInfo",
+                            "plural": false,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "endCursor",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasNextPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasPreviousPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "startCursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                        ],
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "filters": Array [],
+                        "handle": "connection",
+                        "key": "LocalLabbooks_localLabbooks",
+                        "kind": "LinkedHandle",
+                        "name": "localLabbooks",
+                      },
+                    ],
+                    "storageKey": null,
+                  },
+                ],
+              },
+              "params": Object {
+                "id": null,
+                "metadata": Object {},
+                "name": "DashboardLocalQuery",
+                "operationKind": "query",
+                "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+              },
+            },
+            "render": [Function],
+            "variables": Object {
               "cursor": null,
               "first": 100,
               "orderBy": "modified_on",
               "sort": "desc",
-            }
-          }
-        />,
-        "className": "Dashboard__view flex-1-0-auto",
-      },
-      "ref": null,
-      "rendered": Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "class",
-        "props": Object {
-          "environment": RelayModernEnvironment {
-            "__setNet": [Function],
-            "_deferrableSelections": Set {},
-            "_network": Object {
-              "execute": [Function],
-            },
-            "_publishQueue": RelayPublishQueue {
-              "_appliedOptimisticUpdates": Set {},
-              "_backup": Object {},
-              "_handlerProvider": [Function],
-              "_pendingBackupRebase": false,
-              "_pendingData": Set {},
-              "_pendingOptimisticUpdates": Set {},
-              "_pendingUpdaters": Set {},
-              "_store": RelayMarkSweepStore {
-                "_gcEnabled": true,
-                "_hasScheduledGC": false,
-                "_index": 0,
-                "_recordSource": Object {},
-                "_roots": Map {},
-                "_subscriptions": Set {},
-                "_updatedRecordIDs": Object {},
-              },
-            },
-            "_store": RelayMarkSweepStore {
-              "_gcEnabled": true,
-              "_hasScheduledGC": false,
-              "_index": 0,
-              "_recordSource": Object {},
-              "_roots": Map {},
-              "_subscriptions": Set {},
-              "_updatedRecordIDs": Object {},
-            },
-            "configName": undefined,
-            "unstable_internal": Object {
-              "areEqualSelectors": [Function],
-              "createFragmentSpecResolver": [Function],
-              "createOperationSelector": [Function],
-              "getDataIDsFromObject": [Function],
-              "getFragment": [Function],
-              "getRequest": [Function],
-              "getSelector": [Function],
-              "getSelectorList": [Function],
-              "getSelectorsFromObject": [Function],
-              "getVariablesFromObject": [Function],
             },
           },
-          "query": [Function],
-          "render": [Function],
-          "variables": Object {
-            "cursor": null,
-            "first": 100,
-            "orderBy": "modified_on",
-            "sort": "desc",
-          },
+          "ref": null,
+          "rendered": null,
+          "type": [Function],
         },
-        "ref": null,
-        "rendered": null,
-        "type": [Function],
-      },
+      ],
       "type": "div",
     },
     "type": "div",
@@ -261,57 +1111,333 @@ ShallowWrapper {
         "children": <div
           className="Dashboard__view flex-1-0-auto"
         >
+          <div
+            className="Dashboard__cover hidden"
+            id="dashboard__cover"
+          >
+            <Loader />
+          </div>
           <ReactRelayQueryRenderer
-            environment={
-              RelayModernEnvironment {
-                "__setNet": [Function],
-                "_deferrableSelections": Set {},
-                "_network": Object {
-                  "execute": [Function],
+            environment={"RelayModernEnvironment()"}
+            query={
+              Object {
+                "fragment": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Fragment",
+                  "metadata": null,
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "args": null,
+                      "kind": "FragmentSpread",
+                      "name": "LocalLabbooksContainer_labbookList",
+                    },
+                  ],
+                  "type": "LabbookQuery",
                 },
-                "_publishQueue": RelayPublishQueue {
-                  "_appliedOptimisticUpdates": Set {},
-                  "_backup": Object {},
-                  "_handlerProvider": [Function],
-                  "_pendingBackupRebase": false,
-                  "_pendingData": Set {},
-                  "_pendingOptimisticUpdates": Set {},
-                  "_pendingUpdaters": Set {},
-                  "_store": RelayMarkSweepStore {
-                    "_gcEnabled": true,
-                    "_hasScheduledGC": false,
-                    "_index": 0,
-                    "_recordSource": Object {},
-                    "_roots": Map {},
-                    "_subscriptions": Set {},
-                    "_updatedRecordIDs": Object {},
-                  },
+                "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                "kind": "Request",
+                "operation": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Operation",
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "LabbookList",
+                      "kind": "LinkedField",
+                      "name": "labbookList",
+                      "plural": false,
+                      "selections": Array [
+                        Object {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "id",
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "concreteType": "LabbookConnection",
+                          "kind": "LinkedField",
+                          "name": "localLabbooks",
+                          "plural": false,
+                          "selections": Array [
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "LabbookEdge",
+                              "kind": "LinkedField",
+                              "name": "edges",
+                              "plural": true,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "concreteType": "Labbook",
+                                  "kind": "LinkedField",
+                                  "name": "node",
+                                  "plural": false,
+                                  "selections": Array [
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "id",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "name",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "description",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "owner",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "creationDateUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "modifiedOnUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "__typename",
+                                      "storageKey": null,
+                                    },
+                                  ],
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "cursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "PageInfo",
+                              "kind": "LinkedField",
+                              "name": "pageInfo",
+                              "plural": false,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "endCursor",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasNextPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasPreviousPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "startCursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                          ],
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "filters": Array [],
+                          "handle": "connection",
+                          "key": "LocalLabbooks_localLabbooks",
+                          "kind": "LinkedHandle",
+                          "name": "localLabbooks",
+                        },
+                      ],
+                      "storageKey": null,
+                    },
+                  ],
                 },
-                "_store": RelayMarkSweepStore {
-                  "_gcEnabled": true,
-                  "_hasScheduledGC": false,
-                  "_index": 0,
-                  "_recordSource": Object {},
-                  "_roots": Map {},
-                  "_subscriptions": Set {},
-                  "_updatedRecordIDs": Object {},
-                },
-                "configName": undefined,
-                "unstable_internal": Object {
-                  "areEqualSelectors": [Function],
-                  "createFragmentSpecResolver": [Function],
-                  "createOperationSelector": [Function],
-                  "getDataIDsFromObject": [Function],
-                  "getFragment": [Function],
-                  "getRequest": [Function],
-                  "getSelector": [Function],
-                  "getSelectorList": [Function],
-                  "getSelectorsFromObject": [Function],
-                  "getVariablesFromObject": [Function],
+                "params": Object {
+                  "id": null,
+                  "metadata": Object {},
+                  "name": "DashboardLocalQuery",
+                  "operationKind": "query",
+                  "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
                 },
               }
             }
-            query={[Function]}
             render={[Function]}
             variables={
               Object {
@@ -324,6 +1450,7 @@ ShallowWrapper {
           />
         </div>,
         "className": "Dashboard flex flex-column",
+        "data-selenium-id": "Dashboard",
       },
       "ref": null,
       "rendered": Object {
@@ -331,135 +1458,706 @@ ShallowWrapper {
         "key": undefined,
         "nodeType": "host",
         "props": Object {
-          "children": <ReactRelayQueryRenderer
-            environment={
-              RelayModernEnvironment {
-                "__setNet": [Function],
-                "_deferrableSelections": Set {},
-                "_network": Object {
-                  "execute": [Function],
-                },
-                "_publishQueue": RelayPublishQueue {
-                  "_appliedOptimisticUpdates": Set {},
-                  "_backup": Object {},
-                  "_handlerProvider": [Function],
-                  "_pendingBackupRebase": false,
-                  "_pendingData": Set {},
-                  "_pendingOptimisticUpdates": Set {},
-                  "_pendingUpdaters": Set {},
-                  "_store": RelayMarkSweepStore {
-                    "_gcEnabled": true,
-                    "_hasScheduledGC": false,
-                    "_index": 0,
-                    "_recordSource": Object {},
-                    "_roots": Map {},
-                    "_subscriptions": Set {},
-                    "_updatedRecordIDs": Object {},
+          "children": Array [
+            <div
+              className="Dashboard__cover hidden"
+              id="dashboard__cover"
+            >
+              <Loader />
+            </div>,
+            <ReactRelayQueryRenderer
+              environment={"RelayModernEnvironment()"}
+              query={
+                Object {
+                  "fragment": Object {
+                    "argumentDefinitions": Array [
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "first",
+                        "type": "Int!",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "cursor",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "orderBy",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "sort",
+                        "type": "String",
+                      },
+                    ],
+                    "kind": "Fragment",
+                    "metadata": null,
+                    "name": "DashboardLocalQuery",
+                    "selections": Array [
+                      Object {
+                        "args": null,
+                        "kind": "FragmentSpread",
+                        "name": "LocalLabbooksContainer_labbookList",
+                      },
+                    ],
+                    "type": "LabbookQuery",
                   },
-                },
-                "_store": RelayMarkSweepStore {
-                  "_gcEnabled": true,
-                  "_hasScheduledGC": false,
-                  "_index": 0,
-                  "_recordSource": Object {},
-                  "_roots": Map {},
-                  "_subscriptions": Set {},
-                  "_updatedRecordIDs": Object {},
-                },
-                "configName": undefined,
-                "unstable_internal": Object {
-                  "areEqualSelectors": [Function],
-                  "createFragmentSpecResolver": [Function],
-                  "createOperationSelector": [Function],
-                  "getDataIDsFromObject": [Function],
-                  "getFragment": [Function],
-                  "getRequest": [Function],
-                  "getSelector": [Function],
-                  "getSelectorList": [Function],
-                  "getSelectorsFromObject": [Function],
-                  "getVariablesFromObject": [Function],
-                },
+                  "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                  "kind": "Request",
+                  "operation": Object {
+                    "argumentDefinitions": Array [
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "first",
+                        "type": "Int!",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "cursor",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "orderBy",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "sort",
+                        "type": "String",
+                      },
+                    ],
+                    "kind": "Operation",
+                    "name": "DashboardLocalQuery",
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "LabbookList",
+                        "kind": "LinkedField",
+                        "name": "labbookList",
+                        "plural": false,
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "id",
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Array [
+                              Object {
+                                "kind": "Variable",
+                                "name": "after",
+                                "variableName": "cursor",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "first",
+                                "variableName": "first",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "orderBy",
+                                "variableName": "orderBy",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "sort",
+                                "variableName": "sort",
+                              },
+                            ],
+                            "concreteType": "LabbookConnection",
+                            "kind": "LinkedField",
+                            "name": "localLabbooks",
+                            "plural": false,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "LabbookEdge",
+                                "kind": "LinkedField",
+                                "name": "edges",
+                                "plural": true,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "concreteType": "Labbook",
+                                    "kind": "LinkedField",
+                                    "name": "node",
+                                    "plural": false,
+                                    "selections": Array [
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "id",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "name",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "description",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "owner",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "creationDateUtc",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "modifiedOnUtc",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "__typename",
+                                        "storageKey": null,
+                                      },
+                                    ],
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "cursor",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "PageInfo",
+                                "kind": "LinkedField",
+                                "name": "pageInfo",
+                                "plural": false,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "endCursor",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "hasNextPage",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "hasPreviousPage",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "startCursor",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Array [
+                              Object {
+                                "kind": "Variable",
+                                "name": "after",
+                                "variableName": "cursor",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "first",
+                                "variableName": "first",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "orderBy",
+                                "variableName": "orderBy",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "sort",
+                                "variableName": "sort",
+                              },
+                            ],
+                            "filters": Array [],
+                            "handle": "connection",
+                            "key": "LocalLabbooks_localLabbooks",
+                            "kind": "LinkedHandle",
+                            "name": "localLabbooks",
+                          },
+                        ],
+                        "storageKey": null,
+                      },
+                    ],
+                  },
+                  "params": Object {
+                    "id": null,
+                    "metadata": Object {},
+                    "name": "DashboardLocalQuery",
+                    "operationKind": "query",
+                    "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                  },
+                }
               }
-            }
-            query={[Function]}
-            render={[Function]}
-            variables={
-              Object {
+              render={[Function]}
+              variables={
+                Object {
+                  "cursor": null,
+                  "first": 100,
+                  "orderBy": "modified_on",
+                  "sort": "desc",
+                }
+              }
+            />,
+          ],
+          "className": "Dashboard__view flex-1-0-auto",
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": <Loader />,
+              "className": "Dashboard__cover hidden",
+              "id": "dashboard__cover",
+            },
+            "ref": null,
+            "rendered": Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "function",
+              "props": Object {},
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            "type": "div",
+          },
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": Object {
+              "environment": "RelayModernEnvironment()",
+              "query": Object {
+                "fragment": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Fragment",
+                  "metadata": null,
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "args": null,
+                      "kind": "FragmentSpread",
+                      "name": "LocalLabbooksContainer_labbookList",
+                    },
+                  ],
+                  "type": "LabbookQuery",
+                },
+                "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                "kind": "Request",
+                "operation": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Operation",
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "LabbookList",
+                      "kind": "LinkedField",
+                      "name": "labbookList",
+                      "plural": false,
+                      "selections": Array [
+                        Object {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "id",
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "concreteType": "LabbookConnection",
+                          "kind": "LinkedField",
+                          "name": "localLabbooks",
+                          "plural": false,
+                          "selections": Array [
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "LabbookEdge",
+                              "kind": "LinkedField",
+                              "name": "edges",
+                              "plural": true,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "concreteType": "Labbook",
+                                  "kind": "LinkedField",
+                                  "name": "node",
+                                  "plural": false,
+                                  "selections": Array [
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "id",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "name",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "description",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "owner",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "creationDateUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "modifiedOnUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "__typename",
+                                      "storageKey": null,
+                                    },
+                                  ],
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "cursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "PageInfo",
+                              "kind": "LinkedField",
+                              "name": "pageInfo",
+                              "plural": false,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "endCursor",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasNextPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasPreviousPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "startCursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                          ],
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "filters": Array [],
+                          "handle": "connection",
+                          "key": "LocalLabbooks_localLabbooks",
+                          "kind": "LinkedHandle",
+                          "name": "localLabbooks",
+                        },
+                      ],
+                      "storageKey": null,
+                    },
+                  ],
+                },
+                "params": Object {
+                  "id": null,
+                  "metadata": Object {},
+                  "name": "DashboardLocalQuery",
+                  "operationKind": "query",
+                  "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                },
+              },
+              "render": [Function],
+              "variables": Object {
                 "cursor": null,
                 "first": 100,
                 "orderBy": "modified_on",
                 "sort": "desc",
-              }
-            }
-          />,
-          "className": "Dashboard__view flex-1-0-auto",
-        },
-        "ref": null,
-        "rendered": Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "class",
-          "props": Object {
-            "environment": RelayModernEnvironment {
-              "__setNet": [Function],
-              "_deferrableSelections": Set {},
-              "_network": Object {
-                "execute": [Function],
-              },
-              "_publishQueue": RelayPublishQueue {
-                "_appliedOptimisticUpdates": Set {},
-                "_backup": Object {},
-                "_handlerProvider": [Function],
-                "_pendingBackupRebase": false,
-                "_pendingData": Set {},
-                "_pendingOptimisticUpdates": Set {},
-                "_pendingUpdaters": Set {},
-                "_store": RelayMarkSweepStore {
-                  "_gcEnabled": true,
-                  "_hasScheduledGC": false,
-                  "_index": 0,
-                  "_recordSource": Object {},
-                  "_roots": Map {},
-                  "_subscriptions": Set {},
-                  "_updatedRecordIDs": Object {},
-                },
-              },
-              "_store": RelayMarkSweepStore {
-                "_gcEnabled": true,
-                "_hasScheduledGC": false,
-                "_index": 0,
-                "_recordSource": Object {},
-                "_roots": Map {},
-                "_subscriptions": Set {},
-                "_updatedRecordIDs": Object {},
-              },
-              "configName": undefined,
-              "unstable_internal": Object {
-                "areEqualSelectors": [Function],
-                "createFragmentSpecResolver": [Function],
-                "createOperationSelector": [Function],
-                "getDataIDsFromObject": [Function],
-                "getFragment": [Function],
-                "getRequest": [Function],
-                "getSelector": [Function],
-                "getSelectorList": [Function],
-                "getSelectorsFromObject": [Function],
-                "getVariablesFromObject": [Function],
               },
             },
-            "query": [Function],
-            "render": [Function],
-            "variables": Object {
-              "cursor": null,
-              "first": 100,
-              "orderBy": "modified_on",
-              "sort": "desc",
-            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
           },
-          "ref": null,
-          "rendered": null,
-          "type": [Function],
-        },
+        ],
         "type": "div",
       },
       "type": "div",
@@ -469,9 +2167,13 @@ ShallowWrapper {
     "adapter": ReactSixteenAdapter {
       "options": Object {
         "enableComponentDidUpdateOnSetState": true,
+        "legacyContextMode": "parent",
         "lifecycles": Object {
           "componentDidUpdate": Object {
             "onSetState": true,
+          },
+          "getChildContext": Object {
+            "calledByRenderer": false,
           },
           "getDerivedStateFromProps": true,
           "getSnapshotBeforeUpdate": true,
@@ -492,7 +2194,7 @@ ShallowWrapper {
     footerWorkerCallback={[Function]}
     history={
       Object {
-        "action": "POP",
+        "action": "REPLACE",
         "block": [Function],
         "createHref": [Function],
         "go": [Function],
@@ -502,7 +2204,8 @@ ShallowWrapper {
         "listen": [Function],
         "location": Object {
           "hash": "",
-          "pathname": "/",
+          "key": "z2nlsu",
+          "pathname": "/projects/local",
           "search": "",
           "state": undefined,
         },
@@ -520,6 +2223,7 @@ ShallowWrapper {
   />,
   Symbol(enzyme.__renderer__): Object {
     "batchedUpdates": [Function],
+    "checkPropTypes": [Function],
     "getNode": [Function],
     "render": [Function],
     "simulateError": [Function],
@@ -534,9 +2238,346 @@ ShallowWrapper {
       "children": <div
         className="Dashboard__view flex-1-0-auto"
       >
-        <DatasetSets />
+        <div
+          className="Dashboard__cover hidden"
+          id="dashboard__cover"
+        >
+          <Loader />
+        </div>
+        <ReactRelayQueryRenderer
+          environment={"RelayModernEnvironment()"}
+          query={
+            Object {
+              "fragment": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Fragment",
+                "metadata": null,
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "args": null,
+                    "kind": "FragmentSpread",
+                    "name": "LocalLabbooksContainer_labbookList",
+                  },
+                ],
+                "type": "LabbookQuery",
+              },
+              "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+              "kind": "Request",
+              "operation": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Operation",
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "LabbookList",
+                    "kind": "LinkedField",
+                    "name": "labbookList",
+                    "plural": false,
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "id",
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "concreteType": "LabbookConnection",
+                        "kind": "LinkedField",
+                        "name": "localLabbooks",
+                        "plural": false,
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "LabbookEdge",
+                            "kind": "LinkedField",
+                            "name": "edges",
+                            "plural": true,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "Labbook",
+                                "kind": "LinkedField",
+                                "name": "node",
+                                "plural": false,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "id",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "name",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "description",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "owner",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "creationDateUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "modifiedOnUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "__typename",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "cursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "PageInfo",
+                            "kind": "LinkedField",
+                            "name": "pageInfo",
+                            "plural": false,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "endCursor",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasNextPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasPreviousPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "startCursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                        ],
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "filters": Array [],
+                        "handle": "connection",
+                        "key": "LocalLabbooks_localLabbooks",
+                        "kind": "LinkedHandle",
+                        "name": "localLabbooks",
+                      },
+                    ],
+                    "storageKey": null,
+                  },
+                ],
+              },
+              "params": Object {
+                "id": null,
+                "metadata": Object {},
+                "name": "DashboardLocalQuery",
+                "operationKind": "query",
+                "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+              },
+            }
+          }
+          render={[Function]}
+          variables={
+            Object {
+              "cursor": null,
+              "first": 100,
+              "orderBy": "modified_on",
+              "sort": "desc",
+            }
+          }
+        />
       </div>,
       "className": "Dashboard flex flex-column",
+      "data-selenium-id": "Dashboard",
     },
     "ref": null,
     "rendered": Object {
@@ -544,19 +2585,706 @@ ShallowWrapper {
       "key": undefined,
       "nodeType": "host",
       "props": Object {
-        "children": <DatasetSets />,
+        "children": Array [
+          <div
+            className="Dashboard__cover hidden"
+            id="dashboard__cover"
+          >
+            <Loader />
+          </div>,
+          <ReactRelayQueryRenderer
+            environment={"RelayModernEnvironment()"}
+            query={
+              Object {
+                "fragment": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Fragment",
+                  "metadata": null,
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "args": null,
+                      "kind": "FragmentSpread",
+                      "name": "LocalLabbooksContainer_labbookList",
+                    },
+                  ],
+                  "type": "LabbookQuery",
+                },
+                "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                "kind": "Request",
+                "operation": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Operation",
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "LabbookList",
+                      "kind": "LinkedField",
+                      "name": "labbookList",
+                      "plural": false,
+                      "selections": Array [
+                        Object {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "id",
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "concreteType": "LabbookConnection",
+                          "kind": "LinkedField",
+                          "name": "localLabbooks",
+                          "plural": false,
+                          "selections": Array [
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "LabbookEdge",
+                              "kind": "LinkedField",
+                              "name": "edges",
+                              "plural": true,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "concreteType": "Labbook",
+                                  "kind": "LinkedField",
+                                  "name": "node",
+                                  "plural": false,
+                                  "selections": Array [
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "id",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "name",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "description",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "owner",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "creationDateUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "modifiedOnUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "__typename",
+                                      "storageKey": null,
+                                    },
+                                  ],
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "cursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "PageInfo",
+                              "kind": "LinkedField",
+                              "name": "pageInfo",
+                              "plural": false,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "endCursor",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasNextPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasPreviousPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "startCursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                          ],
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "filters": Array [],
+                          "handle": "connection",
+                          "key": "LocalLabbooks_localLabbooks",
+                          "kind": "LinkedHandle",
+                          "name": "localLabbooks",
+                        },
+                      ],
+                      "storageKey": null,
+                    },
+                  ],
+                },
+                "params": Object {
+                  "id": null,
+                  "metadata": Object {},
+                  "name": "DashboardLocalQuery",
+                  "operationKind": "query",
+                  "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                },
+              }
+            }
+            render={[Function]}
+            variables={
+              Object {
+                "cursor": null,
+                "first": 100,
+                "orderBy": "modified_on",
+                "sort": "desc",
+              }
+            }
+          />,
+        ],
         "className": "Dashboard__view flex-1-0-auto",
       },
       "ref": null,
-      "rendered": Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "class",
-        "props": Object {},
-        "ref": null,
-        "rendered": null,
-        "type": [Function],
-      },
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": <Loader />,
+            "className": "Dashboard__cover hidden",
+            "id": "dashboard__cover",
+          },
+          "ref": null,
+          "rendered": Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "function",
+            "props": Object {},
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          "type": "div",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "class",
+          "props": Object {
+            "environment": "RelayModernEnvironment()",
+            "query": Object {
+              "fragment": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Fragment",
+                "metadata": null,
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "args": null,
+                    "kind": "FragmentSpread",
+                    "name": "LocalLabbooksContainer_labbookList",
+                  },
+                ],
+                "type": "LabbookQuery",
+              },
+              "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+              "kind": "Request",
+              "operation": Object {
+                "argumentDefinitions": Array [
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "first",
+                    "type": "Int!",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "cursor",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "orderBy",
+                    "type": "String",
+                  },
+                  Object {
+                    "defaultValue": null,
+                    "kind": "LocalArgument",
+                    "name": "sort",
+                    "type": "String",
+                  },
+                ],
+                "kind": "Operation",
+                "name": "DashboardLocalQuery",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "LabbookList",
+                    "kind": "LinkedField",
+                    "name": "labbookList",
+                    "plural": false,
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "id",
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "concreteType": "LabbookConnection",
+                        "kind": "LinkedField",
+                        "name": "localLabbooks",
+                        "plural": false,
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "LabbookEdge",
+                            "kind": "LinkedField",
+                            "name": "edges",
+                            "plural": true,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "Labbook",
+                                "kind": "LinkedField",
+                                "name": "node",
+                                "plural": false,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "id",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "name",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "description",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "owner",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "creationDateUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "modifiedOnUtc",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "__typename",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "cursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "PageInfo",
+                            "kind": "LinkedField",
+                            "name": "pageInfo",
+                            "plural": false,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "endCursor",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasNextPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "hasPreviousPage",
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "startCursor",
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                        ],
+                        "storageKey": null,
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Array [
+                          Object {
+                            "kind": "Variable",
+                            "name": "after",
+                            "variableName": "cursor",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "first",
+                            "variableName": "first",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "orderBy",
+                            "variableName": "orderBy",
+                          },
+                          Object {
+                            "kind": "Variable",
+                            "name": "sort",
+                            "variableName": "sort",
+                          },
+                        ],
+                        "filters": Array [],
+                        "handle": "connection",
+                        "key": "LocalLabbooks_localLabbooks",
+                        "kind": "LinkedHandle",
+                        "name": "localLabbooks",
+                      },
+                    ],
+                    "storageKey": null,
+                  },
+                ],
+              },
+              "params": Object {
+                "id": null,
+                "metadata": Object {},
+                "name": "DashboardLocalQuery",
+                "operationKind": "query",
+                "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+              },
+            },
+            "render": [Function],
+            "variables": Object {
+              "cursor": null,
+              "first": 100,
+              "orderBy": "modified_on",
+              "sort": "desc",
+            },
+          },
+          "ref": null,
+          "rendered": null,
+          "type": [Function],
+        },
+      ],
       "type": "div",
     },
     "type": "div",
@@ -570,9 +3298,346 @@ ShallowWrapper {
         "children": <div
           className="Dashboard__view flex-1-0-auto"
         >
-          <DatasetSets />
+          <div
+            className="Dashboard__cover hidden"
+            id="dashboard__cover"
+          >
+            <Loader />
+          </div>
+          <ReactRelayQueryRenderer
+            environment={"RelayModernEnvironment()"}
+            query={
+              Object {
+                "fragment": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Fragment",
+                  "metadata": null,
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "args": null,
+                      "kind": "FragmentSpread",
+                      "name": "LocalLabbooksContainer_labbookList",
+                    },
+                  ],
+                  "type": "LabbookQuery",
+                },
+                "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                "kind": "Request",
+                "operation": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Operation",
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "LabbookList",
+                      "kind": "LinkedField",
+                      "name": "labbookList",
+                      "plural": false,
+                      "selections": Array [
+                        Object {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "id",
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "concreteType": "LabbookConnection",
+                          "kind": "LinkedField",
+                          "name": "localLabbooks",
+                          "plural": false,
+                          "selections": Array [
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "LabbookEdge",
+                              "kind": "LinkedField",
+                              "name": "edges",
+                              "plural": true,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "concreteType": "Labbook",
+                                  "kind": "LinkedField",
+                                  "name": "node",
+                                  "plural": false,
+                                  "selections": Array [
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "id",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "name",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "description",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "owner",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "creationDateUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "modifiedOnUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "__typename",
+                                      "storageKey": null,
+                                    },
+                                  ],
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "cursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "PageInfo",
+                              "kind": "LinkedField",
+                              "name": "pageInfo",
+                              "plural": false,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "endCursor",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasNextPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasPreviousPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "startCursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                          ],
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "filters": Array [],
+                          "handle": "connection",
+                          "key": "LocalLabbooks_localLabbooks",
+                          "kind": "LinkedHandle",
+                          "name": "localLabbooks",
+                        },
+                      ],
+                      "storageKey": null,
+                    },
+                  ],
+                },
+                "params": Object {
+                  "id": null,
+                  "metadata": Object {},
+                  "name": "DashboardLocalQuery",
+                  "operationKind": "query",
+                  "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                },
+              }
+            }
+            render={[Function]}
+            variables={
+              Object {
+                "cursor": null,
+                "first": 100,
+                "orderBy": "modified_on",
+                "sort": "desc",
+              }
+            }
+          />
         </div>,
         "className": "Dashboard flex flex-column",
+        "data-selenium-id": "Dashboard",
       },
       "ref": null,
       "rendered": Object {
@@ -580,19 +3645,706 @@ ShallowWrapper {
         "key": undefined,
         "nodeType": "host",
         "props": Object {
-          "children": <DatasetSets />,
+          "children": Array [
+            <div
+              className="Dashboard__cover hidden"
+              id="dashboard__cover"
+            >
+              <Loader />
+            </div>,
+            <ReactRelayQueryRenderer
+              environment={"RelayModernEnvironment()"}
+              query={
+                Object {
+                  "fragment": Object {
+                    "argumentDefinitions": Array [
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "first",
+                        "type": "Int!",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "cursor",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "orderBy",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "sort",
+                        "type": "String",
+                      },
+                    ],
+                    "kind": "Fragment",
+                    "metadata": null,
+                    "name": "DashboardLocalQuery",
+                    "selections": Array [
+                      Object {
+                        "args": null,
+                        "kind": "FragmentSpread",
+                        "name": "LocalLabbooksContainer_labbookList",
+                      },
+                    ],
+                    "type": "LabbookQuery",
+                  },
+                  "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                  "kind": "Request",
+                  "operation": Object {
+                    "argumentDefinitions": Array [
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "first",
+                        "type": "Int!",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "cursor",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "orderBy",
+                        "type": "String",
+                      },
+                      Object {
+                        "defaultValue": null,
+                        "kind": "LocalArgument",
+                        "name": "sort",
+                        "type": "String",
+                      },
+                    ],
+                    "kind": "Operation",
+                    "name": "DashboardLocalQuery",
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "LabbookList",
+                        "kind": "LinkedField",
+                        "name": "labbookList",
+                        "plural": false,
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "id",
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Array [
+                              Object {
+                                "kind": "Variable",
+                                "name": "after",
+                                "variableName": "cursor",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "first",
+                                "variableName": "first",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "orderBy",
+                                "variableName": "orderBy",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "sort",
+                                "variableName": "sort",
+                              },
+                            ],
+                            "concreteType": "LabbookConnection",
+                            "kind": "LinkedField",
+                            "name": "localLabbooks",
+                            "plural": false,
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "LabbookEdge",
+                                "kind": "LinkedField",
+                                "name": "edges",
+                                "plural": true,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "concreteType": "Labbook",
+                                    "kind": "LinkedField",
+                                    "name": "node",
+                                    "plural": false,
+                                    "selections": Array [
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "id",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "name",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "description",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "owner",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "creationDateUtc",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "modifiedOnUtc",
+                                        "storageKey": null,
+                                      },
+                                      Object {
+                                        "alias": null,
+                                        "args": null,
+                                        "kind": "ScalarField",
+                                        "name": "__typename",
+                                        "storageKey": null,
+                                      },
+                                    ],
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "cursor",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                              Object {
+                                "alias": null,
+                                "args": null,
+                                "concreteType": "PageInfo",
+                                "kind": "LinkedField",
+                                "name": "pageInfo",
+                                "plural": false,
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "endCursor",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "hasNextPage",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "hasPreviousPage",
+                                    "storageKey": null,
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": null,
+                                    "kind": "ScalarField",
+                                    "name": "startCursor",
+                                    "storageKey": null,
+                                  },
+                                ],
+                                "storageKey": null,
+                              },
+                            ],
+                            "storageKey": null,
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Array [
+                              Object {
+                                "kind": "Variable",
+                                "name": "after",
+                                "variableName": "cursor",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "first",
+                                "variableName": "first",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "orderBy",
+                                "variableName": "orderBy",
+                              },
+                              Object {
+                                "kind": "Variable",
+                                "name": "sort",
+                                "variableName": "sort",
+                              },
+                            ],
+                            "filters": Array [],
+                            "handle": "connection",
+                            "key": "LocalLabbooks_localLabbooks",
+                            "kind": "LinkedHandle",
+                            "name": "localLabbooks",
+                          },
+                        ],
+                        "storageKey": null,
+                      },
+                    ],
+                  },
+                  "params": Object {
+                    "id": null,
+                    "metadata": Object {},
+                    "name": "DashboardLocalQuery",
+                    "operationKind": "query",
+                    "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                  },
+                }
+              }
+              render={[Function]}
+              variables={
+                Object {
+                  "cursor": null,
+                  "first": 100,
+                  "orderBy": "modified_on",
+                  "sort": "desc",
+                }
+              }
+            />,
+          ],
           "className": "Dashboard__view flex-1-0-auto",
         },
         "ref": null,
-        "rendered": Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "class",
-          "props": Object {},
-          "ref": null,
-          "rendered": null,
-          "type": [Function],
-        },
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": <Loader />,
+              "className": "Dashboard__cover hidden",
+              "id": "dashboard__cover",
+            },
+            "ref": null,
+            "rendered": Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "function",
+              "props": Object {},
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            "type": "div",
+          },
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": Object {
+              "environment": "RelayModernEnvironment()",
+              "query": Object {
+                "fragment": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Fragment",
+                  "metadata": null,
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "args": null,
+                      "kind": "FragmentSpread",
+                      "name": "LocalLabbooksContainer_labbookList",
+                    },
+                  ],
+                  "type": "LabbookQuery",
+                },
+                "hash": "90d1ee01c30400fbfd63c0f0e4bdb37a",
+                "kind": "Request",
+                "operation": Object {
+                  "argumentDefinitions": Array [
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "first",
+                      "type": "Int!",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "cursor",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "orderBy",
+                      "type": "String",
+                    },
+                    Object {
+                      "defaultValue": null,
+                      "kind": "LocalArgument",
+                      "name": "sort",
+                      "type": "String",
+                    },
+                  ],
+                  "kind": "Operation",
+                  "name": "DashboardLocalQuery",
+                  "selections": Array [
+                    Object {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "LabbookList",
+                      "kind": "LinkedField",
+                      "name": "labbookList",
+                      "plural": false,
+                      "selections": Array [
+                        Object {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "id",
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "concreteType": "LabbookConnection",
+                          "kind": "LinkedField",
+                          "name": "localLabbooks",
+                          "plural": false,
+                          "selections": Array [
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "LabbookEdge",
+                              "kind": "LinkedField",
+                              "name": "edges",
+                              "plural": true,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "concreteType": "Labbook",
+                                  "kind": "LinkedField",
+                                  "name": "node",
+                                  "plural": false,
+                                  "selections": Array [
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "id",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "name",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "description",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "owner",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "creationDateUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "modifiedOnUtc",
+                                      "storageKey": null,
+                                    },
+                                    Object {
+                                      "alias": null,
+                                      "args": null,
+                                      "kind": "ScalarField",
+                                      "name": "__typename",
+                                      "storageKey": null,
+                                    },
+                                  ],
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "cursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                            Object {
+                              "alias": null,
+                              "args": null,
+                              "concreteType": "PageInfo",
+                              "kind": "LinkedField",
+                              "name": "pageInfo",
+                              "plural": false,
+                              "selections": Array [
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "endCursor",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasNextPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "hasPreviousPage",
+                                  "storageKey": null,
+                                },
+                                Object {
+                                  "alias": null,
+                                  "args": null,
+                                  "kind": "ScalarField",
+                                  "name": "startCursor",
+                                  "storageKey": null,
+                                },
+                              ],
+                              "storageKey": null,
+                            },
+                          ],
+                          "storageKey": null,
+                        },
+                        Object {
+                          "alias": null,
+                          "args": Array [
+                            Object {
+                              "kind": "Variable",
+                              "name": "after",
+                              "variableName": "cursor",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "first",
+                              "variableName": "first",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "orderBy",
+                              "variableName": "orderBy",
+                            },
+                            Object {
+                              "kind": "Variable",
+                              "name": "sort",
+                              "variableName": "sort",
+                            },
+                          ],
+                          "filters": Array [],
+                          "handle": "connection",
+                          "key": "LocalLabbooks_localLabbooks",
+                          "kind": "LinkedHandle",
+                          "name": "localLabbooks",
+                        },
+                      ],
+                      "storageKey": null,
+                    },
+                  ],
+                },
+                "params": Object {
+                  "id": null,
+                  "metadata": Object {},
+                  "name": "DashboardLocalQuery",
+                  "operationKind": "query",
+                  "text": "query DashboardLocalQuery(
+  $first: Int!
+  $cursor: String
+  $orderBy: String
+  $sort: String
+) {
+  ...LocalLabbooksContainer_labbookList
+}
+
+fragment LocalLabbooksContainer_labbookList on LabbookQuery {
+  labbookList {
+    id
+    ...LocalLabbooks_localLabbooks
+  }
+}
+
+fragment LocalLabbooks_localLabbooks on LabbookList {
+  localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort) {
+    edges {
+      node {
+        id
+        name
+        description
+        owner
+        creationDateUtc
+        modifiedOnUtc
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+",
+                },
+              },
+              "render": [Function],
+              "variables": Object {
+                "cursor": null,
+                "first": 100,
+                "orderBy": "modified_on",
+                "sort": "desc",
+              },
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+        ],
         "type": "div",
       },
       "type": "div",
@@ -602,9 +4354,13 @@ ShallowWrapper {
     "adapter": ReactSixteenAdapter {
       "options": Object {
         "enableComponentDidUpdateOnSetState": true,
+        "legacyContextMode": "parent",
         "lifecycles": Object {
           "componentDidUpdate": Object {
             "onSetState": true,
+          },
+          "getChildContext": Object {
+            "calledByRenderer": false,
           },
           "getDerivedStateFromProps": true,
           "getSnapshotBeforeUpdate": true,

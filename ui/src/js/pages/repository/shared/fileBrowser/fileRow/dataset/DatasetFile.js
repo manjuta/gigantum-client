@@ -1,7 +1,7 @@
 // vendor
 import React, { Component } from 'react';
 import Moment from 'moment';
-import fileIconsJs from 'file-icons-js';
+import fileIconsJs from 'file-icons-js/dist/file-icons';
 import classNames from 'classnames';
 import MiddleTruncate from 'react-middle-truncate/lib/react-middle-truncate';
 // config
@@ -58,8 +58,7 @@ class File extends Component {
                     text={filename}
                     smartCopy
                   />
-                )
-              }
+                )}
             </div>
 
           </div>

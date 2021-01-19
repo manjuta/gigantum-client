@@ -8,6 +8,7 @@ exports[`Test LinkModal 1`] = `
   <div
     className="Modal__cover"
     onClick={[Function]}
+    role="presentation"
   />
   <div
     className="Modal__content Modal__content--noPadding Modal__content--large-long"
