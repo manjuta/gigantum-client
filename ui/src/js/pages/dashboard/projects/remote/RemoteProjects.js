@@ -6,7 +6,7 @@ import {
   graphql,
 } from 'react-relay';
 // components
-import RemoteLabbookPanel from 'Pages/dashboard/labbooks/remoteLabbooks/RemoteLabbookPanel';
+import RemoteProjectPanel from 'Pages/dashboard/projects/remote/panel/RemoteProjectPanel';
 import DeleteLabbook from 'Pages/repository/shared/modals/DeleteLabbook';
 import CardLoader from 'Pages/dashboard/shared/loaders/CardLoader';
 import NoResults from 'Pages/dashboard/shared/NoResults';
@@ -16,18 +16,18 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 // store
 import store from 'JS/redux/store';
 // assets
-import './RemoteLabbooks.scss';
+import './RemoteProjects.scss';
 
 
 type Props = {
-  filterLabbooks: Function,
+  filterProjects: Function,
   filterState: string,
   forceLocalView: Function,
   relay: {
     isLoading: Function,
     loadMore: Function,
   },
-  remoteLabbooks: {
+  remoteProjects: {
     remoteLabbooks: {
       edges: Array<Object>,
       pageInfo: {
@@ -35,11 +35,11 @@ type Props = {
       }
     }
   },
-  remoteLabbooksId: string,
+  remoteProjectsId: string,
   setFilterValue: Function,
 };
 
-class RemoteLabbooks extends Component<Props> {
+class RemoteProjects extends Component<Props> {
   state = {
     deleteData: {
       remoteId: null,
@@ -53,13 +53,13 @@ class RemoteLabbooks extends Component<Props> {
   };
 
   /*
-    loads more remote labbooks on mount
+    loads more remote projects on mount
   */
   componentDidMount() {
-    const { forceLocalView, remoteLabbooks } = this.props;
+    const { forceLocalView, remoteProjects } = this.props;
     if (
-      remoteLabbooks.remoteLabbooks
-      && remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage
+      remoteProjects.remoteLabbooks
+      && remoteProjects.remoteLabbooks.pageInfo.hasNextPage
     ) {
       this._loadMore();
     }
@@ -79,13 +79,13 @@ class RemoteLabbooks extends Component<Props> {
 
   /**
     *  @param {}
-    *  loads more labbooks using the relay pagination container
+    *  loads more projects using the relay pagination container
   */
   _loadMore = () => {
     const {
       forceLocalView,
       relay,
-      remoteLabbooks,
+      remoteProjects,
     } = this.props;
 
     if (relay.isLoading()) {
@@ -96,14 +96,14 @@ class RemoteLabbooks extends Component<Props> {
       if (navigator.onLine) {
         if (response.data) {
           if (response.data.userIdentity.isSessionValid) {
-            if (remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage) {
+            if (remoteProjects.remoteLabbooks.pageInfo.hasNextPage) {
               relay.loadMore(
                 8, // Fetch the next 8 items
                 () => {
                   const newProps = this.props;
                   if (
-                    newProps.remoteLabbooks.remoteLabbooks
-                    && newProps.remoteLabbooks.remoteLabbooks.pageInfo.hasNextPage
+                    newProps.remoteProjects.remoteLabbooks
+                    && newProps.remoteProjects.remoteLabbooks.pageInfo.hasNextPage
                   ) {
                     this._loadMore();
                   }
@@ -154,10 +154,10 @@ class RemoteLabbooks extends Component<Props> {
 
   render() {
     const {
-      filterLabbooks,
+      filterProjects,
       filterState,
-      remoteLabbooks,
-      remoteLabbooksId,
+      remoteProjects,
+      remoteProjectsId,
       relay,
       setFilterValue,
     } = this.props;
@@ -166,14 +166,14 @@ class RemoteLabbooks extends Component<Props> {
       deleteModalVisible,
       showLoginPrompt,
     } = this.state;
-    const { hasNextPage } = remoteLabbooks.remoteLabbooks.pageInfo;
+    const { hasNextPage } = remoteProjects.remoteLabbooks.pageInfo;
 
     if (
-      remoteLabbooks
-      && (remoteLabbooks.remoteLabbooks !== null)
+      remoteProjects
+      && (remoteProjects.remoteLabbooks !== null)
     ) {
-      const labbooks = filterLabbooks(
-        remoteLabbooks.remoteLabbooks.edges,
+      const projects = filterProjects(
+        remoteProjects.remoteLabbooks.edges,
         filterState,
       );
 
@@ -181,14 +181,14 @@ class RemoteLabbooks extends Component<Props> {
         <div className="Labbooks__listing">
           <div className="grid">
             {
-            labbooks.length
-              ? labbooks.map(edge => (
-                <RemoteLabbookPanel
+            projects.length
+              ? projects.map(edge => (
+                <RemoteProjectPanel
                   {...this.props}
                   toggleDeleteModal={this._toggleDeleteModal}
-                  labbookListId={remoteLabbooksId}
+                  projectistId={remoteProjectsId}
                   key={edge.node.owner + edge.node.name}
-                  ref={`RemoteLabbookPanel${edge.node.name}`}
+                  ref={`RemoteProjectPanel${edge.node.name}`}
                   edge={edge}
                   existsLocally={edge.node.isLocal}
                 />
@@ -199,7 +199,7 @@ class RemoteLabbooks extends Component<Props> {
             }
             { Array(5).fill(1).map((value, index) => (
               <CardLoader
-                key={`RemoteLabbooks_paginationLoader${index}`}
+                key={`RemoteProjects_paginationLoader${index}`}
                 index={index}
                 isLoadingMore={hasNextPage}
               />
@@ -235,7 +235,7 @@ class RemoteLabbooks extends Component<Props> {
 }
 
 export default createPaginationContainer(
-  RemoteLabbooks,
+  RemoteProjects,
   {
     remoteLabbooks: graphql`
       fragment RemoteLabbooks_remoteLabbooks on LabbookList{
@@ -267,7 +267,7 @@ export default createPaginationContainer(
   {
     direction: 'forward',
     getConnectionFromProps(props) {
-      return props.remoteLabbooks.remoteLabbooks;
+      return props.remoteProjects.remoteLabbooks;
     },
     getFragmentVariables(prevVars, first) {
       return {
@@ -279,7 +279,7 @@ export default createPaginationContainer(
       first, cursor, orderBy, sort,
     }, fragmentVariables) {
       first = 10;
-      cursor = props.remoteLabbooks.remoteLabbooks.pageInfo.endCursor;
+      cursor = props.remoteProjects.remoteLabbooks.pageInfo.endCursor;
       orderBy = fragmentVariables.orderBy;
       sort = fragmentVariables.sort;
       return {

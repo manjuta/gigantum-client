@@ -6,10 +6,10 @@ import { setCallbackRoute } from 'JS/redux/actions/routes';
 // components
 import environment from 'JS/createRelayEnvironment';
 import Loader from 'Components/loader/Loader';
-import LocalLabbooksContainer from './labbooks/localLabbooks/LocalLabbooksContainer';
-import LocalDatasetsContainer from './datasets/localDatasets/LocalDatasetsContainer';
-import RemoteDatasetsContainer from './datasets/remoteDatasets/RemoteDatasetsContainer';
-import RemoteLabbooksContainer from './labbooks/remoteLabbooks/RemoteLabbooksContainer';
+import LocalProjectsContainer from './projects/local/LocalProjectsContainer';
+import LocalDatasetsContainer from './datasets/local/LocalDatasetsContainer';
+import RemoteDatasetsContainer from './datasets/remote/RemoteDatasetsContainer';
+import RemoteProjectsContainer from './projects/remote/RemoteProjectsContainer';
 // assets
 import './Dashboard.scss';
 
@@ -50,21 +50,18 @@ export default class DashboardContainer extends Component<Props> {
     };
   }
 
+  static getDerivedStateFromProps(props, state) {
+    setCallbackRoute(props.history.location.pathname);
+    return {
+      ...state,
+      selectedComponent: props.match.path,
+    };
+  }
+
   componentDidMount() {
     const { history } = this.props;
     window.location.hash = '';
     setCallbackRoute(history.location.pathname);
-  }
-
-  /**
-  *  @param {Object} nextProps
-  *  update select component before component renders
-  */
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({
-      selectedComponent: nextProps.match.path,
-    });
-    setCallbackRoute(nextProps.history.location.pathname);
   }
 
   /**
@@ -164,7 +161,7 @@ export default class DashboardContainer extends Component<Props> {
             }
             if (sectionRoute === 'cloud') {
               return (
-                <RemoteLabbooksContainer
+                <RemoteProjectsContainer
                   auth={auth}
                   diskLow={diskLow}
                   history={history}
@@ -179,7 +176,7 @@ export default class DashboardContainer extends Component<Props> {
             }
 
             return (
-              <LocalLabbooksContainer
+              <LocalProjectsContainer
                 auth={auth}
                 diskLow={diskLow}
                 hash={hash}
@@ -212,7 +209,7 @@ export default class DashboardContainer extends Component<Props> {
             }
 
             return (
-              <LocalLabbooksContainer
+              <LocalProjectsContainer
                 auth={auth}
                 diskLow={diskLow}
                 history={history}

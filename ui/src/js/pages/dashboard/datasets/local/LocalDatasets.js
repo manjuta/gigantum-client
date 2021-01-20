@@ -5,7 +5,7 @@ import {
   graphql,
 } from 'react-relay';
 // components
-import LocalDatasetPanel from 'Pages/dashboard/datasets/localDatasets/LocalDatasetsPanel';
+import LocalDatasetPanel from 'Pages/dashboard/datasets/local/panel/LocalDatasetsPanel';
 import CardLoader from 'Pages/dashboard/shared/loaders/CardLoader';
 import ImportModule from 'Pages/dashboard/shared/import/ImportModule';
 import NoResults from 'Pages/dashboard/shared/NoResults';

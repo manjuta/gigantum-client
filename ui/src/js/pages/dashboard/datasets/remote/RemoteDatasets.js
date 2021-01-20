@@ -10,7 +10,7 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 // store
 import store from 'JS/redux/store';
 // components
-import RemoteDatasetPanel from 'Pages/dashboard/datasets/remoteDatasets/RemoteDatasetsPanel';
+import RemoteDatasetPanel from 'Pages/dashboard/datasets/remote/panel/RemoteDatasetsPanel';
 import DeleteDataset from 'Pages/repository/shared/modals/DeleteDataset';
 import CardLoader from 'Pages/dashboard/shared/loaders/CardLoader';
 import NoResults from 'Pages/dashboard/shared/NoResults';

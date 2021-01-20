@@ -1,6 +1,6 @@
 @import '~Styles/_imports.scss';
 
-.LocalLabbooks {
+.LocalProjects {
   width: auto;
   min-width: 760px;
   max-width: 1285px;
@@ -9,7 +9,7 @@
   padding: 0 25px;
 }
 
-.LocalLabbooks__title {
+.LocalProjects__title {
   position: relative;
 
   width: 280px;
@@ -21,7 +21,7 @@
   color: $primaryText;
 }
 
-.LocalLabbooks__username {
+.LocalProjects__username {
   margin: 20px 0 10px 0;
   padding: 0;
 }

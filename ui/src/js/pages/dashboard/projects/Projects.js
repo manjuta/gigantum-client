@@ -7,8 +7,8 @@ import { connect } from 'react-redux';
 // components
 import CreateModal from 'Pages/repository/shared/modals/create/CreateModal';
 import Loader from 'Components/loader/Loader';
-import LocalLabbooksContainer, { LocalLabbooks } from 'Pages/dashboard/labbooks/localLabbooks/LocalLabbooks';
-import RemoteLabbooks from 'Pages/dashboard/labbooks/remoteLabbooks/RemoteLabbooks';
+import LocalProjectsContainer, { LocalProjects } from 'Pages/dashboard/projects/local/LocalProjects';
+import RemoteProjects from 'Pages/dashboard/projects/remote/RemoteProjects';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
 import Tooltip from 'Components/tooltip/Tooltip';
 import FilterByDropdown from 'Pages/dashboard/shared/filters/FilterByDropdown';
@@ -23,7 +23,7 @@ import ServerContext from 'Pages/ServerContext';
 import { setErrorMessage } from 'JS/redux/actions/footer';
 import { setFilterText } from 'JS/redux/actions/labbookListing/labbookListing';
 // assets
-import './Labbooks.scss';
+import './Projects.scss';
 
 type Props = {
   diskLow: boolean,
@@ -46,7 +46,7 @@ type Props = {
   sortBy: string,
 }
 
-class Labbooks extends Component<Props> {
+class Projects extends Component<Props> {
   constructor(props) {
     super(props);
 
@@ -61,8 +61,8 @@ class Labbooks extends Component<Props> {
     }
 
     this.state = {
-      labbookModalVisible: false,
-      newLabbookName: '',
+      projectModalVisible: false,
+      newProjectName: '',
       renameError: '',
       showNamingError: false,
       filter: filter || 'all',
@@ -176,37 +176,37 @@ class Labbooks extends Component<Props> {
     const { showSearchCancel } = this.state;
     if (
       showSearchCancel
-      && (evt.target.className !== 'Labbooks__search-cancel')
-      && (evt.target.className !== 'Labbooks__search no--margin')
+      && (evt.target.className !== 'Projects__search-cancel')
+      && (evt.target.className !== 'Projects__search no--margin')
     ) {
       this.setState({ showSearchCancel: false });
     }
   }
 
   /**
-    *  @param {string} name - inputs a labbook name
-    *  routes to that labbook
+    *  @param {string} name - inputs a project name
+    *  routes to that project
   */
-  _goToLabbook = (name, owner) => {
+  _goToProject = (name, owner) => {
     this.setState({ name, owner });
   }
 
   /**
     *  @param {} -
-    *  closes labbook modal and resets state to initial state
+    *  closes project modal and resets state to initial state
   */
-  _closeLabbook = () => {
+  _closeProject = () => {
     this.setState({
-      labbookModalVisible: false,
+      projectModalVisible: false,
       showNamingError: false,
     });
   }
 
   /**
     *  @param {event} evt
-    *  sets new labbook title to state
+    *  sets new project title to state
   */
-  _setLabbookTitle = (evt) => {
+  _setProjectTitle = (evt) => {
     const isValid = Validation.labbookName(evt.target.value);
     if (isValid) {
       this.setState({
@@ -254,18 +254,18 @@ class Labbooks extends Component<Props> {
   }
 
   /**
-   * @param {object} labbook
-   * returns true if labbook's name or description exists in filtervalue, else returns false
+   * @param {object} project
+   * returns true if project's name or description exists in filtervalue, else returns false
   */
-  _filterSearch = (labbook) => {
+  _filterSearch = (project) => {
     const { filterText } = this.props;
     const hasNoFileText = (filterText === '');
-    const nameMatches = labbook.node
-      && labbook.node.name
-      && (labbook.node.name.toLowerCase().indexOf(filterText.toLowerCase()) > -1);
-    const descriptionMatches = labbook.node
-      && labbook.node.description
-      && (labbook.node.description.toLowerCase().indexOf(filterText.toLowerCase()) > -1);
+    const nameMatches = project.node
+      && project.node.name
+      && (project.node.name.toLowerCase().indexOf(filterText.toLowerCase()) > -1);
+    const descriptionMatches = project.node
+      && project.node.description
+      && (project.node.description.toLowerCase().indexOf(filterText.toLowerCase()) > -1);
 
     if (hasNoFileText
       || nameMatches
@@ -276,30 +276,30 @@ class Labbooks extends Component<Props> {
   }
 
   /**
-   * @param {array, string} localLabbooks.edges,filter
-   * @return {array} filteredLabbooks
+   * @param {array, string} localProjects.edges,filter
+   * @return {array} filteredProjects
   */
-  _filterLabbooks = (labbooks, filter) => {
+  _filterProjects = (projects, filter) => {
     const username = localStorage.getItem('username');
     const self = this;
-    let filteredLabbooks = [];
+    let filteredProjects = [];
 
 
     if (filter === 'owner') {
-      filteredLabbooks = labbooks.filter(
-        labbook => ((labbook.node.owner === username)
-        && self._filterSearch(labbook)),
+      filteredProjects = projects.filter(
+        project => ((project.node.owner === username)
+        && self._filterSearch(project)),
       );
     } else if (filter === 'others') {
-      filteredLabbooks = labbooks.filter(
-        labbook => (labbook.node.owner !== username
-          && self._filterSearch(labbook)),
+      filteredProjects = projects.filter(
+        project => (project.node.owner !== username
+          && self._filterSearch(project)),
       );
     } else {
-      filteredLabbooks = labbooks.filter(labbook => self._filterSearch(labbook));
+      filteredProjects = projects.filter(project => self._filterSearch(project));
     }
 
-    return filteredLabbooks;
+    return filteredProjects;
   }
 
   /**
@@ -335,7 +335,7 @@ class Labbooks extends Component<Props> {
       showLoginPrompt,
     } = this.state;
 
-    if (selectedSection === 'remoteLabbooks') {
+    if (selectedSection === 'remoteProjects') {
       UserIdentity.getUserIdentity().then((response) => {
         if (navigator.onLine) {
           if (response.data) {
@@ -356,7 +356,7 @@ class Labbooks extends Component<Props> {
 
   /**
     * @param {}
-    * fires when user selects remote labbook view
+    * fires when user selects remote project view
     * checks user auth before changing selectedSection state
   */
   _viewRemote = () => {
@@ -384,8 +384,8 @@ class Labbooks extends Component<Props> {
   _setFilterValue = (evt) => {
     setFilterText(evt.target.value);
     // TODO remove refs
-    if (this.labbookSearch.value !== evt.target.value) {
-      this.labbookSearch.value = evt.target.value;
+    if (this.projectSearch.value !== evt.target.value) {
+      this.projectSearch.value = evt.target.value;
     }
   }
 
@@ -435,9 +435,9 @@ class Labbooks extends Component<Props> {
     const { currentServer } = this.context;
     const currentServerName = currentServer && currentServer.name ? currentServer.name : 'gigantum'
     // declare css
-    const labbooksCSS = classNames({
-      Labbooks: true,
-      'Labbooks--disk-low': diskLow,
+    const projectsCSS = classNames({
+      Projects: true,
+      'Projects--disk-low': diskLow,
     });
 
     if ((labbookList !== null) || loading) {
@@ -454,7 +454,7 @@ class Labbooks extends Component<Props> {
 
       return (
 
-        <div className={labbooksCSS}>
+        <div className={projectsCSS}>
 
           <CreateModal
             {...this.props}
@@ -462,12 +462,12 @@ class Labbooks extends Component<Props> {
             handler={this.handler}
           />
 
-          <div className="Labbooks__panel-bar">
-            <h6 className="Labbooks__username">{localStorage.getItem('username')}</h6>
+          <div className="Projects__panel-bar">
+            <h6 className="Projects__username">{localStorage.getItem('username')}</h6>
             <h1>Projects</h1>
 
           </div>
-          <div className="Labbooks__menu  mui-container flex-0-0-auto">
+          <div className="Projects__menu  mui-container flex-0-0-auto">
             <ul className="Tabs">
               <li className={localNavItemCSS}>
                 <button
@@ -492,8 +492,8 @@ class Labbooks extends Component<Props> {
             </ul>
 
           </div>
-          <div className="Labbooks__subheader grid">
-            <div className="Labbooks__search-container column-2-span-6 padding--0">
+          <div className="Projects__subheader grid">
+            <div className="Projects__search-container column-2-span-6 padding--0">
               <div className="Input Input--clear">
                 { (filterText.length !== 0)
                     && (
@@ -508,7 +508,7 @@ class Labbooks extends Component<Props> {
                   }
                 <input
                   type="text"
-                  ref={(modal) => { this.labbookSearch = modal; }}
+                  ref={(modal) => { this.projectSearch = modal; }}
                   className="margin--0"
                   placeholder="Filter Projects by name or description"
                   defaultValue={filterText}
@@ -533,13 +533,13 @@ class Labbooks extends Component<Props> {
           </div>
           { (!loading) && (selectedSection === 'local')
             && (
-              <LocalLabbooksContainer
+              <LocalProjectsContainer
                 {...this.props}
-                labbookListId={labbookList.id}
-                localLabbooks={labbookList.labbookList}
+                projectListId={labbookList.id}
+                localProjects={labbookList.labbookList}
                 showModal={this._showModal}
-                goToLabbook={this._goToLabbook}
-                filterLabbooks={this._filterLabbooks}
+                goToProject={this._goToProject}
+                filterProjects={this._filterProjects}
                 filterState={filter}
                 setFilterValue={this._setFilterValue}
                 changeRefetchState={bool => this.setState({ refetchLoading: bool })}
@@ -548,13 +548,13 @@ class Labbooks extends Component<Props> {
           }
           { (!loading) && (selectedSection === 'cloud')
             && (
-              <RemoteLabbooks
+              <RemoteProjects
                 {...this.props}
-                labbookListId={labbookList.labbookList.id}
-                remoteLabbooks={labbookList.labbookList}
+                projectListId={labbookList.labbookList.id}
+                remoteProjects={labbookList.labbookList}
                 showModal={this._showModal}
-                goToLabbook={this._goToLabbook}
-                filterLabbooks={this._filterLabbooks}
+                goToProject={this._goToProject}
+                filterProjects={this._filterProjects}
                 filterState={filter}
                 setFilterValue={this._setFilterValue}
                 forceLocalView={() => { this._forceLocalView(); }}
@@ -564,7 +564,7 @@ class Labbooks extends Component<Props> {
           }
           { loading
             && (
-              <LocalLabbooks
+              <LocalProjects
                 {...this.props}
                 loading
                 showModal={this._showModal}
@@ -582,7 +582,7 @@ class Labbooks extends Component<Props> {
     }
     if ((labbookList === null) && !loading) {
       return (
-        <div className="Labbooks__fetch-error">
+        <div className="Projects__fetch-error">
           There was an error attempting to fetch Projects.
           <br />
           Try restarting Gigantum and refresh the page.
@@ -609,4 +609,4 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = () => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(Labbooks);
+export default connect(mapStateToProps, mapDispatchToProps)(Projects);

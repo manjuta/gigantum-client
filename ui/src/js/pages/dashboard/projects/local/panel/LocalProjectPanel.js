@@ -13,7 +13,7 @@ import StopContainerMutation from 'Mutations/container/StopContainerMutation';
 // store
 import { setErrorMessage, setInfoMessage } from 'JS/redux/actions/footer';
 // assets
-import './LocalLabbookPanel.scss';
+import './LocalProjectPanel.scss';
 
 type Props = {
   edge: {
@@ -30,9 +30,9 @@ type Props = {
 };
 
 /**
-*  labbook panel is to only render the edge passed to it
+*  project panel is to only render the edge passed to it
 */
-class LocalLabbookPanel extends Component<Props> {
+class LocalProjectPanel extends Component<Props> {
   state = {
     exportPath: '',
     status: 'loading',
@@ -44,7 +44,7 @@ class LocalLabbookPanel extends Component<Props> {
 
   /** *
   * @param {Object} nextProps
-  * processes container lookup and assigns container status to labbook card
+  * processes container lookup and assigns container status to project card
   */
   static getDerivedStateFromProps(nextProps, state) {
     const { environment } = nextProps.node;
@@ -98,7 +98,7 @@ class LocalLabbookPanel extends Component<Props> {
 
   /** *
   * @param {string} status
-  * starts labbook conatainer
+  * starts project conatainer
   */
   _startContainerMutation = () => {
     const self = this;
@@ -123,7 +123,7 @@ class LocalLabbookPanel extends Component<Props> {
 
   /** *
   * @param {string} status
-  * stops labbbok conatainer
+  * stops project container
   */
   _stopContainerMutation = () => {
     const { owner, name } = this.state;
@@ -205,17 +205,15 @@ class LocalLabbookPanel extends Component<Props> {
         className="Card Card--225 Card--text column-4-span-3 flex flex--column justify--space-between"
       >
 
-        <div className="LocalLabbooks__row--icons">
+        <div className="LocalProjects__row--icons">
           { !(visibility === 'local')
             && (
             <div
               data-tooltip={`${visibility}`}
-              className={`Tooltip-Listing LocalLabbookPanel__${visibility} Tooltip-data Tooltip-data--small`}
+              className={`Tooltip-Listing LocalProjectPanel__${visibility} Tooltip-data Tooltip-data--small`}
             />
-            )
-          }
-
-          <div className="LocalLabbooks__containerStatus">
+            )}
+          <div className="LocalProjects__containerStatus">
 
             <div
               role="presentation"
@@ -233,39 +231,35 @@ class LocalLabbookPanel extends Component<Props> {
                 <div className="ContainerStatus__toggle-btn" />
               </div>
             </div>
-
           </div>
-
         </div>
 
-        <div className="LocalLabbooks__row--text">
-
+        <div className="LocalProjects__row--text">
           <div>
             <RepositoryTitle
               name={name}
-              section="LocalLabbooks"
+              section="LocalProjects"
               filterText={filterText}
             />
           </div>
-
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--owner ">{owner}</p>
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata">
+          <p className="LocalProjects__paragraph LocalProjects__paragraph--owner ">{owner}</p>
+          <p className="LocalProjects__paragraph LocalProjects__paragraph--metadata">
             <span className="bold">Created:</span>
             {' '}
             {Moment(creationDateUtc).format('MM/DD/YY')}
           </p>
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--metadata">
+          <p className="LocalProjects__paragraph LocalProjects__paragraph--metadata">
             <span className="bold">Modified:</span>
             {' '}
             {Moment(modifiedOnUtc).fromNow()}
           </p>
 
-          <p className="LocalLabbooks__paragraph LocalLabbooks__paragraph--description">
+          <p className="LocalProjects__paragraph LocalProjects__paragraph--description">
             {
               description && description.length
                 ? (
                   <Highlighter
-                    highlightClassName="LocalLabbooks__highlighted"
+                    highlightClassName="LocalProjects__highlighted"
                     searchWords={[filterText]}
                     autoEscape={false}
                     caseSensitive={false}
@@ -284,4 +278,4 @@ class LocalLabbookPanel extends Component<Props> {
   }
 }
 
-export default LocalLabbookPanel;
+export default LocalProjectPanel;
