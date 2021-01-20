@@ -15,7 +15,7 @@ import './Dashboard.scss';
 
 
 const LocalListingQuery = graphql`query DashboardLocalQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
-  ...LocalLabbooksContainer_labbookList
+  ...LocalProjectsContainer_projectList
 }`;
 
 const LocalDatasetListingQuery = graphql`query DashboardDatasetLocalQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
@@ -26,7 +26,7 @@ const RemoteDatasetListingQuery = graphql`query DashboardDatasetRemoteQuery($fir
 }`;
 
 const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
-  ...RemoteLabbooksContainer_labbookList
+  ...RemoteProjectsContainer_labbookList
 }`;
 
 type Props = {

@@ -237,8 +237,8 @@ class RemoteProjects extends Component<Props> {
 export default createPaginationContainer(
   RemoteProjects,
   {
-    remoteLabbooks: graphql`
-      fragment RemoteLabbooks_remoteLabbooks on LabbookList{
+    remoteProjects: graphql`
+      fragment RemoteProjects_remoteProjects on LabbookList{
         remoteLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "RemoteLabbooks_remoteLabbooks", filters: []){
           edges {
             node {
@@ -292,14 +292,14 @@ export default createPaginationContainer(
       };
     },
     query: graphql`
-      query RemoteLabbooksPaginationQuery(
+      query RemoteProjectsPaginationQuery(
         $first: Int!
         $cursor: String
         $orderBy: String
         $sort: String
       ) {
         labbookList{
-          ...RemoteLabbooks_remoteLabbooks
+          ...RemoteProjects_remoteProjects
         }
       }
     `,
