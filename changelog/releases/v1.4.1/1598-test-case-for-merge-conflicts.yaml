@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1607"
+changelog:
+  - type: NEW
+    description: Test case to tests basic merge conflict behavior ('mine', 'theirs', 'abort').

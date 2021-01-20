@@ -5,6 +5,7 @@ import requests
 from gtmcore.logging import LMLogger
 from gtmcore.container import ContainerOperations
 from gtmcore.exceptions import GigantumException
+from gtmcore.environment.componentmanager import ComponentManager
 
 logger = LMLogger.get_logger()
 
@@ -42,10 +43,17 @@ def start_rserver(project_container: ContainerOperations, check_reachable: bool 
 
 
 def _start_rserver_process(project_container: ContainerOperations) -> None:
-    cmd = ("mkdir -p /home/giguser/.rstudio/monitored/user-settings"
-           " && cp /tmp/user-settings /home/giguser/.rstudio/monitored/user-settings/"
-           # --www-port is just here to be explicit / document how to change if needed
-           " && exec /usr/lib/rstudio-server/bin/rserver --www-port=8787")
+    cm = ComponentManager(labbook=project_container.labbook)
+    revision = cm.base_fields["revision"]
+
+    if revision <= 3:
+        cmd = ("mkdir -p /home/giguser/.rstudio/monitored/user-settings"
+               " && cp /tmp/user-settings /home/giguser/.rstudio/monitored/user-settings/"
+               # --www-port is just here to be explicit / document how to change if needed
+               " && exec /usr/lib/rstudio-server/bin/rserver --www-port=8787")
+    else:
+        cmd = "exec /usr/lib/rstudio-server/bin/rserver --www-port=8787"
+
     # USER skips the login screen for rserver, specifying `user` in exec_run is insufficient
     env = {'USER': 'giguser'}
     project_container.exec_command(cmd, environment=env, user='giguser')

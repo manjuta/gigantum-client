@@ -2,7 +2,7 @@
 // vendor
 import React, { Component } from 'react';
 import Moment from 'moment';
-import fileIconsJs from 'file-icons-js';
+import fileIconsJs from 'file-icons-js/dist/file-icons';
 import classNames from 'classnames';
 import { DragSource } from 'react-dnd';
 import ReactTooltip from 'react-tooltip';

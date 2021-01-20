@@ -1,0 +1,6 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1606"
+changelog:
+  - type: FIX
+    description: Fixes issue with configuring RStudio working directory at launch
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1605
+

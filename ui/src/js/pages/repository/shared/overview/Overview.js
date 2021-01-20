@@ -10,12 +10,12 @@ import { setErrorMessage } from 'JS/redux/actions/footer';
 // components
 import MarkdownEditor from 'Components/markdownEditor/MarkdownEditor';
 import Base from 'Pages/repository/labbook/environment/Base';
-import Type from 'Pages/repository/dataset/overview/Type';
+import Type from 'Pages/repository/dataset/overview/type/Type';
 import RecentActivity from 'Pages/repository/labbook/overview/RecentActivity';
 import Loader from 'Components/loader/Loader';
 import CodeBlock from 'Pages/repository/labbook/renderers/CodeBlock';
 import Tooltip from 'Components/tooltip/Tooltip';
-import Summary from 'Pages/repository/dataset/overview/Summary';
+import Summary from 'Pages/repository/dataset/overview/summary/Summary';
 import EmptyReadme from './EmptyReadme';
 
 // assets
@@ -232,92 +232,93 @@ class Overview extends Component<Props> {
      }
    }
 
-  render() {
-    // destructure here
-    const {
-      datasetType,
-      name,
-      owner,
-      sectionType,
-      scrollToTop,
-      history,
-      isManaged,
-    } = this.props;
-    const {
-      editingReadme,
-      editorFullscreen,
-      markdown,
-      overflowExists,
-      readmeExpanded,
-    } = this.state;
-    // declare variables here
-    const sectionProps = this.props[sectionType];
-    const isLabbook = (sectionType === 'labbook');
-    const typeText = isLabbook ? 'Environment' : 'Type';
-    const showLoadMoreButton = overflowExists
+   render() {
+     // destructure here
+     const {
+       datasetType,
+       name,
+       owner,
+       sectionType,
+       scrollToTop,
+       history,
+       isManaged,
+     } = this.props;
+     const {
+       editingReadme,
+       editorFullscreen,
+       markdown,
+       overflowExists,
+       readmeExpanded,
+     } = this.state;
+     // declare variables here
+     const sectionProps = this.props[sectionType];
+     const isLabbook = (sectionType === 'labbook');
+     const typeText = isLabbook ? 'Environment' : 'Type';
+     const showLoadMoreButton = overflowExists
       || (readmeExpanded && !overflowExists);
-    const overViewComponent = (isLabbook && sectionProps.overview)
-      ? (
-        <RecentActivity
-          name={name}
-          owner={owner}
-          recentActivity={sectionProps.overview.recentActivity}
-          scrollToTop={scrollToTop}
-          history={history}
-        />
-      )
-      : (
-        <Summary
-          name={name}
-          owner={owner}
-          isManaged={isManaged}
-          {...sectionProps.overview}
-        />
-      );
+     const overViewComponent = (isLabbook && sectionProps.overview)
+       ? (
+         <RecentActivity
+           name={name}
+           owner={owner}
+           recentActivity={sectionProps.overview.recentActivity}
+           scrollToTop={scrollToTop}
+           history={history}
+         />
+       )
+       : (
+         <Summary
+           name={name}
+           owner={owner}
+           isManaged={isManaged}
+           {...sectionProps.overview}
+         />
+       );
 
-    // decalre css here
-    const overviewCSS = classNames({
-      Overview: true,
-      'Overview--fullscreen': editorFullscreen,
-    });
-    const readmeCSS = classNames({
-      ReadmeMarkdown: true,
-      'ReadmeMarkdown--collapsed': !readmeExpanded,
-      'ReadmeMarkdown--expanded': readmeExpanded,
-    });
-    const overviewReadmeCSS = classNames({
-      'Overview__readme Readme Card Card--auto Card--no-hover column-1-span-12': !editingReadme,
-      hidden: editingReadme,
-    });
-    const overviewReadmeButtonCSS = classNames({
-      'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
-      hidden: editingReadme,
-    });
+     // decalre css here
+     const overviewCSS = classNames({
+       Overview: true,
+       'Overview--fullscreen': editorFullscreen,
+     });
+     const readmeCSS = classNames({
+       'ReadmeMarkdown Markdown': true,
+       'ReadmeMarkdown--collapsed': !readmeExpanded,
+       'ReadmeMarkdown--expanded': readmeExpanded,
 
-    const loadMoreCSS = classNames({
-      'Btn Btn__expandadble': true,
-      'Btn__expandadble--expand': !readmeExpanded,
-      'Btn__expandadble--collapse': readmeExpanded,
-    });
+     });
+     const overviewReadmeCSS = classNames({
+       'Overview__readme Readme Card Card--auto Card--no-hover column-1-span-12': !editingReadme,
+       hidden: editingReadme,
+     });
+     const overviewReadmeButtonCSS = classNames({
+       'Btn Btn--feature Btn__edit Btn__edit--featurePosition': true,
+       hidden: editingReadme,
+     });
 
-    if (sectionProps && sectionProps.overview) {
-      return (
+     const loadMoreCSS = classNames({
+       'Btn Btn__expandadble': true,
+       'Btn__expandadble--expand': !readmeExpanded,
+       'Btn__expandadble--collapse': readmeExpanded,
+     });
 
-        <div className={overviewCSS}>
-          { overViewComponent }
+     if (sectionProps && sectionProps.overview) {
+       return (
 
-          <div className="Overview__container">
+         <div className={overviewCSS}>
+           { overViewComponent }
 
-            <h4 className="Overview__title">
-              Readme
-              <Tooltip section="readMe" />
-            </h4>
+           <div className="Overview__container">
 
-          </div>
+             <h4 className="Overview__title">
+               Readme
+               <Tooltip section="readMe" />
+             </h4>
 
-          { editingReadme
+           </div>
+
+           { editingReadme
             && (
-              <div className="Overview__readme--editing column-1-span-12">
+              <div className="Overview__readme--editing Markdown column-1-span-12">
                 <MarkdownEditor
                   {...this.props}
                   markdown={sectionProps.overview.readme || markdown}
@@ -342,29 +343,27 @@ class Overview extends Component<Props> {
                   </button>
                 </div>
               </div>
-            )
-          }
-          { sectionProps.overview.readme
-            ? (
-              <div className="grid">
-                <div className={overviewReadmeCSS}>
-                  <button
-                    type="button"
-                    className={overviewReadmeButtonCSS}
-                    onClick={() => this._setEditingReadme(true)}
-                  >
-                    <span>Edit Readme</span>
-                  </button>
-                  <ReactMarkdown
-                    className={readmeCSS}
-                    source={sectionProps.overview.readme}
-                    renderers={{ code: props => <CodeBlock {...props} /> }}
-                  />
+            )}
+           { sectionProps.overview.readme
+             ? (
+               <div className="grid">
+                 <div className={overviewReadmeCSS}>
+                   <button
+                     type="button"
+                     className={overviewReadmeButtonCSS}
+                     onClick={() => this._setEditingReadme(true)}
+                   >
+                     <span>Edit Readme</span>
+                   </button>
+                   <ReactMarkdown
+                     className={readmeCSS}
+                     source={sectionProps.overview.readme}
+                     renderers={{ code: props => <CodeBlock {...props} /> }}
+                   />
 
-                  { (overflowExists && !readmeExpanded)
-                      && <div className="Overview__readme-fadeout" />
-                  }
-                  { showLoadMoreButton
+                   { (overflowExists && !readmeExpanded)
+                      && <div className="Overview__readme-fadeout" />}
+                   { showLoadMoreButton
                     && (
                       <div className="Overview__readme-buttons">
                         <div className="Overview__readme-bar-less">
@@ -375,63 +374,60 @@ class Overview extends Component<Props> {
                           />
                         </div>
                       </div>
-                    )
-                  }
-                </div>
-              </div>
-            )
-            : !editingReadme
+                    )}
+                 </div>
+               </div>
+             )
+             : !editingReadme
               && (
                 <EmptyReadme
                   sectionType={sectionType}
                   editingReadme={editingReadme}
                   setEditingReadme={this._setEditingReadme}
                 />
-              )
-          }
+              )}
 
-          <div className="Overview__container">
-            <h4>
-              {typeText}
-              <Tooltip section="environmentOverview" />
-            </h4>
-          </div>
+           <div className="Overview__container">
+             <h4>
+               {typeText}
+               <Tooltip section="environmentOverview" />
+             </h4>
+           </div>
 
-          { isLabbook
-            ? (
-              <div className="grid">
-                <div className="Overview__environment column-1-span-12">
-                  <button
-                    type="button"
-                    className="Btn Btn--feature Btn__redirect Btn__redirect--featurePosition Btn__overview"
-                    onClick={() => this._handleRedirect('environment')}
-                  >
-                    <span>View Environment Details</span>
-                  </button>
-                  <Base
-                    environment={sectionProps.environment}
-                    blockClass="Overview"
-                    overview={sectionProps.overview}
-                  />
+           { isLabbook
+             ? (
+               <div className="grid">
+                 <div className="Overview__environment column-1-span-12">
+                   <button
+                     type="button"
+                     className="Btn Btn--feature Btn__redirect Btn__redirect--featurePosition Btn__overview"
+                     onClick={() => this._handleRedirect('environment')}
+                   >
+                     <span>View Environment Details</span>
+                   </button>
+                   <Base
+                     environment={sectionProps.environment}
+                     blockClass="Overview"
+                     overview={sectionProps.overview}
+                   />
 
-                </div>
-              </div>
-            )
-            : (
-              <div className="Overview__environment">
-                <Type
-                  type={datasetType}
-                  isManaged={isManaged}
-                />
-              </div>
-            )
-          }
-        </div>
-      );
-    }
+                 </div>
+               </div>
+             )
+             : (
+               <div className="Overview__environment">
+                 <Type
+                   type={datasetType}
+                   isManaged={isManaged}
+                 />
+               </div>
+             )}
+         </div>
+       );
+     }
 
-    return (<Loader />);
-  }
+     return (<Loader />);
+   }
 }
 
 export default Overview;

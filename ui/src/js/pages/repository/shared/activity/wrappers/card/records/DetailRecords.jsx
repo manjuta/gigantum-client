@@ -9,6 +9,7 @@ import './DetailRecords.scss';
 
 type Props = {
   detailRecords: Array,
+  isNote: Boolean,
 };
 
 class DetailRecords extends Component<Props> {
@@ -57,7 +58,7 @@ class DetailRecords extends Component<Props> {
   }
 
   render() {
-    const { detailRecords } = this.props;
+    const { detailRecords, isNote } = this.props;
     const { hasOverflow, showingMore } = this.state;
     const toggleLinkText = showingMore ? 'Less...' : 'More...';
     const isImage = detailRecords[0] && detailRecords[0]
@@ -66,7 +67,7 @@ class DetailRecords extends Component<Props> {
       && detailRecords[0].data[0][0].indexOf('image') > -1;
     const listCSS = classNames({
       DetailsRecords__list: true,
-      'DetailsRecords__list--long': showingMore || (isImage),
+      'DetailsRecords__list--long': showingMore || (isImage) || isNote,
     });
     const linkCSS = classNames({
       DetailsRecords__link: !showingMore,
@@ -79,7 +80,13 @@ class DetailRecords extends Component<Props> {
           className={listCSS}
           ref={(ref) => { this.recordList = ref; }}
         >
-          { detailRecords.map((detailRecord) => (<Record detailRecord={detailRecord} />))}
+          { detailRecords.map((detailRecord) => (
+            <Record
+              detailRecord={detailRecord}
+              isNote={isNote}
+              key={detailRecord.id}
+            />
+          ))}
         </div>
 
         { hasOverflow && (!isImage)
@@ -90,12 +97,11 @@ class DetailRecords extends Component<Props> {
                 className={linkCSS}
                 onClick={e => this._moreClicked(e.target)}
                 role="presentation"
-               >
-                 {toggleLinkText}
-               </p>
-             </div>
-           )
-         }
+              >
+                {toggleLinkText}
+              </p>
+            </div>
+          )}
       </div>
     );
   }

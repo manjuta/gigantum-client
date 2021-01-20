@@ -15,8 +15,7 @@ class ProjectContainerStatusComponent(BaseComponent):
     """
 
     def __init__(self, driver: webdriver) -> None:
-        project_container_status_model = ComponentModel(locator_type=LocatorType.XPath,
-                                                        locator="//div[@class='ContainerStatus flex flex--row']")
+        project_container_status_model = ComponentModel()
         super(ProjectContainerStatusComponent, self).__init__(driver, project_container_status_model)
 
     def monitor_container_status(self, compare_text: str, wait_timeout: int) -> bool:
@@ -29,10 +28,13 @@ class ProjectContainerStatusComponent(BaseComponent):
         Returns:
             Returns the comparison result.
         """
-        container_status_element = self.ui_element.find_element_by_xpath("div")
-        container_status_text = container_status_element.find_element_by_xpath("div")
-        compared_value = container_status_text.wait_until(CompareUtilityType.CompareText, wait_timeout, compare_text)
-        return compared_value
+        element = "//div[@class='ContainerStatus flex flex--row']/div"
+        if self.check_element_presence(LocatorType.XPath, element, 30):
+            container_status_element = self.get_locator(LocatorType.XPath, element)
+            container_status_text = container_status_element.find_element_by_xpath("div")
+            compared_value = container_status_text.wait_until(CompareUtilityType.CompareText, wait_timeout, compare_text)
+            return compared_value
+        return False
 
     def click_container_status(self) -> bool:
         """ Checks if the div is clickable and performs the click action using ActionChains"""

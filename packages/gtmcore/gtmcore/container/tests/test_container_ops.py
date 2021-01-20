@@ -81,8 +81,9 @@ class TestContainerOps:
         result = proj_container.exec_command("echo My sample message", get_results=True)
         assert result.strip() == 'My sample message'
 
-        result = proj_container.exec_command("pip search gigantum", get_results=True)
-        assert any(['Gigantum Platform' in l for l in result.strip().split('\n')])
+        result = proj_container.exec_command("pip freeze", get_results=True)
+        assert "conda" in result
+        assert "notebook" in result
 
         result = proj_container.exec_command("/bin/true", get_results=True)
         assert result.strip() == ""

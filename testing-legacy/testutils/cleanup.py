@@ -4,6 +4,8 @@ import shutil
 import glob
 import docker
 
+import testutils
+
 
 def stop_project_containers():
     containers = docker.from_env().containers.list()
@@ -27,6 +29,7 @@ def delete_project_images():
 
 def delete_projects_on_disk():
     root_dir = os.path.expanduser(os.environ['GIGANTUM_HOME'])
+    root_dir = os.path.join(root_dir, 'servers', testutils.current_server_id())
     if os.name == 'nt':
         user_projects = glob.glob(f'{root_dir}\*\*\labbooks\selenium-project-*')
     else:
@@ -41,12 +44,14 @@ def delete_projects_on_disk():
 
 def delete_local_datasets():
     root_dir = os.path.expanduser(os.environ['GIGANTUM_HOME'])
+    server_dir = os.path.join(root_dir, 'servers', testutils.current_server_id())
+    dataset_file_cache_dir = os.path.join(root_dir, '.labmanager', 'datasets', testutils.current_server_id())
     if os.name == 'nt':
-        user_datasets = glob.glob(f'{root_dir}\*\*\datasets\selenium-dataset-*')
-        cache_datasets = glob.glob(f'{root_dir}\.labmanager\*\*\selenium-dataset-*')
+        user_datasets = glob.glob(f'{server_dir}\*\*\datasets\selenium-dataset-*')
+        cache_datasets = glob.glob(f'{dataset_file_cache_dir}\*\*\selenium-dataset-*')
     else:
         user_datasets = glob.glob(f'{root_dir}/*/*/datasets/selenium-dataset-*')
-        cache_datasets = glob.glob(f'{root_dir}/.labmanager/*/*/selenium-dataset-*')
+        cache_datasets = glob.glob(f'{dataset_file_cache_dir}/*/*/selenium-dataset-*')
 
     for user_dataset_path in user_datasets:
         logging.info(f"Deleting directory: {user_dataset_path}")

@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1622"
+changelog:
+  - type: NON_USER_FACING
+    description: HOTFIX recent changes to file-icon-js breaks current build. Adds code to import code from packages dist folder.

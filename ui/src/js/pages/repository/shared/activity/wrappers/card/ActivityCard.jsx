@@ -184,6 +184,7 @@ class ActivityCard extends Component<Props> {
       firstInitial,
       type,
     } = getRenderVariables(this.props, this.state);
+    const isNote = (type === 'note');
     // declare css here
     const activityCardCSS = classNames({
       'ActivityCard card': showExtraInfo,
@@ -194,8 +195,8 @@ class ActivityCard extends Component<Props> {
     });
     const titleCSS = classNames({
       'ActivityCard__title flex flex--row justify--space-between': true,
-      open: showExtraInfo || (type === 'note' && show),
-      closed: !showExtraInfo || (type === 'note' && !show),
+      open: showExtraInfo || (isNote && show),
+      closed: !showExtraInfo || (isNote && !show),
     });
 
     return (
@@ -232,13 +233,14 @@ class ActivityCard extends Component<Props> {
               (showExtraInfo && ((type !== 'note') || show))
                 && (
                   <ActivityDetails
-                    sectionType={sectionType}
                     edge={edge}
-                    show={showExtraInfo}
+                    isNote={isNote}
                     key={`${node.id}_activity-details`}
+                    name={name}
                     node={node}
                     owner={owner}
-                    name={name}
+                    sectionType={sectionType}
+                    show={showExtraInfo}
                   />
                 )
             }
