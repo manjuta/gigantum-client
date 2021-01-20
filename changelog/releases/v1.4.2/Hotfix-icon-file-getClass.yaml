@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1623"
+changelog:
+  - type: NON_USER_FACING
+    description: HOTFIX uses import of getClass and not the iconJs library object to fix bug in all environments.
