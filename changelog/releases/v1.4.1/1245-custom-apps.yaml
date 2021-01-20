@@ -1,0 +1,4 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1625"
+changelog:
+  - type: NEW
+    description: Adds the ability to configure a custom application that is then available in the Project launcher
