@@ -247,9 +247,9 @@ class ImageBuilder(object):
                              self._install_user_defined_ca,
                              self._load_packages,
                              self._load_docker_snippets,
-                             self._load_bundled_apps,
                              self._enable_iframes,
                              self._post_image_hook,
+                             self._load_bundled_apps,
                              self._entrypoint_hooks]
 
         # flat map the results of executing the pipeline.

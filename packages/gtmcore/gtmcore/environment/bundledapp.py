@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 
 from typing import (Dict, Optional, Any, List)
 from collections import OrderedDict
@@ -18,7 +19,7 @@ class BundledAppManager:
 
     @property
     def bundled_app_file(self):
-        return os.path.join(self.labbook.root_dir, '.gigantum', 'bundled_apps.json')
+        return os.path.join(self.labbook.root_dir, '.gigantum', 'apps.json')
 
     @property
     def reserved_names(self) -> list:
@@ -71,11 +72,14 @@ class BundledAppManager:
             if len(command) > 1024:
                 raise ValueError(f"{command} must be 1024 characters or less.")
 
+            # Base64 encode the command to avoid escaping issues when persisting to json file
+            command = base64.b64encode(command.encode()).decode()
+
         # Check if a reserved port currently
         if port in self.reserved_ports:
-            raise ValueError(f"Port {port} is a in reserved port. Try again.")
+            raise ValueError(f"Port {port} is a in reserved port. Try a different port.")
 
-        data = self.get_bundled_apps()
+        data = self._load_bundled_app_data()
 
         # Check for port already in use
         for app in data:
@@ -86,8 +90,8 @@ class BundledAppManager:
                       'description': description,
                       'command': command}
 
-        with open(self.bundled_app_file, 'wt') as baf:
-            json.dump(data, baf)
+        with open(self.bundled_app_file, 'wt') as bf:
+            json.dump(data, bf)
 
         # Commit the changes
         self.labbook.git.add(self.bundled_app_file)
@@ -96,10 +100,10 @@ class BundledAppManager:
         adr = ActivityDetailRecord(ActivityDetailType.ENVIRONMENT,
                                    show=False,
                                    action=ActivityAction.CREATE,
-                                   data=TextData('plain', f"Added bundled application: {json.dumps(data[name])}"))
+                                   data=TextData('plain', f"App configuration: {json.dumps(data[name])}"))
 
         ar = ActivityRecord(ActivityType.ENVIRONMENT,
-                            message=f"Added bundled app '{name}'",
+                            message=f"Added app '{name}'",
                             show=True,
                             linked_commit=commit.hexsha,
                             detail_objects=DetailRecordList([adr]),
@@ -119,7 +123,7 @@ class BundledAppManager:
         Returns:
             None
         """
-        data = self.get_bundled_apps()
+        data = self._load_bundled_app_data()
         if name not in data:
             raise ValueError(f"App {name} does not exist. Cannot remove.")
 
@@ -147,17 +151,32 @@ class BundledAppManager:
         ars = ActivityStore(self.labbook)
         ars.create_activity_record(ar)
 
-    def get_bundled_apps(self) -> OrderedDict:
-        """Get collection of bundled apps in this labbook
+    def _load_bundled_app_data(self) -> OrderedDict:
+        """Load data file or return an empty OrderedDict
 
         Returns:
-            None
+            OrderedDict
         """
         if os.path.isfile(self.bundled_app_file):
             with open(self.bundled_app_file, 'rt') as baf:
                 data = json.load(baf, object_pairs_hook=OrderedDict)
         else:
             data = OrderedDict()
+
+        return data
+
+    def get_bundled_apps(self) -> OrderedDict:
+        """Get collection of bundled apps in this labbook
+
+        Returns:
+            None
+        """
+        data = self._load_bundled_app_data()
+
+        # b64 decode the commands
+        for app in data:
+            if data[app]['command']:
+                data[app]['command'] = base64.b64decode(data[app]['command']).decode()
 
         return data
 

@@ -179,7 +179,7 @@ class StartDevTool(graphene.relay.ClientIDMutation):
         labbook_ip = project_container.query_container_ip()
         endpoint = f'http://{labbook_ip}:{tool_port}'
 
-        route_prefix = quote_plus(bundled_app['name'])
+        route_prefix = f"/{quote_plus(bundled_app['name'])}"
 
         matched_routes = router.get_matching_routes(endpoint, route_prefix)
 
@@ -195,10 +195,9 @@ class StartDevTool(graphene.relay.ClientIDMutation):
                              f"for {str(labbook)}! Restart container.")
 
         if run_command:
-            # TODO: when this feature is completed, need to be sure to update route.add due to leading slash issue
+            external_rt_prefix = f"{route_prefix}/{unique_id()}"
             logger.info(f"Adding {bundled_app['name']} to route table for {str(labbook)}.")
-            suffix, _ = router.add(endpoint, route_prefix)
-            suffix = "/" + suffix
+            suffix, _ = router.add(endpoint, external_rt_prefix)
 
             # Start app
             logger.info(f"Starting {bundled_app['name']} in {str(labbook)}.")
