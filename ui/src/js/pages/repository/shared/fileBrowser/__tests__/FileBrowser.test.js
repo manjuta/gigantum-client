@@ -5,8 +5,6 @@ import path from 'path';
 
 const converter = new Stories2SnapsConverter();
 
-console.log('this ran');
-
 initStoryshots({
   framework: 'react',
   configPath: path.join(__dirname, './FileBrowser.stories.jsx'),
