@@ -21,10 +21,10 @@ type Props = {
   filterState: string,
   filterText: string,
   history: Object,
-  labbookList: Array,
+  projectList: Array,
   loading: boolean,
   localProjects: {
-    localProjects: {
+    localLabbooks: {
       edges: Array<Object>,
       pageInfo: {
         hasNextPage: boolean,
@@ -53,7 +53,7 @@ export class LocalProjects extends Component<Props> {
   */
   componentDidMount() {
     const {
-      labbookList,
+      projectList,
       localProjects,
       loading,
     } = this.props;
@@ -64,10 +64,10 @@ export class LocalProjects extends Component<Props> {
       this._containerLookup();
       this._visibilityLookup();
 
-      if (labbookList
-         && localProjects.localProjects
-         && localProjects.localProjects.edges
-         && localProjects.localProjects.edges.length === 0) {
+      if (projectList
+         && localProjects.localLabbooks
+         && localProjects.localLabbooks.edges
+         && localProjects.localLabbooks.edges.length === 0) {
         this._fetchDemo();
       }
     }
@@ -94,7 +94,7 @@ export class LocalProjects extends Component<Props> {
       isPaginating: true,
     });
 
-    if (localProjects.localProjects.pageInfo.hasNextPage) {
+    if (localProjects.localLabbooks.pageInfo.hasNextPage) {
       relay.loadMore(
         10, // Fetch the next 10 items
         () => {
@@ -120,9 +120,9 @@ export class LocalProjects extends Component<Props> {
     const distanceY = window.innerHeight + document.documentElement.scrollTop + 200;
     const expandOn = root.offsetHeight;
 
-    if (localProjects.localProjects) {
+    if (localProjects.localLabbooks) {
       if ((distanceY > expandOn) && !isPaginating
-        && localProjects.localProjects.pageInfo.hasNextPage) {
+        && localProjects.localLabbooks.pageInfo.hasNextPage) {
         this._loadMore();
       }
     }
@@ -136,8 +136,8 @@ export class LocalProjects extends Component<Props> {
     const { containerList } = this.state;
     const { localProjects } = this.props;
     const self = this;
-    const idArr = localProjects.localProjects
-      ? localProjects.localProjects.edges.map(edges => edges.node.id)
+    const idArr = localProjects.localLabbooks
+      ? localProjects.localLabbooks.edges.map(edges => edges.node.id)
       : [];
 
     ContainerLookup.query(idArr).then((res) => {
@@ -182,7 +182,7 @@ export class LocalProjects extends Component<Props> {
       const self = this;
       setTimeout(() => {
         relay.refetchConnection(20, () => {
-          if (localProjects.localProjects.edges.length > 0) {
+          if (localProjects.localLabbooks.edges.length > 0) {
             self._containerLookup();
             self._visibilityLookup();
           } else {
@@ -200,8 +200,8 @@ export class LocalProjects extends Component<Props> {
   _visibilityLookup = () => {
     const { localProjects } = this.props;
     const self = this;
-    const idArr = localProjects.localProjects
-      ? localProjects.localProjects.edges.map(edges => edges.node.id)
+    const idArr = localProjects.localLabbooks
+      ? localProjects.localLabbooks.edges.map(edges => edges.node.id)
       : [];
     let index = 0;
 
@@ -246,18 +246,22 @@ export class LocalProjects extends Component<Props> {
       setFilterValue,
       showModal,
     } = this.props;
-    const { state } = this;
+    const {
+      isPaginating,
+      visibilityList,
+      containerList,
+    } = this.state;
     const projectList = localProjects;
 
     if (
-      (projectList && projectList.localProjects && projectList.localProjects.edges)
+      (projectList && projectList.localLabbooks && projectList.localLabbooks.edges)
       || loading
     ) {
       const Projects = !loading
-        ? filterProjects(projectList.localProjects.edges, filterState)
+        ? filterProjects(projectList.localLabbooks.edges, filterState)
         : [];
       const importVisible = (section === 'local' || !loading) && !filterText;
-      const isLoadingMore = state.isPaginating || loading;
+      const isLoadingMore = isPaginating || loading;
 
       return (
 
@@ -275,11 +279,11 @@ export class LocalProjects extends Component<Props> {
                 />
                 )}
             { Projects.length ? Projects.map((edge) => {
-              const visibility = state.visibilityList.has(edge.node.id)
-                ? state.visibilityList.get(edge.node.id).visibility
+              const visibility = visibilityList.has(edge.node.id)
+                ? visibilityList.get(edge.node.id).visibility
                 : 'loading';
-              const node = state.containerList.has(edge.node.id)
-                && state.containerList.get(edge.node.id);
+              const node = containerList.has(edge.node.id)
+                && containerList.get(edge.node.id);
 
               return (
                 <LocalProjectPanel
@@ -321,7 +325,7 @@ export default createPaginationContainer(
   {
     localProjects: graphql`
     fragment LocalProjects_localProjects on LabbookList{
-      localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "LocalLabbooks_localLabbooks", filters: []){
+      localLabbooks(first: $first, after: $cursor, orderBy: $orderBy, sort: $sort)@connection(key: "LocalProjects_localLabbooks", filters: []){
         edges {
           node {
             id
@@ -346,7 +350,7 @@ export default createPaginationContainer(
   {
     direction: 'forward',
     getConnectionFromProps(props) {
-      return props.localProjects.localProjects;
+      return props.localProjects.localLabbooks;
     },
     getFragmentVariables(prevVars, first) {
       return {
@@ -358,7 +362,7 @@ export default createPaginationContainer(
       first, cursor, orderBy, sort,
     }, fragmentVariables) {
       first = 10;
-      cursor = props.localProjects.localProjects.pageInfo.endCursor;
+      cursor = props.localProjects.localLabbooks.pageInfo.endCursor;
       orderBy = fragmentVariables.orderBy;
       sort = fragmentVariables.sort;
       return {

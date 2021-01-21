@@ -9,8 +9,8 @@ import Projects from '../Projects';
 export default createFragmentContainer(
   Projects,
   {
-    labbookList: graphql`
-      fragment RemoteProjectsContainer_labbookList on LabbookQuery{
+    projectList: graphql`
+      fragment RemoteProjectsContainer_projectList on LabbookQuery{
         labbookList{
           id
           ...RemoteProjects_remoteProjects

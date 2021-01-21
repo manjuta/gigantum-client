@@ -36,7 +36,7 @@ type Props = {
     },
     replace: Function,
   },
-  labbookList: Array<Object>,
+  projectList: Array<Object>,
   loading: boolean,
   orderBy: string,
   refetchSort: Function,
@@ -90,7 +90,7 @@ class Projects extends Component<Props> {
     window.addEventListener('click', this._closeSortMenu);
     window.addEventListener('click', this._closeFilterMenu);
 
-    if ((props.labbookList === null) && !props.loading) {
+    if ((props.projectList === null) && !props.loading) {
       UserIdentity.getUserIdentity().then((response) => {
         if (response.data && response.data.userIdentity.isSessionValid) {
           setErrorMessage(null, null, 'Failed to fetch Projects.', [{ message: 'There was an error while fetching Projects. This likely means you have a corrupted Project directory.' }]);
@@ -422,10 +422,11 @@ class Projects extends Component<Props> {
     const {
       diskLow,
       filterText,
-      labbookList,
+      projectList,
       loading,
       serverName,
     } = this.props;
+    console.log(this.props);
     const {
       filter,
       filterMenuOpen,
@@ -440,7 +441,7 @@ class Projects extends Component<Props> {
       'Projects--disk-low': diskLow,
     });
 
-    if ((labbookList !== null) || loading) {
+    if ((projectList !== null) || loading) {
       const localNavItemCSS = classNames({
         Tab: true,
         'Tab--local': true,
@@ -535,8 +536,8 @@ class Projects extends Component<Props> {
             && (
               <LocalProjectsContainer
                 {...this.props}
-                projectListId={labbookList.id}
-                localProjects={labbookList.labbookList}
+                projectListId={projectList.id}
+                localProjects={projectList.labbookList}
                 showModal={this._showModal}
                 goToProject={this._goToProject}
                 filterProjects={this._filterProjects}
@@ -550,8 +551,8 @@ class Projects extends Component<Props> {
             && (
               <RemoteProjects
                 {...this.props}
-                projectListId={labbookList.labbookList.id}
-                remoteProjects={labbookList.labbookList}
+                projectListId={projectList.labbookList.id}
+                remoteProjects={projectList.labbookList}
                 showModal={this._showModal}
                 goToProject={this._goToProject}
                 filterProjects={this._filterProjects}
@@ -580,7 +581,7 @@ class Projects extends Component<Props> {
         </div>
       );
     }
-    if ((labbookList === null) && !loading) {
+    if ((projectList === null) && !loading) {
       return (
         <div className="Projects__fetch-error">
           There was an error attempting to fetch Projects.

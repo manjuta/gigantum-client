@@ -26,7 +26,7 @@ const RemoteDatasetListingQuery = graphql`query DashboardDatasetRemoteQuery($fir
 }`;
 
 const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
-  ...RemoteProjectsContainer_labbookList
+  ...RemoteProjectsContainer_projectList
 }`;
 
 type Props = {
@@ -165,7 +165,7 @@ export default class DashboardContainer extends Component<Props> {
                   auth={auth}
                   diskLow={diskLow}
                   history={history}
-                  labbookList={queryProps}
+                  projectList={queryProps}
                   orderBy={orderBy}
                   refetchSort={this._refetchSort}
                   section={sectionRoute}
@@ -181,7 +181,7 @@ export default class DashboardContainer extends Component<Props> {
                 diskLow={diskLow}
                 hash={hash}
                 history={history}
-                labbookList={queryProps}
+                projectList={queryProps}
                 orderBy={orderBy}
                 refetchSort={this._refetchSort}
                 section={sectionRoute}
@@ -214,7 +214,7 @@ export default class DashboardContainer extends Component<Props> {
                 diskLow={diskLow}
                 history={history}
                 hash={hash}
-                labbookList={queryProps}
+                projectList={queryProps}
                 loading
                 orderBy={orderBy}
                 refetchSort={this._refetchSort}
