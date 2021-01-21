@@ -1,4 +1,4 @@
-prLink: "https://github.com/gigantum/gigantum-client/pull/1477"
+prLink: "https://github.com/gigantum/gigantum-client/pull/1629"
 changelog:
   - type: NON_USER_FACING
     description: Refactor Dashboard components and move tests into src directory
