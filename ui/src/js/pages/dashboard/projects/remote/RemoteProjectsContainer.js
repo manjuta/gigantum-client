@@ -4,16 +4,16 @@ import {
   graphql,
 } from 'react-relay';
 // components
-import Labbooks from '../Labbooks';
+import Projects from '../Projects';
 
 export default createFragmentContainer(
-  Labbooks,
+  Projects,
   {
-    labbookList: graphql`
-      fragment RemoteLabbooksContainer_labbookList on LabbookQuery{
+    projectList: graphql`
+      fragment RemoteProjectsContainer_projectList on LabbookQuery{
         labbookList{
           id
-          ...RemoteLabbooks_remoteLabbooks
+          ...RemoteProjects_remoteProjects
         }
       }
     `,

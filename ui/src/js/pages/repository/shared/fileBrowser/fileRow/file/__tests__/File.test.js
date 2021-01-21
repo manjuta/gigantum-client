@@ -5,9 +5,11 @@
 
 // const converter = new Stories2SnapsConverter();
 
+// console.log('this ran');
+
 // initStoryshots({
 //   framework: 'react',
-//   configPath: path.join(__dirname, './ActionsMenu.stories.jsx'),
+//   configPath: path.join(__dirname, './File.stories.jsx'),
 //   test: ({ story, context }) => {
 //     const snapshotFileName = converter.getSnapshotFileName(context);
 //     const storyElement = story.render();

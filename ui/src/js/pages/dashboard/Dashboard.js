@@ -6,16 +6,16 @@ import { setCallbackRoute } from 'JS/redux/actions/routes';
 // components
 import environment from 'JS/createRelayEnvironment';
 import Loader from 'Components/loader/Loader';
-import LocalLabbooksContainer from './labbooks/localLabbooks/LocalLabbooksContainer';
-import LocalDatasetsContainer from './datasets/localDatasets/LocalDatasetsContainer';
-import RemoteDatasetsContainer from './datasets/remoteDatasets/RemoteDatasetsContainer';
-import RemoteLabbooksContainer from './labbooks/remoteLabbooks/RemoteLabbooksContainer';
+import LocalProjectsContainer from './projects/local/LocalProjectsContainer';
+import LocalDatasetsContainer from './datasets/local/LocalDatasetsContainer';
+import RemoteDatasetsContainer from './datasets/remote/RemoteDatasetsContainer';
+import RemoteProjectsContainer from './projects/remote/RemoteProjectsContainer';
 // assets
 import './Dashboard.scss';
 
 
 const LocalListingQuery = graphql`query DashboardLocalQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
-  ...LocalLabbooksContainer_labbookList
+  ...LocalProjectsContainer_projectList
 }`;
 
 const LocalDatasetListingQuery = graphql`query DashboardDatasetLocalQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
@@ -26,7 +26,7 @@ const RemoteDatasetListingQuery = graphql`query DashboardDatasetRemoteQuery($fir
 }`;
 
 const RemoteListingQuery = graphql`query DashboardRemoteQuery($first: Int!, $cursor: String, $orderBy: String $sort: String){
-  ...RemoteLabbooksContainer_labbookList
+  ...RemoteProjectsContainer_projectList
 }`;
 
 type Props = {
@@ -50,21 +50,18 @@ export default class DashboardContainer extends Component<Props> {
     };
   }
 
+  static getDerivedStateFromProps(props, state) {
+    setCallbackRoute(props.history.location.pathname);
+    return {
+      ...state,
+      selectedComponent: props.match.path,
+    };
+  }
+
   componentDidMount() {
     const { history } = this.props;
     window.location.hash = '';
     setCallbackRoute(history.location.pathname);
-  }
-
-  /**
-  *  @param {Object} nextProps
-  *  update select component before component renders
-  */
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({
-      selectedComponent: nextProps.match.path,
-    });
-    setCallbackRoute(nextProps.history.location.pathname);
   }
 
   /**
@@ -164,11 +161,11 @@ export default class DashboardContainer extends Component<Props> {
             }
             if (sectionRoute === 'cloud') {
               return (
-                <RemoteLabbooksContainer
+                <RemoteProjectsContainer
                   auth={auth}
                   diskLow={diskLow}
                   history={history}
-                  labbookList={queryProps}
+                  projectList={queryProps}
                   orderBy={orderBy}
                   refetchSort={this._refetchSort}
                   section={sectionRoute}
@@ -179,12 +176,12 @@ export default class DashboardContainer extends Component<Props> {
             }
 
             return (
-              <LocalLabbooksContainer
+              <LocalProjectsContainer
                 auth={auth}
                 diskLow={diskLow}
                 hash={hash}
                 history={history}
-                labbookList={queryProps}
+                projectList={queryProps}
                 orderBy={orderBy}
                 refetchSort={this._refetchSort}
                 section={sectionRoute}
@@ -212,12 +209,12 @@ export default class DashboardContainer extends Component<Props> {
             }
 
             return (
-              <LocalLabbooksContainer
+              <LocalProjectsContainer
                 auth={auth}
                 diskLow={diskLow}
                 history={history}
                 hash={hash}
-                labbookList={queryProps}
+                projectList={queryProps}
                 loading
                 orderBy={orderBy}
                 refetchSort={this._refetchSort}

@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 // components
 import CreateModal from 'Pages/repository/shared/modals/create/CreateModal';
 import Loader from 'Components/loader/Loader';
-import LocalDatasetsContainer, { LocalDatasets } from 'Pages/dashboard/datasets/localDatasets/LocalDatasets';
-import RemoteDatasets from 'Pages/dashboard/datasets/remoteDatasets/RemoteDatasets';
+import LocalDatasetsContainer, { LocalDatasets } from 'Pages/dashboard/datasets/local/LocalDatasets';
+import RemoteDatasets from 'Pages/dashboard/datasets/remote/RemoteDatasets';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
 import Tooltip from 'Components/tooltip/Tooltip';
 import FilterByDropdown from 'Pages/dashboard/shared/filters/FilterByDropdown';
@@ -176,19 +176,6 @@ class Datasets extends Component<Props> {
   */
   _goToDataset = (datasetName, owner) => {
     this.setState({ datasetName, owner });
-  }
-
-  /**
-    *  @param {} -
-    *  closes dataset modal and resets state to initial state
-    */
-  _closeDataset = () => {
-    this.setState({
-      datasetModalVisible: false,
-      oldDatasetName: '',
-      newDatasetName: '',
-      showNamingError: false,
-    });
   }
 
   /**

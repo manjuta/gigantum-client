@@ -13,7 +13,7 @@
   }
 }
 
-.LocalLabbooks__row{
+.LocalProjects__row{
 
   &--icons{
     width: calc(100% + 20px);
@@ -33,7 +33,7 @@
   }
 }
 
-.LocalLabbooks__paragraph{
+.LocalProjects__paragraph{
   margin-top: 5px;
   color: $mineShaft;
 
@@ -70,12 +70,12 @@
   }
 }
 
-.LocalLabbooks__highlighted{
+.LocalProjects__highlighted{
   color: $white;
   background: $primary;
 }
 
-.LocalLabbookPanel__private{
+.LocalProjectPanel__private{
   align-self: center;
 
   width: 30px;
@@ -87,7 +87,7 @@
   border-radius: 25px;
 }
 
-.LocalLabbookPanel__public{
+.LocalProjectPanel__public{
   align-self: center;
 
   width: 30px;
@@ -99,7 +99,7 @@
   border-radius: 25px;
 }
 
-.LocalLabbookPanel__loading{
+.LocalProjectPanel__loading{
   align-self: center;
 
   width: 18px;
@@ -116,7 +116,7 @@
 * Container Status
 *****************************/
 
-.LocalLabbooks__containerStatus {
+.LocalProjects__containerStatus {
   width: 100%;
 
   color: white;
@@ -126,7 +126,7 @@
   @include flex(flex-end, row);
 }
 
-.LocalLabbooks__containerStatus--state {
+.LocalProjects__containerStatus--state {
   z-index: index($elements, button);
 
   width: 141px;
@@ -211,13 +211,13 @@
    }
 }
 
-.LocalLabbooks__description--blank{
+.LocalProjects__description--blank{
   font-style: italic;
 }
 /****************
 * Overrides
 *****************/
-.LocalLabbooks__containerStatus {
+.LocalProjects__containerStatus {
   .ContainerStatus__container-state {
     border-width: 0px !important;
     box-shadow: none !important;
@@ -225,7 +225,7 @@
   }
 }
 
-.LocalLabbooks__panel-title {
+.LocalProjects__panel-title {
   white-space: nowrap;
   text-overflow: ellipsis;
   word-break: break-all;

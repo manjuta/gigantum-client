@@ -7,7 +7,7 @@ import Moment from 'moment';
 // components
 import RepositoryTitle from 'Pages/dashboard/shared/title/RepositoryTitle';
 // muations
-import ImportRemoteLabbookMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
+import ImportRemoteProjectMutation from 'Mutations/repository/import/ImportRemoteLabbookMutation';
 import BuildImageMutation from 'Mutations/container/BuildImageMutation';
 // store
 import { setWarningMessage, setMultiInfoMessage } from 'JS/redux/actions/footer';
@@ -17,7 +17,7 @@ import UserIdentity from 'JS/Auth/UserIdentity';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
 import Loader from 'Components/loader/Loader';
 // assets
-import './RemoteLabbookPanel.scss';
+import './RemoteProjectPanel.scss';
 
 type Props = {
   edge: {
@@ -36,7 +36,7 @@ type Props = {
   filterText: string,
 }
 
-class RemoteLabbookPanel extends Component<Props> {
+class RemoteProjectPanel extends Component<Props> {
   state = {
     isImporting: false,
     showLoginPrompt: false,
@@ -68,11 +68,11 @@ class RemoteLabbookPanel extends Component<Props> {
   }
 
   /**
-    *  @param {owner, labbookName}
-    *  imports labbook from remote url, builds the image, and redirects to imported labbook
+    *  @param {owner, projectName}
+    *  imports project from remote url, builds the image, and redirects to imported project
     *  @return {}
   */
-  _importLabbook = (owner, labbookName) => {
+  _importProject = (owner, projectName) => {
     // TODO break up this function
     const { edge } = this.props;
     const self = this;
@@ -90,58 +90,58 @@ class RemoteLabbookPanel extends Component<Props> {
               isLast: false,
               error: false,
             };
-            setMultiInfoMessage(owner, labbookName, messageData);
+            setMultiInfoMessage(owner, projectName, messageData);
             const successCall = () => {
               this._clearState();
               const mulitMessageData = {
                 id,
-                message: `Successfully imported remote Project ${labbookName}`,
+                message: `Successfully imported remote Project ${projectName}`,
                 isLast: true,
                 error: false,
               };
-              setMultiInfoMessage(owner, labbookName, mulitMessageData);
+              setMultiInfoMessage(owner, projectName, mulitMessageData);
 
 
               BuildImageMutation(
                 owner,
-                labbookName,
+                projectName,
                 false,
                 (response, error) => {
                   if (error) {
                     const buildMessageData = {
                       id,
                       owner,
-                      name: labbookName,
-                      message: `ERROR: Failed to build ${labbookName}`,
+                      name: projectName,
+                      message: `ERROR: Failed to build ${projectName}`,
                       isLast: null,
                       error: true,
                       messageBody: error,
                     };
-                    setMultiInfoMessage(owner, labbookName, buildMessageData);
+                    setMultiInfoMessage(owner, projectName, buildMessageData);
                   }
                 },
               );
 
-              self.props.history.replace(`/projects/${owner}/${labbookName}`);
+              self.props.history.replace(`/projects/${owner}/${projectName}`);
             };
             const failureCall = (error) => {
               this._clearState();
               const failureMessageData = {
                 id,
                 owner,
-                name: labbookName,
+                name: projectName,
                 message: 'ERROR: Could not import remote Project',
                 isLast: null,
                 error: true,
                 messageBody: error,
               };
-              setMultiInfoMessage(owner, labbookName, failureMessageData);
+              setMultiInfoMessage(owner, projectName, failureMessageData);
             };
             self.setState({ isImporting: true });
 
-            ImportRemoteLabbookMutation(
+            ImportRemoteProjectMutation(
               owner,
-              labbookName,
+              projectName,
               remote,
               successCall,
               failureCall,
@@ -217,7 +217,7 @@ class RemoteLabbookPanel extends Component<Props> {
 
     // css declared here
     const descriptionCss = classNames({
-      'RemoteLabbooks__row RemoteLabbooks__row--text': true,
+      'RemoteProjects__row RemoteProjects__row--text': true,
       blur: isImporting,
     });
     const deleteCSS = classNames({
@@ -232,12 +232,12 @@ class RemoteLabbookPanel extends Component<Props> {
         key={edge.node.name}
         className="Card Card--225 column-4-span-3 flex flex--column justify--space-between"
       >
-        <div className="RemoteLabbooks__row RemoteLabbooks__row--icon">
+        <div className="RemoteProjects__row RemoteProjects__row--icon">
           { !(edge.node.visibility === 'local')
             && (
             <div
               data-tooltip={`${edge.node.visibility}`}
-              className={`Tooltip-Listing RemoteLabbooks__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
+              className={`Tooltip-Listing RemoteProjects__${edge.node.visibility} Tooltip-data Tooltip-data--small`}
             />
             )
           }
@@ -257,7 +257,7 @@ class RemoteLabbookPanel extends Component<Props> {
                 type="button"
                 disabled={isImporting}
                 className="Btn__dashboard Btn--action Btn__dashboard--cloud-download"
-                onClick={() => this._importLabbook(edge.node.owner, edge.node.name)}
+                onClick={() => this._importProject(edge.node.owner, edge.node.name)}
               >
                 Import
               </button>
@@ -278,32 +278,32 @@ class RemoteLabbookPanel extends Component<Props> {
 
         <div className={descriptionCss}>
 
-          <div className="RemoteLabbooks__row RemoteLabbooks__row--title">
+          <div className="RemoteProjects__row RemoteProjects__row--title">
             <RepositoryTitle
               action={() => {}}
               name={edge.node.name}
-              section="RemoteLabbooks"
+              section="RemoteProjects"
               filterText={filterText}
             />
           </div>
 
-          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--owner">{edge.node.owner}</p>
-          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
+          <p className="RemoteProjects__paragraph RemoteProjects__paragraph--owner">{edge.node.owner}</p>
+          <p className="RemoteProjects__paragraph RemoteProjects__paragraph--metadata">
             <span className="bold">Created:</span>
             {' '}
             {Moment(edge.node.creationDateUtc).format('MM/DD/YY')}
           </p>
-          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--metadata">
+          <p className="RemoteProjects__paragraph RemoteProjects__paragraph--metadata">
             <span className="bold">Modified:</span>
             {' '}
             {Moment(edge.node.modifiedDateUtc).fromNow()}
           </p>
 
-          <p className="RemoteLabbooks__paragraph RemoteLabbooks__paragraph--description">
+          <p className="RemoteProjects__paragraph RemoteProjects__paragraph--description">
             { (edge.node.description && edge.node.description.length)
               ? (
                 <Highlighter
-                  highlightClassName="LocalLabbooks__highlighted"
+                  highlightClassName="LocalProjects__highlighted"
                   searchWords={[filterText]}
                   autoEscape={false}
                   caseSensitive={false}
@@ -317,7 +317,7 @@ class RemoteLabbookPanel extends Component<Props> {
 
         { isImporting
           && (
-            <div className="RemoteLabbooks__loader">
+            <div className="RemoteProjects__loader">
               <Loader />
             </div>
           )
@@ -332,4 +332,4 @@ class RemoteLabbookPanel extends Component<Props> {
   }
 }
 
-export default RemoteLabbookPanel;
+export default RemoteProjectPanel;
