@@ -179,19 +179,6 @@ class Datasets extends Component<Props> {
   }
 
   /**
-    *  @param {} -
-    *  closes dataset modal and resets state to initial state
-    */
-  _closeDataset = () => {
-    this.setState({
-      datasetModalVisible: false,
-      oldDatasetName: '',
-      newDatasetName: '',
-      showNamingError: false,
-    });
-  }
-
-  /**
   *  @param {event} evt
   *  sets new dataset title to state
   */
