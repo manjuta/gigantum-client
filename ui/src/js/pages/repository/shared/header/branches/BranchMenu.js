@@ -20,6 +20,7 @@ import Branches from 'Pages/repository/shared/sidePanel/Branches';
 import VisibilityModal from 'Pages/repository/shared/modals/visibility/VisibilityModal';
 import PublishDatasetsModal from 'Pages/repository/shared/modals/publishDataset/PublishDatasetsModal';
 import LoginPrompt from 'Pages/repository/shared/modals/LoginPrompt';
+import SyncWarning from 'Components/modal/syncWarning/SyncWarning';
 // context
 import ServerContext from 'Pages/ServerContext';
 // utils
@@ -61,18 +62,22 @@ const getSyncTooltip = (props, data, currentServer, isDataset) => {
     sectionCollabs,
     activeBranch,
   } = data;
+  const {
+    defaultRemote,
+    isLockedSync,
+  } = props;
   const repositoryType = isDataset ? 'Dataset' : 'Project';
   let syncTooltip = !hasWriteAccess ? 'Pull changes from Gignatum Hub' : `Sync changes to ${currentServer.name}`;
-  syncTooltip = !props.defaultRemote
+  syncTooltip = !defaultRemote
     ? `Click Publish to push branch to ${currentServer.name}`
     : syncTooltip;
-  syncTooltip = props.isLocked
+  syncTooltip = isLockedSync
     ? `Cannot ${syncOrPublish} while ${repositoryType} is in use`
     : syncTooltip;
-  syncTooltip = (activeBranch.branchName !== 'master' && !props.defaultRemote)
+  syncTooltip = (activeBranch.branchName !== 'master' && !defaultRemote)
     ? 'Must publish Master branch first'
     : syncTooltip;
-  syncTooltip = props.defaultRemote && !sectionCollabs
+  syncTooltip = defaultRemote && !sectionCollabs
     ? `Please wait while ${repositoryType} data is being fetched`
     : syncTooltip;
 
@@ -154,6 +159,7 @@ type Props = {
   defaultRemote: string,
   isExporting: boolean,
   isLocked: boolean,
+  isLockedSync: boolean,
   isSticky: boolean,
   name: string,
   owner: string,
@@ -186,8 +192,10 @@ class BranchMenu extends Component<Props> {
     publishDatasetsModalAction: 'Publish',
     syncMenuVisible: false,
     showLoginPrompt: false,
+    showSyncWarning: false,
     isDataset: (this.props.sectionType !== 'labbook'),
     action: null,
+    warningAction: 'publish',
   };
 
 
@@ -554,10 +562,19 @@ class BranchMenu extends Component<Props> {
   *  @param {Boolean} - allowSync
   *  @param {Boolean} - allowSyncPull
   *  @param {Function} - passedSuccessCall
+  *  @param {Boolean} - isLocked
+  *  @param {Boolean} - overrideLock
   *  handles syncing or publishing the project
   *  @return {}
   */
-  _handleSyncButton = (pullOnly, allowSync, allowSyncPull, passedSuccessCall) => {
+  _handleSyncButton = (
+    pullOnly,
+    allowSync,
+    allowSyncPull,
+    passedSuccessCall,
+    isLocked,
+    overrideLock,
+  ) => {
     // TODO refactor this function
 
     const {
@@ -570,7 +587,15 @@ class BranchMenu extends Component<Props> {
     const { owner } = section;
     const { isDataset } = this.state;
     const { buildImage } = this.state.branchMutations;
-    this.setState({ syncMenuVisible: false });
+
+    if (isLocked && !overrideLock) {
+      const warningAction = defaultRemote ? 'sync' : 'publish'
+      this.setState({ showSyncWarning: true, warningAction });
+      return;
+    }
+
+    this.setState({ syncMenuVisible: false, showSyncWarning: false });
+
 
     if (allowSync || (pullOnly && allowSyncPull)) {
       if (!defaultRemote) {
@@ -581,19 +606,21 @@ class BranchMenu extends Component<Props> {
         const data = {
           successCall: () => {
             if (sectionType === 'labbook') {
-              buildImage((response, error) => {
-                if (error) {
-                  console.error(error);
-                  const messageData = {
-                    id: uuidv4(),
-                    message: `ERROR: Failed to build ${section.name}`,
-                    isLast: null,
-                    error: true,
-                    messageBody: error,
-                  };
-                  setMultiInfoMessage(owner, section.name, messageData);
-                }
-              });
+              if (!isLocked) {
+                buildImage((response, error) => {
+                  if (error) {
+                    console.error(error);
+                    const messageData = {
+                      id: uuidv4(),
+                      message: `ERROR: Failed to build ${section.name}`,
+                      isLast: null,
+                      error: true,
+                      messageBody: error,
+                    };
+                    setMultiInfoMessage(owner, section.name, messageData);
+                  }
+                });
+              }
               setBranchUptodate();
             }
             setSyncingState(false);
@@ -700,23 +727,34 @@ class BranchMenu extends Component<Props> {
    });
  }
 
+  /**
+  * sets state for sync warning modal
+  */
+  _toggleSyncWarningModal = () => {
+    this.setState({ showSyncWarning: false });
+  }
+
+
  static contextType = ServerContext;
 
  render() {
    const { props, state } = this;
    const {
+     collaborators,
      branches,
      defaultRemote,
      owner,
      name,
      isLocked,
+     isLockedSync,
      isSticky,
      section,
-     collaborators,
      setSyncingState,
    } = this.props;
    const {
      showLoginPrompt,
+     showSyncWarning,
+     warningAction,
    } = this.state;
    const {
      activeBranch,
@@ -737,9 +775,9 @@ class BranchMenu extends Component<Props> {
    const upToDate = (activeBranch.commitsAhead === 0)
     && (activeBranch.commitsBehind === 0);
    const allowSync = !((activeBranch.branchName !== 'master') && !defaultRemote)
-    && !isLocked && hasWriteAccess;
-   const allowSyncPull = !((activeBranch.branchName !== 'master') && !defaultRemote)
-    && !isLocked && defaultRemote;
+    && hasWriteAccess && !isLockedSync;
+   const allowSyncPull = !((activeBranch.branchName !== 'master') && !defaultRemote) && !isLockedSync
+    && defaultRemote;
    const allowReset = !isLocked
     && !upToDate
     && activeBranch.isRemote
@@ -749,9 +787,6 @@ class BranchMenu extends Component<Props> {
      : 'Local only';
    const showPullOnly = defaultRemote && !hasWriteAccess && !waitingOnCollabs;
    const disableDropdown = !allowSyncPull || !defaultRemote || showPullOnly;
-   const syncButtonDisabled = (showPullOnly && !allowSyncPull)
-    || (!defaultRemote && !allowSync)
-    || (defaultRemote && !allowSync && !showPullOnly);
    const {
      syncTooltip,
      manageTooltip,
@@ -765,6 +800,9 @@ class BranchMenu extends Component<Props> {
      ? 'Pull'
      : 'Sync'
      : 'Publish';
+    const syncButtonDisabled = (showPullOnly && !allowSyncPull)
+    || (!defaultRemote && !allowSync)
+    || (defaultRemote && !allowSync && !showPullOnly);
 
    // declare css here
    const switchDropdownCSS = classNames({
@@ -824,6 +862,16 @@ class BranchMenu extends Component<Props> {
    return (
      <div className={branchMenuCSS}>
        <div className="BranchMenu__dropdown">
+         {
+            showSyncWarning
+            && (
+              <SyncWarning
+                toggleSyncWarningModal={this._toggleSyncWarningModal}
+                handleSync={() => this._handleSyncButton(showPullOnly, allowSync, allowSyncPull, null, isLocked, true)}
+                warningAction={warningAction}
+              />
+            )
+          }
          <div
            onClick={() => this._toggleBranchSwitch()}
            data-tooltip={switchTooltip}
@@ -968,8 +1016,8 @@ class BranchMenu extends Component<Props> {
              <div className="BranchMenu__sync-container">
                <button
                  className={syncCSS}
-                 onClick={() => { this._handleSyncButton(showPullOnly, allowSync, allowSyncPull); }}
                  disabled={syncButtonDisabled}
+                 onClick={() => { this._handleSyncButton(showPullOnly, allowSync, allowSyncPull, null, isLocked); }}
                  data-tooltip={syncTooltip}
                  type="button"
                >
@@ -1019,7 +1067,7 @@ class BranchMenu extends Component<Props> {
                       && (
                       <li
                         className="BranchMenu__list-item"
-                        onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull)}
+                        onClick={() => this._handleSyncButton(false, allowSync, allowSyncPull, null, isLocked)}
                         role="presentation"
                       >
                         Sync (Pull then Push)
@@ -1028,7 +1076,7 @@ class BranchMenu extends Component<Props> {
                    }
                    <li
                      className="BranchMenu__list-item"
-                     onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull)}
+                     onClick={() => this._handleSyncButton(true, allowSync, allowSyncPull, null, isLocked)}
                      role="presentation"
                    >
                      Pull (Pull-only)

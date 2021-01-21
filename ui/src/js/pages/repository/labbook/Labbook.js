@@ -53,10 +53,11 @@ const scrollToTop = () => {
 
 /**
    @param {Object} props
+   @param {Boolean} ignoreContainer
    determines if project is locked
    @return {Boolean}
   */
-const determineIsLocked = (props) => {
+const determineIsLocked = (props, ignoreContainer) => {
   const {
     labbook,
     isBuilding,
@@ -67,7 +68,7 @@ const determineIsLocked = (props) => {
   } = props;
 
   return (
-    (labbook.environment.containerStatus !== 'NOT_RUNNING')
+    ((labbook.environment.containerStatus !== 'NOT_RUNNING') || ignoreContainer)
     || (labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
     || (labbook.environment.imageStatus === 'BUILD_QUEUED')
     || isBuilding
@@ -124,6 +125,7 @@ type Props = {
 class Labbook extends Component<Props> {
   state = {
     isLocked: determineIsLocked(this.props),
+    isLockedSync: determineIsLocked(this.props, true),
     collaborators: this.props.labbook.collaborators,
     canManageCollaborators: this.props.labbook.canManageCollaborators,
     branches: this.props.labbook.branches,
@@ -180,9 +182,8 @@ class Labbook extends Component<Props> {
     branchMap.forEach((branch) => {
       mergedBranches.push(branch);
     });
-    const isLocked = (nextProps.labbook
-      && nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING')
-      || (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS')
+    const isLockedSync = (nextProps.labbook
+      && (nextProps.labbook.environment.imageStatus === 'BUILD_IN_PROGRESS'))
       || (nextProps.labbook.environment.imageStatus === 'BUILD_QUEUED')
       || nextProps.isBuilding
       || nextProps.isSyncing
@@ -191,6 +192,9 @@ class Labbook extends Component<Props> {
       || nextProps.globalIsUploading
       || (transitionState === 'Starting')
       || (transitionState === 'Exporting');
+
+    const isLocked = isLockedSync
+      || (nextProps.labbook.environment.containerStatus !== 'NOT_RUNNING');
 
     const canManageCollaborators = nextProps.labbook
       ? nextProps.labbook.canManageCollaborators
@@ -210,6 +214,7 @@ class Labbook extends Component<Props> {
       canManageCollaborators,
       collaborators,
       isLocked,
+      isLockedSync,
       lockFileBrowser,
     };
   }
@@ -608,6 +613,10 @@ class Labbook extends Component<Props> {
       || isSyncing
       || isPublishing
       || this.state.isLocked;
+    const isLockedSync = isBuilding
+      || isSyncing
+      || isPublishing
+      || this.state.isLockedSync;
 
     if (labbook) {
       const {
@@ -706,6 +715,7 @@ class Labbook extends Component<Props> {
               containerStatus={containerStatus}
               imageStatus={imageStatus}
               isLocked={isLocked}
+              isLockedSync={isLockedSync}
               isSticky={isSticky}
               collaborators={collaborators}
               canManageCollaborators={canManageCollaborators}
