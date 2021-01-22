@@ -1,0 +1,5 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1633"
+changelog:
+  - type: NON_USER_FACING
+    description: Fixes issue found during QA testing related to export and package updates
+
