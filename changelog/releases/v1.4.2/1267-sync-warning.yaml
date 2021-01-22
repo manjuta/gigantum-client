@@ -1,0 +1,6 @@
+prLink: "https://github.com/gigantum/gigantum-client/pull/1624"
+changelog:
+  - type: IMPROVEMENT
+    description: Allows the user to Sync while a Project is running.
+    issueLink: https://github.com/gigantum/gigantum-client/issues/1267
+

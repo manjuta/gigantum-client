@@ -1,0 +1,92 @@
+@import '~Styles/_imports.scss';
+
+.SyncWarning {
+  height: 100%;
+
+  &__body {
+    height: 351px;
+    border-top: 2px solid $grey-border;
+    border-bottom: 2px solid $grey-border;
+    text-align: center;
+  }
+
+  &__header {
+    text-align: center;
+    width: 100%;
+    height: 72px;
+    color: $mineShaft;
+    border-bottom: 2px solid $grey-border;
+  }
+
+  &__header-text{
+    display:inline-block;
+    padding-left: 50px;
+    background: url('~Images/icons/branches/sync-warning.svg') no-repeat left center;
+    background-size: 50px;
+    color: $primary;
+    font-weight: 400;
+    padding: 5px 70px;
+  }
+
+  &__message {
+    padding: 20px 100px;
+    flex: 1;
+    p {
+      font-size: 19px;
+      color: $mineShaft;
+      margin: 20px 0;
+    }
+  }
+
+  &__p--warning {
+    color: $crimson !important;
+  }
+
+  &__buttonContainer {
+    height: 100px;
+    width: 100%;
+    padding-right: 70px;
+  }
+  &__subheader {
+    padding: 0 160px;
+    height: 120x;
+    border-bottom: 1px solid $grey-border;
+    background: $lightGrey;
+    color: $mineShaft;
+    width: 100%;
+  }
+  &__subheader-text {
+    width: 100%;
+    align-self: center;
+    p {
+      font-size: $h5-fontsize;
+      font-weight: 100;
+    }
+  }
+  &__subheader-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 10px;
+    text-transform: capitalize;
+  }
+  &__flex {
+    height: calc(100% - 277px);
+    margin: 0 70px;
+    border-bottom: 1px solid $grey-border;
+    align-items: center;
+    width: 100%;
+    p {
+      font-size: $h5-fontsize;
+    }
+  }
+
+  &__text {
+    font-size: $h5-fontsize;
+    color: $mineShaft;
+    margin: 20px 0;
+    &--small {
+      font-size: $h6-fontsize;
+      margin: -15px 0 10px 0;
+    }
+  }
+}
