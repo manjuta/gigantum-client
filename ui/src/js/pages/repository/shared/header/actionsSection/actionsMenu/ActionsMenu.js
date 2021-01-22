@@ -673,7 +673,7 @@ class ActionsMenu extends Component<Props> {
 
               <div
                 className="Tooltip-data Tooltip-data--top-offset Tooltip-data--info"
-                data-tooltip="Exports project zip file to your gignatum directory"
+                data-tooltip="Export as a zip file to your gigantum working directory"
               />
 
             </li>

@@ -153,6 +153,9 @@ def export_labbook_as_zip(labbook_path: str, lb_export_directory: str) -> str:
         lb = InventoryManager().load_labbook_from_directory(labbook_path)
         with lb.lock():
             path = ZipExporter.export_labbook(lb.root_dir, lb_export_directory)
+
+            # Replace path so it is host filesystem oriented
+            path = path.replace("/mnt/gigantum", os.environ['HOST_WORK_DIR'])
         return path
     except Exception as e:
         logger.exception(f"(Job {p}) Error on export_labbook_as_zip: {e}")
@@ -169,6 +172,9 @@ def export_dataset_as_zip(dataset_path: str, ds_export_directory: str) -> str:
         ds = InventoryManager().load_dataset_from_directory(dataset_path)
         with ds.lock():
             path = ZipExporter.export_dataset(ds.root_dir, ds_export_directory)
+
+            # Replace path so it is host filesystem oriented
+            path = path.replace("/mnt/gigantum", os.environ['HOST_WORK_DIR'])
         return path
     except Exception as e:
         logger.exception(f"(Job {p}) Error on export_dataset_as_zip: {e}")

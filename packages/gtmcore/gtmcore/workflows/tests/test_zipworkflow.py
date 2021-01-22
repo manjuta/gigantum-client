@@ -124,6 +124,10 @@ class TestLabbookImportZipping(object):
 
         with tempfile.TemporaryDirectory() as tempd:
             path = ZipExporter.export_labbook(lb.root_dir, tempd)
+            assert "mnt/gigantum" not in path
+
+            # Update path back to container filesystem
+            path = path.replace(os.environ['HOST_WORK_DIR'], "/mnt/gigantum")
             newlb = ZipExporter.import_labbook(path, "unittester2", "unittester2")
             assert not os.path.exists(path)
             assert 'unittester2' == InventoryManager().query_owner(newlb)
@@ -132,6 +136,9 @@ class TestLabbookImportZipping(object):
             # Now try with same user as exporter
             path2 = ZipExporter.export_labbook(lb.root_dir, tempd)
             shutil.rmtree(lb.root_dir)
+
+            # Update path back to container filesystem
+            path2 = path2.replace(os.environ['HOST_WORK_DIR'], "/mnt/gigantum")
             lb2 = ZipExporter.import_labbook(path2, "unittester", "unittester")
             assert 'unittester' == InventoryManager().query_owner(lb2)
             assert lb2.is_repo_clean
