@@ -69,6 +69,13 @@
     background-size: 42px;
   }
 
+
+  &--sync-warning {
+    background: url('~Images/icons/branches/sync-warning.svg') no-repeat center center;
+    background-size: 42px;
+  }
+
+
   &--publish {
     background: url('~Images/icons/branches/push.svg') no-repeat center center;
     background-size: 42px;
