@@ -1,0 +1,16 @@
+@import '~Styles/_imports.scss';
+
+.PublishSyncErrorModal {
+  height: 100%;
+  @include flex(space-between, column);
+
+  &__p {
+    &--error {
+      color: $orange;
+    }
+  }
+
+  &__buttons {
+    @include flex(flex-end, row);
+  }
+}

@@ -143,7 +143,7 @@ class VisibilityModal extends Component<Props> {
 
       setTimeout(() => {
         toggleModal();
-      }, 1000)
+      }, 1000);
     } else {
       this._transition(
         ERROR,
@@ -160,24 +160,28 @@ class VisibilityModal extends Component<Props> {
   *  @return {}
   */
   _modifyVisibility = () => {
-    const { header } = this.props;
+    const { header, toggleModal } = this.props;
     const { isPublic } = this.state;
 
     if (header === 'Publish') {
       const { currentServer } = this.context;
       const { baseUrl } = currentServer;
-      this._transition(
-        PUBLISHING,
-        {},
-      );
+      // TODO add back in when updating progress
+      // this._transition(
+      //   PUBLISHING,
+      //   {},
+      // );
       publish(baseUrl, this.props, isPublic, this._publishCallback);
     } else {
-      this._transition(
-        PUBLISHING,
-        {},
-      );
+      // TODO add back in when updating progress
+      // this._transition(
+      //   PUBLISHING,
+      //   {},
+      // );
       changeVisibility(this.props, isPublic, this._modifyVisibilityCallback);
     }
+
+    toggleModal();
   }
 
   static contextType = ServerContext;
@@ -217,7 +221,7 @@ class VisibilityModal extends Component<Props> {
           modalStateValue={modalStateValue}
           modifyVisibility={this._modifyVisibility}
           setPublic={this._setPublic}
-          toggleModal={this._toggleModal}
+          toggleModal={toggleModal}
           visibility={visibility}
         />
       ),

@@ -95,6 +95,7 @@ class SectionBrowser extends Component {
     const {
       owner,
       name,
+      uploadAllowed,
     } = this.props;
     const { isProcessing } = props.datasetState[`${owner}_${name}`];
     if (props[props.section] && props[props.section].allFiles) {
@@ -122,6 +123,7 @@ class SectionBrowser extends Component {
           containerStatus={props.containerStatus}
           loadMore={this._loadMore}
           lockFileBrowser={props.lockFileBrowser}
+          uploadAllowed={uploadAllowed}
           {...props}
         />
       );

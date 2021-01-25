@@ -9,10 +9,10 @@
         box-shadow: none;
     }
 
-    progress {
-      -webkit-appearance: none;
-         -moz-appearance: none;
-              appearance: none;
+    progress[value] {
+      -webkit-appearance: none !important;
+         -moz-appearance: none !important;
+              appearance: none !important;
       border: none;
       background-color: transparent;
       height: 3px;
@@ -23,10 +23,8 @@
       width: 100%;
     }
 
-    progress::-webkit-progress-value,
-    progress::progress-value {
-      background-color: $primary;
-      border-radius: 20px;
+    progress[value]::-webkit-progress-value {
+        background-color: $primary;
     }
 
     progress::-webkit-progress-bar,

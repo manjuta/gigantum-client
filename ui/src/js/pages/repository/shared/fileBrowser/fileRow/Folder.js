@@ -243,11 +243,11 @@ class Folder extends Component {
       isSelected,
     } = state;
 
-    if (!classList.contains('Folder__btn') &&
-      !classList.contains('ActionsMenu__item') &&
-      !classList.contains('Btn--round') &&
-      !classList.contains('DatasetActionsMenu__item') &&
-      !classList.contains('File__btn--round')) {
+    if (!classList.contains('Folder__btn')
+      && !classList.contains('ActionsMenu__item')
+      && !classList.contains('Btn--round')
+      && !classList.contains('DatasetActionsMenu__item')
+      && !classList.contains('File__btn--round')) {
       this.setState({ expanded: !state.expanded }, () => {
         props.updateChildState(key, isSelected, isIncomplete, expanded, addFolderVisible);
       });
@@ -362,10 +362,10 @@ class Folder extends Component {
     const { refs } = this;
 
     Object.keys(refs).forEach((childname) => {
-      if (refs[childname].getDecoratedComponentInstance &&
-        refs[childname].getDecoratedComponentInstance() &&
-        refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance &&
-        refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
+      if (refs[childname].getDecoratedComponentInstance
+        && refs[childname].getDecoratedComponentInstance()
+        && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance
+        && refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance()) {
         const child = refs[childname].getDecoratedComponentInstance().getDecoratedComponentInstance();
         if (child.props.fileData && !child.props.fileData.edge.node.isDir) {
           if (child.props.isOverCurrent) {
@@ -537,6 +537,7 @@ class Folder extends Component {
   }
 
   render() {
+    const { uploadAllowed } = this.props;
     const { props, state } = this;
     const { node } = props.fileData.edge;
     const isLocal = props.checkLocal(props.fileData);
@@ -647,16 +648,14 @@ class Folder extends Component {
                 data-tip="Files in this folder will not be versioned or synced."
                 data-for="Tooltip--untracked"
               />
-              )
-            }
+              )}
             { isUntrackedDirectory
               && (
               <ReactTooltip
                 place="bottom"
                 id="Tooltip--untracked"
               />
-              )
-            }
+              )}
           </div>
           <div className={renameCSS}>
 
@@ -726,8 +725,7 @@ class Folder extends Component {
                 isLocal={isLocal}
                 isDragging={props.isDragging}
               />
-              )
-            }
+              )}
           </div>
         </div>
         <div className={folderChildCSS}>
@@ -742,8 +740,7 @@ class Folder extends Component {
               setAddFolderVisible={this._addFolderVisible}
               addFolderVisible={state.addFolderVisible}
             />
-            )
-          }
+            )}
           { state.expanded
             && childrenKeys.map((file, index) => {
               if ((children
@@ -782,6 +779,7 @@ class Folder extends Component {
                     checkLocal={props.checkLocal}
                     containerStatus={props.containerStatus}
                     refetch={props.refetch}
+                    uploadAllowed={uploadAllowed}
                   />
                 );
               } if ((children
@@ -820,8 +818,7 @@ class Folder extends Component {
                 return (<div key={`${file}${index}`} />);
               }
               return (<div key={`${file}${index}`}>Loading</div>);
-            })
-          }
+            })}
         </div>
       </div>
     );

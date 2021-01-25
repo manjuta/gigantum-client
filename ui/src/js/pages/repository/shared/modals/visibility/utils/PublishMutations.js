@@ -82,8 +82,8 @@ const publish = (baseUrl, props, isPublic, callback) => {
                     if (publishResponse && publishResponse.publishLabbook) {
                       callback(publishResponse.publishLabbook.jobKey, error);
                     } else if (error) {
-                      failureCall();
-                      callback(null, error)
+                      failureCall(error);
+                      callback(null, error);
                     }
                   },
                 );
@@ -99,8 +99,8 @@ const publish = (baseUrl, props, isPublic, callback) => {
                     if (publishResponse && publishResponse.publishDataset) {
                       callback(publishResponse.publishDataset.jobKey, error);
                     } else if (error) {
-                      failureCall();
-                      callback(null, error)
+                      failureCall(error);
+                      callback(null, error);
                     }
                   },
                 );
@@ -116,7 +116,6 @@ const publish = (baseUrl, props, isPublic, callback) => {
     }
   });
 };
-
 
 
 /**
