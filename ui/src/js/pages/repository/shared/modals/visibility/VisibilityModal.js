@@ -3,6 +3,8 @@
 import React, { Component } from 'react';
 // context
 import ServerContext from 'Pages/ServerContext';
+// job status
+import JobStatus from 'JS/utils/JobStatus';
 // component
 import Modal from 'Components/modal/Modal';
 import Complete from './status/Complete';
@@ -31,6 +33,7 @@ type Props = {
   resetState: Function,
   resetPublishState: Function,
   setPublishingState: Function,
+  setPublishErrorState: Function,
   setRemoteSession: Function,
   setSyncingState: Function,
   toggleModal: Function,
@@ -102,17 +105,14 @@ class VisibilityModal extends Component<Props> {
       name,
       owner,
       resetPublishState,
+      setPublishErrorState,
       setPublishingState,
     } = this.props;
     if (jobKey) {
       this.setState({ jobKey });
     } else {
-      this._transition(
-        ERROR,
-        {
-          failureMessage: error[0].message,
-        },
-      );
+      console.log(error);
+      setPublishErrorState(error[0]);
 
       if (setPublishingState) {
         setPublishingState(owner, name, false);
@@ -121,6 +121,59 @@ class VisibilityModal extends Component<Props> {
       resetPublishState(false);
     }
   };
+
+
+  /**
+  * Method fetches job status and updates modal messaging
+  * @param {string} jobKey
+  */
+  _fetchData = (jobKey) => {
+    const {
+      name,
+      owner,
+      resetPublishState,
+      setPublishErrorState,
+      setPublishingState,
+      setSyncingState,
+      toggleModal,
+    } = this.props;
+
+    JobStatus.updateFooterStatus(jobKey).then((response) => {
+      const { status } = response.data.jobStatus;
+
+      if ((status === 'started') || (status === 'queued')) {
+        const { jobMetadata } = response.data.jobStatus;
+        const jobMetaDataParsed = JSON.parse(jobMetadata);
+        setTimeout(() => {
+          this._fetchData(jobKey);
+        }, 1000);
+      }
+
+      if (status === 'finished') {
+        setTimeout(() => {
+          if (setPublishingState) {
+            setPublishingState(owner, name, false);
+          }
+          setSyncingState(false);
+          resetPublishState(false);
+        }, 1000);
+      }
+
+      if (status === 'failed') {
+        const { jobMetadata } = response.data.jobStatus;
+        const jobMetaDataParsed = JSON.parse(jobMetadata);
+        const { failureMessage } = response.data.jobStatus;
+        console.log(response);
+        if (setPublishingState) {
+          setPublishingState(owner, name, false);
+        }
+
+        setSyncingState(false);
+
+        resetPublishState(false);
+      }
+    });
+  }
 
   /**
   * Method handles modalVisibility callback.
