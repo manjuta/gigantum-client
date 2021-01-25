@@ -56,7 +56,13 @@ const extraxtActiveBranch = (branches) => {
   Gets sync tooltip
   @return {String}
 */
-const getSyncTooltip = (props, data, currentServer, isDataset, getSyncTooltip) => {
+const getSyncTooltip = (
+  props,
+  data,
+  currentServer,
+  isDataset,
+  publishSyncError,
+) => {
   const {
     hasWriteAccess,
     syncOrPublish,
@@ -82,7 +88,10 @@ const getSyncTooltip = (props, data, currentServer, isDataset, getSyncTooltip) =
     ? `Please wait while ${repositoryType} data is being fetched`
     : syncTooltip;
 
-  syncTooltip = `An error occured during ${syncOrPublish}ing, click to see more detail.`;
+  syncTooltip = publishSyncError
+    ? `An error occured during ${syncOrPublish}ing, click to see more detail.`
+    : syncTooltip;
+
 
   return syncTooltip;
 };
@@ -753,7 +762,13 @@ class BranchMenu extends Component<Props> {
     };
     // TODO FIX this, nesting ternary operations is bad
     return {
-      syncTooltip: getSyncTooltip(props, data, currentServer, state.isDataset, syncOrPublish),
+      syncTooltip: getSyncTooltip(
+        props,
+        data,
+        currentServer,
+        state.isDataset,
+        publishSyncError,
+      ),
       manageTooltip: getManagedToolip(props, data),
       createTooltip,
       resetTooltip,
@@ -1207,6 +1222,7 @@ class BranchMenu extends Component<Props> {
             toggleModal={this._togglePublishModal}
             resetState={this._resetState}
             resetPublishState={this._resetPublishState}
+            setPublishErrorState={this._setPublishErrorState}
             setRemoteSession={this._setRemoteSession}
             setSyncingState={setSyncingState}
           />
