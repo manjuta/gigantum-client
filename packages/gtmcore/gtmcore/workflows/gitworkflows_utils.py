@@ -135,7 +135,9 @@ def _set_upstream_branch(repository: Repository, branch_name: str, feedback_cb: 
 def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: Callable,
           username: Optional[str] = None) -> None:
     # TODO(billvb) Refactor to BranchManager
-    feedback_cb(f"Pulling from remote branch \"{branch_name}\"...")
+    current_server = repository.client_config.get_server_configuration()
+    feedback_cb(f"Pulling latest changes from {current_server.name}...")
+
     cp = repository.git.commit_hash
     try:
         call_subprocess(f'git pull'.split(), cwd=repository.root_dir)
@@ -147,7 +149,11 @@ def _pull(repository: Repository, branch_name: str, override: str, feedback_cb: 
             conflicted_files = bm._infer_conflicted_files(cp_error.stdout.decode())
             if 'abort' == override:
                 call_subprocess(f'git reset --hard {cp}'.split(), cwd=repository.root_dir)
-                raise MergeConflict('Merge conflict pulling upstream', conflicted_files)
+                conflicted_str = "\n".join(conflicted_files)
+                feedback_cb(f'Sync aborted due to conflicts while pulling changes from {current_server.name}. '
+                            f'The following files conflicted:\n\n {conflicted_str}')
+                raise MergeConflict(f'Sync aborted due to conflicts while pulling changes from {current_server.name}',
+                                    conflicted_files)
             call_subprocess(f'git checkout --{override} {" ".join(conflicted_files)}'.split(),
                             cwd=repository.root_dir)
             call_subprocess('git add .'.split(), cwd=repository.root_dir)
@@ -164,6 +170,9 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
         return 0
 
     repository.sweep_uncommitted_changes()
+
+    current_server = repository.client_config.get_server_configuration()
+    feedback_callback(f"Preparing to sync with {current_server.name}...")
     repository.git.fetch()
 
     bm = BranchManager(repository)
@@ -177,16 +186,17 @@ def sync_branch(repository: Repository, username: Optional[str], override: str,
 
     if branch_name not in bm.branches_remote:
         # Branch does not exist, so push it to remote.
+        feedback_callback(f"Pushing current branch \"{branch_name}\" to {current_server.name}...")
         _set_upstream_branch(repository, bm.active_branch, feedback_callback)
         repository.git.clear_checkout_context()
-        feedback_callback("Synced current branch up to remote")
+        feedback_callback("Sync complete")
         return 0
     else:
         pulled_updates_count = bm.get_commits_behind()
         _pull(repository, branch_name, override, feedback_callback, username=username)
         should_push = not pull_only
         if should_push:
-            feedback_callback(f"Pushing changes to remote branch \"{branch_name}\"...")
+            feedback_callback(f"Pushing changes in current branch \"{branch_name}\" to {current_server.name}...")
             # Skip pushing back up if set to pull_only
             push_tokens = f'git push origin {branch_name}'.split()
             if branch_name not in bm.branches_remote:

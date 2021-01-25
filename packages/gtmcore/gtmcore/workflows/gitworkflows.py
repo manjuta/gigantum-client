@@ -112,9 +112,13 @@ class GitWorkflow(ABC):
         Returns:
             Integer number of commits pulled down from remote.
         """
-        updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
-                                                     override=override.value, pull_only=pull_only,
-                                                     feedback_callback=feedback_callback)
+        try:
+            updates_cnt = gitworkflows_utils.sync_branch(self.repository, username=username,
+                                                         override=override.value, pull_only=pull_only,
+                                                         feedback_callback=feedback_callback)
+        except Exception as err:
+            feedback_callback(str(err))
+            raise Exception(f"An error occurred while syncing. View details for more information and try again.")
 
         return updates_cnt
 
