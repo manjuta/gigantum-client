@@ -56,7 +56,7 @@ const extraxtActiveBranch = (branches) => {
   Gets sync tooltip
   @return {String}
 */
-const getSyncTooltip = (props, data, currentServer, isDataset) => {
+const getSyncTooltip = (props, data, currentServer, isDataset, getSyncTooltip) => {
   const {
     hasWriteAccess,
     syncOrPublish,
@@ -81,6 +81,8 @@ const getSyncTooltip = (props, data, currentServer, isDataset) => {
   syncTooltip = defaultRemote && !sectionCollabs
     ? `Please wait while ${repositoryType} data is being fetched`
     : syncTooltip;
+
+  syncTooltip = `An error occured during ${syncOrPublish}ing, click to see more detail.`;
 
   return syncTooltip;
 };
@@ -151,6 +153,42 @@ const checkForWriteAccess = (activeBranch, defaultRemote, collaborators, section
     return false;
   }
   return true;
+};
+
+/**
+* Method returns text for publish sync button
+*  @param {string} defaultRemote
+*  @param {boolean} publishSyncError
+*  @param {boolean} showPullOnly
+
+*  @return {string}
+*/
+const getPublishSyncText = (
+  defaultRemote,
+  publishSyncError,
+  showPullOnly,
+) => {
+  const syncButtonText = defaultRemote
+    ? showPullOnly
+      ? 'Pull'
+      : 'Sync'
+    : 'Publish';
+
+  if (defaultRemote) {
+    if (publishSyncError) {
+      return 'Sync Error';
+    }
+    if (showPullOnly) {
+      return 'Pull';
+    }
+
+    return 'Sync';
+  }
+
+  if (publishSyncError) {
+    return 'Sync Error';
+  }
+  return 'Publish';
 };
 
 
@@ -670,10 +708,11 @@ class BranchMenu extends Component<Props> {
     *  @param {Object} activeBranch
     *  @param {Boolean} hasWriteAccess
     *  @param {Boolean} upToDate
+    *  @param {Boolean} publishSyncError
     *  returns tooltip info
     *  @return {string}
     */
-  _getTooltipText = (activeBranch, hasWriteAccess, upToDate) => {
+  _getTooltipText = (activeBranch, hasWriteAccess, upToDate, publishSyncError) => {
     // destructure here
     const { props, state } = this;
     const {
@@ -717,12 +756,13 @@ class BranchMenu extends Component<Props> {
     };
     // TODO FIX this, nesting ternary operations is bad
     return {
-      syncTooltip: getSyncTooltip(props, data, currentServer, state.isDataset),
+      syncTooltip: getSyncTooltip(props, data, currentServer, state.isDataset, syncOrPublish),
       manageTooltip: getManagedToolip(props, data),
       createTooltip,
       resetTooltip,
       switchTooltip,
       commitTooltip,
+      syncOrPublish,
     };
   }
 
@@ -838,12 +878,9 @@ class BranchMenu extends Component<Props> {
      resetTooltip,
      switchTooltip,
      commitTooltip,
-   } = this._getTooltipText(activeBranch, hasWriteAccess, upToDate);
-   const syncButtonText = defaultRemote
-     ? showPullOnly
-       ? 'Pull'
-       : 'Sync'
-     : 'Publish';
+     syncOrPublish,
+   } = this._getTooltipText(activeBranch, hasWriteAccess, upToDate, publishSyncError);
+   const syncButtonText = getPublishSyncText(defaultRemote, publishSyncError, showPullOnly);
    const syncButtonDisabled = (showPullOnly && !allowSyncPull)
     || (!defaultRemote && !allowSync)
     || (defaultRemote && !allowSync && !showPullOnly);
@@ -1220,6 +1257,7 @@ class BranchMenu extends Component<Props> {
          closeModal={this._clearSyncErorrState}
          data={publishSyncErrorData}
          isVisible={isPublishSyncErroModalVisible}
+         remoteOperationPerformed={syncOrPublish}
        />
      </div>
 

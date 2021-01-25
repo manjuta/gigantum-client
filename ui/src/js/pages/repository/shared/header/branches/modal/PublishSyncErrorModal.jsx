@@ -14,6 +14,7 @@ type Props = {
     message: string,
   },
   isVisible: boolean,
+  remoteOperationPerformed: string
 };
 
 
@@ -21,6 +22,7 @@ const PublishSyncErrorModal = ({
   closeModal,
   data,
   isVisible,
+  remoteOperationPerformed,
 }: Props) => {
   if (!isVisible) {
     return null;
@@ -31,16 +33,28 @@ const PublishSyncErrorModal = ({
     message,
   } = data;
 
+  const headerModalText = `${remoteOperationPerformed} Error`;
+
   return (
     <Modal
-      header="Sync Error"
+      header={headerModalText}
       handleClose={closeModal}
       icon="sync"
       size="large"
     >
       <div className="PublishSyncErrorModal">
         <div className="PublishSyncErrorModal__text">
-          <h5>{header}</h5>
+          <h5>
+            An error occured during
+            {' '}
+            {remoteOperationPerformed}
+          </h5>
+          <p className="PublishSyncErrorModal__p">Remote operations usually fail because of network issues. Check to see if you have a stable internet connection and try again.</p>
+        </div>
+
+
+        <div className="PublishSyncErrorModal__error-details">
+          <h6 className="PublishSyncErrorModal__h6 PublishSyncErrorModal__h6--error">{header}</h6>
           <p className="PublishSyncErrorModal__p PublishSyncErrorModal__p--error">{message}</p>
         </div>
 

@@ -10,7 +10,21 @@
     }
   }
 
+  &__h6 {
+    &--error {
+      color: $white;
+    }
+  }
+
   &__buttons {
     @include flex(flex-end, row);
+  }
+
+  &__error-details {
+    background-color: $slateBlue;
+    color: $white;
+    padding: 1em;
+    max-height: 9em;
+    overflow: auto;
   }
 }

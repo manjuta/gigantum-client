@@ -298,18 +298,6 @@ $dropBoxWidth: 250px;
       background-size: 20px;
     }
   }
-
-  &--error {
-    background-color: $white;
-    border-color: $orange !important;
-    color: $orange !important;
-
-    &:hover {
-      background-color: $white;
-    }
-
-
-  }
 }
 
 .BranchMenu__icon {
