@@ -27,7 +27,7 @@ const PublishSyncErrorModal = ({
   if (!isVisible) {
     return null;
   }
-
+  console.log(data);
   const {
     header,
     message,
@@ -39,7 +39,7 @@ const PublishSyncErrorModal = ({
     <Modal
       header={headerModalText}
       handleClose={closeModal}
-      icon="sync"
+      icon="sync-warning"
       size="large"
     >
       <div className="PublishSyncErrorModal">
@@ -55,7 +55,7 @@ const PublishSyncErrorModal = ({
 
         <div className="PublishSyncErrorModal__error-details">
           <h6 className="PublishSyncErrorModal__h6 PublishSyncErrorModal__h6--error">{header}</h6>
-          <p className="PublishSyncErrorModal__p PublishSyncErrorModal__p--error">{message}</p>
+          <p className="PublishSyncErrorModal__p PublishSyncErrorModal__p--error">{message.feedback}</p>
         </div>
 
         <div className="PublishSyncErrorModal__buttons">

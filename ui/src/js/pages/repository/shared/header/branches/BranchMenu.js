@@ -229,11 +229,8 @@ class BranchMenu extends Component<Props> {
     publishModalVisible: false,
     publishDatasetsModalVisible: false,
     publishDatasetsModalAction: 'Publish',
-    publishSyncError: true,
-    publishSyncErrorData: {
-      header: "subprocess.CalledProcessError: Command ['git', 'push', 'origin', 'asdsa'] returned non-zero exit status 1.",
-      message: 'Pushing changes to remote branch "asdsa"...',
-    },
+    publishSyncError: false,
+    publishSyncErrorData: null,
     syncMenuVisible: false,
     showLoginPrompt: false,
     showSyncWarning: false,
