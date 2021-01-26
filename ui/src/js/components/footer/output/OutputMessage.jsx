@@ -10,6 +10,7 @@ type Props = {
 }
 
 const OutputMessage = ({ item }) => {
+  console.log(hasAnsi(item.message), item.message);
   if (hasAnsi(item.message)) {
     const converter = new Converter();
     const html = converter.toHtml(item.message);

@@ -381,7 +381,7 @@ export default (state = {
         ? action.payload.messageBody
         : [],
       error: action.payload.error,
-      messageListOpen: false,
+      messageListOpen: action.payload.error || false,
       messageBodyOpen,
       buildProgress,
       dismissed,
