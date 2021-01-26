@@ -71,7 +71,6 @@ class GitWorkflow(ABC):
         Returns:
             None
         """
-
         logger.info(f"Publishing {str(self.repository)} for user {username} to remote {remote}")
         if self.remote:
             raise GitWorkflowException("Cannot publish Labbook when remote already set.")
@@ -89,10 +88,12 @@ class GitWorkflow(ABC):
             gitworkflows_utils.publish_to_remote(repository=self.repository, username=username,
                                                  remote=remote, feedback_callback=feedback_callback)
         except Exception as e:
-            # Unsure what specific exception add_remote creates, so make a catchall.
+            feedback_callback(f"ERROR: {str(e)}")
             logger.error(f"Publish failed {e}: {str(self.repository)} may be in corrupted Git state!")
             call_subprocess(['git', 'reset', '--hard'], cwd=self.repository.root_dir)
-            raise e
+            raise Exception(f"An error occurred while publishing. "
+                            f"View details for more information and try again. You may need to refresh the page and"
+                            f" try to sync again.")
 
     def sync(self, username: str, remote: str = "origin", override: MergeOverride = MergeOverride.ABORT,
              feedback_callback: Callable = lambda _: None, pull_only: bool = False,
@@ -117,7 +118,7 @@ class GitWorkflow(ABC):
                                                          override=override.value, pull_only=pull_only,
                                                          feedback_callback=feedback_callback)
         except Exception as err:
-            feedback_callback(str(err))
+            feedback_callback(f"ERROR: {str(err)}")
             raise Exception(f"An error occurred while syncing. View details for more information and try again.")
 
         return updates_cnt

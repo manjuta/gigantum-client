@@ -83,7 +83,10 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
         if percent_complete:
             current_job.meta['percent_complete'] = percent_complete
 
-        current_job.meta['feedback'] = msg
+        if 'feedback' not in current_job.meta:
+            current_job.meta['feedback'] = msg
+        else:
+            current_job.meta['feedback'] = current_job.meta['feedback'] + f'\n{msg}'
         current_job.save_meta()
 
     try:
