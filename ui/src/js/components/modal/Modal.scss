@@ -17,7 +17,7 @@
 }
 
 .Modal__container{
-  height: calc(100% - 70px);
+  height: calc(100%);
   padding: 20px;
   hr {
     width: calc(100% - 2px) !important;
@@ -142,8 +142,6 @@
 
 .Modal__pre-header{
   margin: 0;
-  margin-top: -10px;
-  margin-bottom: -40px;
 
   text-align: center;
 
@@ -154,7 +152,7 @@
 
 .Modal__header{
   margin: 0;
-  padding: 40px 0 5px 20px;
+  padding: 0px 0 5px 20px;
 
   text-align: center;
   white-space: nowrap;

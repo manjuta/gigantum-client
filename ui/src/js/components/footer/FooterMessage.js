@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import Moment from 'moment';
 // components
 import BuildModal from 'Pages/repository/shared/modals/BuildModal';
-import OutputMessage from './output/OutputMessage';
+import OutputMessage from 'Components/output/OutputMessage';
 // assets
 import './FooterMessage.scss';
 
@@ -111,7 +111,7 @@ class FooterMessage extends PureComponent<Props> {
             {
               messageItem && messageItem.messageBody && messageItem.messageBody.map(item => (
                 <li key={messageItem.id}>
-                  <OutputMessage item={item} />
+                  <OutputMessage message={item.message} />
                 </li>
               ))
             }

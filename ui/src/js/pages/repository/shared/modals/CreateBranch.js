@@ -303,46 +303,47 @@ class CreateBranchModal extends Component<Props> {
             icon={icon}
           >
             <div className="CreateBranch">
-              <div className="CreateBranch__name">
-                <label
-                  htmlFor="CreateBranchName"
-                >
-                  Name
-                  <input
-                    id="CreateBranchName"
-                    type="text"
-                    maxLength="80"
-                    className={inputCSS}
-                    onChange={evt => this._updateTextState(evt, 'branchName')}
-                    onKeyUp={evt => this._updateTextState(evt, 'branchName')}
-                    placeholder="Enter a unique branch name"
-                    defaultValue={branchDefault}
-                    disabled={inputsDisabled}
-                  />
-                </label>
-                <span className={errorCSS}>{this._getErrorText()}</span>
-              </div>
+              <div>
+                <div className="CreateBranch__name">
+                  <label
+                    htmlFor="CreateBranchName"
+                  >
+                    Name
+                    <input
+                      id="CreateBranchName"
+                      type="text"
+                      maxLength="80"
+                      className={inputCSS}
+                      onChange={evt => this._updateTextState(evt, 'branchName')}
+                      onKeyUp={evt => this._updateTextState(evt, 'branchName')}
+                      placeholder="Enter a unique branch name"
+                      defaultValue={branchDefault}
+                      disabled={inputsDisabled}
+                    />
+                  </label>
+                  <span className={errorCSS}>{this._getErrorText()}</span>
+                </div>
 
-              <div className="CreateBranch__description">
-                <label
-                  id="CreateBranchDescription__label"
-                  htmlFor="CreateBranchDescription"
-                >
-                  Description
-                  <textarea
-                    id="CreateBranchDescription"
-                    className="CreateBranch__input--description"
-                    disabled={inputsDisabled}
-                    onChange={evt => this._updateTextState(evt, 'branchDescription')}
-                    onKeyUp={evt => this._updateTextState(evt, 'branchDescription')}
-                    maxLength="80"
-                    placeholder="Briefly describe this branch, its purpose and any other key details. "
-                    defaultValue={textAreaDefault}
-                  />
-                </label>
-                <p className={`CreateBranch__warning ${textWarning}`}>{`${textLength} characters remaining`}</p>
+                <div className="CreateBranch__description">
+                  <label
+                    id="CreateBranchDescription__label"
+                    htmlFor="CreateBranchDescription"
+                  >
+                    Description
+                    <textarea
+                      id="CreateBranchDescription"
+                      className="CreateBranch__input--description"
+                      disabled={inputsDisabled}
+                      onChange={evt => this._updateTextState(evt, 'branchDescription')}
+                      onKeyUp={evt => this._updateTextState(evt, 'branchDescription')}
+                      maxLength="80"
+                      placeholder="Briefly describe this branch, its purpose and any other key details. "
+                      defaultValue={textAreaDefault}
+                    />
+                  </label>
+                  <p className={`CreateBranch__warning ${textWarning}`}>{`${textLength} characters remaining`}</p>
+                </div>
               </div>
-
               <div className="CreateBranch_nav">
                 <div className="CreateBranch__buttons">
                   <button
@@ -367,8 +368,7 @@ class CreateBranchModal extends Component<Props> {
             </div>
 
           </Modal>
-          )
-        }
+          )}
       </div>
 
     );

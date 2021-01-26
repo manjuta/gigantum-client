@@ -35,51 +35,52 @@ const VisibilityModalContent = (props: Props) => {
   return (
     <div className="VisibilityModal">
       <div>
-        <p>{message}</p>
-      </div>
-
-      <div>
-        <div className="VisibilityModal__private">
-          <label
-            className="Radio"
-            htmlFor="publish_private"
-          >
-            <input
-              defaultChecked={(visibility === 'private') || !isPublic}
-              type="radio"
-              name="publish"
-              id="publish_private"
-              onClick={() => { setPublic(false); }}
-            />
-            <span><b>Private</b></span>
-          </label>
-
-          <p className="VisibilityModal__paragraph">Private projects are only visible to collaborators. Users that are added as a collaborator will be able to view and edit.</p>
-
+        <div>
+          <p>{message}</p>
         </div>
 
-        <div className="VisibilityModal__public">
+        <div>
+          <div className="VisibilityModal__private">
+            <label
+              className="Radio"
+              htmlFor="publish_private"
+            >
+              <input
+                defaultChecked={(visibility === 'private') || !isPublic}
+                type="radio"
+                name="publish"
+                id="publish_private"
+                onClick={() => { setPublic(false); }}
+              />
+              <span><b>Private</b></span>
+            </label>
 
-          <label
-            className="Radio"
-            htmlFor="publish_public"
-          >
-            <input
-              defaultChecked={visibility === 'public'}
-              name="publish"
-              type="radio"
-              id="publish_public"
-              onClick={() => { setPublic(true); }}
-            />
-            <span><b>Public</b></span>
-          </label>
+            <p className="VisibilityModal__paragraph">Private projects are only visible to collaborators. Users that are added as a collaborator will be able to view and edit.</p>
 
-          <p className="VisibilityModal__paragraph">Public projects are visible to everyone. Users will be able to import a copy. Only users that are added as a collaborator will be able to edit.</p>
+          </div>
+
+          <div className="VisibilityModal__public">
+
+            <label
+              className="Radio"
+              htmlFor="publish_public"
+            >
+              <input
+                defaultChecked={visibility === 'public'}
+                name="publish"
+                type="radio"
+                id="publish_public"
+                onClick={() => { setPublic(true); }}
+              />
+              <span><b>Public</b></span>
+            </label>
+
+            <p className="VisibilityModal__paragraph">Public projects are visible to everyone. Users will be able to import a copy. Only users that are added as a collaborator will be able to edit.</p>
+
+          </div>
 
         </div>
-
       </div>
-
       <div className="VisibilityModal__buttons">
         <button
           type="submit"
