@@ -44,12 +44,12 @@ const PublishSyncErrorModal = ({
     >
       <div className="PublishSyncErrorModal">
         <div className="PublishSyncErrorModal__text">
-          <h4>
+          <h5>
             An error occured during
             {' '}
             {remoteOperationPerformed}
             . Please check your internet connection and try again.
-          </h4>
+          </h5>
         </div>
 
 

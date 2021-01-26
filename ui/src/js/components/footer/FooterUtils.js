@@ -173,14 +173,13 @@ const FooterUtils = {
                 callback(response);
               }
 
-              const errorHTML = `${html}\n<span style="color:rgb(255,85,85)">${metaData.failure_detail}</span>`;
               const messageData = {
                 id: responseId,
                 message: errorMessage,
                 isLast: true,
                 status: response.data.jobStatus.status,
                 error: true,
-                messageBody: [{ message: errorHTML }],
+                messageBody: [{ message: html }],
                 buildProgress: type === 'buildImage',
               };
               setMultiInfoMessage(owner, name, messageData);
