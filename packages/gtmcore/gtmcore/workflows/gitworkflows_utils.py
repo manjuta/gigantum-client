@@ -370,9 +370,48 @@ def call_git_subprocess(cmd_tokens: List[str], cwd: str, feedback_callback: Call
 
             # Just grab the last item if console is updated interactively. You only get
             # all of the output at once due to how things get flushed it seems anyway.
-            line_str = line.split('\r')[-1]
-            feedback_callback(line_str)
+            feedback_callback(line)
 
     if sp.returncode != 0:
         cmd = " ".join(cmd_tokens)
         raise Exception(f"An error occurred while running `{cmd}`")
+
+
+def handle_git_feedback(current_feedback: str, message: str) -> str:
+    """Function to handle git output in a reasonable way for UI rendering for the user
+
+    Args:
+        current_feedback: current string of feedback stored in the background job
+        message: new message output from git
+
+    Returns:
+        string containing all messages separated by newlines
+    """
+    # We manage whitespace for git feedback in this function
+    message = message.strip()
+
+    lines_to_skip = (".git/info/lfs.locksverify true",
+                     "Locking support detected on remote",
+                     "hint: ")
+    if message.startswith(lines_to_skip):
+        return current_feedback
+
+    if not current_feedback:
+        # First line provided as feedback.
+        return message
+
+    lines = current_feedback.split('\n')
+    last_line = lines[-1]
+    msg_parts = message.split(':')
+    if len(msg_parts) > 1:
+        # You might have a progress update vs. a new message
+        last_line_parts = last_line.split(':')
+        if len(msg_parts) == len(last_line_parts):
+            if msg_parts[0] == last_line_parts[0]:
+                # It's an update, remove last line to update instead of just append
+                _ = lines.pop()
+
+    lines.append(message)
+    return "\n".join(lines)
+
+
