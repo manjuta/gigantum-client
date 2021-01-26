@@ -359,7 +359,7 @@ def call_git_subprocess(cmd_tokens: List[str], cwd: str, feedback_callback: Call
     """
     with subprocess.Popen(cmd_tokens, cwd=cwd, shell=False,
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, universal_newlines=True) as sp:
-        for line in sp.stdout:
+        for line in sp.stdout:  # type: ignore
             # Clean up some of the output that we know we want to ignore for now
             if ".git/info/lfs.locksverify true" in line:
                 continue
