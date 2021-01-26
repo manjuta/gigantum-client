@@ -20,6 +20,7 @@ from gtmcore.environment import RepositoryManager
 from gtmcore.environment.repository import RepositoryLock
 from gtmcore.logging import LMLogger
 from gtmcore.workflows import ZipExporter, LabbookWorkflow, DatasetWorkflow, MergeOverride
+from gtmcore.workflows.gitworkflows_utils import handle_git_feedback
 from gtmcore.configuration import Configuration
 
 from gtmcore.dataset.storage.backend import UnmanagedStorageBackend
@@ -50,7 +51,10 @@ def publish_repository(repository: Repository, username: str, access_token: str,
         if percent_complete:
             current_job.meta['percent_complete'] = percent_complete
 
-        current_job.meta['feedback'] = msg
+        if 'feedback' not in current_job.meta:
+            current_job.meta['feedback'] = handle_git_feedback("", msg)
+        else:
+            current_job.meta['feedback'] = handle_git_feedback(current_job.meta['feedback'], msg)
         current_job.save_meta()
 
     update_feedback("Publish task in queue")
@@ -84,9 +88,9 @@ def sync_repository(repository: Repository, username: str, override: MergeOverri
             current_job.meta['percent_complete'] = percent_complete
 
         if 'feedback' not in current_job.meta:
-            current_job.meta['feedback'] = msg
+            current_job.meta['feedback'] = handle_git_feedback("", msg)
         else:
-            current_job.meta['feedback'] = current_job.meta['feedback'] + f'\n{msg}'
+            current_job.meta['feedback'] = handle_git_feedback(current_job.meta['feedback'], msg)
         current_job.save_meta()
 
     try:
@@ -127,9 +131,10 @@ def import_labbook_from_remote(remote_url: str, username: str) -> str:
         if not job:
             return
         if 'feedback' not in job.meta:
-            job.meta['feedback'] = msg
+            job.meta['feedback'] = handle_git_feedback("", msg)
         else:
-            job.meta['feedback'] = job.meta['feedback'] + f'\n{msg}'
+            job.meta['feedback'] = handle_git_feedback(job.meta['feedback'], msg)
+
         job.save_meta()
 
     remote = RepoLocation(remote_url, username)
