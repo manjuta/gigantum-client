@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Moment from 'moment';
 // components
 import BuildModal from 'Pages/repository/shared/modals/BuildModal';
+import OutputMessage from './output/OutputMessage';
 // assets
 import './FooterMessage.scss';
 
@@ -90,9 +91,7 @@ class FooterMessage extends PureComponent<Props> {
                 onClick={() => { this._showMessageBody(); }}
               />
             </div>
-            )
-
-          }
+            )}
           {
             messageItem.buildProgress
             && (
@@ -112,7 +111,7 @@ class FooterMessage extends PureComponent<Props> {
             {
               messageItem && messageItem.messageBody && messageItem.messageBody.map(item => (
                 <li key={messageItem.id}>
-                  <div dangerouslySetInnerHTML={{ __html: item.message }} />
+                  <OutputMessage item={item} />
                 </li>
               ))
             }
@@ -125,7 +124,7 @@ class FooterMessage extends PureComponent<Props> {
             <BuildModal
               setBuildId={setBuildId}
               buildId={selectedBuildId}
-              keepOpen={true}
+              keepOpen
               owner={owner}
               name={name}
             />

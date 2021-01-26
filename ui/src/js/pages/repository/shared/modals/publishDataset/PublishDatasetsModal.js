@@ -25,11 +25,13 @@ type Props = {
   checkSessionIsValid: Function,
   handleSync: Function,
   header: string,
+  isVisible: boolean,
   localDatasets: Array,
   name: string,
   owner: string,
   resetPublishState: Function,
   resetState: Function,
+  setPublishErrorState: Function,
   setPublishingState: Function,
   setRemoteSession: Function,
   setSyncingState: Function,
@@ -137,12 +139,13 @@ class PublishDatasetsModal extends Component<Props> {
   *  sets public state
   *  @return {}
   */
-  _failureCall = (errorMessage) => {
+  _failureCall = (errorMessage, jobQueryData) => {
     const {
       header,
       owner,
       name,
       resetPublishState,
+      setPublishErrorState,
       setPublishingState,
       setSyncingState,
       toggleModal,
@@ -150,6 +153,7 @@ class PublishDatasetsModal extends Component<Props> {
     } = this.props;
     const isPublishing = (header === 'Publish');
 
+    setPublishErrorState(errorMessage, jobQueryData);
     setTimeout(() => toggleModal(false, true), 2000);
 
     if (isPublishing) {
@@ -456,6 +460,7 @@ class PublishDatasetsModal extends Component<Props> {
     const {
       buttonText,
       header,
+      isVisible,
       localDatasets,
       name,
       owner,
@@ -475,6 +480,11 @@ class PublishDatasetsModal extends Component<Props> {
       PublishDatasetsModal__container: true,
       'PublishDatasetsModal__container--processing': isProcessing,
     });
+
+
+    if (!isVisible) {
+      return null;
+    }
 
     return (
       <Modal
@@ -506,8 +516,7 @@ class PublishDatasetsModal extends Component<Props> {
                         progress={progress}
                       />
                     )
-                    : <p>Select the visibility for the datasets to be published.</p>
-                  }
+                    : <p>Select the visibility for the datasets to be published.</p>}
                   <h5 className="PublishDatasetsModal__Label">
                     Datasets
                   </h5>
@@ -519,8 +528,7 @@ class PublishDatasetsModal extends Component<Props> {
                         progress={progress}
                         isProcessing={isProcessing}
                       />
-                    ))
-                    }
+                    ))}
                   </ul>
 
                 </div>
@@ -544,10 +552,9 @@ class PublishDatasetsModal extends Component<Props> {
                         {header === 'Sync' && ' And Sync'}
                       </button>
                     </div>
-                    )
-                  }
-            </div>
-          )}
+                    )}
+              </div>
+            )}
         </div>
       </Modal>
     );

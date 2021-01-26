@@ -1,6 +1,7 @@
 // @flow
 // vendor
 import React from 'react';
+import Converter from 'ansi-to-html';
 // components
 import Modal from 'Components/modal/Modal';
 // css
@@ -34,6 +35,8 @@ const PublishSyncErrorModal = ({
   } = data;
 
   const headerModalText = `${remoteOperationPerformed} Error`;
+  const convert = new Converter();
+  const html = convert.toHtml(message.feedback);
 
   return (
     <Modal
@@ -55,7 +58,7 @@ const PublishSyncErrorModal = ({
 
         <div className="PublishSyncErrorModal__error-details">
           <h6 className="PublishSyncErrorModal__h6 PublishSyncErrorModal__h6--error">{header}</h6>
-          <p className="PublishSyncErrorModal__p PublishSyncErrorModal__p--error">{message.feedback}</p>
+          <div dangerouslySetInnerHTML={{ __html: html }} />
         </div>
 
         <div className="PublishSyncErrorModal__buttons">

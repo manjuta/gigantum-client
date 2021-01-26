@@ -27,6 +27,7 @@ import './VisibilityModal.scss';
 type Props = {
   buttonText: string,
   header: string,
+  isVisible: boolean,
   modalStateValue: Object,
   name: string,
   owner: string,
@@ -112,9 +113,6 @@ class VisibilityModal extends Component<Props> {
       this.setState({ jobKey });
       this._fetchData(jobKey);
     } else {
-      console.log(error);
-      setPublishErrorState(error[0]);
-
       if (setPublishingState) {
         setPublishingState(owner, name, false);
       }
@@ -164,6 +162,7 @@ class VisibilityModal extends Component<Props> {
         const { jobMetadata } = response.data.jobStatus;
         const jobMetaDataParsed = JSON.parse(jobMetadata);
         const { failureMessage } = response.data.jobStatus;
+        setPublishErrorState(response.data.jobStatus.failureMessage, jobMetaDataParsed);
         console.log(response);
         if (setPublishingState) {
           setPublishingState(owner, name, false);
@@ -244,6 +243,7 @@ class VisibilityModal extends Component<Props> {
     const {
       buttonText,
       header,
+      isVisible,
       modalStateValue,
       name,
       owner,
@@ -308,6 +308,10 @@ class VisibilityModal extends Component<Props> {
         />
       ),
     };
+
+    if (!isVisible) {
+      return null;
+    }
 
     if (stateMachine) {
       return (

@@ -12,11 +12,14 @@ import { setMultiInfoMessage } from 'JS/redux/actions/footer';
 import './ForceSync.scss';
 
 type Props = {
-  owner: string,
+  isVisible: boolean,
   name: string,
+  owner: string,
   pullOnly: bool,
+  sectionType: string,
+  setPublishErrorState: Function,
   toggleSyncModal: Function,
-}
+};
 
 export default class ForceSync extends Component<Props> {
   /**
@@ -25,16 +28,17 @@ export default class ForceSync extends Component<Props> {
   *  @return {}
   */
   _forceSync(method) {
-    const { props } = this;
     const id = uuidv4;
     const {
       owner,
       name,
       pullOnly,
+      sectionType,
+      setPublishErrorState,
       toggleSyncModal,
     } = this.props;
 
-    if (props.sectionType === 'labbook') {
+    if (sectionType === 'labbook') {
       const footerMessageData = {
         id,
         message: 'Syncing Project with Gigantum cloud ...',
@@ -60,6 +64,13 @@ export default class ForceSync extends Component<Props> {
               messageBody: error,
             };
             setMultiInfoMessage(owner, name, messageData);
+
+            setPublishErrorState(
+              `Could not 'force' sync ${name}`,
+              {
+                feedback: error[0].message,
+              },
+            );
           }
         },
       );
@@ -89,6 +100,13 @@ export default class ForceSync extends Component<Props> {
               messageBody: error,
             };
             setMultiInfoMessage(owner, name, messageData);
+
+            setPublishErrorState(
+              `Could not 'force' sync ${name}`,
+              {
+                feedback: error[0].message,
+              },
+            );
           }
         },
       );
@@ -99,8 +117,13 @@ export default class ForceSync extends Component<Props> {
 
   render() {
     const {
+      isVisible,
       toggleSyncModal,
     } = this.props;
+
+    if (!isVisible) {
+      return null;
+    }
 
     return (
       <Modal

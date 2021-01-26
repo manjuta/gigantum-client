@@ -182,7 +182,6 @@ const getPublishSyncText = (
       ? 'Pull'
       : 'Sync'
     : 'Publish';
-
   if (defaultRemote) {
     if (publishSyncError) {
       return 'Sync Error';
@@ -195,7 +194,7 @@ const getPublishSyncText = (
   }
 
   if (publishSyncError) {
-    return 'Sync Error';
+    return 'Publish Error';
   }
   return 'Publish';
 };
@@ -845,7 +844,10 @@ class BranchMenu extends Component<Props> {
      setSyncingState,
    } = this.props;
    const {
+     forceSyncModalVisible,
+     publishModalVisible,
      publishSyncErrorData,
+     publishDatasetsModalVisible,
      isPublishSyncErroModalVisible,
      publishSyncError,
      showLoginPrompt,
@@ -930,9 +932,9 @@ class BranchMenu extends Component<Props> {
    });
    const syncCSS = classNames({
      'Btn--branch Btn--action Btn--branch--sync': true,
-     'Btn--branch--sync--publish': !defaultRemote,
-     'Btn--branch--sync--pull': showPullOnly,
-     'Btn--branch--sync--upToDate': defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined) || isLocked) && !showPullOnly,
+     'Btn--branch--sync--publish': !defaultRemote && !publishSyncError,
+     'Btn--branch--sync--pull': showPullOnly && !publishSyncError,
+     'Btn--branch--sync--upToDate': defaultRemote && (upToDate || (activeBranch.commitsAhead === undefined) || isLocked) && !showPullOnly && !publishSyncError,
      'Tooltip-data': !state.commitsHovered,
      'Btn--branch--error': publishSyncError,
    });
@@ -1206,60 +1208,56 @@ class BranchMenu extends Component<Props> {
          owner={owner}
          name={name}
        />
-       {
-        state.publishModalVisible
-        && (
-          <VisibilityModal
-            {...this.props}
-            owner={section.owner}
-            name={section.name}
-            labbookId={props.sectionId}
-            remoteUrl={defaultRemote}
-            buttonText="Publish"
-            header="Publish"
-            modalStateValue="visibilityModalVisible"
-            checkSessionIsValid={this._checkSessionIsValid}
-            toggleModal={this._togglePublishModal}
-            resetState={this._resetState}
-            resetPublishState={this._resetPublishState}
-            setPublishErrorState={this._setPublishErrorState}
-            setRemoteSession={this._setRemoteSession}
-            setSyncingState={setSyncingState}
-          />
-        )
-       }
-       { state.publishDatasetsModalVisible
-        && (
-          <PublishDatasetsModal
-            {...this.props}
-            owner={props.section.owner}
-            name={props.section.name}
-            labbookId={props.sectionId}
-            buttonText="Publish All"
-            header={state.publishDatasetsModalAction}
-            pullOnly={state.pullOnly}
-            modalStateValue="visibilityModalVisible"
-            toggleSyncModal={this._toggleSyncModal}
-            checkSessionIsValid={this._checkSessionIsValid}
-            toggleModal={this._togglePublishModal}
-            resetState={this._resetState}
-            resetPublishState={this._resetPublishState}
-            setRemoteSession={this._setRemoteSession}
-            handleSync={this._handleSyncButton}
-            localDatasets={state.localDatasets || []}
-          />
-        )}
 
-       { state.forceSyncModalVisible
-        && (
-          <ForceSync
-            {...this.props}
-            toggleSyncModal={this._toggleSyncModal}
-            pullOnly={state.pullOnly}
-            owner={owner}
-            name={name}
-          />
-        )}
+       <VisibilityModal
+         {...this.props}
+         isVisible={publishModalVisible}
+         owner={section.owner}
+         name={section.name}
+         labbookId={props.sectionId}
+         remoteUrl={defaultRemote}
+         buttonText="Publish"
+         header="Publish"
+         modalStateValue="visibilityModalVisible"
+         checkSessionIsValid={this._checkSessionIsValid}
+         toggleModal={this._togglePublishModal}
+         resetState={this._resetState}
+         resetPublishState={this._resetPublishState}
+         setPublishErrorState={this._setPublishErrorState}
+         setRemoteSession={this._setRemoteSession}
+         setSyncingState={setSyncingState}
+       />
+
+       <PublishDatasetsModal
+         {...this.props}
+         isVisible={publishDatasetsModalVisible}
+         owner={props.section.owner}
+         name={props.section.name}
+         labbookId={props.sectionId}
+         buttonText="Publish All"
+         header={state.publishDatasetsModalAction}
+         pullOnly={state.pullOnly}
+         modalStateValue="visibilityModalVisible"
+         toggleSyncModal={this._toggleSyncModal}
+         checkSessionIsValid={this._checkSessionIsValid}
+         toggleModal={this._togglePublishModal}
+         resetState={this._resetState}
+         resetPublishState={this._resetPublishState}
+         setRemoteSession={this._setRemoteSession}
+         handleSync={this._handleSyncButton}
+         localDatasets={state.localDatasets || []}
+         setPublishErrorState={this._setPublishErrorState}
+       />
+
+       <ForceSync
+         {...this.props}
+         isVisible={forceSyncModalVisible}
+         name={name}
+         owner={owner}
+         pullOnly={state.pullOnly}
+         toggleSyncModal={this._toggleSyncModal}
+         setPublishErrorState={this._setPublishErrorState}
+       />
 
        <LoginPrompt
          showLoginPrompt={showLoginPrompt}
