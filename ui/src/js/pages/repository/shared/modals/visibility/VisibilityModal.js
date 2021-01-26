@@ -110,6 +110,7 @@ class VisibilityModal extends Component<Props> {
     } = this.props;
     if (jobKey) {
       this.setState({ jobKey });
+      this._fetchData(jobKey);
     } else {
       console.log(error);
       setPublishErrorState(error[0]);
